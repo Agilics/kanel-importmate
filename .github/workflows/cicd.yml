@@ -26,13 +26,6 @@ jobs:
           npm run lint
           npm run test:unit:coverage
           npm run prettier:verify
-      - name: Validation des métadonnées Salesforce
-        run: |
-          echo "Validation des métadonnées..."
-          npm install -g @salesforce/cli
-          # Validation de la structure du projet (prévisualisation)
-          sf project deploy preview --source-dir force-app
-          echo "✅ Validation de la structure du projet réussie"
 
   # 1. Integration Testing in Dedicated Sandbox (feature/develop branches)
   integration:
@@ -54,6 +47,12 @@ jobs:
         run: |
           printf "%s" "${{ secrets.SF_JWT_KEY_FILE }}" > jwt.key
           sf org login jwt --client-id ${{ secrets.SF_CONNECTED_APP_CONSUMER_KEY }} --jwt-key-file jwt.key --username ${{ secrets.SF_INT_USERNAME }} --instance-url ${{ secrets.SF_INT_INSTANCE_URL }} --alias int-sandbox
+      - name: Validation complète avec org cible
+        run: |
+          echo "🔍 Validation complète contre l'org d'intégration..."
+          sf project deploy validate --source-dir force-app --target-org int-sandbox
+          echo "✅ Validation complète réussie"
+
       - name: Deploy & Test in Integration Sandbox
         run: |
           sf project deploy start --source-dir force-app --target-org int-sandbox
@@ -77,6 +76,12 @@ jobs:
         run: |
           printf "%s" "${{ secrets.SF_JWT_KEY_FILE }}" > jwt.key
           sf org login jwt --client-id ${{ secrets.SF_CONNECTED_APP_CONSUMER_KEY }} --jwt-key-file jwt.key --username ${{ secrets.SF_UAT_USERNAME }} --instance-url ${{ secrets.SF_UAT_INSTANCE_URL }} --alias uat-org
+      - name: Validation complète avec org UAT
+        run: |
+          echo "🔍 Validation complète contre l'org UAT..."
+          sf project deploy validate --source-dir force-app --target-org uat-org
+          echo "✅ Validation complète réussie"
+
       - name: Deploy & Test in UAT Sandbox
         run: |
           sf project deploy start --source-dir force-app --target-org uat-org
