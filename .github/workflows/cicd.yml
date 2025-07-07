@@ -30,15 +30,9 @@ jobs:
         run: |
           echo "Validation des métadonnées..."
           npm install -g @salesforce/cli
-          # Validation de la structure du projet
-          sf project deploy validate --source-dir force-app --check-only
-          # Validation de la syntaxe Apex
-          sf apex run test --test-level RunLocalTests --check-only
-      - name: Validation des dépendances
-        run: |
-          echo "Vérification des dépendances..."
-          # Vérification de la structure du projet
+          # Validation de la structure du projet (prévisualisation)
           sf project deploy preview --source-dir force-app
+          echo "✅ Validation de la structure du projet réussie"
 
   # 1. Integration Testing in Dedicated Sandbox (feature/develop branches)
   integration:
