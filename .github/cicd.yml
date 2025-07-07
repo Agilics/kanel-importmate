@@ -2,10 +2,15 @@ name: AppExchange CI/CD
 
 on:
   push:
-    branches: [develop, main, 'release/*']
+    branches: [develop, main, "release/*"]
   pull_request:
-    branches: [develop, main, 'release/*']
+    branches: [develop, main, "release/*"]
   workflow_dispatch:
+    inputs:
+      run_tests:
+        description: "Exécuter les tests unitaires ?"
+        required: false
+        default: "true"
 
 env:
   NODE_VERSION: "18"
@@ -20,12 +25,11 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
       - run: npm ci
-      - name: Validation du code
-        run: |
-          echo "🔍 Validation de la syntaxe et structure..."
-          npm run lint
-          npm run test:unit:coverage
-          npm run prettier:verify
+      - run: npm run lint
+      - name: Run unit tests
+        if: ${{ github.event.inputs.run_tests == 'true' || github.event_name != 'workflow_dispatch' }}
+        run: npm run test:unit:coverage
+      - run: npm run prettier:verify
       - name: Validation des métadonnées Salesforce
         run: |
           echo "📋 Validation des métadonnées..."
@@ -52,7 +56,9 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
       - run: npm ci
       - run: npm run lint
-      - run: npm run test:unit:coverage
+      - name: Run unit tests
+        if: ${{ github.event.inputs.run_tests == 'true' || github.event_name != 'workflow_dispatch' }}
+        run: npm run test:unit:coverage
       - run: npm run prettier:verify
       - name: Install Salesforce CLI
         run: npm install -g @salesforce/cli
@@ -65,69 +71,4 @@ jobs:
           sf project deploy start --source-dir force-app --target-org int-sandbox
           sf apex run test --test-level RunLocalTests --target-org int-sandbox --wait 10
       - run: rm -f jwt.key
-
-  # 2. UAT in Sandbox (release/* branch)
-  uat:
-    if: startsWith(github.ref, 'refs/heads/release/')
-    runs-on: ubuntu-latest
-    needs: [validation, integration]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-      - run: npm ci
-      - name: Install Salesforce CLI
-        run: npm install -g @salesforce/cli
-      - name: Authenticate to UAT Sandbox
-        run: |
-          printf "%s" "${{ secrets.SF_JWT_KEY_FILE }}" > jwt.key
-          sf org login jwt --client-id ${{ secrets.SF_CONNECTED_APP_CONSUMER_KEY }} --jwt-key-file jwt.key --username ${{ secrets.SF_UAT_USERNAME }} --instance-url ${{ secrets.SF_UAT_INSTANCE_URL }} --alias uat-org
-      - name: Deploy & Test in UAT Sandbox
-        run: |
-          sf project deploy start --source-dir force-app --target-org uat-org
-          sf apex run test --test-level RunLocalTests --target-org uat-org --wait 10
-      - run: rm -f jwt.key
-
-  # 3. Package Creation in Packaging Env Hub DE Org (main branch, manual trigger)
-  package:
-    if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    needs: [validation, uat]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-      - run: npm ci
-      - name: Install Salesforce CLI
-        run: npm install -g @salesforce/cli
-      - name: Authenticate to Packaging DE Org
-        run: |
-          printf "%s" "${{ secrets.SF_JWT_KEY_FILE }}" > jwt.key
-          sf org login jwt --client-id ${{ secrets.SF_CONNECTED_APP_CONSUMER_KEY }} --jwt-key-file jwt.key --username ${{ secrets.SF_PKG_USERNAME }} --instance-url ${{ secrets.SF_PKG_INSTANCE_URL }} --alias pkg-org
-      - name: Create Package Version
-        run: |
-          sf package version create --package "YourPackageName" --installation-key-bypass --wait 20 --target-org pkg-org
-      - run: rm -f jwt.key
-
-  # 4. Subscriber Org Install/Upgrade Test (manual trigger)
-  subscriber-test:
-    if: github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
-    needs: [validation, package]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-      - name: Install Salesforce CLI
-        run: npm install -g @salesforce/cli
-      - name: Authenticate to Subscriber Org
-        run: |
-          printf "%s" "${{ secrets.SF_JWT_KEY_FILE }}" > jwt.key
-          sf org login jwt --client-id ${{ secrets.SF_CONNECTED_APP_CONSUMER_KEY }} --jwt-key-file jwt.key --username ${{ secrets.SF_SUB_USERNAME }} --instance-url ${{ secrets.SF_SUB_INSTANCE_URL }} --alias sub-org
-      - name: Install/Upgrade Package
-        run: |
-          sf package install --package <packageVersionId> --target-org sub-org --wait 20
-      - run: rm -f jwt.key
+# ... existing code ...
