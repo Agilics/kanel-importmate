@@ -6,7 +6,7 @@
     }
   ],
   "name": "KANEL-IMPORTMATE",
-  "namespace": "",
+  "namespace": "kanel_importmate",
   "sfdcLoginUrl": "https://login.salesforce.com",
   "sourceApiVersion": "58.0"
 }
