@@ -2,7 +2,8 @@
   "packageDirectories": [
     {
       "path": "force-app",
-      "default": true
+      "default": true,
+      "package": "KANEL-IMPORTMATE"
     }
   ],
   "name": "KANEL-IMPORTMATE",
