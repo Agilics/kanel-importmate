@@ -1,13 +1,18 @@
 {
   "packageDirectories": [
     {
+      "versionName": "ver 0.1",
+      "versionNumber": "0.1.0.NEXT",
       "path": "force-app",
-      "default": true,
-      "package": "KANEL-IMPORTMATE"
+      "default": false,
+      "package": "KANEL-IMPORTMATE",
+      "versionDescription": ""
     }
   ],
   "name": "KANEL-IMPORTMATE",
-  "namespace": "kanel_importmate",
   "sfdcLoginUrl": "https://login.salesforce.com",
-  "sourceApiVersion": "58.0"
+  "sourceApiVersion": "58.0",
+  "packageAliases": {
+    "KANEL-IMPORTMATE": "0HogL0000000K3ZSAU"
+  }
 }

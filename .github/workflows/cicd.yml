@@ -110,7 +110,7 @@ jobs:
           sf org login jwt --client-id ${{ secrets.SF_CONNECTED_APP_CONSUMER_KEY }} --jwt-key-file jwt.key --username ${{ secrets.SF_PKG_USERNAME }} --instance-url ${{ secrets.SF_PKG_INSTANCE_URL }} --alias pkg-org
       - name: Create Package if not exists
         run: |
-          sf package create --package "KANEL-IMPORTMATE" --path force-app --package-type Unlocked --target-dev-hub pkg-org || echo "Package already exists"
+          sf package create "KANEL-IMPORTMATE" --path force-app --package-type Unlocked --target-dev-hub pkg-org || echo "Package already exists"
       - name: Create Package Version
         run: |
           sf package version create --package "KANEL-IMPORTMATE" --installation-key-bypass --wait 20 --target-dev-hub pkg-org
