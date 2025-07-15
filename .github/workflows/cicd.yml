@@ -56,7 +56,7 @@ jobs:
 
       - name: Deploy & Test in Integration Sandbox
         run: |
-          sf project deploy start --source-dir force-app --target-org int-sandbox
+          sf project deploy start --source-dir force-app --target-org int-sandbox --ignore-conflicts
           sf apex run test --test-level RunLocalTests --target-org int-sandbox --wait 10
       - run: rm -f jwt.key
 
@@ -65,7 +65,7 @@ jobs:
     environment: uat
     if: startsWith(github.ref, 'refs/heads/release/')
     runs-on: ubuntu-latest
-    needs: [validation, integration]
+    needs: [validation]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -86,7 +86,7 @@ jobs:
 
       - name: Deploy & Test in UAT Sandbox
         run: |
-          sf project deploy start --source-dir force-app --target-org uat-org
+          sf project deploy start --source-dir force-app --target-org uat-org --ignore-conflicts
           sf apex run test --test-level RunLocalTests --target-org uat-org --wait 10
       - run: rm -f jwt.key
 
@@ -95,7 +95,7 @@ jobs:
     environment: package
     if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
-    needs: [validation, uat]
+    needs: [validation]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
