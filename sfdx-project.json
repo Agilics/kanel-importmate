@@ -3,7 +3,10 @@
     {
       "path": "force-app",
       "default": true,
-      "package": "KANEL-IMPORTMATE"
+      "package": "KANEL-IMPORTMATE",
+      "versionName": "Version 0.1",
+      "versionNumber": "0.1.0.NEXT",
+      "versionDescription": "Initial version"
     }
   ],
   "name": "KANEL-IMPORTMATE",
