@@ -112,8 +112,10 @@ jobs:
         run: |
           sf package create "KANEL-IMPORTMATE" --path force-app --package-type Unlocked --target-dev-hub pkg-org || echo "Package already exists"
       - name: Create Package Version
+        id: create_version
         run: |
-          sf package version create --package "KANEL-IMPORTMATE" --installation-key-bypass --wait 20 --target-dev-hub pkg-org
+          VERSION_ID=$(sf package version create --package "KANEL-IMPORTMATE" --installation-key-bypass --wait 20 --target-dev-hub pkg-org --json | jq -r '.result.SubscriberPackageVersionId')
+          echo "package_version_id=$VERSION_ID" >> $GITHUB_OUTPUT
       - run: rm -f jwt.key
 
   # 4. Subscriber Org Install/Upgrade Test (manual trigger)
@@ -135,5 +137,5 @@ jobs:
           sf org login jwt --client-id ${{ secrets.SF_CONNECTED_APP_CONSUMER_KEY }} --jwt-key-file jwt.key --username ${{ secrets.SF_SUB_USERNAME }} --instance-url ${{ secrets.SF_SUB_INSTANCE_URL }} --alias sub-org
       - name: Install/Upgrade Package
         run: |
-          sf package install --package <packageVersionId> --target-org sub-org --wait 20
+          sf package install --package ${{ needs.package.outputs.package_version_id }} --target-org sub-org --wait 20
       - run: rm -f jwt.key
