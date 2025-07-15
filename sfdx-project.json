@@ -1,12 +1,8 @@
 {
   "packageDirectories": [
     {
-      "versionName": "ver 0.1",
-      "versionNumber": "0.1.0.NEXT",
       "path": "force-app",
-      "default": false,
-      "package": "KANEL-IMPORTMATE",
-      "versionDescription": ""
+      "default": true
     }
   ],
   "name": "KANEL-IMPORTMATE",
