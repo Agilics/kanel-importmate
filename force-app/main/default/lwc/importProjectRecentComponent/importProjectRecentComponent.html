@@ -1,0 +1,79 @@
+<template>
+  <section class="cards" aria-label="Project options">
+    <article
+      class="card"
+      tabindex="0"
+      role="button"
+      aria-pressed="false"
+      aria-label="Create a new project"
+    >
+      <div class="icon-container" aria-hidden="true">
+        <i class="fa-solid fa-plus fa-2x"></i>
+      </div>
+      <h3>New Project</h3>
+      <p>
+        Vestibulum efficitur enim quis purus blandit, eget vehicula neque
+        blandit.
+      </p>
+    </article>
+    <article
+      class="card"
+      tabindex="0"
+      role="button"
+      aria-pressed="false"
+      aria-label="Select an existing project"
+    >
+      <div class="icon-container" aria-hidden="true">
+        <i class="fas fa-table fa-2x"></i>
+      </div>
+      <h3>Select Project</h3>
+      <p>
+        Vestibulum efficitur enim quis purus blandit, eget vehicula neque
+        blandit.
+      </p>
+    </article>
+  </section>
+
+  <section class="recent-projects-wrapper" aria-label="Recent Projects">
+    <div class="recent-title">Recent Projects</div>
+    <div class="recent-projects">
+      <div class="project-item" tabindex="0">
+        <template if:true={isNoProjectsAredImportedYet}>
+          <h3>
+            <i class="fa-regular fa-file-excel fa-3x"></i>
+            No project import yet, please add
+          </h3>
+        </template>
+
+        <template
+          if:true={importProjects.data}
+          for:each={importProjects.data}
+          for:item="pro"
+        >
+          <div class="project-info" key={pro}>
+            <span class="project-name">{pro.Name}</span>
+            <span class="project-meta"
+              >Target Sobject : {pro.Target_Object__c}</span
+            >
+            <small class="project-meta" name="created-date" id="created-date">
+              Created :
+              <lightning-formatted-date-time
+                value={pro.CreatedDate}
+                year="numeric"
+                month="numeric"
+                day="2-digit"
+              ></lightning-formatted-date-time>
+            </small>
+          </div>
+        </template>
+        <button
+          class="btn-select"
+          type="button"
+          aria-label="Select this project"
+        >
+          Select this project
+        </button>
+      </div>
+    </div>
+  </section>
+</template>
