@@ -10,7 +10,7 @@ public with sharing class ProjectService {
     ImportProject__c project = new ImportProject__c(
       Name = name,
       Description__c = description,
-      Target_Object__c = targetObject
+      TargetObject__c = targetObject
     );
     projectRepository.saveProject(project);
     return project;
@@ -28,7 +28,7 @@ public with sharing class ProjectService {
       if (project != null) {
         project.Name = name;
         project.Description__c = description;
-        project.Target_Object__c = targetObject;
+        project.TargetObject__c = targetObject;
         projectRepository.saveProject(project);
       }
     } catch (ImportException e) {
@@ -37,7 +37,7 @@ public with sharing class ProjectService {
   }
 
   // Récupère une nombre variable de projets récements importés
-  public static List<ImportProject> getRecentsProjets(Integer limitor) {
+  public static List<ImportProject__c> getRecentsProjets(Integer limitor) {
     return ProjectRepository.getRecentsProjets(limitor);
   }
 

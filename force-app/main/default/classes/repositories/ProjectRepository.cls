@@ -16,10 +16,10 @@ public with sharing class ProjectRepository {
   }
 
   // Récupère un projet par ID
-  public static ImportProject getProjectById(String projectId) {
+  public static ImportProject__c getProjectById(String projectId) {
     if (Schema.ImportProject__c.SObjectType.getDescribe().isAccessible()) {
       return [
-        SELECT Id, Name, Description__c, Target_Object__c
+        SELECT Id, Name, Description__c, TargetObject__c
         FROM ImportProject__c
         WHERE Id = :projectId
         WITH SECURITY_ENFORCED
@@ -33,7 +33,7 @@ public with sharing class ProjectRepository {
   public static List<ImportProject__c> getAllProjects() {
     if (Schema.ImportProject__c.SObjectType.getDescribe().isAccessible()) {
       return [
-        SELECT Id, Name, Description__c, Target_Object__c
+        SELECT Id, Name, Description__c, TargetObject__c
         FROM ImportProject__c
         WITH SECURITY_ENFORCED
         ORDER BY Name
@@ -43,20 +43,16 @@ public with sharing class ProjectRepository {
   }
 
   //Récuperer un nombre de  projets recents définit via un limiteur
-  public static List<ImportProject> getRecentsProjets(Integer limitor) {
+  public static List<ImportProject__c> getRecentsProjets(Integer limitor) {
     if (Schema.ImportProject__c.SObjectType.getDescribe().isAccessible()) {
-      ImportProject__c sObjets = [
-        SELECT Id, CreatedDate, Name, Target_Object__c
+      return [
+        SELECT Id, CreatedDate, Name, TargetObject__c
         FROM ImportProject__c
         ORDER BY CreatedDate DESC
         LIMIT :limitor
       ];
-      List<ImportProject> projects = new List<ImportProject>();
-      for (List<ImportProject__c> pro : sObjets) {
-        projects.add(pro);
-      }
-      return projects;
+     
     }
-    return new List<ImportProject>();
+    return new List<ImportProject__c>();
   }
 }
