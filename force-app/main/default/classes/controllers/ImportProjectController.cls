@@ -1,12 +1,7 @@
 public class ImportProjectController {
-  //get 3 lastest imported project
+  //Récuperer une variable de nombre (limitor) de   projets récements importés
   @AuraEnabled(cacheable=true)
-  public static List<Import_Project__c> getRecentsProjets() {
-    return [
-      SELECT Id, CreatedDate, Name, Target_Object__c
-      FROM Import_Project__c
-      ORDER BY CreatedDate DESC
-      LIMIT 3
-    ];
+  public static List<ImportProject__c> getRecentsProjets(Integer limitor) {
+    return ProjectService.getRecentsProjets(limitor);
   }
 }
