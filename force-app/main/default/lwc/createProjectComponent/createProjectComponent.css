@@ -1,0 +1,100 @@
+/* Create project Action */
+.container {
+  border-radius: 30px;
+  max-width: 1200px;
+  background-color: #ebe3e2;
+  border-radius: 24px;
+  padding: 1.6rem 2rem;
+}
+.title {
+  font-weight: 500;
+  margin: 0 0 0.9rem 0;
+  padding: 0 0 0 12%;
+}
+/* display inputs in lines*/
+
+/*Add some rounded buttons*/
+.rounded-input {
+  border-radius: 15px;
+}
+/* inputs */
+lightning-input {
+  width: 100%;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+/*  */
+.btn-groups {
+  margin: 2rem 0 2rem 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5rem;
+}
+/*Action button params radius - color &  fonts */
+.btn {
+  color: #ffffff;
+  height: 36px;
+  width: 200px;
+  font-weight: 700;
+  font-size: 15px;
+  min-height: 51;
+  padding: 10px 55px;
+  position: relative;
+  line-height: 18px;
+  border-radius: 30px;
+}
+
+/* Save Project button */
+.btn-save {
+  background-color: #135392;
+  border: 1px solid #135392;
+}
+
+.btn-save :hover {
+  background-color: #135392;
+  border: 1px solid #135392;
+  opacity: 0.7;
+}
+
+/* Cancel button */
+.btn-cancel {
+  background-color: #777f87;
+  border: 1px solid #777f87;
+}
+
+/* Tablette et en-dessous */
+@media (max-width: 1024px) {
+  .container {
+    flex-wrap: wrap;
+  }
+  .btn-groups {
+    gap: 1.5rem;
+    justify-content: space-between;
+  }
+  .btn {
+    width: 90%;
+    padding: 12px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+    align-items: stretch;
+    flex-wrap: wrap;
+  }
+
+  .btn-groups {
+    flex-direction: flex;
+    gap: 1rem;
+    align-items: space-between;
+    justify-content: center;
+  }
+
+  .btn {
+    width: 34%;
+    padding: 12px;
+  }
+}

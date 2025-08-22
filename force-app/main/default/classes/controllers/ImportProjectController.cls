@@ -1,3 +1,10 @@
+/**
+ * @description       :
+ * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @group             :
+ * @last modified on  : 08-20-2025
+ * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+ **/
 public class ImportProjectController {
   //Récuperer une variable de nombre (limitor) de   projets récements importés
   @AuraEnabled(cacheable=true)
@@ -22,11 +29,11 @@ public class ImportProjectController {
   }
 
   //Rechercher  par nom la liste des projets importés
-  // @AuraEnabled(cacheable=true)
-  /* public static List<ImportProject__c> searchProjetsByName(String name) {
+  @AuraEnabled(cacheable=true)
+  public static List<ImportProject__c> searchProjetsByName(String name) {
     return ProjectService.getProjectsByName(name);
   }
-  */
+
   //Rechercher  par l'id  un projet importé
   @AuraEnabled(cacheable=true)
   public static ImportProject__c searchProjetsById(String id) {
