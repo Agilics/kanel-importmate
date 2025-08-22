@@ -1,3 +1,10 @@
+/**
+ * @description       :
+ * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @group             :
+ * @last modified on  : 08-18-2025
+ * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+ **/
 public with sharing class ProjectRepository {
   // Sauvegarde un nouveau projet ou met à jour un existant
   public static void saveProject(ImportProject__c project) {
@@ -29,26 +36,25 @@ public with sharing class ProjectRepository {
     return null;
   }
 
-  // Récupère un projet par le nome
-  public static ImportProject__c getProjectByName(String projectName) {
-    if (Schema.ImportProject__c.SObjectType.getDescribe().isAccessible()) {
-      return [
-        SELECT Id, Name, Description__c, TargetObject__c
-        FROM ImportProject__c
-        WHERE Name LIKE :('%' + projectName + '%')
-        LIMIT 1
-      ];
-    }
-    return null;
-  }
-
   // Récupère tous les projets
   public static List<ImportProject__c> getAllProjects() {
     if (Schema.ImportProject__c.SObjectType.getDescribe().isAccessible()) {
       return [
         SELECT Id, Name, Description__c, TargetObject__c
         FROM ImportProject__c
-        WITH SECURITY_ENFORCED
+        ORDER BY Name
+      ];
+    }
+    return new List<ImportProject__c>();
+  }
+
+  // Rechercher  les projets par le nom
+  public static List<ImportProject__c> getProjectsByName(String projectName) {
+    if (Schema.ImportProject__c.SObjectType.getDescribe().isAccessible()) {
+      return [
+        SELECT Id, Name, Description__c, TargetObject__c
+        FROM ImportProject__c
+        WHERE Name LIKE :('%' + projectName + '%')
         ORDER BY Name
       ];
     }
@@ -68,12 +74,14 @@ public with sharing class ProjectRepository {
     return new List<ImportProject__c>();
   }
 
-  //Récupére tous les objets dans Apex
+  //Récupérer la liste de tous les SObjets dans Apex
   public static Map<String, String> getObjects() {
     Map<String, String> objectMap = new Map<String, String>();
+    //Returns a map of all sObject names to sObject tokens for all
+    //the standard and custom objects defined in your organization
     for (Schema.SObjectType objTyp : Schema.getGlobalDescribe().Values()) {
-      String name = objTyp.getDescribe().getName();
-      String label = objTyp.getDescribe().getLabel();
+      String name = objTyp.getDescribe().getName(); //Returns the name of the object.
+      String label = objTyp.getDescribe().getLabel(); //Returns the object’s label, which may or may not match the object name.
       if (
         !name.containsignorecase('history') &&
         !name.containsignorecase('tag') &&
