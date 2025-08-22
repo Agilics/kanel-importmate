@@ -1,0 +1,44 @@
+<template>
+  <lightning-card title="File Upload" icon-name="custom:custom63">
+    <div class="slds-p-around_medium">
+      <!-- Upload CSV -->
+      <lightning-input
+        type="file"
+        label="Import CSV"
+        accept=".csv"
+        onchange={handleFileUpload}
+      >
+      </lightning-input>
+
+      <!-- Table -->
+      <template if:true={data.length}>
+        <div class="slds-m-top_medium">
+          <lightning-layout>
+            <lightning-layout-item size="12">
+              <table
+                class="slds-table slds-table_bordered slds-table_cell-buffer"
+              >
+                <thead>
+                  <tr>
+                    <template for:each={columns} for:item="col">
+                      <th key={col}>{col}</th>
+                    </template>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template for:each={data} for:item="row">
+                    <tr key={row.id}>
+                      <template for:each={row.values} for:item="val">
+                        <td key={val.key}>{val.value}</td>
+                      </template>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </lightning-layout-item>
+          </lightning-layout>
+        </div>
+      </template>
+    </div>
+  </lightning-card>
+</template>
