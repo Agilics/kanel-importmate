@@ -190,4 +190,28 @@ public with sharing class ProjectServiceTest {
     System.assert(objectList.size() > 0, 'La liste des objets n\'est pas vide');
     System.assertNotEquals(null, objectList);
   }
+
+  //Tester la récupèration des données par l'ID
+  @IsTest
+  static void testGetProjectById() {
+    Test.startTest();
+    String expectedName = 'Lead Import';
+    String expectedTargetObject = 'Lead';
+    //Insertion de données de testes
+    ImportProject__c recordToInsert = new ImportProject__c(
+      Name = expectedName,
+      TargetObject__c = expectedTargetObject,
+      Description__c = 'here'
+    );
+    Database.SaveResult saveResult = Database.insert(recordToInsert);
+    String id = saveResult.getId(); // Récupération de l'id
+    ImportProject__c actual = ProjectService.getProjectById(id);
+
+    Test.stopTest();
+
+    // Assertion
+
+    System.assertNotEquals(null, actual);
+    System.assertEquals(expectedName, actual.Name);
+  }
 }
