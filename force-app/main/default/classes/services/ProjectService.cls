@@ -1,6 +1,4 @@
 public with sharing class ProjectService {
-  public ProjectRepository projectRepository;
-
   // Crée un nouveau projet
   public static ImportProject__c createProject(
     String name,
@@ -12,7 +10,7 @@ public with sharing class ProjectService {
       Description__c = description,
       TargetObject__c = targetObject
     );
-    projectRepository.saveProject(project);
+    ProjectRepository.saveProject(project);
     return project;
   }
 
@@ -36,24 +34,33 @@ public with sharing class ProjectService {
     }
   }
 
-  // Récupère une  projet  importé par ID
-  public static ImportProject__c getProjectById(String id) {
-    return ProjectRepository.getProjectById(id);
-  }
-
-  // Récupère une  projet  importé par Name
-  public static ImportProject__c getProjectByName(String name) {
-    return ProjectRepository.getProjectByName(name);
-  }
-
   // Récupère une nombre variable de projets récements importés
   public static List<ImportProject__c> getRecentsProjets(Integer limitor) {
+    if (limitor < 0 || limitor == null) {
+      return new List<ImportProject__c>();
+    }
+
     return ProjectRepository.getRecentsProjets(limitor);
   }
 
-  //Récupére les objets dans Apex
-  public static final Map<String, String> getAllOjects() {
+  // Récupère la liste de tous les SObjets dans Apex
+  public static Map<String, String> getAllOjects() {
     return ProjectRepository.getObjects();
+  }
+
+  // Recherche projet par le nom
+  public static List<ImportProject__c> getProjectsByName(String keyword) {
+    return ProjectRepository.getProjectsByName(keyword);
+  }
+
+  // Recherche projet par l'identifiant du projet
+  public static ImportProject__c getProjectById(String projectId) {
+    return ProjectRepository.getProjectById(projectId);
+  }
+
+  //Récupérer tous les projets importés
+  public static List<ImportProject__c> getAllProjects() {
+    return ProjectRepository.getAllProjects();
   }
 
   // Valide l'objet cible Salesforce

@@ -1,9 +1,10 @@
 import { LightningElement, wire, track } from "lwc";
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
-
+//import delay from "delay";
 //importation méthodes depuis le Contrôleur
 import saveProject from "@salesforce/apex/ImportProjectController.saveProject";
 import getRecentsProjects from "@salesforce/apex/ImportProjectController.getRecentsProjects";
+//import searchProjetsByName from "@salesforce/apex/ImportProjectController.searchProjetsByName";
 
 export default class MainComponent extends LightningElement {
   @track showCreatorSection = false;
@@ -46,8 +47,10 @@ export default class MainComponent extends LightningElement {
           "success"
         );
 
-        // recharge après 3s, pour laisser voir le toast
+        // recharge après 3s pour laisser voir le toast
+        //  delay(3000);
         this.isLoading = false;
+        //  delay(700);
         window.location.reload();
       })
       .catch((error) => {

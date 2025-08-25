@@ -1,20 +1,36 @@
 /* Two cards side by side */
 .cards {
   display: flex;
-  gap: 2rem;
+  gap: 4rem;
   flex-wrap: wrap;
   margin-bottom: 3rem;
 }
 .card {
   flex: 1 1 45%;
   background-color: #e7e1e1;
+  max-width: 700px;
   border-radius: 20px;
-  padding: 1.5rem 2rem;
+  padding: 5rem 2rem;
+  row-gap: 8rem;
   cursor: pointer;
   transition: background-color 0.25s ease;
+  -webkit-transition: background-color 0.25s ease;
+  -moz-transition: background-color 0.25s ease;
+  -ms-transition: background-color 0.25s ease;
+  -o-transition: background-color 0.25s ease;
 }
 .card:hover {
   background-color: #d4cbcc;
+}
+.header {
+  display: flex;
+  flex-direction: row;
+  margin: 0 0 1.6rem 0;
+}
+.is-center {
+  text-align: center;
+  align-items: center;
+  column-gap: 1em;
 }
 /* Icon container */
 .icon-container {
@@ -28,9 +44,14 @@
   align-items: center;
   margin-bottom: 0.7rem;
 }
+svg,
+lightning-icon,
+.–sds-c-icon-color-foreground-default {
+  color: #ffff;
+}
 .card h3 {
   margin: 0 0 0.6rem 0;
-  font-size: 1.1rem;
+  font-size: 20px;
   font-weight: 700;
 }
 .card p {
@@ -40,6 +61,14 @@
   color: #222;
   line-height: 1.2;
 }
+a {
+  text-decoration: none;
+  color: #222;
+}
+/* paragraph */
+p {
+  font-size: 10px;
+}
 /* Recent Projects block */
 .recent-projects-wrapper {
   background-color: #165a9f;
@@ -48,44 +77,68 @@
 }
 .recent-projects {
   background-color: #e7e1e1;
+  min-height: 230px;
   border-radius: 24px;
   padding: 1rem 1.8rem;
 }
 .recent-title {
   color: white;
   font-weight: 700;
-  font-size: 1rem;
+  font-size: 20px;
   margin-bottom: 0.8rem;
 }
 .project-item {
   background: white;
   border-radius: 36px;
-  padding: 12px 30px 11px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  color: #222;
-}
-.project-info {
+  padding: 12px 30px 3px 20px;
   display: flex;
   flex-direction: column;
+  gap: 0.4rem;
+  color: #222;
 }
+
 .project-name {
   font-weight: 700;
-  font-size: 1rem;
-  font-family: "Courier New", Courier, monospace;
-  margin-bottom: 5px;
+  font-family: "Itim";
+  font-size: 20px;
+}
+.slds-icon,
+.slds-icon-text-default,
+.slds-icon_large {
+  --lwc-colorTextIconDefault: #f4eeef;
+}
+
+.empty {
+  color: #fff;
+  gap: 1rem;
+}
+.project-row {
+  display: flex;
+  justify-content: space-between; /* Target à gauche, bouton à droite */
+  align-items: center;
+}
+
+.project-meta {
+  font-weight: 300;
+  font-size: 11px;
+  font-family: Arial, sans-serif;
+  color: #555;
+}
+
+.project-name {
+  font-weight: 400;
+  font-size: 20px;
 }
 .project-meta {
   font-weight: 300;
   font-size: 0.75rem;
   font-family: Arial, sans-serif;
   color: #555;
-  user-select: none;
 }
 .project-meta small {
   display: block;
 }
+
 /* Select button */
 .btn-select {
   background-color: #165a9f;
@@ -95,10 +148,20 @@
   padding: 9px 24px;
   font-weight: 700;
   cursor: pointer;
-  font-size: 0.9rem;
-  user-select: none;
+  font-size: 15px;
   flex-shrink: 0;
   transition: background-color 0.3s ease;
+  -webkit-transition: background-color 0.3s ease;
+  -moz-transition: background-color 0.3s ease;
+  -ms-transition: background-color 0.3s ease;
+  -o-transition: background-color 0.3s ease;
+  -webkit-border-radius: 20px;
+  -moz-border-radius: 20px;
+  -ms-border-radius: 20px;
+  -o-border-radius: 20px;
+}
+.btn-select:hover {
+  background-color: #10427a;
 }
 .btn-select:hover {
   background-color: #10427a;

@@ -22,6 +22,7 @@ public with sharing class ProjectServiceTest {
     }
     insert projects;
   }
+
   // Test négatif : limiter < 0 -> liste vide
   @isTest
   static void testRecentsProjectsNegativeLimitor() {
@@ -104,6 +105,7 @@ public with sharing class ProjectServiceTest {
       TargetObject__c = 'Account',
       Description__c = 'ma desc'
     );
+    //Insertion  des données
     Database.SaveResult saveResults = Database.insert(save);
     List<ImportProject__c> results = ProjectService.getProjectsByName(
       expectedTargetObject
@@ -126,5 +128,66 @@ public with sharing class ProjectServiceTest {
     System.assertEquals(true, isValid, 'L\'objet est valide');
   }
 
-  //Tester la
+  //Tester la mise à jour d'un projet importé
+  @isTest
+  static void testForUpdateProject() {
+    String expectedName = 'Lead Import';
+    String expectedDescription = 'Describe Lead import';
+    String expectedTargetObject = 'Lead';
+    //Exécution du  teste
+    Test.startTest();
+    ImportProject__c save = new ImportProject__c(
+      Name = 'Contact Import',
+      TargetObject__c = 'Lead',
+      Description__c = 'This is a lead import'
+    );
+
+    //Persistance des données de testes
+    Database.SaveResult results = Database.insert(save);
+    String projectId = results.getId();
+    System.debug('Record with Id ' + projectId + ' was inserted successfully.');
+
+    // Mise à jour des données
+    ProjectService.updateProject(
+      projectId,
+      expectedName,
+      expectedDescription,
+      expectedTargetObject
+    );
+
+    //Récupération du projet importé par l'ID
+    ImportProject__c actualProject = ProjectService.getProjectById(projectId);
+    Test.stopTest();
+
+    // ------ Assertion pour vérifier si l'objet est vide -------
+    System.assertNotEquals(
+      null,
+      actualProject,
+      'L\'objet des projets importés'
+    );
+
+    //Assertions pour vérifier les champs nom et descriptions
+    System.assertEquals(expectedName, actualProject.Name);
+    System.assertEquals(expectedTargetObject, actualProject.TargetObject__c);
+    System.assertEquals(
+      expectedDescription.trim(),
+      actualProject.Description__c.trim()
+    );
+  }
+
+  // Tester la Récupèration la liste de tous les SObjets dans Apex
+  @IsTest
+  static void testGetAllObject() {
+    Test.startTest();
+    Map<String, String> objectMaps = ProjectService.getAllOjects();
+    List<String> objectList = new List<String>();
+
+    // Récupérer toutes les valeurs de la map
+    objectList.addAll(objectMaps.values());
+    Test.stopTest();
+
+    // Assertions
+    System.assert(objectList.size() > 0, 'La liste des objets n\'est pas vide');
+    System.assertNotEquals(null, objectList);
+  }
 }
