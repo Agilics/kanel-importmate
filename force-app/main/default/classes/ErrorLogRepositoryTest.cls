@@ -54,7 +54,7 @@ public class ErrorLogRepositoryTest {
             Test.startTest();
             try {
                 ErrorLogRepository.saveErrorLogs(errors);
-            } catch (ImportException e) {
+            } catch (DMLException e) {
                 Assert.isTrue(e.getMessage().contains('Error saving logs'), '');
             }
             Test.stopTest();
