@@ -25,7 +25,7 @@ public class ErrorLogServiceTest {
             // Force an exception
             Integer i = 1 / 0;
         } catch (Exception e) {
-            //ErrorLogService.logException(e);
+            ErrorLogService.logException(e);
         }
         Test.stopTest();
 
