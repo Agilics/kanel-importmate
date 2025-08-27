@@ -8,6 +8,7 @@
         <type>AutoNumber</type>
     </nameField>
     <pluralLabel>Error Logs</pluralLabel>
-    <sharingModel>ControlledByParent</sharingModel>
+    <searchLayouts></searchLayouts>
+    <sharingModel>ReadWrite</sharingModel>
     <visibility>Public</visibility>
 </CustomObject>
