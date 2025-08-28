@@ -1,131 +1,60 @@
-@isTest
-public class QueryBuilderServiceTest {
-    
-    @isTest
-    static void testFetchObjects() {
-        Test.startTest();
-        List<String> objects = QueryBuilderService.fetchObjects();
-        Test.stopTest();
+@IsTest
+private class QueryBuilderServiceTest {
 
-        // Perform case-insensitive checks for common objects
-        Boolean hasAccount = false;
-        Boolean hasContact = false;
-        for (String objName : objects) {
-            if (objName != null) {
-                if (objName.equalsIgnoreCase('Account')) {
-                    hasAccount = true;
-                }
-                if (objName.equalsIgnoreCase('Contact')) {
-                    hasContact = true;
-                }
-            }
-        }
-        System.assert(hasAccount, 'Expected Account object to be present');
-        System.assert(hasContact, 'Expected Contact object to be present');
-    }
+    @IsTest
+    static void testBuildSoqlAddsId() {
+        List<String> fields = new List<String>{ 'Name' };
+        String soql = QueryBuilderService.buildSoql('Account', fields, null);
 
-    
-    @isTest
-    static void testFetchFields() {
-        Test.startTest();
-        List<String> fields = QueryBuilderService.fetchFields('Account');
-        Test.stopTest();
-
-        // Perform case-insensitive checks for Id and Name fields
-        Boolean hasId = false;
-        Boolean hasName = false;
-        for (String field : fields) {
-            if (field != null) {
-                if (field.equalsIgnoreCase('Id')) {
-                    hasId = true;
-                }
-                if (field.equalsIgnoreCase('Name')) {
-                    hasName = true;
-                }
-            }
-        }
-        System.assert(hasName, 'Expected Name field on Account');
-        System.assert(hasId, 'Expected Id field on Account');
-    }
-
-    /**
-     * Test building and running a valid query via the service.
-     */
-    @isTest
-    static void testBuildAndRunQueryValid() {
-        // Create some test data to query
-        Account testAcc = new Account(Name = 'Service Test Account');
-        insert testAcc;
-
-        // Use service to build and run query
-        Test.startTest();
-        List<Map<String, Object>> results = QueryBuilderService.buildAndRunQuery(
-            'Account',
-            new List<String>{'Id', 'Name'},
-            'Id = \'' + testAcc.Id + '\''
+        System.assert(soql.startsWithIgnoreCase('SELECT '), 'Should start with SELECT');
+        System.assert(soql.toLowerCase().contains(' from account'), 'Should contain FROM Account (case-insensitive)');
+        System.assert(
+            soql.contains(' Id') || soql.contains(', Id') || soql.contains('Id,'),
+            'Query should include Id automatically'
         );
-        Test.stopTest();
+    }
 
-        // At least one result should be returned for the inserted account
-        System.assert(results.size() > 0, 'Expected at least one result for the inserted account');
-        Map<String, Object> row = results[0];
+    @IsTest
+    static void testBuildSoqlWhereClause() {
+        List<String> fields = new List<String>{ 'Name', 'Id' };
+        String soql = QueryBuilderService.buildSoql('Account', fields, 'Name LIKE \'Acme%\'');
 
-        // Find the keys for Id and Name case-insensitively
-        String idKey = null;
-        String nameKey = null;
-        for (String key : row.keySet()) {
-            if (key != null) {
-                if (key.equalsIgnoreCase('Id')) {
-                    idKey = key;
-                }
-                if (key.equalsIgnoreCase('Name')) {
-                    nameKey = key;
-                }
+        System.assert(soql.contains('WHERE Name LIKE \'Acme%\''), 'WHERE clause should be appended');
+    }
+
+    @IsTest
+    static void testBuildSoqlInvalidArgs() {
+        Boolean thrown;
+
+        thrown = false;
+        try { QueryBuilderService.buildSoql('', new List<String>{ 'Id' }, null); }
+        catch (AuraHandledException ahe) { thrown = true; }
+        System.assert(thrown, 'Should throw when object name is blank');
+
+        thrown = false;
+        try { QueryBuilderService.buildSoql('Account', new List<String>(), null); }
+        catch (AuraHandledException ahe) { thrown = true; }
+        System.assert(thrown, 'Should throw when field list is empty');
+    }
+
+    @IsTest
+    static void testAssertQueryable() {
+      
+        List<String> candidates = new List<String>{ 'Account', 'Contact', 'User', 'Group' };
+        Boolean ok = false;
+        for (String c : candidates) {
+            try {
+                QueryBuilderService.assertQueryable(c);
+                ok = true; break;
+            } catch (Exception e) {
+               
             }
         }
-        System.assertNotEquals(null, idKey, 'Expected Id field in result');
-        System.assertNotEquals(null, nameKey, 'Expected Name field in result');
+        System.assert(ok, 'No common object was queryable in this org');
 
-        System.assertEquals(testAcc.Id, (Id) row.get(idKey), 'Returned Id should match the inserted account');
-        System.assertEquals(testAcc.Name, (String) row.get(nameKey), 'Returned Name should match the inserted account');
-    }
-
-    @isTest
-    static void testBuildAndRunQueryValidation() {
-        Boolean missingObjectException = false;
-        try {
-            QueryBuilderService.buildAndRunQuery('', new List<String>{'Id'}, null);
-        } catch (Exception e) {
-            missingObjectException = true;
-        }
-        System.assert(missingObjectException, 'Expected exception when objectName is blank');
-
-        Boolean missingFieldsException = false;
-        try {
-            QueryBuilderService.buildAndRunQuery('Account', new List<String>(), null);
-        } catch (Exception e) {
-            missingFieldsException = true;
-        }
-        System.assert(missingFieldsException, 'Expected exception when field list is empty');
-    }
-
-    @isTest
-    static void testBuildAndRunQueryInvalid() {
-        // Create a simple account for context
-        Account acc = new Account(Name = 'Invalid Query Account');
-        insert acc;
-
-        Boolean invalidWhereException = false;
-        try {
-            // Provide an invalid field name in where clause
-            QueryBuilderService.buildAndRunQuery(
-                'Account',
-                new List<String>{'Id'},
-                'NonExistentField__c = \'' + acc.Id + '\''
-            );
-        } catch (Exception e) {
-            invalidWhereException = true;
-        }
-        System.assert(invalidWhereException, 'Expected exception when where clause contains invalid field');
+        Boolean blew = false;
+        try { QueryBuilderService.assertQueryable('DoesNotExist__c'); }
+        catch (Exception e) { blew = true; }
+        System.assert(blew, 'Asserting queryable on a non-existing object should throw');
     }
 }

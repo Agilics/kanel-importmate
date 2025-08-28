@@ -1,33 +1,32 @@
 public with sharing class QueryBuilderService {
- 
-    @AuraEnabled(cacheable=true)
-    public static List<String> fetchObjects() {
-        return QueryBuilderRepository.getAllObjectNames();
-    }
 
-    @AuraEnabled(cacheable=true)
-    public static List<String> fetchFields(String objectName) {
-        return QueryBuilderRepository.getFieldNames(objectName);
-    }
-
-   
-    @AuraEnabled
-    public static List<Map<String, Object>> buildAndRunQuery(
-        String objectName,
-        List<String> fieldList,
-        String whereClause
-    ) {
-        if (String.isBlank(objectName) || fieldList == null || fieldList.isEmpty()) {
+    
+    public static String buildSoql(String objectName, List<String> fields, String whereClause) {
+        if (String.isBlank(objectName) || fields == null || fields.isEmpty()) {
             throw new AuraHandledException('Object name and fields are required to run a SOQL query.');
         }
 
-        // Build the basic query
-        String soql = 'SELECT ' + String.join(fieldList, ', ') + ' FROM ' + objectName;
+      
+        Set<String> fieldSet = new Set<String>(fields);
+        fieldSet.add('Id');
+
+        String soql = 'SELECT ' + String.join(new List<String>(fieldSet), ', ')
+                    + ' FROM ' + objectName;
         if (!String.isBlank(whereClause)) {
             soql += ' WHERE ' + whereClause;
         }
+        return soql;
+    }
 
-        // Delegate actual data fetch to the repository
-        return QueryBuilderRepository.executeQuery(soql);
+    
+    public static void assertQueryable(String objectName) {
+        Schema.SObjectType t = Schema.getGlobalDescribe().get(objectName);
+        if (t == null) {
+            throw new AuraHandledException('Object ' + objectName + ' does not exist or is not accessible.');
+        }
+        Schema.DescribeSObjectResult d = t.getDescribe();
+        if (!d.isQueryable() || !d.isAccessible()) {
+            throw new AuraHandledException('You do not have access to query ' + objectName + '.');
+        }
     }
 }
