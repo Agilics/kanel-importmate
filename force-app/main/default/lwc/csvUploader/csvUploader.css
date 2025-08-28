@@ -1,0 +1,88 @@
+:host {
+    display: block;
+}
+
+/* Override lightning-card for a subtle border radius and remove box shadow */
+.custom-card {
+    --slds-c-card-radius-border: 0.75rem;
+    --slds-c-card-shadow: none;
+    --slds-c-card-heading-font-size: 1rem;
+    --slds-c-card-heading-font-weight: 700;
+}
+
+/* Upload area styling */
+.upload-area {
+    background-color: #f5f5f5;
+    border: 1px solid #e0e0e0;
+    border-radius: 0.5rem;
+    text-align: center;
+    padding: 1rem;
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.upload-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.upload-subtitle {
+    font-size: 0.9rem;
+    color: #666666;
+    margin-bottom: 0.75rem;
+}
+
+/* Make the file input control transparent so the upload message shows above it */
+.upload-area lightning-input {
+    display: inline-block;
+    width: auto;
+    margin-top: 0.5rem;
+}
+
+/* Table wrapper for scrolling */
+.table-wrapper {
+    overflow-x: auto;
+}
+
+.table-container {
+    border: 1px solid #e0e0e0;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+}
+
+.table-container table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table-container th {
+    background-color: #29568f;
+    color: #ffffff;
+    padding: 0.75rem;
+    text-align: left;
+    font-weight: 600;
+}
+
+.table-container td {
+    padding: 0.75rem;
+    border-top: 1px solid #e0e0e0;
+    font-size: 0.9rem;
+}
+
+.table-container tr:nth-child(even) td {
+    background-color: #fafafa;
+}
+
+/* Scrollbar styling for Webkit browsers */
+.table-wrapper::-webkit-scrollbar {
+    height: 8px;
+}
+.table-wrapper::-webkit-scrollbar-thumb {
+    background-color: #cccccc;
+    border-radius: 4px;
+}
+.table-wrapper::-webkit-scrollbar-track {
+    background-color: #f0f0f0;
+    border-radius: 4px;
+}
