@@ -1,7 +1,7 @@
-import { LightningElement, track } from "lwc";
+import { LightningElement, track } from 'lwc';
 
 export default class CsvUploader extends LightningElement {
- @track data = [];    // Rows
+    @track data = [];    // Rows
     @track columns = []; // Headers
 
     handleFileUpload(event) {
