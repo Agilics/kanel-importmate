@@ -1,6 +1,18 @@
 import { createElement } from '@lwc/engine-dom';
 import SoqlBuilder from 'c/soqlBuilder';
 
+
+jest.mock('lightning/platformShowToastEvent', () => {
+  return {
+    ShowToastEvent: class ShowToastEvent extends CustomEvent {
+      constructor(detail) {
+        super('lightning__showtoast', { detail });
+      }
+    },
+  };
+}, { virtual: true });
+
+
 // Mock Apex (imperative)
 jest.mock(
   '@salesforce/apex/QueryBuilderController.fetchObjects',
@@ -22,11 +34,11 @@ import fetchObjects from '@salesforce/apex/QueryBuilderController.fetchObjects';
 import fetchFields from '@salesforce/apex/QueryBuilderController.fetchFields';
 import buildAndRunQuery from '@salesforce/apex/QueryBuilderController.buildAndRunQuery';
 
-
+// Microtask flush
 const tick = () => Promise.resolve();
 const flushPromises = () => tick().then(tick);
 
-
+// Helper to control async resolution
 const deferred = () => {
   let resolve, reject;
   const promise = new Promise((res, rej) => { resolve = res; reject = rej; });
@@ -125,7 +137,7 @@ describe('c-soql-builder', () => {
     const el = mount();
     await flushPromises();
 
-   
+    // select object + fields
     el.shadowRoot.querySelector('lightning-combobox')
       .dispatchEvent(new CustomEvent('change', { detail: { value: 'Account' } }));
     await flushPromises();
@@ -134,10 +146,10 @@ describe('c-soql-builder', () => {
       .dispatchEvent(new CustomEvent('change', { detail: { value: ['Name', 'Account.Name'] } }));
     await flushPromises();
 
-    
+    // click Run
     const btn = el.shadowRoot.querySelector('lightning-button');
     btn.click();
-  
+    // wait one render tick so label/disabled reflect isLoading=true
     await flushPromises();
 
     expect(buildAndRunQuery).toHaveBeenCalledWith({
@@ -148,7 +160,7 @@ describe('c-soql-builder', () => {
     expect(btn.label).toBe('Running...');
     expect(btn.disabled).toBe(true);
 
-  
+    // now resolve the Apex call
     d.resolve(sampleRows);
     await flushPromises();
 
