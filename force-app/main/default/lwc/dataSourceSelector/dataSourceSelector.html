@@ -1,1 +1,52 @@
-<template> </template>
+<template>
+    <div class="container">
+        <div class="con">
+            <div class="import">
+                <span class="icon">⬇</span>
+                <span class="title">ImportMate</span>
+            </div>
+
+            <!-- Stepper -->
+             <div class="steps">
+                <c-stepper current-step={currentStep}></c-stepper>
+            </div>
+        </div>
+
+        <div class="header">
+            <p class="subtitle">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sodales nulla finibus in.
+            </p>
+        </div>
+
+        <!-- Selection -->
+        <template if:true={showSelection}>
+            <h2 class="section-title">Data source</h2>
+            <div class="cards">
+                <div class="card" onclick={handleCSV}>
+                    <div class="card-icon file-icon"></div>
+                    <h3>Import CSV</h3>
+                    <p>Import a CSV file from your local machine.</p>
+                </div>
+
+                <div class="card" onclick={handleSOQL}>
+                    <div class="card-icon soql-icon"></div>
+                    <h3>SOQL Builder</h3>
+                    <p>Build your query interactively from Salesforce objects.</p>
+                </div>
+            </div>
+        </template>
+
+        <!-- CSV -->
+        <template if:true={showCSV}>
+            <c-csv-uploader oncsvloaded={handleCsvLoaded}></c-csv-uploader>
+        </template>
+
+        <!-- SOQL -->
+        <template if:true={showSOQL}>
+            <c-soql-builder onsoqlbuilt={handleSoqlBuilt}></c-soql-builder>
+        </template>
+
+        <!-- Back button -->
+        <c-backbutton onback={handleBackToSelection}></c-backbutton>
+    </div>
+</template>
