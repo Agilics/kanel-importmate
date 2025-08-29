@@ -2,9 +2,8 @@
     max-width: 1000px;
     margin: 2rem auto;
     padding: 2rem;
-
     border-radius: 16px;
-    background-color: #F8F8FF;
+    background-color:#FFFFFF;
     box-shadow: 0px 6px 20px rgba(0,0,0,0.1);
 }
 
@@ -29,7 +28,7 @@ color: white; }
 
 
 .header { text-align: center; margin-bottom: 2rem; }
-.subtitle { font-size: 1rem; color: #666; margin-top: 8%;text-align: justify;}
+.subtitle { font-size: 1rem; color: #666; margin-top: 8%;text-align: justify;font-weight: bolder;}
 
 .section-title { margin-bottom: 1.5rem; font-size: 1.4rem; font-weight: 600; color: #333;
 margin-left: 20%; }
