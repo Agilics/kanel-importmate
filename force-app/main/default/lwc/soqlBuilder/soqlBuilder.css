@@ -1,0 +1,122 @@
+.soql-container h2{
+  font-size: 20px;
+  color:darkblue;
+  font-weight: bold;
+}
+.soql-container p{
+  font-size: 20px;
+  font-weight: bold;
+  margin-left: 20%;
+}
+
+:host {
+  /* palette + spacing */
+  --sb-header-bg: #1f4a7a;  /* deep blue */
+  --sb-header-fg: #ffffff;  /* white */
+  --sb-alt-row-bg: #f7f9fc; /* subtle zebra */
+  --sb-radius: 12px;
+  --sb-pad-v: 0.95rem;
+  --sb-pad-h: 1.25rem;
+  --sb-shadow: 0 6px 16px rgba(31, 74, 122, 0.12);
+
+  /* Datatable tokens (applied inside lightning-datatable’s shadow) */
+  --slds-c-table-radius-border: var(--sb-radius);
+
+  /* header */
+  --slds-c-table-color-background-header: var(--sb-header-bg);
+  --slds-c-table-header-color-background: var(--sb-header-bg); /* safe alias */
+  --slds-c-table-header-text-color: var(--sb-header-fg);
+  --slds-c-table-header-font-weight: 700;
+  --slds-c-table-header-font-size: 0.95rem;
+  --slds-c-table-header-cell-spacing-block-start: 0.9rem; /* header height */
+  --slds-c-table-header-cell-spacing-block-end: 0.9rem;
+  --slds-c-table-header-cell-spacing-inline-start: var(--sb-pad-h);
+  --slds-c-table-header-cell-spacing-inline-end: var(--sb-pad-h);
+
+  /* body rows */
+  --slds-c-table-color-background-row-striped: var(--sb-alt-row-bg);
+  --slds-c-table-row-hover-color-background: #eef4ff;
+
+  /* cell padding */
+  --slds-c-table-cell-spacing-block-start: var(--sb-pad-v);
+  --slds-c-table-cell-spacing-block-end: var(--sb-pad-v);
+  --slds-c-table-cell-spacing-inline-start: var(--sb-pad-h);
+  --slds-c-table-cell-spacing-inline-end: var(--sb-pad-h);
+
+  /* borders (soft separators) */
+  --slds-c-table-borders-color: #e9edf4;
+  --slds-c-table-borders-width: 1px;
+
+  /* make sort chevrons/buttons visible on dark header */
+  --slds-c-icon-color-foreground-default: var(--sb-header-fg);
+  --slds-c-button-color-foreground: var(--sb-header-fg);
+  --slds-c-button-text-color: var(--sb-header-fg);
+}
+
+/* container + preview */
+.soql-container { padding: 1rem; }
+
+.query-preview pre {
+  background: #f6f8fb;
+  border: 1px solid #e9edf5;
+  border-radius: 10px;
+  padding: .75rem 1rem;
+  margin: .5rem 0 1rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  color: #0b2e4e;
+}
+
+/* rounded, shadowed table card like your image */
+.results-table {
+  position: relative;            /* for spinner overlay */
+  margin-top: 1rem;
+  border-radius: var(--sb-radius);
+  overflow: hidden;              /* clip header corners */
+  box-shadow: var(--sb-shadow);
+  background: #29568f;
+}
+
+/* subtle row separators */
+.results-table tbody tr td { border-top-color:#29568f; }
+
+/* loading overlay */
+.spinner-overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.45);
+  z-index: 1;
+}
+/* --- HEADER COLORS (applies to <th>) --- */
+:host {
+  /* pick your blue */
+  --sb-header-bg: #29568f;
+  --sb-header-fg: #ffffff;
+
+  /* datatable header tokens */
+  --slds-c-table-color-background-header: var(--sb-header-bg);
+  --slds-c-table-header-color-background: var(--sb-header-bg); /* alias for some versions */
+  --slds-c-table-header-text-color: var(--sb-header-fg);
+  --slds-c-table-header-font-weight: 700;
+
+  /* make header icons/buttons visible on dark bg */
+  --slds-c-icon-color-foreground-default: var(--sb-header-fg);
+  --slds-c-button-color-foreground: var(--sb-header-fg);
+  --slds-c-button-text-color: var(--sb-header-fg);
+}
+
+/* keep the card/body white; only header is blue */
+.results-table {
+  position: relative;
+  margin-top: 1rem;
+  border-radius: var(--sb-radius);
+  overflow: hidden;
+  box-shadow: var(--sb-shadow);
+  background: #fff;               /* <- was blue; set to white */
+}
+
+/* soft row separators instead of blue lines */
+.results-table tbody tr td {
+  border-top-color: #e9edf4;      /* <- was #29568f */
+}

@@ -63,6 +63,43 @@ export default class SoqlBuilder extends LightningElement {
         return this.isLoading ? 'Running...' : 'Run Query';
     }
 
+    // ---------- helpers for display ----------
+
+    // Key used in data rows when repository flattens relationship fields (Account.Name -> Account__Name)
+    normalizeKey(apiName) {
+        return apiName.includes('.') ? apiName.replace(/\./g, '__') : apiName;
+    }
+
+    // Human-friendly column label (Account.Name -> "Account Name", AnnualRevenue -> "Annual Revenue")
+    prettyLabel(apiName) {
+        let s = apiName.replace(/__/g, ' ').replace(/\./g, ' ').replace(/_/g, ' ');
+        s = s.replace(/([a-z])([A-Z])/g, '$1 $2'); // camelCase -> spaced
+        s = s.replace(/\s+/g, ' ').trim();
+        return s.charAt(0).toUpperCase() + s.slice(1);
+    }
+
+    // Infer column type/alignment from first row (number/right, boolean, url)
+    inferTypeAttrs(key, sampleRow) {
+        const col = { type: 'text', cellAttributes: { alignment: 'left' } };
+
+        if (!sampleRow || !(key in sampleRow)) return col;
+
+        const v = sampleRow[key];
+        if (typeof v === 'number') {
+            col.type = 'number';
+            col.cellAttributes.alignment = 'right';
+            // Feel free to tweak number formatting:
+            col.typeAttributes = { minimumFractionDigits: 0, maximumFractionDigits: 0 };
+        } else if (typeof v === 'boolean') {
+            col.type = 'boolean';
+        } else if (typeof v === 'string' && /^https?:\/\//i.test(v)) {
+            // show as clickable url with same label text
+            col.type = 'url';
+            col.typeAttributes = { label: { fieldName: key }, target: '_blank' };
+        }
+        return col;
+    }
+
     handleRun() {
         if (!this.selectedObject || this.selectedFields.length === 0) {
             this.showToast('Warning', 'Please select an object and at least one field.', 'warning');
@@ -79,9 +116,25 @@ export default class SoqlBuilder extends LightningElement {
             whereClause: this.whereCondition
         })
             .then(result => {
-                const displayFields = new Set(['Id']);
-                this.selectedFields.forEach(f => displayFields.add(f.includes('.') ? f.replace('.', '__') : f));
-                this.columns = Array.from(displayFields).map(f => ({ label: f, fieldName: f, type: 'text' }));
+                // Ensure Id is included and preserve selection order
+                const orderedApis = ['Id', ...this.selectedFields];
+
+                // Use first row (if any) to infer column types/alignments
+                const sample = (result && result.length > 0) ? result[0] : null;
+
+                this.columns = orderedApis.map(api => {
+                    const key = this.normalizeKey(api);      // data key (e.g., Account__Name)
+                    const label = this.prettyLabel(api);     // friendly header (e.g., Account Name)
+                    const typed = this.inferTypeAttrs(key, sample);
+                    return {
+                        label,
+                        fieldName: key,
+                        type: typed.type,
+                        wrapText: true,                       // allow long headers to wrap like the screenshot
+                        cellAttributes: typed.cellAttributes,
+                        typeAttributes: typed.typeAttributes
+                    };
+                });
 
                 this.queryResults = result || [];
                 if (this.queryResults.length === 0) {
