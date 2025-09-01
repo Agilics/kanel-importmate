@@ -1,29 +1,26 @@
-/* Modal for select Import Project */
+// selectProject.js
 import { api } from "lwc";
 import LightningModal from "lightning/modal";
 
 export default class SelectProjectComponent extends LightningModal {
-  //@api projectId;
-  //@api projectName;
-  @api project;
+  @api projects;
+  @api columns;
 
-  columns = [
-    { label: "Project Name", fieldName: "name" },
-    { label: "Description", fieldName: "description" },
-    { label: "Target Objet", fieldName: "target" }
-  ];
+handleSearch(e) {
+  const searchEvent = new CustomEvent("search", {
+    detail: { name: e.target.value }
+  });
+  this.dispatchEvent(searchEvent);
+}
+  //on choisie de visualiser les détails d'un projet importé et on ferme le modal 
+  handleSelectProject(e) {
+    const { id } = e.target.dataset;
+    this.dispatchEvent(new CustomEvent("select", { detail: id }));
+    this.close(id);
+    alert(id);
+  }
 
-  /*handleFindProjectById(event) {
-    this.dispatchEvent(new new CustomEvent("findid")());
-  }*/
-
-  // rechercher projet  par le nom
-  /**handleSearch(event) {
-    this.dispatchEvent(new CustomEvent("search"));
-  }*/
-
-  //Fermeture  du modal
   handleCloseModal() {
-    this.close("okay");
+    this.close();
   }
 }

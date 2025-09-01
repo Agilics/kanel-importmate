@@ -63,7 +63,7 @@ public with sharing class ProjectServiceTest {
   }
 
   // Test de la méthode permettant la récupération de tous les projets
-  @IsTest
+  @isTest
   static void testGetAllProjects() {
     Integer expected = 5;
     //excecution du test
@@ -173,22 +173,6 @@ public with sharing class ProjectServiceTest {
       expectedDescription.trim(),
       actualProject.Description__c.trim()
     );
-  }
-
-  // Tester la Récupèration la liste de tous les SObjets dans Apex
-  @IsTest
-  static void testGetAllObject() {
-    Test.startTest();
-    Map<String, String> objectMaps = ProjectService.getAllOjects();
-    List<String> objectList = new List<String>();
-
-    // Récupérer toutes les valeurs de la map
-    objectList.addAll(objectMaps.values());
-    Test.stopTest();
-
-    // Assertions
-    System.assert(objectList.size() > 0, 'La liste des objets n\'est pas vide');
-    System.assertNotEquals(null, objectList);
   }
 
   //Tester la récupèration des données par l'ID

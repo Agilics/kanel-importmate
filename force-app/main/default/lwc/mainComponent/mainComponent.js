@@ -1,10 +1,9 @@
 import { LightningElement, wire, track } from "lwc";
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
-//import delay from "delay";
+
 //importation méthodes depuis le Contrôleur
 import saveProject from "@salesforce/apex/ImportProjectController.saveProject";
 import getRecentsProjects from "@salesforce/apex/ImportProjectController.getRecentsProjects";
-//import searchProjetsByName from "@salesforce/apex/ImportProjectController.searchProjetsByName";
 
 export default class MainComponent extends LightningElement {
   @track showCreatorSection = false;
@@ -13,15 +12,15 @@ export default class MainComponent extends LightningElement {
   isLoading = false;
   objectList = [];
   projectName = "";
+  @track selectProject = [];
   description = "";
   targetObjet = "";
+  @track simpleTargetObject = "";
   projectId;
   project;
   //paramètres pour la section projets récents
   limitor = 3;
   @wire(getRecentsProjects, { limitor: "$limitor" }) importProjects; //affiche 3 projets récents
-
-  //  @wire(searchProjetsByName, { projectName: "$projectName" }) selectProjects;
 
   //Enregistrement d'un nouveau projet
   handleCreateProject() {
@@ -46,11 +45,7 @@ export default class MainComponent extends LightningElement {
           `Projet "${this.projectName} ${this.targetObject}" créé avec succès !`,
           "success"
         );
-
-        // recharge après 3s pour laisser voir le toast
-        //  delay(3000);
         this.isLoading = false;
-        //  delay(700);
         window.location.reload();
       })
       .catch((error) => {
@@ -78,7 +73,6 @@ export default class MainComponent extends LightningElement {
   //Mise à jour de la variable target Object via le champs de selection
   handleTargetObjectChange(event) {
     this.targetObject = event.detail;
-    console.log("Description:", this.targetObject);
   }
 
   //affiche un flash message via un toast

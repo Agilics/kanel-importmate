@@ -43,14 +43,13 @@ public with sharing class ProjectService {
     return ProjectRepository.getRecentsProjets(limitor);
   }
 
-  // Récupère la liste de tous les SObjets dans Apex
-  public static Map<String, String> getAllOjects() {
-    return ProjectRepository.getObjects();
-  }
-
   // Recherche projet par le nom
   public static List<ImportProject__c> getProjectsByName(String keyword) {
-    return ProjectRepository.getProjectsByName(keyword);
+    if(String.isBlank(keyword) || String.isEmpty(keyword)){
+      return ProjectRepository.getAllProjects();
+    } 
+      return ProjectRepository.getProjectsByName(keyword);   
+    
   }
 
   // Recherche projet par l'identifiant du projet
