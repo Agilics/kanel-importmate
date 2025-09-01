@@ -12,12 +12,6 @@ public class ImportProjectController {
     return ProjectService.getRecentsProjets(limitor);
   }
 
-  //Récupèrer la liste des SObjets standard dans Apex
-  @AuraEnabled(cacheable=true)
-  public static Map<String, String> getAllOjects() {
-    return ProjectService.getAllOjects();
-  }
-
   //Enregistrer un projet importé
   @AuraEnabled
   public static void saveProject(
@@ -36,7 +30,13 @@ public class ImportProjectController {
 
   //Rechercher  par l'id  un projet importé
   @AuraEnabled(cacheable=true)
-  public static ImportProject__c searchProjetsById(String id) {
+  public static ImportProject__c searchProjetById(String id) {
     return ProjectService.getProjectById(id);
+  }
+
+  //récupérer la liste  de tous les projets
+  @AuraEnabled(cacheable=true)
+  public static List<ImportProject__c> getAllProjects() {
+    return ProjectService.getAllProjects();
   }
 }

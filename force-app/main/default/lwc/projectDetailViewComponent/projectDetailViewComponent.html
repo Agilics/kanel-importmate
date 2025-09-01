@@ -1,0 +1,48 @@
+<template>
+  <lightning-modal-header label="Import Project Detail View">
+  </lightning-modal-header>
+
+  <lightning-modal-body>
+    <div class="slds-p-around_medium slds-text-align_center">
+      <!-- Icône d’information -->
+      <lightning-icon
+        icon-name="utility:info"
+        alternative-text="Info"
+        size="large"
+        class="slds-m-bottom_small"
+      ></lightning-icon>
+
+      <!-- Card pour les détails du projet -->
+      <lightning-card>
+        <div class="slds-p-around_small">
+          <p class="slds-text-title_bold slds-m-bottom_xx-small">Name</p>
+          <p class="slds-m-bottom_small">{project.Name}</p>
+
+          <p class="slds-text-title_bold slds-m-bottom_xx-small">
+            Target Object
+          </p>
+          <p class="slds-m-bottom_small">{project.TargetObject__c}</p>
+
+          <p class="slds-text-title_bold slds-m-bottom_xx-small">Description</p>
+          <p>{project.Description__c}</p>
+        </div>
+      </lightning-card>
+    </div>
+  </lightning-modal-body>
+
+  <lightning-modal-footer>
+    <lightning-button
+      label="Close"
+      onclick={handleCloseModal}
+      variant="neutral"
+    ></lightning-button>
+
+    <lightning-button
+      variant="brand"
+      label="Edit"
+      title="Edit project details"
+      onclick={handleEdit}
+      class="slds-m-left_small"
+    ></lightning-button>
+  </lightning-modal-footer>
+</template>
