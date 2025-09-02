@@ -3,17 +3,12 @@
   "private": true,
   "version": "1.0.0",
   "description": "Salesforce App",
-  "engines": {
-    "node": ">=18"
-  },
   "scripts": {
     "lint": "eslint \"force-app/main/default/lwc/**/*.js\" \"**/*.test.js\" \"jest.config.js\" --no-error-on-unmatched-pattern",
     "test": "npm run test:unit",
     "test:unit": "sfdx-lwc-jest",
     "test:unit:watch": "sfdx-lwc-jest --watch",
     "test:unit:coverage": "sfdx-lwc-jest --coverage",
-    "prettier": "prettier --plugin=@prettier/plugin-xml --plugin=prettier-plugin-apex --write \"**/*.{cls,cmp,component,css,html,js,json,md,page,trigger,xml,yaml,yml}\"",
-    "prettier:verify": "prettier --plugin=@prettier/plugin-xml --plugin=prettier-plugin-apex --list-different \"**/*.{cls,cmp,component,css,html,js,json,md,page,trigger,xml,yaml,yml}\"",
     "postinstall": "husky install",
     "precommit": "lint-staged"
   },
@@ -22,46 +17,29 @@
     "@lwc/engine-server": "8.21.6",
     "@lwc/eslint-plugin-lwc": "2.0.0",
     "@salesforce/eslint-config-lwc": "3.7.2",
-    "@salesforce/eslint-plugin-aura": "2.0.0",
-    "@salesforce/eslint-plugin-lightning": "1.0.0",
+    "@salesforce/eslint-plugin-lightning": "^2.0.0",
     "@salesforce/sfdx-lwc-jest": "1.1.0",
     "eslint": "8.57.1",
     "eslint-plugin-import": "2.29.1",
-    "eslint-plugin-jest": "27.6.3",
+    "eslint-plugin-jest": "27.9.0",
     "husky": "9.1.7",
     "lint-staged": "15.5.2",
-    "prettier": "3.6.2",
-    "prettier-plugin-apex": "2.2.6",
-    "@prettier/plugin-xml": "2.0.1",
+    "prettier": "3.3.3",
     "typescript": "5.9.2"
   },
   "lint-staged": {
-    "**/*.{js,ts}": [
-      "eslint --cache --fix"
+    "force-app/main/default/lwc/**/*.{js,json,md}": [
+      "prettier --write",
+      "eslint --fix"
     ],
-    "**/*.{cls,cmp,component,css,html,js,json,md,page,trigger,xml,yaml,yml}": [
-      "prettier --plugin=@prettier/plugin-xml --plugin=prettier-plugin-apex --write"
+    "*.{json,md,yaml,yml}": [
+      "prettier --write"
     ]
   },
   "eslintConfig": {
     "root": true,
-    "env": {
-      "es2021": true,
-      "browser": true,
-      "node": true
-    },
-    "parserOptions": {
-      "ecmaVersion": 2021,
-      "sourceType": "module"
-    },
     "extends": [
-      "eslint:recommended",
-      "plugin:@lwc/lwc/recommended",
-      "plugin:jest/recommended"
-    ],
-    "plugins": [
-      "@lwc/lwc",
-      "jest"
+      "@salesforce/eslint-config-lwc/recommended"
     ],
     "overrides": [
       {
@@ -70,31 +48,17 @@
           "**/*.test.js"
         ],
         "env": {
-          "jest": true,
-          "node": true,
-          "browser": true
+          "jest": true
         }
       },
       {
         "files": [
           "jest.config.js"
         ],
-        "parserOptions": {
-          "sourceType": "script"
-        },
         "env": {
           "node": true
         }
       }
-    ],
-    "ignorePatterns": [
-      "node_modules/",
-      "coverage/",
-      ".sfdx/",
-      ".vscode/",
-      "**/*.html",
-      "**/*.css",
-      "**/*.xml"
     ]
   }
 }
