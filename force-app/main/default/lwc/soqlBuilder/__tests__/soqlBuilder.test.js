@@ -1,10 +1,10 @@
-// --- Mock FIRST (before importing the component) ---
+// Mock the Toast event FIRST (before importing the component)
 jest.mock(
   'lightning/platformShowToastEvent',
   () => {
-    // Use a classic function (not an arrow) so `new ShowToastEvent(...)` works.
-    // We create and return a real CustomEvent so jsdom's dispatchEvent accepts it.
     function ShowToastEvent(detail) {
+      // Create a real CustomEvent so jsdom accepts it.
+      // eslint-disable-next-line no-undef
       return new globalThis.CustomEvent('lightning__showtoast', { detail });
     }
     return { ShowToastEvent };
@@ -12,7 +12,7 @@ jest.mock(
   { virtual: true }
 );
 
-// Apex mocks
+// Mock Apex (imperative)
 jest.mock(
   '@salesforce/apex/QueryBuilderController.fetchObjects',
   () => ({ default: jest.fn() }),
@@ -36,29 +36,30 @@ import fetchObjects from '@salesforce/apex/QueryBuilderController.fetchObjects';
 import fetchFields from '@salesforce/apex/QueryBuilderController.fetchFields';
 import buildAndRunQuery from '@salesforce/apex/QueryBuilderController.buildAndRunQuery';
 
-// microtask flush
+// Microtask flush helpers
 const tick = () => Promise.resolve();
 const flushPromises = () => tick().then(tick);
 
-// controllable promise helper
+// Deferred promise helper
 const deferred = () => {
   let resolve, reject;
   const promise = new Promise((res, rej) => {
-    resolve = res; reject = rej;
+    resolve = res;
+    reject = rej;
   });
   return { promise, resolve, reject };
 };
 
 describe('c-soql-builder', () => {
   const sampleRows = [
-    { Id: '001xx0000000001AAA', Name: 'Acme', Account__Name: 'ParentCo' },
+    { Id: '001xx0000000001AAA', Name: 'Acme', Account__Name: 'ParentCo' }
   ];
 
   beforeEach(() => {
     jest.clearAllMocks();
     fetchObjects.mockResolvedValue(['Account', 'Contact']);
     fetchFields.mockResolvedValue(['Id', 'Name', 'Account.Name']);
-    buildAndRunQuery.mockResolvedValue(sampleRows);
+    buildAndRunQuery.mockResolvedValue(sampleRows); // default
   });
 
   afterEach(() => {
@@ -83,7 +84,7 @@ describe('c-soql-builder', () => {
     expect(combo).toBeTruthy();
     expect(combo.options).toEqual([
       { label: 'Account', value: 'Account' },
-      { label: 'Contact', value: 'Contact' },
+      { label: 'Contact', value: 'Contact' }
     ]);
   });
 
@@ -101,7 +102,7 @@ describe('c-soql-builder', () => {
     expect(dual.options).toEqual([
       { label: 'Id', value: 'Id' },
       { label: 'Name', value: 'Name' },
-      { label: 'Account.Name', value: 'Account.Name' },
+      { label: 'Account.Name', value: 'Account.Name' }
     ]);
   });
 
@@ -109,22 +110,30 @@ describe('c-soql-builder', () => {
     const el = mount();
     await flushPromises();
 
+    // initial
     let pre = el.shadowRoot.querySelector('pre');
     expect(pre.textContent).toBe('SELECT ... FROM ...');
 
+    // choose object
     el.shadowRoot
       .querySelector('lightning-combobox')
       .dispatchEvent(new CustomEvent('change', { detail: { value: 'Account' } }));
     await flushPromises();
 
+    // choose fields
     el.shadowRoot
       .querySelector('lightning-dual-listbox')
-      .dispatchEvent(new CustomEvent('change', { detail: { value: ['Name', 'Account.Name'] } }));
+      .dispatchEvent(
+        new CustomEvent('change', { detail: { value: ['Name', 'Account.Name'] } })
+      );
     await flushPromises();
 
+    // set WHERE
     el.shadowRoot
       .querySelector('lightning-input')
-      .dispatchEvent(new CustomEvent('change', { detail: { value: "Name LIKE 'A%'" } }));
+      .dispatchEvent(
+        new CustomEvent('change', { detail: { value: "Name LIKE 'A%'" } })
+      );
     await flushPromises();
 
     pre = el.shadowRoot.querySelector('pre');
@@ -136,7 +145,8 @@ describe('c-soql-builder', () => {
     expect(txt).toMatch(/WHERE Name LIKE 'A%'/);
   });
 
-  test('Run success: button shows Running…, then datatable renders and button resets', async () => {
+  test('Run success: shows Running... while pending, then populates datatable and resets', async () => {
+    // Make the Apex call deferred so we can inspect mid-flight state
     const d = deferred();
     buildAndRunQuery.mockReturnValueOnce(d.promise);
 
@@ -150,7 +160,9 @@ describe('c-soql-builder', () => {
 
     el.shadowRoot
       .querySelector('lightning-dual-listbox')
-      .dispatchEvent(new CustomEvent('change', { detail: { value: ['Name', 'Account.Name'] } }));
+      .dispatchEvent(
+        new CustomEvent('change', { detail: { value: ['Name', 'Account.Name'] } })
+      );
     await flushPromises();
 
     const btn = el.shadowRoot.querySelector('lightning-button');
@@ -160,7 +172,7 @@ describe('c-soql-builder', () => {
     expect(buildAndRunQuery).toHaveBeenCalledWith({
       objectName: 'Account',
       fieldList: ['Name', 'Account.Name'],
-      whereClause: '',
+      whereClause: ''
     });
     expect(btn.label).toBe('Running...');
     expect(btn.disabled).toBe(true);
@@ -201,6 +213,7 @@ describe('c-soql-builder', () => {
     el.shadowRoot.querySelector('lightning-button').click();
     await flushPromises();
 
+    // resolve with empty array
     d.resolve([]);
     await flushPromises();
 
