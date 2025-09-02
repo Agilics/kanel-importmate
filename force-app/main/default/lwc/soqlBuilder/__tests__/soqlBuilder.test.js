@@ -1,17 +1,15 @@
-import { createElement } from '@lwc/engine-dom';
-import SoqlBuilder from 'c/soqlBuilder';
-
-
-jest.mock('lightning/platformShowToastEvent', () => {
-  return {
-    ShowToastEvent: class ShowToastEvent extends CustomEvent {
-      constructor(detail) {
-        super('lightning__showtoast', { detail });
-      }
-    },
-  };
-}, { virtual: true });
-
+// 👇 Mock FIRST (before importing the component)
+jest.mock(
+  'lightning/platformShowToastEvent',
+  () => {
+    function ShowToastEvent(detail) {
+      // minimal shape used by tests
+      return { type: 'lightning__showtoast', detail };
+    }
+    return { ShowToastEvent };
+  },
+  { virtual: true }
+);
 
 // Mock Apex (imperative)
 jest.mock(
@@ -29,6 +27,9 @@ jest.mock(
   () => ({ default: jest.fn() }),
   { virtual: true }
 );
+
+import { createElement } from '@lwc/engine-dom';
+import SoqlBuilder from 'c/soqlBuilder';
 
 import fetchObjects from '@salesforce/apex/QueryBuilderController.fetchObjects';
 import fetchFields from '@salesforce/apex/QueryBuilderController.fetchFields';
@@ -130,14 +131,12 @@ describe('c-soql-builder', () => {
   });
 
   test('Run success: shows Running... while pending, then populates datatable and resets', async () => {
-    // Make the Apex call deferred so we can inspect the mid-flight state
     const d = deferred();
     buildAndRunQuery.mockReturnValueOnce(d.promise);
 
     const el = mount();
     await flushPromises();
 
-    // select object + fields
     el.shadowRoot.querySelector('lightning-combobox')
       .dispatchEvent(new CustomEvent('change', { detail: { value: 'Account' } }));
     await flushPromises();
@@ -146,10 +145,8 @@ describe('c-soql-builder', () => {
       .dispatchEvent(new CustomEvent('change', { detail: { value: ['Name', 'Account.Name'] } }));
     await flushPromises();
 
-    // click Run
     const btn = el.shadowRoot.querySelector('lightning-button');
     btn.click();
-    // wait one render tick so label/disabled reflect isLoading=true
     await flushPromises();
 
     expect(buildAndRunQuery).toHaveBeenCalledWith({
@@ -160,7 +157,6 @@ describe('c-soql-builder', () => {
     expect(btn.label).toBe('Running...');
     expect(btn.disabled).toBe(true);
 
-    // now resolve the Apex call
     d.resolve(sampleRows);
     await flushPromises();
 
@@ -170,7 +166,6 @@ describe('c-soql-builder', () => {
       .toEqual(expect.arrayContaining(['Id', 'Name', 'Account__Name']));
     expect(dt.data).toEqual(sampleRows);
 
-    // button reset
     expect(btn.label).toBe('Run Query');
     expect(btn.disabled).toBe(false);
   });
@@ -195,7 +190,6 @@ describe('c-soql-builder', () => {
     el.shadowRoot.querySelector('lightning-button').click();
     await flushPromises();
 
-    // resolve with empty array
     d.resolve([]);
     await flushPromises();
 

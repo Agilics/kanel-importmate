@@ -1,8 +1,8 @@
-﻿**/*.cls
-**/*.trigger
-**/*.page
-**/*.component
-**/*.object-meta.xml
-**/*.field-meta.xml
-**/*.js-meta.xml
-**/*.xml
+﻿force-app/**/*.object-meta.xml
+force-app/**/*.field-meta.xml
+force-app/**/*.xml
+force-app/**/*.cls
+force-app/**/*.trigger
+*.js-meta.xml
+.sfdx/
+coverage/
