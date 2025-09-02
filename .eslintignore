@@ -1,4 +1,5 @@
-﻿**/*.cls
+﻿**/*.html
+**/*.css
 **/*.xml
 **/*.object-meta.xml
 **/*.field-meta.xml

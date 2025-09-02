@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "description": "Salesforce App",
   "scripts": {
-    "lint": "eslint **/{aura,lwc}/**",
+    "lint": "eslint --ext .js,.ts force-app/main/default/aura force-app/main/default/lwc",
     "test": "npm run test:unit",
     "test:unit": "sfdx-lwc-jest",
     "test:unit:watch": "sfdx-lwc-jest --watch",
@@ -16,6 +16,8 @@
     "precommit": "lint-staged"
   },
   "devDependencies": {
+    "@babel/eslint-parser": "^7.28.0",
+    "@lwc/engine-server": "^8.21.6",
     "@lwc/eslint-plugin-lwc": "^2.0.0",
     "@prettier/plugin-xml": "^2.0.1",
     "@salesforce/eslint-config-lwc": "^3.7.2",
@@ -29,7 +31,8 @@
     "lint-staged": "^15.5.2",
     "prettier": "^3.6.2",
     "prettier-plugin-apex": "^2.2.6",
-    "prettier-plugin-xml": "^0.1.0"
+    "prettier-plugin-xml": "^0.1.0",
+    "typescript": "^5.9.2"
   },
   "lint-staged": {
     "**/*.{cls,cmp,component,css,html,js,json,md,page,trigger,xml,yaml,yml}": [
