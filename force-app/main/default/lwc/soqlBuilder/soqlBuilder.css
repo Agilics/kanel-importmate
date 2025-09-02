@@ -35,8 +35,7 @@
   /* shadow */
   --card-shadow: 0 6px 16px rgba(31, 74, 122, 0.10);
 
-  /* ====== Lightning Datatable tokens (inside shadow DOM) ====== */
-  /* header */
+
   --slds-c-table-radius-border: var(--inner-radius);
   --slds-c-table-color-background-header: var(--tbl-header-bg);
   --slds-c-table-header-color-background: var(--tbl-header-bg);
@@ -68,7 +67,7 @@
   --slds-c-button-text-color: var(--tbl-header-fg);
 }
 
-/* ====== OUTER CARD (rounded, soft background) ====== */
+
 .results-table {
   position: relative;
   margin-top: 1rem;
@@ -78,26 +77,25 @@
   box-shadow: var(--card-shadow);
 }
 
-/* Clip the table header to rounded corners and keep body white */
+
 .results-table lightning-datatable {
   display: block;
   background: var(--tbl-body-bg);
   border-radius: var(--inner-radius);
-  overflow: hidden;              /* ensures header looks pill-shaped */
+  overflow: hidden;             
 }
 
-/* Softer row separators like the mock */
+
 .results-table tbody tr td {
   border-top-color: var(--tbl-line);
 }
 
-/* Scroll body within the card (height similar to mock) */
+
 .table-scroll {
-  max-height: 280px;             /* adjust as needed */
+  max-height: 280px;             
   background: var(--tbl-body-bg);
 }
 
-/* Slimmer scrollbar for WebKit browsers (cosmetic) */
 .table-scroll::-webkit-scrollbar { width: 8px; }
 .table-scroll::-webkit-scrollbar-thumb {
   background: #c5c9d1;
@@ -105,7 +103,6 @@
 }
 .table-scroll::-webkit-scrollbar-track { background: transparent; }
 
-/* Decorative rounded bar at the bottom (mimics mock’s scroll rail) */
 .results-table::after {
   content: "";
   display: block;
@@ -117,7 +114,7 @@
   opacity: 0.7;
 }
 
-/* Query preview styling (optional) */
+
 .query-preview pre {
   background: #f6f8fb;
   border: 1px solid #e9edf5;
