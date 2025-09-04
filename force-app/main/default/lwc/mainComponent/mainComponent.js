@@ -1,11 +1,18 @@
 import { LightningElement, wire, track } from "lwc";
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
+<<<<<<< HEAD
 import SelectProject from "c/selectProjectComponent";
 import searchProjetById from "@salesforce/apex/ImportProjectController.searchProjetById";
+=======
+>>>>>>> f83ef903b35e27bd75f90d9deb39df4dacde02da
 
 //importation méthodes depuis le Contrôleur
 import saveProject from "@salesforce/apex/ImportProjectController.saveProject";
 import getRecentsProjects from "@salesforce/apex/ImportProjectController.getRecentsProjects";
+<<<<<<< HEAD
+=======
+
+>>>>>>> f83ef903b35e27bd75f90d9deb39df4dacde02da
 export default class MainComponent extends LightningElement {
   @track showCreatorSection = false;
   //paramètres pour la création de projet
@@ -50,8 +57,11 @@ export default class MainComponent extends LightningElement {
   limitor = 3;
   @wire(getRecentsProjects, { limitor: "$limitor" }) importProjects; //affiche 3 projets récents
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> f83ef903b35e27bd75f90d9deb39df4dacde02da
   //Enregistrement d'un nouveau projet
   handleCreateProject() {
     this.isLoading = true; //affichage du spinner
@@ -78,8 +88,12 @@ export default class MainComponent extends LightningElement {
           "success"
         );
         this.isLoading = false;
+<<<<<<< HEAD
         //On passe à l'étape 2 Selection du source de données
         this.currentStep = 2; // mise à jour du stepper
+=======
+        window.location.reload();
+>>>>>>> f83ef903b35e27bd75f90d9deb39df4dacde02da
       })
       .catch((error) => {
         this.showToast(
@@ -135,6 +149,7 @@ export default class MainComponent extends LightningElement {
   openNewProject() {
     this.showCreatorSection = true;
   }
+<<<<<<< HEAD
 
   // navigation du stepper
   handleStepClick(event) {
@@ -175,4 +190,6 @@ export default class MainComponent extends LightningElement {
       }
     });
   }
+=======
+>>>>>>> f83ef903b35e27bd75f90d9deb39df4dacde02da
 }

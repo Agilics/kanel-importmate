@@ -1,60 +1,25 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 09-04-2025
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
 <template>
   <lightning-modal-header label="Imports Projects"> </lightning-modal-header>
 
   <lightning-modal-body>
-    <div class="slds-p-around_medium slds-text-align_center">
-      <!-- Champs pour la recherche  de projets importés -->
-      <div class="slds-p-around_medium lgc-bg">
-        <lightning-input
-          type="search"
-          label="Search import project"
-          onchange={handleSearch}
-        ></lightning-input>
-      </div>
-      <!-- Card pour les détails du projet -->
-      <template if:true={projects}>
-        <lightning-card>
-          <table class="styled-table">
-            <caption class="slds-text-align_center">
-              Import projects Informations
-            </caption>
-            <thead>
-              <tr>
-                <template for:each={columns} for:item="column">
-                  <th key={column.fieldName}>{column.label}</th>
-                </template>
-              </tr>
-            </thead>
-            <tbody>
-              <!-- tableau de projets importés -->
-              <template for:each={projects} for:item="project">
-                <tr key={project.Id}>
-                  <!-- Nom  -->
-                  <td>{project.Name}</td>
-                  <!-- objet ciblé -->
-                  <td>{project.TargetObject__c}</td>
+    <div class="slds-text-align_center">
+      <lightning-icon
+        icon-name="utility:info_alt"
+        alternative-text="info_alt"
+        size="large"
+        title="info_alt"
+      ></lightning-icon>
 
-                  <!-- Description -->
-                  <td>{project.Description__c}</td>
-
-                  <!-- Bouton d'action -->
-                  <td>
-                    <lightning-button
-                      onclick={handleShowDetailProject}
-                      variant="brand"
-                      label="Details"
-                      icon-name="action:preview"
-                      data-id={project.Id}
-                    >
-                    </lightning-button>
-                  </td>
-                </tr>
-              </template>
-            </tbody>
-          </table>
-        </lightning-card>
-      </template>
-      <!-- tablesau -->
+      <h2>Name :{project.Name}</h2>
+      <h4>Target Object: {project.TargetObject__c}</h4>
+      <h4>Description: {project.Description__c}</h4>
     </div>
   </lightning-modal-body>
 
@@ -62,7 +27,15 @@
     <lightning-button
       label="Close"
       onclick={handleCloseModal}
-      variant="neutral"
+      variant="destructive-text"
+    ></lightning-button>
+    <!-- Brand outline variant: Identifies the primary action in a group of buttons, but has a lighter look -->
+    <lightning-button
+      variant="brand-outline"
+      label="Edit"
+      title="Primary action with lighter look"
+      onclick={handleEdit}
+      class="slds-m-left_x-small"
     ></lightning-button>
   </lightning-modal-footer>
 </template>

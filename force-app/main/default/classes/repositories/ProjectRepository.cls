@@ -55,10 +55,11 @@ public static ImportProject__c saveProject(ImportProject__c project) {
   // Rechercher  les projets par le nom
   public static List<ImportProject__c> getProjectsByName(String projectName) {
     if (Schema.ImportProject__c.SObjectType.getDescribe().isAccessible()) {
+      String query = '%' + projectName + '%';
       return [
         SELECT Id, Name, Description__c, TargetObject__c
         FROM ImportProject__c
-        WHERE Name LIKE :('%' + projectName + '%')
+        WHERE Name LIKE :query
         ORDER BY Name
       ];
     }

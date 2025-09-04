@@ -45,10 +45,18 @@ public with sharing class ProjectService {
 
   // Recherche projet par le nom
   public static List<ImportProject__c> getProjectsByName(String keyword) {
+<<<<<<< HEAD
     if (String.isBlank(keyword)) {
       return ProjectRepository.getAllProjects();
     }
     return ProjectRepository.getProjectsByName(keyword);
+=======
+    if(String.isBlank(keyword) || String.isEmpty(keyword)){
+      return ProjectRepository.getAllProjects();
+    } 
+      return ProjectRepository.getProjectsByName(keyword);   
+    
+>>>>>>> f83ef903b35e27bd75f90d9deb39df4dacde02da
   }
 
   // Recherche projet par l'identifiant du projets'

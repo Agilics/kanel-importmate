@@ -1,5 +1,4 @@
-import { LightningElement, api } from "lwc";
-
+import { LightningElement, track } from "lwc";
 //import methods from Controller
 import getCompatibleSObjects from "@salesforce/apex/ObjectMetadataController.getCompatibleSObjects";
 //import getObjectFields from "@salesforce/apex/ObjectMetadataController.getObjectFields";
@@ -14,17 +13,13 @@ export default class ProjectCreatorComponent extends LightningElement {
 
   // Permet au parent de définir des valeurs initiales dans le champs target object
   connectedCallback() {
-    getCompatibleSObjects()
-      .then((results) => {
-        if (results && results.length > 0) {
-          // Transformer la liste en [{label, value}]
-          this.options = results.map((objName) => {
-            return { label: objName, value: objName };
-          });
-
-          // Préselectionner le premier objet
-          //this.targetObject = this.options[0].value;
-        }
+    getAllOjects()
+      .then((result) => {
+        // Transformer la Map en tableau [{key, value}]
+        this.options = Object.entries(result).map(([key, value]) => {
+          return { label: key, value: value };
+        });
+        console.log(this.options);
       })
       .catch((e) => {
         console.error(

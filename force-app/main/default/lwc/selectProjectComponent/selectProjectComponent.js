@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // projects.js
 import { api, track, wire } from "lwc";
 import LightningModal from "lightning/modal";
@@ -34,6 +35,28 @@ export default class projectsComponent extends LightningModal {
     const { id } = e.target.dataset;
     this.dispatchEvent(new CustomEvent("select", { detail: id }));
     this.close(id);
+=======
+// selectProject.js
+import { api } from "lwc";
+import LightningModal from "lightning/modal";
+
+export default class SelectProjectComponent extends LightningModal {
+  @api projects;
+  @api columns;
+
+handleSearch(e) {
+  const searchEvent = new CustomEvent("search", {
+    detail: { name: e.target.value }
+  });
+  this.dispatchEvent(searchEvent);
+}
+  //on choisie de visualiser les détails d'un projet importé et on ferme le modal 
+  handleSelectProject(e) {
+    const { id } = e.target.dataset;
+    this.dispatchEvent(new CustomEvent("select", { detail: id }));
+    this.close(id);
+    alert(id);
+>>>>>>> f83ef903b35e27bd75f90d9deb39df4dacde02da
   }
 
   handleCloseModal() {
