@@ -1,14 +1,16 @@
-import { LightningElement, track } from "lwc";
+import { LightningElement, api } from "lwc";
 
 //import methods from Controller
 import getCompatibleSObjects from "@salesforce/apex/ObjectMetadataController.getCompatibleSObjects";
 //import getObjectFields from "@salesforce/apex/ObjectMetadataController.getObjectFields";
 
 export default class ProjectCreatorComponent extends LightningElement {
-  @track projectName = "";
-  @track description = "";
-  @track targetObject = "";
-  @track options = [];
+  @api projectName = "";
+  @api description = "";
+  @api targetObject = "";
+  @api options = [];
+  @api project;
+  @api currentStep;
 
   // Permet au parent de définir des valeurs initiales dans le champs target object
   connectedCallback() {
@@ -21,7 +23,7 @@ export default class ProjectCreatorComponent extends LightningElement {
           });
 
           // Préselectionner le premier objet
-          this.targetObject = results[0];
+          //this.targetObject = this.options[0].value;
         }
       })
       .catch((e) => {
@@ -37,6 +39,8 @@ export default class ProjectCreatorComponent extends LightningElement {
     return this.targetObject != null && this.targetObject.split("").length > 0;
   }
 
+  //Dispatching vers le composant principal MainComopnent
+  //Evénement portant sur la mise à jour du nom du projet
   handleProjectNameChange(event) {
     this.projectName = event.target.value;
     this.dispatchEvent(
@@ -44,6 +48,8 @@ export default class ProjectCreatorComponent extends LightningElement {
     );
   }
 
+  //Dispatching vers le composant principal MainComopnent
+  //  le événement portant sur la mise à jour de l'attribut description
   handleDescriptionChange(event) {
     this.description = event.target.value;
     this.dispatchEvent(
@@ -51,6 +57,8 @@ export default class ProjectCreatorComponent extends LightningElement {
     );
   }
 
+  //Dispatching vers le composant parent MainComponent
+  //  de l'événement portant sur la mise à jour de l'attribut target object
   handleTargetObjectChange(event) {
     this.targetObject = event.target.value;
     this.dispatchEvent(
@@ -58,6 +66,8 @@ export default class ProjectCreatorComponent extends LightningElement {
     );
   }
 
+  //Evénement portant sur l'enregistrement de projet
+  //Dispatching vers le parent (composant principal) des variables Name | Description | Target Object
   handleCreateProject() {
     this.dispatchEvent(
       new CustomEvent("save", {

@@ -21,17 +21,16 @@
         >
         </lightning-input>
         <div style="display: inline-block">
-          <lightning-select
-            style="margint-top: 1rem"
+          <lightning-combobox
             class="rounded-input"
             name="tickets"
             id="targetObjet"
             label="Target Object"
-            value={selectTargetObject}
+            value={targetObject}
             options={options}
             onchange={handleTargetObjectChange}
             required
-          ></lightning-select>
+          ></lightning-combobox>
           <template if:true={isTargetObjetSelected}>
             <p for="targetObject" class="block text-sm font-semibold mb-2">
               Target Object: {targetObject}

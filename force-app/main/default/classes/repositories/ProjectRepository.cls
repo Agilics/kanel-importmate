@@ -7,20 +7,24 @@
  **/
 public with sharing class ProjectRepository {
   // Sauvegarde un nouveau projet ou met à jour un existant
-  public static void saveProject(ImportProject__c project) {
+public static ImportProject__c saveProject(ImportProject__c project) {
     if (
       Schema.ImportProject__c.SObjectType.getDescribe().isCreateable() ||
       Schema.ImportProject__c.SObjectType.getDescribe().isUpdateable()
     ) {
       try {
         upsert project;
+        return project;
       } catch (DmlException e) {
         throw new ImportException(
           'Erreur lors de la sauvegarde du projet : ' + e.getMessage()
         );
       }
     }
-  }
+    // Retour obligatoire si pas de droits
+    throw new ImportException('Vous n’avez pas les droits pour créer ou modifier un projet.');
+}
+
 
   // Récupère un projet par ID
   public static ImportProject__c getProjectById(String projectId) {
@@ -51,11 +55,10 @@ public with sharing class ProjectRepository {
   // Rechercher  les projets par le nom
   public static List<ImportProject__c> getProjectsByName(String projectName) {
     if (Schema.ImportProject__c.SObjectType.getDescribe().isAccessible()) {
-      String query = '%' + projectName + '%';
       return [
         SELECT Id, Name, Description__c, TargetObject__c
         FROM ImportProject__c
-        WHERE Name LIKE :query
+        WHERE Name LIKE :('%' + projectName + '%')
         ORDER BY Name
       ];
     }

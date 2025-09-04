@@ -1,0 +1,16 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 09-03-2025
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<template>
+  <template lwc:if={recentProject}>
+    <h1>Select project ID : {recentProject.Id}</h1>
+    <h2>{recentProject.Name}</h2>
+    <h3>{recentProject.TargetObject__c}</h3>
+    <h3>{recentProject.Description__c}</h3>
+    <button class="btn btn-back" onclick={handlePreviousStep}>Back</button>
+  </template>
+</template>

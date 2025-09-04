@@ -2,59 +2,86 @@
   @description       : 
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
   @group             : 
-  @last modified on  : 08-21-2025
+  @last modified on  : 09-04-2025
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
   <template if:true={isLoading}>
     <lightning-spinner
       alternative-text="Loading"
-      size="medium"
+      size="large"
     ></lightning-spinner>
   </template>
   <div class="container" role="main" aria-label="ImportMate project interface">
     <header>
-      <div class="logo" aria-label="ImportMate logo">
-        <lightning-icon
-          style="margin-right: 20px"
-          icon-name="utility:download"
-          alternative-text="Utility download"
-          title="download"
-        ></lightning-icon>
-        ImportMate
+      <div class="sub-container">
+        <div class="logo" aria-label="ImportMate logo">
+          <lightning-icon
+            style="margin-right: 20px"
+            icon-name="utility:download"
+            alternative-text="Utility download"
+            title="download"
+          ></lightning-icon>
+          ImportMate
+          <div class="stepper">
+            <c-stepper-component
+              current-step={activeStep}
+              base-steps={baseSteps}
+              steps={steps}
+              onstepchange={handleStepClick}
+            ></c-stepper-component>
+          </div>
+        </div>
       </div>
+
       <p class="intro-text">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sodales
         nulla ligula, non lacinia felis finibus in. Proin id mattis elit. Donec
         at nulla metus.
       </p>
     </header>
+    <template if:true={currentStep}>
+      <template if:true={isStart}>
+        <!-- child here content-->
+        <!-- show  recent imported project -->
+        <template if:false={showCreatorSection}>
+          <c-import-project-recent-component
+            onshow={openNewProject}
+            onselectproject={handleSelectProject}
+            projects={importProjects}
+          ></c-import-project-recent-component>
+        </template>
+        <!-- end show  recent imported project -->
 
-    <!-- child here content-->
-    <!-- show  recent imported project -->
-    <template if:false={showCreatorSection}>
-      <c-import-project-recent-component
-        onshow={openNewProject}
-        projects={importProjects}
-      ></c-import-project-recent-component>
+        <!-- project creator section -->
+        <template if:true={showCreatorSection}>
+          <c-create-project-component
+            project-name={projectName}
+            description={description}
+            target-object={targetObject}
+            onnamechange={handleProjectNameChange}
+            ondescriptionchange={handleDescriptionChange}
+            ontargetchange={handleTargetObjectChange}
+            onsave={handleCreateProject}
+          >
+          </c-create-project-component>
+        </template>
+        <!-- end project creator section -->
+
+        <!-- end child content-->
+      </template>
+      <!-- stepper 2 -->
+      <template if:true={isSelectSource}>
+        <c-select-data-source-component
+          onprevious={handlePreviousStep}
+          recent-project={recentProject}
+        >
+        </c-select-data-source-component>
+      </template>
+      <template if:true={isMappingAndTransformation}>
+        <h2>Step 3: Mapping & Transformation</h2>
+        <p>Ici tu affiches ton composant de mapping.</p>
+      </template>
     </template>
-    <!-- end show  recent imported project -->
-
-    <!-- project creator section -->
-    <template if:true={showCreatorSection}>
-      <c-create-project-component
-        project-name={projectName}
-        description={description}
-        target-object={targetObject}
-        onnamechange={handleProjectNameChange}
-        ondescriptionchange={handleDescriptionChange}
-        ontargetchange={handleTargetObjectChange}
-        onsave={handleCreateProject}
-      >
-      </c-create-project-component>
-    </template>
-    <!-- end project creator section -->
-
-    <!-- end child content-->
   </div>
 </template>

@@ -6,6 +6,10 @@
   border-radius: 20px;
   padding: 2.5rem 3rem 3rem 3rem;
   box-shadow: 0 0 14px rgb(0 0 0 / 0.15);
+  -webkit-border-radius: 20px;
+  -moz-border-radius: 20px;
+  -ms-border-radius: 20px;
+  -o-border-radius: 20px;
 }
 /* Header - Logo and Steps */
 header {
@@ -15,6 +19,13 @@ header {
   align-items: center;
   margin-bottom: 2rem;
 }
+/* Sub container */
+.sub-container {
+  display: flex;
+  flex-wrap: wrap;
+  row-gap: 5em;
+}
+
 /* Logo */
 .logo {
   display: flex;
@@ -36,6 +47,11 @@ header {
   fill: none;
 }
 
+.stepper {
+  float: right;
+  margin: 2em 0 0 15rem;
+}
+
 /* Description text under header */
 .intro-text {
   font-weight: 700;
@@ -55,5 +71,6 @@ header {
     flex-direction: column;
     gap: 1.5rem;
     align-items: flex-start;
+    flex-wrap: wrap;
   }
 }

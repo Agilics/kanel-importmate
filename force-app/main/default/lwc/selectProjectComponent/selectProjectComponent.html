@@ -6,12 +6,11 @@
       <!-- Champs pour la recherche  de projets importés -->
       <div class="slds-p-around_medium lgc-bg">
         <lightning-input
-          type="search" 
+          type="search"
           label="Search import project"
           onchange={handleSearch}
         ></lightning-input>
       </div>
-      {projectName}
       <!-- Card pour les détails du projet -->
       <template if:true={projects}>
         <lightning-card>
@@ -41,7 +40,7 @@
                   <!-- Bouton d'action -->
                   <td>
                     <lightning-button
-                      onclick={handleSelectProject}
+                      onclick={handleShowDetailProject}
                       variant="brand"
                       label="Details"
                       icon-name="action:preview"
@@ -61,8 +60,8 @@
 
   <lightning-modal-footer>
     <lightning-button
-      label="Ok"
-      onclick={handleCloseTheModal}
+      label="Close"
+      onclick={handleCloseModal}
       variant="neutral"
     ></lightning-button>
   </lightning-modal-footer>

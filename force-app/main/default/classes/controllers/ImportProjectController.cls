@@ -14,17 +14,17 @@ public class ImportProjectController {
 
   //Enregistrer un projet importé
   @AuraEnabled
-  public static void saveProject(
+  public static ImportProject__c saveProject(
     String name,
     String description,
     String targetObject
   ) {
-    ProjectService.createProject(name, description, targetObject);
+    return ProjectService.createProject(name, description, targetObject);
   }
 
   //Rechercher  par nom la liste des projets importés
   @AuraEnabled(cacheable=true)
-  public static List<ImportProject__c> searchProjetsByName(String name) {
+  public static List<ImportProject__c> searchProjectsByName(String name) {
     return ProjectService.getProjectsByName(name);
   }
 
