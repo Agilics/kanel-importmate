@@ -2,16 +2,13 @@
  * @description       :
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             :
- * @last modified on  : 08-18-2025
+ * @last modified on  : 09-04-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
  **/
 public with sharing class ProjectRepository {
   // Sauvegarde un nouveau projet ou met à jour un existant
 public static ImportProject__c saveProject(ImportProject__c project) {
-    if (
-      Schema.ImportProject__c.SObjectType.getDescribe().isCreateable() ||
-      Schema.ImportProject__c.SObjectType.getDescribe().isUpdateable()
-    ) {
+    if ( SecurityUtils.isCreateable() || SecurityUtils.isUpdateable()) {
       try {
         upsert project;
         return project;
@@ -42,7 +39,7 @@ public static ImportProject__c saveProject(ImportProject__c project) {
 
   // Récupère tous les projets importés
   public static List<ImportProject__c> getAllProjects() {
-    if (Schema.ImportProject__c.SObjectType.getDescribe().isAccessible()) {
+    if (SecurityUtils.isAccessible()) {
       return [
         SELECT Id, Name, Description__c, TargetObject__c
         FROM ImportProject__c
@@ -54,12 +51,11 @@ public static ImportProject__c saveProject(ImportProject__c project) {
 
   // Rechercher  les projets par le nom
   public static List<ImportProject__c> getProjectsByName(String projectName) {
-    if (Schema.ImportProject__c.SObjectType.getDescribe().isAccessible()) {
-      String query = '%' + projectName + '%';
+    if (SecurityUtils.isAccessible()) {
       return [
         SELECT Id, Name, Description__c, TargetObject__c
         FROM ImportProject__c
-        WHERE Name LIKE :query
+        WHERE Name LIKE :('%' + projectName + '%')
         ORDER BY Name
       ];
     }
@@ -68,7 +64,7 @@ public static ImportProject__c saveProject(ImportProject__c project) {
 
   //Récuperer un nombre de  projets recents définit via un limiteur
   public static List<ImportProject__c> getRecentsProjets(Integer limitor) {
-    if (Schema.ImportProject__c.SObjectType.getDescribe().isAccessible()) {
+    if (SecurityUtils.isAccessible()) {
       return [
         SELECT Id, CreatedDate, Name, TargetObject__c
         FROM ImportProject__c

@@ -1,3 +1,10 @@
+/**
+ * @description       : 
+ * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @group             : 
+ * @last modified on  : 09-04-2025
+ * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+**/
 public with sharing class ProjectService {
   // Crée un nouveau projet
   public static ImportProject__c createProject(
@@ -5,13 +12,18 @@ public with sharing class ProjectService {
     String description,
     String targetObject
   ) {
-    ImportProject__c project = new ImportProject__c(
-      Name = name,
-      Description__c = description,
-      TargetObject__c = targetObject
-    );
-    ProjectRepository.saveProject(project);
-    return project;
+    try {
+     ImportProject__c project = new ImportProject__c(
+        Name = name,
+        Description__c = description,
+        TargetObject__c = targetObject
+      );
+      ProjectRepository.saveProject(project);
+      return project;   
+    } catch (DmlException e) {
+      ErrorLogService.logException(e);
+    }
+   
   }
 
   // Met à jour un projet existant
@@ -29,44 +41,58 @@ public with sharing class ProjectService {
         project.TargetObject__c = targetObject;
         projectRepository.saveProject(project);
       }
-    } catch (ImportException e) {
+    } catch (DmlException e) {
+      ErrorLogService.logException(e);
       throw new ImportException(e, 'Projet non trouvé');
     }
   }
 
   // Récupère une nombre variable de projets récements importés
   public static List<ImportProject__c> getRecentsProjets(Integer limitor) {
-    if (limitor < 0 || limitor == null) {
+    try {
+      if (limitor < 0 || limitor == null) {
       return new List<ImportProject__c>();
     }
-
-    return ProjectRepository.getRecentsProjets(limitor);
+      return ProjectRepository.getRecentsProjets(limitor);  
+    
+    } catch (ImportException e) {
+      ErrorLogService.logException(e);
+    }
+    
   }
 
   // Recherche projet par le nom
   public static List<ImportProject__c> getProjectsByName(String keyword) {
-<<<<<<< HEAD
-    if (String.isBlank(keyword)) {
-      return ProjectRepository.getAllProjects();
-    }
+   
+    try {
+     if (String.isBlank(keyword)) {
+        return ProjectRepository.getAllProjects();
+     }
     return ProjectRepository.getProjectsByName(keyword);
-=======
-    if(String.isBlank(keyword) || String.isEmpty(keyword)){
-      return ProjectRepository.getAllProjects();
-    } 
-      return ProjectRepository.getProjectsByName(keyword);   
-    
->>>>>>> f83ef903b35e27bd75f90d9deb39df4dacde02da
+    } catch (ImportException e) {
+      ErrorLogService.logException(e);
+      throw new ImportExceptionp(e.getMessage());
+    }
   }
 
   // Recherche projet par l'identifiant du projets'
   public static ImportProject__c getProjectById(String projectId) {
-    return ProjectRepository.getProjectById(projectId);
+    try {
+      return ProjectRepository.getProjectById(projectId);
+    } catch (ImportException e) {
+      ErrorLogService.logException(e);
+      throw new ImportException(e.getMessage());
+    }
   }
 
   //Récupérer tous les projets importés
-  public static List<ImportProject__c> getAllProjects() {
-    return ProjectRepository.getAllProjects();
+  public static List<ImportProject__c> getAllProjects() { 
+    try {
+      return ProjectRepository.getAllProjects();
+    } catch (exceptionType) {
+       ErrorLogService.logException(e);
+      throw new ImportException(e.getMessage());
+    }
   }
 
   // Valide l'objet cible Salesforce
