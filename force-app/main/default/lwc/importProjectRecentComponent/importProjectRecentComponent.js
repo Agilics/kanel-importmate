@@ -1,4 +1,4 @@
-import { LightningElement, api,track } from "lwc";
+import { LightningElement, api, track } from "lwc";
 import searchProjetById from "@salesforce/apex/ImportProjectController.searchProjetById";
 // importation du modal
 import DetailView from "c/projectDetailViewComponent";
@@ -50,7 +50,7 @@ export default class ImportProjectRecentComponent extends LightningElement {
 
   //Dispatching vers le composant MainComponent
   // rechercher les projets importés par nom
-   async handleShowSelectProject() {
-   this.dispatchEvent(new CustomEvent('selectproject'));
+  async handleShowSelectProject() {
+    this.dispatchEvent(new CustomEvent("selectproject"));
   }
 }

@@ -2,13 +2,13 @@
  * @description       :
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             :
- * @last modified on  : 09-04-2025
+ * @last modified on  : 09-08-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
  **/
 public with sharing class ProjectRepository {
-  // Sauvegarde un nouveau projet ou met à jour un existant
+  // Sauvegarde un nouveau projet ou met à jour un existant 
 public static ImportProject__c saveProject(ImportProject__c project) {
-    if ( SecurityUtils.isCreateable() || SecurityUtils.isUpdateable()) {
+    if (SecurityUtils.isCreateable(ImportProject__c.SObjectType) || SecurityUtils.isUpdateable(ImportProject__c.SObjectType)) {
       try {
         upsert project;
         return project;
@@ -25,7 +25,7 @@ public static ImportProject__c saveProject(ImportProject__c project) {
 
   // Récupère un projet par ID
   public static ImportProject__c getProjectById(String projectId) {
-    if (Schema.ImportProject__c.SObjectType.getDescribe().isAccessible()) {
+    if (SecurityUtils.isAccessible(ImportProject__c.SObjectType)) {
       return [
         SELECT Id, Name, Description__c, TargetObject__c
         FROM ImportProject__c
@@ -39,7 +39,7 @@ public static ImportProject__c saveProject(ImportProject__c project) {
 
   // Récupère tous les projets importés
   public static List<ImportProject__c> getAllProjects() {
-    if (SecurityUtils.isAccessible()) {
+    if (SecurityUtils.isAccessible(ImportProject__c.SObjectType)) {
       return [
         SELECT Id, Name, Description__c, TargetObject__c
         FROM ImportProject__c
@@ -51,7 +51,7 @@ public static ImportProject__c saveProject(ImportProject__c project) {
 
   // Rechercher  les projets par le nom
   public static List<ImportProject__c> getProjectsByName(String projectName) {
-    if (SecurityUtils.isAccessible()) {
+    if (SecurityUtils.isAccessible(ImportProject__c.SObjectType)) {
       return [
         SELECT Id, Name, Description__c, TargetObject__c
         FROM ImportProject__c
@@ -64,7 +64,7 @@ public static ImportProject__c saveProject(ImportProject__c project) {
 
   //Récuperer un nombre de  projets recents définit via un limiteur
   public static List<ImportProject__c> getRecentsProjets(Integer limitor) {
-    if (SecurityUtils.isAccessible()) {
+    if (SecurityUtils.isAccessible(ImportProject__c.SObjectType)) {
       return [
         SELECT Id, CreatedDate, Name, TargetObject__c
         FROM ImportProject__c

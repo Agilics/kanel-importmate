@@ -2,7 +2,7 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 09-04-2025
+ * @last modified on  : 09-08-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 public with sharing class ProjectService {
@@ -18,10 +18,10 @@ public with sharing class ProjectService {
         Description__c = description,
         TargetObject__c = targetObject
       );
-      ProjectRepository.saveProject(project);
-      return project;   
+      return ProjectRepository.saveProject(project);
     } catch (DmlException e) {
       ErrorLogService.logException(e);
+      throw new ImportException('Erreur lors de la création du projet : ' + e.getMessage());
     }
    
   }
@@ -43,7 +43,7 @@ public with sharing class ProjectService {
       }
     } catch (DmlException e) {
       ErrorLogService.logException(e);
-      throw new ImportException(e, 'Projet non trouvé');
+      throw new ImportException(e.getMessage());
     }
   }
 
@@ -54,9 +54,9 @@ public with sharing class ProjectService {
       return new List<ImportProject__c>();
     }
       return ProjectRepository.getRecentsProjets(limitor);  
-    
     } catch (ImportException e) {
       ErrorLogService.logException(e);
+      throw new ImportException(e.getMessage());
     }
     
   }
@@ -71,7 +71,7 @@ public with sharing class ProjectService {
     return ProjectRepository.getProjectsByName(keyword);
     } catch (ImportException e) {
       ErrorLogService.logException(e);
-      throw new ImportExceptionp(e.getMessage());
+      throw new ImportException(e.getMessage());
     }
   }
 
@@ -89,7 +89,7 @@ public with sharing class ProjectService {
   public static List<ImportProject__c> getAllProjects() { 
     try {
       return ProjectRepository.getAllProjects();
-    } catch (exceptionType) {
+    } catch (ImportException e) {
        ErrorLogService.logException(e);
       throw new ImportException(e.getMessage());
     }

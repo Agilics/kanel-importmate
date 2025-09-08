@@ -50,8 +50,6 @@ export default class MainComponent extends LightningElement {
   limitor = 3;
   @wire(getRecentsProjects, { limitor: "$limitor" }) importProjects; //affiche 3 projets récents
 
-
-
   //Enregistrement d'un nouveau projet
   handleCreateProject() {
     this.isLoading = true; //affichage du spinner
@@ -93,14 +91,17 @@ export default class MainComponent extends LightningElement {
 
   // Retour vers l'étape précédente du stepper
   handlePreviousStep() {
-    if (this.currentStep > 1 ) {
+    if (this.currentStep > 1) {
       this.currentStep--; // décrementation du compteur
-    } 
+    }
   }
 
   //passage à l'étape suivante du stepper
   handleNextStep() {
-    if (this.currentStep < this.baseSteps.length && this.recentProject != null) {
+    if (
+      this.currentStep < this.baseSteps.length &&
+      this.recentProject != null
+    ) {
       this.currentStep++; // Incrémentation du compteur
     }
   }
@@ -157,10 +158,9 @@ export default class MainComponent extends LightningElement {
     return this.current === 3;
   }
 
-  
   // rechercher les projets importés par nom
   //  Ouverture Modal permettant de selectionner des  projets
-  async handleSelectProject() { 
+  async handleSelectProject() {
     await SelectProject.open({
       size: "large",
       description: "modal permettant la recherche de projets importés",
@@ -169,8 +169,8 @@ export default class MainComponent extends LightningElement {
         const id = e.detail;
         searchProjetById({ id }) //récupération de projets importés par l'id
           .then((data) => {
-              this.recentProject = data;
-              this.handleNextStep(); //Passage à l'étape 2 selection de source 
+            this.recentProject = data;
+            this.handleNextStep(); //Passage à l'étape 2 selection de source
           });
       }
     });
