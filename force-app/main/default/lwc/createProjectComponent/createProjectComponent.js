@@ -1,4 +1,4 @@
-import { LightningElement, api } from "lwc";
+import { LightningElement, api,track } from "lwc";
 
 //import methods from Controller
 import getCompatibleSObjects from "@salesforce/apex/ObjectMetadataController.getCompatibleSObjects";
@@ -8,7 +8,7 @@ export default class ProjectCreatorComponent extends LightningElement {
   @api projectName = "";
   @api description = "";
   @api targetObject = "";
-  @api options = [];
+  @track options =[] ;
   @api project;
   @api currentStep;
 
@@ -21,9 +21,6 @@ export default class ProjectCreatorComponent extends LightningElement {
           this.options = results.map((objName) => {
             return { label: objName, value: objName };
           });
-
-          // Préselectionner le premier objet
-          //this.targetObject = this.options[0].value;
         }
       })
       .catch((e) => {
@@ -41,28 +38,25 @@ export default class ProjectCreatorComponent extends LightningElement {
 
   //Dispatching vers le composant principal MainComopnent
   //Evénement portant sur la mise à jour du nom du projet
-  handleProjectNameChange(event) {
-    this.projectName = event.target.value;
+  handleProjectNameChange(event) { 
     this.dispatchEvent(
-      new CustomEvent("namechange", { detail: this.projectName })
+      new CustomEvent("namechange", { detail: event.target.value})
     );
   }
 
   //Dispatching vers le composant principal MainComopnent
   //  le événement portant sur la mise à jour de l'attribut description
-  handleDescriptionChange(event) {
-    this.description = event.target.value;
+  handleDescriptionChange(event) { 
     this.dispatchEvent(
-      new CustomEvent("descriptionchange", { detail: this.description })
+      new CustomEvent("descriptionchange", { detail: event.target.value })
     );
   }
 
   //Dispatching vers le composant parent MainComponent
   //  de l'événement portant sur la mise à jour de l'attribut target object
-  handleTargetObjectChange(event) {
-    this.targetObject = event.target.value;
+  handleTargetObjectChange(event) { 
     this.dispatchEvent(
-      new CustomEvent("targetchange", { detail: this.targetObject })
+      new CustomEvent("targetchange", { detail: event.target.value})
     );
   }
 

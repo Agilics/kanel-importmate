@@ -50,7 +50,7 @@ export default class ImportProjectRecentComponent extends LightningElement {
 
   //Dispatching vers le composant MainComponent
   // rechercher les projets importés par nom
-   async handleShowSelectProject(e) {
+   async handleShowSelectProject() {
    this.dispatchEvent(new CustomEvent('selectproject'));
   }
 }

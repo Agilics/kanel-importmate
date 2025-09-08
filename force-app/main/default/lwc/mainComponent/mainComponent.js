@@ -145,22 +145,22 @@ export default class MainComponent extends LightningElement {
   //vérifie l'étape du stepper
   // on affiche une section en fonction de l'étape cliquer par l'utilisateur
   get isStart() {
-    return this.currentStep == 1;
+    return this.currentStep === 1;
   }
   //Navigation vers l'étape 2 Selection de source
   get isSelectSource() {
-    return this.currentStep == 2;
+    return this.currentStep === 2;
   }
 
   //Navigation vers l'étape 3 Mapping & transformation
   get isMappingAndTransformation() {
-    return this.current == 3;
+    return this.current === 3;
   }
 
   
   // rechercher les projets importés par nom
   //  Ouverture Modal permettant de selectionner des  projets
-  async handleSelectProject(e) { 
+  async handleSelectProject() { 
     await SelectProject.open({
       size: "large",
       description: "modal permettant la recherche de projets importés",

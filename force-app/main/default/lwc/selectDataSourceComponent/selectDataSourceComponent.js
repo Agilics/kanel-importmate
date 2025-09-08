@@ -4,7 +4,7 @@ export default class SelectDataSourceComponent extends LightningElement {
   @api recentProject;
 
   //handle navigation vers l'étape précédente
-  handlePreviousStep(e) {
+  handlePreviousStep() {
     this.dispatchEvent(new CustomEvent("previous"));
   }
 }
