@@ -3,7 +3,7 @@ import { api, track, wire } from "lwc";
 import LightningModal from "lightning/modal";
 
 import searchProjectsByName from "@salesforce/apex/ImportProjectController.searchProjectsByName";
-export default class projectsComponent extends LightningModal {
+export default class SelectProjectComponent extends LightningModal {
   @api columns;
   @api selectedProject;
 

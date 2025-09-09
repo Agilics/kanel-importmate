@@ -1,0 +1,8 @@
+
+  {
+    "Id": "002",
+    "Name": "Project Beta",
+    "TargetObject__c": "Contact",
+    "Description__c": "Beta description"
+  }
+

@@ -1,0 +1,134 @@
+/* Stepper container */
+.stepper {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  user-select: none;
+  padding: 1rem 0;
+  max-width: 900px;
+  margin: 5rem auto 7rem auto;
+}
+a {
+  text-decoration: none;
+}
+/* Each step container */
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  flex: 1;
+  min-width: 80px;
+}
+
+/* Circle with step number */
+.step-circle {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #c2c8d1;
+  color: #135392;
+  font-weight: 600;
+  display: flex;
+  font-size: 20px;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  position: relative;
+  flex-wrap: wrap;
+  transition:
+    background-color 0.3s,
+    color 0.3s;
+  cursor: pointer;
+  -webkit-transition:
+    background-color 0.3s,
+    color 0.3s;
+  -moz-transition:
+    background-color 0.3s,
+    color 0.3s;
+  -ms-transition:
+    background-color 0.3s,
+    color 0.3s;
+  -o-transition:
+    background-color 0.3s,
+    color 0.3s;
+  -webkit-border-radius: 50%;
+  -moz-border-radius: 50%;
+  -ms-border-radius: 50%;
+  -o-border-radius: 50%;
+}
+/* Active step circle style */
+.step.active .step-circle {
+  background: #1d4e8b;
+  color: #fff;
+  cursor: default;
+  box-shadow: 0 0 8px rgb(29 78 139 / 0.5);
+}
+/* Completed step circle style */
+.step.completed .step-circle {
+  background: #3c6bb8;
+  color: white;
+  cursor: pointer;
+  box-shadow: 0 0 8px rgba(60, 107, 184, 0.5);
+}
+
+/* Label below each circle */
+.step-label {
+  margin-top: 0.5rem;
+  font-size: 14px;
+  color: #697584;
+  text-align: center;
+  max-width: 90px;
+  line-height: 1.2;
+  user-select: none;
+}
+
+/* Label for step title (under number) - bold for active and completed */
+.step.active .step-label,
+.step.completed .step-label {
+  color: #203547;
+  font-weight: 600;
+}
+
+/* Line connector between steps 
+    .step-line {
+      position: absolute;
+      top: 16px;
+      */ /*Halfofcircleheight*/ /*left: 50%;
+      width: 100%;
+      height: 3px;
+      background: #c2c8d1;
+      z-index: 1;
+      transform: translateX(50%);
+      border-radius: 2px;
+      -webkit-border-radius: 2px;
+      -moz-border-radius: 2px;
+      -ms-border-radius: 2px;
+      -o-border-radius: 2px;
+      -webkit-transform: translateX(50%);
+      -moz-transform: translateX(50%);
+      -ms-transform: translateX(50%);
+      -o-transform: translateX(50%);
+}*/
+/* Colored line up to completed or active step */
+.step.completed ~ .step .step-line,
+.step.active ~ .step .step-line {
+  background: #c2c8d1;
+}
+.step.completed .step-line,
+.step.active .step-line {
+  background: linear-gradient(to right, #1d4e8b 0%, #3c6bb8 100%);
+}
+
+/* Hide line on last step */
+.step:last-child .step-line {
+  display: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 520px) {
+  .step-label {
+    font-size: 0.65rem;
+    max-width: 70px;
+  }
+}

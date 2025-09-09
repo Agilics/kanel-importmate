@@ -21,7 +21,8 @@
             <thead>
               <tr>
                 <template for:each={columns} for:item="column">
-                  <th key={column.fieldName}>{column.label}</th>
+                  <th key={column.fieldName}>
+                    <pre >{column.label}</pre></th>
                 </template>
               </tr>
             </thead>
@@ -30,15 +31,19 @@
               <template for:each={projects} for:item="project">
                 <tr key={project.Id}>
                   <!-- Nom  -->
-                  <td>{project.Name}</td>
+                  <td class="data">
+                    <pre class="projectName">{project.Name}</pre>
+                  </td>
                   <!-- objet ciblé -->
-                  <td>{project.TargetObject__c}</td>
+                  <td class="data">
+                    <pre class="targetObject">{project.TargetObject__c}</pre>
+                      
+                    </td>
 
                   <!-- Description -->
-                  <td>{project.Description__c}</td>
+                  <td class="data"><pre class="description">{project.Description__c}</pre></td>
 
-                  <!-- Bouton d'action -->
-                  <td>
+                  <td class="data">
                     <lightning-button
                       onclick={handleShowDetailProject}
                       variant="brand"

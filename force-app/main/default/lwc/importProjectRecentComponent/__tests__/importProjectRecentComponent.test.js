@@ -1,6 +1,7 @@
 import { createElement } from "@lwc/engine-dom";
 import ImportProjectRecentComponent from "c/importProjectRecentComponent";
 
+
 describe("c-import-project-recent-component", () => {
   afterEach(() => {
     // The jsdom instance is shared across test cases in a single file so reset the DOM
@@ -19,7 +20,9 @@ describe("c-import-project-recent-component", () => {
     document.body.appendChild(element);
 
     // Assert
-    // const div = element.shadowRoot.querySelector('div');
+     const div = element.shadowRoot.querySelector('div');
     expect(1).toBe(1);
   });
+
+
 });
