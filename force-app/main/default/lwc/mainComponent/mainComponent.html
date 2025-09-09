@@ -43,6 +43,7 @@
         at nulla metus.
       </p>
     </header>
+
     <template if:true={currentStep}>
       <template if:true={isStart}>
         <!-- child here content-->
@@ -74,6 +75,7 @@
 
         <!-- end child content-->
       </template>
+    
       <!-- stepper 2 -->
       <template if:true={isSelectSource}>
         <c-select-data-source-component
@@ -82,10 +84,12 @@
         >
         </c-select-data-source-component>
       </template>
+    
       <template if:true={isMappingAndTransformation}>
         <h2>Step 3: Mapping & Transformation</h2>
         <p>Ici tu affiches ton composant de mapping.</p>
       </template>
+    
     </template>
   </div>
 </template>

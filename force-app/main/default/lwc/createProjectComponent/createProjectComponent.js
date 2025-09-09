@@ -62,7 +62,7 @@ export default class ProjectCreatorComponent extends LightningElement {
 
   //Evénement portant sur l'enregistrement de projet
   //Dispatching vers le parent (composant principal) des variables Name | Description | Target Object
-  handleCreateProject(e) { 
+  handleCreateProject() { 
     this.dispatchEvent(
       new CustomEvent("save", {
         detail: {
