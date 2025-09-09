@@ -2,7 +2,7 @@ import { LightningElement, wire, track } from "lwc";
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 import SelectProject from "c/selectProjectComponent";
 import searchProjetById from "@salesforce/apex/ImportProjectController.searchProjetById";
-import Stepper from '';
+
 //importation méthodes depuis le Contrôleur
 import saveProject from "@salesforce/apex/ImportProjectController.saveProject";
 import getRecentsProjects from "@salesforce/apex/ImportProjectController.getRecentsProjects";
@@ -93,6 +93,7 @@ export default class MainComponent extends LightningElement {
   handlePreviousStep() {
     if (this.currentStep > 1) {
       this.currentStep--; // décrementation du compteur
+      this.showCreatorSection = false;
     }
   }
 
@@ -149,7 +150,7 @@ export default class MainComponent extends LightningElement {
     return this.currentStep === 1;
   }
   //Navigation vers l'étape 2 Selection de source
-  get isSelectSource() {
+  get isSelectSource() { 
     return this.currentStep === 2;
   }
 

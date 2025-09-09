@@ -1,9 +1,6 @@
 import { createElement } from "lwc";
 import ProjectDetailViewComponent from 'c/projectDetailViewComponent';
-import {expect, jest, test} from '@jest/globals';
-import {getRecord} from 'lightning/uiRecordApi';
-import  searchProjetById from "@salesforce/apex/ImportProjectController. searchProjetById";
-import  getAllProjects from "@salesforce/apex/ImportProjectController.getAllProjects";
+import {expect, jest } from '@jest/globals';
 
 //mock données fictives
 const mockProject = {
@@ -34,15 +31,13 @@ describe("c-project-detail-view-component", () => {
  
     const expectedId= '002';
     const expectedName ='Project Beta';
-    const div = element.shadowRoot.querySelector('pre#projectName');
+ 
     return Promise.resolve().then(() => { 
-  // Query DOM elements
-            const nameElement = element.shadowRoot.querySelector('pre#projectName');
-            const targetObjectElement = element.shadowRoot.querySelector('pre#target');
-            const descriptionElement = element.shadowRoot.querySelector('pre#desc'); 
+  // Query DOM elements  
             // Assertions
             expect(element.project).not.toBeNull();
             expect( expectedName).toBe(mockProject.Name);
+            expect(expectedId).toBe(mockProject.Id);
             
     });
   });

@@ -24,7 +24,7 @@ export default class StepperComponent extends LightningElement {
   }
 
   //naviguer vers l'étape précédente du stepper
-  prevStep(e) {
-    this.dispatchEvent(new Custom("previous"));
+  prevStep() {
+    this.dispatchEvent(new CustomEvent("previous"));
   }
 }

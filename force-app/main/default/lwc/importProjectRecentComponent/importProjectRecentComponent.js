@@ -20,7 +20,7 @@ export default class ImportProjectRecentComponent extends LightningElement {
 
   // check is project already imported
   get hasNoProjects() {
-    return !(this.projects && this.projects.data.length > 0);
+    return !(this.projects );
   }
   //on ferme la section projets recents et on affiche la section création de projet
   handleShow() {

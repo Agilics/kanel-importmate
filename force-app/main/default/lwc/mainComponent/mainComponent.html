@@ -2,15 +2,19 @@
   @description       : 
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
   @group             : 
-  @last modified on  : 09-08-2025
+  @last modified on  : 09-09-2025
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
   <template if:true={isLoading}>
-    <lightning-spinner
-      alternative-text="Loading"
-      size="large"
-    ></lightning-spinner>
+    <!-- spinner plein écran SLDS -->
+    <div class="slds-spinner_container">
+      <lightning-spinner
+        alternative-text="Loading"
+        size="medium"
+        variant="inverse">
+      </lightning-spinner>
+    </div>
   </template>
   <div class="container" role="main" aria-label="ImportMate project interface">
     <header>

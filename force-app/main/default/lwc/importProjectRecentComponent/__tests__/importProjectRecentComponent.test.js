@@ -1,8 +1,5 @@
 import { createElement } from "@lwc/engine-dom";
-import ImportProjectRecentComponent from "c/importProjectRecentComponent";
-import {getRecord} from 'lightning/uiRecordApi';
-import  searchProjetById from "@salesforce/apex/ImportProjectController. searchProjetById";
-import  getAllProjects from "@salesforce/apex/ImportProjectController.getAllProjects";
+import ImportProjectRecentComponent from "c/importProjectRecentComponent"; 
 
 describe("c-import-project-recent-component", () => {
   afterEach(() => {
@@ -22,8 +19,8 @@ describe("c-import-project-recent-component", () => {
     document.body.appendChild(element);
 
     // Assert
-     const div = element.shadowRoot.querySelector('div');
-    expect(1).toBe(1);
+     const div = element.shadowRoot.querySelector('.recent-title');
+     expect(div).not.toBeNull();
   });
 
 

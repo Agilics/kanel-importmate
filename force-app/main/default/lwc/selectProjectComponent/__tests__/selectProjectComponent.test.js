@@ -1,7 +1,5 @@
 import { createElement } from 'lwc';
-import SelectProjectComponent from 'c/selectProjectComponent';
-import { getRecord, getFieldValue } from 'lightning/uiRecordApi';
-import  searchProjectsByName from "@salesforce/apex/ImportProjectController. searchProjectsByName";
+import SelectProjectComponent from 'c/selectProjectComponent'; 
 import  getAllProjects from "@salesforce/apex/ImportProjectController.getAllProjects";
 
 // Mock realistic data
