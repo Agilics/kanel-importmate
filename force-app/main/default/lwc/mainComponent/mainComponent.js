@@ -15,8 +15,7 @@ export default class MainComponent extends LightningElement {
   projectName = "";
   @track selectProject = [];
   description = "";
-  targetObjet = "";
-  @track simpleTargetObject = "";
+  targetObjet = ""; 
   projectId;
   project;
   recentProject;
@@ -32,6 +31,7 @@ export default class MainComponent extends LightningElement {
   ];
 
   // getter calculé qui ajoute la classe CSS
+  
   get steps() {
     return this.baseSteps.map((step) => {
       let cssClass = "step";
@@ -76,6 +76,7 @@ export default class MainComponent extends LightningElement {
           "success"
         );
         this.isLoading = false;
+        this.targetObjet =""
         //On passe à l'étape 2 Selection du source de données
         this.currentStep = 2; // mise à jour du stepper
       })
@@ -94,6 +95,7 @@ export default class MainComponent extends LightningElement {
     if (this.currentStep > 1) {
       this.currentStep--; // décrementation du compteur
       this.showCreatorSection = false;
+      
     }
   }
 
@@ -174,6 +176,18 @@ export default class MainComponent extends LightningElement {
             this.handleNextStep(); //Passage à l'étape 2 selection de source
           });
       }
+    });
+  }
+
+  handleResetFields(e){
+     e.preventDefault();
+     this.projectName = "";
+    this.description = "";
+    this.targetObject = "";
+
+    // reset valeurs UI 
+    this.template.querySelectorAll(".rounded-input").forEach((input) => {
+      input.value = "";
     });
   }
 }

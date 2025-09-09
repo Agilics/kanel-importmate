@@ -8,7 +8,7 @@
 <template>
   <template if:true={isLoading}>
     <!-- spinner plein écran SLDS -->
-    <div class="slds-spinner_container">
+    <div class="slds-spinner_container" >
       <lightning-spinner
         alternative-text="Loading"
         size="medium"
@@ -66,6 +66,7 @@
             ondescriptionchange={handleDescriptionChange}
             ontargetchange={handleTargetObjectChange}
             onsave={handleCreateProject}
+            onreset={handleResetFields}
           >
           </c-create-project-component>
         </template>
