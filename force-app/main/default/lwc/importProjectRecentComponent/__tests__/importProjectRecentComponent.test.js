@@ -1,6 +1,8 @@
 import { createElement } from "@lwc/engine-dom";
 import ImportProjectRecentComponent from "c/importProjectRecentComponent";
-
+import {getRecord} from 'lightning/uiRecordApi';
+import  searchProjetById from "@salesforce/apex/ImportProjectController. searchProjetById";
+import  getAllProjects from "@salesforce/apex/ImportProjectController.getAllProjects";
 
 describe("c-import-project-recent-component", () => {
   afterEach(() => {
