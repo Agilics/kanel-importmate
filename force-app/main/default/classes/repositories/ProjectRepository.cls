@@ -2,13 +2,14 @@
  * @description       :
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             :
- * @last modified on  : 09-08-2025
+ * @last modified on  : 09-09-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
  **/
 public with sharing class ProjectRepository {
   // Sauvegarde un nouveau projet ou met à jour un existant 
 public static ImportProject__c saveProject(ImportProject__c project) {
-    if (SecurityUtils.isCreateable(ImportProject__c.SObjectType) || SecurityUtils.isUpdateable(ImportProject__c.SObjectType)) {
+    
+  if (SecurityUtils.isCreateable(ImportProject__c.SObjectType) || SecurityUtils.isUpdateable(ImportProject__c.SObjectType)) {
       try {
         upsert project;
         return project;
@@ -60,6 +61,24 @@ public static ImportProject__c saveProject(ImportProject__c project) {
       ];
     }
     return new List<ImportProject__c>();
+  }
+
+  //Récupérer un projet par le nom et l'objet ciblé 
+  public  static ImportProject__c findProjectByNameAndTargetObject(String projectName, String targetObject) {
+      if (SecurityUtils.isAccessible(ImportProject__c.SObjectType)) {
+      List<ImportProject__c> results =  [
+        SELECT Id, Name, Description__c, TargetObject__c
+        FROM ImportProject__c
+        WHERE Name =: projectName
+        AND  TargetObject__c =:targetObject
+        LIMIT 1
+      ];
+      //Vérifie la présence d'un projet
+      if(!results.isEmpty()){
+          return results[0];
+      }
+    }
+    return null;
   }
 
   //Récuperer un nombre de  projets recents définit via un limiteur

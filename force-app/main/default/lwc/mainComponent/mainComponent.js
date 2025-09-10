@@ -1,7 +1,9 @@
 import { LightningElement, wire, track } from "lwc";
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 import SelectProject from "c/selectProjectComponent";
+
 import searchProjetById from "@salesforce/apex/ImportProjectController.searchProjetById";
+import doesProjectExist from "@salesforce/apex/ImportProjectController.doesProjectExist";
 
 //importation méthodes depuis le Contrôleur
 import saveProject from "@salesforce/apex/ImportProjectController.saveProject";
@@ -15,10 +17,11 @@ export default class MainComponent extends LightningElement {
   projectName = "";
   @track selectProject = [];
   description = "";
-  targetObjet = ""; 
+  targetObjet = "";
   projectId;
   project;
   recentProject;
+  isProject;
 
   // paramètre du stepper
   currentStep = 1; // le step courrant
@@ -31,7 +34,7 @@ export default class MainComponent extends LightningElement {
   ];
 
   // getter calculé qui ajoute la classe CSS
-  
+
   get steps() {
     return this.baseSteps.map((step) => {
       let cssClass = "step";
@@ -40,6 +43,7 @@ export default class MainComponent extends LightningElement {
       } else if (step.number === this.currentStep) {
         cssClass = "step active";
       }
+
       // on renvoie aussi ariaCurrent ici
       let ariaCurrent = step.number === this.currentStep ? "step" : "false";
       return { ...step, cssClass, ariaCurrent };
@@ -51,51 +55,74 @@ export default class MainComponent extends LightningElement {
   @wire(getRecentsProjects, { limitor: "$limitor" }) importProjects; //affiche 3 projets récents
 
   //Enregistrement d'un nouveau projet
-  handleCreateProject() {
-    this.isLoading = true; //affichage du spinner
+    async handleCreateProject() {
+    this.isLoading = true;
 
-    //Vérifie si les champs sont saisies
+    // validation UI
     if (!this.projectName || !this.description || !this.targetObject) {
-      this.showToast("Warning", "Tous les champs sont requis.", "warning");
-      this.isLoading = false; //affichage du spinner
+      this.showToast("Warning", "All fields are required.", "warning");
+      this.isLoading = false;
       return;
     }
 
-    // Appel Apex
-    saveProject({
-      name: this.projectName,
-      targetObject: this.targetObject,
-      description: this.description
-    })
-      .then((result) => {
+    try {
+      // 1) Vérifie l’existence
+      const exists = await doesProjectExist({
+        name: this.projectName,
+        targetObject: this.targetObject
+      });
+
+      if (exists) {
+        this.showToast(
+          "Warning",
+          "This project already exists, please choose another name/target object.",
+          "warning"
+        ); 
+        this.isLoading = false;
+         
+        this.targetObject = "";
+        return;
+      }
+
+      // 2) Crée le projet si inexistant
+      const result = await saveProject({
+        name: this.projectName,
+        description: this.description,
+        targetObject: this.targetObject
+      })
+       
         this.recentProject = result;
+
         //Affichage du message toast de succès
         this.showToast(
           "Success",
           `Record  with ID\t:${result.Id}  created  successfully !`,
           "success"
         );
-        this.isLoading = false;
-        this.targetObjet =""
+
+        this.isLoading = false; 
+        
         //On passe à l'étape 2 Selection du source de données
-        this.currentStep = 2; // mise à jour du stepper
-      })
-      .catch((error) => {
-        this.showToast(
-          "Error",
-          error?.body?.message || "Une erreur est survenue",
-          "error"
-        );
-        this.isLoading = false;
-      });
+        this.handleNextStep(); // mise à jour du stepper
+      
+    } catch (err) {
+      this.showToast(
+        "Error",
+        err?.body?.message || 'An Error were occured!',
+        "error"
+      );
+    } finally {
+      this.isLoading = false;
+    }
   }
+
+
 
   // Retour vers l'étape précédente du stepper
   handlePreviousStep() {
     if (this.currentStep > 1) {
       this.currentStep--; // décrementation du compteur
       this.showCreatorSection = false;
-      
     }
   }
 
@@ -151,8 +178,9 @@ export default class MainComponent extends LightningElement {
   get isStart() {
     return this.currentStep === 1;
   }
+
   //Navigation vers l'étape 2 Selection de source
-  get isSelectSource() { 
+  get isSelectSource() {
     return this.currentStep === 2;
   }
 
@@ -179,15 +207,5 @@ export default class MainComponent extends LightningElement {
     });
   }
 
-  handleResetFields(e){
-     e.preventDefault();
-     this.projectName = "";
-    this.description = "";
-    this.targetObject = "";
-
-    // reset valeurs UI 
-    this.template.querySelectorAll(".rounded-input").forEach((input) => {
-      input.value = "";
-    });
-  }
+  
 }

@@ -22,7 +22,8 @@
               <tr>
                 <template for:each={columns} for:item="column">
                   <th key={column.fieldName}>
-                    <pre >{column.label}</pre></th>
+                    <pre>{column.label}</pre>
+                  </th>
                 </template>
               </tr>
             </thead>
@@ -37,11 +38,12 @@
                   <!-- objet ciblé -->
                   <td class="data">
                     <pre class="targetObject">{project.TargetObject__c}</pre>
-                      
-                    </td>
+                  </td>
 
                   <!-- Description -->
-                  <td class="data"><pre class="description">{project.Description__c}</pre></td>
+                  <td class="data">
+                    <pre class="description">{project.Description__c}</pre>
+                  </td>
 
                   <td class="data">
                     <lightning-button

@@ -2,7 +2,7 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 09-08-2025
+ * @last modified on  : 09-10-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 public with sharing class ProjectService {
@@ -13,11 +13,17 @@ public with sharing class ProjectService {
     String targetObject
   ) {
     try {
+    /*  Boolean isProjectExist = doesProjectExist(name,targetObject) ;
+      if (isProjectExist) {
+        //ErrorLogService.logException(e);
+        throw new ImportException('This project already exists');
+      }*/
      ImportProject__c project = new ImportProject__c(
         Name = name,
         Description__c = description,
         TargetObject__c = targetObject
       );
+      
       return ProjectRepository.saveProject(project);
     } catch (DmlException e) {
       ErrorLogService.logException(e);
@@ -95,8 +101,25 @@ public with sharing class ProjectService {
     }
   }
 
+  //Vérifier si le projet est déjà importé pour prévénir de la duplication de projet
+  public  static Boolean doesProjectExist(String name,String targetObject) {
+      try {
+        ImportProject__c existProject = ProjectRepository.findProjectByNameAndTargetObject(name,targetObject);
+       
+        if(existProject != null  ){
+          return true;
+        }
+       
+        return false;
+      } catch (ImportException e) {
+          ErrorLogService.logException(e);
+      throw new ImportException(e.getMessage());
+      }
+  }
+
+  
   // Valide l'objet cible Salesforce
   public static Boolean validateTargetObject(String targetObject) {
     return Schema.getGlobalDescribe().containsKey(targetObject);
   }
-}
+} 

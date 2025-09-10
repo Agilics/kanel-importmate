@@ -18,10 +18,12 @@ export default class ImportProjectRecentComponent extends LightningElement {
     { label: "Actions", fieldName: "show" }
   ];
 
-  // check is project already imported
+  // vérification si le projet est présent
+
   get hasNoProjects() {
-    return !(this.projects );
+    return !this.projects;
   }
+
   //on ferme la section projets recents et on affiche la section création de projet
   handleShow() {
     this.dispatchEvent(new CustomEvent("show"));

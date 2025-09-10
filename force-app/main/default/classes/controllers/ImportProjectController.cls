@@ -2,7 +2,7 @@
  * @description       :
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             :
- * @last modified on  : 08-20-2025
+ * @last modified on  : 09-09-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
  **/
 public class ImportProjectController {
@@ -38,5 +38,11 @@ public class ImportProjectController {
   @AuraEnabled(cacheable=true)
   public static List<ImportProject__c> getAllProjects() {
     return ProjectService.getAllProjects();
+  }
+
+  //Vérifie l'existance du projet via son nom et l'objet ciblé
+  @AuraEnabled(cacheable=true)
+  public static Boolean doesProjectExist(String name,String targetObject){
+    return ProjectService.doesProjectExist(name,targetObject);
   }
 }

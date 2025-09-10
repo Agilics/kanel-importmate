@@ -8,14 +8,16 @@
 <template>
   <template if:true={isLoading}>
     <!-- spinner plein écran SLDS -->
-    <div class="slds-spinner_container" >
+    <div class="slds-spinner_container">
       <lightning-spinner
         alternative-text="Loading"
         size="medium"
-        variant="inverse">
+        variant="inverse"
+      >
       </lightning-spinner>
     </div>
   </template>
+
   <div class="container" role="main" aria-label="ImportMate project interface">
     <header>
       <div class="sub-container">
@@ -45,10 +47,13 @@
     </header>
 
     <template if:true={currentStep}>
-      <template if:true={isStart}>
+      <template if:true={isStart} aria-label="section start">
         <!-- child here content-->
         <!-- show  recent imported project -->
-        <template if:false={showCreatorSection}>
+        <template
+          if:false={showCreatorSection}
+          aria-label="select project recent section"
+        >
           <c-import-project-recent-component
             onshow={openNewProject}
             onselectproject={handleSelectProject}
@@ -58,7 +63,10 @@
         <!-- end show  recent imported project -->
 
         <!-- project creator section -->
-        <template if:true={showCreatorSection}>
+        <template
+          if:true={showCreatorSection}
+          aria-label="creation project section"
+        >
           <c-create-project-component
             project-name={projectName}
             description={description}
@@ -66,8 +74,7 @@
             onnamechange={handleProjectNameChange}
             ondescriptionchange={handleDescriptionChange}
             ontargetchange={handleTargetObjectChange}
-            onsave={handleCreateProject}
-            onreset={handleResetFields}
+            onsave={handleCreateProject} 
           >
           </c-create-project-component>
         </template>
@@ -75,21 +82,23 @@
 
         <!-- end child content-->
       </template>
-    
+
       <!-- stepper 2 -->
-      <template if:true={isSelectSource}>
+      <template if:true={isSelectSource} aria-label="select source section">
         <c-select-data-source-component
           onprevious={handlePreviousStep}
           recent-project={recentProject}
         >
         </c-select-data-source-component>
       </template>
-    
-      <template if:true={isMappingAndTransformation}>
+
+      <template
+        if:true={isMappingAndTransformation}
+        aria-label="mapping & transformation section"
+      >
         <h2>Step 3: Mapping & Transformation</h2>
         <p>Ici tu affiches ton composant de mapping.</p>
       </template>
-    
     </template>
   </div>
 </template>

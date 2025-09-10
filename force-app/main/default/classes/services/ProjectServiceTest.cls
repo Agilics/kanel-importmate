@@ -28,8 +28,11 @@ public with sharing class ProjectServiceTest {
   static void testRecentsProjectsNegativeLimitor() {
     // Performer le teste
     Test.startTest();
+  
     List<ImportProject__c> projects = ProjectService.getRecentsProjets(-2);
     Test.stopTest();
+  
+  //Assert
     System.assertEquals(
       0,
       projects.size(),
@@ -65,11 +68,14 @@ public with sharing class ProjectServiceTest {
   // Test de la méthode permettant la récupération de tous les projets
   @isTest
   static void testGetAllProjects() {
+  
     Integer expected = 5;
     //excecution du test
     Test.startTest();
     List<ImportProject__c> results = ProjectService.getAllProjects();
     Test.stopTest();
+   
+   //Assert
     System.assert(results.size() > 0, 'Le taille de la liste est positif');
     System.assertEquals(
       expected,
@@ -82,6 +88,7 @@ public with sharing class ProjectServiceTest {
   static void testSaveProject() {
     //execution du test
     Test.startTest();
+  
     // insertion au niveau de la base
     ImportProject__c result = ProjectService.createProject(
       'Lead Import',
@@ -90,6 +97,8 @@ public with sharing class ProjectServiceTest {
     );
 
     Test.stopTest();
+   
+    //Assert
     System.assertNotEquals(null, result, 'Insérer avec success');
   }
 
@@ -105,10 +114,12 @@ public with sharing class ProjectServiceTest {
       TargetObject__c = 'Account',
       Description__c = 'ma desc'
     );
+  
     //Insertion  des données
     Database.SaveResult saveResults = Database.insert(save);
     List<ImportProject__c> results = ProjectService.getProjectsByName(
       expectedTargetObject
+  
     );
     Test.stopTest();
 
@@ -117,13 +128,17 @@ public with sharing class ProjectServiceTest {
     System.assertEquals(expectedTargetObject, results[0].Name, 'Success');
   }
 
+
   //Tester la Validité l'objet cible Salesforce
   @IsTest
   static void testValidateTargetObject() {
+
     // Execution du test
     Test.startTest();
     Boolean isValid = ProjectService.validateTargetObject('Account');
     Test.stopTest();
+
+    //ASSERT
     System.assertNotEquals(false, isValid, 'L\'objet est valide');
     System.assertEquals(true, isValid, 'L\'objet est valide');
   }
@@ -134,6 +149,7 @@ public with sharing class ProjectServiceTest {
     String expectedName = 'Lead Import';
     String expectedDescription = 'Describe Lead import';
     String expectedTargetObject = 'Lead';
+
     //Exécution du  teste
     Test.startTest();
     ImportProject__c save = new ImportProject__c(
@@ -187,6 +203,8 @@ public with sharing class ProjectServiceTest {
       TargetObject__c = expectedTargetObject,
       Description__c = 'here'
     );
+
+    //Insertion de données
     Database.SaveResult saveResult = Database.insert(recordToInsert);
     String id = saveResult.getId(); // Récupération de l'id
     ImportProject__c actual = ProjectService.getProjectById(id);
@@ -197,5 +215,39 @@ public with sharing class ProjectServiceTest {
 
     System.assertNotEquals(null, actual);
     System.assertEquals(expectedName, actual.Name);
+  }
+
+
+  @IsTest
+  static void testdoesProjectExist() {
+    // expected values
+    Boolean expectedFalse = false;
+    Boolean expectedTrue = true;   
+    
+    Test.startTest();
+     String name = 'Lead Import';
+     String targetObject = 'Lead';
+     String fakeName = 'Account imp';
+     String fakeTarget ='Account'; 
+     
+     
+     //Insertion de données de testes
+    ImportProject__c recordToInsert = new ImportProject__c(
+      Name = name,
+      TargetObject__c =targetObject,
+      Description__c = 'here'
+    );
+
+      //Insertion de données
+    Database.SaveResult saveResult = Database.insert(recordToInsert); 
+    Boolean actual = ProjectService.doesProjectExist(name,targetObject);
+    Boolean isProject = ProjectService.doesProjectExist(name,targetObject);
+    Test.stopTest();
+
+
+    // ****** Assertions ****** 
+     System.assertEquals(expectedTrue, actual);
+   //  System.assertEquals(expectedFalse, isProject);
+    // System.assertNotEquals(expectedFalse, actual);
   }
 }

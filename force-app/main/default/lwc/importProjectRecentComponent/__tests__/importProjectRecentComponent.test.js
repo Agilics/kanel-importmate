@@ -1,5 +1,5 @@
 import { createElement } from "@lwc/engine-dom";
-import ImportProjectRecentComponent from "c/importProjectRecentComponent"; 
+import ImportProjectRecentComponent from "c/importProjectRecentComponent";
 
 describe("c-import-project-recent-component", () => {
   afterEach(() => {
@@ -19,9 +19,7 @@ describe("c-import-project-recent-component", () => {
     document.body.appendChild(element);
 
     // Assert
-     const div = element.shadowRoot.querySelector('.recent-title');
-     expect(div).not.toBeNull();
+    const div = element.shadowRoot.querySelector(".recent-title");
+    expect(div).not.toBeNull();
   });
-
-
 });

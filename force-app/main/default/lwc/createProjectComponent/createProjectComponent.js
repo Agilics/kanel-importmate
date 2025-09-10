@@ -62,7 +62,7 @@ export default class ProjectCreatorComponent extends LightningElement {
 
   //Evénement portant sur l'enregistrement de projet
   //Dispatching vers le parent (composant principal) des variables Name | Description | Target Object
-  handleCreateProject() { 
+  handleCreateProject() {
     this.dispatchEvent(
       new CustomEvent("save", {
         detail: {
@@ -72,14 +72,13 @@ export default class ProjectCreatorComponent extends LightningElement {
         }
       })
     );
-    
   }
 
-   
-
-  resetFields(){
-      this.dispatchEvent(
-      new CustomEvent("reset")
-    );
+  resetFields() {
+     // reset valeurs UI
+    this.template.querySelectorAll(".rounded-input").forEach((input) => {
+      input.value = "";
+    }); 
+    
   }
 }

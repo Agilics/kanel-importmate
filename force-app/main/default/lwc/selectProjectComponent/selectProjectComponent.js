@@ -10,6 +10,7 @@ export default class SelectProjectComponent extends LightningModal {
   @track error;
   @track nom = "";
   @track projects = [];
+
   @wire(searchProjectsByName, { nom: "$nom" })
   wiredSearchProjectHandler({ error, data }) {
     if (data) {
@@ -30,6 +31,7 @@ export default class SelectProjectComponent extends LightningModal {
       console.log("new value:" + JSON.stringify(this.projects));
     });
   }
+
   //on récupére l'id du projet choisie
   handleShowDetailProject(e) {
     const { id } = e.target.dataset;
@@ -37,6 +39,7 @@ export default class SelectProjectComponent extends LightningModal {
     this.close(id);
   }
 
+  //fermeture du modal
   handleCloseModal() {
     this.close();
   }
