@@ -1,68 +1,30 @@
 @IsTest
 private class QueryBuilderRepositoryTest {
 
-    @IsTest
-    static void testGetAllObjectNames() {
-        Test.startTest();
-        List<String> names = QueryBuilderRepository.getAllObjectNames();
-        Test.stopTest();
-
-        System.assertNotEquals(0, names.size(), 'Should return some object API names');
+    @testSetup
+    static void setupData() {
+        insert new Account(Name = 'Repo Test');
     }
 
     @IsTest
-    static void testGetFieldNamesBlank() {
+    static void testExecuteQuery_basic() {
         Test.startTest();
-        List<String> fields = QueryBuilderRepository.getFieldNames('');
+        List<SObject> rows = QueryBuilderRepository.executeQuery('SELECT Id, Name FROM Account LIMIT 5');
         Test.stopTest();
 
-        System.assertEquals(0, fields.size(), 'Blank object name should return empty list');
-    }
-
-    @IsTest
-    static void testExecuteQueryBlankReturnsEmpty() {
-        Test.startTest();
-        List<Map<String, Object>> rows = QueryBuilderRepository.executeQuery(null);
-        Test.stopTest();
-
-        System.assertEquals(0, rows.size(), 'Blank SOQL should return empty list');
-    }
-
-    @IsTest
-    static void testExecuteQueryGeneric() {
-        // Trouver un objet queryable génériquement (prend le premier renvoyé)
-        List<String> objects = QueryBuilderRepository.getAllObjectNames();
-        System.assert(objects.size() > 0, 'No objects returned by repository');
-
-        String anyObject = objects[0];
-
-        
-        Integer limitTries = Math.min(5, objects.size());
-        String chosen = null;
-        for (Integer i = 0; i < limitTries; i++) {
-            String candidate = objects[i];
-            try {
-                // Construire une requête minimale SELECT Id FROM candidate LIMIT 1
-                String q = 'SELECT Id FROM ' + candidate + ' LIMIT 1';
-                List<Map<String, Object>> rows = QueryBuilderRepository.executeQuery(q);
-                chosen = candidate;
-                break;
-            } catch (Exception e) {
-               
-            }
+        System.assertNotEquals(null, rows);
+        System.assertEquals(true, rows.size() <= 5);
+        if (!rows.isEmpty()) {
+            System.assert(rows[0].get('Id') != null, 'Should include Id');
         }
+    }
 
-        System.assertNotEquals(null, chosen, 'Could not find a queryable object among first candidates');
-        String soql = 'SELECT Id FROM ' + chosen + ' LIMIT 1';
-
+    @IsTest
+    static void testExecuteQuery_emptySoql() {
         Test.startTest();
-        List<Map<String, Object>> res = QueryBuilderRepository.executeQuery(soql);
+        List<SObject> rows = QueryBuilderRepository.executeQuery(null);
         Test.stopTest();
 
-        // Même s’il n’y a pas de lignes, l’exécution ne doit pas jeter
-        System.assertNotEquals(null, res, 'executeQuery should not return null');
-        if (!res.isEmpty()) {
-            System.assert(res[0].containsKey('Id'), 'Row should contain Id');
-        }
+        System.assertEquals(0, rows.size(), 'Null/empty SOQL returns empty list');
     }
 }

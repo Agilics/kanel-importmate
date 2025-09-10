@@ -1,0 +1,10 @@
+﻿{
+  "root": true,
+  "extends": ["@salesforce/eslint-config-lwc/recommended"],
+  "env": {
+    "es2021": true,
+    "browser": true,
+    "node": true,
+    "jest": true
+  }
+}

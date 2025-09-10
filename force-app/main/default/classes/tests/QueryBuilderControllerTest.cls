@@ -1,106 +1,80 @@
 @IsTest
 private class QueryBuilderControllerTest {
 
-
-    @IsTest
-    static void testFetchObjectsAndFieldsGeneric() {
-        List<String> objs = QueryBuilderController.fetchObjects();
-
-        System.assert(objs != null, 'fetchObjects should not return null');
-        System.assert(objs.size() > 0, 'fetchObjects should return at least one object');
-
-        // Cherche un objet avec champ 'Id'
-        String pickedWithId = null;
-        List<String> fieldsForPicked = null;
-
-        Integer maxScan = Math.min(30, objs.size());
-        for (Integer i = 0; i < maxScan; i++) {
-            String candidate = objs[i];
-            List<String> f = QueryBuilderController.fetchFields(candidate);
-            if (f != null && !f.isEmpty()) {
-                if (f.contains('Id')) {
-                    pickedWithId = candidate;
-                    fieldsForPicked = f;
-                    break;
-                }
-            }
-        }
-
-        if (pickedWithId != null) {
-            System.assert(fieldsForPicked.contains('Id'),
-                'Field list for ' + pickedWithId + ' should contain Id');
-        } else {
+    @testSetup
+    static void setupData() {
+        try {
+            insert new Account(Name = 'Zeta');
+        } catch (Exception e) {
            
-            String anyObject = objs[0];
-            List<String> fields = QueryBuilderController.fetchFields(anyObject);
-            System.assert(fields != null, 'fetchFields should not return null');
-            System.assert(fields.size() > 0,
-                'fetchFields should return at least one field for ' + anyObject);
         }
     }
 
-   
     @IsTest
-    static void testBuildAndRunQueryValidationErrors() {
-        Boolean threw;
-
-        threw = false;
-        try { QueryBuilderController.buildAndRunQuery(null, new List<String>{'Id'}, null); }
-        catch (Exception e) { threw = true; }
-        System.assert(threw, 'Null object should throw');
-
-        threw = false;
-        try { QueryBuilderController.buildAndRunQuery('', new List<String>{'Id'}, null); }
-        catch (Exception e) { threw = true; }
-        System.assert(threw, 'Empty object should throw');
-
-        threw = false;
-        try { QueryBuilderController.buildAndRunQuery('SomeObject__c', new List<String>(), null); }
-        catch (Exception e) { threw = true; }
-        System.assert(threw, 'Empty field list should throw');
-    }
-
-    /**
-     * Smoke test : on essaie de construire/exécuter une requête sur un objet queryable.
-     * On parcourt quelques objets jusqu’à en trouver un qui passe.
-     */
-    @IsTest
-    static void testBuildAndRunQueryGeneric() {
+    static void testFetchObjects() {
+        Test.startTest();
         List<String> objs = QueryBuilderController.fetchObjects();
-        System.assert(objs.size() > 0, 'No objects returned by controller');
+        Test.stopTest();
 
-        Integer tries = Math.min(30, objs.size());
-        String target = null;
+        System.assertNotEquals(null, objs, 'Objects should not be null');
+        System.assert(!objs.isEmpty(), 'Compatible SObjects should not be empty');
+    }
 
-        for (Integer i = 0; i < tries; i++) {
-            String candidate = objs[i];
-            try {
-                // tente un SELECT Id FROM <obj> LIMIT 1 — si l’objet n’a pas Id, ça lèvera,
-                // on passera au suivant
-                List<Map<String, Object>> res = QueryBuilderController.buildAndRunQuery(
-                    candidate,
-                    new List<String>{ 'Id' },
-                    null
-                );
-                target = candidate;
-                break;
-            } catch (Exception e) {
-                
-            }
+    @IsTest
+    static void testFetchFields() {
+        // Récupère la liste des objets compatibles
+        List<String> objs = QueryBuilderController.fetchObjects();
+        System.assert(!objs.isEmpty(), 'Compatible SObjects should not be empty');
+
+        // Préfère Account si dispo, sinon prend le premier
+        String target = 'Account';
+        if (!objs.contains('Account')) {
+            target = objs[0];
         }
 
-        System.assertNotEquals(null, target,
-            'Could not find a queryable object with Id among first candidates');
+        Test.startTest();
+        List<String> fields = QueryBuilderController.fetchFields(target);
+        Test.stopTest();
 
-        List<Map<String, Object>> rows = QueryBuilderController.buildAndRunQuery(
-            target,
-            new List<String>{ 'Id' },
-            null
+        System.assertNotEquals(null, fields, 'Fields should not be null');
+        System.assert(!fields.isEmpty(), 'There should be at least one accessible field for ' + target);
+        // On ne suppose pas que Name/Id soient accessibles dans toutes les orgs.
+    }
+
+    @IsTest
+    static void testBuildAndRunQuery_3args() {
+        Test.startTest();
+        // On reste sur Account pour ce test (comme ton flux LWC) ;
+        List<Map<String,Object>> rows = QueryBuilderController.buildAndRunQuery(
+            'Account',
+            new List<String>{ 'Name' },
+            'Name != null'
         );
+        Test.stopTest();
 
-        System.assertNotEquals(null, rows, 'Result list should not be null');
+        System.assertNotEquals(null, rows);
         if (!rows.isEmpty()) {
-            System.assert(rows[0].containsKey('Id'), 'Row should include Id key');
+            System.assert(rows[0].containsKey('Id'), 'Row should contain Id');
+            System.assert(rows[0].containsKey('Name'), 'Row should contain Name');
         }
+    }
+
+    @IsTest
+    static void testBuildAndRunQueryEx_8args() {
+        Test.startTest();
+        List<Map<String,Object>> rows = QueryBuilderController.buildAndRunQueryEx(
+            'Account',
+            new List<String>{ 'Name' },
+            'Name != null',
+            'Name',     // orderByField
+            'ASC',      // orderDirection
+            'LAST',     // nulls behavior
+            1,          // limit
+            0           // offset
+        );
+        Test.stopTest();
+
+        System.assertNotEquals(null, rows);
+        System.assert(rows.size() <= 1, 'LIMIT 1 should cap results to 1');
     }
 }

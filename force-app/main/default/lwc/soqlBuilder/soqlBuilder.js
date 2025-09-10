@@ -3,18 +3,43 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 import fetchObjects from '@salesforce/apex/QueryBuilderController.fetchObjects';
 import fetchFields from '@salesforce/apex/QueryBuilderController.fetchFields';
-import buildAndRunQuery from '@salesforce/apex/QueryBuilderController.buildAndRunQuery';
+import buildAndRunQueryEx from '@salesforce/apex/QueryBuilderController.buildAndRunQueryEx';
 
 export default class SoqlBuilder extends LightningElement {
+    // UI data
     @track objectOptions = [];
-    @track fieldOptions = [];
+    @track fieldOptions = [];          // [{label, value}]
+    @track orderByFieldOptions = [];   // reuse fields for ORDER BY
+
+    // results
     @track queryResults = [];
     @track columns = [];
 
+    // selections
     selectedObject = '';
     selectedFields = [];
     whereCondition = '';
+
+    // sorting/limit controls
+    orderByField = '';
+    orderDirection = 'ASC';
+    nullsBehavior = ''; // '', 'FIRST', 'LAST'
+    limitRows = 200;
+    offsetRows = 0;
+
+    // misc
     isLoading = false;
+
+    // static option sets
+    directionOptions = [
+        { label: 'ASC', value: 'ASC' },
+        { label: 'DESC', value: 'DESC' }
+    ];
+    nullsOptions = [
+        { label: 'Default', value: '' },
+        { label: 'FIRST', value: 'FIRST' },
+        { label: 'LAST', value: 'LAST' }
+    ];
 
     connectedCallback() {
         fetchObjects()
@@ -26,28 +51,63 @@ export default class SoqlBuilder extends LightningElement {
             });
     }
 
-    handleObjectChange(event) {
+    // --- handlers ---
+
+    handleObjectChange = (event) => {
         this.selectedObject = event.detail.value;
         this.selectedFields = [];
         this.queryResults = [];
         this.columns = [];
+        this.orderByField = '';
+
+        if (!this.selectedObject) {
+            this.fieldOptions = [];
+            this.orderByFieldOptions = [];
+            return;
+        }
 
         fetchFields({ objectName: this.selectedObject })
             .then(result => {
-                this.fieldOptions = (result || []).map(f => ({ label: f, value: f }));
+                const options = (result || []).map(f => ({ label: f, value: f }));
+                this.fieldOptions = options;
+                this.orderByFieldOptions = [{ label: 'None', value: '' }, ...options];
             })
             .catch(error => {
                 this.showToast('Error', this.errMsg(error, 'Failed to load fields'), 'error');
             });
-    }
+    };
 
-    handleFieldsChange(event) {
+    handleFieldsChange = (event) => {
         this.selectedFields = event.detail.value || [];
-    }
+    };
 
-    handleWhereChange(event) {
+    handleWhereChange = (event) => {
         this.whereCondition = event.detail.value || '';
-    }
+    };
+
+    handleOrderByChange = (event) => {
+        this.orderByField = event.detail.value || '';
+    };
+
+    handleDirectionChange = (event) => {
+        this.orderDirection = event.detail.value || 'ASC';
+    };
+
+    handleNullsChange = (event) => {
+        this.nullsBehavior = event.detail.value || '';
+    };
+
+    handleLimitChange = (event) => {
+        const v = Number(event.detail.value);
+        this.limitRows = Number.isFinite(v) ? Math.max(1, Math.min(v, 2000)) : 200;
+    };
+
+    handleOffsetChange = (event) => {
+        const v = Number(event.detail.value);
+        this.offsetRows = Number.isFinite(v) ? Math.max(0, Math.min(v, 2000)) : 0;
+    };
+
+    // --- computed ---
 
     get generatedQuery() {
         if (!this.selectedObject || this.selectedFields.length === 0) {
@@ -56,6 +116,13 @@ export default class SoqlBuilder extends LightningElement {
         const fields = Array.from(new Set([...this.selectedFields, 'Id'])).join(', ');
         let query = `SELECT ${fields} FROM ${this.selectedObject}`;
         if (this.whereCondition) query += ` WHERE ${this.whereCondition}`;
+        if (this.orderByField) {
+            query += ` ORDER BY ${this.orderByField}`;
+            if (this.orderDirection) query += ` ${this.orderDirection}`;
+            if (this.nullsBehavior) query += ` NULLS ${this.nullsBehavior}`;
+        }
+        if (this.limitRows) query += ` LIMIT ${this.limitRows}`;
+        if (this.offsetRows) query += ` OFFSET ${this.offsetRows}`;
         return query;
     }
 
@@ -63,9 +130,13 @@ export default class SoqlBuilder extends LightningElement {
         return this.isLoading ? 'Running...' : 'Run Query';
     }
 
-    // ---------- helpers for display ----------
+    get hasResults() {
+        return Array.isArray(this.queryResults) && this.queryResults.length > 0;
+    }
 
-    // Key used in data rows when repository flattens relationship fields (Account.Name -> Account__Name)
+    // --- helpers for display ---
+
+    // Key used in data rows when service flattens relationship fields (Account.Name -> Account__Name)
     normalizeKey(apiName) {
         return apiName.includes('.') ? apiName.replace(/\./g, '__') : apiName;
     }
@@ -81,26 +152,25 @@ export default class SoqlBuilder extends LightningElement {
     // Infer column type/alignment from first row (number/right, boolean, url)
     inferTypeAttrs(key, sampleRow) {
         const col = { type: 'text', cellAttributes: { alignment: 'left' } };
-
         if (!sampleRow || !(key in sampleRow)) return col;
 
         const v = sampleRow[key];
         if (typeof v === 'number') {
             col.type = 'number';
             col.cellAttributes.alignment = 'right';
-            // Feel free to tweak number formatting:
             col.typeAttributes = { minimumFractionDigits: 0, maximumFractionDigits: 0 };
         } else if (typeof v === 'boolean') {
             col.type = 'boolean';
         } else if (typeof v === 'string' && /^https?:\/\//i.test(v)) {
-            // show as clickable url with same label text
             col.type = 'url';
             col.typeAttributes = { label: { fieldName: key }, target: '_blank' };
         }
         return col;
     }
 
-    handleRun() {
+    // --- run ---
+
+    handleRun = () => {
         if (!this.selectedObject || this.selectedFields.length === 0) {
             this.showToast('Warning', 'Please select an object and at least one field.', 'warning');
             return;
@@ -110,17 +180,24 @@ export default class SoqlBuilder extends LightningElement {
         this.queryResults = [];
         this.columns = [];
 
-        buildAndRunQuery({
+        buildAndRunQueryEx({
             objectName: this.selectedObject,
             fieldList: this.selectedFields,
-            whereClause: this.whereCondition
+            whereClause: this.whereCondition || null,
+            orderByField: this.orderByField || null,
+            orderDirection: this.orderDirection || null,
+            nullsBehavior: this.nullsBehavior || null,
+            limitRows: this.limitRows || null,
+            offsetRows: this.offsetRows || null
         })
             .then(result => {
-                // Ensure Id is included and preserve selection order
+                const rows = result || [];
+
+                // Ensure Id is first then keep user selection order
                 const orderedApis = ['Id', ...this.selectedFields];
 
                 // Use first row (if any) to infer column types/alignments
-                const sample = (result && result.length > 0) ? result[0] : null;
+                const sample = rows.length > 0 ? rows[0] : null;
 
                 this.columns = orderedApis.map(api => {
                     const key = this.normalizeKey(api);      // data key (e.g., Account__Name)
@@ -130,14 +207,15 @@ export default class SoqlBuilder extends LightningElement {
                         label,
                         fieldName: key,
                         type: typed.type,
-                        wrapText: true,                       // allow long headers to wrap like the screenshot
+                        wrapText: true,
                         cellAttributes: typed.cellAttributes,
                         typeAttributes: typed.typeAttributes
                     };
                 });
 
-                this.queryResults = result || [];
-                if (this.queryResults.length === 0) {
+                this.queryResults = rows;
+
+                if (rows.length === 0) {
                     this.showToast('Info', 'No records found.', 'info');
                 }
             })
@@ -147,11 +225,9 @@ export default class SoqlBuilder extends LightningElement {
             .finally(() => {
                 this.isLoading = false;
             });
-    }
+    };
 
-    get hasResults() {
-        return Array.isArray(this.queryResults) && this.queryResults.length > 0;
-    }
+    // --- utilities ---
 
     showToast(title, message, variant) {
         this.dispatchEvent(new ShowToastEvent({ title, message, variant }));

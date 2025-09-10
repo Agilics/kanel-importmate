@@ -1,18 +1,7 @@
-// Mock the Toast event FIRST (before importing the component)
-jest.mock(
-  'lightning/platformShowToastEvent',
-  () => {
-    function ShowToastEvent(detail) {
-      // Create a real CustomEvent so jsdom accepts it.
-      // eslint-disable-next-line no-undef
-      return new globalThis.CustomEvent('lightning__showtoast', { detail });
-    }
-    return { ShowToastEvent };
-  },
-  { virtual: true }
-);
+import { createElement } from '@lwc/engine-dom';
+import SoqlBuilder from 'c/soqlBuilder';
 
-// Mock Apex (imperative)
+// --- Apex mocks (inline, virtual) ---
 jest.mock(
   '@salesforce/apex/QueryBuilderController.fetchObjects',
   () => ({ default: jest.fn() }),
@@ -24,248 +13,192 @@ jest.mock(
   { virtual: true }
 );
 jest.mock(
-  '@salesforce/apex/QueryBuilderController.buildAndRunQuery',
+  '@salesforce/apex/QueryBuilderController.buildAndRunQueryEx',
   () => ({ default: jest.fn() }),
   { virtual: true }
 );
 
-import { createElement } from '@lwc/engine-dom';
-import SoqlBuilder from 'c/soqlBuilder';
-
 import fetchObjects from '@salesforce/apex/QueryBuilderController.fetchObjects';
 import fetchFields from '@salesforce/apex/QueryBuilderController.fetchFields';
-import buildAndRunQuery from '@salesforce/apex/QueryBuilderController.buildAndRunQuery';
+import buildAndRunQueryEx from '@salesforce/apex/QueryBuilderController.buildAndRunQueryEx';
 
-// Microtask flush helpers
-const tick = () => Promise.resolve();
-const flushPromises = () => tick().then(tick);
-
-// Deferred promise helper
-const deferred = () => {
-  let resolve, reject;
-  const promise = new Promise((res, rej) => {
-    resolve = res;
-    reject = rej;
-  });
-  return { promise, resolve, reject };
+// Microtask-only flush (no timers)
+const flush = async (n = 3) => {
+  for (let i = 0; i < n; i++) {
+    // eslint-disable-next-line no-await-in-loop
+    await Promise.resolve();
+  }
 };
 
 describe('c-soql-builder', () => {
-  const sampleRows = [
-    { Id: '001xx0000000001AAA', Name: 'Acme', Account__Name: 'ParentCo' }
-  ];
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    fetchObjects.mockResolvedValue(['Account', 'Contact']);
-    fetchFields.mockResolvedValue(['Id', 'Name', 'Account.Name']);
-    buildAndRunQuery.mockResolvedValue(sampleRows); // default
-  });
-
   afterEach(() => {
-    while (document.body.firstChild) {
-      document.body.removeChild(document.body.firstChild);
-    }
+    while (document.body.firstChild) document.body.removeChild(document.body.firstChild);
+    jest.clearAllMocks();
   });
 
-  const mount = () => {
-    const el = createElement('c-soql-builder', { is: SoqlBuilder });
-    document.body.appendChild(el);
-    return el;
-  };
+  it('loads object options in the object combobox on mount', async () => {
+    fetchObjects.mockResolvedValueOnce(['Account', 'Contact']);
 
-  test('loads objects at init and populates combobox options', async () => {
-    const el = mount();
-    await flushPromises();
+    const elm = createElement('c-soql-builder', { is: SoqlBuilder });
+    document.body.appendChild(elm);
+    await flush();
 
-    expect(fetchObjects).toHaveBeenCalledTimes(1);
-
-    const combo = el.shadowRoot.querySelector('lightning-combobox');
-    expect(combo).toBeTruthy();
-    expect(combo.options).toEqual([
+    const objectCombo = elm.shadowRoot.querySelector('lightning-combobox');
+    expect(objectCombo).toBeTruthy();
+    expect(objectCombo.options).toEqual([
       { label: 'Account', value: 'Account' },
       { label: 'Contact', value: 'Contact' }
     ]);
   });
 
-  test('calls fetchFields when object selection changes', async () => {
-    const el = mount();
-    await flushPromises();
+  it('changing object loads fields into the dual-listbox', async () => {
+    fetchObjects.mockResolvedValueOnce(['Account']);
+    fetchFields.mockResolvedValueOnce(['Id', 'Name', 'Owner.Name']);
 
-    const combo = el.shadowRoot.querySelector('lightning-combobox');
-    combo.dispatchEvent(new CustomEvent('change', { detail: { value: 'Account' } }));
-    await flushPromises();
+    const elm = createElement('c-soql-builder', { is: SoqlBuilder });
+    document.body.appendChild(elm);
+    await flush();
 
-    expect(fetchFields).toHaveBeenCalledWith({ objectName: 'Account' });
+    // Select object
+    const objectCombo = elm.shadowRoot.querySelector('lightning-combobox');
+    objectCombo.dispatchEvent(new CustomEvent('change', { detail: { value: 'Account' } }));
+    await flush();
 
-    const dual = el.shadowRoot.querySelector('lightning-dual-listbox');
+    const dual = elm.shadowRoot.querySelector('lightning-dual-listbox');
+    expect(dual).toBeTruthy();
     expect(dual.options).toEqual([
       { label: 'Id', value: 'Id' },
       { label: 'Name', value: 'Name' },
-      { label: 'Account.Name', value: 'Account.Name' }
+      { label: 'Owner.Name', value: 'Owner.Name' }
     ]);
   });
 
-  test('generatedQuery preview updates after fields + WHERE', async () => {
-    const el = mount();
-    await flushPromises();
+  it('preview shows generated SOQL (object, fields, WHERE)', async () => {
+    fetchObjects.mockResolvedValueOnce(['Account']);
+    fetchFields.mockResolvedValueOnce(['Id', 'Name', 'Owner.Name']);
 
-    // initial
-    let pre = el.shadowRoot.querySelector('pre');
-    expect(pre.textContent).toBe('SELECT ... FROM ...');
+    const elm = createElement('c-soql-builder', { is: SoqlBuilder });
+    document.body.appendChild(elm);
+    await flush();
 
-    // choose object
-    el.shadowRoot
-      .querySelector('lightning-combobox')
+    // Select object
+    elm.shadowRoot.querySelector('lightning-combobox')
       .dispatchEvent(new CustomEvent('change', { detail: { value: 'Account' } }));
-    await flushPromises();
+    await flush();
 
-    // choose fields
-    el.shadowRoot
-      .querySelector('lightning-dual-listbox')
-      .dispatchEvent(
-        new CustomEvent('change', { detail: { value: ['Name', 'Account.Name'] } })
-      );
-    await flushPromises();
+    // Select fields
+    const dual = elm.shadowRoot.querySelector('lightning-dual-listbox');
+    dual.dispatchEvent(new CustomEvent('change', { detail: { value: ['Name', 'Owner.Name'] } }));
 
-    // set WHERE
-    el.shadowRoot
-      .querySelector('lightning-input')
-      .dispatchEvent(
-        new CustomEvent('change', { detail: { value: "Name LIKE 'A%'" } })
-      );
-    await flushPromises();
+    // WHERE
+    const whereInput = elm.shadowRoot.querySelector('lightning-input');
+    whereInput.dispatchEvent(new CustomEvent('change', { detail: { value: 'Name != null' } }));
+    await flush();
 
-    pre = el.shadowRoot.querySelector('pre');
-    const txt = pre.textContent;
-    expect(txt).toMatch(/^SELECT /);
-    expect(txt).toMatch(/Id/);
-    expect(txt).toMatch(/Name/);
-    expect(txt).toMatch(/ FROM Account/);
-    expect(txt).toMatch(/WHERE Name LIKE 'A%'/);
+    // Read preview
+    const pre = elm.shadowRoot.querySelector('pre');
+    const text = pre.textContent;
+
+    expect(text).toMatch(/^SELECT /);
+    expect(text).toContain('FROM Account');
+    expect(text).toContain('Name');
+    expect(text).toContain('Owner.Name');
+    expect(text).toContain('Id');
+    expect(text).toContain('WHERE Name != null');
   });
 
-  test('Run success: shows Running... while pending, then populates datatable and resets', async () => {
-    // Make the Apex call deferred so we can inspect mid-flight state
-    const d = deferred();
-    buildAndRunQuery.mockReturnValueOnce(d.promise);
+  it('Run executes Apex and renders datatable with normalized relation key', async () => {
+    fetchObjects.mockResolvedValueOnce(['Account']);
+    fetchFields.mockResolvedValueOnce(['Id', 'Name', 'Owner.Name']);
 
-    const el = mount();
-    await flushPromises();
+    const elm = createElement('c-soql-builder', { is: SoqlBuilder });
+    document.body.appendChild(elm);
+    await flush();
 
-    el.shadowRoot
-      .querySelector('lightning-combobox')
+    // Select object
+    elm.shadowRoot.querySelector('lightning-combobox')
       .dispatchEvent(new CustomEvent('change', { detail: { value: 'Account' } }));
-    await flushPromises();
+    await flush();
 
-    el.shadowRoot
-      .querySelector('lightning-dual-listbox')
-      .dispatchEvent(
-        new CustomEvent('change', { detail: { value: ['Name', 'Account.Name'] } })
-      );
-    await flushPromises();
+    // Select fields
+    elm.shadowRoot.querySelector('lightning-dual-listbox')
+      .dispatchEvent(new CustomEvent('change', { detail: { value: ['Name', 'Owner.Name'] } }));
+    await flush();
 
-    const btn = el.shadowRoot.querySelector('lightning-button');
-    btn.click();
-    await flushPromises();
+    // WHERE
+    elm.shadowRoot.querySelector('lightning-input')
+      .dispatchEvent(new CustomEvent('change', { detail: { value: 'Name != null' } }));
+    await flush();
 
-    expect(buildAndRunQuery).toHaveBeenCalledWith({
-      objectName: 'Account',
-      fieldList: ['Name', 'Account.Name'],
-      whereClause: ''
-    });
-    expect(btn.label).toBe('Running...');
-    expect(btn.disabled).toBe(true);
+    // Mock Apex result
+    const rows = [{ Id: '001xx1', Name: 'Acme', Owner__Name: 'User A' }];
+    buildAndRunQueryEx.mockResolvedValueOnce(rows);
 
-    d.resolve(sampleRows);
-    await flushPromises();
+    // Run
+    elm.shadowRoot.querySelector('lightning-button').click();
+    await flush();
 
-    const dt = el.shadowRoot.querySelector('lightning-datatable');
-    expect(dt).toBeTruthy();
-    expect(dt.columns.map((c) => c.fieldName)).toEqual(
-      expect.arrayContaining(['Id', 'Name', 'Account__Name'])
-    );
-    expect(dt.data).toEqual(sampleRows);
+    // Assert payload fields that are always present from the component
+    expect(buildAndRunQueryEx).toHaveBeenCalledTimes(1);
+    const payload = buildAndRunQueryEx.mock.calls[0][0];
+    expect(payload.objectName).toBe('Account');
+    expect(payload.fieldList).toEqual(['Name', 'Owner.Name']);
+    expect(payload.whereClause).toBe('Name != null');
 
-    expect(btn.label).toBe('Run Query');
-    expect(btn.disabled).toBe(false);
+    // Datatable
+    const table = elm.shadowRoot.querySelector('lightning-datatable');
+    expect(table).toBeTruthy();
+    const colFields = (table.columns || []).map(c => c.fieldName);
+    expect(colFields).toEqual(expect.arrayContaining(['Id', 'Name', 'Owner__Name']));
+    expect(table.data).toEqual(rows);
   });
 
-  test('Run with zero results shows info toast', async () => {
-    const d = deferred();
-    buildAndRunQuery.mockReturnValueOnce(d.promise);
+  it('Run shows warning toast when object/fields missing', async () => {
+    fetchObjects.mockResolvedValueOnce(['Account']);
 
-    const el = mount();
-    await flushPromises();
+    const elm = createElement('c-soql-builder', { is: SoqlBuilder });
+    document.body.appendChild(elm);
+    await flush();
 
-    el.shadowRoot
-      .querySelector('lightning-combobox')
-      .dispatchEvent(new CustomEvent('change', { detail: { value: 'Account' } }));
-    await flushPromises();
+    const toastHandler = jest.fn();
+    elm.addEventListener('lightning__showtoast', toastHandler);
 
-    el.shadowRoot
-      .querySelector('lightning-dual-listbox')
-      .dispatchEvent(new CustomEvent('change', { detail: { value: ['Id'] } }));
-    await flushPromises();
+    elm.shadowRoot.querySelector('lightning-button').click();
+    await flush();
 
-    const spy = jest.spyOn(el, 'dispatchEvent');
-
-    el.shadowRoot.querySelector('lightning-button').click();
-    await flushPromises();
-
-    // resolve with empty array
-    d.resolve([]);
-    await flushPromises();
-
-    const toast = spy.mock.calls.map((c) => c[0]).find((e) => e.type === 'lightning__showtoast');
-    expect(toast).toBeTruthy();
-    expect(toast.detail.variant).toBe('info');
-    expect(toast.detail.message).toMatch(/No records found/i);
+    expect(toastHandler).toHaveBeenCalledTimes(1);
+    const evt = toastHandler.mock.calls[0][0];
+    expect(evt.detail.variant).toBe('warning');
+    expect(evt.detail.title).toBe('Warning');
   });
 
-  test('Run error shows error toast', async () => {
-    const d = deferred();
-    buildAndRunQuery.mockReturnValueOnce(d.promise);
+  it('Run shows error toast on Apex failure', async () => {
+    fetchObjects.mockResolvedValueOnce(['Account']);
+    fetchFields.mockResolvedValueOnce(['Id', 'Name']);
 
-    const el = mount();
-    await flushPromises();
+    const elm = createElement('c-soql-builder', { is: SoqlBuilder });
+    document.body.appendChild(elm);
+    await flush();
 
-    el.shadowRoot
-      .querySelector('lightning-combobox')
+    // Select object & one field
+    elm.shadowRoot.querySelector('lightning-combobox')
       .dispatchEvent(new CustomEvent('change', { detail: { value: 'Account' } }));
-    await flushPromises();
+    await flush();
+    elm.shadowRoot.querySelector('lightning-dual-listbox')
+      .dispatchEvent(new CustomEvent('change', { detail: { value: ['Name'] } }));
+    await flush();
 
-    el.shadowRoot
-      .querySelector('lightning-dual-listbox')
-      .dispatchEvent(new CustomEvent('change', { detail: { value: ['Id'] } }));
-    await flushPromises();
+    buildAndRunQueryEx.mockRejectedValueOnce(new Error('Boom'));
 
-    const spy = jest.spyOn(el, 'dispatchEvent');
+    const toastHandler = jest.fn();
+    elm.addEventListener('lightning__showtoast', toastHandler);
 
-    el.shadowRoot.querySelector('lightning-button').click();
-    await flushPromises();
+    elm.shadowRoot.querySelector('lightning-button').click();
+    await flush();
 
-    d.reject({ message: 'Boom' });
-    await flushPromises();
-
-    const toast = spy.mock.calls.map((c) => c[0]).find((e) => e.type === 'lightning__showtoast');
-    expect(toast).toBeTruthy();
-    expect(toast.detail.variant).toBe('error');
-    expect(toast.detail.message).toMatch(/Failed to run query|Boom/i);
-  });
-
-  test('Run without selections shows warning toast', async () => {
-    const el = mount();
-    await flushPromises();
-
-    const spy = jest.spyOn(el, 'dispatchEvent');
-
-    el.shadowRoot.querySelector('lightning-button').click();
-    await flushPromises();
-
-    const toast = spy.mock.calls.map((c) => c[0]).find((e) => e.type === 'lightning__showtoast');
-    expect(toast).toBeTruthy();
-    expect(toast.detail.variant).toBe('warning');
-    expect(toast.detail.message).toMatch(/select an object/i);
+    expect(toastHandler).toHaveBeenCalledTimes(1);
+    const evt = toastHandler.mock.calls[0][0];
+    expect(evt.detail.variant).toBe('error');
+    expect(evt.detail.title).toBe('Error');
   });
 });

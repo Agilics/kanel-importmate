@@ -15,6 +15,7 @@
     <!-- Field selector -->
     <template if:true={fieldOptions.length}>
       <lightning-dual-listbox
+        class="m-top"
         label="Select Fields"
         source-label="Available"
         selected-label="Selected"
@@ -24,27 +25,73 @@
       </lightning-dual-listbox>
     </template>
 
-    <!-- Optional WHERE clause -->
+    <!-- WHERE clause -->
     <lightning-input
+      class="m-top"
       label="WHERE Condition (optional)"
       placeholder="Example: Name LIKE 'A%'"
       value={whereCondition}
       onchange={handleWhereChange}>
     </lightning-input>
 
+    <!-- Sorting & limits row -->
+    <div class="grid m-top">
+      <lightning-combobox
+        label="ORDER BY Field"
+        value={orderByField}
+        placeholder="None"
+        options={orderByFieldOptions}
+        onchange={handleOrderByChange}>
+      </lightning-combobox>
+
+      <lightning-combobox
+        label="Direction"
+        value={orderDirection}
+        options={directionOptions}
+        onchange={handleDirectionChange}>
+      </lightning-combobox>
+
+      <lightning-combobox
+        label="NULLS"
+        value={nullsBehavior}
+        options={nullsOptions}
+        onchange={handleNullsChange}>
+      </lightning-combobox>
+
+      <lightning-input
+        type="number"
+        label="LIMIT"
+        value={limitRows}
+        min="1"
+        max="2000"
+        onchange={handleLimitChange}>
+      </lightning-input>
+
+      <lightning-input
+        type="number"
+        label="OFFSET"
+        value={offsetRows}
+        min="0"
+        max="2000"
+        onchange={handleOffsetChange}>
+      </lightning-input>
+    </div>
+
     <!-- Generated SOQL preview -->
-    <div class="query-preview">
+    <div class="query-preview m-top">
       <h3>Generated SOQL</h3>
       <pre>{generatedQuery}</pre>
     </div>
 
-    <!-- Run query -->
-    <lightning-button
-      variant="brand"
-      label={runButtonLabel}
-      onclick={handleRun}
-      disabled={isLoading}>
-    </lightning-button>
+    <!-- Actions -->
+    <div class="actions">
+      <lightning-button
+        variant="brand"
+        label={runButtonLabel}
+        onclick={handleRun}
+        disabled={isLoading}>
+      </lightning-button>
+    </div>
 
     <!-- Loading overlay -->
     <template if:true={isLoading}>
@@ -55,9 +102,7 @@
 
     <!-- Results -->
     <template if:true={hasResults}>
-      <!-- Outer rounded card with soft surface + shadow -->
-      <section class="results-table">
-        
+      <section class="results-table m-top">
         <div class="table-scroll slds-scrollable_y">
           <lightning-datatable
             key-field="Id"
