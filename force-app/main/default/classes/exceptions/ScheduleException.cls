@@ -1,0 +1,1 @@
+public  class ScheduleException  extends Exception{}
