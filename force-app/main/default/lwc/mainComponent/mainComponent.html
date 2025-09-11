@@ -2,7 +2,7 @@
   @description       : 
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
   @group             : 
-  @last modified on  : 09-09-2025
+  @last modified on  : 09-11-2025
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
@@ -74,7 +74,8 @@
             onnamechange={handleProjectNameChange}
             ondescriptionchange={handleDescriptionChange}
             ontargetchange={handleTargetObjectChange}
-            onsave={handleCreateProject} 
+            onsave={handleCreateProject}
+            oncancel={handleCancel}
           >
           </c-create-project-component>
         </template>

@@ -12,12 +12,7 @@ public with sharing class ProjectService {
     String description,
     String targetObject
   ) {
-    try {
-    /*  Boolean isProjectExist = doesProjectExist(name,targetObject) ;
-      if (isProjectExist) {
-        //ErrorLogService.logException(e);
-        throw new ImportException('This project already exists');
-      }*/
+    try { 
      ImportProject__c project = new ImportProject__c(
         Name = name,
         Description__c = description,

@@ -55,7 +55,7 @@ export default class MainComponent extends LightningElement {
   @wire(getRecentsProjects, { limitor: "$limitor" }) importProjects; //affiche 3 projets récents
 
   //Enregistrement d'un nouveau projet
-    async handleCreateProject() {
+  async handleCreateProject() {
     this.isLoading = true;
 
     // validation UI
@@ -66,7 +66,7 @@ export default class MainComponent extends LightningElement {
     }
 
     try {
-      // 1) Vérifie l’existence
+      // 1) Vérifie l’existence du projet
       const exists = await doesProjectExist({
         name: this.projectName,
         targetObject: this.targetObject
@@ -77,9 +77,12 @@ export default class MainComponent extends LightningElement {
           "Warning",
           "This project already exists, please choose another name/target object.",
           "warning"
-        ); 
+        );
+
+        this.handleResetFields(); // Réintialisation de tous les champs de texte | combo box
+
         this.isLoading = false;
-         
+
         this.targetObject = "";
         return;
       }
@@ -89,26 +92,28 @@ export default class MainComponent extends LightningElement {
         name: this.projectName,
         description: this.description,
         targetObject: this.targetObject
-      })
-       
-        this.recentProject = result;
+      });
 
-        //Affichage du message toast de succès
-        this.showToast(
-          "Success",
-          `Record  with ID\t:${result.Id}  created  successfully !`,
-          "success"
-        );
+      this.recentProject = result;
 
-        this.isLoading = false; 
-        
-        //On passe à l'étape 2 Selection du source de données
-        this.handleNextStep(); // mise à jour du stepper
-      
+      //Affichage du message toast de succès
+      this.showToast(
+        "Success",
+        `Record  with ID:\t${result.Id}  created  successfully !`,
+        "success"
+      );
+
+      this.handleResetFields(); // Réintialisation de tous les champs de texte | combo box
+
+      this.isLoading = false; //Désactivation du  loading spinner
+
+      //On passe à l'étape 2 Selection du source de données
+      this.handleNextStep(); // mise à jour du stepper
     } catch (err) {
+      //Affichage d'un toast de message d'erreur
       this.showToast(
         "Error",
-        err?.body?.message || 'An Error were occured!',
+        err?.body?.message || "An Error were occured!",
         "error"
       );
     } finally {
@@ -116,13 +121,12 @@ export default class MainComponent extends LightningElement {
     }
   }
 
-
-
   // Retour vers l'étape précédente du stepper
   handlePreviousStep() {
     if (this.currentStep > 1) {
       this.currentStep--; // décrementation du compteur
       this.showCreatorSection = false;
+      this.targetObject = "";
     }
   }
 
@@ -134,6 +138,16 @@ export default class MainComponent extends LightningElement {
     ) {
       this.currentStep++; // Incrémentation du compteur
     }
+  }
+
+  //Masquer la section de création de projet
+  handleCancel(){
+    this.showCreatorSection = false;
+  }
+
+  //Réinitialisation de tous les champs de texte | combo box
+  handleResetFields() {
+    this.template.querySelector("c-create-project-component").resetFields();
   }
 
   //Mise à jour de la variable project name via le champs de texte
@@ -190,7 +204,7 @@ export default class MainComponent extends LightningElement {
   }
 
   // rechercher les projets importés par nom
-  //  Ouverture Modal permettant de selectionner des  projets
+  //  Ouverture Modal permettant de la recherche et la selection des  projets
   async handleSelectProject() {
     await SelectProject.open({
       size: "large",
@@ -206,6 +220,4 @@ export default class MainComponent extends LightningElement {
       }
     });
   }
-
-  
 }

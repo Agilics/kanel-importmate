@@ -74,11 +74,19 @@ export default class ProjectCreatorComponent extends LightningElement {
     );
   }
 
+  // réintialisation des valeurs de tous les champs  de textes | combo box
+  @api
   resetFields() {
-     // reset valeurs UI
+    // reset valeurs UI
     this.template.querySelectorAll(".rounded-input").forEach((input) => {
       input.value = "";
-    }); 
-    
+    });
+  }
+
+  //Masquer la section de création de projets
+  handleCancel() {
+    this.dispatchEvent(
+      new  CustomEvent('cancel')
+    );
   }
 }
