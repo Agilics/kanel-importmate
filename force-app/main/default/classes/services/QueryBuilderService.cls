@@ -4,123 +4,75 @@ public with sharing class QueryBuilderService {
     private static final Integer MAX_LIMIT      = 2000;
     private static final Integer MAX_OFFSET     = 2000;
 
-    // ===== ORDER BY ===== 
+    //Spécification ORDER BY Regroupe champ, direction et gestion des NULLs.
     private class OrderBySpec {
-        String fieldName;      // may be null
-        String direction;      // ASC | DESC | null
-        String nullsBehavior;  // FIRST | LAST | null
+        String fieldName;
+        String direction;
+        String nullsBehavior;
     }
 
-    // ===== PUBLIC ENTRY POINTS =====
-
-    // 8-parameter overload (used by Controller.buildAndRunQueryEx)
-    public static List<Map<String, Object>> buildAndRunQuery(
-        String objectName,
-        List<String> fields,
-        String whereClause,
-        String orderByField,
-        String orderDirection,
-        String nullsBehavior,
-        Integer limitRows,
-        Integer offsetRows
-    ) {
-        return buildAndRunQueryCore(
-            objectName, fields, whereClause,
-            orderByField, orderDirection, nullsBehavior,
-            limitRows, offsetRows
-        );
+    //Point d’entrée complet pour construire et exécuter une requête.
+    public static List<Map<String, Object>> buildAndRunQuery(String objectName, List<String> fields, String whereClause, String orderByField, String orderDirection, String nullsBehavior, Integer limitRows, Integer offsetRows) {
+        return buildAndRunQueryCore(objectName, fields, whereClause, orderByField, orderDirection, nullsBehavior, limitRows, offsetRows);
     }
 
-    // 3-parameter overload (keeps backward compatibility)
-    public static List<Map<String, Object>> buildAndRunQuery(
-        String objectName,
-        List<String> fields,
-        String whereClause
-    ) {
-        return buildAndRunQueryCore(
-            objectName, fields, whereClause,
-            null, null, null,
-            null, null
-        );
+    //Point d’entrée simplifié pour compatibilité ascendante.
+    public static List<Map<String, Object>> buildAndRunQuery(String objectName, List<String> fields, String whereClause) {
+        return buildAndRunQueryCore(objectName, fields, whereClause, null, null, null, null, null);
     }
 
-    // ===== CORE IMPLEMENTATION =====
-    private static List<Map<String, Object>> buildAndRunQueryCore(
-        String objectName,
-        List<String> fields,
-        String whereClause,
-        String orderByField,
-        String orderDirection,
-        String nullsBehavior,
-        Integer limitRows,
-        Integer offsetRows
-    ) {
+    //Implémentation centrale : sécurise, construit le SOQL, exécute et mappe le résultat.
+    private static List<Map<String, Object>> buildAndRunQueryCore(String objectName, List<String> fields, String whereClause, String orderByField, String orderDirection, String nullsBehavior, Integer limitRows, Integer offsetRows) {
         try {
-            // 1) Security
-            assertQueryable(objectName); // uses SecurityUtils for access
-            Schema.DescribeSObjectResult dObj = getDescribe(objectName);
+            assertQueryable(objectName);
+
+            Schema.DescribeSObjectResult dObj = ObjectMetadataService.getDescribe(objectName);
 
             List<String> safeFields = validateAndNormalizeFields(dObj, fields);
-            OrderBySpec orderSpec   = validateOrderBy(dObj, orderByField, orderDirection, nullsBehavior);
+            OrderBySpec orderSpec = validateOrderBy(dObj, orderByField, orderDirection, nullsBehavior);
 
-            Integer safeLimit  = (limitRows == null)  ? DEFAULT_LIMIT : Math.max(1, Math.min(limitRows, MAX_LIMIT));
-            Integer safeOffset = (offsetRows == null) ? 0            : Math.max(0, Math.min(offsetRows, MAX_OFFSET));
+            Integer safeLimit = (limitRows == null) ? DEFAULT_LIMIT : Math.max(1, Math.min(limitRows, MAX_LIMIT));
+            Integer safeOffset = (offsetRows == null) ? 0 : Math.max(0, Math.min(offsetRows, MAX_OFFSET));
 
-            String safeWhere = sanitizeWhereClause(whereClause);
+            String safeWhere = sanitizeWhere(whereClause);
 
-            // 2) Build SOQL
             String soql = buildSoql(objectName, safeFields, safeWhere, orderSpec, safeLimit, safeOffset);
 
-            // 3) Execute
-            List<SObject> recs = QueryBuilderRepository.executeQuery(soql);
+            List<SObject> records = QueryBuilderRepository.executeQuery(soql);
 
-            // 4) Map to LWC-friendly rows
-            return mapRecordsToRows(recs, safeFields);
+            return mapRecordsToRows(records, safeFields);
 
         } catch (ApplicationException ae) {
-            throw ae; // propagate as-is
+            throw ae;
         } catch (Exception ex) {
-            throw new ApplicationException('QueryBuilderService failure: ' + ex.getMessage());
+            throw new ApplicationException('Échec QueryBuilderService : ' + ex.getMessage());
         }
     }
 
-    // ===== SECURITY / VALIDATION HELPERS =====
+    //Vérifie l’accès et la requêtabilité de l’objet.
+    // Utilise SecurityUtils pour l’accessibilité et un check dédié isQueryable.
     public static void assertQueryable(String objectName) {
         if (String.isBlank(objectName)) {
-            throw new ApplicationException('Object name is required.');
+            throw new ApplicationException('Nom d’objet requis.');
         }
         Map<String, Schema.SObjectType> gd = Schema.getGlobalDescribe();
         Schema.SObjectType t = gd.get(objectName);
         if (t == null) {
-            throw new ApplicationException('Unknown object: ' + objectName);
+            throw new ApplicationException('Objet inconnu : ' + objectName);
         }
-
-        // Access check via SecurityUtils 
-        Boolean accessible = SecurityUtils.isAccessible(t);
-        if (accessible == null || accessible == false) {
-            throw new ApplicationException('Access denied: object ' + objectName + ' is not accessible.');
+        if (SecurityUtils.isAccessible(t) != true) {
+            throw new ApplicationException('Accès refusé : objet non accessible ' + objectName + '.');
         }
-
-        // Queryable check
-        if (!t.getDescribe().isQueryable()) {
-            throw new ApplicationException('Access denied: object ' + objectName + ' is not queryable.');
+        if (SecurityUtils.isQueryable(t) != true) {
+            throw new ApplicationException('Accès refusé : objet non interrogeable ' + objectName + '.');
         }
     }
 
-    private static Schema.DescribeSObjectResult getDescribe(String objectName) {
-        Schema.SObjectType t = Schema.getGlobalDescribe().get(objectName);
-        if (t == null) {
-            throw new ApplicationException('Unknown object: ' + objectName);
-        }
-        return t.getDescribe();
-    }
-
-    private static List<String> validateAndNormalizeFields(
-        Schema.DescribeSObjectResult dObj,
-        List<String> fields
-    ) {
+    //Valide la liste des champs demandés et applique FLS.
+    //Ajoute toujours Id et renvoie une liste triée sans doublons.
+    private static List<String> validateAndNormalizeFields(Schema.DescribeSObjectResult dObj, List<String> fields) {
         if (fields == null || fields.isEmpty()) {
-            throw new ApplicationException('At least one field is required.');
+            throw new ApplicationException('Au moins un champ est requis.');
         }
 
         Map<String, Schema.SObjectField> fmap = dObj.fields.getMap();
@@ -131,49 +83,56 @@ public with sharing class QueryBuilderService {
             String key = raw.trim();
 
             if (key.contains('.')) {
-          
                 List<String> parts = key.split('\\.');
                 if (parts.size() != 2) {
-                    throw new ApplicationException('Invalid field path: ' + key);
+                    throw new ApplicationException('Chemin de champ invalide : ' + key);
                 }
                 assertNoDangerousToken(parts[0]);
                 assertNoDangerousToken(parts[1]);
                 out.add(parts[0] + '.' + parts[1]);
             } else {
                 Schema.SObjectField sf = fmap.get(key);
-                if (sf == null) throw new ApplicationException('Unknown field: ' + key);
+                if (sf == null) {
+                    throw new ApplicationException('Champ inconnu : ' + key);
+                }
                 if (!sf.getDescribe().isAccessible()) {
-                    throw new ApplicationException('Field not accessible: ' + key);
+                    throw new ApplicationException('Champ non accessible : ' + key);
                 }
                 out.add(key);
             }
         }
 
-        out.add('Id'); // always include Id
-        List<String> sorted = new List<String>(); sorted.addAll(out); sorted.sort();
+        out.add('Id');
+
+        List<String> sorted = new List<String>();
+        sorted.addAll(out);
+        sorted.sort();
         return sorted;
     }
 
-    private static OrderBySpec validateOrderBy(
-        Schema.DescribeSObjectResult dObj,
-        String orderByField,
-        String orderDirection,
-        String nullsBehavior
-    ) {
+    //Valide la clause ORDER BY.
+    //Vérifie l’existence du champ, l’accessibilité, la direction et la gestion des NULLs.
+    private static OrderBySpec validateOrderBy(Schema.DescribeSObjectResult dObj, String orderByField, String orderDirection, String nullsBehavior) {
         OrderBySpec spec = new OrderBySpec();
-        if (String.isBlank(orderByField)) return spec;
+        if (String.isBlank(orderByField)) {
+            return spec;
+        }
 
         String f = orderByField.trim();
         Schema.SObjectField sf = dObj.fields.getMap().get(f);
-        if (sf == null)                       throw new ApplicationException('ORDER BY field does not exist: ' + f);
-        if (!sf.getDescribe().isAccessible()) throw new ApplicationException('ORDER BY field not accessible: ' + f);
+        if (sf == null) {
+            throw new ApplicationException('Champ ORDER BY inexistant : ' + f);
+        }
+        if (!sf.getDescribe().isAccessible()) {
+            throw new ApplicationException('Champ ORDER BY non accessible : ' + f);
+        }
 
         spec.fieldName = f;
 
         if (!String.isBlank(orderDirection)) {
             String dir = orderDirection.trim().toUpperCase();
             if (dir != 'ASC' && dir != 'DESC') {
-                throw new ApplicationException('Invalid ORDER BY direction: ' + orderDirection);
+                throw new ApplicationException('Direction ORDER BY invalide : ' + orderDirection);
             }
             spec.direction = dir;
         }
@@ -181,43 +140,38 @@ public with sharing class QueryBuilderService {
         if (!String.isBlank(nullsBehavior)) {
             String nb = nullsBehavior.trim().toUpperCase();
             if (nb != 'FIRST' && nb != 'LAST') {
-                throw new ApplicationException('Invalid NULLS behavior: ' + nullsBehavior);
+                throw new ApplicationException('Comportement NULLS invalide : ' + nullsBehavior);
             }
             spec.nullsBehavior = nb;
         }
         return spec;
     }
 
-    /** UI-oriented hardening for WHERE. Prefer UI builders with bound variables. */
-    private static String sanitizeWhereClause(String whereClause) {
-        if (String.isBlank(whereClause)) return null;
+    
+    private static String sanitizeWhere(String whereClause) {
+        if (String.isBlank(whereClause)) {
+            return null;
+        }
         String w = whereClause.trim();
         String lower = ' ' + w.toLowerCase() + ' ';
 
-        // Forbid obvious injections / DML / exec
-        List<String> bads = new List<String>{
+        List<String> forbidden = new List<String>{
             ';', '/*', '*/', '--', '\\', '"',
             ' execute ', ' insert ', ' update ', ' delete ', ' merge ', ' upsert ', ' call '
         };
-        for (String b : bads) {
+        for (String b : forbidden) {
             if (lower.contains(b)) {
-                throw new ApplicationException('Unsafe WHERE clause detected.');
+                throw new ApplicationException('Clause WHERE non sûre détectée.');
             }
         }
-        if (w.endsWith(';')) w = w.substring(0, w.length() - 1).trim();
+        if (w.endsWith(';')) {
+            w = w.substring(0, w.length() - 1).trim();
+        }
         return String.isBlank(w) ? null : w;
     }
 
-    // ===== SOQL BUILDER =====
-
-    private static String buildSoql(
-        String objectName,
-        List<String> fields,
-        String whereClause,
-        OrderBySpec orderSpec,
-        Integer limitRows,
-        Integer offsetRows
-    ) {
+    //Construit la requête SOQL finale à partir des éléments validés.
+    private static String buildSoql(String objectName, List<String> fields, String whereClause, OrderBySpec orderSpec, Integer limitRows, Integer offsetRows) {
         String soql = 'SELECT ' + String.join(fields, ', ') + ' FROM ' + objectName;
 
         if (!String.isBlank(whereClause)) {
@@ -241,10 +195,13 @@ public with sharing class QueryBuilderService {
         return soql;
     }
 
-    // ===== MAPPING =====
+    // Convertit une liste de SObject en lignes clé/valeur adaptées à LWC.
+    //Supporte Parent.Child sous la forme Parent__Child.
     public static List<Map<String,Object>> mapRecordsToRows(List<SObject> records, List<String> selectedFields) {
         List<Map<String,Object>> out = new List<Map<String,Object>>();
-        if (records == null || records.isEmpty()) return out;
+        if (records == null || records.isEmpty()) {
+            return out;
+        }
 
         for (SObject row : records) {
             Map<String,Object> line = new Map<String,Object>();
@@ -254,9 +211,10 @@ public with sharing class QueryBuilderService {
                     List<String> parts = key.split('\\.');
                     if (parts.size() == 2) {
                         String parent = parts[0].trim();
-                        String child  = parts[1].trim();
+                        String child = parts[1].trim();
                         SObject rel = (SObject) row.getSObject(parent);
-                        line.put(parent + '__' + child, rel != null ? rel.get(child) : null);
+                        Object val = (rel == null) ? null : rel.get(child);
+                        line.put(parent + '__' + child, val);
                     } else {
                         line.put(key.replace('.', '__'), null);
                     }
@@ -264,17 +222,22 @@ public with sharing class QueryBuilderService {
                     line.put(key, row.get(key));
                 }
             }
-            if (!line.containsKey('Id')) line.put('Id', (Id) row.get('Id'));
+            if (!line.containsKey('Id')) {
+                line.put('Id', (Id) row.get('Id'));
+            }
             out.add(line);
         }
         return out;
     }
 
+    // Garde à l’écart les tokens dangereux dans les chemins Parent.Child.
     private static void assertNoDangerousToken(String token) {
-        if (String.isBlank(token)) throw new ApplicationException('Invalid token.');
+        if (String.isBlank(token)) {
+            throw new ApplicationException('Jeton invalide.');
+        }
         String t = token.toLowerCase();
         if (t.contains(';') || t.contains('--') || t.contains('/*') || t.contains('*/') || t.contains('\\') || t.contains('"')) {
-            throw new ApplicationException('Invalid token.');
+            throw new ApplicationException('Jeton invalide.');
         }
     }
 }

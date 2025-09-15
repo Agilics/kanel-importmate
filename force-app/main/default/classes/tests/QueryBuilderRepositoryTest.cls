@@ -5,7 +5,6 @@ private class QueryBuilderRepositoryTest {
     static void setupData() {
         insert new Account(Name = 'Repo Test');
     }
-
     @IsTest
     static void testExecuteQuery_basic() {
         Test.startTest();
@@ -18,7 +17,6 @@ private class QueryBuilderRepositoryTest {
             System.assert(rows[0].get('Id') != null, 'Should include Id');
         }
     }
-
     @IsTest
     static void testExecuteQuery_emptySoql() {
         Test.startTest();

@@ -1,117 +1,92 @@
 <template>
-  <div class="soql-container">
-    <h2>SOQL Builder</h2>
-    <p>Build your query interactively from Salesforce objects.</p>
-
-    <!-- Object selector -->
+  <div class="controls">
+    <!-- Combobox[0]: Object -->
     <lightning-combobox
-      label="Select Object"
+      name="object"
+      label="Object"
       value={selectedObject}
-      placeholder="Choose an object"
+      placeholder="Select an object"
       options={objectOptions}
       onchange={handleObjectChange}>
     </lightning-combobox>
 
-    <!-- Field selector -->
-    <template if:true={fieldOptions.length}>
-      <lightning-dual-listbox
-        class="m-top"
-        label="Select Fields"
-        source-label="Available"
-        selected-label="Selected"
-        options={fieldOptions}
-        value={selectedFields}
-        onchange={handleFieldsChange}>
-      </lightning-dual-listbox>
-    </template>
+    <!-- Fields (dual list) -->
+    <lightning-dual-listbox
+      name="fields"
+      label="Fields"
+      source-label="Available"
+      selected-label="Selected"
+      options={fieldOptions}
+      value={selectedFields}
+      onchange={handleFieldsChange}>
+    </lightning-dual-listbox>
 
-    <!-- WHERE clause -->
+    <!-- Input[0]: WHERE -->
     <lightning-input
-      class="m-top"
-      label="WHERE Condition (optional)"
-      placeholder="Example: Name LIKE 'A%'"
+      type="text"
+      label="WHERE"
       value={whereCondition}
       onchange={handleWhereChange}>
     </lightning-input>
 
-    <!-- Sorting & limits row -->
-    <div class="grid m-top">
-      <lightning-combobox
-        label="ORDER BY Field"
-        value={orderByField}
-        placeholder="None"
-        options={orderByFieldOptions}
-        onchange={handleOrderByChange}>
-      </lightning-combobox>
+    <!-- Combobox[1]: ORDER BY -->
+    <lightning-combobox
+      name="orderBy"
+      label="Order By"
+      value={orderByField}
+      placeholder="None"
+      options={orderByFieldOptions}
+      onchange={handleOrderByChange}>
+    </lightning-combobox>
 
-      <lightning-combobox
-        label="Direction"
-        value={orderDirection}
-        options={directionOptions}
-        onchange={handleDirectionChange}>
-      </lightning-combobox>
+    <!-- Combobox[2]: Direction -->
+    <lightning-combobox
+      name="direction"
+      label="Direction"
+      value={orderDirection}
+      options={directionOptions}
+      onchange={handleDirectionChange}>
+    </lightning-combobox>
 
-      <lightning-combobox
-        label="NULLS"
-        value={nullsBehavior}
-        options={nullsOptions}
-        onchange={handleNullsChange}>
-      </lightning-combobox>
+    <!-- Combobox[3]: NULLS -->
+    <lightning-combobox
+      name="nulls"
+      label="NULLS"
+      value={nullsBehavior}
+      options={nullsOptions}
+      onchange={handleNullsChange}>
+    </lightning-combobox>
 
-      <lightning-input
-        type="number"
-        label="LIMIT"
-        value={limitRows}
-        min="1"
-        max="2000"
-        onchange={handleLimitChange}>
-      </lightning-input>
+    <!-- Input[1]: LIMIT -->
+    <lightning-input
+      type="number"
+      label="LIMIT"
+      value={limitRows}
+      onchange={handleLimitChange}>
+    </lightning-input>
 
-      <lightning-input
-        type="number"
-        label="OFFSET"
-        value={offsetRows}
-        min="0"
-        max="2000"
-        onchange={handleOffsetChange}>
-      </lightning-input>
-    </div>
+    <!-- Input[2]: OFFSET -->
+    <lightning-input
+      type="number"
+      label="OFFSET"
+      value={offsetRows}
+      onchange={handleOffsetChange}>
+    </lightning-input>
 
-    <!-- Generated SOQL preview -->
-    <div class="query-preview m-top">
-      <h3>Generated SOQL</h3>
-      <pre>{generatedQuery}</pre>
-    </div>
-
-    <!-- Actions -->
-    <div class="actions">
-      <lightning-button
-        variant="brand"
-        label={runButtonLabel}
-        onclick={handleRun}
-        disabled={isLoading}>
-      </lightning-button>
-    </div>
-
-    <!-- Loading overlay -->
-    <template if:true={isLoading}>
-      <div class="spinner-overlay">
-        <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
-      </div>
-    </template>
-
-    <!-- Results -->
-    <template if:true={hasResults}>
-      <section class="results-table m-top">
-        <div class="table-scroll slds-scrollable_y">
-          <lightning-datatable
-            key-field="Id"
-            data={queryResults}
-            columns={columns}
-            hide-checkbox-column="true">
-          </lightning-datatable>
-        </div>
-      </section>
-    </template>
+    <!-- Run -->
+    <lightning-button
+      variant="brand"
+      label="Run"
+      onclick={handleRunClick}
+      disabled={isLoading}>
+    </lightning-button>
   </div>
+
+  <template if:true={columns}>
+    <lightning-datatable
+      key-field="Id"
+      data={queryResults}
+      columns={columns}>
+    </lightning-datatable>
+  </template>
 </template>
