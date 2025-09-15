@@ -141,7 +141,7 @@ export default class MainComponent extends LightningElement {
   }
 
   //Masquer la section de création de projet
-  handleCancel(){
+  handleCancel() {
     this.showCreatorSection = false;
   }
 

@@ -10,10 +10,18 @@ private class ProjectRepositoryTest {
 
     @TestSetup
     static void projectCreation() {
-        //GIVEN
-        Integer numProject = 5;
-        ImportProject__c[] pros=  TestProjectFactory.generateProjects('Contact',numProject);
+            User admin = TestDataFactory.createAdminUser();
+        Integer numProject = 5; 
+        List<ImportProject__c> pros = new List<ImportProject__c>();
+        for (Integer i = 0; i < 5; i++) {
+            pros.add(new ImportProject__c(
+                Name = 'project' + i,
+                TargetObject__c = 'Account',
+                Description__c = 'desc' + i
+            ));
+        }
         insert pros;
+        
     } 
 
     //Tester l'enregistrement d'un projet
@@ -27,7 +35,7 @@ private class ProjectRepositoryTest {
         Boolean doInsert = true;
         
         System.runAs(admin) {
-            TestProjectFactory.createTestProject(name,targetObject,doInsert);
+            TestDataFactory.createImportProject();
 
             //When 
             Test.startTest();
@@ -48,12 +56,11 @@ private class ProjectRepositoryTest {
        
         System.runAs(admin) {
              //GIVEN
-            ImportProject__c project = TestProjectFactory.createTestProject('Projet Update', 'Contact',true);
-
-            project.Description__c = 'Nouvelle description';
+            ImportProject__c project = TestDataFactory.createImportProject();
 
             //WHEN
             Test.startTest();
+            project.Description__c = 'Nouvelle description';
             ImportProject__c updated = ProjectRepository.saveProject(project);
             Test.stopTest();
 
@@ -75,7 +82,7 @@ private class ProjectRepositoryTest {
         String targetObject ='Lead';
         Boolean  doInsert= true; 
         System.runAs(admin) {
-            ImportProject__c savedProject = TestProjectFactory.createTestProject(name,targetObject,doInsert);
+            ImportProject__c savedProject = TestDataFactory.createImportProject();
 
             Test.startTest();
             ImportProject__c project = ProjectRepository.getProjectById(savedProject.Id);
@@ -107,9 +114,10 @@ private class ProjectRepositoryTest {
 
         User admin = TestDataFactory.createAdminUser();
         //GIVEN
-        ImportProject__c p1 = TestProjectFactory.createTestProject('UniqueName123', 'Account',true);
          System.runAs(admin) {
             //WHEN
+             ImportProject__c p1 = TestDataFactory.createImportProject();
+     
             Test.startTest();
             List<ImportProject__c> results = ProjectRepository.getProjectsByName('UniqueName123');
             Test.stopTest();
@@ -124,10 +132,13 @@ private class ProjectRepositoryTest {
     static void testFindProjectByNameAndTargetObject() {
         User admin = TestDataFactory.createAdminUser();
 
-        //GIVEN
-        ImportProject__c p1 = TestProjectFactory.createTestProject('FindMe', 'Contact',true);
         
-        System.runAs(admin) {        
+        
+        System.runAs(admin) {  
+            //GIVEN  
+            ImportProject__c p1 = TestDataFactory.createImportProject();
+
+                
             //WHEN
             //Performer le teste
             Test.startTest();

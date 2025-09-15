@@ -85,8 +85,6 @@ export default class ProjectCreatorComponent extends LightningElement {
 
   //Masquer la section de création de projets
   handleCancel() {
-    this.dispatchEvent(
-      new  CustomEvent('cancel')
-    );
+    this.dispatchEvent(new CustomEvent("cancel"));
   }
 }
