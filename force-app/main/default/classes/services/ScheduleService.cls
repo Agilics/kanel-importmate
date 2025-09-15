@@ -1,83 +1,125 @@
-public with sharing class ScheduleService {
+/**
+ * @description       : 
+ * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @group             : 
+ * @last modified on  : 09-11-2025
+ * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+**/
+public with sharing class ScheduleService{
+    /**
+     * Calcule la prochaine date d’exécution selon la fréquence
+     */
+    public static Datetime calculateNextRun(Schedule__c sched) {
+        
+        //Exécution Journaliière
+        if (sched.Frequency__c === FrequencyEnum.DAILY) {
+            return System.now().addDays(1);
+        }
+        
+        //Exécution Hebdomadaire
+        if (sched.Frequency__c === FrequencyEnum.WEEKLY) {
+            return System.now().addDays(7);
+        }
 
-    //Enregistrement d'une nouvelle planification 
-    public static Schedule__c addSchedule(
-        String  frequency,
-        DateTime nextRun,
-        String projectName
-    ){  
+        //Exécution Mensuelle
+        if (sched.Frequency__c === FrequencyEnum.MONTHLY) {
+            return System.now().addMonths(1);
+        }
+        return null;
+    }
+    
+     /**
+     * Mettre à jour et enregistrement  d'une planification  Schedule__c
+     */
+    public static void schedule(FrequencyEnum frequence,String projectId) {
         try {
             if (
                 SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType) ||
-                 SecurityUtils.isAccessible(Schema.ImportProject__c.SObjectType) 
-                SecurityUtils.isUpdateable(Schema.Schedule__c.SObjectType)
+                SecurityUtils.isAccessible(Schema.ImportProject__c.SObjectType) ||
+                SecurityUtils.isCreateable(Schema.Schedule__c.SObjectType)
             ) {
-            ImportProject__c project = ProjectRepository.getProjectsByName(projectName);
-            if (!project) {
-                throw new ScheduleException('No project were found with provided Name:'+ projectName);
+                
+            ImportProject__c project = ProjectRepository.getProjectById(projectId);
+            
+            if(!project){
+                throw new ImportException('No project were found with provided ID:\t'+projectId);
             }
-                //Instanciation de l'objet Schedule
-                Schedule__c schedule = new Schedule__c( 
-                    Frequency__c = frequency,
-                    NextRun__c = nextRun,
-                    Project__c = project
-                );
+            
+            //Initialisation de la planification
+            Schedule__c sched = new Schedule(
+                Frequency__c = frequence.Name(),
+                Project__c = project
+            );
 
-                return ScheduleRepository.addSchedule(schedule); // persistance de données
+            sched.NextRun__c = calculateNextRun(sched);
+            ScheduleRepository.save(sched);
+
+            if (sched.NextRun__c != null) {
+                String cron = buildCron(sched.NextRun__c);
+                System.schedule('Schedule_' + sched.Id, cron, new ScheduleJob(sched.Id));
+              }
             }
-            return null;
-        } catch (DmlException e) {
+
+          } catch (DmlException e) {
               ErrorLogService.logException(e);
               throw new DmlException(e.getMessage());
         }
+
     }
+   
+   
 
-
-     // Met à jour une planification existante
-    public static Schedule__c updateSchedule(
-        String scheduleId,
-        String scheduleName,
-        String  frequency,
-        DateTime nextRun,
-        String projectName
-    ){
-        Schedule__c schedule = ScheduleRepository.getScheduleById(scheduleId); 
-        
-        ImportProject__c project = ProjectRepository.getProjectsByName(projectName);
-
-        try { 
-            if(schedule && project){
-                schedule.Name = scheduleName;
-                schedule.Frequency__c = frequency;
-                schedule.NextRun__c = nextRun;
-                schedule.Project__c = project;
-                ScheduleRepository.addSchedule(schedule);
-                return schedule;
-            }
-        } catch (DmlException e) {
-              ErrorLogService.logException(e);
-              throw new DmlException(e.getMessage());
-        }
-    }
-
-
-    //suppression d'une planification
+    /*
+    *suppression d'une planification
+    */
     public  static void deleteScheduleById(String id) {
-        try {
+        
+        try { 
             ScheduleRepository.deleteScheduleById(id);
         } catch (DmlException e) {
             ErrorLogService.logException(e);
               throw new DmlException(e.getMessage());
         }
+
     }
 
-    //Récupérer toutes les planifications
+    /**
+    *Récupérer toutes les planifications
+    */
     public static List<Schedule__c> getAllSchedules() {
        try {
-            ScheduleRepository.deleteScheduleById(id);
-        } catch (DmlException e) {
+            ScheduleRepository.getAllSchedules();
+        } catch (ScheduleException e) {
             ErrorLogService.logException(e);
-              throw new DmlException(e.getMessage());
+            throw new ScheduleException(e.getMessage());
         }  
     } 
+
+    /**
+     *Filtrer par fréquence (DAILY | WEEKLY | MONTHLY)
+    */
+     public static List<Schedule__c> getSchedulesByFrequency(FrequencyEnum frequence) {
+       try {
+            ScheduleRepository.getSchedulesByFrequency(fréquence.Name());
+        } catch (ScheduleException e) {
+            ErrorLogService.logException(e);
+            throw new ScheduleException(e.getMessage());
+        }  
+    } 
+    
+    /**
+     * Construit l’expression CRON Salesforce
+    */
+    private static String buildCron(Datetime dateTime) {
+        return String.format('{0} {1} {2} {3} {4} ? {5}',
+            new List<String>{
+                String.valueOf(dateTime.second()),
+                String.valueOf(dateTime.minute()),
+                String.valueOf(dateTime.hour()),
+                String.valueOf(dateTime.day()),
+                String.valueOf(dateTime.month()),
+                String.valueOf(dateTime.year())
+            }
+        );
+    }
 }
