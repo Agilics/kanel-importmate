@@ -9,6 +9,6 @@
     </nameField>
     <pluralLabel>Error Logs</pluralLabel>
     <searchLayouts></searchLayouts>
-    <sharingModel>ControlledByParent </sharingModel>
+    <sharingModel>ReadWrite</sharingModel>
     <visibility>Public</visibility>
 </CustomObject>
