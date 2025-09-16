@@ -2,7 +2,7 @@
  * @description       :
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             :
- * @last modified on  : 08-20-2025
+ * @last modified on  : 09-16-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
  **/
 @isTest
@@ -186,8 +186,8 @@ public with sharing class ProjectServiceTest {
     System.assertEquals(expectedName, actualProject.Name);
     System.assertEquals(expectedTargetObject, actualProject.TargetObject__c);
     System.assertEquals(
-      expectedDescription.trim(),
-      actualProject.Description__c.trim()
+      expectedDescription,
+      actualProject.Description__c
     );
   }
 
@@ -198,22 +198,24 @@ public with sharing class ProjectServiceTest {
     String expectedName = 'Lead Import';
     String expectedTargetObject = 'Lead';
     //Insertion de données de testes
-    ImportProject__c recordToInsert = new ImportProject__c(
+    ImportProject__c recordsToInsert = new ImportProject__c(
       Name = expectedName,
       TargetObject__c = expectedTargetObject,
       Description__c = 'here'
     );
 
-    //Insertion de données
-    Database.SaveResult saveResult = Database.insert(recordToInsert);
-    String id = saveResult.getId(); // Récupération de l'id
+    //Insertion de données 
+    Database.SaveResult saveResults = Database.insert(recordsToInsert); 
+    String id = saveResults.getId(); // Récupération de l'id
     ImportProject__c actual = ProjectService.getProjectById(id);
 
     Test.stopTest();
 
     // Assertion
 
-    System.assertNotEquals(null, actual);
+    System.Assert.isNotNull(actual, 'No found project!');
+    
+
     System.assertEquals(expectedName, actual.Name);
   }
 
