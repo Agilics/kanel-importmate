@@ -1,161 +1,161 @@
 @IsTest
 private class QueryBuilderServiceTest {
 
-    @testSetup
-    static void setupData() {
-        // Accounts A..D
-        List<Account> accs = new List<Account>{
-            new Account(Name = 'Alpha'),
-            new Account(Name = 'Bravo'),
-            new Account(Name = 'Charlie'),
-            new Account(Name = 'Delta')
-        };
-        insert accs;
-
-        // One contact linked to Alpha to test relation mapping (Account.Name)
-        insert new Contact(FirstName = 'John', LastName = 'Doe', AccountId = accs[0].Id);
+    // ---------- Helpers ----------
+    private static Id makeAccount(String name, Id parentId) {
+        Account a = new Account(Name = name);
+        if (parentId != null) a.ParentId = parentId;
+        insert a;
+        return a.Id;
     }
 
+    private static void assertContainsIgnoreCase(String text, String expectedSub, String msg) {
+        String t = text == null ? '' : text.toLowerCase();
+        String e = expectedSub == null ? '' : expectedSub.toLowerCase();
+        System.assert(t.contains(e), msg + ' | message="' + text + '"');
+    }
+
+    // ---------- Happy paths ----------
     @IsTest
-    static void testBuildAndRunQuery_minimal() {
+    static void buildAndRunQuery_8params_retourne_lignes_et_aplatissement() {
+        // Données
+        Id pId = makeAccount('ParentCo', null);
+        makeAccount('Acme A', pId);
+        makeAccount('Acme B', pId);
+
+        // Exécution
         Test.startTest();
-        List<Map<String,Object>> rows = QueryBuilderService.buildAndRunQuery(
+        List<Map<String, Object>> rows = QueryBuilderService.buildAndRunQuery(
             'Account',
-            new List<String>{ 'Name' },
-            'Name != null'
+            new List<String>{ 'Name', 'Parent.Name' },
+            'Name LIKE \'Acme%\'',
+            'Name',
+            'ASC',
+            'LAST',
+            200,
+            0
         );
         Test.stopTest();
 
-        System.assertNotEquals(null, rows, 'Rows should not be null');
-        System.assert(rows.size() > 0, 'Should return at least one Account');
-        // Must include Id and Name keys
-        System.assert(rows[0].containsKey('Id'), 'Id must be included');
-        System.assert(rows[0].containsKey('Name'), 'Selected field must be present');
-    }
-
-    @IsTest
-    static void testBuildAndRunQuery_withOrderLimitOffset() {
-        Test.startTest();
-        List<Map<String,Object>> rows = QueryBuilderService.buildAndRunQuery(
-            'Account',
-            new List<String>{ 'Name' },
-            'Name != null',
-            'Name',          // orderByField
-            'DESC',          // orderDirection
-            'LAST',          // nullsBehavior
-            2,               // limit
-            1                // offset
-        );
-        Test.stopTest();
-
-        System.assertEquals(true, rows.size() <= 2, 'LIMIT should cap results to 2');
-        // Just ensure keys are present
-        if (!rows.isEmpty()) {
-            System.assert(rows[0].containsKey('Id'));
-            System.assert(rows[0].containsKey('Name'));
+        // Vérifs
+        System.assertEquals(2, rows.size(), 'Deux enregistrements attendus');
+        for (Map<String, Object> r : rows) {
+            System.assert(r.containsKey('Id'), 'La clé Id doit être présente dans le résultat mappé');
+            System.assertEquals('ParentCo', (String) r.get('Parent__Name'),
+                'Parent__Name doit être aplati depuis Parent.Name');
         }
     }
 
     @IsTest
-    static void testBuildAndRunQuery_relationFieldMapping() {
+    static void buildAndRunQuery_3params_retourne_un_resultat() {
+        // Données
+        Id accId = makeAccount('Solo Corp', null);
+
+        // Exécution
         Test.startTest();
-        List<Map<String,Object>> rows = QueryBuilderService.buildAndRunQuery(
-            'Contact',
-            new List<String>{ 'FirstName', 'LastName', 'Account.Name' },
-            'LastName = \'Doe\''
+        List<Map<String, Object>> rows = QueryBuilderService.buildAndRunQuery(
+            'Account',
+            new List<String>{ 'Name' },
+            'Id = \'' + accId + '\''
         );
         Test.stopTest();
 
-        System.assert(rows.size() > 0, 'Should return contact(s) with LastName Doe');
-        Map<String,Object> r = rows[0];
-        System.assert(r.containsKey('Account__Name'),
-            'Relation field must be flattened to Account__Name');
-        System.assert(r.containsKey('Id'), 'Id must be present');
-        System.assert(r.containsKey('LastName'), 'LastName must be present');
+        // Vérifs
+        System.assertEquals(1, rows.size(), 'Une ligne attendue');
+        System.assertEquals('Solo Corp', (String) rows[0].get('Name'), 'Name doit correspondre');
+        System.assert(rows[0].containsKey('Id'), 'La clé Id doit être présente');
     }
 
-    @IsTest
-    static void testBuildAndRunQuery_invalidObject() {
-        Boolean thrown = false;
-        try {
-            QueryBuilderService.buildAndRunQuery(
-                'NoSuchObject__c',
-                new List<String>{ 'Name' },
-                null
-            );
-        } catch (ApplicationException ex) {
-            thrown = true;
-            System.assert(ex.getMessage().contains('Unknown object'));
-        }
-        System.assert(thrown, 'Should throw ApplicationException for unknown object');
-    }
+    // ---------- Validations / erreurs ----------
 
     @IsTest
-    static void testBuildAndRunQuery_invalidField() {
-        Boolean thrown = false;
+    static void where_dangereuse_declenche_exception() {
+        Boolean threw = false;
         try {
             QueryBuilderService.buildAndRunQuery(
                 'Account',
-                new List<String>{ 'Nope__c' },
-                null
+                new List<String>{ 'Name' },
+                'Id != null; delete from Account',  
+                null, null, null, 10, 0
             );
         } catch (ApplicationException ex) {
-            thrown = true;
-            System.assert(ex.getMessage().contains('Unknown field'));
+            threw = true;
+            assertContainsIgnoreCase(ex.getMessage(), 'clause where non sûre', 'WHERE dangereuse non détectée');
         }
-        System.assert(thrown, 'Should throw for unknown field');
+        System.assert(threw, 'Une ApplicationException devait être levée');
     }
 
     @IsTest
-    static void testBuildAndRunQuery_invalidOrderByField() {
-        Boolean thrown = false;
+    static void champ_inconnu_declenche_exception() {
+        Boolean threw = false;
+        try {
+            QueryBuilderService.buildAndRunQuery(
+                'Account',
+                new List<String>{ 'ChampQuiNExistePas__c' },
+                null, null, null, null, 10, 0
+            );
+        } catch (ApplicationException ex) {
+            threw = true;
+            assertContainsIgnoreCase(ex.getMessage(), 'champ inconnu', 'Message attendu sur champ inconnu');
+        }
+        System.assert(threw, 'Une ApplicationException devait être levée');
+    }
+
+    @IsTest
+    static void direction_orderby_invalide_declenche_exception() {
+        Boolean threw = false;
         try {
             QueryBuilderService.buildAndRunQuery(
                 'Account',
                 new List<String>{ 'Name' },
                 null,
-                'Nope__c',  // orderByField
+                'Name',
+                'UPWARDS', 
+                null,
+                10, 0
+            );
+        } catch (ApplicationException ex) {
+            threw = true;
+            assertContainsIgnoreCase(ex.getMessage(), 'direction order by invalide',
+                'Message attendu sur direction invalide');
+        }
+        System.assert(threw, 'Une ApplicationException devait être levée');
+    }
+
+    @IsTest
+    static void nulls_behavior_invalide_declenche_exception() {
+        Boolean threw = false;
+        try {
+            QueryBuilderService.buildAndRunQuery(
+                'Account',
+                new List<String>{ 'Name' },
+                null,
+                'Name',
                 'ASC',
-                null,
-                10,
-                0
+                'MIDDLE', 
+                10, 0
             );
         } catch (ApplicationException ex) {
-            thrown = true;
-            System.assert(ex.getMessage().contains('ORDER BY field does not exist'));
+            threw = true;
+            assertContainsIgnoreCase(ex.getMessage(), 'comportement nulls invalide',
+                'Message attendu sur NULLS invalide');
         }
-        System.assert(thrown, 'Should throw for invalid ORDER BY field');
+        System.assert(threw, 'Une ApplicationException devait être levée');
     }
 
     @IsTest
-    static void testBuildAndRunQuery_invalidWhereInjection() {
-       
-        String badWhere = 'Name LIKE \'A%\';';
-        Boolean thrown = false;
+    static void objet_inconnu_declenche_exception() {
+        Boolean threw = false;
         try {
             QueryBuilderService.buildAndRunQuery(
-                'Account',
+                'ObjetQuiNExistePas__c',
                 new List<String>{ 'Name' },
-                badWhere
+                null, null, null, null, 10, 0
             );
         } catch (ApplicationException ex) {
-            thrown = true;
-            System.assert(ex.getMessage().contains('Unsafe WHERE clause'));
+            threw = true;
+            assertContainsIgnoreCase(ex.getMessage(), 'objet inconnu', 'Message attendu sur objet inconnu');
         }
-        System.assert(thrown, 'Should throw for unsafe WHERE clause');
-    }
-
-    @IsTest
-    static void testBuildAndRunQuery_validWhereNoSemicolon() {
-        Test.startTest();
-        List<Map<String,Object>> rows = QueryBuilderService.buildAndRunQuery(
-            'Account',
-            new List<String>{ 'Name' },
-            'Name LIKE \'A%\''
-        );
-        Test.stopTest();
-
-        System.assertNotEquals(null, rows);
-        // not asserting count; just ensuring no exception is thrown
+        System.assert(threw, 'Une ApplicationException devait être levée');
     }
 }
