@@ -1,0 +1,14 @@
+[
+  {
+    "Id": "001",
+    "Name": "Project Alpha",
+    "TargetObject__c": "Account",
+    "Description__c": "Alpha description"
+  },
+  {
+    "Id": "002",
+    "Name": "Project Beta",
+    "TargetObject__c": "Contact",
+    "Description__c": "Beta description"
+  }
+]

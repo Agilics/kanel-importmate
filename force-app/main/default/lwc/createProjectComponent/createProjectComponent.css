@@ -1,0 +1,96 @@
+/* Create project Action */
+.container {
+  border-radius: 30px;
+  max-width: 1200px;
+  background-color: #ebe3e2;
+  border-radius: 24px;
+  padding: 1.6rem 2rem;
+}
+.title {
+  font-weight: 500;
+  margin: 0 0 0.9rem 0;
+  padding: 0 0 0 12%;
+}
+/* display inputs in lines*/
+
+/*Add some rounded buttons*/
+.rounded-input {
+  border-radius: 15px;
+}
+/* inputs */
+lightning-input,
+lightning-combobox {
+  width: 100%;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+/*  */
+.btn-groups {
+  margin: 2rem 0 2rem 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5rem;
+}
+.btn {
+  width: 192.125px;
+  height: 48px;
+  opacity: 1;
+  border-radius: 30px;
+  border: none;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+}
+/*Action button params radius - color &  fonts */
+.btn-save {
+  background-color: #1e3a8a;
+
+  box-shadow: 0 6px 12px rgb(30 58 138 / 0.45);
+}
+.btn-save:hover {
+  background-color: #153071;
+}
+.btn-cancel {
+  background-color: #6b757d;
+  box-shadow: 0 6px 12px rgb(107 117 125 / 0.45);
+}
+.btn-cancel:hover {
+  background-color: #4a5257;
+}
+
+/* Tablette et en-dessous */
+@media (max-width: 1024px) {
+  .container {
+    flex-wrap: wrap;
+  }
+  .btn-groups {
+    gap: 1.5rem;
+    justify-content: space-between;
+  }
+  .btn {
+    width: 90%;
+    padding: 12px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+    align-items: stretch;
+    flex-wrap: wrap;
+  }
+
+  .btn-groups {
+    flex-direction: flex;
+    gap: 1rem;
+    align-items: space-between;
+    justify-content: center;
+  }
+
+  .btn {
+    width: 34%;
+    padding: 12px;
+  }
+}
