@@ -1,5 +1,5 @@
  
-    global enum FrequencyEnum {
+public enum FrequencyEnum {
         DAILY ,
         WEEKLY ,
         MONTHLY

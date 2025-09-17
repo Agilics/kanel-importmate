@@ -1,15 +1,16 @@
-@isTest 
+@IsTest 
 public with sharing class FrequencyUtilTest {
-     @isTest
-    public  static  testmethod void callTestData() {
+     
+     @IsTest
+    public  static  void callTestData() {
         
         //Perform test
         Test.startTest();
         String excpetedFrequency = 'DAILY';
-        FrequencyEnum actual =  FrequencyEnum.Frequency.DAILY;
+        FrequencyEnum actual =  FrequencyEnum.DAILY;
         Test.stopTest();
 
         //Assertions
-        System.assertEquals(expectedFrequency, actual);
+        System.assertEquals(excpetedFrequency, actual.Name());
      }
 }
