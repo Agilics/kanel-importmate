@@ -1,8 +1,15 @@
+/**
+ * @description       : 
+ * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @group             : 
+ * @last modified on  : 09-16-2025
+ * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+**/
 @isTest
 public class TestDataFactory {
 
     public static User createAdminUser() {
-        Profile adminProfile = [SELECT Id FROM Profile WHERE Name = 'System Administrator' LIMIT 1];
+        Profile p = [SELECT Id FROM Profile WHERE Id = :UserInfo.getProfileId()];
         String uniqueUserName = 'admin' + DateTime.now().getTime() + '@importmate.com';
         User adminUser = new User(
             Alias = 'admin',
@@ -11,7 +18,7 @@ public class TestDataFactory {
             LastName = 'Testing',
             LanguageLocaleKey = 'en_US',
             LocaleSidKey = 'en_US',
-            ProfileId = adminProfile.Id,
+            ProfileId = p.Id,
             TimeZoneSidKey = 'America/Los_Angeles',
             Username = uniqueUserName
         );
@@ -19,15 +26,30 @@ public class TestDataFactory {
         return adminUser;
     }
 
+
     public static ImportProject__c createImportProject() {
         ImportProject__c project = new ImportProject__c(
             Name = 'Test Project',
+            TargetObject__c='Account',
             Description__c = 'Test Description'
         );
         insert project;
         return project;
     }
 
+    public static Schedule__c createSchedule(){
+        ImportProject__c project = TestDataFactory.createImportProject() ;
+        String frequence = String.valueOf(FrequencyEnum.DAILY);
+
+        Schedule__c schedule = new Schedule__c(
+            Frequency__c = frequence,
+            Project__c = project.Id
+        );
+        
+        insert schedule;
+        return schedule;
+    }
+ 
     public static ImportExecution__c createImportExecution(Id projectId) {
         ImportExecution__c execution = new ImportExecution__c(
             Status__c = 'Pending',

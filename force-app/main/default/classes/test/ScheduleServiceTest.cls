@@ -86,44 +86,17 @@ public with sharing class ScheduleServiceTest {
     @IsTest
     static void testScheduleByName() {
         //GIVEN
-        String name ='Project 001';
-        String  target =  'Account';
-        String description = 'desc';
-       
-        List<ImportProject__c> projects = new List<ImportProject__c>();
-        ImportProject__c newProject =  new ImportProject__c(
-                    Name = name,
-                    TargetObject__c = target,
-                    Description__c =description
-        ) ;
-
-        projects.add(newProject);
+            Schedule__c schedule = TestDataFactory.createSchedule();       
         //When
         //Perform test
         Test.startTest();
-
-            List<Database.SaveResult> project = Database.insert(projects);
-
-            //Create a new Schedule 
-            Schedule__c schedule = new Schedule__c();
-            schedule.Frequency__c = FrequencyEnum.WEEKLY.Name();
-            schedule.Project__c = project[0].id; 
-
-            //Persist data
-            insert schedule; 
-
             // Récupérer le Schedule avec    son Name généré
-            Schedule__c insertedSchedule = [
-                        SELECT Id,Name FROM Schedule__c
-                        WHERE  Id =: schedule.Id 
-                        LIMIT 1
-            ]; 
-            
-            List<Schedule__c> schedules = ScheduleService.getSchedulesByName(insertedSchedule.Name);   //search schedules by Name   
+            String name = schedule.Name;
+        
+            List<Schedule__c> schedules = ScheduleService.getSchedulesByName(name);   //search schedules by Name   
         Test.stopTest();
         
-        //THEN - ASSERTION
-        System.assertNotEquals(null,insertedSchedule, 'No schedule were found '); 
+        //THEN - ASSERTION 
         System.assertNotEquals(null, schedules);  
 
     }
@@ -132,40 +105,19 @@ public with sharing class ScheduleServiceTest {
     //tester la récupération de planification par le nom du projet
     @IsTest
     static void testScheduleByProjectName() {
-        //GIVEN
-        String name ='Project 001';
-        String  target =  'Account';
-        String description = 'desc';
-       
-        List<ImportProject__c> projects = new List<ImportProject__c>();
-        ImportProject__c newProject =  new ImportProject__c(
-                    Name = name,
-                    TargetObject__c = target,
-                    Description__c =description
-        ) ;
-
-        projects.add(newProject);
+        //creation d'une planification avec projet depuis Test Data Factory 
+        Schedule__c schedule = TestDataFactory.createSchedule(); 
+        
         //When
         //Perform test
         Test.startTest();
-
-            List<Database.SaveResult> project = Database.insert(projects);
-
-            //Create a new Schedule
-            List<Schedule__c> recordsToInsert = new List<Schedule__c>();
-            Schedule__c schedule = new Schedule__c();
-            schedule.Frequency__c = FrequencyEnum.WEEKLY.Name();
-            schedule.Project__c = project[0].id;
-            recordsToInsert.add(schedule);
-
-            //Persist data
-            List<Database.SaveResult> saveResults = Database.insert(recordsToInsert); 
-            List<Schedule__c> schedules = ScheduleService.getSchedulesByProjectName(name);   //search schedules by project Name   
+            String keyword = schedule.Project__r.Name;    // get project's name
+            List<Schedule__c> schedules = ScheduleService.getSchedulesByProjectName(keyword);   //search schedules by project Name   
         Test.stopTest();
         
         //THEN - ASSERTION
-        System.assertNotEquals(null,saveResults, 'No schedule were found '); 
-        System.assertNotEquals(null, schedules); 
+         
+        System.assertNotEquals(null, schedule); 
 
     }
 
@@ -227,7 +179,7 @@ public with sharing class ScheduleServiceTest {
      @IsTest
      static void testGetSchedulesByFrequency() {
         //GIVEN
-        FrequencyEnum exceptedFrequency = FrequencyEnum.DAILY;
+       FrequencyEnum exceptedFrequency =  FrequencyEnum.DAILY;
         
         //WHEN
         Test.startTest();
@@ -238,5 +190,25 @@ public with sharing class ScheduleServiceTest {
         //then - Assertions
         System.assertNotEquals(null, schedules);
         System.Assert.isTrue( schedules.size() > 0 ,'Schedule\'s list is not empty');
+    }    
+
+      /**
+     *Tester le filtre par l'id de la planification
+     */
+     @IsTest
+     static void testGetScheduleById() {
+        //GIVEN 
+        Schedule__c result = TestDataFactory.createSchedule();
+        String expected = String.valueOf(FrequencyEnum.DAILY);
+
+        //WHEN
+        Test.startTest();
+        Schedule__c schedule = ScheduleService.getScheduleById(result.Id);
+        Test.stopTest();
+
+        //then - Assertions
+        String actual = String.valueOf(schedule.Frequency__c).toUpperCase();
+        System.assertNotEquals(null, schedule);
+        System.assertEquals(expected,actual);
     }    
 }

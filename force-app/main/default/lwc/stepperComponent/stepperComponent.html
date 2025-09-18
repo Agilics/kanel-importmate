@@ -1,0 +1,24 @@
+<template>
+  <nav class="stepper" aria-label="Progress">
+    <template for:each={steps} for:item="step">
+      <div
+        key={step.number}
+        class={step.cssClass}
+        data-step={step.number}
+        aria-current={step.ariaCurrent}
+        onclick={handleStepClick}
+      >
+        <a class="step-circle">{step.number}</a>
+        <div class="step-label">{step.label}</div>
+        <div class="step-line" if:true={step.hasLine}></div>
+      </div>
+    </template>
+  </nav>
+
+  <!-- Boutons de navigation 
+  <div style="margin-top: 1rem; display:flex; gap:1rem;">
+    <lightning-button label="Previous" onclick={prevStep}></lightning-button>
+    <lightning-button label="Next" onclick={nextStep}></lightning-button>
+  </div>
+  -->
+</template>

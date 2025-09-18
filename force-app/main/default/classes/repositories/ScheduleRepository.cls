@@ -87,17 +87,18 @@ public with sharing class ScheduleRepository {
                 throw new ScheduleException(e.getMessage());
             }
           }
-          return null;
+          return new List<Schedule__c>();
     }
 
     // Récupérer la plannification par l'id
-    public  static List<Schedule__c> getScheduleById(String scheduleId) {
+    public  static Schedule__c getScheduleById(String scheduleId) {
           if(SecurityUtils.isCreateable(Schema.Schedule__c.SObjectType)){
             try {
                 return [
                     SELECT NextRun__c, Name, Id,Frequency__c 
                     FROM Schedule__c
                     WHERE Id =: scheduleId
+                    LIMIT 1
                 ];
             }catch(ScheduleException e){
                    ErrorLogService.logException(e);

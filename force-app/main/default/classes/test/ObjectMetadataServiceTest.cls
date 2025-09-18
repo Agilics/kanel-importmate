@@ -1,21 +1,34 @@
 @isTest
 public with sharing class ObjectMetadataServiceTest {
-    public ObjectMetadataServiceTest() {
+   
+  @isTest
+  static void testGetCompatibleSObjects() {
+        //when
+    Test.startTest();
+    List<String> objects = ObjectMetadataService.getCompatibleSObjects();
+    Test.stopTest();
+    
+    //then
+    System.assert(objects.size() > 0, 'No objects found');
+  }
 
-    }
+  @isTest
+  static void testGetFieldsForObject() {
+        //when
+    Test.startTest();
 
-    @isTest
-    static void testGetCompatibleSObjects() {
-        List<String> objects = ObjectMetadataService.getCompatibleSObjects();
-        Assert.isTrue(objects.size() > 0, 'No objects found');
-    }
-
-    @isTest
-    static void testGetFieldsForObject() {
-        List<String> objects = ObjectMetadataService.getCompatibleSObjects();
-        Assert.isTrue(objects.size() > 0, 'No objects found');
-        String objectName = objects[0];
-        Map<String, Schema.SObjectField> fields = ObjectMetadataService.getFieldsForObject(objectName);
-        Assert.isTrue(fields.size() > 0, 'No fields found for object: ' + objectName);
-    }
+    List<String> objects = ObjectMetadataService.getCompatibleSObjects();
+    String objectName = objects[0];
+    Map<String, Schema.SObjectField> fields = ObjectMetadataService.getFieldsForObject(
+      objectName
+    );
+    Test.stopTest();
+    
+    //then
+    System.assert(objects.size() > 0, 'No objects found');
+    System.assert(
+      fields.size() > 0,
+      'No fields found for object: ' + objectName
+    );
+  }
 }

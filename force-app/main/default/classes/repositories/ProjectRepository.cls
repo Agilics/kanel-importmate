@@ -1,8 +1,8 @@
 /**
  * @description       :
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
- * @group             :
- * @last modified on  : 09-09-2025
+ * @group             : 
+ * @last modified on  : 09-09-2025 
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
  **/
 public with sharing class ProjectRepository {
@@ -29,9 +29,8 @@ public static ImportProject__c saveProject(ImportProject__c project) {
     if (SecurityUtils.isAccessible(ImportProject__c.SObjectType)) {
       return [
         SELECT Id, Name, Description__c, TargetObject__c
-        FROM ImportProject__c
-        WHERE Id = :projectId
-        WITH SECURITY_ENFORCED
+        FROM ImportProject__c 
+        WHERE Id = :projectId  
         LIMIT 1
       ];
     }
