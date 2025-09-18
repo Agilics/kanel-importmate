@@ -1,11 +1,10 @@
-@isTest
-public with sharing class ObjectMetadataServiceTest {
-   
-  @isTest
+@IsTest
+public with sharing class ObjectMetadataControllerTest {
+     @isTest
   static void testGetCompatibleSObjects() {
-        //when
+    //when
     Test.startTest();
-    List<String> objects = ObjectMetadataService.getCompatibleSObjects();
+    List<String> objects = ObjectMetadataController.getCompatibleSObjects();
     Test.stopTest();
     
     //then
@@ -14,21 +13,22 @@ public with sharing class ObjectMetadataServiceTest {
 
   @isTest
   static void testGetFieldsForObject() {
-        //when
+    //when
     Test.startTest();
-
-    List<String> objects = ObjectMetadataService.getCompatibleSObjects();
+   
+    List<String> objects = ObjectMetadataController.getCompatibleSObjects();
     String objectName = objects[0];
-    Map<String, Schema.SObjectField> fields = ObjectMetadataService.getFieldsForObject(
+    Map<String, String> fields = ObjectMetadataController.getObjectFields(
       objectName
     );
     Test.stopTest();
     
     //then
-    System.assert(objects.size() > 0, 'No objects found');
+    System.assert(objects.size() > 0, 'No objects found'); 
     System.assert(
       fields.size() > 0,
       'No fields found for object: ' + objectName
     );
   }
+
 }

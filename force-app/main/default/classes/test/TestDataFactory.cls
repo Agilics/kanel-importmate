@@ -37,6 +37,19 @@ public class TestDataFactory {
         return project;
     }
 
+    public static Schedule__c createSchedule(){
+        ImportProject__c project = TestDataFactory.createImportProject() ;
+        String frequence = String.valueOf(FrequencyEnum.DAILY);
+
+        Schedule__c schedule = new Schedule__c(
+            Frequency__c = frequence,
+            Project__c = project.Id
+        );
+        
+        insert schedule;
+        return schedule;
+    }
+ 
     public static ImportExecution__c createImportExecution(Id projectId) {
         ImportExecution__c execution = new ImportExecution__c(
             Status__c = 'Pending',
