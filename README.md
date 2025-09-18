@@ -1,6 +1,7 @@
 # test coverage with executing Validation before Deploy :
 
-![100%_coverage.png](screenshots/100%_coverage.png)
+ 
+![100% coverage](screenshots/100_coverage.png)
 
 # Video link record with loom for project management
 
