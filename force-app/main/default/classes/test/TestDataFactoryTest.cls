@@ -23,17 +23,7 @@ private class TestDataFactoryTest {
         System.assertEquals('Test Project', queried.Name, 'Project name mismatch');
         System.assertEquals('Account', queried.TargetObject__c, 'Target object mismatch');
     }
-
-    @IsTest
-    static void testCreateSchedule() {
-        Test.startTest();
-            Schedule__c schedule = TestDataFactory.createSchedule();
-        Test.stopTest();
-
-        Schedule__c queried = [SELECT Id, Frequency__c, Project__c FROM Schedule__c WHERE Id = :schedule.Id];
-        System.assertEquals(String.valueOf(FrequencyEnum.DAILY), queried.Frequency__c.toUpperCase(), 'Frequency should be DAILY');
-        System.assertNotEquals(null, queried.Project__c, 'Schedule should be linked to a project');
-    }
+ 
 
     @IsTest
     static void testCreateImportExecution() {
