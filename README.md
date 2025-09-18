@@ -1,3 +1,7 @@
+# test coverage with executing Validation before Deploy :
+
+![image](screenshots/100%_coverage.png)
+
 # Video link record with loom for project management
 
 https://www.loom.com/share/54a86eac36144134a9af2156cc39d9c2?sid=b3acf7e7-412c-4854-a373-a612ff204074
