@@ -2,7 +2,7 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 09-10-2025
+ * @last modified on  : 09-19-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 public with sharing class ScheduleRepository {
@@ -33,10 +33,12 @@ public with sharing class ScheduleRepository {
 
     // Récupérer toutes les plannifications
     public  static List<Schedule__c> getAllSchedules() {
-          if(SecurityUtils.isCreateable(Schema.Schedule__c.SObjectType)){
+          if(SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType)){
             try {
                 return [
-                    SELECT NextRun__c, Name, Id,Frequency__c 
+                    SELECT Id, Name,  Frequency__c,
+                    NextRun__c, Project__r.Name, Project__r.TargetObject__c,
+                    Project__r.Description__c
                     FROM Schedule__c
                 ];
             }catch(ScheduleException e){
@@ -50,12 +52,12 @@ public with sharing class ScheduleRepository {
 
     // Récupérer les plannifications par le nom 
     public  static List<Schedule__c> getSchedulesByName(String name) {
-          if(SecurityUtils.isCreateable(Schema.Schedule__c.SObjectType)){
+          if(SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType)){
             try {
                 return [
                     SELECT  NextRun__c, Name, Id,Frequency__c ,
                     Project__r.Name,
-                    Project__r.Id,Project__r.TargetObject__c, 
+                    Project__r.Id,Project__r.TargetObject__c,
                     Project__r.Description__c
                     FROM Schedule__c
                     WHERE Name LIKE  :('%' + name + '%')
@@ -71,12 +73,12 @@ public with sharing class ScheduleRepository {
 
        // Récupérer les plannifications par le nom du projet
     public  static List<Schedule__c> getSchedulesByProjectName(String projectName) {
-          if(SecurityUtils.isCreateable(Schema.Schedule__c.SObjectType)){
+          if(SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType)){
             try {
                 return [
                     SELECT Id, NextRun__c, Name,Frequency__c ,
                     Project__r.Name,
-                    Project__r.Id,Project__r.TargetObject__c, 
+                    Project__r.Id,Project__r.TargetObject__c,
                     Project__r.Description__c
                     FROM Schedule__c
                     WHERE Project__r.Name LIKE  :('%' + projectName + '%')

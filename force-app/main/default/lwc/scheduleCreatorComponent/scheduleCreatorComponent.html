@@ -1,0 +1,40 @@
+<template>
+  <h2 class="title">New schedule</h2>
+  <div class="slds-grid slds-gutters slds-align_absolute-center">
+    <section class="container" aria-label="New schedule">
+
+        <!-- Date time picker for time  execution -->
+        <lightning-input
+                type="date"
+              name="executionDate" 
+              value={executionDate} 
+              label="Execution Date"
+        >
+        </lightning-input>
+             
+
+      <!--- text area for description -->
+	   <!-- ComboBox for Select Frequency-->
+    <lightning-input name="frequency" 
+                    label="Select a frequency" 
+                    value={selectedFrequency} 
+                    options={frequencyOptions} 
+                    onchange={handleFrequencyChange} >
+    </lightning-input>
+        <template if:true={isSelectedFrequency}>
+                <p for="targetObject" class="block text-sm font-semibold mb-2">
+                  Frequency: {selectedFrequency}
+                </p>
+        </template> 
+      <!-- actions buttons-->
+      <div class="btn-groups">
+        <button class="btn btn-save" onclick={handleCreateProject}>
+          Save Project
+        </button>
+        <button class="btn btn-cancel" type="reset" onclick={handleCancel}>
+          Cancel
+        </button>
+      </div>
+    </section>
+  </div>
+</template>

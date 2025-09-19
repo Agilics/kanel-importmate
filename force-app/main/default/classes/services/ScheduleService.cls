@@ -2,31 +2,11 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 09-11-2025
+ * @last modified on  : 09-19-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 public with sharing class ScheduleService{
-    /**
-     * Calcule la prochaine date d’exécution selon la fréquence
-     */
-    public static Datetime calculateNextRun(Schedule__c schedule) {
-        
-        //Exécution Journaliière
-        if (schedule.Frequency__c.equals((FrequencyEnum.DAILY))) {
-            return System.now().addDays(1);
-        }
-        
-        //Exécution Hebdomadaire
-        if (schedule.Frequency__c.equals(String.valueOf(FrequencyEnum.WEEKLY))) {
-            return System.now().addDays(7);
-        }
-
-        //Exécution Mensuelle
-        if (schedule.Frequency__c.equals(String.valueOf(FrequencyEnum.MONTHLY))) {
-            return System.now().addMonths(1);
-        }
-        return null;
-    }
+   
     
      /**
      * Mettre à jour et enregistrement  d'une planification  Schedule__c
@@ -45,7 +25,7 @@ public with sharing class ScheduleService{
                 Project__c = projectId
             );
 
-            schedule.NextRun__c = calculateNextRun(schedule);
+            schedule.NextRun__c = ScheduleTaskUtils.calculateNextRun(schedule);
             ScheduleRepository.addSchedule(schedule);
 
             if (schedule.NextRun__c != null) {
@@ -145,7 +125,7 @@ public with sharing class ScheduleService{
     } 
     
 
-        /**
+     /**
      * Recherche les planifications par le nom du projet
     */
      public static List<Schedule__c> getSchedulesByProjectName(String name) {

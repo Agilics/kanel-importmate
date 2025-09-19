@@ -24,7 +24,7 @@
 /* inputs */
 lightning-input,
 lightning-combobox {
-  width: 100%;
+  width: 450px;
   padding: 10px;
   border-radius: 5px;
 }
