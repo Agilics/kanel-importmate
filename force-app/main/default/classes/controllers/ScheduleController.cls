@@ -1,8 +1,9 @@
 public with sharing class ScheduleController {
      
     @AuraEnabled
-    public static void addSchedule(FrequencyEnum frequence,String projectId){
-        ScheduleService.schedule(frequence, projectId);
+    public static Id addSchedule(String frequency,String projectId){ 
+       return  ScheduleService.schedule(frequency, projectId);
     }
 }
- 
+
+  

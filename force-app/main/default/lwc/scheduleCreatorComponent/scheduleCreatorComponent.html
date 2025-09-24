@@ -10,16 +10,7 @@
   <div class="slds-grid slds-gutters slds-align_absolute-center">
     <section class="container" aria-label="New schedule">
 
-        <!-- Date time picker for time  execution 
-        <lightning-input
-                type="date"
-              name="executionDate" 
-              value={executionDate} 
-              label="Execution Date"
-        >
-        </lightning-input>
-        -->
-        <!-- project's id -->
+        <!-- project's id  readonly input -->
           <lightning-input
               type="text"
               name="projectId" 
@@ -30,8 +21,6 @@
         >
         </lightning-input>
       
-
-      <!--- text area for description -->
 	   <!-- ComboBox for Select Frequency-->
       <lightning-combobox
         name="frequency" 
@@ -40,12 +29,13 @@
         options={picklistValues} 
         onchange={handleFrequencyChange}
       ></lightning-combobox>
-     
-        <template if:true={isSelectedFrequency}>
-                <p for="targetObject" class="block text-sm font-semibold mb-2">
+        
+      <template if:true={isSelectedFrequency}>
+              <p for="targetObject" class="block text-sm font-semibold mb-2">
                   Frequency: {selectedFrequency}
                 </p>
-        </template> 
+      </template>
+          
       <!-- actions buttons-->
       <div class="btn-groups">
         <button class="btn btn-save" onclick={handleAddSchedule}>

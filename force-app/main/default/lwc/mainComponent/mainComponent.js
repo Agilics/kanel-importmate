@@ -8,6 +8,7 @@ import doesProjectExist from "@salesforce/apex/ImportProjectController.doesProje
 //importation méthodes depuis le Contrôleur
 import saveProject from "@salesforce/apex/ImportProjectController.saveProject";
 import getRecentsProjects from "@salesforce/apex/ImportProjectController.getRecentsProjects";
+import addSchedule from "@salesforce/apex/ScheduleController.addSchedule";
 export default class MainComponent extends LightningElement {
   @track showCreatorSection = false;
   //paramètres pour la création de projet
@@ -22,6 +23,8 @@ export default class MainComponent extends LightningElement {
   project;
   recentProject;
   isProject;
+
+  selectedFrequency ; // paramètre pour la fréquence sélectionnée
 
   // paramètre du stepper
   currentStep = 1; // le step courrant
@@ -127,7 +130,7 @@ export default class MainComponent extends LightningElement {
       this.currentStep--; // décrementation du compteur
       this.showCreatorSection = false;
       this.targetObject = "";
-      if(this.currentStep != 2 ){
+      if(this.currentStep !== 2 ){
         this.selectedSource = null;
       }
     }
@@ -186,9 +189,8 @@ export default class MainComponent extends LightningElement {
   }
 
   // navigation du stepper
-  handleStepClick(event) {
-    const clickedStep = parseInt(event.detail, 10);
-    this.currentStep = clickedStep;
+  handleStepClick(event) { 
+    this.currentStep =  parseInt(event.detail, 10); 
   }
 
   //vérifie l'étape du stepper
@@ -199,17 +201,26 @@ export default class MainComponent extends LightningElement {
 
   //Navigation vers l'étape 2 Selection de source
   get isSelectSource() {
+    if(!this.recentProject){
+      return false;
+    }
     return this.currentStep === 2;
   }
 
   //Navigation vers l'étape 3 Mapping & transformation
   get isMappingAndTransformation() {
-    return this.current === 3;
+     if(!this.recentProject){
+      return false;
+    }
+    return this.currentStep === 3;
   }
   
   //Navigation vers l'étape 4 Schedule
   get isScheduling() {
-    return this.current === 4;
+    if(!this.recentProject){
+      return false;
+    }
+    return this.currentStep === 4;
   }
 
   // rechercher les projets importés par nom
@@ -236,8 +247,44 @@ export default class MainComponent extends LightningElement {
      this.selectedFrequency = event.detail.frequency;
   }
 
-  //création de schedule
-  handleAddSchedule(){
+  //Enregistrement  d'une nouvelle planification 
+  async handleAddSchedule(){
+   
+    const id = this.recentProject?.Id;
 
+    try{
+      this.isLoading = true; //activer le spinner
+
+      if (!id  || !this.selectedFrequency) {
+        this.showToast("Warning", "All fields are required.", "warning");
+        this.isLoading = false;
+        return;
+      } 
+      await addSchedule({
+        frequency:this.selectedFrequency,
+        projectId: id
+      })
+      .then((data)=>{ 
+          //Affichage du message toast de succès
+        this.showToast(
+          "Success",
+          `Schedule  with ID:\t${data}  created  successfully !`,
+          "success"
+        );
+         this.handleResetFields(); // Réintialisation de tous les champs de texte | combo box
+        this.isLoading = false; //Désactivation du  loading spinner
+
+      });
+    }catch (err) {
+      //Affichage d'un toast de message d'erreur
+      this.showToast(
+        "Error",
+        err?.body?.message || "An Error were occured!",
+        "error"
+      );
+    }finally {
+      this.isLoading = false;
+    }
   }
+
 }

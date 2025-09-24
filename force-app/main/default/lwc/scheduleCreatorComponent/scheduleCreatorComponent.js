@@ -36,7 +36,7 @@ export default class ScheduleCreatorComponent extends LightningElement {
     }
 
    //add a new schedule
-   handleAddSchedule(event){
+   handleAddSchedule(){
       this.dispatchEvent(
         new CustomEvent('add')
       );

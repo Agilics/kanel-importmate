@@ -29,7 +29,7 @@ export default class SelectProjectComponent extends LightningModal {
   }
 
    get hasNoProjects() {
-     return !(this.projects&& this.projects.length > 0);;
+     return !(this.projects&& this.projects.length > 0);
   }
 
   // recherche de projets par le nom
