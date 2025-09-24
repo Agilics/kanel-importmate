@@ -127,7 +127,11 @@ export default class MainComponent extends LightningElement {
       this.currentStep--; // décrementation du compteur
       this.showCreatorSection = false;
       this.targetObject = "";
+      if(this.currentStep != 2 ){
+        this.selectedSource = null;
+      }
     }
+    
   }
 
   //passage à l'étape suivante du stepper
@@ -202,6 +206,11 @@ export default class MainComponent extends LightningElement {
   get isMappingAndTransformation() {
     return this.current === 3;
   }
+  
+  //Navigation vers l'étape 4 Schedule
+  get isScheduling() {
+    return this.current === 4;
+  }
 
   // rechercher les projets importés par nom
   //  Ouverture Modal permettant de la recherche et la selection des  projets
@@ -219,5 +228,16 @@ export default class MainComponent extends LightningElement {
           });
       }
     });
+  }
+  
+
+  //Mise à jour du champs de sélection de Frequency__c
+  handleSelectedFrequency(event){
+     this.selectedFrequency = event.detail.frequency;
+  }
+
+  //création de schedule
+  handleAddSchedule(){
+
   }
 }

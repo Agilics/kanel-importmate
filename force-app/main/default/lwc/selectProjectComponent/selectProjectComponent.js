@@ -4,7 +4,12 @@ import LightningModal from "lightning/modal";
 
 import searchProjectsByName from "@salesforce/apex/ImportProjectController.searchProjectsByName";
 export default class SelectProjectComponent extends LightningModal {
-  @api columns;
+  columns = [
+    { fieldName:'ProjectName',label:'Project name',},
+    {fieldName:'TargetObject',label:'Target object',},
+    { fieldName:'Description',label:'Description',},
+    { fieldName:'Actions',label:'Actions',}
+  ];
   @api selectedProject;
 
   @track error;
@@ -24,7 +29,7 @@ export default class SelectProjectComponent extends LightningModal {
   }
 
    get hasNoProjects() {
-     return !(this.projects.data && this.projects.data.length > 0);;
+     return !(this.projects&& this.projects.length > 0);;
   }
 
   // recherche de projets par le nom

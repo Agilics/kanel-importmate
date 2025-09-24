@@ -6,7 +6,7 @@ export default class ScheduleCreatorComponent extends LightningElement {
     @track executionDate ;    
     @api projectId;
     @track picklistValues = [];
-    @track selectedFrequency;
+    @api selectedFrequency;
 
 
     //Récupération des valeurs de la liste de sélection de Frequency__c(Daily | Weekly | Monthly)
@@ -27,15 +27,18 @@ export default class ScheduleCreatorComponent extends LightningElement {
 
     //Mise à de la valeur de selectedFrequency
     handleFrequencyChange(event){
-        this.selectedFrequency = event.detail.value;
-        console.log(this.selectedFrequency);
+        this.dispatchEvent(
+            new CustomEvent(
+                'select',
+                {detail:{frequency:event.detail.value}}
+            )
+        );
     }
- 
-    
+
    //add a new schedule
    handleAddSchedule(event){
       this.dispatchEvent(
-        new CustomEvent('addSchedule')
+        new CustomEvent('add')
       );
    }
 
