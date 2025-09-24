@@ -8,9 +8,10 @@
 public class ScheduleTaskUtils {
      /**
      * Calcule la prochaine date d’exécution selon la fréquence
+     * @param schedule
      */
     public static Datetime calculateNextRun(Schedule__c schedule) {
-        
+       
          String frequency = schedule.Frequency__c.toUpperCase();
 
         //Exécution Journaliière
@@ -31,4 +32,6 @@ public class ScheduleTaskUtils {
         }
         
     }
+ 
+
 }

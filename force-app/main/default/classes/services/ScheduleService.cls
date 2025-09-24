@@ -32,7 +32,7 @@ public with sharing class ScheduleService{
                 String cron = buildCron(schedule.NextRun__c); 
               }
             }
-
+            
           } catch (DmlException e) {
               ErrorLogService.logException(e);
               throw new DmlException(e.getMessage());

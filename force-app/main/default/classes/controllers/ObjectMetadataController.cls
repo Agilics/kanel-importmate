@@ -15,4 +15,14 @@ public with sharing class ObjectMetadataController {
     }
     return retVal;
   }
+
+  //Récupére les valeurs du picklist
+  @AuraEnabled(cacheable = true)
+ public static Map<String, String> getPickListValues(String objectApiName, String fieldApiName) {
+    try {
+      return ObjectMetadataService.getPickListValues(objectApiName, fieldApiName);
+    } catch (ScheduleException e) {
+      throw new ScheduleException(e.getMessage());
+    }
+  }
 }

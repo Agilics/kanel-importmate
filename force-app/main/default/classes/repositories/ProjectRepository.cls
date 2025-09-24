@@ -69,7 +69,7 @@ public static ImportProject__c saveProject(ImportProject__c project) {
         SELECT Id, Name, Description__c, TargetObject__c
         FROM ImportProject__c
         WHERE Name =: projectName
-        AND  TargetObject__c =:targetObject
+        AND  TargetObject__c =: targetObject
         LIMIT 1
       ];
       //Vérifie la présence d'un projet

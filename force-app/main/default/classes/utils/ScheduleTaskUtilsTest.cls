@@ -7,6 +7,7 @@
 **/
 @IsTest 
 public with sharing class ScheduleTaskUtilsTest {
+    
     @IsTest
     static void testCalculateNextRun() {
         //Given 
@@ -21,6 +22,7 @@ public with sharing class ScheduleTaskUtilsTest {
         //Then - Assertions
         Assert.isNotNull(savedSchedule, 'No schedule were found');
         Assert.isNotNull(result, 'No datetime were found ');
-
     }
+
+ 
 }

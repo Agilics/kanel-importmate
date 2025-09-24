@@ -16,9 +16,9 @@
       <!--- text area for description -->
 	   <!-- ComboBox for Select Frequency-->
     <lightning-input name="frequency" 
-                    label="Select a frequency" 
+       label="Select a frequency" 
                     value={selectedFrequency} 
-                    options={frequencyOptions} 
+                    options={picklistValues} 
                     onchange={handleFrequencyChange} >
     </lightning-input>
         <template if:true={isSelectedFrequency}>
@@ -29,7 +29,7 @@
       <!-- actions buttons-->
       <div class="btn-groups">
         <button class="btn btn-save" onclick={handleCreateProject}>
-          Save Project
+          Add Schedule
         </button>
         <button class="btn btn-cancel" type="reset" onclick={handleCancel}>
           Cancel

@@ -31,4 +31,19 @@ public with sharing class ObjectMetadataServiceTest {
       'No fields found for object: ' + objectName
     );
   }
+
+    @IsTest
+  static void testGetPickListValues() {
+    //Given
+    String objectApiName ='Opportunity';
+    String fieldApiName = 'ForecastCategoryName';
+
+    //when
+    Test.startTest();
+      Map<String,String>  result =  ObjectMetadataRepository.getPickListValues(objectApiName,fieldApiName );    
+    Test.stopTest();   
+
+    //then
+    System.assert(result.size() >0, 'Echec j\'ai la flemme de faire la desc');  
+  }
 }
