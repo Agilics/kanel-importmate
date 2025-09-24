@@ -38,7 +38,7 @@ public with sharing class ScheduleServiceTest {
     @IsTest
     static void testAddSchedule() {
         //Given
-        FrequencyEnum exceptedFrequency = FrequencyEnum.WEEKLY;
+        String exceptedFrequency = 'Weekly';
         String name ='uno';
         String target = 'Account';
         String description ='desc';    
@@ -82,25 +82,7 @@ public with sharing class ScheduleServiceTest {
     }
 
 
-    //tester la récupération de planification par le nom
-    @IsTest
-    static void testScheduleByName() {
-        //GIVEN
-            Schedule__c schedule = TestDataFactory.createSchedule();       
-        //When
-        //Perform test
-        Test.startTest();
-            // Récupérer le Schedule avec    son Name généré
-            String name = schedule.Name;
-        
-            List<Schedule__c> schedules = ScheduleService.getSchedulesByName(name);   //search schedules by Name   
-        Test.stopTest();
-        
-        //THEN - ASSERTION 
-        System.assertNotEquals(null, schedules);  
-
-    }
-
+    
     
     //tester la récupération de planification par le nom du projet
     @IsTest
@@ -209,6 +191,6 @@ public with sharing class ScheduleServiceTest {
         //then - Assertions
         String actual = String.valueOf(schedule.Frequency__c).toUpperCase();
         System.assertNotEquals(null, schedule);
-        System.assertEquals(expected,actual);
+        System.assertEquals(expected,actual.toUpperCase());
     }    
 }

@@ -25,7 +25,7 @@ export default class MainComponent extends LightningElement {
   isProject;
 
   selectedFrequency ; // paramètre pour la fréquence sélectionnée
-
+  showSchedule = false;
   // paramètre du stepper
   currentStep = 1; // le step courrant
   baseSteps = [
@@ -248,7 +248,7 @@ export default class MainComponent extends LightningElement {
   }
 
   //Enregistrement  d'une nouvelle planification 
-  async handleAddSchedule(){
+  async handleAddSchedule(event){
    
     const id = this.recentProject?.Id;
 
@@ -271,15 +271,17 @@ export default class MainComponent extends LightningElement {
           `Schedule  with ID:\t${data}  created  successfully !`,
           "success"
         );
-         this.handleResetFields(); // Réintialisation de tous les champs de texte | combo box
-        this.isLoading = false; //Désactivation du  loading spinner
+         this.template.querySelector("c-schedule-creator-component").resetFields(); // Réintialisation de tous les champs de texte | combo box
+          this.showSchedule =  event.detail;
+         this.isLoading = false; //Désactivation du  loading spinner
+      
 
       });
     }catch (err) {
       //Affichage d'un toast de message d'erreur
       this.showToast(
         "Error",
-        err?.body?.message || "An Error were occured!",
+        err?.body?.message || "An Error were occured while adding a schedule! ",
         "error"
       );
     }finally {

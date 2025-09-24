@@ -38,22 +38,7 @@ public with sharing class ScheduleRepositoryTest {
         Assert.isNotNull(result, 'find a schedule success');    
      }
 
-     //Tester la récupération de planification par son nom
-     @IsTest
-     static void testGetScheduleByName() {
-
-        //When 
-        Test.startTest();
-            Schedule__c savedSchedule = TestDataFactory.createSchedule();
-            String queryWord =savedSchedule.Name;
-            System.debug(queryWord);
-            List<Schedule__c> result =  ScheduleRepository.getSchedulesByName(queryWord);        
-        Test.stopTest();
-
-        //Then - Assertion
-        Assert.isNotNull(result, 'failed to find a schedule success');     
-    }
-
+     
     //Tester la récupération de planification par la fréquence(DAILY | WEEKLY | MONTHLY)
      @IsTest
      static void testGetScheduleByFrequency() {

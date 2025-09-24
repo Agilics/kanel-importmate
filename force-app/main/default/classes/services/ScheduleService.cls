@@ -96,21 +96,6 @@ public with sharing class ScheduleService{
     
 
     /**
-     * Recherche les planifications par le nom du schedule
-    */
-     public static List<Schedule__c> getSchedulesByName(String name) {
-       try {
-            if(SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType)) {
-                return  ScheduleRepository.getSchedulesByName(name);   
-            }
-            return new List<Schedule__c>();
-        } catch (ScheduleException e) {
-            ErrorLogService.logException(e);
-            throw new ScheduleException(e.getMessage());
-        }  
-    } 
-    
-    /**
      * Recherche les planifications par l'id
     */
      public static Schedule__c getScheduleById(Id id) {

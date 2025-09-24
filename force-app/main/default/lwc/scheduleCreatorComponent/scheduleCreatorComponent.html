@@ -8,10 +8,10 @@
 <template>
   <h2 class="title">New schedule</h2>
   <div class="slds-grid slds-gutters slds-align_absolute-center">
-    <section class="container" aria-label="New schedule">
+    <section class="slds-col slds-medium-size_3-of-12 slds-large-size_6-of-12 container" aria-label="New schedule">
 
         <!-- project's id  readonly input -->
-          <lightning-input
+          <lightning-input 
               type="text"
               name="projectId" 
               value={projectId} 
@@ -23,6 +23,7 @@
       
 	   <!-- ComboBox for Select Frequency-->
       <lightning-combobox
+        class="rounded-input"
         name="frequency" 
         label="Select a frequency" 
         value={selectedFrequency} 
@@ -30,12 +31,6 @@
         onchange={handleFrequencyChange}
       ></lightning-combobox>
         
-      <template if:true={isSelectedFrequency}>
-              <p for="targetObject" class="block text-sm font-semibold mb-2">
-                  Frequency: {selectedFrequency}
-                </p>
-      </template>
-          
       <!-- actions buttons-->
       <div class="btn-groups">
         <button class="btn btn-save" onclick={handleAddSchedule}>
@@ -45,6 +40,14 @@
           Cancel
         </button>
       </div>
+       <template lwc:if={isShowDatable}>
+
+        <lightning-datatable
+                key-field="id"
+                data={schedules}
+                columns={columns}>
+        </lightning-datatable>
+    </template>
     </section>
   </div>
 </template>

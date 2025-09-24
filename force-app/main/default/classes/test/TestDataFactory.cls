@@ -39,11 +39,10 @@
 
         public static Schedule__c createSchedule(){
             ImportProject__c project = TestDataFactory.createImportProject() ;
-            String frequence = String.valueOf(FrequencyEnum.DAILY);
-            DateTime nextRun = Datetime.now();
+            String frequence = String.valueOf(FrequencyEnum.DAILY); 
 
             Schedule__c schedule = new Schedule__c(
-                Frequency__c = frequence, 
+                Frequency__c = 'Daily', 
                 Project__c = project.Id
             );
             

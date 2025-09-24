@@ -21,6 +21,7 @@ public with sharing class ScheduleRepository {
         return null;
     }
 
+//suppresion d'une planification par l'id
     public static void deleteScheduleById(String scheduleId) {
         try {
             delete [SELECT Id FROM Schedule__c WHERE Id = :scheduleId LIMIT 1];
@@ -50,27 +51,7 @@ public with sharing class ScheduleRepository {
           return null;
     }
 
-    // Récupérer les plannifications par le nom 
-    public  static List<Schedule__c> getSchedulesByName(String name) {
-          if(SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType)){
-            try {
-                return [
-                    SELECT  NextRun__c, Name, Id,Frequency__c ,
-                    Project__r.Name,
-                    Project__r.Id,Project__r.TargetObject__c,
-                    Project__r.Description__c
-                    FROM Schedule__c
-                    WHERE Name LIKE  :('%' + name + '%')
-                    LIMIT 50
-                ];
-            }catch(ScheduleException e){
-                   ErrorLogService.logException(e);
-                throw new ScheduleException(e.getMessage());
-            }
-          }
-          return null;
-    }
-
+  
        // Récupérer les plannifications par le nom du projet
     public  static List<Schedule__c> getSchedulesByProjectName(String projectName) {
           if(SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType)){

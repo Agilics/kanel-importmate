@@ -105,8 +105,8 @@
         aria-label="schedule's section"
        >
       <c-schedule-creator-component
-        project-id={recentProject.Id}
-        selected-frequency={}
+        project-id={recentProject.Id} 
+        show-schedule = {showSchedule}
         onselect={handleSelectedFrequency}
         onadd={handleAddSchedule}
       >
