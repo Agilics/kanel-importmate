@@ -1,13 +1,16 @@
-import { LightningElement,track,wire } from 'lwc';
-import objectApiName from '@salesforce/schema/Schedule__c';
-import fieldApiName from '@salesforce/schema/Schedule__c.Frequency__c';
+import { LightningElement,track,wire,api } from 'lwc';
+import SCHEDULE_OBJECT from '@salesforce/schema/Schedule__c';
+import FREQUENCY_FIELD from '@salesforce/schema/Schedule__c.Frequency__c';
 import getPickListValues from "@salesforce/apex/ObjectMetadataController.getPickListValues";
 export default class ScheduleCreatorComponent extends LightningElement {
     @track executionDate ;    
+    @api projectId;
     @track picklistValues = [];
-    @track selectedFrequency; 
+    @track selectedFrequency;
 
-    @wire(getPickListValues, { objectApiName: '$objectApiName', fieldApiName: '$fieldApiName' })
+
+    //Récupération des valeurs de la liste de sélection de Frequency__c(Daily | Weekly | Monthly)
+    @wire(getPickListValues, {objectApiName: SCHEDULE_OBJECT.objectApiName, fieldApiName: FREQUENCY_FIELD.fieldApiName })
     wiredPicklistValues({ error, data }) {
         if (data) {
             this.picklistValues = Object.entries(data).map(([label, value]) => ({ label, value }));
@@ -17,8 +20,6 @@ export default class ScheduleCreatorComponent extends LightningElement {
     }
 
 
-    
-    
     //Vérifie si la fréquence est sélectionnée
     get isSelectedFrequency(){
         return this.selectedFrequency != null && this.selectedFrequency.split("").length > 0;
@@ -30,12 +31,18 @@ export default class ScheduleCreatorComponent extends LightningElement {
         console.log(this.selectedFrequency);
     }
  
-
     
-    // transformer le texte en format Capitilize 
-    toCapitalize(string) {
-        return string.charAt(0).toUpperCase() + string.slice(1)
-    }
+   //add a new schedule
+   handleAddSchedule(event){
+      this.dispatchEvent(
+        new CustomEvent('addSchedule')
+      );
+   }
+
+   //cancel all actions
+   handleCancel(){
+    this.dispatchEvent(new CustomEvent("cancel"));
+   }
 
 
     

@@ -1,9 +1,16 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 09-24-2025
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
 <template>
   <h2 class="title">New schedule</h2>
   <div class="slds-grid slds-gutters slds-align_absolute-center">
     <section class="container" aria-label="New schedule">
 
-        <!-- Date time picker for time  execution -->
+        <!-- Date time picker for time  execution 
         <lightning-input
                 type="date"
               name="executionDate" 
@@ -11,16 +18,29 @@
               label="Execution Date"
         >
         </lightning-input>
-             
+        -->
+        <!-- project's id -->
+          <lightning-input
+              type="text"
+              name="projectId" 
+              value={projectId} 
+              read-only
+              readonly
+              label="Project's ID"
+        >
+        </lightning-input>
+      
 
       <!--- text area for description -->
 	   <!-- ComboBox for Select Frequency-->
-    <lightning-input name="frequency" 
-       label="Select a frequency" 
-                    value={selectedFrequency} 
-                    options={picklistValues} 
-                    onchange={handleFrequencyChange} >
-    </lightning-input>
+      <lightning-combobox
+        name="frequency" 
+        label="Select a frequency" 
+        value={selectedFrequency} 
+        options={picklistValues} 
+        onchange={handleFrequencyChange}
+      ></lightning-combobox>
+     
         <template if:true={isSelectedFrequency}>
                 <p for="targetObject" class="block text-sm font-semibold mb-2">
                   Frequency: {selectedFrequency}
@@ -28,7 +48,7 @@
         </template> 
       <!-- actions buttons-->
       <div class="btn-groups">
-        <button class="btn btn-save" onclick={handleCreateProject}>
+        <button class="btn btn-save" onclick={handleAddSchedule}>
           Add Schedule
         </button>
         <button class="btn btn-cancel" type="reset" onclick={handleCancel}>
