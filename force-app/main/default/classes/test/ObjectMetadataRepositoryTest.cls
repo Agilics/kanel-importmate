@@ -1,3 +1,10 @@
+/**
+ * @description       : 
+ * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @group             : 
+ * @last modified on  : 09-25-2025
+ * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+**/
 @IsTest
 public with sharing class ObjectMetadataRepositoryTest {
     @isTest
@@ -103,15 +110,13 @@ public with sharing class ObjectMetadataRepositoryTest {
         Test.startTest();
         //  "Type" sur Account est une picklist standard avec des valeurs (Prospect, Customer, etc.)
         Map<String, String> result = ObjectMetadataController.getPickListValues(objectName, fieldName);
-        Test.stopTest();
+        Test.stopTest(); 
         
         //then
-        Assert.areNotEqual(0, result.size(), 'La map de picklist ne doit pas être vide');     
-        
+        Assert.areNotEqual(0, result.size(), 'La map de picklist ne doit pas être vide');
         Assert.isNotNull(
           result.containsKey('Prospect'),
           'La valeur Prospect doit être présente dans les picklist de Account.Type'
-        );
-          
+        ); 
   }
 }
