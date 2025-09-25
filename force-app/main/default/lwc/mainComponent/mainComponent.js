@@ -1,13 +1,14 @@
 import { LightningElement, wire, track } from "lwc";
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 import SelectProject from "c/selectProjectComponent";
-
+import { refreshApex } from '@salesforce/apex';
 import searchProjetById from "@salesforce/apex/ImportProjectController.searchProjetById";
 import doesProjectExist from "@salesforce/apex/ImportProjectController.doesProjectExist";
 
 //importation méthodes depuis le Contrôleur
 import saveProject from "@salesforce/apex/ImportProjectController.saveProject";
 import getRecentsProjects from "@salesforce/apex/ImportProjectController.getRecentsProjects";
+import getAllSchedules from "@salesforce/apex/ScheduleController.getAllSchedules";
 import addSchedule from "@salesforce/apex/ScheduleController.addSchedule";
 export default class MainComponent extends LightningElement {
   @track showCreatorSection = false;
@@ -26,6 +27,8 @@ export default class MainComponent extends LightningElement {
 
   selectedFrequency ; // paramètre pour la fréquence sélectionnée
   showSchedule = false;
+  wiredSchedulesResult;
+
   // paramètre du stepper
   currentStep = 1; // le step courrant
   baseSteps = [
@@ -137,6 +140,23 @@ export default class MainComponent extends LightningElement {
     
   }
 
+
+  @wire(getAllSchedules)
+wireAllSchedules(result) {
+    this.wiredSchedulesResult = result; 
+    const { data, error } = result;
+    if (data) {
+        this.schedules = data.map(sch => ({
+            id: sch.Id,
+            name: sch.Name,
+            project: sch.Project__r?.Name,
+            nextRun: sch.NextRun__c,
+            frequency: sch.Frequency__c
+        }));
+    } else if (error) {
+        this.showToast("Error", error?.body?.message, "error");
+    }
+}
   //passage à l'étape suivante du stepper
   handleNextStep() {
     if (
@@ -273,9 +293,8 @@ export default class MainComponent extends LightningElement {
         );
          this.template.querySelector("c-schedule-creator-component").resetFields(); // Réintialisation de tous les champs de texte | combo box
           this.showSchedule =  event.detail;
-         this.isLoading = false; //Désactivation du  loading spinner
-      
-
+           refreshApex(this.wiredSchedulesResult); //  refresh datatable
+          this.isLoading = false; //Désactivation du  loading spinner
       });
     }catch (err) {
       //Affichage d'un toast de message d'erreur

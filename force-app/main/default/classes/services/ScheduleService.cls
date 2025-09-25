@@ -142,25 +142,5 @@ public with sharing class ScheduleService{
         );
     }
 
-    //converts a given string to Title Case where the
-//first letter of every word is capitalised and the rest are small
-private String toTitleCase(String phrase){
-  String titlePhrase = '';
-  //a set of words that should always (or at least, almost always) be in lower case when in Title Case
-  //eg The Day of the Jackal.  First and last word of a phrase should always be Capped though.
-  Set<String> forceLower = new Set<String>{'of', 'the', 'for', 'and', 'a', 'to', 'at' ,'an', 'but', 'if', 'or', 'nor'};
-
-  if(phrase != null && phrase.length() > 0){
-    String[] splitPhrase = phrase.trim().split(' ');
-
-    for(integer i = 0; i < splitPhrase.size(); i++){
-      if(!forceLower.contains(splitPhrase[i].toLowerCase()) || i == 0 || i == (splitPhrase.size()-1) ){
-        titlePhrase += (splitPhrase[i].substring(0,1).toUpperCase())+(splitPhrase[i].substring(1).toLowerCase())+' ';
-      }else{
-        titlePhrase += splitPhrase[i].toLowerCase()+' ';
-      }
-    }
-  }
-    return titlePhrase.trim();
-  }
+   
 }

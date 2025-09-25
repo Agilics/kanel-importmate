@@ -26,11 +26,11 @@ public with sharing class ObjectMetadataRepositoryTest {
     Test.stopTest();
     
     //then 
-    Assert.isTrue(objects.size() > 0, 'No objects found'); 
+    Assert.isTrue(objects.size() > 0, 'Echec  l\'object est introuvable'); 
     
-   Assert.isTrue(
+    Assert.isTrue(
       fields.size() > 0,
-      'No fields found for object: ' + objectName
+      'Echec  le champs est introuvable avec l\'objet: ' + objectName
     );
   }
 
@@ -45,47 +45,73 @@ public with sharing class ObjectMetadataRepositoryTest {
       Map<String,String>  result =  ObjectMetadataRepository.getPickListValues(objectApiName,fieldApiName );    
     Test.stopTest();   
 
-    //then
-    Assert.isTrue(result.size() > 0, 'Echec j\'ai la flemme de faire la desc');  
+    //then 
+    Assert.isTrue(result.size() > 0, 'Echec  l\'object est introuvable');  
   }
 
    @IsTest
     static void testGetPickListValues_UnknownObject() {
+      //given
+      String objectApiName = 'ObjetQuiNexistePas__c';
+      String fieldApiName = 'Type__c';
+
+      //when
         Test.startTest();
         try {
-            ObjectMetadataController.getPickListValues('ObjetQuiNexistePas__c', 'Type__c');
-            System.assert(false, 'Une ApplicationException aurait dû être levée');
+            Map<String,String> results = ObjectMetadataController.getPickListValues(objectApiName, fieldApiName); 
+            Assert.isFalse(false,'Une exception aurait dû être levée');
+            
         } catch (ApplicationException ex) {
-            System.assert(ex.getMessage().contains('Objet inconnu'),
-                'Le message doit indiquer objet inconnu');
+            Assert.isNotNull(
+              ex.getMessage().contains('Objet inconnu'),
+              ' objet inconnu'
+            );  
         }
         Test.stopTest();
     }
+
 
     @IsTest
     static void testGetPickListValues_UnknownField() {
-        Test.startTest();
-        try {
-            //  Account existe, mais "ChampQuiNexistePas__c" non
-            ObjectMetadataController.getPickListValues('Account', 'ChampQuiNexistePas__c');
-            System.assert(false, 'Une ApplicationException aurait dû être levée');
-        } catch (ApplicationException ex) {
-            System.assert(ex.getMessage().contains('Champ inconnu'),
-                'Le message doit indiquer champ inconnu');
-        }
+        
+        //given
+        String objectApiName ='Account';
+        String fieldApiName ='Unkown' ;
+        
+        Test.startTest();   
+          //  Account existe, mais "ChampQuiNexistePas__c" non
+          try { 
+            ObjectMetadataController.getPickListValues(objectApiName, fieldApiName); 
+          } catch (ApplicationException e) {
+            //then
+             Assert.isNotNull(
+              e.getMessage().contains('Objet inconnu'),
+              ' objet inconnu'
+            );
+          }
         Test.stopTest();
-    }
+    }  
 
     @IsTest
     static void testGetPickListValues_Success() {
+       
+        //Given 
+        String objectName ='Account';
+        String fieldName = 'Type';
+
+        //when
         Test.startTest();
         //  "Type" sur Account est une picklist standard avec des valeurs (Prospect, Customer, etc.)
-        Map<String, String> result = ObjectMetadataController.getPickListValues('Account', 'Type');
+        Map<String, String> result = ObjectMetadataController.getPickListValues(objectName, fieldName);
         Test.stopTest();
-
-        System.assertNotEquals(0, result.size(), 'La map de picklist ne doit pas être vide');
-        System.assert(result.containsKey('Prospect'),
-            'La valeur Prospect doit être présente dans les picklist de Account.Type');
+        
+        //then
+        Assert.areNotEqual(0, result.size(), 'La map de picklist ne doit pas être vide');     
+        
+        Assert.isNotNull(
+          result.containsKey('Prospect'),
+          'La valeur Prospect doit être présente dans les picklist de Account.Type'
+        );
+          
   }
-
 }

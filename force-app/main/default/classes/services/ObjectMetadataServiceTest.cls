@@ -28,9 +28,14 @@ public class ObjectMetadataControllerTest {
 
     @IsTest
     static void testGetPickListValues_Error() {
+      //given
+      String objectApiName ='Account';
+      String fieldApiName ='Name';
+
+      //when
         Test.startTest();
         try {
-            ObjectMetadataController.getPickListValues('', '');
+            ObjectMetadataController.getPickListValues(objectApiName, fieldApiName);
             System.assert(false, 'Une ScheduleException aurait dû être levée');
         } catch (ScheduleException ex) {
             System.assertEquals('Nom d’objet requis.', ex.getMessage(),

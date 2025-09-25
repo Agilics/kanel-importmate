@@ -10,7 +10,7 @@ export default class ScheduleCreatorComponent extends LightningElement {
     @api projectId;
     @track picklistValues = [];
     @api selectedFrequency;
-    @api showSchedules = false;
+    @api showSchedule;
     @track schedules=[];
     
     columns =[
@@ -63,7 +63,7 @@ export default class ScheduleCreatorComponent extends LightningElement {
 
     //afficher la table de données
     get isShowDatable(){
-        return (this.showSchedule === true && this.schedules?.length > 0);
+        return (this.showSchedule === true || this.schedules?.length > 0);
     }
 
     //Mise à de la valeur de selectedFrequency
