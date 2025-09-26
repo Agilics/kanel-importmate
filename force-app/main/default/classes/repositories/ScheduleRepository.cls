@@ -73,6 +73,8 @@ public with sharing class ScheduleRepository {
           return new List<Schedule__c>();
     }
 
+     
+
     // Récupérer la plannification par l'id
     public  static Schedule__c getScheduleById(String scheduleId) {
           if(SecurityUtils.isCreateable(Schema.Schedule__c.SObjectType)){

@@ -57,14 +57,10 @@ export default class ScheduleCreatorComponent extends LightningElement {
         }
     }
 
-    //Vérifie si la fréquence est sélectionnée
-    get isSelectedFrequency(){
-        return this.selectedFrequency != null && this.selectedFrequency.split("").length > 0;
-    }
 
     //afficher la table de données
     get isShowDatable(){
-        return (this.showSchedule === true || this.schedules?.length > 0);
+        return (this.showSchedule  || this.schedules?.length > 0);
     }
 
     //Mise à jour de la valeur de selectedFrequency

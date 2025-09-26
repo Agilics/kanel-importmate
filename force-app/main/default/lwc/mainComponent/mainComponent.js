@@ -146,24 +146,25 @@ export default class MainComponent extends LightningElement {
     
   }
 
-  // Récupération de tous les données de plannings
-  @wire(getAllSchedules)
-wireAllSchedules(result) {
-    this.wiredSchedulesResult = result; 
-    const { data, error } = result;
-    if (data) {
-        this.schedules = data.map(sch => ({
-            id: sch.Id,
-            name: sch.Name,
-            project: sch.Project__r?.Name,
-            nextRun: sch.NextRun__c,
-            frequency: sch.Frequency__c
-        }));
-    } else if (error) {
-        this.showToast("Error", error?.body?.message, "error");
+    // Récupération de tous les données de plannings
+    @wire(getAllSchedules)
+    wireAllSchedules(result) {
+        this.wiredSchedulesResult = result; 
+        const { data, error } = result;
+        if (data) {
+            this.schedules = data.map(sch => ({
+                id: sch.Id,
+                name: sch.Name,
+                project: sch.Project__r?.Name,
+                nextRun: sch.NextRun__c,
+                frequency: sch.Frequency__c
+            }));
+        } else if (error) {
+            this.showToast("Error", error?.body?.message, "error");
+        }
     }
-}
-  //passage à l'étape suivante du stepper
+  
+    //passage à l'étape suivante du stepper
   handleNextStep() {
     if (
       this.currentStep < this.baseSteps.length &&
@@ -290,7 +291,7 @@ wireAllSchedules(result) {
       /**
        * Création d'une planification via la fréquence , l'id du project
        * et la date d'éxécution NextRun
-       *  
+       *  Création d'une tâche Apex 
        */
       
       await addSchedule({
