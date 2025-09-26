@@ -19,12 +19,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-      - name: Synchroniser package-lock.json
-        run: |
-          echo "🔄 Synchronisation du package-lock.json..."
-          rm -f package-lock.json
-          npm install
-          echo "✅ package-lock.json synchronisé"
       - run: npm ci
       - name: Validation du code
         run: |
@@ -44,12 +38,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-      - name: Synchroniser package-lock.json
-        run: |
-          echo "🔄 Synchronisation du package-lock.json..."
-          rm -f package-lock.json
-          npm install
-          echo "✅ package-lock.json synchronisé"
       - run: npm ci
       - run: npm run lint
       - run: npm run test:unit:coverage
@@ -83,12 +71,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-      - name: Synchroniser package-lock.json
-        run: |
-          echo "🔄 Synchronisation du package-lock.json..."
-          rm -f package-lock.json
-          npm install
-          echo "✅ package-lock.json synchronisé"
       - run: npm ci
       - name: Install Salesforce CLI
         run: npm install -g @salesforce/cli
@@ -121,12 +103,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-      - name: Synchroniser package-lock.json
-        run: |
-          echo "🔄 Synchronisation du package-lock.json..."
-          rm -f package-lock.json
-          npm install
-          echo "✅ package-lock.json synchronisé"
       - run: npm ci
       - name: Install Salesforce CLI
         run: npm install -g @salesforce/cli
@@ -157,12 +133,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-      - name: Synchroniser package-lock.json
-        run: |
-          echo "🔄 Synchronisation du package-lock.json..."
-          rm -f package-lock.json
-          npm install
-          echo "✅ package-lock.json synchronisé"
       - name: Install Salesforce CLI
         run: npm install -g @salesforce/cli
       - name: Authenticate to Subscriber Org
