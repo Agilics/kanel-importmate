@@ -6,7 +6,6 @@
 .sf/
 .sfdx/
 .localdevserver/
-
 deploy-options.json
 
 # LWC VSCode autocomplete
@@ -44,6 +43,3 @@ $RECYCLE.BIN/
 **/__pycache__/
 **/.venv/
 **/venv/
-
-# Vs code 
-.vscode
