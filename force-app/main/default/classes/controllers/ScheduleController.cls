@@ -3,8 +3,8 @@ public with sharing class ScheduleController {
 
     //add a new schedule
     @AuraEnabled
-    public static Id addSchedule(String frequency,String projectId){ 
-       return  ScheduleService.schedule(frequency, projectId);
+    public static Id addSchedule(String frequency,Datetime nextRun,String projectId){ 
+       return  ScheduleService.schedule(frequency,nextRun, projectId);
     }
 
 

@@ -14,10 +14,13 @@ public class ScheduleControllerTest {
     @IsTest
     static void testAddSchedule() {
         ImportProject__c project = TestDataFactory.createImportProject();
+        
+        Datetime NextRun = Datetime.now();
 
         Test.startTest();
         Id scheduleId = ScheduleController.addSchedule(
             String.valueOf(FrequencyEnum.DAILY),
+            nextRun,
             project.Id
         );
         Test.stopTest();
@@ -28,17 +31,22 @@ public class ScheduleControllerTest {
 
       @IsTest
     static void testUpateSchedule() {
+        //given
         ImportProject__c project = TestDataFactory.createImportProject();
+        Datetime NextRun = Datetime.now();
 
+          //when  
         Test.startTest();
         Id scheduleId = ScheduleController.addSchedule(
             String.valueOf(FrequencyEnum.WEEKLY),
+            nextRun,
             project.Id
         );
         Test.stopTest();
 
+        //then
         System.assertNotEquals(null, scheduleId, 'Schedule ID should not be null');
- 
+    
     }
 
     @IsTest
@@ -64,7 +72,7 @@ public class ScheduleControllerTest {
 
     @IsTest
     static void testGetSchedulesByFrequency() {
-        //giv
+        //given
         Test.startTest();
         List<Schedule__c> schedules = ScheduleController.getSchedulesByFrequency(FrequencyEnum.DAILY);
         Test.stopTest();

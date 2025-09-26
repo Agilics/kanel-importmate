@@ -8,6 +8,7 @@ import getPickListValues from "@salesforce/apex/ObjectMetadataController.getPick
 export default class ScheduleCreatorComponent extends LightningElement {
     @track executionDate ;    
     @api projectId;
+    @api nextRun;
     @track picklistValues = [];
     @api selectedFrequency;
     @api showSchedule;
@@ -66,12 +67,22 @@ export default class ScheduleCreatorComponent extends LightningElement {
         return (this.showSchedule === true || this.schedules?.length > 0);
     }
 
-    //Mise à de la valeur de selectedFrequency
+    //Mise à jour de la valeur de selectedFrequency
     handleFrequencyChange(event){
         this.dispatchEvent(
             new CustomEvent(
                 'select',
                 {detail:{frequency:event.detail.value}}
+            )
+        );
+    }
+
+    //Mise à jour de la valeur de next run 
+    handleNextRunChange(event){
+         this.dispatchEvent(
+            new CustomEvent(
+                'nextrunchange',
+                {detail:{nextRun:event.detail.value}}
             )
         );
     }

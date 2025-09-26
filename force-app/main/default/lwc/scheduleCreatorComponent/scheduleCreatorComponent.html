@@ -10,17 +10,7 @@
   <div class="slds-grid slds-gutters slds-align_absolute-center">
     <section class="slds-col slds-medium-size_3-of-12 slds-large-size_6-of-12 container" aria-label="New schedule">
 
-        <!-- project's id  readonly input -->
-          <lightning-input 
-              type="text"
-              name="projectId" 
-              value={projectId} 
-              read-only
-              readonly
-              label="Project's ID"
-        >
-        </lightning-input>
-      
+       
 	   <!-- ComboBox for Select Frequency-->
       <lightning-combobox
         class="rounded-input"
@@ -30,7 +20,16 @@
         options={picklistValues} 
         onchange={handleFrequencyChange}
       ></lightning-combobox>
-        
+      
+      <!-- Next Run date time picker  on local area --> 
+       <lightning-input
+          class="rounded-input"
+          type="datetime-local"
+          label="Next Run"
+          value={nextRun}
+          onchange={handleNextRunChange}>
+      </lightning-input>
+
       <!-- actions buttons-->
       <div class="btn-groups">
         <button class="btn btn-save" onclick={handleAddSchedule}>

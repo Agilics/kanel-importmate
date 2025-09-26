@@ -6,12 +6,12 @@
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 public with sharing class ScheduleService{
-   
+    
     
      /**
      * Mettre à jour et enregistrement  d'une planification  Schedule__c
      */
-    public static Id schedule(String frequence,String projectId) {
+    public static Id schedule(String frequence,Datetime nextRun,String projectId) {
         try {
             if (
                 SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType) ||
@@ -22,10 +22,10 @@ public with sharing class ScheduleService{
             //Intialisation de la planification
             Schedule__c schedule = new Schedule__c(
                 Frequency__c = frequence,
-                Project__c = projectId
+                Project__c = projectId,
+                NextRun__c = nextRun
             );
-
-            schedule.NextRun__c = ScheduleTaskUtils.calculateNextRun(schedule);
+ 
             ScheduleRepository.addSchedule(schedule);
 
             if (schedule.NextRun__c != null) {

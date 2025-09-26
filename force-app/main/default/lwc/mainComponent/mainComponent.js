@@ -25,9 +25,11 @@ export default class MainComponent extends LightningElement {
   recentProject;
   isProject;
 
+
   selectedFrequency ; // paramètre pour la fréquence sélectionnée
   showSchedule = false;
   wiredSchedulesResult;
+  nextRun ; // paramètre de date d'éxécution
 
   // paramètre du stepper
   currentStep = 1; // le step courrant
@@ -85,8 +87,11 @@ export default class MainComponent extends LightningElement {
           "warning"
         );
 
-        this.handleResetFields(); // Réintialisation de tous les champs de texte | combo box
-
+         /**
+          *  Réintialisation de tous les champs de texte | combo box
+          *  dans la section de création de projets
+          * */
+        this.template.querySelector("c-create-project-component").resetFields();
         this.isLoading = false;
 
         this.targetObject = "";
@@ -109,7 +114,8 @@ export default class MainComponent extends LightningElement {
         "success"
       );
 
-      this.handleResetFields(); // Réintialisation de tous les champs de texte | combo box
+       // Réintialisation de tous les champs de texte | combo box
+       this.template.querySelector("c-create-project-component").resetFields();
 
       this.isLoading = false; //Désactivation du  loading spinner
 
@@ -140,7 +146,7 @@ export default class MainComponent extends LightningElement {
     
   }
 
-
+  // Récupération de tous les données de plannings
   @wire(getAllSchedules)
 wireAllSchedules(result) {
     this.wiredSchedulesResult = result; 
@@ -171,11 +177,7 @@ wireAllSchedules(result) {
   handleCancel() {
     this.showCreatorSection = false;
   }
-
-  //Réinitialisation de tous les champs de texte | combo box
-  handleResetFields() {
-    this.template.querySelector("c-create-project-component").resetFields();
-  }
+ 
 
   //Mise à jour de la variable project name via le champs de texte
   handleProjectNameChange(event) {
@@ -267,21 +269,33 @@ wireAllSchedules(result) {
      this.selectedFrequency = event.detail.frequency;
   }
 
+  //Mise à jour du champs de la date d'éxécution
+  handleNextRunChange(event){
+    this.nextRun = event.detail.nextRun;
+  }
+
   //Enregistrement  d'une nouvelle planification 
   async handleAddSchedule(event){
-   
+   //Récupération de l'id du projet sélectionné
     const id = this.recentProject?.Id;
 
     try{
-      this.isLoading = true; //activer le spinner
+      this.isLoading = true; //activer le loading spinner
 
-      if (!id  || !this.selectedFrequency) {
+      if (!id  || !this.selectedFrequency || !this.nextRun) {
         this.showToast("Warning", "All fields are required.", "warning");
         this.isLoading = false;
         return;
       } 
+      /**
+       * Création d'une planification via la fréquence , l'id du project
+       * et la date d'éxécution NextRun
+       *  
+       */
+      
       await addSchedule({
         frequency:this.selectedFrequency,
+        nextRun:this.nextRun,
         projectId: id
       })
       .then((data)=>{ 

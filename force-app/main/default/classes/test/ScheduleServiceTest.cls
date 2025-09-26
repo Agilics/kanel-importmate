@@ -42,11 +42,11 @@ public with sharing class ScheduleServiceTest {
         String name ='uno';
         String target = 'Account';
         String description ='desc';    
-
+        Datetime NextRun = Datetime.now();
         //When
         //Perform test
         Test.startTest();
-        List<ImportProject__c> recordToInsert =new List<ImportProject__c>();
+        List<ImportProject__c> recordToInsert = new List<ImportProject__c>();
          recordToInsert.add(
                 new ImportProject__c(
                     Name = name,
@@ -60,7 +60,7 @@ public with sharing class ScheduleServiceTest {
         String id =String.valueOf(resultProject[0].id);
 
         //persist schedule
-        ScheduleService.schedule(exceptedFrequency,id); 
+        ScheduleService.schedule(exceptedFrequency,nextRun,id); 
 
         // Create a new schedule 
         Schedule__c savedSchedule = new Schedule__c();

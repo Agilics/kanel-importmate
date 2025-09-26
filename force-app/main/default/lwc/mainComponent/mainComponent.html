@@ -106,8 +106,9 @@
        >
       <c-schedule-creator-component
         project-id={recentProject.Id} 
-        show-schedule = {showSchedule}
+        show-schedule ={showSchedule}
         onselect={handleSelectedFrequency}
+        onnextrunchange={handleNextRunChange}
         onadd={handleAddSchedule}
       >
         </c-schedule-creator-component>
