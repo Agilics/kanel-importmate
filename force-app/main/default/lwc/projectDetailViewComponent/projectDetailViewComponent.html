@@ -1,0 +1,65 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 09-08-2025
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<template>
+  <lightning-modal-header label="Import Project Detail View">
+  </lightning-modal-header>
+
+  <lightning-modal-body>
+    <div class="slds-p-around_medium slds-text-align_center">
+      <!-- Icône d’information -->
+      <lightning-icon
+        icon-name="utility:info"
+        alternative-text="Info"
+        size="large"
+        class="slds-m-bottom_small"
+      ></lightning-icon>
+
+      <!-- Card pour les détails du projet -->
+      <lightning-card>
+        <template if:true={project}>
+          <div class="slds-p-around_small">
+            <p class="slds-text-title_bold slds-m-bottom_xx-small" id="name">
+              Name
+            </p>
+            <pre class="projectName slds-m-bottom_small" id="projectName">
+{project.Name}</pre
+            >
+
+            <p class="slds-text-title_bold slds-m-bottom_xx-small">
+              Target Object
+            </p>
+            <pre class="slds-m-bottom_small" id="target">
+{project.TargetObject__c}</pre
+            >
+
+            <p class="slds-text-title_bold slds-m-bottom_xx-small">
+              Description
+            </p>
+            <pre id="desc">{project.Description__c}</pre>
+          </div>
+        </template>
+      </lightning-card>
+    </div>
+  </lightning-modal-body>
+
+  <lightning-modal-footer>
+    <lightning-button
+      label="Close"
+      onclick={handleCloseModal}
+      variant="neutral"
+    ></lightning-button>
+
+    <lightning-button
+      variant="brand"
+      label="Edit"
+      title="Edit project details"
+      onclick={handleEdit}
+      class="slds-m-left_small"
+    ></lightning-button>
+  </lightning-modal-footer>
+</template>
