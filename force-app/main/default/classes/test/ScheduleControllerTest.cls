@@ -11,41 +11,102 @@ public class ScheduleControllerTest {
         TestDataFactory.createSchedule();
     }
 
-    @IsTest
+    @IsTest 
     static void testAddSchedule() {
-        ImportProject__c project = TestDataFactory.createImportProject();
-        
-        Datetime NextRun = Datetime.now();
+        // Given
+        String cron = '0 0 * * * ?'; // chaque heure pile → toujours valide
 
+        ImportProject__c project = TestDataFactory.createImportProject();
+        Datetime nextRun = Datetime.now().addDays(1); // date future obligatoire
+        
+        // When
         Test.startTest();
         Id scheduleId = ScheduleController.addSchedule(
             String.valueOf(FrequencyEnum.DAILY),
             nextRun,
             project.Id
         );
-        Test.stopTest();
+        System.schedule('TestJob_' + System.currentTimeMillis(), cron, new ScheduleJob());
 
-        System.assertNotEquals(null, scheduleId, 'Schedule ID should not be null');
- 
+        Test.stopTest();
+        
+        // Then
+        System.assertNotEquals(null, scheduleId, 'Schedule ID ne doit pas être null');
+
+        // Vérification en base
+        Schedule__c insertedSchedule = [
+            SELECT Id, Frequency__c, Project__c, NextRun__c
+            FROM Schedule__c
+            WHERE Id = :scheduleId
+            LIMIT 1
+        ];
+
+        System.assertEquals(
+            String.valueOf(FrequencyEnum.DAILY),
+            insertedSchedule.Frequency__c.toUpperCase(),
+            'La fréquence doit être DAILY'
+        );
+        System.assertEquals(
+            project.Id,
+            insertedSchedule.Project__c,
+            'Le projet associé doit correspondre'
+        );
     }
+
 
       @IsTest
     static void testUpateSchedule() {
-        //given
+                // Given
         ImportProject__c project = TestDataFactory.createImportProject();
-        Datetime NextRun = Datetime.now();
-
-          //when  
+        Datetime nextRun = Datetime.now().addDays(1); // date future obligatoire
+        
+        // When
         Test.startTest();
-        Id scheduleId = ScheduleController.addSchedule(
-            String.valueOf(FrequencyEnum.WEEKLY),
+        Id scheduleId =ScheduleController.addSchedule(
+            String.valueOf(FrequencyEnum.DAILY),
             nextRun,
             project.Id
         );
-        Test.stopTest();
+        // Vérification en base
+        Schedule__c insertedSchedule = [
+            SELECT Id, Frequency__c, Project__c, NextRun__c
+            FROM Schedule__c
+            WHERE Id = :scheduleId
+            LIMIT 1
+        ];
+        insertedSchedule.Frequency__c = String.valueOf(FrequencyEnum.MONTHLY);
 
-        //then
-        System.assertNotEquals(null, scheduleId, 'Schedule ID should not be null');
+       Id resultId = ScheduleController.addSchedule(
+            insertedSchedule.Frequency__c,
+            insertedSchedule.NextRun__c,
+            insertedSchedule.Project__c
+        );
+
+
+        Test.stopTest();
+         // Vérification en base
+        Schedule__c updateSchedule = [
+            SELECT Id, Frequency__c, Project__c, NextRun__c
+            FROM Schedule__c
+            WHERE Id = :resultId
+            LIMIT 1
+        ];
+        // Then
+        System.assertNotEquals(null, scheduleId, 'Schedule ID ne doit pas être null');
+
+    
+
+        System.assertEquals(
+            String.valueOf(FrequencyEnum.MONTHLY),
+             updateSchedule.Frequency__c.toUpperCase(),
+            'La fréquence doit être MONTHLY'
+        );
+        
+        System.assertEquals(
+            project.Id,
+            updateSchedule.Project__c,
+            'Le projet associé doit correspondre'
+        );
     
     }
 

@@ -308,8 +308,8 @@ export default class MainComponent extends LightningElement {
         );
          this.template.querySelector("c-schedule-creator-component").resetFields(); // Réintialisation de tous les champs de texte | combo box
           this.showSchedule =  event.detail;
-           refreshApex(this.wiredSchedulesResult); //  refresh datatable
           this.isLoading = false; //Désactivation du  loading spinner
+          return refreshApex(this.wiredSchedulesResult); //  refresh datatable
       });
     }catch (err) {
       //Affichage d'un toast de message d'erreur

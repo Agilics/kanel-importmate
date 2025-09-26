@@ -26,14 +26,12 @@ public with sharing class ScheduleService{
                 NextRun__c = nextRun
             );
  
-            ScheduleRepository.addSchedule(schedule);
-
-            if (schedule.NextRun__c != null) {
+                ScheduleRepository.addSchedule(schedule);            
                 String cron = buildCron(schedule.NextRun__c); 
-                ScheduleJob scheduler = new ScheduleJob();
-
-                System.schedule('Schedule Apex Job', cron, scheduler);
-              } 
+                ScheduleJob scheduler = new ScheduleJob(); 
+                String name = 'Schedule Apex Job' + Datetime.now().getTime();
+                System.schedule(name, cron, scheduler);
+              
               return schedule.Id;
             }
             return null;
@@ -129,8 +127,8 @@ public with sharing class ScheduleService{
         }  
     } 
 
-   
 
+ 
     /**
      * Construit l’expression CRON Salesforce
     */

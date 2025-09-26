@@ -35,51 +35,47 @@ public with sharing class ScheduleServiceTest {
     }
 
     //Tester l'ajout de planification
-    @IsTest
     static void testAddSchedule() {
-        //Given
-        String exceptedFrequency = 'Weekly';
-        String name ='uno';
-        String target = 'Account';
-        String description ='desc';    
-        Datetime NextRun = Datetime.now();
-        //When
-        //Perform test
+        // Given
+        String cron = '0 0 * * * ?'; // chaque heure pile → toujours valide
+
+        ImportProject__c project = TestDataFactory.createImportProject();
+        Datetime nextRun = Datetime.now().addDays(1); // date future obligatoire
+        
+        // When
         Test.startTest();
-        List<ImportProject__c> recordToInsert = new List<ImportProject__c>();
-         recordToInsert.add(
-                new ImportProject__c(
-                    Name = name,
-                    TargetObject__c =target,
-                    Description__c =description
-                )
-            );
+        Id scheduleId = ScheduleService.schedule(
+            String.valueOf(FrequencyEnum.DAILY),
+            nextRun,
+            project.Id
+        );
+        System.schedule('TestJob_' + System.currentTimeMillis(), cron, new ScheduleJob());
 
-        //insert a project
-        List<Database.SaveResult> resultProject = Database.insert(recordToInsert); 
-        String id =String.valueOf(resultProject[0].id);
-
-        //persist schedule
-        ScheduleService.schedule(exceptedFrequency,nextRun,id); 
-
-        // Create a new schedule 
-        Schedule__c savedSchedule = new Schedule__c();
-        savedSchedule.Frequency__c = String.valueOf(FrequencyEnum.MONTHLY);
-        savedSchedule.Project__c = resultProject[0].id;
-        List<Schedule__c> recordsToInsert = new List<Schedule__c>();
-        recordsToInsert.add(savedSchedule);
-        System.debug(savedSchedule);
-
-        //persist a schedule  
-        List<Database.SaveResult> saveResults = Database.insert(recordsToInsert);
-       
         Test.stopTest();
+        
+        // Then
+        System.assertNotEquals(null, scheduleId, 'Schedule ID ne doit pas être null');
 
-        //Then - Assertions
-        System.assertNotEquals(null, saveResults);
-        System.assertNotEquals(null, resultProject, 'No project were found'); 
-        System.Assert.isTrue( saveResults.size() > 0,'Not empty' );
+        // Vérification en base
+        Schedule__c insertedSchedule = [
+            SELECT Id, Frequency__c, Project__c, NextRun__c
+            FROM Schedule__c
+            WHERE Id = :scheduleId
+            LIMIT 1
+        ];
+
+        System.assertEquals(
+            String.valueOf(FrequencyEnum.DAILY),
+            insertedSchedule.Frequency__c.toUpperCase(),
+            'La fréquence doit être DAILY'
+        );
+        System.assertEquals(
+            project.Id,
+            insertedSchedule.Project__c,
+            'Le projet associé doit correspondre'
+        );
     }
+
 
 
     

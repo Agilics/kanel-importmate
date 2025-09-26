@@ -3,7 +3,18 @@ public with sharing class ScheduleRepositoryTest {
    
     @TestSetup
     static void setupTestData(){
-       User admin = TestDataFactory.createAdminUser();       
+       User admin = TestDataFactory.createAdminUser();     
+           String expected ='Test';
+            String frequence =String.valueOf(FrequencyEnum.MONTHLY);
+            ImportProject__c project = TestDataFactory.createImportProject();
+             
+              Schedule__c schedule = new Schedule__c(
+                    Frequency__c = frequence,
+                    NextRun__c = Datetime.now(),
+                    Project__c = project.Id
+                );
+                insert schedule;
+                  
     }
 
 
@@ -38,6 +49,8 @@ public with sharing class ScheduleRepositoryTest {
         Assert.isNotNull(result, 'find a schedule success');    
      }
 
+      //Tester la suppression de tâches par le nom de la planification
+    
      
     //Tester la récupération de planification par la fréquence(DAILY | WEEKLY | MONTHLY)
      @IsTest
@@ -78,13 +91,15 @@ public with sharing class ScheduleRepositoryTest {
         //Tester l'enregistrement d'une nouvelle plabification 
       @IsTest
      static void testAddSchedule() {  
-              //Given 
+              //Given  
+
             String expected ='Test Project';
             String frequence =String.valueOf(FrequencyEnum.MONTHLY);
             ImportProject__c project = TestDataFactory.createImportProject();
 
               Schedule__c schedule = new Schedule__c(
                     Frequency__c = frequence,
+                    NextRun__c = Datetime.now(),
                     Project__c = project.Id
                 );
                 ScheduleRepository.addSchedule(schedule); 
@@ -98,10 +113,12 @@ public with sharing class ScheduleRepositoryTest {
                     WHERE Project__r.Id = : project.Id 
                     AND Frequency__c = :frequence
                 ];
+                  
             Test.stopTest();
-
+               
             //Then - Assertions
-         Assert.isNotNull(result, 'find a schedule success');    
+         Assert.isNotNull(result, 'find a schedule success');   
+           
          Assert.areEqual(expected, result.Project__r.Name,'Values matched');
     }     
 
