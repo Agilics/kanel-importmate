@@ -1,10 +1,14 @@
 <template>
   <div class="slds-p-around_medium">
-
     <!-- Status bar -->
-    <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-theme_info slds-m-bottom_small" role="status">
+    <div
+      class="slds-notify slds-notify_alert slds-theme_alert-texture slds-theme_info slds-m-bottom_small"
+      role="status"
+    >
       <span class="slds-assistive-text">info</span>
-      <span class="slds-icon_container slds-m-right_x-small" title="info">ℹ️</span>
+      <span class="slds-icon_container slds-m-right_x-small" title="info"
+        >ℹ️</span
+      >
       <h2>{statusText}</h2>
     </div>
 
@@ -22,7 +26,8 @@
           value={selectedObjectApiName}
           options={objectOptions}
           placeholder="Select an object"
-          onchange={handleObjectPick}>
+          onchange={handleObjectPick}
+        >
         </lightning-combobox>
       </div>
 
@@ -33,7 +38,8 @@
           value={selectedProjectId}
           options={projectOptions}
           placeholder="Select a project"
-          onchange={handleProjectPick}>
+          onchange={handleProjectPick}
+        >
         </lightning-combobox>
       </div>
 
@@ -42,7 +48,8 @@
           type="text"
           label="Version"
           value={selectedVersion}
-          onchange={handleVersionChange}>
+          onchange={handleVersionChange}
+        >
         </lightning-input>
       </div>
     </div>
@@ -59,7 +66,7 @@
             <tr>
               <th scope="col">CSV Column</th>
               <th scope="col">Target Field</th>
-              <th scope="col" style="width:110px;">Lookup?</th>
+              <th scope="col" style="width: 110px">Lookup?</th>
               <th scope="col">Lookup Object</th>
               <th scope="col">Match Field</th>
             </tr>
@@ -75,7 +82,8 @@
                     value={r.targetField}
                     options={fieldOptions}
                     placeholder="-- none --"
-                    onchange={handleFieldPick}>
+                    onchange={handleFieldPick}
+                  >
                   </lightning-combobox>
                 </td>
 
@@ -84,7 +92,8 @@
                     type="checkbox"
                     data-key={r.key}
                     checked={r.isLookup}
-                    onchange={handleLookupToggle}>
+                    onchange={handleLookupToggle}
+                  >
                   </lightning-input>
                 </td>
 
@@ -95,7 +104,8 @@
                     options={objectOptions}
                     placeholder="Select object"
                     disabled={r.disabledLookup}
-                    onchange={handleLookupObjectPick}>
+                    onchange={handleLookupObjectPick}
+                  >
                   </lightning-combobox>
                 </td>
 
@@ -106,7 +116,8 @@
                     options={r.lookupMatchFieldOptions}
                     placeholder="Field on lookup object"
                     disabled={r.disabledLookup}
-                    onchange={handleLookupMatchFieldPick}>
+                    onchange={handleLookupMatchFieldPick}
+                  >
                   </lightning-combobox>
                 </td>
               </tr>
@@ -120,20 +131,24 @@
           variant="brand"
           label="Save mappings"
           onclick={handleSave}
-          disabled={isSaveDisabled}>
+          disabled={isSaveDisabled}
+        >
         </lightning-button>
 
         <lightning-button
           class="slds-m-left_small"
           label="Load existing"
           onclick={handleLoadExisting}
-          disabled={disableLoad}>
+          disabled={disableLoad}
+        >
         </lightning-button>
       </div>
     </template>
 
     <template if:false={hasColumns}>
-      <p class="slds-text-color_weak">Upload a CSV (or provide columns) to start mapping.</p>
+      <p class="slds-text-color_weak">
+        Upload a CSV (or provide columns) to start mapping.
+      </p>
     </template>
   </div>
 </template>

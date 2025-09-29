@@ -7,4 +7,6 @@
 .sfdx
 .vscode
 
-coverage/
+coverage/# Salesforce metadata XML (not supported by Prettier core)
+force-app/main/default/**/*.js-meta.xml
+**/*.xml
