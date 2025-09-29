@@ -13,6 +13,7 @@ describe('c-data-source-selector', () => {
 
   afterEach(() => {
     while (document.body.firstChild) document.body.removeChild(document.body.firstChild);
+    jest.clearAllMocks();
   });
 
   test('initial state', async () => {

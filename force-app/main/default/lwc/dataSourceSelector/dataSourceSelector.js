@@ -2,39 +2,42 @@ import { LightningElement, track, api } from 'lwc';
 
 export default class DataSourceSelector extends LightningElement {
   currentStep = 2;
-  selectedSource = null;       
-  @track csvPayload = null;       
+  selectedSource = null;        // 'CSV' | 'SOQL' | null
+  @track csvPayload = null;     // { columns: [], rows: [] }
 
   // preview context
   @track previewCtx = { projectId: '', version: '', objectApiName: '' };
 
   get showSelection() { return this.selectedSource === null; }
   get showCSV()       { return this.selectedSource === 'CSV'; }
-  get showSOQL()      { return this.selectedSource === 'SOQL'; }   
+  get showSOQL()      { return this.selectedSource === 'SOQL'; }
   get showMapping()   { return this.currentStep === 3; }
   get showPreview()   { return this.currentStep === 4; }
 
   handleCSV()  { this.selectedSource = 'CSV';  this.currentStep = 2; }
-  handleSOQL() { this.selectedSource = 'SOQL'; this.currentStep = 2; } 
+  handleSOQL() { this.selectedSource = 'SOQL'; this.currentStep = 2; }
+
   // from <c-csv-uploader>
   handleCsvLoaded(e) {
     const d = e?.detail || {};
     this.csvPayload = { columns: d.columns || [], rows: d.rows || [] };
-    // stay on step 2 (preview on CSV page)
+    // remain on step 2 for CSV preview
   }
+
   handleGoToMapping(e) {
     const d = e?.detail || {};
     this.csvPayload = { columns: d.columns || [], rows: [] };
     this.currentStep = 3;
   }
 
+  // from <c-soql-builder> (onsoqlbuilt)
   handleSoqlBuilt(e) {
     const d = e?.detail || {};
     const cols = Array.isArray(d.columns) ? d.columns
               : Array.isArray(d.selectedFields) ? d.selectedFields
               : [];
     this.csvPayload = { columns: cols, rows: [] };
-    this.currentStep = 3; 
+    this.currentStep = 3;
   }
 
   // from <c-field-mapping-table> after "Load existing"
@@ -45,7 +48,7 @@ export default class DataSourceSelector extends LightningElement {
       version: d.version || '',
       objectApiName: d.objectApiName || ''
     };
-    this.currentStep = 4; 
+    this.currentStep = 4;
   }
 
   handleBackToMapping() { this.currentStep = 3; }
@@ -57,7 +60,9 @@ export default class DataSourceSelector extends LightningElement {
     this.previewCtx = { projectId: '', version: '', objectApiName: '' };
   }
 
-  handleMappingSaved() { /* optional */ }
+  handleMappingSaved() {
+    // optional hook
+  }
 
   // ===== TEST HOOKS (@api) =====
   @api get stateForTest() {
