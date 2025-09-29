@@ -77,6 +77,19 @@
         </div>
       </template>
 
+      <!-- Go for mapping: visible uniquement après le parsing (quand des en-têtes existent) -->
+      <template if:true={canShowGo}>
+        <div class="slds-m-top_large">
+          <button
+            class="btn btn--primary"
+            onclick={handleGoForMapping}
+            disabled={disableGoForMapping}
+          >
+            Go for mapping
+          </button>
+        </div>
+      </template>
+
     </div>
   </div>
 </template>
