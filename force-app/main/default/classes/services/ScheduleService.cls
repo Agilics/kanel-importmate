@@ -2,7 +2,7 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 09-19-2025
+ * @last modified on  : 09-29-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 public with sharing class ScheduleService{
@@ -26,20 +26,18 @@ public with sharing class ScheduleService{
                 NextRun__c = nextRun
             );
  
-                ScheduleRepository.addSchedule(schedule);            
-                String cron = buildCron(schedule.NextRun__c); 
-                ScheduleJob scheduler = new ScheduleJob(); 
+                ScheduleRepository.addSchedule(schedule);
+                String cron = buildCron(schedule.NextRun__c);
+                ScheduleJob scheduler = new ScheduleJob();
                 String name = 'Schedule Apex Job' + Datetime.now().getTime();
                 System.schedule(name, cron, scheduler);
-              
-              return schedule.Id;
+                return schedule.Id;
             }
-            return null;
+                return null;
           } catch (DmlException e) {
               ErrorLogService.logException(e);
               throw new DmlException(e.getMessage());
         }
-
     }
    
    
@@ -75,10 +73,8 @@ public with sharing class ScheduleService{
         } catch (ScheduleException e) {
                 ErrorLogService.logException(e);
                 throw new ScheduleException(e.getMessage());
-            }   
+            }
         }
-        
-    
 
     /**
      *Filtrer par fréquence (DAILY | WEEKLY | MONTHLY)
@@ -92,9 +88,8 @@ public with sharing class ScheduleService{
         } catch (ScheduleException e) {
             ErrorLogService.logException(e);
             throw new ScheduleException(e.getMessage());
-        }  
-    } 
-    
+        }
+    }
 
     /**
      * Recherche les planifications par l'id
@@ -108,9 +103,9 @@ public with sharing class ScheduleService{
         } catch (ScheduleException e) {
             ErrorLogService.logException(e);
             throw new ScheduleException(e.getMessage());
-        }  
-    } 
-    
+        }
+    }
+
 
      /**
      * Recherche les planifications par le nom du projet
@@ -144,6 +139,4 @@ public with sharing class ScheduleService{
             }
         );
     }
-
-   
 }

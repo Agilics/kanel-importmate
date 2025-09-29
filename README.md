@@ -6,7 +6,8 @@ https://www.loom.com/share/0b0d6379844a4859b0825cb50242d1a6?sid=eb32cfbf-681c-4f
 https://www.loom.com/share/54a86eac36144134a9af2156cc39d9c2?sid=b3acf7e7-412c-4854-a373-a612ff204074
 
 # Salesforce DX Project: Next Steps
-
+# Add Schedule video Link
+https://www.loom.com/share/ab5784f90b1d4e18ba6def519cc1f767?sid=c87a32b9-61a5-499a-b326-91d0d163ac5d 
 Now that you’ve created a Salesforce DX project, what’s next? Here are some documentation resources to get you started.
 
 ## How Do You Plan to Deploy Your Changes?
