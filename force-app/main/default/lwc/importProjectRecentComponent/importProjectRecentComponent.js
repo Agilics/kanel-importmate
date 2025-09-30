@@ -19,7 +19,7 @@ export default class ImportProjectRecentComponent extends LightningElement {
   ];
 
   // vérification si le projet est présent
-
+  @api
   get hasNoProjects() {
      return !(this.projects?.data && this.projects?.data.length > 0);
   }
