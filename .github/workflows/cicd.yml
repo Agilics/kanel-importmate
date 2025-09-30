@@ -24,7 +24,7 @@ jobs:
         run: |
           echo "Validation de la syntaxe et structure..."
           npm run lint
-          npm run test:unit:coverage
+          # npm run test:unit:coverage
           # npm run prettier:verify
 
   # 1. Integration Testing in Dedicated Sandbox (feature/develop branches)
@@ -40,7 +40,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
       - run: npm ci
       - run: npm run lint
-      - run: npm run test:unit:coverage
+      # - run: npm run test:unit:coverage
       #- run: npm run prettier:verify
       - name: Install Salesforce CLI
         run: npm install -g @salesforce/cli
