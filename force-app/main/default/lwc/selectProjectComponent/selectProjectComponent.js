@@ -11,10 +11,11 @@ export default class SelectProjectComponent extends LightningModal {
     { fieldName:'Actions',label:'Actions',}
   ];
   @api selectedProject;
+  @api title;
 
   @track error;
   @track nom = "";
-  @track projects = [];
+  @api projects;
 
   @wire(searchProjectsByName, { nom: "$nom" })
   wiredSearchProjectHandler({ error, data }) {
@@ -27,12 +28,13 @@ export default class SelectProjectComponent extends LightningModal {
       console.log(error?.body?.message);
     }
   }
-
-   get hasNoProjects() {
+  @api
+  get hasNoProjects() {
      return !(this.projects&& this.projects.length > 0);
   }
 
   // recherche de projets par le nom
+  @api
   handleSearch(e) {
     this.nom = e.target.value;
     searchProjectsByName({ name: this.nom }).then((result) => {

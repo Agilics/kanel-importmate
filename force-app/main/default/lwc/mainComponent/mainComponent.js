@@ -12,6 +12,8 @@ import getAllSchedules from "@salesforce/apex/ScheduleController.getAllSchedules
 import addSchedule from "@salesforce/apex/ScheduleController.addSchedule";
 export default class MainComponent extends LightningElement {
   @track showCreatorSection = false;
+  title ='Imports Projects';
+
   //paramètres pour la création de projet
 
   isLoading = false;
