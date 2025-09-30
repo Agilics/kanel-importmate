@@ -10,32 +10,6 @@ export default class DataSourceSelector extends LightningElement {
   @api currentProject;
 
   get projectName() {
-<<<<<<< HEAD
-    return (this.currentProject && this.currentProject.Name) || "";
-  }
-  get projectTargetObject() {
-    const p = this.currentProject || {};
-    return (
-      p.Target_Object__c ||    
-      p.TargetObject__c ||      
-      p.Target_SObject__c ||    
-      ""
-    );
-  }
-
-  get showSelection() {
-    return this.selectedSource === null;
-  }
-  get showCSV() {
-    return this.selectedSource === "CSV";
-  }
-  get showSOQL() {
-    return this.selectedSource === "SOQL";
-  }
-
-  handleCSV() {
-    this.selectedSource = "CSV";
-=======
     return (this.currentProject && this.currentProject.Name) || '';
   }
 
@@ -61,16 +35,11 @@ export default class DataSourceSelector extends LightningElement {
 
   handleCSV() {
     this.selectedSource = 'CSV';
->>>>>>> dfefefbc2af9ece4b175900751a171b4a5cbd597
     this.currentStep = 3;
   }
 
   handleSOQL() {
-<<<<<<< HEAD
-    this.selectedSource = "SOQL";
-=======
     this.selectedSource = 'SOQL';
->>>>>>> dfefefbc2af9ece4b175900751a171b4a5cbd597
     this.currentStep = 3;
   }
 

@@ -305,34 +305,11 @@ export default class MainComponent extends LightningElement {
     }
   }
 
-<<<<<<< HEAD
-  // 2) On passe toutes les informations de l'objet selectionnee
-  const rp = this.recentProject || {};
-  this.mappingTargetObject =
-    rp.TargetObject__c ??
-    rp.Target_Object__c ??
-    rp.Target__c ??
-    rp.targetObject ??
-    '';
- 
-  // 3) On migre vers la page Field Mapper 
-  if (this.recentProject) {
-    this.currentStep = 3;
-  } else {
-    this.dispatchEvent(
-      new ShowToastEvent({
-        title: 'Select a project first',
-        message: 'Please pick a project before starting the mapping.',
-        variant: 'warning'
-      })
-    );
-=======
   /**
    * Handle back to data source selection
    */
   handleBackToDataSourceSelection() {
     this.selectedDataSource = null;
->>>>>>> dfefefbc2af9ece4b175900751a171b4a5cbd597
   }
 
 
