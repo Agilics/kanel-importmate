@@ -40,7 +40,7 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
       - run: npm ci
       - run: npm run lint
-      # - run: npm run test:unit:coverage
+      #- run: npm run test:unit:coverage
       #- run: npm run prettier:verify
       - name: Install Salesforce CLI
         run: npm install -g @salesforce/cli
