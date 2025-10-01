@@ -1,3 +1,10 @@
+/**
+ * @description       : 
+ * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @group             : 
+ * @last modified on  : 10-01-2025
+ * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+**/
 @IsTest
 public class ScheduleControllerTest {
 
@@ -94,7 +101,6 @@ public class ScheduleControllerTest {
         // Then
         System.assertNotEquals(null, scheduleId, 'Schedule ID ne doit pas être null');
 
-    
 
         System.assertEquals(
             String.valueOf(FrequencyEnum.MONTHLY),
@@ -153,8 +159,10 @@ public class ScheduleControllerTest {
         ScheduleController.deleteSchedule(schedule.Id);
         Test.stopTest();
 
-        System.assertEquals(0, [SELECT Count() FROM Schedule__c WHERE Id = :schedule.Id], 
-            'Le Schedule doit être supprimé');
+        System.assertEquals(
+            0, [SELECT Count() FROM Schedule__c WHERE Id = :schedule.Id], 
+            'Le Schedule doit être supprimé'
+        );
     }
 
     @IsTest

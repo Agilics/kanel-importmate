@@ -2,7 +2,7 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 09-12-2025
+ * @last modified on  : 10-01-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 @isTest
@@ -77,9 +77,20 @@ public with sharing class ScheduleServiceTest {
     }
 
 
+    //tester la récupération de planification passée
+        @IsTest
+    static void testGetPastSchedules() {
+        //given
+         Schedule__c savedSchedule = TestDataFactory.createSchedule();
 
-    
-    
+        //when
+        Test.startTest();
+           List<Schedule__c> schedules = ScheduleService.getPastSchedules();
+        Test.stopTest();
+        //then 
+        System.assertNotEquals(null, schedules); 
+    }
+
     //tester la récupération de planification par le nom du projet
     @IsTest
     static void testScheduleByProjectName() {
@@ -97,6 +108,38 @@ public with sharing class ScheduleServiceTest {
          
         System.assertNotEquals(null, schedule); 
 
+    }
+    // création de tâches
+    @IsTest
+    static void testCreateTask() {
+        
+        //creation d'une planification avec projet depuis Test Data Factory 
+        Schedule__c schedule = TestDataFactory.createSchedule(); 
+        schedule.NextRun__c = System.today().addDays(-1); //modification de la date d'éxecution à avant-hier
+        upsert(schedule); // mise à jour
+        List<Schedule__c> schedules = new List<Schedule__c>();
+
+        schedules.add(schedule);
+        
+        Test.startTest();
+        ScheduleService.createTask('Not Start',schedules );
+
+        Test.stopTest();
+        //then
+          List<Task> tasks = [
+            SELECT Id, WhoId, WhatId, Subject, 
+            ActivityDate, Status, Priority, IsHighPriority, 
+            OwnerId, Description, IsDeleted, AccountId, IsClosed,
+            CreatedDate, TaskSubtype, CompletedDateTime FROM Task
+        ];
+
+        /**
+         * Assertions
+         */
+        System.assertNotEquals(null, tasks);
+        System.assert(tasks.size() > 0, 'Une seule tâche doit être créée');
+        System.assertEquals('Scheduled Task for ' + schedule.Name, tasks[0].Subject);
+        System.assertEquals('Not Start', tasks[0].Priority);
     }
 
     //Tester la suppression de plafinification via l'id

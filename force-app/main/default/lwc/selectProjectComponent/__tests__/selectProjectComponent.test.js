@@ -1,5 +1,4 @@
-import { createElement } from "lwc";
-import { getRecord } from 'lightning/uiRecordApi';
+import { createElement } from "lwc"; 
 import SelectProjectComponent from "c/selectProjectComponent"; 
 import searchProjectsByName from '@salesforce/apex/ImportProjectController.searchProjectsByName';
 
@@ -23,7 +22,8 @@ describe("c-select-project-component", () => {
   jest.clearAllMocks();
 
     it('displays label in the header', () => {
-        // Create component and set the header public property
+
+      // Create component and set the header public property
         const element = createElement('c-select-project-component', {
             is: SelectProjectComponent
         });
@@ -33,7 +33,9 @@ describe("c-select-project-component", () => {
         // Validate the modal header to have rendered with correct label
         expect(
             element.shadowRoot.querySelector('lightning-modal-header').label
-        ).toBe('Select a project');     
+        ).toBe('Select a project');
+
+        expect(mockFn).toHaveBeenCalled();
     });
 
     

@@ -1,3 +1,10 @@
+/**
+ * @description       : 
+ * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @group             : 
+ * @last modified on  : 10-01-2025
+ * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+**/
 @isTest
 public with sharing class ScheduleRepositoryTest {
    
@@ -10,14 +17,26 @@ public with sharing class ScheduleRepositoryTest {
              
               Schedule__c schedule = new Schedule__c(
                     Frequency__c = frequence,
-                    NextRun__c = Datetime.now(),
+                    NextRun__c = Date.today().addDays(-1),
                     Project__c = project.Id
                 );
-                insert schedule;
-                  
+                insert schedule; 
     }
 
 
+    @IsTest
+    static void testGetPastSchedules() {
+        //given
+         Schedule__c savedSchedule = TestDataFactory.createSchedule();
+
+        //when
+        Test.startTest();
+           List<Schedule__c> schedules = ScheduleRepository.getPastSchedules();
+        Test.stopTest();
+        //then
+        Assert.isNotNull(schedules, 'La liste de planification ne doît pas être null');
+        
+    }
     //Tester la récupération de toutes les planifications
      @IsTest
      static void testGetAllSchedule() {

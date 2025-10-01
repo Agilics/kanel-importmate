@@ -1,13 +1,8 @@
 import { createElement } from "@lwc/engine-dom";
-import ImportProjectRecentComponent from "c/importProjectRecentComponent"; 
-import { registerLdsTestWireAdapter } from '@salesforce/wire-service-jest-util'; 
-import getRecentsProjects from '@salesforce/apex/ImportProjectController.getRecentsProjects'; 
+import ImportProjectRecentComponent from "c/importProjectRecentComponent";  
  
 
-import { createTestWireAdapter } from '@salesforce/wire-service-jest-util';
-
-export const getTodo = createTestWireAdapter();
-
+ 
 // Mock realistic data
 const mockProjects = require('./data/projects.json');
 describe("c-import-project-recent-component", () => {
@@ -19,7 +14,8 @@ describe("c-import-project-recent-component", () => {
     }
   });
 
-  it('check title recent project section ', () => {
+  it( 'check title recent project section ',  () => {
+
     // Arrange
     const element = createElement("c-import-project-recent-component", {
       is: ImportProjectRecentComponent
@@ -42,12 +38,12 @@ describe("c-import-project-recent-component", () => {
     const mockFn = jest.fn();
 
     mockFn();
-    element.projects = mockProjects;
-    element.pro =  mockProjects [0];
+    element.projects = mockProjects; 
+    document.body.appendChild(element);
     
     //then
-    expect(mockFn).toHaveBeenCalled();
-   // expect(pro.Name).toBe('Import Project Beta');
+    expect(mockFn).toHaveBeenCalled(); 
+   expect(element.projects[0].Name).toBe('Import Project Alpha');
 
       
   });
@@ -60,8 +56,7 @@ describe("c-import-project-recent-component", () => {
     
     return Promise.resolve().then(()=>{
       //when
-      element.projects = [];
-      const message = element.shadowRoot.querySelector('lightning-icon #info');
+      element.projects = []; 
 
       // then assertions
       expect(element.hasNoProjects).toBeTruthy();  

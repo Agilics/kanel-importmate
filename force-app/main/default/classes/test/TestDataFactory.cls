@@ -2,7 +2,7 @@
     * @description       : 
     * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
     * @group             : 
-    * @last modified on  : 09-19-2025
+    * @last modified on  : 10-01-2025
     * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
     **/
     @isTest
@@ -43,7 +43,8 @@
 
             Schedule__c schedule = new Schedule__c(
                 Frequency__c = 'Daily', 
-                Project__c = project.Id
+                Project__c = project.Id,
+                NextRun__c = System.today().addDays(1)
             );
             
             insert schedule;

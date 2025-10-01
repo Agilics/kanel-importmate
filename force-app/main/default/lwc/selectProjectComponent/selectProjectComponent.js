@@ -15,7 +15,7 @@ export default class SelectProjectComponent extends LightningModal {
 
   @track error;
   @track nom = "";
-  @api projects;
+  @track projects =[];
 
   @wire(searchProjectsByName, { nom: "$nom" })
   wiredSearchProjectHandler({ error, data }) {
@@ -38,8 +38,7 @@ export default class SelectProjectComponent extends LightningModal {
   handleSearch(e) {
     this.nom = e.target.value;
     searchProjectsByName({ name: this.nom }).then((result) => {
-      this.projects = [...result];
-      console.log("new value:" + JSON.stringify(this.projects));
+      this.projects = [...result]; 
     });
   }
 

@@ -2,11 +2,13 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 09-29-2025
+ * @last modified on  : 10-01-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 public with sharing class ScheduleService{
-    
+    public static String WEEKLY ='Weekly';
+    public static String Monthly = 'Monthly';
+    public static String DAILY ='Daily';
     
      /**
      * Mettre à jour et enregistrement  d'une planification  Schedule__c
@@ -25,12 +27,13 @@ public with sharing class ScheduleService{
                 Project__c = projectId,
                 NextRun__c = nextRun
             );
- 
+
                 ScheduleRepository.addSchedule(schedule);
                 String cron = buildCron(schedule.NextRun__c);
                 ScheduleJob scheduler = new ScheduleJob();
                 String name = 'Schedule Apex Job' + Datetime.now().getTime();
                 System.schedule(name, cron, scheduler);
+            
                 return schedule.Id;
             }
                 return null;
@@ -59,6 +62,22 @@ public with sharing class ScheduleService{
         }
     
     }
+
+      /**
+    *Récupérer toutes les planifications avec une date d'éxécution passée
+    */
+    public static List<Schedule__c> getPastSchedules() {
+       
+        try {  
+            if(SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType)) {
+                return   ScheduleRepository.getPastSchedules();    
+            }
+            return new List<Schedule__c>();
+        } catch (ScheduleException e) {
+                ErrorLogService.logException(e);
+                throw new ScheduleException(e.getMessage());
+            }
+        }
 
     /**
     *Récupérer toutes les planifications
@@ -122,20 +141,82 @@ public with sharing class ScheduleService{
         }  
     } 
 
+    /**
+     * Insérer une tâche 
+     */
+    public static void createTask(
+        String priority,
+        List<Schedule__c> schedules 
+        ){
+        try {
+        List<Task> tasksToInsert = new List<Task>();
 
- 
+            if(!schedules.isEmpty()){
+                for (Schedule__c schedule : schedules) {
+                    if (schedule.Id != null) {
+                        String subject = 'Scheduled Task for ' + schedule.Name ;
+                        Integer year = schedule.NextRun__c.year();
+                        Integer month = schedule.NextRun__c.month();
+                        Integer day = schedule.NextRun__c.day();
+
+                        Date activityDate = Date.newInstance(year, month, day);
+
+                        Task task = new Task(
+                            Subject = subject,
+                            ActivityDate = activityDate,
+                            Priority = priority
+                        // , WhatId = whatId
+                        );
+                            tasksToInsert.add(task);
+                        }
+                    
+                }
+                insert tasksToInsert;
+            }
+        } catch (ApplicationException e) {
+            ErrorLogService.logException(e);
+            throw new ApplicationException('Not allowed to register this task!');
+        }
+    }
+
+    
+    //Execution automatique
+ public static void runDueSchedules() {
+        List<Schedule__c> schedules = ScheduleRepository.getPastSchedules();
+
+        for (Schedule__c sch : schedules) {
+            try {
+                // Lancer l’import
+                
+                // Replanifier selon la fréquence
+                String frequence = String.valueOf(sch.Frequency__c);
+                if(DAILY.equals(frequence)) {
+                    sch.NextRun__c = sch.NextRun__c.addDays(1);
+                } else if( WEEKLY.equals(frequence)) {
+                    sch.NextRun__c = sch.NextRun__c.addDays(7);
+                } else if(MONTHLY.equals(frequence)) {
+                    sch.NextRun__c = sch.NextRun__c.addMonths(1);
+                }
+            } catch (Exception e) {
+                // Gestion d’erreurs -> logs
+                System.debug('Erreur planification : ' + e.getMessage());
+            }
+        }
+        update schedules;
+    }
+
     /**
      * Construit l’expression CRON Salesforce
     */
-    private static String buildCron(Datetime dt) {
+    private static String buildCron(Datetime nextRun) {
         return String.format('{0} {1} {2} {3} {4} ? {5}',
             new List<String>{
-                String.valueOf(dt.second()),
-                String.valueOf(dt.minute()),
-                String.valueOf(dt.hour()),
-                String.valueOf(dt.day()),
-                String.valueOf(dt.month()),
-                String.valueOf(dt.year())
+                String.valueOf(nextRun.second()),
+                String.valueOf(nextRun.minute()),
+                String.valueOf(nextRun.hour()),
+                String.valueOf(nextRun.day()),
+                String.valueOf(nextRun.month()),
+                String.valueOf(nextRun.year())
             }
         );
     }

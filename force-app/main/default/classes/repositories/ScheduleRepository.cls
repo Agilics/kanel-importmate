@@ -2,7 +2,7 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 09-19-2025
+ * @last modified on  : 10-01-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 public with sharing class ScheduleRepository {
@@ -42,16 +42,31 @@ public with sharing class ScheduleRepository {
                     Project__r.Description__c
                     FROM Schedule__c
                 ];
-            }catch(ScheduleException e){
+            }catch(ApplicationException e){
                    ErrorLogService.logException(e);
-                throw new ScheduleException(e.getMessage());
+                throw new ApplicationException(e.getMessage());
 
             }
           }
           return null;
     }
 
-  
+  //
+  public  static List<Schedule__c> getPastSchedules() {
+    if(SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType)){
+        try {
+            return  [
+                SELECT Id, Project__c, Frequency__c, NextRun__c
+                FROM Schedule__c
+                WHERE NextRun__c <= :System.now()
+            ];
+         } catch(ApplicationException e){
+                   ErrorLogService.logException(e);
+                throw new ApplicationException(e.getMessage());
+            }
+          }
+          return null;
+  }
        // Récupérer les plannifications par le nom du projet
     public  static List<Schedule__c> getSchedulesByProjectName(String projectName) {
           if(SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType)){
@@ -65,9 +80,9 @@ public with sharing class ScheduleRepository {
                     WHERE Project__r.Name LIKE  :('%' + projectName + '%')
                     LIMIT 50
                 ];
-            }catch(ScheduleException e){
+            }catch(ApplicationException e){
                    ErrorLogService.logException(e);
-                throw new ScheduleException(e.getMessage());
+                throw new ApplicationException(e.getMessage());
             }
           }
           return new List<Schedule__c>();
@@ -85,9 +100,9 @@ public with sharing class ScheduleRepository {
                     WHERE Id =: scheduleId
                     LIMIT 1
                 ];
-            }catch(ScheduleException e){
+            }catch(ApplicationException e){
                    ErrorLogService.logException(e);
-                throw new ScheduleException(e.getMessage());
+                throw new ApplicationException(e.getMessage());
             }
           }
           return null;
@@ -104,9 +119,9 @@ public with sharing class ScheduleRepository {
                     FROM Schedule__c
                     WHERE Frequency__c =: keyword
                 ];
-            }catch(ScheduleException e){
+            }catch(ApplicationException e){
                    ErrorLogService.logException(e);
-                throw new ScheduleException(e.getMessage());
+                throw new ApplicationException(e.getMessage());
             }
           }
           return null;

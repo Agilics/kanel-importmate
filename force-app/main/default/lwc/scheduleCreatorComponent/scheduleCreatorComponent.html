@@ -2,7 +2,7 @@
   @description       : 
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
   @group             : 
-  @last modified on  : 09-24-2025
+  @last modified on  : 10-01-2025
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
@@ -39,14 +39,7 @@
           Cancel
         </button>
       </div>
-       <template lwc:if={isShowDatable}>
-
-        <lightning-datatable
-                key-field="id"
-                data={schedules}
-                columns={columns}>
-        </lightning-datatable>
-    </template>
+    
     </section>
   </div>
 </template>

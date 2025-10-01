@@ -31,6 +31,7 @@ export default class ProjectCreatorComponent extends LightningElement {
   }
 
   //Vérifie si le champs d'objet ciblé est selectionnée
+  @api
   get isTargetObjetSelected() {
     return this.targetObject != null && this.targetObject.split("").length > 0;
   }
