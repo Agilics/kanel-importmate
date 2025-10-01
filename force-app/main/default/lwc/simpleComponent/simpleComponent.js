@@ -7,4 +7,8 @@ export default class SimpleComponent extends LightningElement {
   static getGreeting(name) {
     return `Hello ${name}!`;
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> origin/develop2

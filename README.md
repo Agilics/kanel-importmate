@@ -1,3 +1,4 @@
+
 # Demo Data Transformation 
 https://www.loom.com/share/0b0d6379844a4859b0825cb50242d1a6?sid=eb32cfbf-681c-4f53-8e77-30c6d774767d
 
@@ -5,6 +6,7 @@ https://www.loom.com/share/0b0d6379844a4859b0825cb50242d1a6?sid=eb32cfbf-681c-4f
 
 https://www.loom.com/share/54a86eac36144134a9af2156cc39d9c2?sid=b3acf7e7-412c-4854-a373-a612ff204074
 
+<<<<<<< HEAD
 # Salesforce DX Project: Next Steps
 # Add Schedule video Link
 https://www.loom.com/share/ab5784f90b1d4e18ba6def519cc1f767?sid=c87a32b9-61a5-499a-b326-91d0d163ac5d 
@@ -24,3 +26,5 @@ The `sfdx-project.json` file contains useful configuration information for your 
 - [Salesforce CLI Setup Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_setup.meta/sfdx_setup/sfdx_setup_intro.htm)
 - [Salesforce DX Developer Guide](https://developer.salesforce.com/docs/atlas.en-us.sfdx_dev.meta/sfdx_dev/sfdx_dev_intro.htm)
 - [Salesforce CLI Command Reference](https://developer.salesforce.com/docs/atlas.en-us.sfdx_cli_reference.meta/sfdx_cli_reference/cli_reference.htm)
+=======
+>>>>>>> origin/develop2
