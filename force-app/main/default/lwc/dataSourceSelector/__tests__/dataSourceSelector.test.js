@@ -1,70 +1,118 @@
 import { createElement } from '@lwc/engine-dom';
 import DataSourceSelector from 'c/dataSourceSelector';
 
+const flushPromises = () => Promise.resolve();
+
 describe('c-data-source-selector', () => {
-    afterEach(() => {
-        while (document.body.firstChild) {
-            document.body.removeChild(document.body.firstChild);
-        }
-    });
+  let element;
 
-    it('renders two selection cards initially', () => {
-        const element = createElement('c-data-source-selector', {
-            is: DataSourceSelector
-        });
-        document.body.appendChild(element);
-        const cards = element.shadowRoot.querySelectorAll('.card');
-        expect(cards.length).toBe(2);
-    });
+  beforeEach(() => {
+    element = createElement('c-data-source-selector', { is: DataSourceSelector });
+    document.body.appendChild(element);
+  });
 
-    it('renders CSV component when CSV card is clicked', async () => {
-        const element = createElement('c-data-source-selector', {
-            is: DataSourceSelector
-        });
-        document.body.appendChild(element);
+  afterEach(() => {
+    while (document.body.firstChild) document.body.removeChild(document.body.firstChild);
+    jest.clearAllMocks();
+  });
 
-        const cards = element.shadowRoot.querySelectorAll('.card');
-        cards[0].click();
-        await Promise.resolve();
+  test('initial state', async () => {
+    await flushPromises();
+    const s = element.stateForTest;
+    expect(s.currentStep).toBe(2);
+    expect(s.selectedSource).toBeNull();
+    expect(s.csvPayload).toBeNull();
+    expect(s.previewCtx).toEqual({ projectId: '', version: '', objectApiName: '' });
+    expect(s.showSelection).toBe(true);
+    expect(s.showCSV).toBe(false);
+    expect(s.showSOQL).toBe(false);
+    expect(s.showMapping).toBe(false);
+    expect(s.showPreview).toBe(false);
+  });
 
-        const csvComponent = element.shadowRoot.querySelector('c-csv-Uploader');
-        expect(csvComponent).not.toBeNull();
-    });
+  test('handleCSV & handleSOQL set source and keep step 2', async () => {
+    element.triggerHandleCSV();
+    await flushPromises();
+    let s = element.stateForTest;
+    expect(s.selectedSource).toBe('CSV');
+    expect(s.currentStep).toBe(2);
+    expect(s.showCSV).toBe(true);
 
-    it('renders SOQL component when SOQL card is clicked', async () => {
-        const element = createElement('c-data-source-selector', {
-            is: DataSourceSelector
-        });
-        document.body.appendChild(element);
+    element.triggerHandleSOQL();
+    await flushPromises();
+    s = element.stateForTest;
+    expect(s.selectedSource).toBe('SOQL');
+    expect(s.currentStep).toBe(2);
+    expect(s.showSOQL).toBe(true);
+  });
 
-        const cards = element.shadowRoot.querySelectorAll('.card');
-        cards[1].click();
-        await Promise.resolve();
+  test('CSV: csvLoaded keeps step 2 and stores payload; goToMapping moves to step 3 with empty rows', async () => {
+    element.triggerHandleCSV();
 
-        const soqlComponent = element.shadowRoot.querySelector('c-soql-builder');
-        expect(soqlComponent).not.toBeNull();
-    });
+    element.triggerCsvLoadedForTest({ columns: ['A', 'B'], rows: [{ A: '1', B: '2' }] });
+    await flushPromises();
+    let s = element.stateForTest;
+    expect(s.currentStep).toBe(2);
+    expect(s.csvPayload).toEqual({ columns: ['A', 'B'], rows: [{ A: '1', B: '2' }] });
 
-    it('emits dataloaded when child fires soqlbuilt', async () => {
-        const element = createElement('c-data-source-selector', {
-            is: DataSourceSelector
-        });
-        const handler = jest.fn();
-        element.addEventListener('dataloaded', handler);
-        document.body.appendChild(element);
+    element.triggerGoToMappingForTest({ columns: ['A', 'B'] });
+    await flushPromises();
+    s = element.stateForTest;
+    expect(s.currentStep).toBe(3);
+    expect(s.csvPayload).toEqual({ columns: ['A', 'B'], rows: [] });
+    expect(s.showMapping).toBe(true);
+  });
 
-        // Click to render SOQL child
-        const cards = element.shadowRoot.querySelectorAll('.card');
-        cards[1].click();
-        await Promise.resolve();
+  test('SOQL: prefer detail.columns; fallback to detail.selectedFields; advance to mapping (step 3)', async () => {
+    element.triggerHandleSOQL();
 
-        // Dispatch event from child
-        const soqlComponent = element.shadowRoot.querySelector('c-soql-builder');
-        const detail = { query: 'SELECT Id FROM Account', results: [] };
-        soqlComponent.dispatchEvent(new CustomEvent('soqlbuilt', { detail, bubbles: true }));
-        await Promise.resolve();
+    // Case 1: explicit columns
+    element.triggerSoqlBuiltForTest({ columns: ['Name', 'Phone'] });
+    await flushPromises();
+    let s = element.stateForTest;
+    expect(s.currentStep).toBe(3);
+    expect(s.csvPayload).toEqual({ columns: ['Name', 'Phone'], rows: [] });
 
-        expect(handler).toHaveBeenCalledTimes(1);
-        expect(handler.mock.calls[0][0].detail).toEqual(detail);
-    });
+    // Case 2: no columns -> use selectedFields
+    element.triggerHandleSOQL();
+    element.triggerSoqlBuiltForTest({ selectedFields: ['Email'] });
+    await flushPromises();
+    s = element.stateForTest;
+    expect(s.currentStep).toBe(3);
+    expect(s.csvPayload).toEqual({ columns: ['Email'], rows: [] });
+  });
+
+  test('preview request sets previewCtx and moves to step 4', async () => {
+    element.triggerPreviewRequestForTest({ projectId: 'a01xx', version: 'v1', objectApiName: 'Account' });
+    await flushPromises();
+    const s = element.stateForTest;
+    expect(s.currentStep).toBe(4);
+    expect(s.previewCtx).toEqual({ projectId: 'a01xx', version: 'v1', objectApiName: 'Account' });
+    expect(s.showPreview).toBe(true);
+  });
+
+  test('back navigation: to mapping then to selection resets state', async () => {
+    // Move to preview first
+    element.triggerPreviewRequestForTest({ projectId: 'a', version: 'v', objectApiName: 'X' });
+    await flushPromises();
+
+    element.triggerBackToMappingForTest();
+    await flushPromises();
+    let s = element.stateForTest;
+    expect(s.currentStep).toBe(3);
+    expect(s.showMapping).toBe(true);
+
+    element.triggerBackToSelectionForTest();
+    await flushPromises();
+    s = element.stateForTest;
+    expect(s.currentStep).toBe(2);
+    expect(s.selectedSource).toBeNull();
+    expect(s.csvPayload).toBeNull();
+    expect(s.previewCtx).toEqual({ projectId: '', version: '', objectApiName: '' });
+    expect(s.showSelection).toBe(true);
+  });
+
+  test('mappingSaved does not throw', async () => {
+    expect(() => element.triggerMappingSavedForTest()).not.toThrow();
+  });
 });
