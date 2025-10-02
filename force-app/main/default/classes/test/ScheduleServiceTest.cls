@@ -112,7 +112,6 @@ public with sharing class ScheduleServiceTest {
     // création de tâches
     @IsTest
     static void testCreateTask() {
-        
         //creation d'une planification avec projet depuis Test Data Factory 
         Schedule__c schedule = TestDataFactory.createSchedule(); 
         schedule.NextRun__c = System.today().addDays(-1); //modification de la date d'éxecution à avant-hier
@@ -120,7 +119,7 @@ public with sharing class ScheduleServiceTest {
         List<Schedule__c> schedules = new List<Schedule__c>();
 
         schedules.add(schedule);
-        
+        //when
         Test.startTest();
         ScheduleService.createTask('Not Start',schedules );
 
