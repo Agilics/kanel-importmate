@@ -2,7 +2,7 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 10-01-2025
+ * @last modified on  : 10-03-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 public with sharing class ScheduleService{
@@ -141,43 +141,7 @@ public with sharing class ScheduleService{
         }  
     } 
 
-    /**
-     * Insérer une tâche 
-     */
-    public static void createTask(
-        String priority,
-        List<Schedule__c> schedules 
-        ){
-        try {
-        List<Task> tasksToInsert = new List<Task>();
-
-            if(!schedules.isEmpty()){
-                for (Schedule__c schedule : schedules) {
-                    if (schedule.Id != null) {
-                        String subject = 'Scheduled Task for ' + schedule.Name ;
-                        Integer year = schedule.NextRun__c.year();
-                        Integer month = schedule.NextRun__c.month();
-                        Integer day = schedule.NextRun__c.day();
-
-                        Date activityDate = Date.newInstance(year, month, day);
-
-                        Task task = new Task(
-                            Subject = subject,
-                            ActivityDate = activityDate,
-                            Priority = priority
-                        // , WhatId = whatId
-                        );
-                            tasksToInsert.add(task);
-                        }
-                    
-                }
-                insert tasksToInsert;
-            }
-        } catch (ApplicationException e) {
-            ErrorLogService.logException(e);
-            throw new ApplicationException('Not allowed to register this task!');
-        }
-    }
+    
 
     
     //Execution automatique
