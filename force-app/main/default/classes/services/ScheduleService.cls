@@ -6,9 +6,14 @@
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 public with sharing class ScheduleService{
-    public static String WEEKLY ='Weekly';
-    public static String Monthly = 'Monthly';
-    public static String DAILY ='Daily';
+    public enum FrequencyEnum {
+        DAILY ,
+        WEEKLY ,
+        MONTHLY
+    }
+
+    
+
     
      /**
      * Mettre à jour et enregistrement  d'une planification  Schedule__c
@@ -73,9 +78,9 @@ public with sharing class ScheduleService{
                 return   ScheduleRepository.getPastSchedules();    
             }
             return new List<Schedule__c>();
-        } catch (ScheduleException e) {
+        } catch (ApplicationException e) {
                 ErrorLogService.logException(e);
-                throw new ScheduleException(e.getMessage());
+                throw new ApplicationException(e.getMessage());
             }
         }
 
@@ -89,9 +94,9 @@ public with sharing class ScheduleService{
                 return   ScheduleRepository.getAllSchedules();    
             }
             return new List<Schedule__c>();
-        } catch (ScheduleException e) {
+        } catch (ApplicationException e) {
                 ErrorLogService.logException(e);
-                throw new ScheduleException(e.getMessage());
+                throw new ApplicationException(e.getMessage());
             }
         }
 
@@ -104,9 +109,9 @@ public with sharing class ScheduleService{
                 return  ScheduleRepository.getSchedulesByFrequency(frequence);   
             }
             return new List<Schedule__c>();
-        } catch (ScheduleException e) {
+        } catch (ApplicationException e) {
             ErrorLogService.logException(e);
-            throw new ScheduleException(e.getMessage());
+            throw new ApplicationException(e.getMessage());
         }
     }
 
@@ -119,9 +124,9 @@ public with sharing class ScheduleService{
                 return  ScheduleRepository.getScheduleById(id);   
             }
             return null;
-        } catch (ScheduleException e) {
+        } catch (ApplicationException e) {
             ErrorLogService.logException(e);
-            throw new ScheduleException(e.getMessage());
+            throw new ApplicationException(e.getMessage());
         }
     }
 
@@ -135,18 +140,13 @@ public with sharing class ScheduleService{
                 return  ScheduleRepository.getSchedulesByProjectName(name);   
             }
             return new List<Schedule__c>();
-        } catch (ScheduleException e) {
+        } catch (ApplicationException e) {
             ErrorLogService.logException(e);
-            throw new ScheduleException(e.getMessage());
+            throw new ApplicationException(e.getMessage());
         }  
     } 
 
      
-public enum FrequencyEnum {
-        DAILY ,
-        WEEKLY ,
-        MONTHLY
-    }
 
 
     
@@ -159,17 +159,19 @@ public enum FrequencyEnum {
                 // Lancer l’import
                 
                 // Replanifier selon la fréquence
-                String frequence = String.valueOf(sch.Frequency__c);
-                if(DAILY.equals(frequence)) {
+                FrequencyEnum frequence = FrequencyEnum.valueOf(sch.Frequency__c);
+                 
+                if(FrequencyEnum.DAILY.equals(frequence)) {
                     sch.NextRun__c = sch.NextRun__c.addDays(1);
-                } else if( WEEKLY.equals(frequence)) {
+                } else if( FrequencyEnum.WEEKLY === frequence) {
                     sch.NextRun__c = sch.NextRun__c.addDays(7);
-                } else if(MONTHLY.equals(frequence)) {
+                } else if(FrequencyEnum.MONTHLY === frequence) {
                     sch.NextRun__c = sch.NextRun__c.addMonths(1);
                 }
             } catch (Exception e) {
-                // Gestion d’erreurs -> logs
-                System.debug('Erreur planification : ' + e.getMessage());
+                // Gestion d’erreurs 
+                ErrorLogService.logException(e);
+                throw new ApplicationException('Erreur planification : ' + e.getMessage());
             }
         }
         update schedules;

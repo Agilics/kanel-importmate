@@ -2,7 +2,7 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 10-01-2025
+ * @last modified on  : 10-03-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 public class ScheduleJob implements Schedulable {
@@ -12,10 +12,7 @@ public class ScheduleJob implements Schedulable {
     public void execute(SchedulableContext ctx) {
 
         List<Schedule__c> schedules = ScheduleService.getPastSchedules();
-        ScheduleService.createTask(
-            PRIORITY,
-            schedules
-        );
+        
     }
 
 }

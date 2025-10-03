@@ -2,7 +2,7 @@ import { LightningElement,track,wire,api } from 'lwc';
 import SCHEDULE_OBJECT from '@salesforce/schema/Schedule__c'; 
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 import FREQUENCY_FIELD from '@salesforce/schema/Schedule__c.Frequency__c';
-import getPickListValues from "@salesforce/apex/ObjectMetadataController.getPickListValues";
+import getPickListValues from "@salesforce/apex/ScheduleController.getPickListValues";
 export default class ScheduleCreatorComponent extends LightningElement {
     @track executionDate ;    
     @api projectId;

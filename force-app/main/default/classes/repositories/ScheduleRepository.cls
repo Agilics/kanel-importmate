@@ -2,7 +2,7 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 10-01-2025
+ * @last modified on  : 10-03-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 public with sharing class ScheduleRepository {
@@ -55,11 +55,11 @@ public with sharing class ScheduleRepository {
   public  static List<Schedule__c> getPastSchedules() {
     if(SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType)){
         try {
-            return  [
-                SELECT Id, Project__c, Frequency__c, NextRun__c
-                FROM Schedule__c
-                WHERE NextRun__c <= :System.now()
-            ];
+            String queryString  =
+                'SELECT Id, Project__c, Frequency__c, NextRun__c'+
+                'FROM Schedule__c'+
+               ' WHERE NextRun__c <= :System.now()'
+            return Database.query(queryString);
          } catch(ApplicationException e){
                    ErrorLogService.logException(e);
                 throw new ApplicationException(e.getMessage());
