@@ -6,13 +6,11 @@
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 public class ScheduleJob implements Schedulable {
-
-    public  static String PRIORITY = 'Not Started';
+ 
 
     public void execute(SchedulableContext ctx) {
-
-        List<Schedule__c> schedules = ScheduleService.getPastSchedules();
-        
+        // add some code here
+        ScheduleService.runDueSchedules();
     }
 
 }

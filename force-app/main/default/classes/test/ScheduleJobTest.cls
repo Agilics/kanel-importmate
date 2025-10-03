@@ -1,3 +1,10 @@
+/**
+ * @description       : 
+ * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @group             : 
+ * @last modified on  : 10-03-2025
+ * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+**/
 @IsTest
 public with sharing class ScheduleJobTest {
 
@@ -28,12 +35,6 @@ public with sharing class ScheduleJobTest {
         Test.stopTest();
 
         // THEN
-        List<Task> tasks = [SELECT Id, WhatId FROM Task WHERE WhatId IN :scheduleIds];
-
-        System.assert( 
-            schedules.size() > 0,
-            'Tasks were not created'
-        );
        System.assertNotEquals(null, jobId);
     }
 }

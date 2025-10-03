@@ -2,7 +2,7 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 10-01-2025
+ * @last modified on  : 10-03-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 @IsTest
@@ -141,13 +141,13 @@ public class ScheduleControllerTest {
     static void testGetSchedulesByFrequency() {
         //given
         Test.startTest();
-        List<Schedule__c> schedules = ScheduleController.getSchedulesByFrequency(FrequencyEnum.DAILY);
+        List<Schedule__c> schedules = ScheduleController.getSchedulesByFrequency(ScheduleService.FrequencyEnum.DAILY);
         Test.stopTest();
 
         System.assertNotEquals(0, schedules.size(), 'Should return schedules with DAILY frequency');
         for (Schedule__c s : schedules) {
             String actual = (s.Frequency__c).toUpperCase();
-            System.assertEquals(String.valueOf(FrequencyEnum.DAILY), actual, 'Frequency should be DAILY');
+            System.assertEquals(String.valueOf(ScheduleService.FrequencyEnum.DAILY), actual, 'Frequency should be DAILY');
         }
     }
 
@@ -177,4 +177,51 @@ public class ScheduleControllerTest {
         System.assertNotEquals(0, schedules.size(), 'Should return schedules for the given project');
         System.assertEquals(project.Name, schedules[0].Project__r.Name, 'Project name should match');
     }
+
+     
+     @isTest
+  static void testGetCompatibleSObjects() {
+    //when
+    Test.startTest();
+    List<String> objects =  ScheduleController.getCompatibleSObjects();
+    Test.stopTest();
+    
+    //then
+    System.assert(objects.size() > 0, 'No objects found');
+  }
+
+  @isTest
+  static void testGetFieldsForObject() {
+    //when
+    Test.startTest();
+   
+    List<String> objects =  ScheduleController.getCompatibleSObjects();
+    String objectName = objects[0];
+    Map<String, String> fields =  ScheduleController.getObjectFields(
+      objectName
+    );
+    Test.stopTest();
+    
+    //then
+    System.assert(objects.size() > 0, 'No objects found'); 
+    System.assert(
+      fields.size() > 0,
+      'No fields found for object: ' + objectName
+    );
+  }
+  @IsTest
+  static void testGetPickListValues() {
+    //Given
+    String objectApiName ='Opportunity';
+    String fieldApiName = 'ForecastCategoryName';
+
+    //when
+    Test.startTest();
+      Map<String,String>  result =   ScheduleController.getPickListValues(objectApiName,fieldApiName );    
+    Test.stopTest();   
+
+    //then
+    System.assert(result.size()>0, 'Echec j\'ai la flemme de faire la desc');  
+  }
+
 }

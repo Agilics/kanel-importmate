@@ -75,7 +75,7 @@ public with sharing class ScheduleService{
        
         try {  
             if(SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType)) {
-                return   ScheduleRepository.getPastSchedules();    
+                return   ScheduleRepository.getPastSchedules();
             }
             return new List<Schedule__c>();
         } catch (ApplicationException e) {
@@ -103,7 +103,7 @@ public with sharing class ScheduleService{
     /**
      *Filtrer par fréquence (DAILY | WEEKLY | MONTHLY)
     */
-     public static List<Schedule__c> getSchedulesByFrequency(FrequencyEnum frequence) {
+     public static List<Schedule__c> getSchedulesByFrequency(ScheduleService.FrequencyEnum frequence) {
        try {
             if(SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType)) {
                 return  ScheduleRepository.getSchedulesByFrequency(frequence);   
@@ -159,13 +159,13 @@ public with sharing class ScheduleService{
                 // Lancer l’import
                 
                 // Replanifier selon la fréquence
-                FrequencyEnum frequence = FrequencyEnum.valueOf(sch.Frequency__c);
+                ScheduleService.FrequencyEnum  frequence = ScheduleService.FrequencyEnum.valueOf(sch.Frequency__c);
                  
-                if(FrequencyEnum.DAILY.equals(frequence)) {
+                if(ScheduleService.FrequencyEnum.DAILY.equals(frequence)) {
                     sch.NextRun__c = sch.NextRun__c.addDays(1);
-                } else if( FrequencyEnum.WEEKLY === frequence) {
+                } else if(ScheduleService.FrequencyEnum.WEEKLY === frequence) {
                     sch.NextRun__c = sch.NextRun__c.addDays(7);
-                } else if(FrequencyEnum.MONTHLY === frequence) {
+                } else if(ScheduleService.FrequencyEnum.MONTHLY === frequence) {
                     sch.NextRun__c = sch.NextRun__c.addMonths(1);
                 }
             } catch (Exception e) {

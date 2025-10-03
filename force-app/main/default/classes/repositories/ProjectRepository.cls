@@ -2,7 +2,7 @@
  * @description       :
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 09-09-2025 
+ * @last modified on  : 10-03-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
  **/
 public with sharing class ProjectRepository {
@@ -14,13 +14,13 @@ public static ImportProject__c saveProject(ImportProject__c project) {
         upsert project;
         return project;
       } catch (DmlException e) {
-        throw new ImportException(
+        throw new ApplicationException(
           'Erreur lors de la sauvegarde du projet : ' + e.getMessage()
         );
       }
     }
     // Retour obligatoire si pas de droits
-    throw new ImportException('Vous n’avez pas les droits pour créer ou modifier un projet.');
+    throw new ApplicationException('Vous n’avez pas les droits pour créer ou modifier un projet.');
 }
 
 

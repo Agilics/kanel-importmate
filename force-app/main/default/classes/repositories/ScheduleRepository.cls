@@ -55,11 +55,12 @@ public with sharing class ScheduleRepository {
   public  static List<Schedule__c> getPastSchedules() {
     if(SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType)){
         try {
-            String queryString  =
-                'SELECT Id, Project__c, Frequency__c, NextRun__c'+
-                'FROM Schedule__c'+
-               ' WHERE NextRun__c <= :System.now()'
-            return Database.query(queryString);
+            Datetime nowDate = System.now();
+            return [
+                SELECT Id, Project__c, Frequency__c, NextRun__c
+                FROM Schedule__c
+                WHERE NextRun__c <= :nowDate
+            ];
          } catch(ApplicationException e){
                    ErrorLogService.logException(e);
                 throw new ApplicationException(e.getMessage());
@@ -110,7 +111,7 @@ public with sharing class ScheduleRepository {
 
 
      // Récupérer les plannifications par la fréquence
-    public  static List<Schedule__c> getSchedulesByFrequency(FrequencyEnum frequence) {
+    public  static List<Schedule__c> getSchedulesByFrequency(ScheduleService.FrequencyEnum frequence) {
           if(SecurityUtils.isCreateable(Schema.Schedule__c.SObjectType)){
             try {
                 String keyword = String.valueOf(frequence);

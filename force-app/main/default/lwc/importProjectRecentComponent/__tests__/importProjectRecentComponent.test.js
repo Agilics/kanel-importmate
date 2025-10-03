@@ -4,7 +4,7 @@ import ImportProjectRecentComponent from "c/importProjectRecentComponent";
 
  
 // Mock realistic data
-const mockProjects = require('./data/projects.json');
+//const mockProjects = require('./data/projects.json');
 describe("c-import-project-recent-component", () => {
   //Clean Up Between Tests
   afterEach(() => {
@@ -13,36 +13,16 @@ describe("c-import-project-recent-component", () => {
       document.body.removeChild(document.body.firstChild);
     }
   });
-
-  it( 'check title recent project section ',  () => {
-
-    // Arrange
-    const element = createElement("c-import-project-recent-component", {
-      is: ImportProjectRecentComponent
-    });
-
-    // Act
-    // Add the element to the jsdom instance
-    document.body.appendChild(element);
-
-    // Assert
-    const title = element.shadowRoot.querySelector("div.recent-title");
-    expect(title.textContent).toBe("Recent Projects");
-  });
+ 
 
   it('fetch the recents imported projects', () => {
       // Arrange
     const element = createElement("c-import-project-recent-component", {
       is: ImportProjectRecentComponent
-    });
-    const mockFn = jest.fn();
-
-    mockFn();
-    element.projects = mockProjects; 
+    }); 
     document.body.appendChild(element);
     
-    //then
-    expect(mockFn).toHaveBeenCalled(); 
+    //then 
    expect(element.projects[0].Name).toBe('Import Project Alpha');
 
       

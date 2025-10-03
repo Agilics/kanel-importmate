@@ -12,7 +12,7 @@ public with sharing class ScheduleRepositoryTest {
     static void setupTestData(){
        User admin = TestDataFactory.createAdminUser();     
            String expected ='Test';
-            String frequence =String.valueOf(FrequencyEnum.MONTHLY);
+            String frequence =String.valueOf(ScheduleService.FrequencyEnum.MONTHLY);
             ImportProject__c project = TestDataFactory.createImportProject();
              
               Schedule__c schedule = new Schedule__c(
@@ -76,7 +76,7 @@ public with sharing class ScheduleRepositoryTest {
      static void testGetScheduleByFrequency() {
         //GIVEN
          Schedule__c savedSchedule = TestDataFactory.createSchedule();
-        FrequencyEnum expectedFrequence = FrequencyEnum.DAILY;
+        ScheduleService.FrequencyEnum expectedFrequence = ScheduleService.FrequencyEnum.DAILY;
 
         //When 
         Test.startTest();
@@ -113,7 +113,7 @@ public with sharing class ScheduleRepositoryTest {
               //Given  
 
             String expected ='Test Project';
-            String frequence =String.valueOf(FrequencyEnum.MONTHLY);
+            String frequence =String.valueOf(ScheduleService.FrequencyEnum.MONTHLY);
             ImportProject__c project = TestDataFactory.createImportProject();
 
               Schedule__c schedule = new Schedule__c(

@@ -17,7 +17,7 @@ public with sharing class ScheduleServiceTest {
         insert project;
 
         Schedule__c sched = new Schedule__c(
-            Frequency__c = String.valueOf(FrequencyEnum.DAILY),
+            Frequency__c = String.valueOf(ScheduleService.FrequencyEnum.DAILY),
             Project__c = project.Id
         );
         insert sched;
@@ -45,7 +45,7 @@ public with sharing class ScheduleServiceTest {
         // When
         Test.startTest();
         Id scheduleId = ScheduleService.schedule(
-            String.valueOf(FrequencyEnum.DAILY),
+            String.valueOf(ScheduleService.FrequencyEnum.DAILY),
             nextRun,
             project.Id
         );
@@ -65,7 +65,7 @@ public with sharing class ScheduleServiceTest {
         ];
 
         System.assertEquals(
-            String.valueOf(FrequencyEnum.DAILY),
+            String.valueOf(ScheduleService.FrequencyEnum.DAILY),
             insertedSchedule.Frequency__c.toUpperCase(),
             'La fréquence doit être DAILY'
         );
@@ -77,18 +77,45 @@ public with sharing class ScheduleServiceTest {
     }
 
     //tester l'énumération de la fréquence
-        @IsTest
-    public  static  void callTestDataFrequencyEnum() {
+    @IsTest
+    public  static  void callTestDataFrequencyDaily() {
         
         //Perform test
         Test.startTest();
         String excpetedFrequency = 'DAILY';
-        FrequencyEnum actual =  FrequencyEnum.DAILY;
+        ScheduleService.FrequencyEnum actual =  ScheduleService.FrequencyEnum.DAILY;
         Test.stopTest();
 
         //Assertions
         System.assertEquals(excpetedFrequency, actual.Name());
      }
+
+       @IsTest
+    public  static  void callTestDataFrequencyMonthly() {
+        
+        //Perform test
+        Test.startTest();
+        String excpetedFrequency = 'MONTHLY';
+        ScheduleService.FrequencyEnum actual =  ScheduleService.FrequencyEnum.MONTHLY;
+        Test.stopTest();
+
+        //Assertions
+        System.assertEquals(excpetedFrequency, actual.Name());
+     }
+
+        @IsTest
+    public  static  void callTestDataFrequencyWeekly() {
+        
+        //Perform test
+        Test.startTest();
+        String excpetedFrequency = 'WEEKLY';
+        ScheduleService.FrequencyEnum actual =  ScheduleService.FrequencyEnum.WEEKLY;
+        Test.stopTest();
+
+        //Assertions
+        System.assertEquals(excpetedFrequency, actual.Name());
+     }
+
 
     //tester la récupération de planification passée
         @IsTest
@@ -149,7 +176,7 @@ public with sharing class ScheduleServiceTest {
         List<Schedule__c> schedules = new List<Schedule__c>();
         
         Schedule__c schedule = new Schedule__c();
-        schedule.Frequency__c = String.valueOf(FrequencyEnum.DAILY); 
+        schedule.Frequency__c = String.valueOf(ScheduleService.FrequencyEnum.DAILY); 
         schedule.Project__c = savedProject[0].Id;
         schedules.add(schedule);
         
@@ -182,7 +209,7 @@ public with sharing class ScheduleServiceTest {
      @IsTest
      static void testGetSchedulesByFrequency() {
         //GIVEN
-       FrequencyEnum exceptedFrequency =  FrequencyEnum.DAILY;
+       ScheduleService.FrequencyEnum exceptedFrequency =  ScheduleService.FrequencyEnum.DAILY;
         
         //WHEN
         Test.startTest();
@@ -202,7 +229,7 @@ public with sharing class ScheduleServiceTest {
      static void testGetScheduleById() {
         //GIVEN 
         Schedule__c result = TestDataFactory.createSchedule();
-        String expected = String.valueOf(FrequencyEnum.DAILY);
+        String expected = String.valueOf(ScheduleService.FrequencyEnum.DAILY);
 
         //WHEN
         Test.startTest();
