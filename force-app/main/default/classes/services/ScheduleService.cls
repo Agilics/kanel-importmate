@@ -141,7 +141,13 @@ public with sharing class ScheduleService{
         }  
     } 
 
-    
+     
+public enum FrequencyEnum {
+        DAILY ,
+        WEEKLY ,
+        MONTHLY
+    }
+
 
     
     //Execution automatique
