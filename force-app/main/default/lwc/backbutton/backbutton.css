@@ -1,14 +1,21 @@
-.back-btn {
-  background: #a9a9a9;
+.btn {
+  width: 192.125px;
+  height: 48px;
+  opacity: 1;
+  border-radius: 30px;
+  border: 0;
   color: #fff;
-  border: none;
-  border-radius: 6px;
-  padding: 0.7rem 1.4rem;
-  cursor: pointer;
-  margin-top: 1rem;
-  margin-left: 20%;
-  transition: background 0.2s ease;
+  font-size: 15px;
+  font-weight: 700;
+  -webkit-border-radius: 30px;
+  -moz-border-radius: 30px;
+  -ms-border-radius: 30px;
+  -o-border-radius: 30px;
 }
-.back-btn:hover {
-  background: #222;
+.btn-back {
+  background-color: #6b757d;
+  box-shadow: 0 6px 12px rgb(107 117 125 / 0.45);
+}
+.btn-back:hover {
+  background-color: #4a5257;
 }

@@ -2,7 +2,7 @@
   @description       : 
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
   @group             : 
-  @last modified on  : 09-11-2025
+  @last modified on  : 09-24-2025
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
@@ -86,11 +86,12 @@
 
       <!-- stepper 2 -->
       <template if:true={isSelectSource} aria-label="select source section">
-        <c-select-data-source-component
+        <c-data-source-selector
           onprevious={handlePreviousStep}
           recent-project={recentProject}
         >
-        </c-select-data-source-component>
+        </c-data-source-selector>
+        
       </template>
 
       <template
@@ -99,6 +100,18 @@
       >
         <h2>Step 3: Mapping & Transformation</h2>
         <p>Ici tu affiches ton composant de mapping.</p>
+      </template>
+       <template if:true={isScheduling}
+        aria-label="schedule's section"
+       >
+      <c-schedule-creator-component
+        project-id={recentProject.Id} 
+        show-schedule ={showSchedule}
+        onselect={handleSelectedFrequency}
+        onnextrunchange={handleNextRunChange}
+        onadd={handleAddSchedule}
+      >
+        </c-schedule-creator-component>
       </template>
     </template>
   </div>

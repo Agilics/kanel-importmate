@@ -1,8 +1,9 @@
-import { LightningElement } from 'lwc';
+import { LightningElement,api } from 'lwc';
 
 export default class DataSourceSelector extends LightningElement {
     currentStep = 2; 
     selectedSource = null; // CSV | SOQL | null
+    @api recentProject;
 
     // Control visibility
     get showSelection() {
@@ -26,8 +27,11 @@ export default class DataSourceSelector extends LightningElement {
     }
 
     handleBackToSelection() {
-        this.selectedSource = null;
-        this.currentStep = 2;
+        this.dispatchEvent(
+            new CustomEvent(
+                'previous'
+            )
+        );
     }
 
     handleCsvLoaded(event) {

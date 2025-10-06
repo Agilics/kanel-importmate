@@ -17,7 +17,7 @@ describe("c-backbutton", () => {
     document.body.appendChild(element);
 
     // Verify the button exists and contains the word 'Back'
-    const button = element.shadowRoot.querySelector("button.back-btn");
+    const button = element.shadowRoot.querySelector("button.btn-back");
     expect(button).not.toBeNull();
     expect(button.textContent).toContain("Back");
   });
@@ -34,7 +34,7 @@ describe("c-backbutton", () => {
     document.body.appendChild(element);
 
     // Simulate a click on the button
-    const button = element.shadowRoot.querySelector("button.back-btn");
+    const button = element.shadowRoot.querySelector("button.btn-back");
     button.click();
 
     // Verify the event was dispatched exactly once

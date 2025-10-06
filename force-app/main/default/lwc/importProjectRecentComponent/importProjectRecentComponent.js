@@ -19,9 +19,9 @@ export default class ImportProjectRecentComponent extends LightningElement {
   ];
 
   // vérification si le projet est présent
-
+  @api
   get hasNoProjects() {
-    return !this.projects;
+     return !(this.projects?.data && this.projects?.data.length > 0);
   }
 
   //on ferme la section projets recents et on affiche la section création de projet
@@ -55,4 +55,6 @@ export default class ImportProjectRecentComponent extends LightningElement {
   async handleShowSelectProject() {
     this.dispatchEvent(new CustomEvent("selectproject"));
   }
+
+
 }

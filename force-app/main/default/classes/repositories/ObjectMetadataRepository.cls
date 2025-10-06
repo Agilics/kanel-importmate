@@ -78,4 +78,37 @@ public with sharing class ObjectMetadataRepository {
       return null;
     }
   }
+
+  // Récupérer les labels et valeurs d'un champs d'un objet de Selection
+
+  public static Map<String, String> getPickListValues(String objectApiName, String fieldApiName) {
+        Schema.SObjectType objType = Schema.getGlobalDescribe().get(objectApiName);
+        if (objType == null) {
+            throw new ApplicationException('Objet inconnu : ' + objectApiName);
+        }
+        
+        Schema.DescribeSObjectResult objDescribe = objType.getDescribe();
+        Map<String, Schema.SObjectField> fieldMap = objDescribe.fields.getMap();
+        Schema.SObjectField field = fieldMap.get(fieldApiName);
+        if (field == null) {
+            throw new ApplicationException('Champ inconnu : ' + fieldApiName);
+        }
+        
+        Schema.DescribeFieldResult fieldDescribe = field.getDescribe();
+        if (fieldDescribe.getType() != Schema.DisplayType.PICKLIST) {
+            throw new ApplicationException('Le champ n\'est pas une picklist : ' + fieldApiName);
+        }
+        
+        List<Schema.PicklistEntry> picklistEntries = fieldDescribe.getPicklistValues();
+        Map<String, String> picklistMap = new Map<String, String>();
+        
+        for (Schema.PicklistEntry entry : picklistEntries) {
+            if (entry.isActive()) {
+                picklistMap.put(entry.getLabel(), entry.getValue());
+            }
+        }
+        
+        return picklistMap;
+    }
+      
 }
