@@ -1,13 +1,5 @@
 name: AppExchange CI/CD
 
-# IMPORTANT: To enable pre-merge validation, configure branch protection rules for 'develop' branch:
-# 1. Go to Settings > Branches > Add rule
-# 2. Branch name pattern: develop
-# 3. Check "Require status checks to pass before merging"
-# 4. Check "Require branches to be up to date before merging"
-# 5. Select "pre-merge-validation" as required status check
-# 6. Check "Restrict pushes that create files" (optional)
-
 on:
   push:
     branches: [develop, main, "release/*"]
