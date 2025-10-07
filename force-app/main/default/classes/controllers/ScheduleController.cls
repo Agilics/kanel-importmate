@@ -2,7 +2,7 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 10-03-2025
+ * @last modified on  : 10-07-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 public with sharing class ScheduleController {
@@ -38,8 +38,8 @@ public with sharing class ScheduleController {
  public static Map<String, String> getPickListValues(String objectApiName, String fieldApiName) {
     try {
       return ObjectMetadataService.getPickListValues(objectApiName, fieldApiName);
-    } catch (ScheduleException e) {
-      throw new ScheduleException(e.getMessage());
+    } catch (ApplicationException e) {
+      throw new ApplicationException(e.getMessage());
     }
   }
 
