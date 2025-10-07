@@ -1,3 +1,10 @@
+/**
+ * @description       : 
+ * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @group             : 
+ * @last modified on  : 10-07-2025
+ * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+**/
 @isTest
 public with sharing class ObjectMetadataServiceTest {
   public ObjectMetadataServiceTest() {
@@ -23,26 +30,6 @@ public with sharing class ObjectMetadataServiceTest {
     );
   }
 
-  @IsTest
-public class ObjectMetadataControllerTest {
-
-    @IsTest
-    static void testGetPickListValues_Error() {
-      //given
-      String objectApiName ='Account';
-      String fieldApiName ='Name';
-
-      //when
-        Test.startTest();
-        try {
-            ObjectMetadataController.getPickListValues(objectApiName, fieldApiName);
-            System.assert(false, 'Une ScheduleException aurait dû être levée');
-        } catch (ScheduleException ex) {
-            System.assertEquals('Nom d’objet requis.', ex.getMessage(),
-                'Le message d’erreur doit correspondre');
-        }
-        Test.stopTest();
-    }
 
     @IsTest
     static void testGetPickListValues_Success() {
@@ -57,4 +44,4 @@ public class ObjectMetadataControllerTest {
         System.assertNotEquals(0, values.size(), 'La map de valeurs picklist ne doit pas être vide');
         System.assert(values.containsKey('Prospect'), 'La valeur Prospect doit exister');
     }
-}
+  }

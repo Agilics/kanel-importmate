@@ -1,8 +1,6 @@
 import { createElement } from "@lwc/engine-dom";
-import ImportProjectRecentComponent from "c/importProjectRecentComponent";  
- 
+import ImportProjectRecentComponent from "c/importProjectRecentComponent";
 
- 
 // Mock realistic data
 //const mockProjects = require('./data/projects.json');
 describe("c-import-project-recent-component", () => {
@@ -13,39 +11,30 @@ describe("c-import-project-recent-component", () => {
       document.body.removeChild(document.body.firstChild);
     }
   });
- 
 
-  it('fetch the recents imported projects', () => {
-      // Arrange
+  it("fetch the recents imported projects", () => {
+    // Arrange
     const element = createElement("c-import-project-recent-component", {
       is: ImportProjectRecentComponent
-    }); 
+    });
     document.body.appendChild(element);
-    
-    //then 
-   expect(element.projects[0].Name).toBe('Import Project Alpha');
 
-      
+    //then
+    expect(element.projects[0].Name).toBe("Import Project Alpha");
   });
 
-   it("hasNoProjects is true when there's no project",async () => {
+  it("hasNoProjects is true when there's no project", async () => {
     //given
     const element = createElement("c-import-project-recent-component", {
-      is:ImportProjectRecentComponent
+      is: ImportProjectRecentComponent
     });
-    
-    return Promise.resolve().then(()=>{
+
+    return Promise.resolve().then(() => {
       //when
-      element.projects = []; 
+      element.projects = [];
 
       // then assertions
-      expect(element.hasNoProjects).toBeTruthy();  
-      
+      expect(element.hasNoProjects).toBeTruthy();
     });
   });
-
-   
- 
-
-  
 });

@@ -8,26 +8,28 @@
 <template>
   <h2 class="title">New schedule</h2>
   <div class="slds-grid slds-gutters slds-align_absolute-center">
-    <section class="slds-col slds-medium-size_3-of-12 slds-large-size_6-of-12 container" aria-label="New schedule">
-
-       
-	   <!-- ComboBox for Select Frequency-->
+    <section
+      class="slds-col slds-medium-size_3-of-12 slds-large-size_6-of-12 container"
+      aria-label="New schedule"
+    >
+      <!-- ComboBox for Select Frequency-->
       <lightning-combobox
         class="rounded-input"
-        name="frequency" 
-        label="Select a frequency" 
-        value={selectedFrequency} 
-        options={picklistValues} 
+        name="frequency"
+        label="Select a frequency"
+        value={selectedFrequency}
+        options={picklistValues}
         onchange={handleFrequencyChange}
       ></lightning-combobox>
-      
-      <!-- Next Run date time picker  on local area --> 
-       <lightning-input
-          class="rounded-input"
-          type="datetime-local"
-          label="Next Run"
-          value={nextRun}
-          onchange={handleNextRunChange}>
+
+      <!-- Next Run date time picker  on local area -->
+      <lightning-input
+        class="rounded-input"
+        type="datetime-local"
+        label="Next Run"
+        value={nextRun}
+        onchange={handleNextRunChange}
+      >
       </lightning-input>
 
       <!-- actions buttons-->
@@ -39,7 +41,6 @@
           Cancel
         </button>
       </div>
-    
     </section>
   </div>
 </template>

@@ -1,41 +1,41 @@
 <template>
-    <div class="container">
-        <!-- Selection -->
-       
-        <template if:true={showSelection}>
-            <h2 class="section-title">Data source</h2>
-            <div class="cards">
-                <div class="card" onclick={handleCSV}>
-                    <div class="card-icon file-icon"></div>
-                    <h3>Import CSV</h3>
-                    <p>Import a CSV file from your local machine.</p>
-                </div>
+  <div class="container">
+    <!-- Selection -->
 
-                <div class="card" onclick={handleSOQL}>
-                    <div class="card-icon soql-icon"></div>
-                    <h3>SOQL Builder</h3>
-                    <p>Build your query interactively from Salesforce objects.</p>
-                </div>
-            </div>
-        </template>
+    <template if:true={showSelection}>
+      <h2 class="section-title">Data source</h2>
+      <div class="cards">
+        <div class="card" onclick={handleCSV}>
+          <div class="card-icon file-icon"></div>
+          <h3>Import CSV</h3>
+          <p>Import a CSV file from your local machine.</p>
+        </div>
 
-        <!-- CSV -->
-        <template if:true={showCSV}>
-            <c-csv-uploader oncsvloaded={handleCsvLoaded}></c-csv-uploader>
-        </template>
+        <div class="card" onclick={handleSOQL}>
+          <div class="card-icon soql-icon"></div>
+          <h3>SOQL Builder</h3>
+          <p>Build your query interactively from Salesforce objects.</p>
+        </div>
+      </div>
+    </template>
 
-        <!-- SOQL -->
-        <template if:true={showSOQL}>
-            <c-soql-builder onsoqlbuilt={handleSoqlBuilt}></c-soql-builder>
-        </template>
+    <!-- CSV -->
+    <template if:true={showCSV}>
+      <c-csv-uploader oncsvloaded={handleCsvLoaded}></c-csv-uploader>
+    </template>
 
-        <!-- recent's project-->
-        <template lwc:if={recentProject}>
-            <h1>Select project ID: {recentProject.Id} </h1><br/>
-        </template>
+    <!-- SOQL -->
+    <template if:true={showSOQL}>
+      <c-soql-builder onsoqlbuilt={handleSoqlBuilt}></c-soql-builder>
+    </template>
 
-        <!-- Back button -->
-        <c-backbutton onback={handleBackToSelection}> </c-backbutton>
+    <!-- recent's project-->
+    <template lwc:if={recentProject}>
+      <h1>Select project ID: {recentProject.Id}</h1>
+      <br />
+    </template>
 
-    </div>
+    <!-- Back button -->
+    <c-backbutton onback={handleBackToSelection}> </c-backbutton>
+  </div>
 </template>

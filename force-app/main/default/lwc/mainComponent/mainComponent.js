@@ -1,7 +1,7 @@
 import { LightningElement, wire, track } from "lwc";
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 import SelectProject from "c/selectProjectComponent";
-import { refreshApex } from '@salesforce/apex';
+import { refreshApex } from "@salesforce/apex";
 import searchProjetById from "@salesforce/apex/ImportProjectController.searchProjetById";
 import doesProjectExist from "@salesforce/apex/ImportProjectController.doesProjectExist";
 
@@ -12,7 +12,7 @@ import getAllSchedules from "@salesforce/apex/ScheduleController.getAllSchedules
 import addSchedule from "@salesforce/apex/ScheduleController.addSchedule";
 export default class MainComponent extends LightningElement {
   @track showCreatorSection = false;
-  title ='Imports Projects';
+  title = "Imports Projects";
 
   //paramètres pour la création de projet
 
@@ -27,11 +27,10 @@ export default class MainComponent extends LightningElement {
   recentProject;
   isProject;
 
-
-  selectedFrequency ; // paramètre pour la fréquence sélectionnée
+  selectedFrequency; // paramètre pour la fréquence sélectionnée
   showSchedule = false;
   wiredSchedulesResult;
-  nextRun ; // paramètre de date d'éxécution
+  nextRun; // paramètre de date d'éxécution
 
   // paramètre du stepper
   currentStep = 1; // le step courrant
@@ -89,10 +88,10 @@ export default class MainComponent extends LightningElement {
           "warning"
         );
 
-         /**
-          *  Réintialisation de tous les champs de texte | combo box
-          *  dans la section de création de projets
-          * */
+        /**
+         *  Réintialisation de tous les champs de texte | combo box
+         *  dans la section de création de projets
+         * */
         this.template.querySelector("c-create-project-component").resetFields();
         this.isLoading = false;
 
@@ -116,8 +115,8 @@ export default class MainComponent extends LightningElement {
         "success"
       );
 
-       // Réintialisation de tous les champs de texte | combo box
-       this.template.querySelector("c-create-project-component").resetFields();
+      // Réintialisation de tous les champs de texte | combo box
+      this.template.querySelector("c-create-project-component").resetFields();
 
       this.isLoading = false; //Désactivation du  loading spinner
 
@@ -141,32 +140,31 @@ export default class MainComponent extends LightningElement {
       this.currentStep--; // décrementation du compteur
       this.showCreatorSection = false;
       this.targetObject = "";
-      if(this.currentStep !== 2 ){
+      if (this.currentStep !== 2) {
         this.selectedSource = null;
       }
     }
-    
   }
 
-    // Récupération de tous les données de plannings
-    @wire(getAllSchedules)
-    wireAllSchedules(result) {
-        this.wiredSchedulesResult = result; 
-        const { data, error } = result;
-        if (data) {
-            this.schedules = data.map(sch => ({
-                id: sch.Id,
-                name: sch.Name,
-                project: sch.Project__r?.Name,
-                nextRun: sch.NextRun__c,
-                frequency: sch.Frequency__c
-            }));
-        } else if (error) {
-            this.showToast("Error", error?.body?.message, "error");
-        }
+  // Récupération de tous les données de plannings
+  @wire(getAllSchedules)
+  wireAllSchedules(result) {
+    this.wiredSchedulesResult = result;
+    const { data, error } = result;
+    if (data) {
+      this.schedules = data.map((sch) => ({
+        id: sch.Id,
+        name: sch.Name,
+        project: sch.Project__r?.Name,
+        nextRun: sch.NextRun__c,
+        frequency: sch.Frequency__c
+      }));
+    } else if (error) {
+      this.showToast("Error", error?.body?.message, "error");
     }
-  
-    //passage à l'étape suivante du stepper
+  }
+
+  //passage à l'étape suivante du stepper
   handleNextStep() {
     if (
       this.currentStep < this.baseSteps.length &&
@@ -180,7 +178,6 @@ export default class MainComponent extends LightningElement {
   handleCancel() {
     this.showCreatorSection = false;
   }
- 
 
   //Mise à jour de la variable project name via le champs de texte
   handleProjectNameChange(event) {
@@ -214,8 +211,8 @@ export default class MainComponent extends LightningElement {
   }
 
   // navigation du stepper
-  handleStepClick(event) { 
-    this.currentStep =  parseInt(event.detail, 10); 
+  handleStepClick(event) {
+    this.currentStep = parseInt(event.detail, 10);
   }
 
   //vérifie l'étape du stepper
@@ -226,7 +223,7 @@ export default class MainComponent extends LightningElement {
 
   //Navigation vers l'étape 2 Selection de source
   get isSelectSource() {
-    if(!this.recentProject){
+    if (!this.recentProject) {
       return false;
     }
     return this.currentStep === 2;
@@ -234,15 +231,15 @@ export default class MainComponent extends LightningElement {
 
   //Navigation vers l'étape 3 Mapping & transformation
   get isMappingAndTransformation() {
-     if(!this.recentProject){
+    if (!this.recentProject) {
       return false;
     }
     return this.currentStep === 3;
   }
-  
+
   //Navigation vers l'étape 4 Schedule
   get isScheduling() {
-    if(!this.recentProject){
+    if (!this.recentProject) {
       return false;
     }
     return this.currentStep === 4;
@@ -265,64 +262,63 @@ export default class MainComponent extends LightningElement {
       }
     });
   }
-  
 
   //Mise à jour du champs de sélection de Frequency__c
-  handleSelectedFrequency(event){
-     this.selectedFrequency = event.detail.frequency;
+  handleSelectedFrequency(event) {
+    this.selectedFrequency = event.detail.frequency;
   }
 
   //Mise à jour du champs de la date d'éxécution
-  handleNextRunChange(event){
+  handleNextRunChange(event) {
     this.nextRun = event.detail.nextRun;
   }
 
-  //Enregistrement  d'une nouvelle planification 
-  async handleAddSchedule(event){
-   //Récupération de l'id du projet sélectionné
+  //Enregistrement  d'une nouvelle planification
+  async handleAddSchedule(event) {
+    //Récupération de l'id du projet sélectionné
     const id = this.recentProject?.Id;
 
-    try{
+    try {
       this.isLoading = true; //activer le loading spinner
 
-      if (!id  || !this.selectedFrequency || !this.nextRun) {
+      if (!id || !this.selectedFrequency || !this.nextRun) {
         this.showToast("Warning", "All fields are required.", "warning");
         this.isLoading = false;
         return;
-      } 
+      }
       /**
        * Création d'une planification via la fréquence , l'id du project
        * et la date d'éxécution NextRun
-       *  Création d'une tâche Apex 
+       *  Création d'une tâche Apex
        */
-      
+
       await addSchedule({
-        frequency:this.selectedFrequency,
-        nextRun:this.nextRun,
+        frequency: this.selectedFrequency,
+        nextRun: this.nextRun,
         projectId: id
-      })
-      .then((data)=>{ 
-          //Affichage du message toast de succès
+      }).then((data) => {
+        //Affichage du message toast de succès
         this.showToast(
           "Success",
           `Schedule  with ID:\t${data}  created  successfully !`,
           "success"
         );
-         this.template.querySelector("c-schedule-creator-component").resetFields(); // Réintialisation de tous les champs de texte | combo box
-          this.showSchedule =  event.detail;
-          this.isLoading = false; //Désactivation du  loading spinner
-          return refreshApex(this.wiredSchedulesResult); //  refresh datatable
+        this.template
+          .querySelector("c-schedule-creator-component")
+          .resetFields(); // Réintialisation de tous les champs de texte | combo box
+        this.showSchedule = event.detail;
+        this.isLoading = false; //Désactivation du  loading spinner
+        return refreshApex(this.wiredSchedulesResult); //  refresh datatable
       });
-    }catch (err) {
+    } catch (err) {
       //Affichage d'un toast de message d'erreur
       this.showToast(
         "Error",
         err?.body?.message || "An Error were occured while adding a schedule! ",
         "error"
       );
-    }finally {
+    } finally {
       this.isLoading = false;
     }
   }
-
 }

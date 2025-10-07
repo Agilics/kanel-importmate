@@ -9,23 +9,22 @@ describe("c-main-component", () => {
     }
   });
 
-  it("check  target object is selected",async () => {
+  it("check  target object is selected", async () => {
     // Arrange
     const element = createElement("c-main-component", {
       is: MainComponent
     });
-    element.targetObject ='account';
+    element.targetObject = "account";
     // Act
     document.body.appendChild(element);
 
-    // Assert 
-   // expect(p).toContain('Target Object:');
+    // Assert
+    // expect(p).toContain('Target Object:');
     await Promise.resolve();
 
-        const p = element.shadowRoot.querySelector('p');
-        expect(p.textContent).not.toBeNull();
-      expect(element.isTargetObjetSelected).toBeTruthy();
-      expect(element.targetObject.textContent).toBe('Account');
-  
+    const p = element.shadowRoot.querySelector("p");
+    expect(p.textContent).not.toBeNull();
+    expect(element.isTargetObjetSelected).toBeTruthy();
+    expect(element.targetObject.textContent).toBe("Account");
   });
 });
