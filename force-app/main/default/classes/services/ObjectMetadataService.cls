@@ -1,3 +1,10 @@
+/**
+ * @description       : 
+ * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @group             : 
+ * @last modified on  : 10-07-2025
+ * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+**/
 public with sharing class ObjectMetadataService {
     private static List<String> objectsCache;
     private static Map<String, Map<String, Schema.SObjectField>> fieldsCache = new Map<String, Map<String, Schema.SObjectField>>();
@@ -23,7 +30,6 @@ public with sharing class ObjectMetadataService {
         }
         return objectsCache;
     }
-
     public static Schema.DescribeSObjectResult getDescribe(String objectName) {
         if (String.isBlank(objectName)) {
             throw new ApplicationException('Nom d’objet requis.');
@@ -36,7 +42,6 @@ public with sharing class ObjectMetadataService {
         return t.getDescribe();
     }
 
-
     public static Map<String, Schema.SObjectField> getFieldsForObject(String objectName) {
         if (!fieldsCache.containsKey(objectName)) {
             Schema.DescribeSObjectResult d = getDescribe(objectName);
@@ -45,11 +50,10 @@ public with sharing class ObjectMetadataService {
         }
         return fieldsCache.get(objectName);
     }
-
-    
+ 
     public static Map<String,String> getPickListValues(String objectApiName, String fieldApiName){
         if(String.isBlank(objectApiName) && String.isBlank(fieldApiName)) {
-            throw new ScheduleException('Nom d’objet requis.');
+            throw new ApplicationException('Nom d’objet requis.');
         }   
         return ObjectMetadataRepository.getPickListValues(objectApiName,fieldApiName);
    }  
