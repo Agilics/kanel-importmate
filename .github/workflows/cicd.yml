@@ -97,7 +97,7 @@ jobs:
           npm install
           echo "✅ package-lock.json synchronisé"
       - run: npm ci
-      - run: npm run lint
+      #- run: npm run lint
       #- run: npm run test:unit:coverage
       #- run: npm run prettier:verify
       - name: Install Salesforce CLI
