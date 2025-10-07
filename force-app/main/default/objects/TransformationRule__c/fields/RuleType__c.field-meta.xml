@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>RuleType__c</fullName>
+    <externalId>false</externalId>
+    <label>Rule Type</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Concatenation</fullName>
+                <default>false</default>
+                <label>Concatenation</label>
+            </value>
+            <value>
+                <fullName>UppercaseTransformation</fullName>
+                <default>false</default>
+                <label>Uppercase Transformation</label>
+            </value>
+            <value>
+                <fullName>LowercaseTransformation</fullName>
+                <default>false</default>
+                <label>Lowercase Transformation</label>
+            </value>
+            <value>
+                <fullName>BooleanTransformation</fullName>
+                <default>false</default>
+                <label>Boolean Transformation</label>
+            </value>
+            <value>
+                <fullName>EmailMask</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Email Mask</label>
+            </value>
+            <value>
+                <fullName>PhoneMask</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Phone Mask</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>
