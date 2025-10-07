@@ -152,15 +152,15 @@
     <enableSearch>false</enableSearch>
     <enableSharing>true</enableSharing>
     <enableStreamingApi>true</enableStreamingApi>
-    <externalSharingModel>ControlledByParent</externalSharingModel>
-    <label>Field Mapping</label>
+    <externalSharingModel>Private</externalSharingModel>
+    <label>Error Log</label>
     <nameField>
-        <displayFormat>FM-{00000}</displayFormat>
-        <label>Field Mapping Name</label>
+        <displayFormat>EL-{00000}</displayFormat>
+        <label>Error Log Name</label>
         <type>AutoNumber</type>
     </nameField>
-    <pluralLabel>Field Mappings</pluralLabel>  
+    <pluralLabel>Error Logs</pluralLabel>
     <searchLayouts></searchLayouts>
-    <sharingModel>ControlledByParent</sharingModel>
+    <sharingModel>ReadWrite</sharingModel>
     <visibility>Public</visibility>
 </CustomObject>

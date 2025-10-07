@@ -152,15 +152,15 @@
     <enableSearch>false</enableSearch>
     <enableSharing>true</enableSharing>
     <enableStreamingApi>true</enableStreamingApi>
-    <externalSharingModel>ControlledByParent</externalSharingModel>
-    <label>Field Mapping</label>
+    <externalSharingModel>Private</externalSharingModel>
+    <label>Schedule</label>
     <nameField>
-        <displayFormat>FM-{00000}</displayFormat>
-        <label>Field Mapping Name</label>
+        <displayFormat>SCH-{00000}</displayFormat>
+        <label>Schedule Name</label>
         <type>AutoNumber</type>
     </nameField>
-    <pluralLabel>Field Mappings</pluralLabel>  
+    <pluralLabel>Schedules</pluralLabel>
     <searchLayouts></searchLayouts>
-    <sharingModel>ControlledByParent</sharingModel>
+    <sharingModel>ReadWrite</sharingModel>
     <visibility>Public</visibility>
 </CustomObject>

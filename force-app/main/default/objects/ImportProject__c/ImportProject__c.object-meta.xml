@@ -152,15 +152,14 @@
     <enableSearch>false</enableSearch>
     <enableSharing>true</enableSharing>
     <enableStreamingApi>true</enableStreamingApi>
-    <externalSharingModel>ControlledByParent</externalSharingModel>
-    <label>Field Mapping</label>
+    <externalSharingModel>Private</externalSharingModel>
+    <label>Import Project</label>
     <nameField>
-        <displayFormat>FM-{00000}</displayFormat>
-        <label>Field Mapping Name</label>
-        <type>AutoNumber</type>
+        <label>Import Project Name</label>
+        <type>Text</type>
     </nameField>
-    <pluralLabel>Field Mappings</pluralLabel>  
+    <pluralLabel>Import Projects</pluralLabel>
     <searchLayouts></searchLayouts>
-    <sharingModel>ControlledByParent</sharingModel>
+    <sharingModel>ReadWrite</sharingModel>
     <visibility>Public</visibility>
 </CustomObject>

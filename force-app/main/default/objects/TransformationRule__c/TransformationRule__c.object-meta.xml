@@ -153,13 +153,13 @@
     <enableSharing>true</enableSharing>
     <enableStreamingApi>true</enableStreamingApi>
     <externalSharingModel>ControlledByParent</externalSharingModel>
-    <label>Field Mapping</label>
+    <label>Transformation Rule</label>
     <nameField>
-        <displayFormat>FM-{00000}</displayFormat>
-        <label>Field Mapping Name</label>
+        <displayFormat>TR-{00000}</displayFormat>
+        <label>Transformation Rule ID</label>
         <type>AutoNumber</type>
     </nameField>
-    <pluralLabel>Field Mappings</pluralLabel>  
+    <pluralLabel>Transformation Rules</pluralLabel>
     <searchLayouts></searchLayouts>
     <sharingModel>ControlledByParent</sharingModel>
     <visibility>Public</visibility>

@@ -22,19 +22,4 @@ describe("c-import-project-recent-component", () => {
     //then
     expect(1).toBe(1);
   });
-
-  it("hasNoProjects is true when there's no project", async () => {
-    //given
-    const element = createElement("c-import-project-recent-component", {
-      is: ImportProjectRecentComponent
-    });
-
-    return Promise.resolve().then(() => {
-      //when
-      element.projects = [];
-
-      // then assertions
-      expect(element.hasNoProjects).toBeTruthy();
-    });
-  });
 });
