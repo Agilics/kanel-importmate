@@ -153,13 +153,13 @@
     <enableSharing>true</enableSharing>
     <enableStreamingApi>true</enableStreamingApi>
     <externalSharingModel>ControlledByParent</externalSharingModel>
-    <label>Field Mapping</label>
+    <label>Import Execution</label>
     <nameField>
-        <displayFormat>FM-{00000}</displayFormat>
-        <label>Field Mapping Name</label>
+        <displayFormat>IE-{00000}</displayFormat>
+        <label>Import Execution Name</label>
         <type>AutoNumber</type>
     </nameField>
-    <pluralLabel>Field Mappings</pluralLabel>
+    <pluralLabel>Import Executions</pluralLabel>
     <searchLayouts></searchLayouts>
     <sharingModel>ControlledByParent</sharingModel>
     <visibility>Public</visibility>
