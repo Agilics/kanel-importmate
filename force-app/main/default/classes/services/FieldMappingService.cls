@@ -1,92 +1,111 @@
 public with sharing class FieldMappingService {
 
-    private static void validateClean(String targetObjectApiName, List<FieldMappingRepository.FieldMappingDTO> rows) {
-        if (String.isBlank(targetObjectApiName)) {
+    private static void validateRowsAgainstSchema(
+        String targetSObjectApiName,
+        List<FieldMappingRepository.FieldMappingDTO> mappingRowDtos
+    ) {
+        if (String.isBlank(targetSObjectApiName)) {
             throw new ApplicationException('Target object is required.');
         }
-        if (rows == null || rows.isEmpty()) return;
+        if (mappingRowDtos == null || mappingRowDtos.isEmpty()) return;
 
-        Map<String, Schema.SObjectField> targetFields =
-            ObjectMetadataService.getFieldsForObject(targetObjectApiName);
+        Map<String, Schema.SObjectField> targetDescribeFieldsMap =
+            ObjectMetadataService.getFieldsForObject(targetSObjectApiName);
 
-        for (FieldMappingRepository.FieldMappingDTO r : rows) {
-            if (r == null) continue;
+        for (FieldMappingRepository.FieldMappingDTO mappingDto : mappingRowDtos) {
+            if (mappingDto == null) continue;
 
-            if (!String.isBlank(r.targetField) && !targetFields.containsKey(r.targetField)) {
+            if (!String.isBlank(mappingDto.targetField) && !targetDescribeFieldsMap.containsKey(mappingDto.targetField)) {
                 throw new ApplicationException(
-                    'Unknown target field "' + r.targetField + '" on ' + targetObjectApiName + '.'
+                    'Unknown target field "' + mappingDto.targetField + '" on ' + targetSObjectApiName + '.'
                 );
             }
-            if (r.isLookup == true) {
-                if (String.isBlank(r.lookupObject) || String.isBlank(r.lookupMatchField)) {
+
+            if (mappingDto.isLookup == true) {
+                if (String.isBlank(mappingDto.lookupObject) || String.isBlank(mappingDto.lookupMatchField)) {
                     throw new ApplicationException('Lookup requires both Lookup Object and Match Field.');
                 }
-                Map<String, Schema.SObjectField> lookupFields =
-                    ObjectMetadataService.getFieldsForObject(r.lookupObject);
-                if (!lookupFields.containsKey(r.lookupMatchField)) {
+                Map<String, Schema.SObjectField> lookupDescribeFieldsMap =
+                    ObjectMetadataService.getFieldsForObject(mappingDto.lookupObject);
+                if (!lookupDescribeFieldsMap.containsKey(mappingDto.lookupMatchField)) {
                     throw new ApplicationException(
-                        'Lookup match field "' + r.lookupMatchField + '" not found on ' + r.lookupObject + '.'
+                        'Lookup match field "' + mappingDto.lookupMatchField + '" not found on ' + mappingDto.lookupObject + '.'
                     );
                 }
             }
         }
     }
 
-    @AuraEnabled
-    public static List<FieldMapping__c> save(String targetObjectApiName,
-        List<FieldMappingRepository.FieldMappingDTO> rows) {
+   
+    public static List<FieldMapping__c> saveMappings(
+        String targetSObjectApiName,
+        List<FieldMappingRepository.FieldMappingDTO> inputMappingRowDtos
+    ) {
+        List<FieldMappingRepository.FieldMappingDTO> normalizedMappingRowDtos = new List<FieldMappingRepository.FieldMappingDTO>();
 
-        // Clean + keep only meaningful rows
-        List<FieldMappingRepository.FieldMappingDTO> clean = new List<FieldMappingRepository.FieldMappingDTO>();
-        if (rows != null) {
-            for (FieldMappingRepository.FieldMappingDTO r : rows) {
-                if (r == null) continue;
+        if (inputMappingRowDtos != null) {
+            for (FieldMappingRepository.FieldMappingDTO inputDto : inputMappingRowDtos) {
+                if (inputDto == null) continue;
 
-                String src  = (r.sourceColumn == null ? '' : r.sourceColumn.trim());
-                String tf   = (r.targetField == null ? '' : r.targetField.trim());
-                String ver  = (r.version == null ? '' : r.version.trim());
-                String lObj = (r.lookupObject == null ? '' : r.lookupObject.trim());
-                String lFld = (r.lookupMatchField == null ? '' : r.lookupMatchField.trim());
-                Boolean hasMapping = (!String.isBlank(tf) || r.isLookup == true);
+                String sourceColumnName         = (inputDto.sourceColumn == null ? '' : inputDto.sourceColumn.trim());
+                String targetFieldApiName       = (inputDto.targetField   == null ? '' : inputDto.targetField.trim());
+                String versionName              = (inputDto.version       == null ? '' : inputDto.version.trim());
+                String lookupObjectApiName      = (inputDto.lookupObject  == null ? '' : inputDto.lookupObject.trim());
+                String lookupMatchFieldApiName  = (inputDto.lookupMatchField == null ? '' : inputDto.lookupMatchField.trim());
+                Boolean hasAnyMapping           = (!String.isBlank(targetFieldApiName) || inputDto.isLookup == true);
 
-                if (!String.isBlank(src) && hasMapping) {
-                    FieldMappingRepository.FieldMappingDTO x = new FieldMappingRepository.FieldMappingDTO();
-                    x.id               = r.id;
-                    x.projectId        = r.projectId;
-                    x.version          = ver;
-                    x.sourceColumn     = src;
-                    x.targetField      = tf;
-                    x.isLookup         = r.isLookup == true;
-                    x.lookupObject     = lObj;
-                    x.lookupMatchField = lFld;
-                    clean.add(x);
+                if (!String.isBlank(sourceColumnName) && hasAnyMapping) {
+                    FieldMappingRepository.FieldMappingDTO normalizedDto = new FieldMappingRepository.FieldMappingDTO();
+                    normalizedDto.id               = inputDto.id;
+                    normalizedDto.projectId        = inputDto.projectId;
+                    normalizedDto.version          = versionName;
+                    normalizedDto.sourceColumn     = sourceColumnName;
+                    normalizedDto.targetField      = targetFieldApiName;
+                    normalizedDto.isLookup         = inputDto.isLookup == true;
+                    normalizedDto.lookupObject     = lookupObjectApiName;
+                    normalizedDto.lookupMatchField = lookupMatchFieldApiName;
+                    normalizedMappingRowDtos.add(normalizedDto);
                 }
             }
         }
-        if (clean.isEmpty()) {
+
+        if (normalizedMappingRowDtos.isEmpty()) {
             throw new ApplicationException('No valid mapping rows to save.');
         }
 
-        validateClean(targetObjectApiName, clean);
-        return FieldMappingRepository.upsertMappings(clean);
+        validateRowsAgainstSchema(targetSObjectApiName, normalizedMappingRowDtos);
+        return FieldMappingRepository.upsertMappings(normalizedMappingRowDtos);
     }
 
-    @AuraEnabled(cacheable=true)
-    public static List<FieldMappingRepository.FieldMappingDTO> load(Id projectId, String version) {
-        List<FieldMapping__c> found = FieldMappingRepository.load(projectId, version, null);
-        List<FieldMappingRepository.FieldMappingDTO> out = new List<FieldMappingRepository.FieldMappingDTO>();
-        for (FieldMapping__c fm : found) {
-            FieldMappingRepository.FieldMappingDTO d = new FieldMappingRepository.FieldMappingDTO();
-            d.id               = fm.Id;
-            d.projectId        = fm.Project__c;
-            d.version          = fm.Version__c; 
-            d.sourceColumn     = fm.SourceColumn__c;
-            d.targetField      = fm.TargetField__c;
-            d.isLookup         = fm.IsLookup__c;
-            d.lookupObject     = fm.LookupObject__c;
-            d.lookupMatchField = fm.LookupMatchField__c;
-            out.add(d);
+    public static List<FieldMappingRepository.FieldMappingDTO> getMappingsByProject(
+        Id projectId,
+        String version
+    ) {
+        List<FieldMapping__c> mappingRecords = FieldMappingRepository.getByProject(projectId, version);
+        return toDtos(mappingRecords);
+    }
+
+    public static List<FieldMappingRepository.FieldMappingDTO> getAllMappingsByProject(Id projectId) {
+        List<FieldMapping__c> mappingRecords = FieldMappingRepository.getAllByProject(projectId);
+        return toDtos(mappingRecords);
+    }
+
+    private static List<FieldMappingRepository.FieldMappingDTO> toDtos(List<FieldMapping__c> mappingRecords) {
+        List<FieldMappingRepository.FieldMappingDTO> mappingRowDtos = new List<FieldMappingRepository.FieldMappingDTO>();
+        if (mappingRecords == null) return mappingRowDtos;
+
+        for (FieldMapping__c mappingRecord : mappingRecords) {
+            FieldMappingRepository.FieldMappingDTO dto = new FieldMappingRepository.FieldMappingDTO();
+            dto.id               = mappingRecord.Id;
+            dto.projectId        = mappingRecord.Project__c;
+            dto.version          = mappingRecord.Version__c;
+            dto.sourceColumn     = mappingRecord.SourceColumn__c;
+            dto.targetField      = mappingRecord.TargetField__c;
+            dto.isLookup         = mappingRecord.IsLookup__c;
+            dto.lookupObject     = mappingRecord.LookupObject__c;
+            dto.lookupMatchField = mappingRecord.LookupMatchField__c;
+            mappingRowDtos.add(dto);
         }
-        return out;
+        return mappingRowDtos;
     }
 }

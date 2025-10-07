@@ -11,83 +11,100 @@ public with sharing class FieldMappingRepository {
         @AuraEnabled public String  lookupMatchField;
     }
 
-    // Load by Project + Version 
-    public static List<FieldMapping__c> load(Id projectId, String version, String targetObjectApiName) {
-        String baseSoql =
+    // Petite aide pour composer la clé logique
+    private static final String KEY_DELIM = '|';
+
+    public static List<FieldMapping__c> getByProject(Id projectId, String version) {
+        if (projectId == null) return new List<FieldMapping__c>();
+
+        String baseQuery =
             'SELECT Id, Project__c, Version__c, SourceColumn__c, TargetField__c, ' +
             'IsLookup__c, LookupObject__c, LookupMatchField__c ' +
             'FROM FieldMapping__c WHERE Project__c = :projectId';
 
-        if (String.isNotBlank(version)) {
-            baseSoql += ' AND Version__c = :version';
+        if (!String.isBlank(version)) {
+            baseQuery += ' AND Version__c = :version';
         }
-        return Database.query(baseSoql + ' ORDER BY SourceColumn__c');
+
+        baseQuery += ' ORDER BY SourceColumn__c';
+        return Database.query(baseQuery);
     }
 
-    // Upsert by (Project__c, Version__c, SourceColumn__c)
-    public static List<FieldMapping__c> upsertMappings(List<FieldMappingDTO> rows) {
-        if (rows == null || rows.isEmpty()) return new List<FieldMapping__c>();
+    /** Retourne tous les enregistrements FieldMapping__c d'un projet (toutes versions). */
+    public static List<FieldMapping__c> getAllByProject(Id projectId) {
+        return getByProject(projectId, null);
+    }
 
-        // Build lookup keys and collect values for a single SOQL fetch
-        Set<Id> projectIds = new Set<Id>();
-        Set<String> versions = new Set<String>();
-        Set<String> sources = new Set<String>();
-        for (FieldMappingDTO r : rows) {
-            if (r == null) continue;
-            if (r.projectId != null) projectIds.add(r.projectId);
-            if (!String.isBlank(r.version)) versions.add(r.version);
-            if (!String.isBlank(r.sourceColumn)) sources.add(r.sourceColumn);
+    public static List<FieldMapping__c> upsertMappings(List<FieldMappingDTO> inputMappingDtos) {
+        if (inputMappingDtos == null || inputMappingDtos.isEmpty()) return new List<FieldMapping__c>();
+
+        // Collecte des clés pour un fetch unique
+        Set<Id> projectIdSet              = new Set<Id>();
+        Set<String> versionSet            = new Set<String>();
+        Set<String> sourceColumnNameSet   = new Set<String>();
+
+        for (FieldMappingDTO inputDto : inputMappingDtos) {
+            if (inputDto == null) continue;
+            if (inputDto.projectId != null)            projectIdSet.add(inputDto.projectId);
+            if (!String.isBlank(inputDto.version))     versionSet.add(inputDto.version);
+            if (!String.isBlank(inputDto.sourceColumn)) sourceColumnNameSet.add(inputDto.sourceColumn);
         }
 
-        // Fetch existing rows
-        List<FieldMapping__c> existing = new List<FieldMapping__c>();
-        if (!projectIds.isEmpty() && !sources.isEmpty()) {
-            String soql =
+        // Récupération des existants pour construire la map (clé logique)
+        List<FieldMapping__c> existingRows = new List<FieldMapping__c>();
+        if (!projectIdSet.isEmpty() && !sourceColumnNameSet.isEmpty()) {
+            String existingQuery =
                 'SELECT Id, Project__c, Version__c, SourceColumn__c, TargetField__c, ' +
                 'IsLookup__c, LookupObject__c, LookupMatchField__c ' +
-                'FROM FieldMapping__c WHERE Project__c IN :projectIds ' +
-                'AND SourceColumn__c IN :sources';
-            if (!versions.isEmpty()) {
-                soql += ' AND Version__c IN :versions';
+                'FROM FieldMapping__c WHERE Project__c IN :projectIdSet ' +
+                'AND SourceColumn__c IN :sourceColumnNameSet';
+
+            if (!versionSet.isEmpty()) {
+                existingQuery += ' AND Version__c IN :versionSet';
             }
-            existing = Database.query(soql);
+            existingRows = Database.query(existingQuery);
         }
 
-        // Key existing by (project|version|sourceColumn) case-insensitive on source
-        Map<String, FieldMapping__c> byKey = new Map<String, FieldMapping__c>();
-        for (FieldMapping__c fm : existing) {
-            String key = String.valueOf(fm.Project__c) + '|' +
-                         (fm.Version__c == null ? '' : fm.Version__c) + '|' +
-                         (fm.SourceColumn__c == null ? '' : fm.SourceColumn__c.toLowerCase());
-            byKey.put(key, fm);
+        // Indexation des existants par clé logique
+        Map<String, FieldMapping__c> existingByCompositeKey = new Map<String, FieldMapping__c>();
+        for (FieldMapping__c existingRecord : existingRows) {
+            String projectIdPart          = String.valueOf(existingRecord.Project__c);
+            String versionPart            = (existingRecord.Version__c == null ? '' : existingRecord.Version__c);
+            String normalizedSourceColumn = (existingRecord.SourceColumn__c == null ? '' : existingRecord.SourceColumn__c.toLowerCase());
+            String compositeKey           = projectIdPart + KEY_DELIM + versionPart + KEY_DELIM + normalizedSourceColumn;
+            existingByCompositeKey.put(compositeKey, existingRecord);
         }
 
-        List<FieldMapping__c> toUpsert = new List<FieldMapping__c>();
-        for (FieldMappingDTO d : rows) {
-            if (d == null) continue;
-            String v = d.version == null ? '' : d.version;
-            String s = d.sourceColumn == null ? '' : d.sourceColumn;
-            String key = String.valueOf(d.projectId) + '|' + v + '|' + s.toLowerCase();
+        // Construction de la liste à upsert
+        List<FieldMapping__c> recordsToUpsert = new List<FieldMapping__c>();
+        for (FieldMappingDTO inputDto : inputMappingDtos) {
+            if (inputDto == null) continue;
 
-            FieldMapping__c rec = byKey.get(key);
-            if (rec == null) {
-                rec = new FieldMapping__c();
-                rec.Project__c        = d.projectId;
-                rec.Version__c        = v;               
-                rec.SourceColumn__c   = s;
+            String versionPart            = (inputDto.version == null ? '' : inputDto.version);
+            String sourceColumnPart       = (inputDto.sourceColumn == null ? '' : inputDto.sourceColumn);
+            String normalizedSourceColumn = sourceColumnPart.toLowerCase();
+            String compositeKey           = String.valueOf(inputDto.projectId) + KEY_DELIM + versionPart + KEY_DELIM + normalizedSourceColumn;
+
+            FieldMapping__c targetRecord = existingByCompositeKey.get(compositeKey);
+            if (targetRecord == null) {
+                targetRecord = new FieldMapping__c();
+                targetRecord.Project__c      = inputDto.projectId;
+                targetRecord.Version__c      = versionPart;
+                targetRecord.SourceColumn__c = sourceColumnPart;
             }
-            // Always (re)apply mutable fields
-            rec.TargetField__c      = d.targetField;
-            rec.IsLookup__c         = d.isLookup;
-            rec.LookupObject__c     = d.lookupObject;
-            rec.LookupMatchField__c = d.lookupMatchField;
 
-            toUpsert.add(rec);
+            // Champs mutables toujours mis à jour
+            targetRecord.TargetField__c      = inputDto.targetField;
+            targetRecord.IsLookup__c         = inputDto.isLookup;
+            targetRecord.LookupObject__c     = inputDto.lookupObject;
+            targetRecord.LookupMatchField__c = inputDto.lookupMatchField;
+
+            recordsToUpsert.add(targetRecord);
         }
 
-        if (!toUpsert.isEmpty()) {
-            upsert toUpsert; 
+        if (!recordsToUpsert.isEmpty()) {
+            upsert recordsToUpsert;
         }
-        return toUpsert;
+        return recordsToUpsert;
     }
 }

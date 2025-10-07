@@ -12,53 +12,64 @@ public with sharing class FieldMappingController {
 
     @AuraEnabled(cacheable=true)
     public static List<FieldInfoDTO> fetchFields(String objectApiName) {
-        Map<String, Schema.SObjectField> m = ObjectMetadataService.getFieldsForObject(objectApiName);
-        List<FieldInfoDTO> out = new List<FieldInfoDTO>();
-        for (String api : m.keySet()) {
-            Schema.DescribeFieldResult d = m.get(api).getDescribe();
-            if (d.isAccessible()) {
-                FieldInfoDTO f = new FieldInfoDTO();
-                f.apiName = api;
-                f.label   = d.getLabel();
-                out.add(f);
+        Map<String, Schema.SObjectField> fieldsByApiName =
+            ObjectMetadataService.getFieldsForObject(objectApiName);
+
+  
+        List<FieldInfoDTO> fieldInfoList = new List<FieldInfoDTO>();
+
+        for (String fieldApiName : fieldsByApiName.keySet()) {
+            Schema.DescribeFieldResult fieldDescribe = fieldsByApiName.get(fieldApiName).getDescribe();
+            if (fieldDescribe.isAccessible()) {
+                FieldInfoDTO fieldInfo = new FieldInfoDTO();
+                fieldInfo.apiName = fieldApiName;
+                fieldInfo.label   = fieldDescribe.getLabel();
+                fieldInfoList.add(fieldInfo);
             }
         }
-        out.sort(new ComparatorFieldInfo());
-        return out;
+
+        fieldInfoList.sort(new ComparatorFieldInfo());
+        return fieldInfoList;
     }
 
     public class ComparatorFieldInfo implements System.Comparator<FieldInfoDTO> {
-        public Integer compare(FieldInfoDTO a, FieldInfoDTO b) {
-            String la = (a == null || a.label == null) ? '' : a.label.toLowerCase();
-            String lb = (b == null || b.label == null) ? '' : b.label.toLowerCase();
-            return la.compareTo(lb);
+        public Integer compare(FieldInfoDTO left, FieldInfoDTO right) {
+            String leftLabelNormalized  = (left  == null || left.label  == null) ? '' : left.label.toLowerCase();
+            String rightLabelNormalized = (right == null || right.label == null) ? '' : right.label.toLowerCase();
+            return leftLabelNormalized.compareTo(rightLabelNormalized);
         }
     }
 
+
     @AuraEnabled
-    public static List<FieldMapping__c> saveMappings(String targetObjectApiName,
-        List<FieldMappingRepository.FieldMappingDTO> rows) {
-        return FieldMappingService.save(targetObjectApiName, rows);
+    public static List<FieldMapping__c> saveMappings(
+        String targetObjectApiName,
+        List<FieldMappingRepository.FieldMappingDTO> rows
+    ) {
+      
+        List<FieldMappingRepository.FieldMappingDTO> mappingRowDtos = rows;
+        return FieldMappingService.saveMappings(targetObjectApiName, mappingRowDtos);
     }
 
     @AuraEnabled(cacheable=true)
     public static List<FieldMappingRepository.FieldMappingDTO> loadMappings(Id projectId, String version) {
-        return FieldMappingService.load(projectId, version);
+        return FieldMappingService.getMappingsByProject(projectId, version);
     }
 
     @AuraEnabled
-        public static List<FieldMapping__c> saveMappingsJson(
-            String targetObjectApiName,
-            String rowsJson
-        ) {
-            List<FieldMappingRepository.FieldMappingDTO> rows =
-                (List<FieldMappingRepository.FieldMappingDTO>)
-                JSON.deserialize(rowsJson, List<FieldMappingRepository.FieldMappingDTO>.class);
+    public static List<FieldMapping__c> saveMappingsJson(
+        String targetObjectApiName,
+        String rowsJson
+    ) {
+        List<FieldMappingRepository.FieldMappingDTO> parsedMappingRowDtos =
+            (List<FieldMappingRepository.FieldMappingDTO>)
+            JSON.deserialize(rowsJson, List<FieldMappingRepository.FieldMappingDTO>.class);
 
-            return FieldMappingService.save(targetObjectApiName, rows);
-        }
+        return FieldMappingService.saveMappings(targetObjectApiName, parsedMappingRowDtos);
+    }
 
-         public class ProjectDTO {
+
+    public class ProjectDTO {
         @AuraEnabled public String id;
         @AuraEnabled public String name;
         @AuraEnabled public String targetObject; 
@@ -66,19 +77,19 @@ public with sharing class FieldMappingController {
 
     @AuraEnabled(cacheable=true)
     public static List<ProjectDTO> fetchProjects() {
-        List<ProjectDTO> out = new List<ProjectDTO>();
-        for (ImportProject__c p : [
+        List<ProjectDTO> projectDtoList = new List<ProjectDTO>();
+
+        for (ImportProject__c projectRecord : [
             SELECT Id, Name, TargetObject__c
             FROM ImportProject__c
             ORDER BY Name
         ]) {
-            ProjectDTO d = new ProjectDTO();
-            d.id = p.Id;
-            d.name = p.Name;
-            d.targetObject = p.TargetObject__c;
-            out.add(d);
+            ProjectDTO projectDto   = new ProjectDTO();
+            projectDto.id           = projectRecord.Id;
+            projectDto.name         = projectRecord.Name;
+            projectDto.targetObject = projectRecord.TargetObject__c;
+            projectDtoList.add(projectDto);
         }
-        return out;
+        return projectDtoList;
     }
-
 }
