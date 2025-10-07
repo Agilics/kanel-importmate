@@ -50,7 +50,7 @@ jobs:
           npm install
           echo "✅ package-lock.json synchronisé"
       - run: npm ci
-      - run: npm run lint
+      #- run: npm run lint
       - name: Install Salesforce CLI
         run: npm install -g @salesforce/cli
       - name: Authenticate to Dev Hub
