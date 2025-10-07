@@ -159,7 +159,7 @@
         <label>Field Mapping Name</label>
         <type>AutoNumber</type>
     </nameField>
-    <pluralLabel>Field Mappings</pluralLabel>  
+    <pluralLabel>Field Mappings</pluralLabel>
     <searchLayouts></searchLayouts>
     <sharingModel>ControlledByParent</sharingModel>
     <visibility>Public</visibility>
