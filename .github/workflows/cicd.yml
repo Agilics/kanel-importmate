@@ -64,11 +64,17 @@ jobs:
         run: npm install -g @salesforce/cli
       - name: Authenticate to Dev Hub
         run: |
-          echo "🔍 Debug: Checking if secrets are set..."
-          if [ -n "${{ secrets.SF_DEVHUB_USERNAME }}" ]; then echo "✅ SF_DEVHUB_USERNAME is set"; else echo "❌ SF_DEVHUB_USERNAME is empty"; fi
-          if [ -n "${{ secrets.SF_DEVHUB_URL }}" ]; then echo "✅ SF_DEVHUB_URL is set"; else echo "❌ SF_DEVHUB_URL is empty"; fi
-          if [ -n "${{ secrets.SF_CONNECTED_APP_CONSUMER_KEY }}" ]; then echo "✅ SF_CONNECTED_APP_CONSUMER_KEY is set"; else echo "❌ SF_CONNECTED_APP_CONSUMER_KEY is empty"; fi
-          if [ -n "${{ secrets.SF_JWT_KEY_FILE }}" ]; then echo "✅ SF_JWT_KEY_FILE is set"; else echo "❌ SF_JWT_KEY_FILE is empty"; fi
+          echo "🔍 Debug: Checking secrets values..."
+          export DEVHUB_USERNAME="${{ secrets.SF_DEVHUB_USERNAME }}"
+          export DEVHUB_URL="${{ secrets.SF_DEVHUB_URL }}"
+          export CONSUMER_KEY="${{ secrets.SF_CONNECTED_APP_CONSUMER_KEY }}"
+          export JWT_KEY="${{ secrets.SF_JWT_KEY_FILE }}"
+          
+          echo "🔍 SF_DEVHUB_USERNAME = $DEVHUB_USERNAME"
+          echo "🔍 SF_DEVHUB_URL = $DEVHUB_URL"
+          echo "🔍 SF_CONNECTED_APP_CONSUMER_KEY = $CONSUMER_KEY"
+          echo "🔍 SF_JWT_KEY_FILE length = ${#JWT_KEY} characters"
+          
           printf "%s" "${{ secrets.SF_JWT_KEY_FILE }}" > jwt.key
           echo "🔍 Debug: JWT key file created, size: $(wc -c < jwt.key) bytes"
           sf org login jwt --client-id ${{ secrets.SF_CONNECTED_APP_CONSUMER_KEY }} --jwt-key-file jwt.key --username ${{ secrets.SF_DEVHUB_USERNAME }} --instance-url ${{ secrets.SF_DEVHUB_URL }} --alias devhub
