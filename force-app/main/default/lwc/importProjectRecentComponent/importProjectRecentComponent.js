@@ -1,5 +1,4 @@
-import { LightningElement, api, track } from "lwc";
-import searchProjetById from "@salesforce/apex/ImportProjectController.searchProjetById";
+import { LightningElement, api, track } from "lwc"; 
  
 
 export default class ImportProjectRecentComponent extends LightningElement {
@@ -28,21 +27,7 @@ export default class ImportProjectRecentComponent extends LightningElement {
     this.dispatchEvent(new CustomEvent("show"));
   }
 
-  //Affichage  détail d'un projet importé via le modal DetailViewComponent
-  async handleShowDetails(event) {
-    //recherche le project via son id
-    searchProjetById({ id: event.target.dataset.id })
-      .then((result) => {
-        return DetailView.open({
-          size: "medium",
-          description: "Détail du projet",
-          project: result
-        });
-      })
-      .catch((err) => {
-        console.error("Erreur Apex:", err);
-      });
-  }
+ 
 
   //fermeture la section projets récents et on affiche la section création de projets
   openNewProject() {
