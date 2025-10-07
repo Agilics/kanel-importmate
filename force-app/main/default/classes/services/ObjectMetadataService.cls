@@ -1,3 +1,10 @@
+/**
+ * @description       : 
+ * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @group             : 
+ * @last modified on  : 10-07-2025
+ * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+**/
 public with sharing class ObjectMetadataService {
     private static List<String> objectsCache;
     private static Map<String, Map<String, Schema.SObjectField>> fieldsCache = new Map<String, Map<String, Schema.SObjectField>>();
@@ -36,7 +43,7 @@ public with sharing class ObjectMetadataService {
         return t.getDescribe();
     }
 
-
+    //récupèrer le champs de l'objet  
     public static Map<String, Schema.SObjectField> getFieldsForObject(String objectName) {
         if (!fieldsCache.containsKey(objectName)) {
             Schema.DescribeSObjectResult d = getDescribe(objectName);
@@ -45,13 +52,38 @@ public with sharing class ObjectMetadataService {
         }
         return fieldsCache.get(objectName);
     }
-
-    
+ 
+     // Récupérer les labels et valeurs d'un champs d'un objet de Selection
     public static Map<String,String> getPickListValues(String objectApiName, String fieldApiName){
         if(String.isBlank(objectApiName) && String.isBlank(fieldApiName)) {
-            throw new ScheduleException('Nom d’objet requis.');
-        }   
-        return ObjectMetadataRepository.getPickListValues(objectApiName,fieldApiName);
-   }  
-     
+            throw new ApplicationException('Nom d’objet requis.');
+        }
+        
+        Schema.SObjectType objType = Schema.getGlobalDescribe().get(objectApiName);
+        if (objType == null) {
+            throw new ApplicationException('Objet inconnu : ' + objectApiName);
+        }
+        
+        Schema.DescribeSObjectResult objDescribe = objType.getDescribe();
+        Map<String, Schema.SObjectField> fieldMap = objDescribe.fields.getMap();
+        Schema.SObjectField field = fieldMap.get(fieldApiName);
+        if (field == null) {
+            throw new ApplicationException('Champ inconnu : ' + fieldApiName);
+        }
+        
+        Schema.DescribeFieldResult fieldDescribe = field.getDescribe();
+        if (fieldDescribe.getType() != Schema.DisplayType.PICKLIST) {
+            throw new ApplicationException('Le champ n\'est pas une picklist : ' + fieldApiName);
+        }
+        
+        List<Schema.PicklistEntry> picklistEntries = fieldDescribe.getPicklistValues();
+        Map<String, String> picklistMap = new Map<String, String>();
+        
+        for (Schema.PicklistEntry entry : picklistEntries) {
+            if (entry.isActive()) {
+                picklistMap.put(entry.getLabel(), entry.getValue());
+            }
+        }
+        return picklistMap;
+   }
 }
