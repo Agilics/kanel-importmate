@@ -30,6 +30,7 @@ public with sharing class ObjectMetadataService {
         }
         return objectsCache;
     }
+
     public static Schema.DescribeSObjectResult getDescribe(String objectName) {
         if (String.isBlank(objectName)) {
             throw new ApplicationException('Nom d’objet requis.');
@@ -42,6 +43,7 @@ public with sharing class ObjectMetadataService {
         return t.getDescribe();
     }
 
+    //récupèrer le champs de l'objet  
     public static Map<String, Schema.SObjectField> getFieldsForObject(String objectName) {
         if (!fieldsCache.containsKey(objectName)) {
             Schema.DescribeSObjectResult d = getDescribe(objectName);
