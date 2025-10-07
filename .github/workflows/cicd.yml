@@ -1,13 +1,5 @@
 name: AppExchange CI/CD
 
-# IMPORTANT: To enable pre-merge validation, configure branch protection rules for 'develop' branch:
-# 1. Go to Settings > Branches > Add rule
-# 2. Branch name pattern: develop
-# 3. Check "Require status checks to pass before merging"
-# 4. Check "Require branches to be up to date before merging"
-# 5. Select "pre-merge-validation" as required status check
-# 6. Check "Restrict pushes that create files" (optional)
-
 on:
   push:
     branches: [develop, main, "release/*"]
@@ -37,75 +29,11 @@ jobs:
       - name: Validation du code
         run: |
           echo "Validation de la syntaxe et structure..."
-          #npm run lint
-          #npm run test:unit:coverage
+          npm run lint
+          npm run test:unit:coverage
           # npm run prettier:verify
 
-  # 1. Pre-merge Deployment Validation in Scratch Org
-  pre-merge-validation:
-    if: github.event_name == 'pull_request' && github.base_ref == 'develop'
-    runs-on: ubuntu-latest
-    needs: validation
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-      - name: Synchroniser package-lock.json
-        run: |
-          echo "🔄 Synchronisation du package-lock.json..."
-          rm -f package-lock.json
-          npm install
-          echo "✅ package-lock.json synchronisé"
-      - run: npm ci
-      # - run: npm run lint
-      # - run: npm run test:unit:coverage
-      - name: Install Salesforce CLI
-        run: npm install -g @salesforce/cli
-      - name: Authenticate to Dev Hub
-        run: |
-          echo "🔍 Debug: Checking secrets values..."
-          export DEVHUB_USERNAME="${{ secrets.SF_DEVHUB_USERNAME }}"
-          export DEVHUB_URL="${{ secrets.SF_DEVHUB_URL }}"
-          export CONSUMER_KEY="${{ secrets.SF_CONNECTED_APP_CONSUMER_KEY }}"
-          export JWT_KEY="${{ secrets.SF_JWT_KEY_FILE }}"
-          
-          echo "🔍 SF_DEVHUB_USERNAME = $DEVHUB_USERNAME"
-          echo "🔍 SF_DEVHUB_URL = $DEVHUB_URL"
-          echo "🔍 SF_CONNECTED_APP_CONSUMER_KEY = $CONSUMER_KEY"
-          echo "🔍 SF_JWT_KEY_FILE length = ${#JWT_KEY} characters"
-          
-          printf "%s" "${{ secrets.SF_JWT_KEY_FILE }}" > jwt.key
-          echo "🔍 Debug: JWT key file created, size: $(wc -c < jwt.key) bytes"
-          sf org login jwt --client-id ${{ secrets.SF_CONNECTED_APP_CONSUMER_KEY }} --jwt-key-file jwt.key --username ${{ secrets.SF_DEVHUB_USERNAME }} --instance-url ${{ secrets.SF_DEVHUB_URL }} --alias devhub
-      - name: Verify Dev Hub Connection
-        run: |
-          echo "🔍 Verifying Dev Hub connection..."
-          sf org display --target-org devhub
-          echo "✅ Dev Hub connection verified"
-      - name: Create Scratch Org for Validation
-        run: |
-          echo "🏗️ Creating scratch org for deployment validation..."
-          sf org create scratch --definition-file config/project-scratch-def.json --alias pre-merge-validation --duration-days 1 --target-dev-hub devhub --wait 10
-          echo "✅ Scratch org created successfully"
-      - name: Deploy to Scratch Org
-        run: |
-          echo "🚀 Deploying to scratch org for validation..."
-          sf project deploy start --source-dir force-app --target-org pre-merge-validation --ignore-conflicts
-          echo "✅ Deployment successful"
-      - name: Run Tests in Scratch Org
-        run: |
-          echo "🧪 Running tests in scratch org..."
-          sf apex run test --test-level RunLocalTests --target-org pre-merge-validation --wait 10 --result-format human
-          echo "✅ All tests passed"
-      - name: Delete Scratch Org
-        if: always()
-        run: |
-          echo "🧹 Cleaning up scratch org..."
-          sf org delete scratch --target-org pre-merge-validation --no-prompt || echo "Scratch org already deleted"
-      - run: rm -f jwt.key
-
-  # 2. Integration Testing in Dedicated Sandbox (feature/develop branches)
+  # 1. Integration Testing in Dedicated Sandbox (feature/develop branches)
   integration:
     environment: integration
     if: github.ref == 'refs/heads/develop' || startsWith(github.ref, 'refs/heads/feature/')
@@ -125,6 +53,7 @@ jobs:
       - run: npm ci
       - run: npm run lint
       - run: npm run test:unit:coverage
+      #- run: npm run prettier:verify
       - name: Install Salesforce CLI
         run: npm install -g @salesforce/cli
       - name: Authenticate to Integration Sandbox
@@ -143,7 +72,7 @@ jobs:
           sf apex run test --test-level RunLocalTests --target-org int-sandbox --wait 10
       - run: rm -f jwt.key
 
-  # 3. UAT in Sandbox (release/* branch)
+  # 2. UAT in Sandbox (release/* branch)
   uat:
     environment: uat
     if: startsWith(github.ref, 'refs/heads/release/')
@@ -179,7 +108,7 @@ jobs:
           sf apex run test --test-level RunLocalTests --target-org uat-org --wait 10
       - run: rm -f jwt.key
 
-  # 4. Package Creation in Packaging Env Hub DE Org (main branch, manual trigger)
+  # 3. Package Creation in Packaging Env Hub DE Org (main branch, manual trigger)
   package:
     environment: package
     if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
@@ -217,7 +146,7 @@ jobs:
           echo "package_version_id=$VERSION_ID" >> $GITHUB_OUTPUT
       - run: rm -f jwt.key
 
-  # 5. Subscriber Org Install/Upgrade Test (manual trigger)
+  # 4. Subscriber Org Install/Upgrade Test (manual trigger)
   subscriber-test:
     environment: subscriber
     if: github.event_name == 'workflow_dispatch'
