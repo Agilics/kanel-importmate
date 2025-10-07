@@ -2,7 +2,7 @@
     * @description       : 
     * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
     * @group             : 
-    * @last modified on  : 10-01-2025
+    * @last modified on  : 10-07-2025
     * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
     **/
     @isTest
@@ -37,19 +37,18 @@
             return project;
         }
 
-        public static Schedule__c createSchedule(){
-            ImportProject__c project = TestDataFactory.createImportProject() ;
-            String frequence = String.valueOf(FrequencyEnum.DAILY); 
+     public static Schedule__c createSchedule() {
+        ImportProject__c project = createImportProject();
+        Schedule__c schedule = new Schedule__c(
+            Name = 'Test Schedule',
+            Frequency__c = 'DAILY',
+            Project__c = project.Id,
+            NextRun__c = Datetime.now().addDays(1)
+        );
+        insert schedule;
+        return schedule;
+    }
 
-            Schedule__c schedule = new Schedule__c(
-                Frequency__c = 'Daily', 
-                Project__c = project.Id,
-                NextRun__c = System.today().addDays(1)
-            );
-            
-            insert schedule;
-            return schedule;
-        }
     
         public static ImportExecution__c createImportExecution(Id projectId) {
             ImportExecution__c execution = new ImportExecution__c(

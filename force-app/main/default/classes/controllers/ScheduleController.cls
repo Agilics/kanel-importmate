@@ -69,7 +69,7 @@ public with sharing class ScheduleController {
     }
     
     //supprimer planification par l'id
-    @AuraEnabled(cacheable=false)
+    @AuraEnabled
     public static void deleteSchedule(Id scheduleId) {
         ScheduleService.deleteScheduleById(scheduleId);
     }
