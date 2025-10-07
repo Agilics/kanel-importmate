@@ -2,7 +2,7 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 10-03-2025
+ * @last modified on  : 10-07-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 @IsTest
@@ -29,7 +29,7 @@ public class ScheduleControllerTest {
         // When
         Test.startTest();
         Id scheduleId = ScheduleController.addSchedule(
-            String.valueOf(FrequencyEnum.DAILY),
+            String.valueOf(ScheduleService.FrequencyEnum.DAILY),
             nextRun,
             project.Id
         );
@@ -49,7 +49,7 @@ public class ScheduleControllerTest {
         ];
 
         System.assertEquals(
-            String.valueOf(FrequencyEnum.DAILY),
+            String.valueOf(ScheduleService.FrequencyEnum.DAILY),
             insertedSchedule.Frequency__c.toUpperCase(),
             'La fréquence doit être DAILY'
         );
@@ -70,7 +70,7 @@ public class ScheduleControllerTest {
         // When
         Test.startTest();
         Id scheduleId =ScheduleController.addSchedule(
-            String.valueOf(FrequencyEnum.DAILY),
+            String.valueOf(ScheduleService.FrequencyEnum.DAILY),
             nextRun,
             project.Id
         );
@@ -81,7 +81,7 @@ public class ScheduleControllerTest {
             WHERE Id = :scheduleId
             LIMIT 1
         ];
-        insertedSchedule.Frequency__c = String.valueOf(FrequencyEnum.MONTHLY);
+        insertedSchedule.Frequency__c = String.valueOf(ScheduleService.FrequencyEnum.MONTHLY);
 
        Id resultId = ScheduleController.addSchedule(
             insertedSchedule.Frequency__c,
@@ -103,7 +103,7 @@ public class ScheduleControllerTest {
 
 
         System.assertEquals(
-            String.valueOf(FrequencyEnum.MONTHLY),
+            String.valueOf(ScheduleService.FrequencyEnum.MONTHLY),
              updateSchedule.Frequency__c.toUpperCase(),
             'La fréquence doit être MONTHLY'
         );
@@ -221,7 +221,7 @@ public class ScheduleControllerTest {
     Test.stopTest();   
 
     //then
-    System.assert(result.size()>0, 'Echec j\'ai la flemme de faire la desc');  
+    System.assert(result.size()>0, 'Echec ');  
   }
 
 }

@@ -38,7 +38,7 @@ public with sharing class ObjectMetadataServiceTest {
         String fieldApiName  = 'Type';
 
         Test.startTest();
-        Map<String, String> values = ObjectMetadataController.getPickListValues(objectApiName, fieldApiName);
+        Map<String, String> values = ObjectMetadataService.getPickListValues(objectApiName, fieldApiName);
         Test.stopTest();
 
         System.assertNotEquals(0, values.size(), 'La map de valeurs picklist ne doit pas être vide');
