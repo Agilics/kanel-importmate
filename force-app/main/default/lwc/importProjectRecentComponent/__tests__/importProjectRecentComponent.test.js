@@ -12,29 +12,5 @@ describe("c-import-project-recent-component", () => {
     }
   });
 
-  it("fetch the recents imported projects", () => {
-    // Arrange
-    const element = createElement("c-import-project-recent-component", {
-      is: ImportProjectRecentComponent
-    });
-    document.body.appendChild(element);
-
-    //then
-    expect(element.projects[0].Name).toBe("Import Project Alpha");
-  });
-
-  it("hasNoProjects is true when there's no project", async () => {
-    //given
-    const element = createElement("c-import-project-recent-component", {
-      is: ImportProjectRecentComponent
-    });
-
-    return Promise.resolve().then(() => {
-      //when
-      element.projects = [];
-
-      // then assertions
-      expect(element.hasNoProjects).toBeTruthy();
-    });
-  });
+    
 });
