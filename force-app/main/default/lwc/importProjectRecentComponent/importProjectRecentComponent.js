@@ -1,5 +1,4 @@
-import { LightningElement, api, track } from "lwc"; 
- 
+import { LightningElement, api, track } from "lwc";
 
 export default class ImportProjectRecentComponent extends LightningElement {
   //params
@@ -26,8 +25,6 @@ export default class ImportProjectRecentComponent extends LightningElement {
   handleShow() {
     this.dispatchEvent(new CustomEvent("show"));
   }
-
- 
 
   //fermeture la section projets récents et on affiche la section création de projets
   openNewProject() {
