@@ -11,29 +11,36 @@
         <valueSetDefinition>
             <sorted>false</sorted>
             <value>
-                <fullName>Concat</fullName>
+                <fullName>Concatenation</fullName>
                 <default>false</default>
-                <label>Concat</label>
+                <label>Concatenation</label>
             </value>
             <value>
-                <fullName>Replace</fullName>
+                <fullName>UppercaseTransformation</fullName>
                 <default>false</default>
-                <label>Replace</label>
+                <label>Uppercase Transformation</label>
             </value>
             <value>
-                <fullName>Uppercase</fullName>
+                <fullName>LowercaseTransformation</fullName>
                 <default>false</default>
-                <label>Uppercase</label>
+                <label>Lowercase Transformation</label>
             </value>
             <value>
-                <fullName>Lowercase</fullName>
+                <fullName>BooleanTransformation</fullName>
                 <default>false</default>
-                <label>Lowercase</label>
+                <label>Boolean Transformation</label>
             </value>
             <value>
-                <fullName>Constant</fullName>
+                <fullName>EmailMask</fullName>
                 <default>false</default>
-                <label>Constant</label>
+                <isActive>false</isActive>
+                <label>Email Mask</label>
+            </value>
+            <value>
+                <fullName>PhoneMask</fullName>
+                <default>false</default>
+                <isActive>false</isActive>
+                <label>Phone Mask</label>
             </value>
         </valueSetDefinition>
     </valueSet>
