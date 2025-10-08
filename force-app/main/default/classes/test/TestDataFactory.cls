@@ -64,7 +64,6 @@
             List<ImportLog__c> logs = new List<ImportLog__c>();
             for (Integer i = 0; i < count; i++) {
                 logs.add(new ImportLog__c(
-                    
                     Execution__c = executionId,
                     Status__c = 'Info',
                     Details__c = 'Test detail ' + i

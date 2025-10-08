@@ -159,13 +159,9 @@
         <label>Field Mapping Name</label>
         <type>AutoNumber</type>
     </nameField>
-<<<<<<< HEAD
-    <pluralLabel>Field Mappings</pluralLabel>  
-    <searchLayouts />
-=======
+ 
     <pluralLabel>Field Mappings</pluralLabel>
-    <searchLayouts></searchLayouts>
->>>>>>> b74e526058e26f40424cb99ddadc4de2a598c966
+    <searchLayouts></searchLayouts> 
     <sharingModel>ControlledByParent</sharingModel>
     <visibility>Public</visibility>
 </CustomObject>
