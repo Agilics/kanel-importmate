@@ -39,8 +39,7 @@
 
      public static Schedule__c createSchedule() {
         ImportProject__c project = createImportProject();
-        Schedule__c schedule = new Schedule__c(
-            Name = 'Test Schedule',
+        Schedule__c schedule = new Schedule__c( 
             Frequency__c = 'DAILY',
             Project__c = project.Id,
             NextRun__c = Datetime.now().addDays(1)
