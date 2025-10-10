@@ -10,3 +10,10 @@ package.xml
 
 # LWC Jest
 **/__tests__/**
+
+#ObjectMetadataController
+# Ignorer classe de test obsolète
+force-app/main/default/classes/ObjectMetadataController.cls
+force-app/main/default/classes/ObjectMetadataController.cls-meta.xml
+force-app/main/default/classes/ObjectMetadataControllerTest.cls
+force-app/main/default/classes/ObjectMetadataControllerTest.cls-meta.xml

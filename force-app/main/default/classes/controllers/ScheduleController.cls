@@ -5,6 +5,7 @@
  * @last modified on  : 10-07-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
+ 
 public with sharing class ScheduleController {
      
 
@@ -67,6 +68,7 @@ public with sharing class ScheduleController {
     public static List<Schedule__c> getSchedulesByProjectName(String name){
         return ScheduleService.getSchedulesByProjectName(name);
     }
+   
     
     //supprimer planification par l'id
     @AuraEnabled

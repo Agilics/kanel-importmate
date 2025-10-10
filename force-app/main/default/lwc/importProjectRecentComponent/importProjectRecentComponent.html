@@ -1,0 +1,123 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 08-21-2025
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<template>
+  <section class="cards" aria-label="Project options">
+    <a
+      class="card"
+      tabindex="0"
+      role="button"
+      aria-pressed="false"
+      onclick={handleShow}
+      aria-label="Create a new project"
+    >
+      <div class="header is-center">
+        <div class="icon-container" aria-hidden="true">
+          <lightning-icon
+            icon-name="utility:add"
+            alternative-text="Utility add"
+            title="add"
+          ></lightning-icon>
+        </div>
+        <h3>New Project</h3>
+      </div>
+      <p>
+        Vestibulum efficitur enim quis purus blandit, eget vehicula neque
+        blandit.
+      </p>
+    </a>
+
+    <a
+      onclick={handleShowSelectProject}
+      class="card"
+      tabindex="0"
+      role="button"
+      aria-pressed="false"
+      aria-label="Select an existing project"
+    >
+      <div class="header is-center">
+        <lightning-icon
+          icon-name="utility:form"
+          alternative-text="form"
+          size="large"
+          title="form"
+        ></lightning-icon>
+
+        <h3>Select Project</h3>
+      </div>
+
+      <p>
+        Vestibulum efficitur enim quis purus blandit, eget vehicula neque
+        blandit.
+      </p>
+    </a>
+  </section>
+
+  <section class="recent-projects-wrapper" aria-label="Recent Projects">
+    <div class="recent-title">Recent Projects</div>
+    <template if:true={hasNoProjects}>
+      <h3 class="empty slds-text-align_center">
+        <lightning-icon
+          id="info"
+          icon-name="action:info"
+          alternative-text="info"
+          size="large"
+          title="info"
+          style="margin-right: 10px"
+        ></lightning-icon>
+        No project import yet, please add
+      </h3>
+    </template>
+
+    <template if:false={hasNoProjects}>
+      <div class="recent-projects">
+        <div class="project-item" tabindex="0">
+          <div class="main">
+            <template for:each={projects.data} for:item="pro">
+              <div class="project-item" key={pro}>
+                <!-- Ligne 1 : Nom du projet -->
+                <span class="project-name">{pro.Name}</span>
+
+                <!-- Ligne 2 : Target + bouton -->
+                <div class="project-row">
+                  <span class="project-meta">
+                    Target Sobject : {pro.TargetObject__c}
+                  </span>
+                  <button
+                    key={pro.Id}
+                    data-id={pro.Id}
+                    class="btn-select"
+                    type="button"
+                    aria-label="Select this project"
+                    onclick={handleShowSelectProject}
+                  >
+                    Select this project
+                  </button>
+                </div>
+
+                <!-- Ligne 3 : Date de création -->
+                <small
+                  class="project-meta"
+                  name="created-date"
+                  id="created-date"
+                >
+                  Created :
+                  <lightning-formatted-date-time
+                    value={pro.CreatedDate}
+                    month="2-digit"
+                    day="2-digit"
+                    year="numeric"
+                  ></lightning-formatted-date-time>
+                </small>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+    </template>
+  </section>
+</template>

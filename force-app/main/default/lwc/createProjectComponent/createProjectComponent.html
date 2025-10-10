@@ -1,0 +1,66 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 09-11-2025
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<template>
+  <h2 class="title">New project</h2>
+  <div class="slds-grid slds-gutters slds-align_absolute-center">
+    <section class="container" aria-label="Recent Projects">
+      <div style="display: flex; gap: 8rem">
+        <lightning-input
+          style="width: 280px"
+          class="rounded-input"
+          type="text"
+          label="Project Name"
+          id="projectName"
+          name="projectName"
+          onchange={handleProjectNameChange}
+        >
+        </lightning-input>
+        <div style="display: inline-block">
+          <lightning-combobox
+            class="rounded-input"
+            name="tickets"
+            id="targetObjet"
+            label="Target Object"
+            value={targetObject}
+            options={options}
+            onchange={handleTargetObjectChange}
+            required
+          ></lightning-combobox>
+          <template if:true={isTargetObjetSelected}>
+            <p
+              for="targetObject"
+              id="target"
+              class="block text-sm font-semibold mb-2"
+            >
+              Target Object: {targetObject}
+            </p>
+          </template>
+        </div>
+      </div>
+
+      <!--- text area for description -->
+
+      <lightning-textarea
+        name="input1"
+        label="Description"
+        class="rounded-input champs"
+        id="description"
+        onchange={handleDescriptionChange}
+      ></lightning-textarea>
+      <!-- actions buttons-->
+      <div class="btn-groups">
+        <button class="btn btn-save" onclick={handleCreateProject}>
+          Save Project
+        </button>
+        <button class="btn btn-cancel" type="reset" onclick={handleCancel}>
+          Cancel
+        </button>
+      </div>
+    </section>
+  </div>
+</template>
