@@ -1,0 +1,97 @@
+<template>
+    <lightning-modal-header label={title}></lightning-modal-header>
+
+    <lightning-modal-body>
+        <template if:true={hasNoProjects}>
+        <h3 class="empty slds-text-align_center">
+          <lightning-icon
+            icon-name="action:info"
+            alternative-text="info"
+            size="large"
+            title="info"
+            style="margin-right: 10px"
+          ></lightning-icon>
+          No project import yet, please add
+        </h3>
+      </template>
+
+      <template if:false={hasNoProjects}>
+        <div class="slds-p-around_medium slds-text-align_center">
+        <!-- Champs pour la recherche  de projets importés -->
+        <div class="slds-p-around_medium lgc-bg">
+          <lightning-input
+          type="search"
+            label="Search import project"
+              onchange={handleSearch}
+          ></lightning-input>
+        </div>
+        <!-- Card pour les détails du projet -->
+        <template if:true={projects}>
+          <lightning-card>
+            <table class="styled-table">
+                <caption class="slds-text-align_center">
+                Import projects Informations
+              </caption>
+              <thead>
+                <tr>
+                  <template for:each={columns} for:item="column">
+                    <th key={column.fieldName}>
+                      <pre>{column.label}</pre>
+                    </th>
+                  </template>
+                </tr>
+              </thead>
+              <tbody>
+                 
+                <!-- tableau de projets importés -->
+                <template for:each={projects} for:item="project"
+                  class="projects"
+                >
+                  <tr key={project.Id} class="all">
+                    <!-- Nom  -->
+                    <td class="projectName">
+                        {project.Name} 
+                    </td>
+                    <!-- objet ciblé -->
+                    <td class="data">
+                      <pre class="targetObject">{project.TargetObject__c}</pre>
+                    </td>
+
+                    <!-- Description --> 
+                    <td class="data">
+                      <pre class="description">{project.Description__c}</pre>
+                    </td>
+
+                    <td class="data">
+                      <lightning-button
+                        onclick={handleShowDetailProject}
+                        variant="brand"
+                        label="Details"
+                        icon-name="action:preview"
+                        data-id={project.Id}
+                      >
+                      </lightning-button>
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </lightning-card>
+        </template>
+        <!-- tablesau -->
+      </div>
+      </template>
+      
+      
+    </lightning-modal-body>
+
+    <lightning-modal-footer>
+      <lightning-button
+      id="close"
+        class="ok"
+        label="Close"
+        onclick={handleCloseModal}
+        variant="neutral"
+      ></lightning-button>
+    </lightning-modal-footer>
+  </template>

@@ -1,0 +1,19 @@
+<template>
+  <nav class="stepper" aria-label="Progress">
+    <template for:each={steps} for:item="step">
+      <div
+        key={step.number}
+        class={step.cssClass}
+        data-step={step.number}
+        aria-current={step.ariaCurrent}
+        onclick={handleStepClick}
+      >
+        <a class="step-circle">{step.number}</a>
+        <div class="step-label">{step.label}</div>
+        <div class="step-line" if:true={step.hasLine}></div>
+      </div>
+    </template>
+  </nav>
+
+   
+</template>
