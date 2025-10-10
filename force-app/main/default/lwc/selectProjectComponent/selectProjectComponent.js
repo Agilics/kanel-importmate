@@ -5,17 +5,17 @@ import LightningModal from "lightning/modal";
 import searchProjectsByName from "@salesforce/apex/ImportProjectController.searchProjectsByName";
 export default class SelectProjectComponent extends LightningModal {
   columns = [
-    { fieldName:'ProjectName',label:'Project name',},
-    {fieldName:'TargetObject',label:'Target object',},
-    { fieldName:'Description',label:'Description',},
-    { fieldName:'Actions',label:'Actions',}
+    { fieldName: "ProjectName", label: "Project name" },
+    { fieldName: "TargetObject", label: "Target object" },
+    { fieldName: "Description", label: "Description" },
+    { fieldName: "Actions", label: "Actions" }
   ];
   @api selectedProject;
   @api title;
 
   @track error;
   @track nom = "";
-  @track projects =[];
+  @track projects = [];
 
   @wire(searchProjectsByName, { nom: "$nom" })
   wiredSearchProjectHandler({ error, data }) {
@@ -30,7 +30,7 @@ export default class SelectProjectComponent extends LightningModal {
   }
   @api
   get hasNoProjects() {
-     return !(this.projects && this.projects.length > 0);
+    return !(this.projects && this.projects.length > 0);
   }
 
   // recherche de projets par le nom
@@ -38,7 +38,7 @@ export default class SelectProjectComponent extends LightningModal {
   handleSearch(e) {
     this.nom = e.target.value;
     searchProjectsByName({ name: this.nom }).then((result) => {
-      this.projects = [...result]; 
+      this.projects = [...result];
     });
   }
 
