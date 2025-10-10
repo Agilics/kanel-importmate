@@ -1,49 +1,47 @@
+/**
+ * @description       : 
+ * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @group             : 
+ * @last modified on  : 10-07-2025
+ * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+**/
 @isTest
 public with sharing class ObjectMetadataServiceTest {
-   
+  public ObjectMetadataServiceTest() {
+  }
+
   @isTest
   static void testGetCompatibleSObjects() {
-        //when
-    Test.startTest();
     List<String> objects = ObjectMetadataService.getCompatibleSObjects();
-    Test.stopTest();
-    
-    //then
     System.assert(objects.size() > 0, 'No objects found');
   }
 
   @isTest
   static void testGetFieldsForObject() {
-        //when
-    Test.startTest();
-
     List<String> objects = ObjectMetadataService.getCompatibleSObjects();
+    System.assert(objects.size() > 0, 'No objects found');
     String objectName = objects[0];
     Map<String, Schema.SObjectField> fields = ObjectMetadataService.getFieldsForObject(
       objectName
     );
-    Test.stopTest();
-    
-    //then
-    System.assert(objects.size() > 0, 'No objects found');
     System.assert(
       fields.size() > 0,
       'No fields found for object: ' + objectName
     );
   }
 
+
     @IsTest
-  static void testGetPickListValues() {
-    //Given
-    String objectApiName ='Opportunity';
-    String fieldApiName = 'ForecastCategoryName';
+    static void testGetPickListValues_Success() {
+        // rechercher les valeurs de la picklist "Type" sur Account
+        String objectApiName = 'Account';
+        String fieldApiName  = 'Type';
 
-    //when
-    Test.startTest();
-      Map<String,String>  result =  ObjectMetadataRepository.getPickListValues(objectApiName,fieldApiName );    
-    Test.stopTest();   
+        Test.startTest();
+        Map<String, String> values = ObjectMetadataService.getPickListValues(objectApiName, fieldApiName);
+        Test.stopTest();
 
-    //then
-    System.assert(result.size() >0, 'Echec j\'ai la flemme de faire la desc');  
+        System.assertNotEquals(0, values.size(), 'La map de valeurs picklist ne doit pas être vide');
+        System.assert(values.containsKey('Prospect'), 'La valeur Prospect doit exister');
+    }
   }
-}
