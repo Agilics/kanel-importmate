@@ -4,8 +4,8 @@
     <externalId>false</externalId>
     <label>Project</label>
     <referenceTo>ImportProject__c</referenceTo>
-    <relationshipLabel>Import Executions</relationshipLabel>
-    <relationshipName>ImportExecutions</relationshipName>
+    <relationshipLabel>Field Mappings</relationshipLabel>
+    <relationshipName>FieldMappings</relationshipName>
     <relationshipOrder>0</relationshipOrder>
     <reparentableMasterDetail>false</reparentableMasterDetail>
     <trackTrending>false</trackTrending>
