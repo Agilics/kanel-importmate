@@ -1,6 +1,12 @@
+/**
+ * @description       : 
+ * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @group             : 
+ * @last modified on  : 10-07-2025
+ * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+**/
 @isTest
-public with sharing class ObjectMetadataServiceTest {
-   
+public with sharing class ObjectMetadataServiceTest {   
 	@isTest
 	static void testGetCompatibleSObjects() {
 			Test.startTest();
@@ -92,4 +98,17 @@ public with sharing class ObjectMetadataServiceTest {
 		Assert.areEqual(Schema.DisplayType.PHONE, fieldDescribe.getType(), 'Field type for Account.Phone should be Phone');
 	}
 
-}
+    @IsTest
+    static void testGetPickListValues_Success() {
+        // rechercher les valeurs de la picklist "Type" sur Account
+        String objectApiName = 'Account';
+        String fieldApiName  = 'Type';
+
+        Test.startTest();
+        Map<String, String> values = ObjectMetadataService.getPickListValues(objectApiName, fieldApiName);
+        Test.stopTest();
+
+        System.assertNotEquals(0, values.size(), 'La map de valeurs picklist ne doit pas être vide');
+        System.assert(values.containsKey('Prospect'), 'La valeur Prospect doit exister');
+    }
+  }
