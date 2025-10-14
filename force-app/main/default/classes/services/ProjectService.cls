@@ -2,7 +2,7 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 09-10-2025
+ * @last modified on  : 10-03-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 public with sharing class ProjectService {
@@ -22,7 +22,7 @@ public with sharing class ProjectService {
       return ProjectRepository.saveProject(project);
     } catch (DmlException e) {
       ErrorLogService.logException(e);
-      throw new ImportException('Erreur lors de la création du projet : ' + e.getMessage());
+      throw new ApplicationException('Erreur lors de la création du projet : ' + e.getMessage());
     }
    
   }
@@ -44,7 +44,7 @@ public with sharing class ProjectService {
       }
     } catch (DmlException e) {
       ErrorLogService.logException(e);
-      throw new ImportException(e.getMessage());
+      throw new ApplicationException(e.getMessage());
     }
   }
 
@@ -55,9 +55,9 @@ public with sharing class ProjectService {
       return new List<ImportProject__c>();
     }
       return ProjectRepository.getRecentsProjets(limitor);  
-    } catch (ImportException e) {
+    } catch (ApplicationException e) {
       ErrorLogService.logException(e);
-      throw new ImportException(e.getMessage());
+      throw new ApplicationException(e.getMessage());
     }
     
   }
@@ -70,9 +70,9 @@ public with sharing class ProjectService {
         return ProjectRepository.getAllProjects();
      }
     return ProjectRepository.getProjectsByName(keyword);
-    } catch (ImportException e) {
+    } catch (ApplicationException e) {
       ErrorLogService.logException(e);
-      throw new ImportException(e.getMessage());
+      throw new ApplicationException(e.getMessage());
     }
   }
 
@@ -80,9 +80,9 @@ public with sharing class ProjectService {
   public static ImportProject__c getProjectById(String projectId) {
     try {
       return ProjectRepository.getProjectById(projectId);
-    } catch (ImportException e) {
+    } catch (ApplicationException e) {
       ErrorLogService.logException(e);
-      throw new ImportException(e.getMessage());
+      throw new ApplicationException(e.getMessage());
     }
   }
 
@@ -90,9 +90,9 @@ public with sharing class ProjectService {
   public static List<ImportProject__c> getAllProjects() { 
     try {
       return ProjectRepository.getAllProjects();
-    } catch (ImportException e) {
+    } catch (ApplicationException e) {
        ErrorLogService.logException(e);
-      throw new ImportException(e.getMessage());
+      throw new ApplicationException(e.getMessage());
     }
   }
 
@@ -106,9 +106,9 @@ public with sharing class ProjectService {
         }
        
         return false;
-      } catch (ImportException e) {
+      } catch (ApplicationException e) {
           ErrorLogService.logException(e);
-      throw new ImportException(e.getMessage());
+      throw new ApplicationException(e.getMessage());
       }
   }
 

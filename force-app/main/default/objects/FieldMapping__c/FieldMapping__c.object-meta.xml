@@ -160,7 +160,6 @@
         <type>AutoNumber</type>
     </nameField>
     <pluralLabel>Field Mappings</pluralLabel>
-
     <searchLayouts></searchLayouts>
     <sharingModel>ControlledByParent</sharingModel>
     <visibility>Public</visibility>

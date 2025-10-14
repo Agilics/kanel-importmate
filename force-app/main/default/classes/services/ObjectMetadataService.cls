@@ -1,3 +1,10 @@
+/**
+ * @description       : 
+ * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @group             : 
+ * @last modified on  : 10-07-2025
+ * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+**/
 public with sharing class ObjectMetadataService {
     private static List<String> objectsCache;
     private static Map<String, Map<String, Schema.SObjectField>> fieldsCache = new Map<String, Map<String, Schema.SObjectField>>();
@@ -35,7 +42,19 @@ public with sharing class ObjectMetadataService {
         
         return objectsCache;
     }
+    public static Schema.DescribeSObjectResult getDescribe(String objectName) {
+        if (String.isBlank(objectName)) {
+            throw new ApplicationException('Nom d’objet requis.');
+        }
+        Map<String, Schema.SObjectType> gd = Schema.getGlobalDescribe();
+        Schema.SObjectType t = gd.get(objectName);
+        if (t == null) {
+            throw new ApplicationException('Objet inconnu : ' + objectName);
+        }
+        return t.getDescribe();
+    }
 
+    //récupèrer le champs de l'objet  
     public static Map<String, Schema.SObjectField> getFieldsForObject(String objectName) {
         if (!fieldsCache.containsKey(objectName)) {
             if (!getGlobalDescribeMap().containsKey(objectName)) {
@@ -58,84 +77,4 @@ public with sharing class ObjectMetadataService {
         }
         return fieldsCache.get(objectName);
     }
-
-    //check isFieldNullable
-    public static Boolean isFieldNullable(String objectName, String fieldApiName) {
-        try {
-            // Use Schema.describeSObjects to avoid read-only collection issues
-            Schema.DescribeSObjectResult describeResult = Schema.describeSObjects(new List<String>{objectName})[0];
-            Map<String, Schema.SObjectField> fieldsMap = describeResult.fields.getMap();
-            
-            if (!fieldsMap.containsKey(fieldApiName)) {
-                throw new ApplicationException('Field not found: ' + fieldApiName);
-            }
-            
-            return fieldsMap.get(fieldApiName).getDescribe().isNillable();
-        } catch (Exception e) {
-            throw new ApplicationException('Error checking field nullable: ' + e.getMessage());
-        }
-    }
-
-    public static Boolean isValidPicklistValue(String value, String fieldApiName, String objectName) {
-        if (String.isBlank(value)) {
-            return true;
-        }
-        
-        try {
-            // Get the field describe result
-            Schema.SObjectType sObjectType = getGlobalDescribeMap().get(objectName);
-            if (sObjectType == null) {
-                return false;
-            }
-            
-            Schema.DescribeSObjectResult describeResult = sObjectType.getDescribe();
-            Map<String, Schema.SObjectField> fieldMap = describeResult.fields.getMap();
-            
-            if (!fieldMap.containsKey(fieldApiName)) {
-                return false;
-            }
-            
-            Schema.SObjectField field = fieldMap.get(fieldApiName);
-            Schema.DescribeFieldResult fieldDescribe = field.getDescribe();
-            
-            // Check if it's a picklist field
-            if (fieldDescribe.getType() != Schema.DisplayType.PICKLIST) {
-                return true;
-            }
-            
-            // Get picklist values
-            List<Schema.PicklistEntry> picklistValues = fieldDescribe.getPicklistValues();
-            
-            // Check if the value matches any picklist entry (case-insensitive)
-            for (Schema.PicklistEntry entry : picklistValues) {
-                if (entry.getValue().equalsIgnoreCase(value) || entry.getLabel().equalsIgnoreCase(value)) {
-                    return true;
-                }
-            }
-            
-            return false;
-        } catch (Exception e) {
-            ErrorLogService.logException(e);
-            return false;
-        }
-    }
-
-    public static Schema.DisplayType getFieldType(String objectName, String fieldApiName) {
-        Schema.SObjectType sObjectType = getGlobalDescribeMap().get(objectName);
-        if (sObjectType == null) {
-            return null;
-        }
-        return sObjectType.getDescribe().fields.getMap().get(fieldApiName).getDescribe().getType();
-    }
-
-    //get describe of the field
-    public static Schema.DescribeFieldResult getFieldDescribe(String objectName, String fieldApiName) {
-        Schema.SObjectType sObjectType = getGlobalDescribeMap().get(objectName);
-        if (sObjectType == null) {
-            return null;
-        }
-        return sObjectType.getDescribe().fields.getMap().get(fieldApiName).getDescribe();
-    }
-
-    
 }

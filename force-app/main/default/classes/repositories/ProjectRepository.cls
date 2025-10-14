@@ -1,8 +1,8 @@
 /**
  * @description       :
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
- * @group             :
- * @last modified on  : 09-16-2025
+ * @group             : 
+ * @last modified on  : 10-03-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
  **/
 public with sharing class ProjectRepository {
@@ -14,13 +14,13 @@ public static ImportProject__c saveProject(ImportProject__c project) {
         upsert project;
         return project;
       } catch (DmlException e) {
-        throw new ImportException(
+        throw new ApplicationException(
           'Erreur lors de la sauvegarde du projet : ' + e.getMessage()
         );
       }
     }
     // Retour obligatoire si pas de droits
-    throw new ImportException('Vous n’avez pas les droits pour créer ou modifier un projet.');
+    throw new ApplicationException('Vous n’avez pas les droits pour créer ou modifier un projet.');
 }
 
 
@@ -29,8 +29,8 @@ public static ImportProject__c saveProject(ImportProject__c project) {
     if (SecurityUtils.isAccessible(ImportProject__c.SObjectType)) {
       return [
         SELECT Id, Name, Description__c, TargetObject__c
-        FROM ImportProject__c
-        WHERE Id = :projectId 
+        FROM ImportProject__c 
+        WHERE Id = :projectId  
         LIMIT 1
       ];
     }
@@ -69,7 +69,7 @@ public static ImportProject__c saveProject(ImportProject__c project) {
         SELECT Id, Name, Description__c, TargetObject__c
         FROM ImportProject__c
         WHERE Name =: projectName
-        AND  TargetObject__c =:targetObject
+        AND  TargetObject__c =: targetObject
         LIMIT 1
       ];
       //Vérifie la présence d'un projet
