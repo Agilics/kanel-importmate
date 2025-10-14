@@ -46,6 +46,14 @@ public with sharing class Constants {
     public static final String EXECUTION_TYPE_DELETE = 'Delete';
     public static final String EXECUTION_TYPE_UPSERT = 'Upsert';    
 
+    public static final String ERROR_TYPE_VALIDATION = 'Validation';
+    public static final String ERROR_TYPE_TRANSFORMATION = 'Transformation';
+    public static final String ERROR_TYPE_MAPPING = 'Field Mapping';
+    public static final String ERROR_TYPE_EXECUTION = 'Execution';
+    public static final String ERROR_TYPE_SCHEDULING = 'Scheduling';
+    public static final String ERROR_TYPE_CONVERSION = 'Conversion';
+    
+
     public static final String ERROR_CODE_APPLICATION = 'APPLICATION_ERROR';
     public static final String ERROR_CODE_VALIDATION = 'VALIDATION_ERROR';
     public static final String ERROR_CODE_MAPPING = 'MAPPING_ERROR';
