@@ -1,6 +1,5 @@
 @isTest
 public class TestDataFactory {
-
     public static User createAdminUser() {
         Profile p = [SELECT Id FROM Profile WHERE Id = :UserInfo.getProfileId()];
         String uniqueUserName = 'admin' + DateTime.now().getTime() + '@importmate.com';
@@ -18,8 +17,6 @@ public class TestDataFactory {
         insert adminUser;
         return adminUser;
     }
-
-
     public static ImportProject__c createImportProject() {
         ImportProject__c project = new ImportProject__c(
             Name = 'Test Project',
@@ -38,6 +35,17 @@ public class TestDataFactory {
         );
         insert project;
         return project;
+    }
+
+    public static Schedule__c createSchedule() {
+        ImportProject__c project = createImportProject();
+        Schedule__c schedule = new Schedule__c( 
+            Frequency__c = 'DAILY',
+            Project__c = project.Id,
+            NextRun__c = Datetime.now().addDays(1)
+        );
+        insert schedule;
+        return schedule;
     }
  
     public static ImportProject__c createImportProjectWithTargetObject(String targetObject) {
