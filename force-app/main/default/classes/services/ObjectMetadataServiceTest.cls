@@ -2,7 +2,7 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 10-07-2025
+ * @last modified on  : 10-14-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 @isTest
@@ -40,7 +40,6 @@ public with sharing class ObjectMetadataServiceTest {
         Test.startTest();
         Map<String, String> values = ObjectMetadataService.getPickListValues(objectApiName, fieldApiName);
         Test.stopTest();
-
         System.assertNotEquals(0, values.size(), 'La map de valeurs picklist ne doit pas être vide');
         System.assert(values.containsKey('Prospect'), 'La valeur Prospect doit exister');
     }

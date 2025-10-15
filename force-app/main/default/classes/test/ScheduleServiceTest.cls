@@ -85,7 +85,6 @@ public with sharing class ScheduleServiceTest {
         String excpetedFrequency = 'DAILY';
         ScheduleService.FrequencyEnum actual =  ScheduleService.FrequencyEnum.DAILY;
         Test.stopTest();
-
         //Assertions
         System.assertEquals(excpetedFrequency, actual.Name());
      }

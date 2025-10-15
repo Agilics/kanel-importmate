@@ -2,11 +2,10 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 10-07-2025
+ * @last modified on  : 10-14-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 public with sharing class ScheduleController {
-     
 
     //création d'une nouvelle planification
     @AuraEnabled
@@ -16,32 +15,32 @@ public with sharing class ScheduleController {
 
     //récupèrer les SObjets compatibles
      @AuraEnabled(cacheable=true)
-  public static List<String> getCompatibleSObjects() {
-    return ObjectMetadataService.getCompatibleSObjects();
-  }
+    public static List<String> getCompatibleSObjects() {
+      return ObjectMetadataService.getCompatibleSObjects();
+    }
 
   //récupèrer le champs d'un objet 
-  @AuraEnabled(cacheable=true)
-  public static Map<String, String> getObjectFields(String objectName) {
-    Map<String, String> retVal = new Map<String, String>();
-    Map<String, Schema.SObjectField> fieldMap = ObjectMetadataService.getFieldsForObject(
-      objectName
-    );
-    for (String fieldName : fieldMap.keySet()) {
-      retVal.put(fieldName, fieldMap.get(fieldName).getDescribe().getLabel());
+    @AuraEnabled(cacheable=true)
+    public static Map<String, String> getObjectFields(String objectName) {
+      Map<String, String> retVal = new Map<String, String>();
+      Map<String, Schema.SObjectField> fieldMap = ObjectMetadataService.getFieldsForObject(
+        objectName
+      );
+      for (String fieldName : fieldMap.keySet()) {
+        retVal.put(fieldName, fieldMap.get(fieldName).getDescribe().getLabel());
+      }
+      return retVal;
     }
-    return retVal;
-  }
 
-  //Récupére les valeurs du picklist
-  @AuraEnabled(cacheable = true)
- public static Map<String, String> getPickListValues(String objectApiName, String fieldApiName) {
-    try {
-      return ObjectMetadataService.getPickListValues(objectApiName, fieldApiName);
-    } catch (ApplicationException e) {
-      throw new ApplicationException(e.getMessage());
+    //Récupére les valeurs du picklist
+    @AuraEnabled(cacheable = true)
+    public static Map<String, String> getPickListValues(String objectApiName, String fieldApiName) {
+      try {
+        return ObjectMetadataService.getPickListValues(objectApiName, fieldApiName);
+      } catch (ApplicationException e) {
+        throw new ApplicationException(e.getMessage());
+      }
     }
-  }
 
     //récupérer les planifications schedules
     @AuraEnabled(cacheable = true)
@@ -63,11 +62,11 @@ public with sharing class ScheduleController {
     }
 
     // récupérer la planification par le nom du projet
-   @AuraEnabled(cacheable = true)
+    @AuraEnabled(cacheable = true)
     public static List<Schedule__c> getSchedulesByProjectName(String name){
         return ScheduleService.getSchedulesByProjectName(name);
     }
-    
+
     //supprimer planification par l'id
     @AuraEnabled
     public static void deleteSchedule(Id scheduleId) {

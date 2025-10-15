@@ -2,7 +2,7 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 10-03-2025
+ * @last modified on  : 10-14-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 public with sharing class ScheduleRepository {
@@ -27,7 +27,7 @@ public with sharing class ScheduleRepository {
             delete [SELECT Id FROM Schedule__c WHERE Id = :scheduleId LIMIT 1];
         } catch (DmlException e) {
             ErrorLogService.logException(e);
-            throw e;
+            throw new ApplicationException(e.getMessage());
         }
     
     }
