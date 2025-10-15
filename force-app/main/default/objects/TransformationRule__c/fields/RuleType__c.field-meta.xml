@@ -33,13 +33,11 @@
             <value>
                 <fullName>EmailMask</fullName>
                 <default>false</default>
-                <isActive>false</isActive>
                 <label>Email Mask</label>
             </value>
             <value>
                 <fullName>PhoneMask</fullName>
                 <default>false</default>
-                <isActive>false</isActive>
                 <label>Phone Mask</label>
             </value>
         </valueSetDefinition>
