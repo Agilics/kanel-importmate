@@ -1,0 +1,20 @@
+/* Tighten up card spacing a touch */
+.slds-card__body_inner {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+/* Make footer actions breathe on small screens */
+.slds-card__footer .slds-button + .slds-button {
+  margin-left: 0.5rem;
+}
+
+/* Column widths for the table header without inline styles */
+.col-mapped {
+  width: 50%;
+}
+
+/* Help long API names wrap nicely without breaking layout */
+.slds-text-body_small {
+  word-break: break-word;
+}
