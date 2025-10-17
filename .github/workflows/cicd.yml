@@ -204,6 +204,7 @@ jobs:
       - run: npm ci
       - name: Install Salesforce CLI
         run: npm install -g @salesforce/cli
+
       - name: Authenticate to Subscriber Org
         run: |
           printf "%s" "${{ secrets.SF_JWT_KEY_FILE }}" > jwt.key
