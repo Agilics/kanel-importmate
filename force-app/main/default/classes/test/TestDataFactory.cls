@@ -1,5 +1,64 @@
 @isTest
 public class TestDataFactory {
+
+    
+    // 1) If you already have a 4-arg version createTransformationRule(projectId, transformationId, sourceField, targetField)
+    //    KEEP IT as your canonical implementation and add this 5-arg bridge:
+    public static Id createTransformationRule(
+        Id projectId,
+        Id transformationId,
+        String sourceField,
+        String targetField,
+        String ruleType // new/unused or now encoded elsewhere
+    ) {
+        // If ruleType is actually needed now, route it to your new method below.
+        return createTransformationRule(projectId, transformationId, sourceField, targetField);
+    }
+
+    // -------------------------------------------------------------------------
+    // 2) If your current canonical method has a *different name* or *3 args*,
+    //    add the correct forwarder here. Uncomment ONE that matches your code:
+    // -------------------------------------------------------------------------
+
+    // Example: your new method is createRule(projectId, transformationId, sourceField, targetField, ruleType)
+    /*
+    public static Id createTransformationRule(
+        Id projectId, Id transformationId, String sourceField, String targetField, String ruleType
+    ) {
+        return createRule(projectId, transformationId, sourceField, targetField, ruleType);
+    }
+    */
+
+    // Example: your new method is 3-arg (you dropped targetField) => just forward appropriately
+    /*
+    public static Id createTransformationRule(
+        Id projectId, Id transformationId, String sourceField, String targetField, String ruleType
+    ) {
+        return createRule(projectId, transformationId, sourceField);
+    }
+    */
+
+    // -------------------------------------------------------------------------
+    // 3) If you LOST the canonical implementation entirely and need a minimal
+    //    inline creator, use a dynamic-creation fallback like this one and map
+    //    to your actual object/fields:
+    /*
+    public static Id createTransformationRule(
+        Id projectId, Id transformationId, String sourceField, String targetField, String ruleType
+    ) {
+        // Replace object/field API names with your real ones:
+        // e.g., TransformationRule__c( Project__c, Transformation__c, SourceField__c, TargetField__c, Operation__c )
+        SObject tr = Schema.getGlobalDescribe().get('TransformationRule__c').newSObject();
+        tr.put('Project__c',        projectId);
+        tr.put('Transformation__c', transformationId);
+        tr.put('SourceField__c',    sourceField);
+        tr.put('TargetField__c',    targetField);
+        tr.put('Operation__c',      ruleType); // if applicable in your schema
+        insert tr;
+        return (Id)tr.get('Id');
+    }
+    */
+
     public static User createAdminUser() {
         Profile p = [SELECT Id FROM Profile WHERE Id = :UserInfo.getProfileId()];
         String uniqueUserName = 'admin' + DateTime.now().getTime() + '@importmate.com';
@@ -479,5 +538,7 @@ public class TestDataFactory {
         
         return rulesMap;
     }
+
+    
 
 }
