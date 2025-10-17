@@ -2,7 +2,6 @@
   <!-- Zone de sélection de fichier -->
   <div class="page">
     <div class="section">
-
       <div class="upload-card">
         <div class="upload-pill">
           <div class="upload-head">Import CSV</div>
@@ -38,14 +37,26 @@
       <!-- Boutons d’action -->
       <div class="actions">
         <template if:true={showActions}>
-          <button data-id="load-next" class="btn btn--ghost" onclick={handleLoadNext}>
+          <button
+            data-id="load-next"
+            class="btn btn--ghost"
+            onclick={handleLoadNext}
+          >
             Load next
           </button>
-          <button data-id="load-all" class="btn btn--primary" onclick={handleLoadAll}>
+          <button
+            data-id="load-all"
+            class="btn btn--primary"
+            onclick={handleLoadAll}
+          >
             Load all
           </button>
         </template>
-        <button data-id="reset-view" class="btn btn--outline" onclick={handleResetView}>
+        <button
+          data-id="reset-view"
+          class="btn btn--outline"
+          onclick={handleResetView}
+        >
           Reset view
         </button>
       </div>
@@ -76,7 +87,6 @@
           <div class="table-footer"></div>
         </div>
       </template>
-
     </div>
   </div>
 </template>

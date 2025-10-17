@@ -2,7 +2,7 @@
   background: #fff;
   border-radius: 12px;
   padding: 1.25rem;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
 }
 
 .m-top {
@@ -32,7 +32,8 @@
   margin: 0;
   white-space: pre-wrap;
   word-break: break-word;
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
   font-size: 12.5px;
 }
 
@@ -44,7 +45,7 @@
   background: #fff;
   border-radius: 12px;
   border: 1px solid #eef0f2;
-  box-shadow: 0 2px 14px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.05);
 }
 
 .table-scroll {
@@ -55,7 +56,7 @@
 .spinner-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(255,255,255,0.66);
+  background: rgba(255, 255, 255, 0.66);
   display: grid;
   place-items: center;
   z-index: 999;
@@ -63,7 +64,7 @@
 
 /* Optional: keep your back button if you have it elsewhere */
 .back-btn {
-  background: #A9A9A9;
+  background: #a9a9a9;
   color: #fff;
   border: none;
   border-radius: 6px;

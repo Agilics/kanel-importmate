@@ -7,7 +7,8 @@
       value={selectedObject}
       placeholder="Select an object"
       options={objectOptions}
-      onchange={handleObjectChange}>
+      onchange={handleObjectChange}
+    >
     </lightning-combobox>
 
     <!-- Fields (dual list) -->
@@ -18,7 +19,8 @@
       selected-label="Selected"
       options={fieldOptions}
       value={selectedFields}
-      onchange={handleFieldsChange}>
+      onchange={handleFieldsChange}
+    >
     </lightning-dual-listbox>
 
     <!-- Input[0]: WHERE -->
@@ -26,7 +28,8 @@
       type="text"
       label="WHERE"
       value={whereCondition}
-      onchange={handleWhereChange}>
+      onchange={handleWhereChange}
+    >
     </lightning-input>
 
     <!-- Combobox[1]: ORDER BY -->
@@ -36,7 +39,8 @@
       value={orderByField}
       placeholder="None"
       options={orderByFieldOptions}
-      onchange={handleOrderByChange}>
+      onchange={handleOrderByChange}
+    >
     </lightning-combobox>
 
     <!-- Combobox[2]: Direction -->
@@ -45,7 +49,8 @@
       label="Direction"
       value={orderDirection}
       options={directionOptions}
-      onchange={handleDirectionChange}>
+      onchange={handleDirectionChange}
+    >
     </lightning-combobox>
 
     <!-- Combobox[3]: NULLS -->
@@ -54,7 +59,8 @@
       label="NULLS"
       value={nullsBehavior}
       options={nullsOptions}
-      onchange={handleNullsChange}>
+      onchange={handleNullsChange}
+    >
     </lightning-combobox>
 
     <!-- Input[1]: LIMIT -->
@@ -62,7 +68,8 @@
       type="number"
       label="LIMIT"
       value={limitRows}
-      onchange={handleLimitChange}>
+      onchange={handleLimitChange}
+    >
     </lightning-input>
 
     <!-- Input[2]: OFFSET -->
@@ -70,7 +77,8 @@
       type="number"
       label="OFFSET"
       value={offsetRows}
-      onchange={handleOffsetChange}>
+      onchange={handleOffsetChange}
+    >
     </lightning-input>
 
     <!-- Run -->
@@ -78,15 +86,13 @@
       variant="brand"
       label="Run"
       onclick={handleRunClick}
-      disabled={isLoading}>
+      disabled={isLoading}
+    >
     </lightning-button>
   </div>
 
   <template if:true={columns}>
-    <lightning-datatable
-      key-field="Id"
-      data={queryResults}
-      columns={columns}>
+    <lightning-datatable key-field="Id" data={queryResults} columns={columns}>
     </lightning-datatable>
   </template>
 </template>

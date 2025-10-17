@@ -1,9 +1,9 @@
-import { LightningElement, track } from 'lwc';
-import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { LightningElement, track } from "lwc";
+import { ShowToastEvent } from "lightning/platformShowToastEvent";
 
-import fetchObjects from '@salesforce/apex/QueryBuilderController.fetchObjects';
-import fetchFields from '@salesforce/apex/QueryBuilderController.fetchFields';
-import buildAndRunQueryEx from '@salesforce/apex/QueryBuilderController.buildAndRunQueryEx';
+import fetchObjects from "@salesforce/apex/QueryBuilderController.fetchObjects";
+import fetchFields from "@salesforce/apex/QueryBuilderController.fetchFields";
+import buildAndRunQueryEx from "@salesforce/apex/QueryBuilderController.buildAndRunQueryEx";
 
 export default class SoqlBuilder extends LightningElement {
   @track objectOptions = [];
@@ -14,46 +14,48 @@ export default class SoqlBuilder extends LightningElement {
   @track columns = [];
 
   // Sélections
-  selectedObject = '';
+  selectedObject = "";
   selectedFields = [];
-  whereCondition = '';
+  whereCondition = "";
 
   // Tri & pagination
-  orderByField = '';
-  orderDirection = 'ASC';
-  nullsBehavior = '';
+  orderByField = "";
+  orderDirection = "ASC";
+  nullsBehavior = "";
   limitRows = 200;
   offsetRows = 0;
 
   isLoading = false;
 
   directionOptions = [
-    { label: 'ASC', value: 'ASC' },
-    { label: 'DESC', value: 'DESC' }
+    { label: "ASC", value: "ASC" },
+    { label: "DESC", value: "DESC" }
   ];
   nullsOptions = [
-    { label: 'Default', value: '' },
-    { label: 'FIRST', value: 'FIRST' },
-    { label: 'LAST', value: 'LAST' }
+    { label: "Default", value: "" },
+    { label: "FIRST", value: "FIRST" },
+    { label: "LAST", value: "LAST" }
   ];
 
   connectedCallback() {
     fetchObjects()
-      .then(result => {
-        this.objectOptions = (result || []).map(o => ({ label: o, value: o }));
+      .then((result) => {
+        this.objectOptions = (result || []).map((o) => ({
+          label: o,
+          value: o
+        }));
       })
       .catch(() => {
-        this.showToast('Erreur', 'Impossible de charger les objets.', 'error');
+        this.showToast("Erreur", "Impossible de charger les objets.", "error");
       });
   }
-
 
   handleObjectChange(event) {
     this.selectedObject = event.detail.value;
     this.selectedFields = [];
     this.queryResults = [];
     this.columns = [];
-    this.orderByField = '';
+    this.orderByField = "";
 
     if (!this.selectedObject) {
       this.fieldOptions = [];
@@ -62,13 +64,13 @@ export default class SoqlBuilder extends LightningElement {
     }
 
     fetchFields({ objectName: this.selectedObject })
-      .then(result => {
-        const options = (result || []).map(f => ({ label: f, value: f }));
+      .then((result) => {
+        const options = (result || []).map((f) => ({ label: f, value: f }));
         this.fieldOptions = options;
-        this.orderByFieldOptions = [{ label: 'None', value: '' }, ...options];
+        this.orderByFieldOptions = [{ label: "None", value: "" }, ...options];
       })
       .catch(() => {
-        this.showToast('Erreur', 'Impossible de charger les champs.', 'error');
+        this.showToast("Erreur", "Impossible de charger les champs.", "error");
       });
   }
 
@@ -76,16 +78,16 @@ export default class SoqlBuilder extends LightningElement {
     this.selectedFields = event.detail.value || [];
   }
   handleWhereChange(event) {
-    this.whereCondition = event.detail.value || '';
+    this.whereCondition = event.detail.value || "";
   }
   handleOrderByChange(event) {
-    this.orderByField = event.detail.value || '';
+    this.orderByField = event.detail.value || "";
   }
   handleDirectionChange(event) {
-    this.orderDirection = event.detail.value || 'ASC';
+    this.orderDirection = event.detail.value || "ASC";
   }
   handleNullsChange(event) {
-    this.nullsBehavior = event.detail.value || '';
+    this.nullsBehavior = event.detail.value || "";
   }
 
   // bornes & coercition
@@ -112,7 +114,11 @@ export default class SoqlBuilder extends LightningElement {
 
   _run() {
     if (!this.selectedObject || this.selectedFields.length === 0) {
-      this.showToast('Attention', 'Veuillez sélectionner un objet et au moins un champ.', 'warning');
+      this.showToast(
+        "Attention",
+        "Veuillez sélectionner un objet et au moins un champ.",
+        "warning"
+      );
       return;
     }
 
@@ -124,21 +130,21 @@ export default class SoqlBuilder extends LightningElement {
       params: {
         objectName: this.selectedObject,
         fieldList: this.selectedFields,
-        whereClause: this.whereCondition || '',
-        orderByField: this.orderByField || '',
-        orderDirection: this.orderDirection || 'ASC',
-        nullsBehavior: this.nullsBehavior || '',
+        whereClause: this.whereCondition || "",
+        orderByField: this.orderByField || "",
+        orderDirection: this.orderDirection || "ASC",
+        nullsBehavior: this.nullsBehavior || "",
         limitRows: this.coerceInt(this.limitRows, 200),
-        offsetRows: this.coerceInt(this.offsetRows, 0) 
+        offsetRows: this.coerceInt(this.offsetRows, 0)
       }
     })
-      .then(result => {
+      .then((result) => {
         const rows = result || [];
 
-        const orderedApis = ['Id', ...this.selectedFields];
+        const orderedApis = ["Id", ...this.selectedFields];
         const sample = rows.length > 0 ? rows[0] : null;
 
-        this.columns = orderedApis.map(api => {
+        this.columns = orderedApis.map((api) => {
           const key = this.normalizeKey(api);
           const label = this.prettyLabel(api);
           const typed = this.inferTypeAttrs(key, sample);
@@ -155,11 +161,15 @@ export default class SoqlBuilder extends LightningElement {
         this.queryResults = rows;
 
         if (rows.length === 0) {
-          this.showToast('Info', 'Aucun enregistrement trouvé.', 'info');
+          this.showToast("Info", "Aucun enregistrement trouvé.", "info");
         }
       })
       .catch(() => {
-        this.showToast('Erreur', 'Échec de l’exécution de la requête.', 'error');
+        this.showToast(
+          "Erreur",
+          "Échec de l’exécution de la requête.",
+          "error"
+        );
       })
       .finally(() => {
         this.isLoading = false;
@@ -168,26 +178,32 @@ export default class SoqlBuilder extends LightningElement {
 
   // Utils
   normalizeKey(apiName) {
-    return apiName.includes('.') ? apiName.replace(/\./g, '__') : apiName;
+    return apiName.includes(".") ? apiName.replace(/\./g, "__") : apiName;
   }
   prettyLabel(apiName) {
-    let s = apiName.replace(/__/g, ' ').replace(/\./g, ' ').replace(/_/g, ' ');
-    s = s.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/\s+/g, ' ').trim();
+    let s = apiName.replace(/__/g, " ").replace(/\./g, " ").replace(/_/g, " ");
+    s = s
+      .replace(/([a-z])([A-Z])/g, "$1 $2")
+      .replace(/\s+/g, " ")
+      .trim();
     return s.charAt(0).toUpperCase() + s.slice(1);
   }
   inferTypeAttrs(key, sampleRow) {
-    const col = { type: 'text', cellAttributes: { alignment: 'left' } };
+    const col = { type: "text", cellAttributes: { alignment: "left" } };
     if (!sampleRow || !(key in sampleRow)) return col;
     const v = sampleRow[key];
-    if (typeof v === 'number') {
-      col.type = 'number';
-      col.cellAttributes.alignment = 'right';
-      col.typeAttributes = { minimumFractionDigits: 0, maximumFractionDigits: 0 };
-    } else if (typeof v === 'boolean') {
-      col.type = 'boolean';
-    } else if (typeof v === 'string' && /^https?:\/\//i.test(v)) {
-      col.type = 'url';
-      col.typeAttributes = { label: { fieldName: key }, target: '_blank' };
+    if (typeof v === "number") {
+      col.type = "number";
+      col.cellAttributes.alignment = "right";
+      col.typeAttributes = {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+      };
+    } else if (typeof v === "boolean") {
+      col.type = "boolean";
+    } else if (typeof v === "string" && /^https?:\/\//i.test(v)) {
+      col.type = "url";
+      col.typeAttributes = { label: { fieldName: key }, target: "_blank" };
     }
     return col;
   }

@@ -1,5 +1,4 @@
 import { LightningElement, api, track } from "lwc";
-import searchProjetById from "@salesforce/apex/ImportProjectController.searchProjetById"; 
 
 export default class ImportProjectRecentComponent extends LightningElement {
   //params
@@ -26,7 +25,7 @@ export default class ImportProjectRecentComponent extends LightningElement {
   handleShow() {
     this.dispatchEvent(new CustomEvent("show"));
   }
- 
+
   //fermeture la section projets récents et on affiche la section création de projets
   openNewProject() {
     this.showCreatorSection = true;
