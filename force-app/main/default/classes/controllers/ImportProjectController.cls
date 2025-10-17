@@ -45,4 +45,10 @@ public class ImportProjectController {
   public static Boolean doesProjectExist(String name,String targetObject){
     return ProjectService.doesProjectExist(name,targetObject);
   }
+
+   //récupèrer les SObjets compatibles
+    @AuraEnabled(cacheable=true)
+    public static List<String> getCompatibleSObjects() {
+      return ObjectMetadataService.getCompatibleSObjects();
+    }
 }

@@ -1,4 +1,4 @@
-public with sharing class LowercaseTransformation implements ITransformationRule {
+public with sharing class LowerCaseTransformation implements ITransformationRule {
 
     public String apply(Map<String, String> row, TransformationRule__c configRule) {
         
@@ -18,7 +18,7 @@ public with sharing class LowercaseTransformation implements ITransformationRule
     }
 
     public Boolean validate(Map<String, String> row, TransformationRule__c configRule) {
-        // Vérifie si le champ est transformable (type texte/email/phone)
+        // Vérifie si le champ est transformable  
         String targetField = configRule.FieldMapping__r.TargetField__c;
         String value = row.get(targetField);
 
