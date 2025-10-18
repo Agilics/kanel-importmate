@@ -93,7 +93,7 @@ jobs:
       - run: npm ci
       # - run: npm run lint
       # - run: npm run test:unit:coverage
-      # - run: npm run prettier:verify
+      #- run: npm run prettier:verify
       - name: Install Salesforce CLI
         run: npm install -g @salesforce/cli
       - name: Authenticate to Integration Sandbox
@@ -105,6 +105,7 @@ jobs:
           echo "🔍 Validation complète contre l'org d'intégration..."
           sf project deploy validate --source-dir force-app --target-org int-sandbox
           echo "✅ Validation complète réussie"
+
       - name: Deploy & Test in Integration Sandbox
         run: |
           sf project deploy start --source-dir force-app --target-org int-sandbox --ignore-conflicts
@@ -140,6 +141,7 @@ jobs:
           echo "🔍 Validation complète contre l'org UAT..."
           sf project deploy validate --source-dir force-app --target-org uat-org
           echo "✅ Validation complète réussie"
+
       - name: Deploy & Test in UAT Sandbox
         run: |
           sf project deploy start --source-dir force-app --target-org uat-org --ignore-conflicts
@@ -201,7 +203,6 @@ jobs:
           rm -f package-lock.json
           npm install
           echo "✅ package-lock.json synchronisé"
-      - run: npm ci
       - name: Install Salesforce CLI
         run: npm install -g @salesforce/cli
       - name: Authenticate to Subscriber Org
