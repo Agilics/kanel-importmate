@@ -1,0 +1,76 @@
+/* Container for the unassigned source chips */
+.source-list {
+  min-height: 3rem;
+  padding: 0.5rem;
+  border: 1px dashed #dddbda;       /* SLDS gray-2 */
+  border-radius: 0.25rem;
+  background: #ffffff;
+}
+
+/* Draggable source/assigned chips */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  margin: 0.125rem;
+  border-radius: 1rem;
+  background: #f3f2f2;              /* SLDS gray-1 */
+  border: 1px solid #dddbda;
+  cursor: grab;
+  user-select: none;
+  line-height: 1.25rem;
+  font-size: 0.75rem;                /* small */
+  white-space: nowrap;
+}
+
+.pill.assigned {
+  background: #f0f8ff;              /* subtle blue hint */
+  border-color: #a3d0ff;
+}
+
+/* Placeholder inside empty drop zone */
+.placeholder {
+  color: #9e9e9e;
+  font-size: 0.75rem;
+}
+
+/* Drop zone where we can drop a pill */
+.dropzone {
+  min-height: 2.25rem;
+  border: 2px dashed #dddbda;
+  border-radius: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  transition: background 120ms ease-in-out, border-color 120ms ease-in-out, box-shadow 120ms ease-in-out;
+}
+
+/* Visual cue on hover/drag-over */
+.dropzone.is-hover {
+  background: #f4faff;              /* very light blue */
+  border-color: #1b96ff;
+  box-shadow: 0 0 0 2px rgba(27, 150, 255, 0.15) inset;
+}
+
+/* Keyboard focus ring for accessibility */
+.dropzone:focus,
+.pill:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(1, 118, 211, 0.4); /* SLDS brand-ish focus */
+}
+
+/* Make mapped column header responsive without inline style */
+@media (min-width: 48rem) {
+  .col-mapped {
+    width: 50%;
+  }
+}
+
+/* Improve table cell spacing a bit on narrow screens */
+@media (max-width: 30rem) {
+  .pill {
+    font-size: 0.7rem;
+    padding: 0.1rem 0.45rem;
+  }
+  .dropzone {
+    min-height: 2rem;
+  }
+}

@@ -1,0 +1,72 @@
+<template>
+  <article class="slds-card">
+    <div class="slds-card__header slds-grid">
+      <header class="slds-media slds-media_center slds-has-flexi-truncate">
+        <div class="slds-media__figure">
+          <lightning-icon icon-name="utility:settings" size="small"></lightning-icon>
+        </div>
+        <div class="slds-media__body">
+          <h2 class="slds-card__header-title slds-truncate">
+            Field Mapping (Drag & Drop)
+          </h2>
+        </div>
+      </header> 
+    </div>
+
+    <div class="slds-card__body slds-card__body_inner">
+      <!-- Project & Version selectors -->
+      <div class="slds-grid slds-gutters slds-m-bottom_small">
+        <div class="slds-col slds-size_1-of-1 slds-large-size_4-of-12">
+          <lightning-combobox
+            name="project"
+            label="Project"
+            value={projectId}
+            options={projectOptions}
+            placeholder="Select a project"
+            onchange={handleProjectChange}
+          ></lightning-combobox>
+        </div>
+
+        <div class="slds-col slds-size_1-of-1 slds-large-size_3-of-12">
+          <lightning-input
+            type="text"
+            label="Version (optional)"
+            value={version}
+            onchange={handleVersionChange}
+          ></lightning-input>
+        </div>
+
+        <div class="slds-col slds-size_1-of-1 slds-large-size_5-of-12">
+          <lightning-input
+            type="text"
+            label="Target Object"
+            value={targetObjectApiName}
+            disabled
+          ></lightning-input>
+        </div>
+      </div>
+
+      <!-- Drag & Drop mapping board -->
+      <c-field-mapping-dnd
+        sources={sources}
+        targets={targets}
+        value={mapping}
+        onmappingchange={handleMappingChange}
+      ></c-field-mapping-dnd>
+    </div>
+
+    <div class="slds-card__footer slds-grid slds-grid_align-end">
+      <lightning-button
+        label="Reload"
+        onclick={reloadAll}
+      ></lightning-button>
+      <lightning-button
+        class="slds-m-left_small"
+        variant="brand"
+        label="Save Mapping"
+        onclick={handleSave}
+      ></lightning-button>
+    </div>
+  </article>
+</template>
+ 
