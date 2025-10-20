@@ -25,7 +25,7 @@ public with sharing class EmailMaskTransformation implements ITransformationRule
 
         // Si aucun domaine n’est fourni, on met une valeur par défaut
         if(String.isBlank(domain) || String.isEmpty(domain)) {
-            domain =  'sandbox';
+            domain =  'sandbox.com';
         }
 
         String maskedEmail = 'user'+ randomNumber + '@'+ domain ;

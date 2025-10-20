@@ -51,6 +51,8 @@ public class EmailMaskTransformationTest {
         //then 
 
         Assert.isNotNull(transformer.apply(new Map<String, String>{mapping.TargetField__c => 'user123@sandbox.com'},rule), 'Echec de la transformation en vue de masquer l\'email');
+        Assert.isTrue(transformer.apply(new Map<String, String>{mapping.TargetField__c => 'user123@sandbox.com'},rule).contains('@sandbox'), 'Echec : l’email masqué doit contenir @');
+        
         Test.stopTest();
     }
 
