@@ -1,0 +1,92 @@
+<template>
+  <!-- Zone de sélection de fichier -->
+  <div class="page">
+    <div class="section">
+      <div class="upload-card">
+        <div class="upload-pill">
+          <div class="upload-head">Import CSV</div>
+          <div class="upload-sub">Click or Drop CSV file here</div>
+
+          <!-- garde l’input pour les tests -->
+          <input
+            data-id="file"
+            class="upload-input"
+            type="file"
+            accept=".csv,text/csv"
+            onchange={handleFileUpload}
+          />
+        </div>
+      </div>
+
+      <!-- Indicateurs d'état / messages -->
+      <template if:true={isLoading}>
+        <p data-id="loading" class="info info--ok">Chargement en cours…</p>
+      </template>
+
+      <template if:true={parseError}>
+        <p data-id="error" class="info info--error">{parseError}</p>
+      </template>
+
+      <template if:true={fileName}>
+        <p data-id="meta" class="meta">
+          <strong>{fileName}</strong> — {fileSize} bytes —
+          {showingCount}/{totalRows} lignes affichées
+        </p>
+      </template>
+
+      <!-- Boutons d’action -->
+      <div class="actions">
+        <template if:true={showActions}>
+          <button
+            data-id="load-next"
+            class="btn btn--ghost"
+            onclick={handleLoadNext}
+          >
+            Load next
+          </button>
+          <button
+            data-id="load-all"
+            class="btn btn--primary"
+            onclick={handleLoadAll}
+          >
+            Load all
+          </button>
+        </template>
+        <button
+          data-id="reset-view"
+          class="btn btn--outline"
+          onclick={handleResetView}
+        >
+          Reset view
+        </button>
+      </div>
+
+      <!-- Aperçu des données -->
+      <template if:true={hasData}>
+        <div data-id="preview" class="table-card">
+          <div class="table-scroll">
+            <table class="table">
+              <thead>
+                <tr>
+                  <template for:each={columns} for:item="col">
+                    <th key={col}>{col}</th>
+                  </template>
+                </tr>
+              </thead>
+              <tbody>
+                <template for:each={data} for:item="row">
+                  <tr key={row.id}>
+                    <template for:each={row.values} for:item="cell">
+                      <td key={cell.key}>{cell.value}</td>
+                    </template>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+          <div class="table-footer"></div>
+        </div>
+      </template>
+    </div>
+  </div>
+</template>

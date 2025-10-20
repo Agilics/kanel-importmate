@@ -1,0 +1,79 @@
+.soql-container {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1.25rem;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+}
+
+.m-top {
+  margin-top: 1rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+@media (max-width: 1100px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.query-preview {
+  background: #f9fafb;
+  border: 1px solid #eef0f2;
+  border-radius: 10px;
+  padding: 0.75rem 1rem;
+}
+
+.query-preview pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+  font-size: 12.5px;
+}
+
+.actions {
+  margin-top: 0.75rem;
+}
+
+.results-table {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #eef0f2;
+  box-shadow: 0 2px 14px rgba(0, 0, 0, 0.05);
+}
+
+.table-scroll {
+  max-height: 60vh;
+  padding: 0.5rem;
+}
+
+.spinner-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.66);
+  display: grid;
+  place-items: center;
+  z-index: 999;
+}
+
+/* Optional: keep your back button if you have it elsewhere */
+.back-btn {
+  background: #a9a9a9;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.7rem 1.4rem;
+  cursor: pointer;
+  margin-top: 1rem;
+  margin-left: 20%;
+  transition: background 0.2s ease;
+}
+.back-btn:hover {
+  background: #222;
+}
