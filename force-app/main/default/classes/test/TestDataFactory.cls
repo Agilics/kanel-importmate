@@ -1,10 +1,3 @@
-/**
- * @description       : 
- * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
- * @group             : 
- * @last modified on  : 10-20-2025
- * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
-**/
 @isTest
 public class TestDataFactory {
     public static User createAdminUser() {
@@ -172,7 +165,6 @@ public class TestDataFactory {
                 WHERE Id = :rule.Id];
     }
 
-    
     public static TransformationRule__c createBooleanTransformationRule(Id projectId, Id fieldMappingId, List<String> trueValues, List<String> falseValues, String targetValue, String type) {
         List<Object> trueValuesObj = new List<Object>();
         List<Object> falseValuesObj = new List<Object>();
@@ -434,6 +426,31 @@ public class TestDataFactory {
         testData.put('invalidRows', invalidRows);
         
         return testData;
+    }
+
+
+    /**
+    * Creates transformation rules for testing EmailMask
+     */
+     public static List<TransformationRule__c> createTransformationRulesForEmailMask(Id projectId, List<FieldMapping__c> mappings) {
+        List<TransformationRule__c> rules = new List<TransformationRule__c>();
+        
+        for (FieldMapping__c mapping : mappings) {
+            if (mapping.TargetField__c == 'DoNotCall') {
+                // Email transformation rule
+                rules.add(createTransformationRule(
+                    projectId, 
+                    mapping.Id, 
+                    'EmailMask', 
+                    new Map<String, Object>{'format' => 'lowercase'}, 
+                    'test@example.com',
+                    'EmailMask'
+                ));
+            }
+        }
+        
+        insert rules;
+        return rules;
     }
 
     /**
