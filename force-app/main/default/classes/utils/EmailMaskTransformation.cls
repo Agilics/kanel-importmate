@@ -41,19 +41,6 @@ public with sharing class EmailMaskTransformation implements ITransformationRule
             return false;
         }
 
-        // Si des domaines autorisés sont définis dans Parameters__c, on les vérifie
-        if (!String.isBlank(configRule.Parameters__c)) {
-            Map<String, Object> params = (Map<String, Object>) JSON.deserializeUntyped(configRule.Parameters__c);
-            List<Object> domainsObj = (List<Object>) params.get('domain');
-            if (domainsObj != null && !domainsObj.isEmpty()) {
-                List<String> allowedDomains = new List<String>();
-                for (Object o : domainsObj) {
-                    allowedDomains.add((String) o);
-                }
-                return allowedDomains.contains(parts[1].toLowerCase());
-            }
-        }
-
         // Si aucun domaine n’est précisé, tout email bien formé est valide
         return true;
     }

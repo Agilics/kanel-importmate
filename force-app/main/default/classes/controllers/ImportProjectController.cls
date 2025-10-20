@@ -2,7 +2,7 @@
  * @description       :
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             :
- * @last modified on  : 09-09-2025
+ * @last modified on  : 10-20-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
  **/
 public class ImportProjectController {
@@ -44,5 +44,10 @@ public class ImportProjectController {
   @AuraEnabled(cacheable=true)
   public static Boolean doesProjectExist(String name,String targetObject){
     return ProjectService.doesProjectExist(name,targetObject);
+  }
+
+  @AuraEnabled
+  public static List<String> getCompatibleSObjects(){
+    return ObjectMetadataService.getCompatibleSObjects();
   }
 }
