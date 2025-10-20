@@ -39,23 +39,19 @@ public class EmailMaskTransformationTest {
 
     // Test apply() method with various scenarios
     @IsTest
-    static void testApplyTransformationWithEmail() {
-        //given 
-        String params = '{"targetType":"email",{domain:"user123@sandbox.com"}}';
-        //when
-        Test.startTest();
+    static void testApplyWithEmailDomain() {
+        String params = '{"targetType":"email"}';
         TransformationRule__c rule = createRule(params,'email');
-        FieldMapping__c mapping = [SELECT TargetField__c FROM FieldMapping__c WHERE SourceColumn__c = 'IsActive' LIMIT 1  ];
-        
-        EmailMaskTransformation transformer = new EmailMaskTransformation();
-        //then 
 
-        Assert.isNotNull(transformer.apply(new Map<String, String>{mapping.TargetField__c => 'momo213@sandbox'},rule), 'Echec de la transformation en vue de masquer l\'email');
-        Test.stopTest();
+        FieldMapping__c mapping = [SELECT TargetField__c FROM FieldMapping__c WHERE SourceColumn__c = 'IsActive' LIMIT 1];
+        EmailMaskTransformation transformer = new EmailMaskTransformation();
+
+        String masked = transformer.apply(new Map<String, String>{mapping.TargetField__c => 'johndoe@yahoo.com'}, rule);
+        System.assertNotEquals('johndoe@yahoo.com', masked, 'L\'email doit être masqué');
     }
 
      @IsTest
-    static void testApplyTransformationNoEmail() {
+    static void testApplyTransformationNoDomain() {
         
         
         Test.startTest();
