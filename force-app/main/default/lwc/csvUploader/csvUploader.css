@@ -1,0 +1,222 @@
+:host {
+  display: block;
+  color: #111827;
+  --bg-page: #f3f4f6;
+  --card-bg: #ffffff;
+  --muted: #6b7280;
+  --pill-bg: #f1f5f9;
+  --pill-border: #e5e7eb;
+  --brand: #29568f;
+  --brand-600: #2d6ab7;
+  --ring: rgba(41, 86, 143, 0.25);
+}
+
+.page {
+  background: var(--bg-page);
+  padding: 1.25rem;
+  border-radius: 1.25rem;
+}
+.section {
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+/* Cartes */
+.upload-card {
+  background: var(--card-bg);
+  border-radius: 1rem;
+  padding: 1rem;
+  box-shadow: 0 1px 2px rgba(17, 24, 39, 0.04),
+    0 4px 18px rgba(17, 24, 39, 0.06);
+  margin-bottom: 1rem;
+}
+
+/* Zone d’upload type “pilule” */
+.upload-pill {
+  border-radius: 0.9rem;
+  background: var(--pill-bg);
+  border: 1px solid var(--pill-border);
+  text-align: center;
+  padding: 1.35rem 1rem;
+}
+.upload-head {
+  font-weight: 700;
+  font-size: 1.05rem;
+  margin-bottom: 0.15rem;
+}
+.upload-sub {
+  color: var(--muted);
+  font-size: 0.92rem;
+  margin-bottom: 0.6rem;
+}
+
+.upload-input {
+  display: inline-block;
+  padding: 0.4rem 0.75rem;
+  border: 1px dashed var(--pill-border);
+  border-radius: 0.5rem;
+  background: #fff;
+}
+.upload-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--ring);
+}
+
+/* Infos & messages */
+.info {
+  margin: 0.5rem 0;
+  font-size: 0.92rem;
+}
+.info--ok {
+  color: #059669;
+}
+.info--error {
+  color: #b91c1c;
+}
+.meta {
+  margin: 0.25rem 0 0.75rem 0;
+  font-size: 0.92rem;
+  color: #374151;
+}
+
+/* Boutons */
+.actions {
+  display: flex;
+}
+.table-scroll {
+  overflow: auto;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: fixed;
+  min-width: 1200px;
+}
+
+.table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+.table th,
+.table td {
+  padding: 0.7rem 0.9rem;
+  vertical-align: top;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.table th:nth-child(1),
+.table td:nth-child(1) {
+  min-width: 120px;
+}
+.table th:nth-child(2),
+.table td:nth-child(2) {
+  min-width: 140px;
+}
+
+.table th:nth-child(3),
+.table td:nth-child(3) {
+  min-width: 220px;
+  max-width: 260px;
+  word-break: break-all;
+}
+
+.table th:nth-child(4),
+.table td:nth-child(4) {
+  min-width: 120px;
+  max-width: 160px;
+}
+
+.table th:nth-child(5),
+.table td:nth-child(5) {
+  min-width: 220px;
+}
+
+.table th:nth-child(6),
+.table td:nth-child(6) {
+  min-width: 160px;
+}
+
+.table th:nth-child(7),
+.table td:nth-child(7) {
+  min-width: 260px;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  word-break: break-word;
+}
+
+.table th:nth-child(8),
+.table td:nth-child(8) {
+  min-width: 140px;
+}
+.table th:nth-child(9),
+.table td:nth-child(9) {
+  min-width: 120px;
+}
+.table th:nth-child(10),
+.table td:nth-child(10) {
+  min-width: 120px;
+}
+.table th:nth-child(11),
+.table td:nth-child(11) {
+  min-width: 120px;
+}
+.table th:nth-child(12),
+.table td:nth-child(12) {
+  min-width: 160px;
+}
+
+.table th:nth-child(13),
+.table td:nth-child(13) {
+  min-width: 160px;
+}
+
+.table-card {
+  position: relative;
+}
+.table-card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 56px;
+  height: 100%;
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    rgba(41, 86, 143, 0) 0%,
+    rgba(41, 86, 143, 0.12) 70%,
+    rgba(41, 86, 143, 0.22) 100%
+  );
+}
+
+@media (max-width: 1024px) {
+  .table {
+    min-width: 900px;
+  }
+}
+
+@media (max-width: 640px) {
+  .table {
+    min-width: 720px;
+  }
+  .table th:nth-child(3),
+  .table td:nth-child(3) {
+    max-width: 200px;
+  }
+  .table th:nth-child(5),
+  .table td:nth-child(5) {
+    min-width: 180px;
+  }
+  .table th:nth-child(7),
+  .table td:nth-child(7) {
+    min-width: 220px;
+  }
+}

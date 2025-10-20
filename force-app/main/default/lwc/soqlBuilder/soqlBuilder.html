@@ -1,0 +1,98 @@
+<template>
+  <div class="controls">
+    <!-- Combobox[0]: Object -->
+    <lightning-combobox
+      name="object"
+      label="Object"
+      value={selectedObject}
+      placeholder="Select an object"
+      options={objectOptions}
+      onchange={handleObjectChange}
+    >
+    </lightning-combobox>
+
+    <!-- Fields (dual list) -->
+    <lightning-dual-listbox
+      name="fields"
+      label="Fields"
+      source-label="Available"
+      selected-label="Selected"
+      options={fieldOptions}
+      value={selectedFields}
+      onchange={handleFieldsChange}
+    >
+    </lightning-dual-listbox>
+
+    <!-- Input[0]: WHERE -->
+    <lightning-input
+      type="text"
+      label="WHERE"
+      value={whereCondition}
+      onchange={handleWhereChange}
+    >
+    </lightning-input>
+
+    <!-- Combobox[1]: ORDER BY -->
+    <lightning-combobox
+      name="orderBy"
+      label="Order By"
+      value={orderByField}
+      placeholder="None"
+      options={orderByFieldOptions}
+      onchange={handleOrderByChange}
+    >
+    </lightning-combobox>
+
+    <!-- Combobox[2]: Direction -->
+    <lightning-combobox
+      name="direction"
+      label="Direction"
+      value={orderDirection}
+      options={directionOptions}
+      onchange={handleDirectionChange}
+    >
+    </lightning-combobox>
+
+    <!-- Combobox[3]: NULLS -->
+    <lightning-combobox
+      name="nulls"
+      label="NULLS"
+      value={nullsBehavior}
+      options={nullsOptions}
+      onchange={handleNullsChange}
+    >
+    </lightning-combobox>
+
+    <!-- Input[1]: LIMIT -->
+    <lightning-input
+      type="number"
+      label="LIMIT"
+      value={limitRows}
+      onchange={handleLimitChange}
+    >
+    </lightning-input>
+
+    <!-- Input[2]: OFFSET -->
+    <lightning-input
+      type="number"
+      label="OFFSET"
+      value={offsetRows}
+      onchange={handleOffsetChange}
+    >
+    </lightning-input>
+
+    <!-- Run -->
+    <lightning-button
+      variant="brand"
+      label="Run"
+      onclick={handleRunClick}
+      disabled={isLoading}
+    >
+    </lightning-button>
+  </div>
+
+  <template if:true={columns}>
+    <lightning-datatable key-field="Id" data={queryResults} columns={columns}>
+    </lightning-datatable>
+  </template>
+</template>
