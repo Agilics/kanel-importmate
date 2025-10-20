@@ -2,7 +2,7 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 10-17-2025
+ * @last modified on  : 10-20-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 public with sharing class TransformationUtils {
@@ -14,8 +14,6 @@ public with sharing class TransformationUtils {
             return new LowerCaseTransformation();
         }else if(rule.RuleType__c == 'UpperCaseTransformation'){
             return new UpperCaseTransformation();
-        }else if (rule.RuleType__c == 'EmailMasking') {
-            //return new EmailMaskTransformation();
         }
         return null;
     }
