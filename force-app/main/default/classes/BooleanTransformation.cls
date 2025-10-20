@@ -1,4 +1,5 @@
 public with sharing class BooleanTransformation implements ITransformationRule {
+
     public String apply(Map<String, String> row, TransformationRule__c configRule) {
         String value = row.get(configRule.FieldMapping__r.TargetField__c);
         if (String.isBlank(value)) {
@@ -31,7 +32,7 @@ public with sharing class BooleanTransformation implements ITransformationRule {
         // Retourner la valeur par défaut si non trouvé
         String defaultValue = configRule.TargetValue__c != null ? configRule.TargetValue__c : 'false';
         // Log warning pour débogage
-        System.debug(normalizedValue + ' - Default: ' + defaultValue);
+         System.debug(normalizedValue + ' - Default: ' + defaultValue);
         return defaultValue;
     }
 
@@ -58,6 +59,5 @@ public with sharing class BooleanTransformation implements ITransformationRule {
         
         //must be in either trueValues or falseValues
         return trueValues.contains(value.toLowerCase()) || falseValues.contains(value.toLowerCase());
-
     }
 }

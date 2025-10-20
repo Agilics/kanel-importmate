@@ -165,6 +165,22 @@ public class TestDataFactory {
                 WHERE Id = :rule.Id];
     }
 
+     public static TransformationRule__c createTransformationRule(Id projectId, Id fieldMappingId, String targetType,  String targetValue,String type) {
+        TransformationRule__c rule = new TransformationRule__c(
+            Project__c = projectId,
+            FieldMapping__c = fieldMappingId,
+            RuleType__c = type, 
+            TargetValue__c = targetValue
+        );
+        insert rule;
+        
+        // Query the rule back to get the relationship populated
+        return [SELECT Id, Project__c, FieldMapping__c, RuleType__c,  TargetValue__c, 
+                       FieldMapping__r.TargetField__c 
+                FROM TransformationRule__c 
+                WHERE Id = :rule.Id];
+    }
+
     public static TransformationRule__c createBooleanTransformationRule(Id projectId, Id fieldMappingId, List<String> trueValues, List<String> falseValues, String targetValue, String type) {
         List<Object> trueValuesObj = new List<Object>();
         List<Object> falseValuesObj = new List<Object>();
