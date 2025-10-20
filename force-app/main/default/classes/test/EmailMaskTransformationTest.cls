@@ -40,11 +40,9 @@ public class EmailMaskTransformationTest {
     // Test apply() method with various scenarios
     @IsTest
     static void testApplyTransformationWithEmail() {
-    
-        //when
         Test.startTest();
-            //given 
-       String params = '{"targetType":"email","domain":"user123@sandbox.com"}';
+        //given 
+        String params = '{"targetType":"email","domain":"user123@sandbox.com"}';
        //when
         TransformationRule__c rule = createRule(params,'email');
         FieldMapping__c mapping = [SELECT TargetField__c FROM FieldMapping__c WHERE SourceColumn__c = 'IsActive' LIMIT 1  ];
