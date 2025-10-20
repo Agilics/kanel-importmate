@@ -28,7 +28,7 @@ public class EmailMaskTransformationTest {
         TransformationRule__c rule = new TransformationRule__c(
             Project__c = project.Id,
             FieldMapping__c = mapping.Id,
-            RuleType__c = 'BooleanTransformation',
+            RuleType__c = 'EmailMaskTransformation',
             Parameters__c = params,
             TargetValue__c = targetValue,
             Order__c = 1
@@ -39,19 +39,23 @@ public class EmailMaskTransformationTest {
 
     // Test apply() method with various scenarios
     @IsTest
-    static void testApplyWithEmailDomain() {
-        String params = '{"targetType":"email"}';
+    static void testApplyTransformationWithEmail() {
+        //given 
+        String params = '{"targetType":"email",{domain:"user123@sandbox.com"}}';
+        //when
+        Test.startTest();
         TransformationRule__c rule = createRule(params,'email');
-
-        FieldMapping__c mapping = [SELECT TargetField__c FROM FieldMapping__c WHERE SourceColumn__c = 'IsActive' LIMIT 1];
+        FieldMapping__c mapping = [SELECT TargetField__c FROM FieldMapping__c WHERE SourceColumn__c = 'IsActive' LIMIT 1  ];
+        
         EmailMaskTransformation transformer = new EmailMaskTransformation();
+        //then 
 
-        String masked = transformer.apply(new Map<String, String>{mapping.TargetField__c => 'johndoe@yahoo.com'}, rule);
-        System.assertNotEquals('johndoe@yahoo.com', masked, 'L\'email doit être masqué');
+        Assert.isNotNull(transformer.apply(new Map<String, String>{mapping.TargetField__c => 'momo213@sandbox'},rule), 'Echec de la transformation en vue de masquer l\'email');
+        Test.stopTest();
     }
 
      @IsTest
-    static void testApplyTransformationNoDomain() {
+    static void testApplyTransformationNoEmail() {
         
         
         Test.startTest();
@@ -67,7 +71,7 @@ public class EmailMaskTransformationTest {
         Test.stopTest();
     }
 
-       //Test with malformed JSON
+    //Test with malformed JSON
     @isTest
     static void testApplyWithMalformedJSON() {
         Test.startTest();

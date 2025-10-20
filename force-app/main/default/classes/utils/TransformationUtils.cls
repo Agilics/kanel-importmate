@@ -1,10 +1,17 @@
+/**
+ * @description       : 
+ * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @group             : 
+ * @last modified on  : 10-20-2025
+ * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+**/
 public with sharing class TransformationUtils {
 
     public static ITransformationRule getTransformer(TransformationRule__c rule) {
         if (rule.RuleType__c == 'BooleanTransformation') {
             return new BooleanTransformation();
         } else if (rule.RuleType__c == 'EmailMasking') {
-            //return new EmailMaskTransformation();
+            return new EmailMaskTransformation();
         }
         return null;
     }
