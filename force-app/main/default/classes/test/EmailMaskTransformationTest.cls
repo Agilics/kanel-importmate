@@ -28,7 +28,7 @@ public class EmailMaskTransformationTest {
         TransformationRule__c rule = new TransformationRule__c(
             Project__c = project.Id,
             FieldMapping__c = mapping.Id,
-            RuleType__c = 'EmailMaskTransformation',
+            RuleType__c = 'EmailMask',
             Parameters__c = params,
             TargetValue__c = targetValue,
             Order__c = 1
@@ -40,17 +40,19 @@ public class EmailMaskTransformationTest {
     // Test apply() method with various scenarios
     @IsTest
     static void testApplyTransformationWithEmail() {
-        //given 
-        String params = '{"targetType":"email",{domain:"user123@sandbox.com"}}';
+    
         //when
         Test.startTest();
+            //given 
+       String params = '{"targetType":"email","domain":"user123@sandbox.com"}';
+       //when
         TransformationRule__c rule = createRule(params,'email');
         FieldMapping__c mapping = [SELECT TargetField__c FROM FieldMapping__c WHERE SourceColumn__c = 'IsActive' LIMIT 1  ];
         
         EmailMaskTransformation transformer = new EmailMaskTransformation();
         //then 
 
-        Assert.isNotNull(transformer.apply(new Map<String, String>{mapping.TargetField__c => 'momo213@sandbox'},rule), 'Echec de la transformation en vue de masquer l\'email');
+        Assert.isNotNull(transformer.apply(new Map<String, String>{mapping.TargetField__c => 'user123@sandbox.com'},rule), 'Echec de la transformation en vue de masquer l\'email');
         Test.stopTest();
     }
 
@@ -78,7 +80,9 @@ public class EmailMaskTransformationTest {
         TransformationRule__c rule = createRule('{invalid : json}', 'default');
         FieldMapping__c mapping = [SELECT TargetField__c FROM FieldMapping__c WHERE SourceColumn__c = 'IsActive' LIMIT 1];
         try {
-            String result = new EmailMaskTransformation().apply(new Map<String, String>{mapping.TargetField__c => 'mo@sandbox.com'}, rule);
+
+             EmailMaskTransformation transformer = new EmailMaskTransformation();
+            String result = transformer.apply(new Map<String, String>{mapping.TargetField__c => 'mo@sandbox.com'}, rule);
             Assert.areEqual('default', result);
 
         } catch (Exception e) {
