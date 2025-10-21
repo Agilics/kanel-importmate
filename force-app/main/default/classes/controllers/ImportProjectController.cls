@@ -46,8 +46,9 @@ public class ImportProjectController {
     return ProjectService.doesProjectExist(name,targetObject);
   }
 
-  @AuraEnabled
-  public static List<String> getCompatibleSObjects(){
-    return ObjectMetadataService.getCompatibleSObjects();
-  }
+   //récupèrer les SObjets compatibles
+    @AuraEnabled(cacheable=true)
+    public static List<String> getCompatibleSObjects() {
+      return ObjectMetadataService.getCompatibleSObjects();
+    }
 }

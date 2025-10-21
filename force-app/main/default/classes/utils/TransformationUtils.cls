@@ -12,6 +12,10 @@ public with sharing class TransformationUtils {
             return new BooleanTransformation();
         } else if (rule.RuleType__c == 'EmailMasking') {
             return new EmailMaskTransformation();
+        }else if(rule.RuleType__c == 'LowerCaseTransformation'){
+            return new LowerCaseTransformation();
+        }else if(rule.RuleType__c == 'UpperCaseTransformation'){
+            return new UpperCaseTransformation();
         }
         return null;
     }
