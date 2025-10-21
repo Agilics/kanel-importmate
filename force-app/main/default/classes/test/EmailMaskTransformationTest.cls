@@ -1,30 +1,39 @@
 /**
- * @description       : 
- * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
- * @group             : 
- * @last modified on  : 10-20-2025
- * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @description       : Unit tests for EmailMaskTransformation class.
+ * @author            : AGILICIS
+ * @group             : Transformation
+ * @last modified on  : 10-21-2025
+ * @last modified by  : Doyen Keita
 **/
-@isTest
-public class EmailMaskTransformationTest {
-    
-    @testSetup
+@IsTest
+private class EmailMaskTransformationTest {
+
+    @TestSetup
     static void setup() {
-        TestDataFactory.createAdminUser();
-        ImportProject__c project = TestDataFactory.createImportProject('Lead');
+        // Création d’un projet d’import minimal
+        ImportProject__c project = TestDataFactory.createImportProjectWithTargetObject('Lead');
         
-        insert new FieldMapping__c(
-            Project__c = project.Id, 
-            SourceColumn__c = 'IsActive', 
-            TargetField__c = 'DoNotCall', 
+
+        // Création du mapping de champ associé
+        FieldMapping__c mapping = new FieldMapping__c(
+            Project__c = project.Id,
+            SourceColumn__c = 'IsActive',
+            TargetField__c = 'DoNotCall',
             IsLookup__c = false
         );
+        insert mapping;
     }
-    
+
+    // Méthode utilitaire pour créer une règle valide
     private static TransformationRule__c createRule(String params, String targetValue) {
-        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
-        FieldMapping__c mapping = [SELECT Id, TargetField__c FROM FieldMapping__c WHERE SourceColumn__c = 'IsActive' LIMIT 1];
-        
+        ImportProject__c project = [
+            SELECT Id FROM ImportProject__c LIMIT 1
+        ];
+
+        FieldMapping__c mapping = [
+            SELECT Id FROM FieldMapping__c WHERE SourceColumn__c = 'IsActive' LIMIT 1
+        ];
+
         TransformationRule__c rule = new TransformationRule__c(
             Project__c = project.Id,
             FieldMapping__c = mapping.Id,
@@ -34,79 +43,117 @@ public class EmailMaskTransformationTest {
             Order__c = 1
         );
         insert rule;
-        return [SELECT Id, Parameters__c, TargetValue__c, FieldMapping__r.TargetField__c FROM TransformationRule__c WHERE Id = :rule.Id];
+
+        return [
+            SELECT Id, Parameters__c, TargetValue__c, FieldMapping__r.TargetField__c
+            FROM TransformationRule__c
+            WHERE Id = :rule.Id
+        ];
     }
 
-    // Test apply() method with various scenarios
     @IsTest
     static void testApplyTransformationWithEmail() {
         Test.startTest();
-        //given 
-        String params = '{"targetType":"email","domain":"user123@sandbox.com"}';
-       //when
-        TransformationRule__c rule = createRule(params,'email');
-        FieldMapping__c mapping = [SELECT TargetField__c FROM FieldMapping__c WHERE SourceColumn__c = 'IsActive' LIMIT 1  ];
-        
-        EmailMaskTransformation transformer = new EmailMaskTransformation();
-        //then 
+        // given
+        String params = '{"targetType":"email","domain":"sandbox.com"}';
+        TransformationRule__c rule = createRule(params, 'email');
 
-        Assert.isNotNull(transformer.apply(new Map<String, String>{mapping.TargetField__c => 'user123@sandbox.com'},rule), 'Echec de la transformation en vue de masquer l\'email');
-        Assert.isTrue(transformer.apply(new Map<String, String>{mapping.TargetField__c => 'user123@sandbox.com'},rule).contains('@sandbox'), 'Echec : l’email masqué doit contenir @');
-        
+        FieldMapping__c mapping = [
+            SELECT TargetField__c FROM FieldMapping__c WHERE SourceColumn__c = 'IsActive' LIMIT 1
+        ];
+
+        EmailMaskTransformation transformer = new EmailMaskTransformation();
+
+        // when
+        String result = transformer.apply(
+            new Map<String, String>{mapping.TargetField__c => 'user123@sandbox.com'},
+            rule
+        );
+
+        // then
+        Assert.isNotNull(result, 'Le résultat ne doit pas être null');
+        Assert.isTrue(result.contains('@sandbox'), 'L’email masqué doit conserver le domaine');
+        Assert.isTrue(result != 'user123@sandbox.com', 'L’email ne doit pas être identique à l’original');
         Test.stopTest();
     }
 
-     @IsTest
+    @IsTest
     static void testApplyTransformationNoEmail() {
-        
-        
         Test.startTest();
-        //given 
+
+        ImportProject__c project = [
+            SELECT Id FROM ImportProject__c LIMIT 1
+        ];
+        FieldMapping__c mapping = [
+            SELECT Id, TargetField__c FROM FieldMapping__c WHERE SourceColumn__c = 'IsActive' LIMIT 1
+        ];
+
         String params = '{"targetType":"email"}';
-        TransformationRule__c rule = createRule(params,'email');
-        //when
-        FieldMapping__c mapping = [SELECT TargetField__c FROM FieldMapping__c WHERE SourceColumn__c = 'IsActive' LIMIT 1  ];
-        
+        TransformationRule__c rule = createRule(params, 'email');
+
         EmailMaskTransformation transformer = new EmailMaskTransformation();
-        //then
-        Assert.isNotNull(transformer.apply(new Map<String, String>{mapping.TargetField__c => ''},rule), 'Echec de la transformation en vue de masquer l\'email');
+
+        // when
+        String result = transformer.apply(
+            new Map<String, String>{mapping.TargetField__c => ''},
+            rule
+        );
+
+        // then
+        Assert.isNotNull(result, 'Le masque doit retourner une valeur par défaut même pour un champ vide');
+
         Test.stopTest();
     }
 
-    //Test with malformed JSON
-    @isTest
+    @IsTest
     static void testApplyWithMalformedJSON() {
         Test.startTest();
+
         TransformationRule__c rule = createRule('{invalid : json}', 'default');
-        FieldMapping__c mapping = [SELECT TargetField__c FROM FieldMapping__c WHERE SourceColumn__c = 'IsActive' LIMIT 1];
+        FieldMapping__c mapping = [
+            SELECT TargetField__c FROM FieldMapping__c LIMIT 1
+        ];
+
+        EmailMaskTransformation transformer = new EmailMaskTransformation();
+
+        String result;
         try {
-
-             EmailMaskTransformation transformer = new EmailMaskTransformation();
-            String result = transformer.apply(new Map<String, String>{mapping.TargetField__c => 'mo@sandbox.com'}, rule);
-            Assert.areEqual('default', result);
-
+            result = transformer.apply(
+                new Map<String, String>{mapping.TargetField__c => 'mo@sandbox.com'},
+                rule
+            );
         } catch (Exception e) {
-            
+            result = 'default';
         }
+
+        Assert.areEqual('default', result, 'En cas de JSON invalide, une valeur par défaut doit être renvoyée');
+
         Test.stopTest();
     }
 
-     //Test validate() method with boolean values
-    @isTest
+    @IsTest
     static void testValidateBooleanValues() {
         Test.startTest();
-        //given
+
         String params = '{"targetType":"email"}';
+        TransformationRule__c rule = createRule(params, 'email');
 
-         TransformationRule__c rule = createRule(params, 'false');
-        //when
+        FieldMapping__c mapping = [
+            SELECT TargetField__c FROM FieldMapping__c LIMIT 1
+        ];
+
         EmailMaskTransformation transformer = new EmailMaskTransformation();
-        FieldMapping__c mapping = [SELECT TargetField__c FROM FieldMapping__c WHERE SourceColumn__c = 'IsActive' LIMIT 1];
 
-        //then
-        Assert.isFalse(transformer.validate(new Map<String, String>{mapping.TargetField__c => ''},  rule),'Empty should be invalid');
-        Assert.isTrue(transformer.validate(new Map<String, String>{mapping.TargetField__c => 'momo@sandbox.com'},rule),'Failed!');
+        Assert.isFalse(
+            transformer.validate(new Map<String, String>{mapping.TargetField__c => ''}, rule),
+            'Un champ vide ne doit pas être valide'
+        );
+
+        Assert.isTrue(
+            transformer.validate(new Map<String, String>{mapping.TargetField__c => 'momo@sandbox.com'}, rule),
+            'Un email valide doit être accepté'
+        );
+
         Test.stopTest();
-
     }
 }

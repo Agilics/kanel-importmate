@@ -165,6 +165,8 @@ public class TestDataFactory {
                 WHERE Id = :rule.Id];
     }
 
+ 
+
     public static TransformationRule__c createBooleanTransformationRule(Id projectId, Id fieldMappingId, List<String> trueValues, List<String> falseValues, String targetValue, String type) {
         List<Object> trueValuesObj = new List<Object>();
         List<Object> falseValuesObj = new List<Object>();
@@ -429,29 +431,7 @@ public class TestDataFactory {
     }
 
 
-    /**
-    * Creates transformation rules for testing EmailMask
-     */
-     public static List<TransformationRule__c> createTransformationRulesForEmailMask(Id projectId, List<FieldMapping__c> mappings) {
-        List<TransformationRule__c> rules = new List<TransformationRule__c>();
-        
-        for (FieldMapping__c mapping : mappings) {
-            if (mapping.TargetField__c == 'DoNotCall') {
-                // Email transformation rule
-                rules.add(createTransformationRule(
-                    projectId, 
-                    mapping.Id, 
-                    'EmailMask', 
-                    new Map<String, Object>{'format' => 'lowercase'}, 
-                    'test@example.com',
-                    'EmailMask'
-                ));
-            }
-        }
-        
-        insert rules;
-        return rules;
-    }
+  
 
     /**
      * Creates transformation rules for testing
