@@ -1,9 +1,6 @@
 public with sharing class FieldMappingService {
 
-    private static void validateRowsAgainstSchema(
-        String targetSObjectApiName,
-        List<FieldMappingRepository.FieldMappingDTO> mappingRowDtos
-    ) {
+    private static void validateRowsAgainstSchema(String targetSObjectApiName,List<FieldMappingRepository.FieldMappingDTO> mappingRowDtos) {
         if (String.isBlank(targetSObjectApiName)) {
             throw new ApplicationException('Target object is required.');
         }
@@ -37,10 +34,7 @@ public with sharing class FieldMappingService {
     }
 
    
-    public static List<FieldMapping__c> saveMappings(
-        String targetSObjectApiName,
-        List<FieldMappingRepository.FieldMappingDTO> inputMappingRowDtos
-    ) {
+    public static List<FieldMapping__c> saveMappings(String targetSObjectApiName,List<FieldMappingRepository.FieldMappingDTO> inputMappingRowDtos) {
         List<FieldMappingRepository.FieldMappingDTO> normalizedMappingRowDtos = new List<FieldMappingRepository.FieldMappingDTO>();
 
         if (inputMappingRowDtos != null) {
@@ -77,10 +71,7 @@ public with sharing class FieldMappingService {
         return FieldMappingRepository.upsertMappings(normalizedMappingRowDtos);
     }
 
-    public static List<FieldMappingRepository.FieldMappingDTO> getMappingsByProject(
-        Id projectId,
-        String version
-    ) {
+    public static List<FieldMappingRepository.FieldMappingDTO> getMappingsByProject(Id projectId,String version) {
         List<FieldMapping__c> mappingRecords = FieldMappingRepository.getByProject(projectId, version);
         return toDtos(mappingRecords);
     }
