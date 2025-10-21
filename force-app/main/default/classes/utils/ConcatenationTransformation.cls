@@ -7,40 +7,84 @@
 **/
 public with sharing class ConcatenationTransformation implements ITransformationRule {
 
-    //transformation en concaténant 1 -> 3 colonnes
-    public String apply(Map<String, String> row, TransformationRule__c configRule){
-        // Récupération du champ cible
-        String fieldApiName = configRule.FieldMapping__r.TargetField__c;
-        String value = row.get(fieldApiName);
-        
-        // Si vide, renvoyer la valeur par défaut
-        if (String.isBlank(value)) {
+    public String apply(Map<String, String> row, TransformationRule__c configRule) {
+        Map<String, Object> params = (Map<String, Object>) JSON.deserializeUntyped(configRule.Parameters__c);
+
+        // Récupération du séparateur
+        String separator = (String) params.get('separator');
+        if (separator == null) separator = ' ';
+
+        // Récupération des colonnes à concaténer
+        List<Object> columnsRaw = (List<Object>) params.get('columns');
+        List<Map<String, Object>> columns = new List<Map<String, Object>>();
+        for (Object col : columnsRaw) {
+            columns.add((Map<String, Object>) col);
+        }
+
+        // Tri par ordre croissant
+        columns.sort((a, b) => 
+            Integer.valueOf(a.get('order')) - Integer.valueOf(b.get('order'))
+        );
+
+        List<String> values = new List<String>();
+        for (Map<String, Object> col : columns) {
+            String field = (String) col.get('source');
+            String val = row.get(field);
+            if (val != null) {
+                values.add(val.trim());
+            }
+        }
+
+        // Si aucune valeur, renvoyer la valeur par défaut
+        if (values.isEmpty()) {
             return configRule.TargetValue__c != null ? configRule.TargetValue__c : '';
         }
 
-          // Normalisation : trim + passage en minuscules
-        String normalized = value.trim().toLowerCase();
-
-        //convertir JSON en Map<String,Object>
-        Map<String, Object> params = (Map<String, Object>) JSON.deserializeUntyped(configRule.Parameters__c);
-
-        String order = String.valueOf(configRule.Order__c);
-
-        //Convertir List<Object> en List<String>
-        //⚠ => Clé à extraire à déterminer
-        List<String> selectedFields = (List<String>) params.get('fieldsOrder');
-
-        // concaténation de la liste chaînée en une chaîne de caractère
-        String result = String.join(selectedFields, '\t');
-        return result;
+        return String.join(values, separator);
     }
 
-    //validation
-    public Boolean validate(Map<String, String> row, TransformationRule__c configRule){
-        String value = row.get(configRule.FieldMapping__r.TargetField__c);
-        if (String.isBlank(value)) {
+    public Boolean validate(Map<String, String> row, TransformationRule__c configRule) {
+        Map<String, Object> params = (Map<String, Object>) JSON.deserializeUntyped(configRule.Parameters__c);
+        List<Object> columnsRaw = (List<Object>) params.get('columns');
+        if (columnsRaw == null || columnsRaw.isEmpty()) {
             return false;
         }
-        
+
+        for (Object col : columnsRaw) {
+            Map<String, Object> column = (Map<String, Object>) col;
+            String field = (String) column.get('source');
+            if (String.isNotBlank(row.get(field))) {
+                return true; // au moins une valeur présente
+            }
+        }
+
+        return false;
     }
+
 }
+
+/**
+ * JSON présumé attendue pour le champs Parameter__c
+ * {
+  "operation": "concat",
+  "separator": " ", 
+  "columns": [
+    {
+      "source": "FirstName",
+      "order": 1
+    },
+    {
+      "source": "MiddleName",
+      "order": 2
+    },
+    {
+      "source": "LastName",
+      "order": 3
+    }
+  ],
+  "trim": true,
+  "defaultValue": ""
+}
+
+ */
+
