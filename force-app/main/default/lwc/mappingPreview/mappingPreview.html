@@ -1,0 +1,52 @@
+<template>
+  <div class="slds-p-around_medium">
+    <template if:true={isLoading}>
+      <lightning-spinner size="small" variant="brand"></lightning-spinner>
+    </template>
+
+    <p class="slds-text-color_weak slds-m-bottom_small">
+      Project: <strong>{projectId}</strong>
+      &nbsp;•&nbsp; Version: <strong>{version}</strong>
+      <template if:true={objectApiName}>
+        &nbsp;•&nbsp; Object: <strong>{objectApiName}</strong>
+      </template>
+    </p>
+
+    <template if:true={error}>
+      <div class="slds-text-color_error slds-m-bottom_small">{error}</div>
+    </template>
+
+    <template if:true={hasRows}>
+      <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+        <thead>
+          <tr>
+            <th>Source Column</th>
+            <th>Target Field</th>
+            <th>Lookup?</th>
+            <th>Lookup Object</th>
+            <th>Match Field</th>
+          </tr>
+        </thead>
+        <tbody>
+          <template for:each={rows} for:item="r">
+            <tr key={r.id}>
+              <td>{r.sourceColumn}</td>
+              <td>{r.targetField}</td>
+              <td>{r.isLookup}</td>
+              <td>{r.lookupObject}</td>
+              <td>{r.lookupMatchField}</td>
+            </tr>
+          </template>
+        </tbody>
+      </table>
+    </template>
+
+    <template if:false={hasRows}>
+      <div class="slds-text-color_weak">No mappings found for this Project/Version.</div>
+    </template>
+
+    <div class="slds-m-top_medium">
+      <lightning-button label="Back to mapping" onclick={handleBack}></lightning-button>
+    </div>
+  </div>
+</template>
