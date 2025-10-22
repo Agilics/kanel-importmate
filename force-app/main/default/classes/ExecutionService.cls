@@ -6,7 +6,7 @@ public with sharing class ExecutionService {
             String executionId = execution.Id;
 
             //get project record to check status
-            ImportProject__c project = ImportProjectService.getProjectById(projectId);
+            ImportProject__c project = ProjectService.getProjectById(projectId);
 
             //gros volume >200 lignes - utiliser ValidationBatch existante
             if (csvData.size() > 200) {

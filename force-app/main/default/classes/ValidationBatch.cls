@@ -22,7 +22,7 @@ public with sharing class ValidationBatch implements Database.Batchable<Map<Stri
             List<FieldMapping__c> mappings = FieldMappingService.getAllMappingsByProject(projectId);
             Map<String, List<TransformationRule__c>> rulesByMappingId = TransformationRepository.getRulesByProjectIdGroupedByMapping(projectId);
             
-            ImportProject__c project = ImportProjectService.getProjectById(projectId);
+            ImportProject__c project = ProjectService.getProjectById(projectId);
             String objectName = project.TargetObject__c;
             
             Integer startLineNumber = 1; 
