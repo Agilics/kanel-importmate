@@ -1,10 +1,3 @@
-/**
- * @description       : 
- * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
- * @group             : 
- * @last modified on  : 10-17-2025
- * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
-**/
 public with sharing class Constants {
     public static final String BOOLEAN_TYPE = 'Boolean';
     public static final String DATE_TYPE = 'Date';
@@ -51,7 +44,7 @@ public with sharing class Constants {
     public static final String EXECUTION_TYPE_IMPORT = 'Import';
     public static final String EXECUTION_TYPE_UPDATE = 'Update';
     public static final String EXECUTION_TYPE_DELETE = 'Delete';
-    public static final String EXECUTION_TYPE_UPSERT = 'Upsert';
+    public static final String EXECUTION_TYPE_UPSERT = 'Upsert';    
 
     public static final String ERROR_TYPE_VALIDATION = 'Validation';
     public static final String ERROR_TYPE_TRANSFORMATION = 'Transformation';
@@ -80,6 +73,7 @@ public with sharing class Constants {
     public static final String INVALID_NUMERIC_FORMAT = 'INVALID_NUMERIC_FORMAT';
     public static final String REQUIRED_FIELD_MISSING = 'REQUIRED_FIELD_MISSING';
     public static final String TRANSFORMATION_ERROR = 'TRANSFORMATION_ERROR';
+    public static final String INVALID_BOOLEAN_FORMAT = 'INVALID_BOOLEAN_FORMAT';
     
     // Codes d'erreur supplémentaires pour ValidationService
     public static final String ERROR_CODE_VALUE_TOO_LONG = 'VALUE_TOO_LONG';
@@ -88,4 +82,11 @@ public with sharing class Constants {
     public static final String ERROR_CODE_BUSINESS_RULE_EVALUATION_ERROR = 'BUSINESS_RULE_EVALUATION_ERROR';
     public static final String ERROR_CODE_FIELD_SIZE_TOO_LARGE = 'FIELD_SIZE_TOO_LARGE';
     public static final String ERROR_CODE_INVALID_NUMBER_FORMAT = 'INVALID_NUMBER_FORMAT';
+    
+
+
+
+
+
+
 }

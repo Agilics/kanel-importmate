@@ -2,7 +2,7 @@ public with sharing class ImportLogRepository {
 
     public static List<ImportLog__c> getLogsByExecutionId(String executionId) {
         if (SecurityUtils.isAccessible(Schema.ImportLog__c.SObjectType)) {
-            return [SELECT Id, Execution__c, Status__c, Details__c 
+            return [SELECT Id, Execution__c, Status__c, Details__c,ErrorType__c,ErrorMessage__c,LineNumber__c,ColumnName__c,FieldApiName__c
                     FROM ImportLog__c 
                     WHERE Execution__c = :executionId 
                     ORDER BY CreatedDate DESC 

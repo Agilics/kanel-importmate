@@ -1,3 +1,13 @@
+/**
+    Description : Test class for FieldMappingService.
+ 
+    ######################################################################################################
+    Last modified: 22-10-2025
+    Modified by: Khalidou
+    Modifications:
+        - 22-10-2025: Added tests for overloaded getAllMappingsByProject method.
+    ######################################################################################################
+*/
 @IsTest
 private class FieldMappingServiceTest {
 
@@ -186,4 +196,29 @@ private class FieldMappingServiceTest {
         System.assertEquals('Email', vADtos[0].targetField);
         System.assertEquals(false, vADtos[0].isLookup);
     }
+
+    @IsTest
+    static void test_getAllMappingsByProject_overloaded() {
+        String projectId = maybeCreateProject();
+
+        List<FieldMapping__c> mappings = new List<FieldMapping__c>{
+            new FieldMapping__c(
+                Project__c        = projectId,
+                SourceColumn__c   = 'Name',
+                TargetField__c    = 'Name',
+                IsLookup__c       = false
+            ),
+            new FieldMapping__c(
+                Project__c        = projectId,
+                SourceColumn__c   = 'Industry',
+                TargetField__c    = '',
+                IsLookup__c       = true
+            )
+        };
+        insert mappings;
+
+        List<FieldMapping__c> records = FieldMappingService.getAllMappingsByProject(projectId);
+        System.assertEquals(2, records.size(), 'Should return all records for project');
+    }
+
 }
