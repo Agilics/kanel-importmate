@@ -21,7 +21,7 @@ public with sharing class ExecutionService {
 
             //pour petits volumes
             List<ImportLog__c> errors = new List<ImportLog__c>();
-            List<FieldMapping__c> mappings = FieldMappingService.getMappingsByProjectId(projectId);
+            List<FieldMapping__c> mappings = FieldMappingService.getAllMappingsByProject(projectId);
             Map<String, FieldMapping__c> targetFieldToMapping = new Map<String, FieldMapping__c>();
             for (FieldMapping__c mapping : mappings) {
                 targetFieldToMapping.put(mapping.TargetField__c, mapping);
@@ -61,7 +61,7 @@ public with sharing class ExecutionService {
     private static String validateSynchronously(String projectId, List<Map<String, String>> csvData, String executionId) {
         ImportProject__c project = ImportProjectService.getProjectById(projectId);
         List<ImportLog__c> errors = new List<ImportLog__c>();
-        List<FieldMapping__c> mappings = FieldMappingService.getMappingsByProjectId(projectId);
+        List<FieldMapping__c> mappings = FieldMappingService.getAllMappingsByProject(projectId);
         
         Map<String, List<TransformationRule__c>> rulesByMappingId = TransformationRepository.getRulesByProjectIdGroupedByMapping(projectId);
         

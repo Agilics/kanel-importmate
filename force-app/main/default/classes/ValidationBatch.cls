@@ -19,7 +19,7 @@ public with sharing class ValidationBatch implements Database.Batchable<Map<Stri
 
     public void execute(Database.BatchableContext bc, List<Map<String, String>> scope) {
         try {
-            List<FieldMapping__c> mappings = FieldMappingService.getMappingsByProjectId(projectId);
+            List<FieldMapping__c> mappings = FieldMappingService.getAllMappingsByProject(projectId);
             Map<String, List<TransformationRule__c>> rulesByMappingId = TransformationRepository.getRulesByProjectIdGroupedByMapping(projectId);
             
             ImportProject__c project = ImportProjectService.getProjectById(projectId);
