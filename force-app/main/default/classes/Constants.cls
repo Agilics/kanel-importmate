@@ -80,6 +80,7 @@ public with sharing class Constants {
     public static final String INVALID_NUMERIC_FORMAT = 'INVALID_NUMERIC_FORMAT';
     public static final String REQUIRED_FIELD_MISSING = 'REQUIRED_FIELD_MISSING';
     public static final String TRANSFORMATION_ERROR = 'TRANSFORMATION_ERROR';
+    public static final String INVALID_BOOLEAN_FORMAT = 'INVALID_BOOLEAN_FORMAT';
     
     // Codes d'erreur supplémentaires pour ValidationService
     public static final String ERROR_CODE_VALUE_TOO_LONG = 'VALUE_TOO_LONG';
