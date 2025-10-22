@@ -11,6 +11,10 @@ public with sharing class ImportLogService {
         );
         ImportLogRepository.saveImportLogs(new List<ImportLog__c>{log});
     }
+    
+    public static void logImportLogs(List<ImportLog__c> logs) {
+        ImportLogRepository.saveImportLogs(logs);
+    }
 
     public static List<Map<String, Object>> formatLogsForUI(String executionId) {
         List<ImportLog__c> logs = ImportLogRepository.getLogsByExecutionId(executionId);
@@ -19,10 +23,24 @@ public with sharing class ImportLogService {
             Map<String, Object> logMap = new Map<String, Object>{
                 'Id' => log.Id,
                 'Status' => log.Status__c,
-                'Details' => log.Details__c
+                'Details' => log.Details__c,
+                'ErrorType__c' => log.ErrorType__c,
+                'ErrorMessage__c' => log.ErrorMessage__c,
+                'LineNumber__c' => log.LineNumber__c,
+                'ColumnName__c' => log.ColumnName__c,
+                'FieldApiName__c' => log.FieldApiName__c
             };
             formattedLogs.add(logMap);
         }
         return formattedLogs;
+    }
+
+    public static List<ImportLog__c> getLogsByExecutionId(String executionId) {
+        try {
+            return ImportLogRepository.getLogsByExecutionId(executionId);
+        } catch (Exception e) {
+            ErrorLogService.logException(e);
+            throw new ApplicationException('Error retrieving execution logs: ' + e.getMessage());
+        }
     }
 }
