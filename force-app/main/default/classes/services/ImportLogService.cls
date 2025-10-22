@@ -24,11 +24,11 @@ public with sharing class ImportLogService {
                 'Id' => log.Id,
                 'Status' => log.Status__c,
                 'Details' => log.Details__c,
-                'ErrorType__c' => log.ErrorType__c,
-                'ErrorMessage__c' => log.ErrorMessage__c,
-                'LineNumber__c' => log.LineNumber__c,
-                'ColumnName__c' => log.ColumnName__c,
-                'FieldApiName__c' => log.FieldApiName__c
+                'ErrorType' => log.ErrorType__c,
+                'ErrorMessage' => log.ErrorMessage__c,
+                'LineNumber' => log.LineNumber__c,
+                'ColumnName' => log.ColumnName__c,
+                'FieldApiName' => log.FieldApiName__c
             };
             formattedLogs.add(logMap);
         }
