@@ -428,7 +428,7 @@ public class ValidationUtilsTest {
         Assert.areEqual(ValidationUtils.ValidationType.FIELD_SIZE, textareaType, 'TEXTAREA DisplayType should map to FIELD_SIZE ValidationType');
         
         // Test default case
-        ValidationUtils.ValidationType defaultType = ValidationUtils.mapSalesforceTypeToValidationType(Schema.DisplayType.BOOLEAN);
+        ValidationUtils.ValidationType defaultType = ValidationUtils.mapSalesforceTypeToValidationType(Schema.DisplayType.STRING);
         Assert.areEqual(ValidationUtils.ValidationType.FIELD_SIZE, defaultType, 'Unknown DisplayType should default to FIELD_SIZE ValidationType');
         
         Test.stopTest();
