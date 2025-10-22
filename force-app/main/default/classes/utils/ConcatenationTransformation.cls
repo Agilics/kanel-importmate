@@ -2,44 +2,29 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 10-21-2025
+ * @last modified on  : 10-22-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 public with sharing class ConcatenationTransformation implements ITransformationRule {
 
     public String apply(Map<String, String> row, TransformationRule__c configRule) {
-        Map<String, Object> params = (Map<String, Object>) JSON.deserializeUntyped(configRule.Parameters__c);
-
-        // Récupération du séparateur
-        String separator = (String) params.get('separator');
-        if (separator == null) separator = ' ';
-
-        // Récupération des colonnes à concaténer
-        List<Object> columnsRaw = (List<Object>) params.get('columns');
-        List<Map<String, Object>> columns = new List<Map<String, Object>>();
-        for (Object col : columnsRaw) {
-            columns.add((Map<String, Object>) col);
-        }
-
-        // Tri par ordre croissant
-        columns.sort((a, b) => 
-            Integer.valueOf(a.get('order')) - Integer.valueOf(b.get('order'))
-        );
-
-        List<String> values = new List<String>();
-        for (Map<String, Object> col : columns) {
-            String field = (String) col.get('source');
-            String val = row.get(field);
-            if (val != null) {
-                values.add(val.trim());
-            }
-        }
-
         // Si aucune valeur, renvoyer la valeur par défaut
         if (values.isEmpty()) {
             return configRule.TargetValue__c != null ? configRule.TargetValue__c : '';
         }
 
+        Map<String, Object> params = (Map<String, Object>) JSON.deserializeUntyped(configRule.Parameters__c);
+
+        // Récupération du séparateur
+        String separator = (String) params.get('separator');
+        if (separator == null || separator ) separator = '-';
+
+        // Récupération des champs à concaténer
+        List<String> columnsRaw = (List<String>) params.get('fields');
+        List<Map<String, Object>> columns = new List<Map<String, Object>>();
+        for (Object col : columnsRaw) {
+            columns.add((Map<String, Object>) col);
+        }
         return String.join(values, separator);
     }
 
@@ -62,29 +47,5 @@ public with sharing class ConcatenationTransformation implements ITransformation
     }
 
 }
-
-/**
- * JSON présumé attendue pour le champs Parameter__c
- * {
-  "operation": "concat",
-  "separator": " ", 
-  "columns": [
-    {
-      "source": "FirstName",
-      "order": 1
-    },
-    {
-      "source": "MiddleName",
-      "order": 2
-    },
-    {
-      "source": "LastName",
-      "order": 3
-    }
-  ],
-  "trim": true,
-  "defaultValue": ""
-}
-
- */
+ 
 
