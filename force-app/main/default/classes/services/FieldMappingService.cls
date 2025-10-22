@@ -1,3 +1,15 @@
+/**
+    Description : Service class for managing field mappings between source data and Salesforce objects.
+
+    ######################################################################################################
+    Last modified: 22-10-2025
+    Modified by: Khalidou
+    Modifications:
+        - 22-10-2025: Overload getAllMappingsByProject to return list of FieldMapping_c instead of DTOs.
+
+    ######################################################################################################
+
+ */
 public with sharing class FieldMappingService {
 
     private static void validateRowsAgainstSchema(String targetSObjectApiName,List<FieldMappingRepository.FieldMappingDTO> mappingRowDtos) {
@@ -79,6 +91,11 @@ public with sharing class FieldMappingService {
     public static List<FieldMappingRepository.FieldMappingDTO> getAllMappingsByProject(Id projectId) {
         List<FieldMapping__c> mappingRecords = FieldMappingRepository.getAllByProject(projectId);
         return toDtos(mappingRecords);
+    }
+
+    // Overloaded method to return FieldMapping__c records directly
+    public static List<FieldMapping__c> getAllMappingsByProject(String projectId) {
+        return FieldMappingRepository.getAllByProject(projectId);
     }
 
     private static List<FieldMappingRepository.FieldMappingDTO> toDtos(List<FieldMapping__c> mappingRecords) {
