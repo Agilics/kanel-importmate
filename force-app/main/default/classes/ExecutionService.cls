@@ -59,7 +59,7 @@ public with sharing class ExecutionService {
 
     //validate synchronously during tests
     private static String validateSynchronously(String projectId, List<Map<String, String>> csvData, String executionId) {
-        ImportProject__c project = ImportProjectService.getProjectById(projectId);
+        ImportProject__c project = ProjectService.getProjectById(projectId);
         List<ImportLog__c> errors = new List<ImportLog__c>();
         List<FieldMapping__c> mappings = FieldMappingService.getAllMappingsByProject(projectId);
         
