@@ -5,8 +5,8 @@
     </template>
 
     <p class="slds-text-color_weak slds-m-bottom_small">
-      Project: <strong>{projectId}</strong>
-      &nbsp;•&nbsp; Version: <strong>{version}</strong>
+      Project: <strong>{projectId}</strong> &nbsp;•&nbsp; Version:
+      <strong>{version}</strong>
       <template if:true={objectApiName}>
         &nbsp;•&nbsp; Object: <strong>{objectApiName}</strong>
       </template>
@@ -42,11 +42,16 @@
     </template>
 
     <template if:false={hasRows}>
-      <div class="slds-text-color_weak">No mappings found for this Project/Version.</div>
+      <div class="slds-text-color_weak">
+        No mappings found for this Project/Version.
+      </div>
     </template>
 
     <div class="slds-m-top_medium">
-      <lightning-button label="Back to mapping" onclick={handleBack}></lightning-button>
+      <lightning-button
+        label="Back to mapping"
+        onclick={handleBack}
+      ></lightning-button>
     </div>
   </div>
 </template>
