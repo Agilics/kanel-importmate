@@ -1,3 +1,10 @@
+/**
+ * @description       : 
+ * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @group             : 
+ * @last modified on  : 10-24-2025
+ * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+**/
 public with sharing class LowerCaseTransformation implements ITransformationRule {
 
     public String apply(Map<String, String> row, TransformationRule__c configRule) {
@@ -20,7 +27,7 @@ public with sharing class LowerCaseTransformation implements ITransformationRule
     public Boolean validate(Map<String, String> row, TransformationRule__c configRule) {
         // Vérifie si le champ est transformable  
         String targetField = configRule.FieldMapping__r.TargetField__c;
-        String value = row.get(targetField);
+
 
         if (String.isBlank(value)) {
             return false;
