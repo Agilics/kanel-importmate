@@ -1,3 +1,10 @@
+/**
+ * @description       : 
+ * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @group             : 
+ * @last modified on  : 10-22-2025
+ * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+**/
 @isTest
 public class TestDataFactory {
     public static User createAdminUser() {
@@ -348,7 +355,25 @@ public class TestDataFactory {
         
         return rows;
     }
+    
+    /**
+     * Create test for Concatenation Transformation
+     */
+      public static TransformationRule__c createConcatenationTransformation(Id projectId,Id mappingId,String params,String targetValue) {
+        TransformationRule__c rule = new TransformationRule__c(
+            Project__c = projectId,
+            FieldMapping__c = mappingId,
+            RuleType__c = 'Concatenation',
+            Parameters__c = params,
+            TargetValue__c = targetValue,
+            Order__c = 1
+        );
+ 
+        insert rule;
+        return [SELECT Id, Parameters__c, TargetValue__c,Order__c, FieldMapping__r.TargetField__c FROM TransformationRule__c WHERE Id = :rule.Id];
+    
 
+    }
     /**
      * Creates test rows with valid/invalid data
      */

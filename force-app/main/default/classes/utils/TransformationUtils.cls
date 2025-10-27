@@ -16,6 +16,8 @@ public with sharing class TransformationUtils {
             return new LowerCaseTransformation();
         }else if(rule.RuleType__c == 'UpperCaseTransformation'){
             return new UpperCaseTransformation();
+        }else if(rule.RuleType__c == 'ConcatenationTransformation') {
+            return new ConcatenationTransformation();
         }else if(rule.RuleType__c =='PhoneMask'){
             return new PhoneMaskTransformation();
         }
