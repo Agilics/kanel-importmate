@@ -1,3 +1,10 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 10-27-2025
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
 <template>
   <nav class="stepper" aria-label="Progress">
     <template for:each={steps} for:item="step">
@@ -6,7 +13,6 @@
         class={step.cssClass}
         data-step={step.number}
         aria-current={step.ariaCurrent}
-        onclick={handleStepClick}
       >
         <a class="step-circle">{step.number}</a>
         <div class="step-label">{step.label}</div>
