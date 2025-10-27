@@ -40,4 +40,8 @@ export default class ImportProjectRecentComponent extends LightningElement {
       new CustomEvent("selectproject",{ detail: projectId, bubbles: true })
     );
   }
+
+  async handleFindExistingProject() {
+    this.dispatchEvent(new CustomEvent("searchproject"));
+  }
 }

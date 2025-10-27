@@ -264,8 +264,8 @@ export default class MainComponent extends LightningElement {
   }
 
   // rechercher les projets importés par nom
-  //  Ouverture Modal permettant de la recherche et la selection des  projets
-  async handleSelectProject() {
+  //  Ouverture Modal permettant de la recherche et la selection d'existant  projets
+  async handleFindExistingProject() {
     await SelectProject.open({
       size: "large",
       description: "modal permettant la recherche de projets importés",
