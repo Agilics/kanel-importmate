@@ -16,8 +16,9 @@ public class ValidationUtilsTest {
         ValidationUtils.ValidationResult result1 = new ValidationUtils.ValidationResult(true);
         Assert.areEqual(true, result1.isValid, 'Should be valid');
         Assert.areEqual(null, result1.errorMessage, 'Error message should be null');
+        Assert.areEqual(false, result1.isWarning, 'Should not be a warning by default');
         
-        // Test full constructor
+        // Test full constructor without isWarning
         Map<String, Object> testContext = new Map<String, Object>{'testKey' => 'testValue'};
         ValidationUtils.ValidationResult result2 = new ValidationUtils.ValidationResult(
             false, 'Test error', 'TEST_ERROR', testContext
@@ -26,6 +27,15 @@ public class ValidationUtilsTest {
         Assert.areEqual('Test error', result2.errorMessage, 'Error message should match');
         Assert.areEqual('TEST_ERROR', result2.errorCode, 'Error code should match');
         Assert.areEqual(testContext, result2.context, 'Context should match');
+        Assert.areEqual(false, result2.isWarning, 'Should not be a warning by default');
+        
+        // Test constructor with isWarning
+        ValidationUtils.ValidationResult result3 = new ValidationUtils.ValidationResult(
+            true, 'Test warning', 'WARNING_CODE', testContext, true
+        );
+        Assert.areEqual(true, result3.isValid, 'Should be valid (warning)');
+        Assert.areEqual('Test warning', result3.errorMessage, 'Warning message should match');
+        Assert.isTrue(result3.isWarning, 'Should be a warning');
         
         Test.stopTest();
     }
@@ -539,16 +549,17 @@ public class ValidationUtilsTest {
         );
         Assert.isTrue(validLookup.isValid, 'Valid lookup should pass validation');
         
-        // Test invalid lookup
+        // Test invalid lookup (without objectName, defaults to warning)
         ValidationUtils.ValidationResult invalidLookup = ValidationUtils.validateLookup(
             'Non-existent Account', 
             'Account', 
             'Name', 
             'AccountId'
         );
-        Assert.isFalse(invalidLookup.isValid, 'Invalid lookup should fail validation');
+        Assert.isTrue(invalidLookup.isValid, 'Invalid lookup');
+        Assert.isTrue(invalidLookup.isWarning, 'Invalid lookup');
         Assert.areEqual(Constants.LOOKUP_VALUE_NOT_FOUND, invalidLookup.errorCode, 'Error code should be LOOKUP_VALUE_NOT_FOUND');
-        Assert.isTrue(invalidLookup.errorMessage.contains('Valeur de lookup introuvable'), 'Error message should be descriptive');
+        Assert.isTrue(invalidLookup.errorMessage.contains('LOOKUP NOT FOUND'), 'Error message should indicate lookup not found');
         
         // Test empty value (should be valid)
         ValidationUtils.ValidationResult emptyLookup = ValidationUtils.validateLookup(
@@ -617,7 +628,7 @@ public class ValidationUtilsTest {
         Assert.isTrue(result.isValid, 'Complete validation workflow should work');
         
         //Test with invalid data
-        ValidationUtils.ValidationType emailType = ValidationUtils.getValidationTypeForField('Name', 'Account'); // This will be FIELD_SIZE
+        ValidationUtils.ValidationType emailType = ValidationUtils.getValidationTypeForField('Name', 'Account'); 
         ValidationUtils.ValidationResult invalidResult = ValidationUtils.validateFieldFormat(
             'A'.repeat(1000), // Very long string
             emailType, 
@@ -625,6 +636,81 @@ public class ValidationUtilsTest {
             'Account'
         );
         // Result depends on actual field size limits
+        
+        Test.stopTest();
+    }
+    
+    // Test lookup validation with objectName parameter for required field determination
+    @isTest
+    static void testValidateLookupWithObjectName() {
+        Test.startTest();
+        
+        // Create test Account for lookup validation
+        Account testAccount = new Account(Name = 'Test Account for Lookup');
+        insert testAccount;
+        
+        // Test lookup with objectName parameter for optional field (ParentId is nullable in Account)
+        ValidationUtils.ValidationResult optionalLookup = ValidationUtils.validateLookup(
+            'Non-existent Account', 
+            'Account', 
+            'Name', 
+            'ParentId',
+            'Account'
+        );
+        
+        // ParentId is optional in Account (nullable), so should return warning, not error
+        Assert.isTrue(optionalLookup.isValid, 'Optional field lookup not found should pass (isValid = true)');
+        Assert.isTrue(optionalLookup.isWarning, 'Optional field lookup not found should be a warning');
+        Assert.isTrue(optionalLookup.errorMessage.contains('LOOKUP NOT FOUND'), 'Error message should indicate lookup not found');
+        
+        // Test lookup for a valid value with optional field
+        ValidationUtils.ValidationResult validOptionalLookup = ValidationUtils.validateLookup(
+            'Test Account for Lookup', 
+            'Account', 
+            'Name', 
+            'ParentId',
+            'Account'
+        );
+        Assert.isTrue(validOptionalLookup.isValid, 'Valid lookup should pass validation');
+        Assert.isFalse(validOptionalLookup.isWarning, 'Valid lookup should not be a warning');
+        
+        // Test empty value
+        ValidationUtils.ValidationResult emptyLookup = ValidationUtils.validateLookup(
+            '', 
+            'Account', 
+            'Name', 
+            'ParentId',
+            'Account'
+        );
+        Assert.isTrue(emptyLookup.isValid, 'Empty lookup value should be valid');
+        Assert.isFalse(emptyLookup.isWarning, 'Empty value should not be a warning');
+        
+        Test.stopTest();
+    }
+    
+    // Test ValidationResult with warning flag
+    @isTest
+    static void testValidationResultWithWarning() {
+        Test.startTest();
+        
+        // Test constructor with warning
+        Map<String, Object> testContext = new Map<String, Object>{'testKey' => 'testValue'};
+        ValidationUtils.ValidationResult warningResult = new ValidationUtils.ValidationResult(
+            true, 'Test warning message', 'WARNING_CODE', testContext, true
+        );
+        
+        Assert.isTrue(warningResult.isValid, 'Warning should have isValid = true');
+        Assert.areEqual('Test warning message', warningResult.errorMessage, 'Warning should have error message');
+        Assert.isTrue(warningResult.isWarning, 'isWarning should be true');
+        
+        // Test error result (not a warning)
+        ValidationUtils.ValidationResult errorResult = new ValidationUtils.ValidationResult(
+            false, 'Test error message', 'ERROR_CODE', testContext, false
+        );
+        
+        Assert.isFalse(errorResult.isValid, 'Error should have isValid = false');
+        Assert.areEqual('Test error message', errorResult.errorMessage, 'Error should have error message');
+        Assert.isFalse(errorResult.isWarning, 'isWarning should be false for errors');
         
         Test.stopTest();
     }
