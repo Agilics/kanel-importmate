@@ -10,6 +10,8 @@ public with sharing class TransformationUtils {
     public static ITransformationRule getTransformer(TransformationRule__c rule) {
         if (rule.RuleType__c == 'BooleanTransformation') {
             return new BooleanTransformation();
+        } else if (rule.RuleType__c == 'EmailMasking') {
+            return new EmailMaskTransformation();
         }else if(rule.RuleType__c == 'LowerCaseTransformation'){
             return new LowerCaseTransformation();
         }else if(rule.RuleType__c == 'UpperCaseTransformation'){
