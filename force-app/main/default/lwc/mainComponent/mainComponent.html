@@ -2,7 +2,7 @@
   @description       : 
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
   @group             : 
-  @last modified on  : 09-24-2025
+  @last modified on  : 10-27-2025
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
@@ -39,11 +39,11 @@
         </div>
       </div>
 
-      <p class="intro-text">
+      <!--p class="intro-text">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sodales
         nulla ligula, non lacinia felis finibus in. Proin id mattis elit. Donec
         at nulla metus.
-      </p>
+      </p-->
     </header>
 
     <template if:true={currentStep}>
@@ -56,7 +56,7 @@
         >
           <c-import-project-recent-component
             onshow={openNewProject}
-            onselectproject={handleSelectProject}
+            onselectproject={nagivateToSelectdDataSource}
             projects={importProjects}
           ></c-import-project-recent-component>
         </template>

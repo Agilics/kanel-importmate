@@ -63,6 +63,24 @@ export default class MainComponent extends LightningElement {
   limitor = 3;
   @wire(getRecentsProjects, { limitor: "$limitor" }) importProjects; //affiche 3 projets récents
 
+  //Navigation après sélection d'un project vers l'étape 2 selection de source de donnée dans la rubrique projets récents  
+ async nagivateToSelectdDataSource(event) {
+   
+  this.isLoading = true;
+  
+   const selectedProjectId = event.detail;
+   console.log( selectedProjectId );
+  try {
+    const result = await searchProjetById({ id:  selectedProjectId  });
+    this.recentProject = result;
+    this.handleNextStep();
+  } catch (error) {
+    this.showToast("Error", error?.body?.message, "error");
+  } finally {
+    this.isLoading = false;
+  }
+}
+
   //Enregistrement d'un nouveau projet
   async handleCreateProject() {
     this.isLoading = true;
