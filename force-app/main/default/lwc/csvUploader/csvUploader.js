@@ -20,20 +20,35 @@ export default class CsvUploader extends LightningElement {
   isLoading = false;
   parseError = '';
 
-  // === Visibility & state ===
+  // UI visibility
+  @track showFieldMapper = false;          // existing “Open Field Mapper” flow
+  @track showFieldMappingTable = false;    // NEW: “Go for mapping” reveals the table
+
+  /* ===================== Derived ===================== */
   get hasHeaders() {
     return Array.isArray(this.columns) && this.columns.length > 0;
   }
   get canShowGo() {
-    // show the button only after a file is parsed
     return this.hasHeaders;
   }
   get disableGoForMapping() {
     return !this.hasHeaders;
   }
+  get hasData() { return this.data && this.data.length > 0; }
+  get showingCount() { return this.data.length; }
+  get remainingCount() { return Math.max(this.totalRows - this.data.length, 0); }
+  get showActions() { return this.totalRows > 0 && (this.isPreview || this.data.length < this.totalRows); }
 
+  // Pass parsed CSV to FieldMappingTable
+  get csvPayload() {
+    return { columns: this.columns, rows: this.allRows };
+  }
+
+  /* ===================== Actions ===================== */
   handleGoForMapping() {
     if (this.disableGoForMapping) return;
+
+    // keep your event (if a parent listens to it)
     this.dispatchEvent(
       new CustomEvent('gotomapping', {
         detail: {
@@ -45,13 +60,28 @@ export default class CsvUploader extends LightningElement {
         composed: true
       })
     );
+
+    // also reveal the FieldMappingTable here
+    this.showFieldMappingTable = true;
+  }
+
+  handleShowFieldMapper() {
+    this.showFieldMapper = true;
+  }
+
+  get headersCsv() {
+    return this.columns.join(',');
   }
 
   handleFileUpload(event) {
     const file = event.target.files && event.target.files[0];
     if (!file) return;
 
+    // Reset view for a new file
     this.resetState();
+    this.showFieldMapper = false;        // close old mapper if it was open
+    this.showFieldMappingTable = false;  // hide mapping table until user clicks again
+
     this.fileName = file.name;
     this.fileSize = file.size;
 
@@ -120,6 +150,7 @@ export default class CsvUploader extends LightningElement {
     this.previewLimit = DEFAULT_PREVIEW_LIMIT;
   }
 
+  /* ===================== CSV parsing ===================== */
   parseCSV(csvText) {
     const lines = csvText.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
     if (!lines.length || (lines.length === 1 && lines[0].trim() === '')) return { columns: [], rows: [] };
@@ -184,20 +215,4 @@ export default class CsvUploader extends LightningElement {
       }))
     };
   }
- @track showFieldMapper = false;
-
-handleShowFieldMapper() {
-  this.showFieldMapper = true;
-}
-
-get headersCsv() {
-  return this.columns.join(',');
-}
-
-
-
-  get hasData() { return this.data && this.data.length > 0; }
-  get showingCount() { return this.data.length; }
-  get remainingCount() { return Math.max(this.totalRows - this.data.length, 0); }
-  get showActions() { return this.totalRows > 0 && (this.isPreview || this.data.length < this.totalRows); }
 }

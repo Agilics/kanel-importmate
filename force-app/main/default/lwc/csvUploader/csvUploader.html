@@ -76,25 +76,25 @@
           <div class="table-footer"></div>
         </div>
       </template>
-<template if:true={canShowGo}>
-  <div class="slds-m-top_large">
-    <button
-      class="btn btn--primary"
-      onclick={handleShowFieldMapper}
-      disabled={disableGoForMapping}
-    >
-      Open Field Mapper
-    </button>
-  </div>
-</template>
 
-<template if:true={showFieldMapper}>
-  <c-field-mapper source-columns-csv={headersCsv}></c-field-mapper>
-</template>
+      <!-- Open Field Mapper (unchanged) -->
+      <template if:true={canShowGo}>
+        <div class="slds-m-top_large">
+          <button
+            class="btn btn--primary"
+            onclick={handleShowFieldMapper}
+            disabled={disableGoForMapping}
+          >
+            Open Field Mapper
+          </button>
+        </div>
+      </template>
 
+      <template if:true={showFieldMapper}>
+        <c-field-mapper source-columns-csv={headersCsv}></c-field-mapper>
+      </template>
 
-
-      <!-- Go for mapping: visible uniquement après le parsing (quand des en-têtes existent) -->
+      <!-- Go for mapping: reveal mapping table when clicked -->
       <template if:true={canShowGo}>
         <div class="slds-m-top_large">
           <button
@@ -106,9 +106,14 @@
           </button>
         </div>
       </template>
-      
+
+      <!-- Mapping table appears only after clicking "Go for mapping" -->
+      <template if:true={showFieldMappingTable}>
+        <div class="slds-m-top_xx-large">
+          <c-field-mapping-table csv-data={csvPayload}></c-field-mapping-table>
+        </div>
+      </template>
 
     </div>
   </div>
-  
 </template>
