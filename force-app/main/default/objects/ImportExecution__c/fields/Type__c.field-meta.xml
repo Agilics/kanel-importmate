@@ -20,6 +20,21 @@
                 <default>false</default>
                 <label>Import</label>
             </value>
+            <value>
+                <fullName>Upsert</fullName>
+                <default>false</default>
+                <label>Upsert</label>
+            </value>
+            <value>
+                <fullName>Delete</fullName>
+                <default>false</default>
+                <label>Delete</label>
+            </value>
+            <value>
+                <fullName>Insert</fullName>
+                <default>false</default>
+                <label>Insert</label>
+            </value>
         </valueSetDefinition>
     </valueSet>
 </CustomField>

@@ -101,7 +101,6 @@ public class ExecutionServiceTest {
         Assert.areEqual(0, summary.size(), 'Summary should be empty for execution with no errors');
     }
 
-
     @isTest
     static void testDryRunValidationWithTransformationException() {
         //Create test data with transformation rules that will fail
@@ -140,6 +139,46 @@ public class ExecutionServiceTest {
         Test.stopTest();
     }
 
+    @isTest
+  static void testStartImportWithData() {
+    //Create test data
+    ImportProject__c project = TestDataFactory.createImportProject('Account');
+    FieldMapping__c mapping = TestDataFactory.createFieldMapping(project.Id, 'Name', 'Name');
+    List<Map<String, String>> csvData = TestDataFactory.createTestDataRows(5, false);
+    
+    Test.startTest();
+    String jobId = ExecutionService.startImport(project.Id, csvData);
+    Test.stopTest();
+    
+    //Verify execution was created
+    List<ImportExecution__c> executions = [SELECT Id, Status__c, Type__c 
+                       FROM ImportExecution__c 
+                       WHERE Project__c = :project.Id 
+                       AND Type__c = 'Import'];
+    
+    Assert.areEqual(1, executions.size(), 'One import execution should be created');
+    Assert.areEqual('Import', executions[0].Type__c, 'Execution type should be Import');
+  }
+  
+  @isTest
+  static void testStartImportWithEmptyData() {
+    //Create test data
+    ImportProject__c project = TestDataFactory.createImportProject('Account');
+    List<Map<String, String>> csvData = new List<Map<String, String>>();
+    
+    Test.startTest();
+    String result = ExecutionService.startImport(project.Id, csvData);
+    Test.stopTest();
+    
+    //Verify execution was created and completed
+    List<ImportExecution__c> executions = [SELECT Id, Status__c 
+                       FROM ImportExecution__c 
+                       WHERE Project__c = :project.Id];
+    
+    Assert.areEqual(1, executions.size(), 'One execution should be created');
+    Assert.areEqual('Completed', executions[0].Status__c, 'Execution should be completed');
+    Assert.areEqual(null, result, 'Should return null for empty data');
+  }
 
 
 }

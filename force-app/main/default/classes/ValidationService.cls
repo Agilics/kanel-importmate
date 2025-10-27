@@ -33,7 +33,12 @@ public with sharing class ValidationService {
             try {
                 List<ValidationException> mappingErrors = validateMapping(row, mapping, executionId, lineNumber, objectName, rulesByMappingId);
                 System.debug('Mapping Errors for ' + mapping.TargetField__c + ': ' + mappingErrors);
-                validationErrors.addAll(mappingErrors);
+                
+                //Filter out warnings 
+                for (ValidationException ve : mappingErrors) {
+                    // All ValidationExceptions are errors, warnings are in ValidationResult
+                    validationErrors.add(ve);
+                }
             } catch (Exception e) {
                 //Erreur inattendue lors de la validation d'un mapping
                 Map<String, Object> context = buildValidationContext(mapping, executionId, lineNumber, row.get(mapping.SourceColumn__c));
@@ -69,7 +74,7 @@ public with sharing class ValidationService {
             }
             
             //2. Validation des lookups 
-            ValidationException lookupError = validateLookupField(sourceValue, mapping, executionId, lineNumber);
+            ValidationException lookupError = validateLookupField(sourceValue, mapping, executionId, lineNumber, objectName);
             if (lookupError != null) {
                 errors.add(lookupError);
             }
@@ -123,7 +128,7 @@ public with sharing class ValidationService {
     /**
      * Valide les lookup
      */
-    private static ValidationException validateLookupField(String value, FieldMapping__c mapping, String executionId, Integer lineNumber) {
+    private static ValidationException validateLookupField(String value, FieldMapping__c mapping, String executionId, Integer lineNumber, String objectName) {
         if (!mapping.IsLookup__c || String.isBlank(value)) {
             return null;
         }
@@ -151,10 +156,13 @@ public with sharing class ValidationService {
                 value, 
                 mapping.LookupObject__c, 
                 mapping.LookupMatchField__c,
-                mapping.TargetField__c
+                mapping.TargetField__c,
+                objectName
             );
             
-            if (!lookupResult.isValid) {
+            // Si c'est un warning (isWarning = true), ne pas bloquer l'import
+            // Seules les erreurs (isValid = false et isWarning = false) bloquent l'import
+            if (!lookupResult.isValid && !lookupResult.isWarning) {
                 Map<String, Object> context = buildValidationContext(mapping, executionId, lineNumber, value);
                 context.put('lookupObject', mapping.LookupObject__c);
                 context.put('lookupMatchField', mapping.LookupMatchField__c);
@@ -162,16 +170,37 @@ public with sharing class ValidationService {
                 return new ValidationException(lookupResult.errorMessage, lookupResult.errorCode, context);
             }
         } else if (!isFound) {
-            //Valeur trouvée dans le cache mais n'existe pas
-            Map<String, Object> context = buildValidationContext(mapping, executionId, lineNumber, value);
-            context.put('lookupObject', mapping.LookupObject__c);
-            context.put('lookupMatchField', mapping.LookupMatchField__c);
+            //Valeur trouvée dans le cache mais n'existe pas - vérifier si le champ est obligatoire
+            Boolean isRequired = false;
+            try {
+                //Debug log
+                System.debug('Checking if field is required: objectName=' + objectName + ', targetField=' + mapping.TargetField__c);
+                Boolean isNullable = ObjectMetadataService.isFieldNullable(objectName, mapping.TargetField__c);
+                System.debug('Field isNullable result: ' + isNullable);
+                isRequired = !isNullable;
+            } catch (Exception e) {
+                // Si on ne peut pas déterminer, considérer comme optionnel
+                System.debug('Error checking field nullable: ' + e.getMessage());
+                isRequired = false;
+            }
             
-            return new ValidationException(
-                'Valeur de lookup introuvable: "' + value + '" dans ' + mapping.LookupObject__c + '.' + mapping.LookupMatchField__c,
-                Constants.LOOKUP_VALUE_NOT_FOUND,
-                context
-            );
+            //Debug log
+            System.debug('Lookup not found for ' + mapping.TargetField__c + ': isRequired=' + isRequired);
+            
+            // Si le champ est obligatoire, créer une exception (bloque l'import)
+            if (isRequired) {
+                Map<String, Object> context = buildValidationContext(mapping, executionId, lineNumber, value);
+                context.put('lookupObject', mapping.LookupObject__c);
+                context.put('lookupMatchField', mapping.LookupMatchField__c);
+                
+                return new ValidationException(
+                    'Valeur de lookup introuvable (requis): "' + value + '" dans ' + mapping.LookupObject__c + '.' + mapping.LookupMatchField__c,
+                    Constants.LOOKUP_VALUE_NOT_FOUND,
+                    context
+                );
+            }
+            // Si le champ est optionnel, ne pas créer d'exception (ne bloque pas l'import)
+            System.debug('Optional lookup not found for ' + mapping.TargetField__c + ' - continuing without error');
         }
         return null;
     }
@@ -317,6 +346,8 @@ public with sharing class ValidationService {
             }
             
             ErrorLogService.logException(e);
+            // Re-lancer l'exception pour qu'elle soit capturée par validateBatch
+            throw e;
         }
     }
     
@@ -405,7 +436,7 @@ public with sharing class ValidationService {
     }
     
     /**
-     * Point d'entrée public pour valider un champ individuel
+     * Valider un champ individuel
      */
     public static ValidationUtils.ValidationResult validateField(String value, String fieldName, String objectName) {
         ValidationUtils.ValidationType validationType = ValidationUtils.getValidationTypeForField(fieldName, objectName);
@@ -413,7 +444,7 @@ public with sharing class ValidationService {
     }
     
     /**
-     * Point d'entrée public pour valider une valeur de lookup
+     * Valider une valeur de lookup
      */
     public static ValidationUtils.ValidationResult validateLookup(String value, String lookupObject, String lookupMatchField, String fieldName) {
         return ValidationUtils.validateLookup(value, lookupObject, lookupMatchField, fieldName);

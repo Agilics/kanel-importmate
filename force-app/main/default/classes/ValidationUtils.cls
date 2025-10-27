@@ -8,12 +8,22 @@ public with sharing class ValidationUtils {
         public String errorMessage { get; set; }
         public String errorCode { get; set; }
         public Map<String, Object> context { get; set; }
+        public Boolean isWarning { get; set; }
         
         public ValidationResult(Boolean isValid, String errorMessage, String errorCode, Map<String, Object> context) {
             this.isValid = isValid;
             this.errorMessage = errorMessage;
             this.errorCode = errorCode;
             this.context = context;
+            this.isWarning = false;
+        }
+        
+        public ValidationResult(Boolean isValid, String errorMessage, String errorCode, Map<String, Object> context, Boolean isWarning) {
+            this.isValid = isValid;
+            this.errorMessage = errorMessage;
+            this.errorCode = errorCode;
+            this.context = context;
+            this.isWarning = isWarning;
         }
         
         public ValidationResult(Boolean isValid) {
@@ -21,10 +31,11 @@ public with sharing class ValidationUtils {
             this.errorMessage = null;
             this.errorCode = null;
             this.context = null;
+            this.isWarning = false;
         }
     }
 
-    // Types de validation supportés
+    //Types de validation supportés
     public enum ValidationType {
         EMAIL, DATE_TYPE, DATETIME_TYPE, NUMBER_TYPE, PICKLIST, REQUIRED, FIELD_SIZE, BOOLEAN_TYPE
     }
@@ -129,31 +140,51 @@ public with sharing class ValidationUtils {
         }
     }
     
-    //Validation lookup
-    public static ValidationResult validateLookup(String value, String lookupObject, String lookupMatchField, String fieldName) {
+    //Validation lookup avec vérification si le champ est obligatoire
+    public static ValidationResult validateLookup(String value, String lookupObject, String lookupMatchField, String fieldName, String objectName) {
         if (String.isBlank(value)) {
             return new ValidationResult(true);
         }
         
         try {
-            // Construire la requête SOQL pour vérifier l'existence de la valeur
+            //Vérifier si le champ est obligatoire ou optionnel
+            Boolean isRequired = !getCachedFieldNullable(objectName, fieldName);
+            
+            //Construire la requête SOQL pour vérifier l'existence de la valeur
             String soqlQuery = 'SELECT Id FROM ' + String.escapeSingleQuotes(lookupObject) + 
                              ' WHERE ' + String.escapeSingleQuotes(lookupMatchField) + ' = :value LIMIT 1';
             
             List<SObject> results = Database.query(soqlQuery);
             
             if (results.isEmpty()) {
-                return new ValidationResult(
-                    false, 
-                    'Valeur de lookup introuvable: "' + value + '" dans ' + lookupObject + '.' + lookupMatchField,
-                    Constants.LOOKUP_VALUE_NOT_FOUND,
-                    new Map<String, Object>{
-                        'fieldName' => fieldName,
-                        'value' => value,
-                        'lookupObject' => lookupObject,
-                        'lookupMatchField' => lookupMatchField
-                    }
-                );
+                //Si le champ est obligatoire, retourner une erreur
+                if (isRequired) {
+                    return new ValidationResult(
+                        false, 
+                        'Valeur de lookup introuvable (requis): "' + value + '" dans ' + lookupObject + '.' + lookupMatchField,
+                        Constants.LOOKUP_VALUE_NOT_FOUND,
+                        new Map<String, Object>{
+                            'fieldName' => fieldName,
+                            'value' => value,
+                            'lookupObject' => lookupObject,
+                            'lookupMatchField' => lookupMatchField
+                        }
+                    );
+                } else {
+                    //Si le champ est optionnel, retourner un warning 
+                    return new ValidationResult(
+                        true, 
+                        'LOOKUP NOT FOUND: "' + value + '" FOR FIELD ' + lookupObject + '.' + lookupMatchField + '. The field will be left blank.',
+                        Constants.LOOKUP_VALUE_NOT_FOUND,
+                        new Map<String, Object>{
+                            'fieldName' => fieldName,
+                            'value' => value,
+                            'lookupObject' => lookupObject,
+                            'lookupMatchField' => lookupMatchField
+                        },
+                        true
+                    );
+                }
             }
             
             return new ValidationResult(true);
@@ -161,7 +192,7 @@ public with sharing class ValidationUtils {
         } catch (QueryException qe) {
             return new ValidationResult(
                 false,
-                'Erreur lors de la requête de lookup: ' + qe.getMessage(),
+                'LOOKUP QUERY ERROR: ' + qe.getMessage(),
                 Constants.LOOKUP_RESOLUTION_ERROR,
                 new Map<String, Object>{
                     'fieldName' => fieldName,
@@ -187,6 +218,51 @@ public with sharing class ValidationUtils {
         }
     }
     
+    //Validation lookup sans objectName- by default consider the field as optional
+    public static ValidationResult validateLookup(String value, String lookupObject, String lookupMatchField, String fieldName) {
+        if (String.isBlank(value)) {
+            return new ValidationResult(true);
+        }
+        
+        try {
+            String soqlQuery = 'SELECT Id FROM ' + String.escapeSingleQuotes(lookupObject) + 
+                             ' WHERE ' + String.escapeSingleQuotes(lookupMatchField) + ' = :value LIMIT 1';
+            
+            List<SObject> results = Database.query(soqlQuery);
+            
+            if (results.isEmpty()) {
+                //Par défaut, retourner un warning (champ optionnel)
+                return new ValidationResult(
+                    true, 
+                    'LOOKUP NOT FOUND: "' + value + '" FOR ' + lookupObject + '.' + lookupMatchField + '. The field will be left blank.',
+                    Constants.LOOKUP_VALUE_NOT_FOUND,
+                    new Map<String, Object>{
+                        'fieldName' => fieldName,
+                        'value' => value,
+                        'lookupObject' => lookupObject,
+                        'lookupMatchField' => lookupMatchField
+                    },
+                    true
+                );
+            }
+            
+            return new ValidationResult(true);
+            
+        } catch (Exception e) {
+            return new ValidationResult(
+                false,
+                'Erreur lors de la validation du lookup: ' + e.getMessage(),
+                Constants.LOOKUP_RESOLUTION_ERROR,
+                new Map<String, Object>{
+                    'fieldName' => fieldName,
+                    'value' => value,
+                    'lookupObject' => lookupObject,
+                    'lookupMatchField' => lookupMatchField,
+                    'error' => e.getMessage()
+                }
+            );
+        }
+    }
 
     /**
      * get appropriate validation type
@@ -203,11 +279,10 @@ public with sharing class ValidationUtils {
             Schema.DescribeFieldResult fieldDescribe = fieldsMap.get(fieldName).getDescribe();
             Schema.DisplayType fieldType = fieldDescribe.getType();
             
-            // Mapper les types Salesforce vers nos types de validation
+            //Mapper les types Salesforce vers nos types de validation
             return mapSalesforceTypeToValidationType(fieldType);
             
         } catch (Exception e) {
-            // En cas d'erreur, retourner la validation par défaut
             ErrorLogService.logException(e);
             return ValidationType.FIELD_SIZE;
         }
@@ -347,7 +422,6 @@ public with sharing class ValidationUtils {
     public static ImportLog__c createValidationError(String executionId, Integer lineNumber, String errorMessage, String columnName, String fieldName) {
         return buildValidationError(executionId, lineNumber, errorMessage, columnName, fieldName);
     }
-
 
     public static ImportLog__c convertValidationExceptionToImportLog(ValidationException ve, String executionId, Integer lineNumber) {
         ImportLog__c error = buildValidationError(executionId, lineNumber, ve.getMessage(), null, null);

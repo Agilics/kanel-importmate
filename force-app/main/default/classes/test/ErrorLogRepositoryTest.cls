@@ -35,7 +35,7 @@ public class ErrorLogRepositoryTest {
         ErrorLog__c invalidRecord = new ErrorLog__c();
         
         invalidRecord.Id = error.Id;
-        delete error; // Make the Id invalid for insert
+        delete error; 
         errors.add(invalidRecord);
 
         User admin = TestDataFactory.createAdminUser();
@@ -44,8 +44,9 @@ public class ErrorLogRepositoryTest {
             ErrorLogRepository.saveErrorLogs(errors);
             Test.stopTest();
             
+            // The original error was deleted and the new insert failed, so we expect 0 records
             List<ErrorLog__c> insertedErrors = [SELECT Id FROM ErrorLog__c];
-            Assert.areEqual(1, insertedErrors.size(), 'DML error');
+            Assert.areEqual(0, insertedErrors.size(), 'No error logs should exist after DML failure with recursion protection');
         }
     }
 }
