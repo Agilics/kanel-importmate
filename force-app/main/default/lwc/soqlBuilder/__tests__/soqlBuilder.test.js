@@ -138,21 +138,13 @@ describe("c-soql-builder", () => {
     await flushPromises();
 
     // champs
-    el.shadowRoot
-      .querySelector("lightning-dual-listbox")
-      .dispatchEvent(
-        new CustomEvent("change", {
-          detail: {
-            value: [
-              "Name",
-              "Website",
-              "AnnualRevenue",
-              "IsActive",
-              "Parent.Name"
-            ]
-          }
-        })
-      );
+    el.shadowRoot.querySelector("lightning-dual-listbox").dispatchEvent(
+      new CustomEvent("change", {
+        detail: {
+          value: ["Name", "Website", "AnnualRevenue", "IsActive", "Parent.Name"]
+        }
+      })
+    );
     await flushPromises();
 
     // WHERE

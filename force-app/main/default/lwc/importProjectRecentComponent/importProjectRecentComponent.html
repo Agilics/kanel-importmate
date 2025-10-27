@@ -2,7 +2,7 @@
   @description       : 
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
   @group             : 
-  @last modified on  : 08-21-2025
+  @last modified on  : 10-27-2025
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
@@ -23,16 +23,15 @@
             title="add"
           ></lightning-icon>
         </div>
-        <h3>New Project</h3>
+        <h3>Create New Project</h3>
       </div>
       <p>
-        Vestibulum efficitur enim quis purus blandit, eget vehicula neque
-        blandit.
+        Start with a new import project. Define your target object and project settings.
       </p>
     </a>
 
     <a
-      onclick={handleShowSelectProject}
+      onclick={handleFindExistingProject}
       class="card"
       tabindex="0"
       role="button"
@@ -47,12 +46,11 @@
           title="form"
         ></lightning-icon>
 
-        <h3>Select Project</h3>
+        <h3>Use Existing Project</h3>
       </div>
 
       <p>
-        Vestibulum efficitur enim quis purus blandit, eget vehicula neque
-        blandit.
+        Continue with a previously created project. Reuse your field mappings and settings.
       </p>
     </a>
   </section>

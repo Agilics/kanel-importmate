@@ -1,0 +1,147 @@
+<template>
+  <lightning-card title="Field Mapping" icon-name="custom:custom63">
+    <div class="slds-p-around_medium">
+      <!-- Project selection -->
+      <lightning-combobox
+        label="Select Project"
+        value={selectedProjectId}
+        options={projectOptions}
+        onchange={handleProjectChange}>
+      </lightning-combobox>
+
+      <!-- Version -->
+      <lightning-input
+        type="text"
+        label="Version"
+        value={versionInput}
+        onchange={handleVersionChange}>
+      </lightning-input>
+
+      <!-- Controls -->
+      <div class="slds-m-top_small slds-grid slds-gutters">
+        <div class="slds-col">
+          <lightning-button
+            label="Load Saved Mappings"
+            title="Apply previously saved mappings to the board"
+            onclick={handleLoadSavedClick}>
+          </lightning-button>
+        </div>
+        <div class="slds-col">
+          <lightning-button
+            label="Clear All"
+            variant="destructive"
+            title="Remove all mappings and restore CSV list"
+            onclick={handleClearAllClick}>
+          </lightning-button>
+        </div>
+      </div>
+
+      <div class="slds-grid slds-wrap slds-p-top_medium">
+        <!-- Source Fields (CSV columns) -->
+        <div class="slds-col slds-size_1-of-2">
+          <h2 class="slds-text-heading_small slds-m-bottom_small">Source Fields (CSV)</h2>
+
+          <template if:true={availableSourceColumns}>
+            <template for:each={availableSourceColumns} for:item="source">
+              <div
+                key={source}
+                class="draggable slds-p-around_x-small slds-box slds-m-around_xx-small"
+                draggable="true"
+                data-source={source}
+                ondragstart={handleDragStart}>
+                {source}
+              </div>
+            </template>
+          </template>
+
+          <template if:false={availableSourceColumns}>
+            <p class="slds-text-color_weak slds-m-top_small">No source columns to show.</p>
+          </template>
+        </div>
+
+        <!-- Target Fields -->
+        <div class="slds-col slds-size_1-of-2">
+          <h2 class="slds-text-heading_small slds-m-bottom_small">Target Fields</h2>
+
+          <template if:true={targetFields}>
+            <template for:each={targetFields} for:item="field">
+              <div
+                key={field.apiName}
+                class="drop-zone slds-box slds-m-around_xx-small"
+                data-target={field.apiName}
+                ondragover={handleDragOver}
+                ondrop={handleDrop}>
+                <strong>{field.label}</strong>
+
+                <!-- Mapped sources under this target field -->
+                <template if:true={field.mappedSources}>
+                  <template for:each={field.mappedSources} for:item="ms">
+                    <div key={ms.sourceColumn} class="mapped-item slds-p-around_x-small">
+                      <div class="slds-grid slds-wrap slds-grid_vertical-align-center">
+                        <div class="slds-col slds-grow">{ms.sourceColumn}</div>
+                        <div class="slds-col">
+                          <lightning-button
+                            variant="destructive-text"
+                            label="Unmap"
+                            data-source={ms.sourceColumn}
+                            onclick={handleRemoveMapping}>
+                          </lightning-button>
+                        </div>
+                      </div>
+
+                      <!-- Lookup toggle -->
+                      <div class="slds-m-top_x-small">
+                        <lightning-input
+                          type="checkbox"
+                          label="Use as lookup"
+                          checked={ms.mapping.isLookup}
+                          data-source={ms.sourceColumn}
+                          onchange={handleLookupToggle}>
+                        </lightning-input>
+                      </div>
+                      <template if:true={ms.mapping.isLookup}>
+                        <div class="slds-m-top_x-small">
+                          <lightning-combobox
+                            label="Lookup Object"
+                            value={ms.mapping.lookupObject}
+                            data-source={ms.sourceColumn}
+                            options={availableObjectsOptions}
+                            onchange={handleLookupObjectChange}>
+                          </lightning-combobox>
+
+                          <lightning-combobox
+                            class="slds-m-top_x-small"
+                            label="Match Field"
+                            value={ms.mapping.lookupMatchField}
+                            data-source={ms.sourceColumn}
+                            options={ms.lookupFieldsOptions}
+                            onchange={handleLookupFieldChange}>
+                          </lightning-combobox>
+                        </div>
+                      </template>
+                    </div>
+                  </template>
+                </template>
+                <template if:false={field.mappedSources}>
+                  <div class="slds-text-color_weak slds-m-top_x-small">Drop a source column here…</div>
+                </template>
+              </div>
+            </template>
+          </template>
+
+          <template if:false={targetFields}>
+            <p class="slds-text-color_weak slds-m-top_small">Select a project to load target fields.</p>
+          </template>
+        </div>
+      </div>
+
+      <div class="slds-m-top_medium">
+        <lightning-button
+          label="Save Mappings"
+          variant="brand"
+          onclick={handleSave}>
+        </lightning-button>
+      </div>
+    </div>
+  </lightning-card>
+</template>

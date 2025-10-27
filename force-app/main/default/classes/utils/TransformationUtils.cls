@@ -2,7 +2,7 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 10-20-2025
+ * @last modified on  : 10-24-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 public with sharing class TransformationUtils {
@@ -10,10 +10,16 @@ public with sharing class TransformationUtils {
     public static ITransformationRule getTransformer(TransformationRule__c rule) {
         if (rule.RuleType__c == 'BooleanTransformation') {
             return new BooleanTransformation();
+        } else if (rule.RuleType__c == 'EmailMasking') {
+            return new EmailMaskTransformation();
         }else if(rule.RuleType__c == 'LowerCaseTransformation'){
             return new LowerCaseTransformation();
         }else if(rule.RuleType__c == 'UpperCaseTransformation'){
             return new UpperCaseTransformation();
+        }else if(rule.RuleType__c == 'ConcatenationTransformation') {
+            return new ConcatenationTransformation();
+        }else if(rule.RuleType__c =='PhoneMask'){
+            return new PhoneMaskTransformation();
         }
         return null;
     }

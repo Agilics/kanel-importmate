@@ -25,11 +25,11 @@
   border-radius: 0.5rem;
   border: 1px solid var(--lwc-colorBorder, #ddd);
   background: var(--lwc-colorBackground, #fff);
-  max-height: 62vh; 
+  max-height: 62vh;
 }
 
 .slds-table_bordered {
-  border: 0; 
+  border: 0;
 }
 
 .slds-table thead th {
@@ -37,15 +37,24 @@
   top: 0;
   z-index: 1;
   background: var(--lwc-colorBackgroundAlt, #fff);
-  box-shadow: inset 0 -1px 0 rgba(0,0,0,0.06);
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.06);
   font-weight: 700;
 }
 
-.slds-table th[scope="col"]:first-child { min-width: 220px; } 
-.slds-table th[scope="col"]:nth-child(2)  { min-width: 260px; }
-.slds-table th[scope="col"]:nth-child(3)  { min-width: 110px; text-align: center; } 
+.slds-table th[scope="col"]:first-child {
+  min-width: 220px;
+}
+.slds-table th[scope="col"]:nth-child(2) {
+  min-width: 260px;
+}
+.slds-table th[scope="col"]:nth-child(3) {
+  min-width: 110px;
+  text-align: center;
+}
 .slds-table th[scope="col"]:nth-child(4),
-.slds-table th[scope="col"]:nth-child(5)  { min-width: 220px; } 
+.slds-table th[scope="col"]:nth-child(5) {
+  min-width: 220px;
+}
 
 .slds-table tbody tr:nth-child(even) {
   background: #fafafa;
@@ -73,17 +82,14 @@
   --slds-c-checkbox-color-border: var(--lwc-colorBorder, #ddd);
 }
 
-
 .slds-align_absolute-center lightning-button + lightning-button {
   margin-left: 0.75rem;
 }
-
 
 .slds-text-title_caps {
   letter-spacing: 0.6px;
   color: var(--lwc-colorTextWeak, #576574);
 }
-
 
 @media (prefers-reduced-motion: reduce) {
   .slds-table tbody tr:hover {

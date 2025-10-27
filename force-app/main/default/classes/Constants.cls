@@ -1,3 +1,10 @@
+/**
+ * @description       : 
+ * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @group             : 
+ * @last modified on  : 10-24-2025
+ * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+**/
 public with sharing class Constants {
     public static final String BOOLEAN_TYPE = 'Boolean';
     public static final String DATE_TYPE = 'Date';
@@ -52,7 +59,7 @@ public with sharing class Constants {
     public static final String ERROR_TYPE_EXECUTION = 'Execution';
     public static final String ERROR_TYPE_SCHEDULING = 'Scheduling';
     public static final String ERROR_TYPE_CONVERSION = 'Conversion';
-    
+
 
     public static final String ERROR_CODE_APPLICATION = 'APPLICATION_ERROR';
     public static final String ERROR_CODE_VALIDATION = 'VALIDATION_ERROR';
@@ -86,7 +93,38 @@ public with sharing class Constants {
 
 
 
-
+    /**
+     * Liste d’indicatifs connus avec la longueur du numéro local.
+     * Permet de conserver une structure réaliste pour le numéro généré.
+    */
+    public static final Map<String, Integer> COUNTRY_CODE_DIGITS = new Map<String, Integer>{
+        '+1' => 10,     // USA, Canada
+        '+33' => 9,     // France
+        '+221' => 9,    // Sénégal
+        '+32' => 9,     // Belgique
+        '+41' => 9,     // Suisse
+        '+212' => 9,    // Maroc
+        '+225' => 10,   // Côte d’Ivoire
+        '+237' => 9,    // Cameroun
+        '+44' => 10,    // Royaume-Uni
+        '+49' => 10,    // Allemagne
+        '+34' => 9,     // Espagne
+        '+39' => 10,    // Italie
+        '+351' => 9,    // Portugal
+        '+216' => 8,    // Tunisie
+        '+91' => 10,    // Inde
+        '+86' => 11,    // Chine
+        '+81' => 10,    // Japon
+        '+61' => 9,     // Australie
+        '+7' => 10,     // Russie
+        '+254' => 9,    // Kenya
+        '+233' => 9,    // Ghana
+        '+234' => 10,   // Nigeria
+        '+971' => 9,    // Émirats Arabes Unis
+        '+90' => 10,    // Turquie
+        '+48' => 9,     // Pologne
+        '+30' => 10     // Grèce
+    };
 
 
 }
