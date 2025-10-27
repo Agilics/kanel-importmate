@@ -1,0 +1,71 @@
+/* Container layout */
+.slds-card {
+  background-color: #ffffff;
+}
+
+/* Section titles */
+.slds-text-heading_small {
+  font-weight: 600;
+  color: #032d60; /* Salesforce Blue */
+}
+
+/* Draggable source items */
+.draggable {
+  cursor: grab;
+  background-color: #f3f6f9;
+  border: 1px solid #d8dde6;
+  border-radius: 0.4rem;
+  transition: all 0.2s ease-in-out;
+  text-align: center;
+}
+.draggable:hover {
+  background-color: #e0e5ee;
+  transform: translateY(-2px);
+}
+
+/* Drop zone */
+.drop-zone {
+  min-height: 60px;
+  background-color: #fdfdfd;
+  border: 2px dashed #c9c9c9;
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  transition: background-color 0.3s, border-color 0.3s;
+}
+.drop-zone:hover,
+.drop-zone.drag-over {
+  border-color: #0176d3;
+  background-color: #f4faff;
+}
+
+/* Mapped chip */
+.mapped-item {
+  background-color: #ddf3dd;
+  border: 1px solid #9dc79d;
+  border-radius: 0.3rem;
+  padding: 0.25rem 0.5rem;
+  margin-top: 0.3rem;
+  text-align: center;
+  color: #084c0f;
+  font-size: 0.75rem;
+  font-weight: 500;
+  position: relative;
+  transition: background-color 0.2s ease;
+}
+.mapped-item:hover {
+  background-color: #c7e7c7;
+}
+
+/* Spacing & scroll */
+lightning-button {
+  display: block;
+  margin-top: 1rem;
+}
+.slds-grid {
+  gap: 1rem;
+}
+.slds-size_1-of-2 {
+  max-height: 450px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
