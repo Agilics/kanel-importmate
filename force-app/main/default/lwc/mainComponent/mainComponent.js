@@ -152,6 +152,7 @@ export default class MainComponent extends LightningElement {
     }
   }
 
+  
   // Retour vers l'étape précédente du stepper
   handlePreviousStep() {
     if (this.currentStep > 1) {
