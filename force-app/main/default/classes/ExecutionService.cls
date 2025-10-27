@@ -57,6 +57,24 @@ public with sharing class ExecutionService {
         }
     }
 
+    public static String startImport(String projectId, List<Map<String, String>> csvData) {
+        try {
+            ImportExecution__c execution = ExecutionRepository.createImportExecution(projectId, 'InProgress', 'Import');
+            if (csvData.size() > 0 ) {        
+                String jobId = System.enqueueJob(new ImportQueueable(projectId, csvData, execution.Id));
+                return jobId;
+            }
+            execution.Status__c = 'Completed';
+            execution.EndTime__c = Datetime.now();
+            ExecutionRepository.updateImportExecution(execution);
+            return null;
+        } catch (Exception e) {
+            ErrorLogService.logException(e);
+            throw new ExecutionException();
+        }
+    }
+
+
     //validate synchronously during tests
     private static String validateSynchronously(String projectId, List<Map<String, String>> csvData, String executionId) {
         ImportProject__c project = ProjectService.getProjectById(projectId);
