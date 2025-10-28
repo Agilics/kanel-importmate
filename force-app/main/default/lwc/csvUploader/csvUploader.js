@@ -1,4 +1,4 @@
-import { LightningElement, track } from 'lwc';
+import { LightningElement, track ,api} from 'lwc';
 
 const DEFAULT_PREVIEW_LIMIT = 100;
 const INCREMENT_LOAD_COUNT = 500;
@@ -21,9 +21,9 @@ export default class CsvUploader extends LightningElement {
   parseError = '';
 
   // UI visibility
-  @track showFieldMapper = false;          // existing “Open Field Mapper” flow
-  @track showFieldMappingTable = false;    // NEW: “Go for mapping” reveals the table
-
+  @track showFieldMapper = false;       
+  @track showFieldMappingTable = false;   
+  @api currentProject;  
   /* ===================== Derived ===================== */
   get hasHeaders() {
     return Array.isArray(this.columns) && this.columns.length > 0;
@@ -65,9 +65,30 @@ export default class CsvUploader extends LightningElement {
     this.showFieldMappingTable = true;
   }
 
-  handleShowFieldMapper() {
-    this.showFieldMapper = true;
-  }
+// ONLY update this handler
+handleShowFieldMapper() {
+  if (!this.hasHeaders) return;
+
+  this.showFieldMapper = true; 
+  this.dispatchEvent(
+    new CustomEvent('gotomapping', {
+      detail: {
+        columns: this.columns,
+        fileName: this.fileName,
+        fileSize: this.fileSize,
+        projectId: this.currentProject?.Id || null
+      },
+      bubbles: true,
+      composed: true
+    })
+  );
+}
+
+
+
+
+
+  
 
   get headersCsv() {
     return this.columns.join(',');
@@ -215,4 +236,6 @@ export default class CsvUploader extends LightningElement {
       }))
     };
   }
+
+  
 }

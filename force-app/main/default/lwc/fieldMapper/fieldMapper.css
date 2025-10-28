@@ -1,71 +1,148 @@
-/* Container layout */
+/* =========================
+   FieldMapper — FULL CSS (updated)
+   - Source column LEFT, Target column RIGHT
+   - Pretty, clean, and responsive
+   - Target fields column scrollable (independent)
+   ========================= */
+
+/* Card & headings */
 .slds-card {
   background-color: #ffffff;
+  border-radius: 0.75rem;
+  box-shadow: 0 2px 10px rgba(3, 45, 96, 0.08);
 }
 
-/* Section titles */
 .slds-text-heading_small {
-  font-weight: 600;
-  color: #032d60; /* Salesforce Blue */
+  font-weight: 700;
+  color: #032d60; /* Salesforce blue */
 }
 
-/* Draggable source items */
+/* ---------- Top Controls Row ---------- */
+/* Project | Target Object | Version */
+.header-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 240px; /* Project | Target Object | Version */
+  gap: 1rem;
+  align-items: end;
+}
+
+/* Action buttons row */
+.actions-row {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin: 0.75rem 0 0.5rem;
+}
+
+/* ---------- Mapping Board ---------- */
+/* Source LEFT | Target RIGHT */
+.field-map-board {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  align-items: stretch;
+  margin-top: 0.5rem;
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+  min-height: 420px;
+  border: 1px solid #e5e7ea;
+  border-radius: 0.75rem;
+  background: #fcfdff;
+  overflow: hidden;
+}
+
+.column__header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 0.75rem 1rem;
+  background: #f6f9fc;
+  border-bottom: 1px solid #e5e7ea;
+}
+
+.column__body {
+  flex: 1 1 auto;
+  padding: 0.75rem;
+  overflow: auto;
+  max-height: 60vh; /* independent scrolling */
+}
+
+/* Explicit order: Source left, Target right */
+.column--sources { order: 1; }
+.column--targets { order: 2; }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 900px) {
+  .header-row {
+    grid-template-columns: 1fr; /* stack controls */
+  }
+
+  .field-map-board {
+    grid-template-columns: 1fr; /* stack columns */
+  }
+
+  .column__body {
+    max-height: none;
+  }
+}
+
+/* ---------- Items: Source chips ---------- */
 .draggable {
   cursor: grab;
-  background-color: #f3f6f9;
-  border: 1px solid #d8dde6;
-  border-radius: 0.4rem;
-  transition: all 0.2s ease-in-out;
-  text-align: center;
+  background: #f5f8fd;
+  border: 1px solid #dce3ee;
+  border-radius: 0.6rem;
+  padding: 0.5rem 0.75rem;
+  margin: 0.35rem 0;
+  text-align: left;
+  transition: transform 0.12s ease, background 0.12s ease, box-shadow 0.12s ease;
+  box-shadow: 0 1px 2px rgba(3, 45, 96, 0.05);
 }
 .draggable:hover {
-  background-color: #e0e5ee;
-  transform: translateY(-2px);
+  background: #eef3fb;
+  transform: translateY(-1px);
 }
 
-/* Drop zone */
+/* ---------- Target drop zones ---------- */
 .drop-zone {
-  min-height: 60px;
-  background-color: #fdfdfd;
-  border: 2px dashed #c9c9c9;
-  border-radius: 0.5rem;
-  padding: 0.5rem;
-  transition: background-color 0.3s, border-color 0.3s;
+  border: 2px dashed #cbd5e1;
+  background: #ffffff;
+  border-radius: 0.75rem;
+  padding: 0.75rem;
+  margin: 0.5rem 0;
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 .drop-zone:hover,
 .drop-zone.drag-over {
   border-color: #0176d3;
-  background-color: #f4faff;
+  background: #f4faff;
+  box-shadow: 0 0 0 2px rgba(1, 118, 211, 0.06) inset;
 }
 
-/* Mapped chip */
+/* ---------- Mapped item chip ---------- */
 .mapped-item {
-  background-color: #ddf3dd;
-  border: 1px solid #9dc79d;
-  border-radius: 0.3rem;
-  padding: 0.25rem 0.5rem;
-  margin-top: 0.3rem;
-  text-align: center;
-  color: #084c0f;
-  font-size: 0.75rem;
-  font-weight: 500;
-  position: relative;
-  transition: background-color 0.2s ease;
-}
-.mapped-item:hover {
-  background-color: #c7e7c7;
+  background: #e9f6ee;
+  border: 1px solid #bfe2c9;
+  border-radius: 0.5rem;
+  padding: 0.4rem 0.55rem;
+  margin-top: 0.35rem;
+  font-size: 0.78rem;
+  color: #0b4d1d;
+  box-shadow: 0 1px 2px rgba(11, 77, 29, 0.05);
 }
 
-/* Spacing & scroll */
+/* ---------- Subtle text ---------- */
+.hint,
+.muted,
+.slds-text-color_weak {
+  color: #62748a;
+}
+
+/* Keep lightning-button spacing pleasant when stacked in flows */
 lightning-button {
-  display: block;
-  margin-top: 1rem;
-}
-.slds-grid {
-  gap: 1rem;
-}
-.slds-size_1-of-2 {
-  max-height: 450px;
-  overflow-y: auto;
-  padding-right: 0.5rem;
+  --slds-c-button-spacing-block-start: 0.25rem;
+  --slds-c-button-spacing-block-end: 0.25rem;
 }

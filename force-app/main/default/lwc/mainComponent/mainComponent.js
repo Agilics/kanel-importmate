@@ -13,6 +13,8 @@ import addSchedule from "@salesforce/apex/ScheduleController.addSchedule";
 export default class MainComponent extends LightningElement {
   @track showCreatorSection = false;
   title = "Imports Projects";
+  @track mappingHeadersCsv = '';
+@track mappingTargetObject = '';
 
   //paramètres pour la création de projet
 
@@ -64,22 +66,40 @@ export default class MainComponent extends LightningElement {
   @wire(getRecentsProjects, { limitor: "$limitor" }) importProjects; //affiche 3 projets récents
 
   //Navigation après sélection d'un project vers l'étape 2 selection de source de donnée dans la rubrique projets récents  
- async nagivateToSelectdDataSource(event) {
-   
+// mainComponent.js  (inside nagivateToSelectdDataSource)
+async nagivateToSelectdDataSource(event) {
   this.isLoading = true;
-  
-   const selectedProjectId = event.detail;
-   console.log( selectedProjectId );
+  const selectedProjectId = event.detail;
+
   try {
-    const result = await searchProjetById({ id:  selectedProjectId  });
+    const result = await searchProjetById({ id: selectedProjectId });
     this.recentProject = result;
+
+    // ✅ toast to confirm selection
+    this.dispatchEvent(
+      new ShowToastEvent({
+        title: "Project selected",
+        message: `You have selected "${result?.Name}" to start.`,
+        variant: "success",
+        mode: "dismissable"
+      })
+    );
+
+    // ✅ proceed to Select Source step
     this.handleNextStep();
   } catch (error) {
-    this.showToast("Error", error?.body?.message, "error");
+    this.dispatchEvent(
+      new ShowToastEvent({
+        title: "Error",
+        message: error?.body?.message || "Failed to load project",
+        variant: "error"
+      })
+    );
   } finally {
     this.isLoading = false;
   }
 }
+
 
   //Enregistrement d'un nouveau projet
   async handleCreateProject() {
@@ -340,4 +360,34 @@ export default class MainComponent extends LightningElement {
       this.isLoading = false;
     }
   }
+handleStartMapping(event) {
+  // 1) CSV headers (if CSV path)
+  this.mappingHeadersCsv = event?.detail?.headersCsv || '';
+
+  // 2) On passe toutes les informations de l'objet selectionnee
+  const rp = this.recentProject || {};
+  this.mappingTargetObject =
+    rp.TargetObject__c ??
+    rp.Target_Object__c ??
+    rp.Target__c ??
+    rp.targetObject ??
+    '';
+
+  // 3) On migre vers la page Field Mapper 
+  if (this.recentProject) {
+    this.currentStep = 3;
+  } else {
+    this.dispatchEvent(
+      new ShowToastEvent({
+        title: 'Select a project first',
+        message: 'Please pick a project before starting the mapping.',
+        variant: 'warning'
+      })
+    );
+  }
+}
+handleBackToStep2() {
+  this.currentStep = 2;
+}
+
 }
