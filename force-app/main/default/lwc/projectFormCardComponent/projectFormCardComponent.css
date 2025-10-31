@@ -1,3 +1,7 @@
+body {
+  background: #f8fafc;
+}
+
 .plus-icon {
   width: 71px;
   height: 71px;
@@ -5,12 +9,15 @@
   align-items: center;
   justify-content: center;
   border-radius: 17px;
+  --slds-c-icon-color-foreground-default: #ffff;
+  --slds-c-icon-color-foreground: #ffff;
+  --slds-c-icon-color-background: #2f4f8b;
   -webkit-border-radius: 17px;
   -moz-border-radius: 17px;
   -ms-border-radius: 17px;
   -o-border-radius: 17px;
 }
-lightning-combobox{
+lightning-combobox {
   width: 100%;
 }
 /** margin des icônes */
@@ -29,7 +36,7 @@ lightning-combobox{
 }
 .text-header {
   display: block;
-  margin: 5px 0 0 0;
+  margin: 2.5px 0 0 0;
 }
 h1 {
   color: #000;

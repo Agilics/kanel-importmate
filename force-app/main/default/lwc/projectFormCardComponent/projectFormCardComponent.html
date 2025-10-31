@@ -6,13 +6,17 @@
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
+  <div class="content">
+    <!--- breadcrumbs here -->  
+  <!--- end breadcrumbs here -->  
+
   <!-- header title-->
   <div class="header">
     <lightning-icon
       icon-name="utility:add"
       alternative-text="Add"
       size="medium"
-      class="plus-icon icon margin-icon"
+      class="plus-icon  margin-icon"
     ></lightning-icon>
     <div class="text-header">
       <h1>Create New Import Project</h1>
@@ -26,6 +30,7 @@
 
   <!-- title card with form  -->
   <section>
+    <form>
     <h2 class="title" aria-label="project information title">
       <lightning-icon
         class="icon margin-icon"
@@ -75,8 +80,8 @@
     <!-- Target Object configuration  -->
     <h2 style="margin-top: 3rem">
        <lightning-icon
-      icon-name="utility:choice"
-      alternative-text="choice"
+      icon-name="utility:campaign"
+      alternative-text="campaign"
       size="small"
       class=" icon margin-icon"
     ></lightning-icon>
@@ -84,8 +89,7 @@
     </h2>
     <div class="form-row">
       <div class="form-group">
-        <lightning-combobox
-          class="rounded-input"
+        <lightning-combobox 
           name="tickets"
           label="Target Salesforce Object"
           id="targetObjet"
@@ -108,13 +112,15 @@
 
     <!-- footer with actions buttons-->
     <c-project-form-footer-component
-      is-button-disabled={isButtonContinueDisabled}
       onsave={handleCreateProject}
       oncancel={handleCancel}
-      ongotodatasource={handleGoToDataSource}
     ></c-project-form-footer-component>
+  </form>
     <!-- end footer -->
   </section>
 
   <!-- end title card -->
+ 
+  </div>
+  
 </template>

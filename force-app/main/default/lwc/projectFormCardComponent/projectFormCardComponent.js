@@ -9,16 +9,14 @@ import saveProject from "@salesforce/apex/ImportProjectController.saveProject";
 import getCompatibleSObjects from "@salesforce/apex/ImportProjectController.getCompatibleSObjects";
 
 export default class ProjectFormCardComponent extends LightningElement {
-  @track projectName;
-  @track description;
-  @track targetObject;
+  @track projectName="";
+  @track description="";
+  @track targetObject="";
   @track options = [];
   @api recentProject;
-
-  isButtonContinueDisabled = true; // permet d'activer/désactiver le bouton pour continuer vers source de données
-
+ 
   //naviger vers la section data source
-  handleGoToDataSource() {
+  handleGoToDataSource() { 
     //TODO
   }
 
@@ -39,6 +37,20 @@ export default class ProjectFormCardComponent extends LightningElement {
           e?.body?.message || e
         );
       });
+  }
+
+   // réintialisation des valeurs de tous les champs  de textes & combo-box du formulaire de création de projets
+  resetFields() { 
+  // Reset des variables réactives
+  this.projectName = "";
+  this.description = "";
+  this.targetObject = "";
+
+  // Reset des valeurs UI
+  this.template.querySelectorAll(".rounded-input").forEach((input) => {
+    input.value = "";
+  });
+
   }
 
   //enregistrement d'un nouveau projet
@@ -63,11 +75,9 @@ export default class ProjectFormCardComponent extends LightningElement {
           "warning"
         );
 
-        /**
-         *  Réintialisation de tous les champs de texte | combo box
-         *  dans la section de création de projets
-         * */
-        resetFields();
+        
+        // Réintialisation de tous les champs de texte & combobox  dans la section de création de projets
+        this.resetFields();
 
         this.targetObject = "";
         return;
@@ -86,21 +96,19 @@ export default class ProjectFormCardComponent extends LightningElement {
         `Record  with ID:\t${result.Id}  created  successfully !`,
         "success"
       );
-      //  Activer le bouton "Continue to Data Source"
-      this.isDataSource = true;
       // Réintialisation de tous les champs de texte | combo box
-       resetFields();
-      
+      this.resetFields();
+
       //dispatcher l'Object créé vers le parent mainComponent
       this.dispatchEvent(
         new CustomEvent("saveproject", {
           detail: result
         })
       );
-      
-      //Navigation vers le Data Source Selection
-      handleGoToDataSource();
 
+       
+      //TODO Navigation vers le Data Source Selection
+      
     } catch (err) {
       //Affichage d'un toast de message d'erreur
       this.showToast(
@@ -126,13 +134,7 @@ export default class ProjectFormCardComponent extends LightningElement {
     this.targetObject = event.target.value;
   }
 
-  // réintialisation des valeurs de tous les champs  de textes & combo-box du formulaire de création de projets
-  resetFields() {
-    // reset valeurs UI
-    this.template.querySelectorAll(".rounded-input").forEach((input) => {
-      input.value = "";
-    });
-  }
+ 
 
   //affiche un flash message qui contient le titre, le contenu du message et la variant via un toast
   showToast(title, message, variant) {

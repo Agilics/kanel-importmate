@@ -16,17 +16,6 @@ export default class MainComponent extends LightningElement {
   @track mappingHeadersCsv = "";
   @track mappingTargetObject = "";
 
-  //paramètres pour la création de projet
-
-  /*isLoading = false;
-  objectList = [];
-  projectName = "";
-  description = "";
-  targetObjet = "";
-  projectId;
-  project;
-  recentProject;
-  isProject;*/
   @track recentProject;
 
   @track selectProject = [];
