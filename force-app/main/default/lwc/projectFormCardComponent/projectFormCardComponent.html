@@ -2,7 +2,7 @@
   @description       : 
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
   @group             : 
-  @last modified on  : 10-30-2025
+  @last modified on  : 10-31-2025
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
@@ -40,6 +40,7 @@
 
     <lightning-input
       type="text"
+      size="small"
       id="projectName"
       name="projectName"
       label="Project Name"
@@ -57,6 +58,7 @@
     <!--- text area for description -->
     <lightning-textarea
       name="description"
+      size="small"
       class="rounded-input"
       label="Description"
       id="description"
@@ -72,13 +74,12 @@
 
     <!-- Target Object configuration  -->
     <h2 style="margin-top: 3rem">
-      <lightning-icon
-        icon-name="utility:target"
-        alternative-text="Cible"
-        title="Cible"
-        size="medium"
-        class="custom-icon margin-icon"
-      ></lightning-icon>
+       <lightning-icon
+      icon-name="utility:choice"
+      alternative-text="choice"
+      size="small"
+      class=" icon margin-icon"
+    ></lightning-icon>
       Target Object Configuration
     </h2>
     <div class="form-row">

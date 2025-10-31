@@ -89,18 +89,18 @@ export default class ProjectFormCardComponent extends LightningElement {
       //  Activer le bouton "Continue to Data Source"
       this.isDataSource = true;
       // Réintialisation de tous les champs de texte | combo box
-      // resetFields();
-
+       resetFields();
+      
+      //dispatcher l'Object créé vers le parent mainComponent
       this.dispatchEvent(
         new CustomEvent("saveproject", {
           detail: result
         })
       );
+      
+      //Navigation vers le Data Source Selection
+      handleGoToDataSource();
 
-      //Pour activer le bouton du bouton pour passer à l'étape 2 Selection du source de données
-      this.template
-        .querySelector("c-project-form-footer-component")
-        .enableContinueButton();
     } catch (err) {
       //Affichage d'un toast de message d'erreur
       this.showToast(

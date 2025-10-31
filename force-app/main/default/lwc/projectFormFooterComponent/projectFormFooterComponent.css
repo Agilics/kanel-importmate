@@ -24,11 +24,26 @@
 .btn-holder {
   display: flex;
   flex-wrap: wrap;
-  gap: 8.5rem;
+  gap: 8.4rem;
   justify-content: center;
   max-width: 1000px;
   margin: 10px auto 35px;
   padding: 0;
+}
+/* --- Effet hover pour tous les boutons --- */
+button:hover lightning-icon {
+  --slds-c-icon-color-foreground: #ffffff; 
+}
+
+/* --- Effet bouton désactivé --- */
+button[disabled] lightning-icon {
+  --slds-c-icon-color-foreground: #a8a8a8; 
+}
+
+/* --- (Optionnel) texte du bouton devient blanc au hover --- */
+button:hover {
+  color: #ffffff;
+  transition: color 0.3s ease;
 }
 
 .gap-1 {
@@ -72,6 +87,7 @@
 
 .btn-continue::before {
   background-color: #265df2;
+  color: #ffffff;
   transition: 0.3s ease-out;
   -webkit-transition: 0.3s ease-out;
   -moz-transition: 0.3s ease-out;
@@ -79,9 +95,16 @@
   -o-transition: 0.3s ease-out;
 }
 
+ .btn-continues span {
+    background: #265df2;
+    color: white;
+    --slds-c-icon-color-foreground: rgb(255, 255, 255);
+    --slds-c-icon-color-background: #265df2;;
+  }
 .btn-continue span {
-  background-color: #265df2;
+  color: #ffffff;
   border: 1px solid #265df2;
+
   background-color: #265df2;
   transition: 0.2s 0.1s;
   -webkit-transition: 0.2s 0.1s;
@@ -101,7 +124,7 @@
 
 
 /* Style pour le bouton désactivé */
-.btn-continue  span:disabled ,.btn-continue{
+.btn-continue  span:disabled ,.btn-continue:disabled{
   background: #d3d3d3;
   color: #a8a8a8;
   cursor: not-allowed;
@@ -173,31 +196,191 @@ lightning-icon{
   height: 0%;
 }
 
- 
+/* 3.hover-filled-slide-left */
+.btn.hover-filled-slide-left::before {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+}
+.btn.hover-filled-slide-left:hover::before {
+  width: 0%;
+}
+
+/* 4. hover-filled-slide-right */
+.btn.hover-filled-slide-right::before {
+  top: 0;
+  bottom: 0;
+  right: 0;
+  height: 100%;
+  width: 100%;
+}
+.btn.hover-filled-slide-right:hover::before {
+  width: 0%;
+}
+
+/* 5. hover-filled-opacity */
+.btn.hover-filled-opacity::before {
+  top: 0;
+  bottom: 0;
+  right: 0;
+  height: 100%;
+  width: 100%;
+  opacity: 1;
+}
+.btn.hover-filled-opacity:hover::before {
+  opacity: 0;
+}
+
+/*--- btn-2 ---*/
+.btn-2::before {
+  background-color: rgb(28, 31, 30);
+  transition: 0.3s ease-out;
+}
+.btn-2 span {
+  color: rgb(28, 31, 30);
+  border: 1px solid rgb(28, 31, 30);
+  transition: 0.2s;
+  -webkit-transition:;
+  -moz-transition:;
+  -ms-transition:;
+  -o-transition:;
+}
+.btn-2 span:hover {
+  color: rgb(255, 255, 255);
+  transition: 0.2s 0.1s;
+  --slds-c-icon-color-foreground: rgb(255, 255, 255);
+  -webkit-transition:;
+  -moz-transition:;
+  -ms-transition:;
+  -o-transition:;
+}
+
+/* 6. hover-slide-down */
+.btn.hover-slide-down::before {
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 0%;
+  width: 100%;
+}
+.btn.hover-slide-down:hover::before {
+  height: 100%;
+}
+
+/* 7. hover-slide-up */
+.btn.hover-slide-up::before {
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 0%;
+  width: 100%;
+}
+.btn.hover-slide-up:hover::before {
+  height: 100%;
+}
+
+/* 8. hover-slide-left */
+.btn.hover-slide-left::before {
+  top: 0;
+  bottom: 0;
+  right: 0;
+  height: 100%;
+  width: 0%;
+}
+.btn.hover-slide-left:hover::before {
+  width: 100%;
+}
+
+/* 9. hover-slide-right */
+.btn.hover-slide-right::before {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  height: 100%;
+  width: 0%;
+}
+.btn.hover-slide-right:hover::before {
+  width: 100%;
+}
+
+/* 10. hover-opacity */
+.btn.hover-opacity::before {
+  top: 0;
+  bottom: 0;
+  right: 0;
+  height: 100%;
+  width: 100%;
+  opacity: 0;
+}
 .btn.hover-opacity:hover::before {
   opacity: 1;
 }
 
-/* --- Effet hover pour tous les boutons --- */
-button:hover lightning-icon {
-  --slds-c-icon-color-foreground: #ffffff;
-  --slds-c-icon-color-background: #265df2; /* optionnel : change selon ton thème */
+/*--- btn-3 ---*/
+.btn-3 {
+  padding: 5px;
+}
+.btn-3 span {
+  color: rgb(255, 255, 255);
+  background-color: rgb(54, 56, 55);
+}
+.btn-3::before,
+.btn-3::after {
+  background: transparent;
+  z-index: 2;
 }
 
-/* --- Effet bouton désactivé --- */
-button[disabled] lightning-icon {
-  --slds-c-icon-color-foreground: #a8a8a8;
-  --slds-c-icon-color-background: #d3d3d3;
+/* 11. hover-border-1 */
+.btn.hover-border-1::before,
+.btn.hover-border-1::after {
+  width: 10%;
+  height: 25%;
+  transition: 0.35s;
+}
+.btn.hover-border-1::before {
+  top: 0;
+  left: 0;
+  border-left: 1px solid rgb(28, 31, 30);
+  border-top: 1px solid rgb(28, 31, 30);
+}
+.btn.hover-border-1::after {
+  bottom: 0;
+  right: 0;
+  border-right: 1px solid rgb(28, 31, 30);
+  border-bottom: 1px solid rgb(28, 31, 30);
+}
+.btn.hover-border-1:hover::before,
+.btn.hover-border-1:hover::after {
+  width: 99%;
+  height: 98%;
 }
 
-/* --- (Optionnel) texte du bouton devient blanc au hover --- */
-button:hover {
-  color: #ffffff;
-  transition: color 0.3s ease;
+/* 12. hover-border-2 */
+.btn.hover-border-2::before,
+.btn.hover-border-2::after {
+  width: 10%;
+  height: 25%;
+  transition: 0.35s;
 }
-
-
- 
+.btn.hover-border-2::before {
+  bottom: 0;
+  left: 0;
+  border-left: 1px solid rgb(28, 31, 30);
+  border-bottom: 1px solid rgb(28, 31, 30);
+}
+.btn.hover-border-2::after {
+  top: 0;
+  right: 0;
+  border-right: 1px solid rgb(28, 31, 30);
+  border-top: 1px solid rgb(28, 31, 30);
+}
+.btn.hover-border-2:hover::before,
+.btn.hover-border-2:hover::after {
+  width: 99%;
+  height: 99%;
+}
 
 /* Tablettes (max 768px) */
 @media (max-width: 768px) {
@@ -205,7 +388,7 @@ button:hover {
     flex-direction: column;
     align-items: stretch;
     gap: 10px;
-    margin: 1.5rem;
+    margin: .1rem;
   }
   .space {
     margin: 1rem;
