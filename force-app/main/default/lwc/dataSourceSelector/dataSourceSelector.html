@@ -23,16 +23,17 @@
       </div>
     </template>
 
-  <!-- CSV -->
-<template if:true={showCSV}>
-  <!-- pass the selected project object down -->
-  <c-csv-uploader
-    current-project={currentProject}
-    oncsvloaded={handleCsvLoaded}
-    ongotomapping={handleGoToMappingFromCsv}>   <!-- ✅ Forward this -->
-  </c-csv-uploader>
-</template>
-
+    <!-- CSV -->
+    <template if:true={showCSV}>
+      <!-- pass the selected project object down -->
+      <c-csv-uploader
+        current-project={currentProject}
+        oncsvloaded={handleCsvLoaded}
+        ongotomapping={handleGoToMappingFromCsv}
+      >
+        <!-- ✅ Forward this -->
+      </c-csv-uploader>
+    </template>
 
     <!-- SOQL -->
     <template if:true={showSOQL}>

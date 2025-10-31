@@ -1,0 +1,70 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 10-31-2025
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+
+<template>
+  <div class="space"></div>
+  <hr class="solid" aria-label="separator" />
+
+  <div class="btn-holder">
+    <!-- cancel action -->
+    <button type="button" class="btn btn-2 radius hover-slide-right">
+      <span>
+        <lightning-icon
+          icon-name="utility:back"
+          alternative-text="back"
+          size="x-small"
+          title="back"
+        ></lightning-icon>
+        Cancel
+      </span>
+    </button>
+
+    <!-- cancel action -->
+
+    <!-- save action-->
+    <button
+      type="button"
+      class="radius btn btn-1 hover-filled-slide-up "
+      onclick={handleCreateProject}
+    >
+      <span>
+        <lightning-icon
+          icon-name="utility:save"
+          alternative-text="save"
+          size="small"
+          title="save"
+        ></lightning-icon>
+        Save as Draft
+      </span>
+    </button>
+    <!-- end save action-->
+
+    <!-- Go to Data Source section  -->
+
+    <!-- actived button -->
+
+    <button
+      type="button"
+      class="btn radius btn-continue gap-1"
+      onclick={handleGoToDataSource}
+      disabled={isButtonDisabled}
+    >
+      <lightning-icon
+        class="custom-icon-output"
+        icon-name="standard:output"
+        alternative-text="output"
+        size="small"
+        title="output"
+      ></lightning-icon>
+      Continue to Data Source
+    </button>
+    <!-- end actived button -->
+    <!-- end Go to Data Source section  -->
+  </div>
+  <!-- end actions buttons-->
+</template>

@@ -2,7 +2,7 @@
   @description       : 
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
   @group             : 
-  @last modified on  : 10-27-2025
+  @last modified on  : 10-31-2025
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
@@ -47,63 +47,39 @@
     </header>
 
     <template if:true={currentStep}>
-      <template if:true={isStart} aria-label="section start">
-        <!-- child here content-->
-        <!-- show  recent imported project -->
-        <template
-          if:false={showCreatorSection}
-          aria-label="select project recent section"
+      <template if:true={isStart}>
+        <!-- Project Form -->
+        <c-project-form-card-component
+          onsaveproject={handleCreateProject}
+          recent-project={recentProject}
         >
-          <c-import-project-recent-component
-            onshow={openNewProject}
-            onselectproject={nagivateToSelectdDataSource}
-            onsearchproject={handleFindExistingProject}
-            projects={importProjects}
-          ></c-import-project-recent-component>
-        </template>
-        <!-- end show  recent imported project -->
+        </c-project-form-card-component>
 
-        <!-- project creator section -->
-        <template
-          if:true={showCreatorSection}
-          aria-label="creation project section"
-        >
-          <c-create-project-component
-            project-name={projectName}
-            description={description}
-            target-object={targetObject}
-            onnamechange={handleProjectNameChange}
-            ondescriptionchange={handleDescriptionChange}
-            ontargetchange={handleTargetObjectChange}
-            onsave={handleCreateProject}
-            oncancel={handleCancel}
-          >
-          </c-create-project-component>
-        </template>
-        <!-- end project creator section -->
-
-        <!-- end child content-->
+        <!-- end Step 1: Project Form-->
       </template>
-<!-- Step 2 -->
-<!-- Step 2: Data source -->
-<template if:true={isSelectSource} aria-label="select source section">
-  <c-data-source-selector
-    onprevious={handlePreviousStep}
-    onstartmapping={handleStartMapping}  
-    current-project={recentProject}>
-  </c-data-source-selector>
-</template>
+      <!-- Step 2 -->
+      <!-- Step 2: Data source -->
+      <template if:true={isSelectSource}>
+        <c-data-source-selector
+          onprevious={handlePreviousStep}
+          onstartmapping={handleStartMapping}
+          current-project={recentProject}
+        >
+        </c-data-source-selector>
+      </template>
 
-<!-- Step 3: Full Field Mapper page -->
-<template if:true={isMappingAndTransformation} aria-label="mapping & transformation section">
-  <c-field-mapper
-    preselected-project-id={recentProject.Id}
-    preselected-target-object={mappingTargetObject}
-    source-columns-csv={mappingHeadersCsv}
-    onprevious={handleBackToStep2}>
-  </c-field-mapper>
-</template>
-      <template if:true={isScheduling} aria-label="schedule's section">
+      <!-- Step 3: Full Field Mapper page -->
+      <template if:true={isMappingAndTransformation}>
+        <c-field-mapper
+          preselected-project-id={recentProject.Id}
+          preselected-target-object={mappingTargetObject}
+          source-columns-csv={mappingHeadersCsv}
+          onprevious={handleBackToStep2}
+        >
+        </c-field-mapper>
+      </template>
+      <!-- Step 4: Scheduling -->
+      <template if:true={isScheduling}>
         <c-schedule-creator-component
           project-id={recentProject.Id}
           show-schedule={showSchedule}

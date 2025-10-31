@@ -1,0 +1,119 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 10-30-2025
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<template>
+  <!-- header title-->
+  <div class="header">
+    <lightning-icon
+      icon-name="utility:add"
+      alternative-text="Add"
+      size="medium"
+      class="plus-icon icon margin-icon"
+    ></lightning-icon>
+    <div class="text-header">
+      <h1>Create New Import Project</h1>
+      <p class="subtitle">
+        Set up your data import project with target object and configuration
+      </p>
+    </div>
+  </div>
+
+  <!-- end header title-->
+
+  <!-- title card with form  -->
+  <section>
+    <h2 class="title" aria-label="project information title">
+      <lightning-icon
+        class="icon margin-icon"
+        icon-name="utility:info"
+        alternative-text="info"
+        size="medium"
+        title="info"
+      ></lightning-icon>
+      Project Information
+    </h2>
+    <!-- project name -->
+
+    <lightning-input
+      type="text"
+      id="projectName"
+      name="projectName"
+      label="Project Name"
+      class="rounded-input"
+      required
+      placeholder="Enter a descriptive project name (e.g., Q4 Contact Import)"
+      onchange={handleProjectNameChange}
+    >
+    </lightning-input>
+
+    <div class="help-text">
+      Choose a clear, descriptive name for easy identification
+    </div>
+
+    <!--- text area for description -->
+    <lightning-textarea
+      name="description"
+      class="rounded-input"
+      label="Description"
+      id="description"
+      placeholder="Describe the purpose and scope of this import project..."
+      onchange={handleDescriptionChange}
+    ></lightning-textarea>
+
+    <div class="help-text">
+      Provide details about data source, business purpose, and expected outcomes
+    </div>
+
+    <hr class="solid" aria-label="separator" />
+
+    <!-- Target Object configuration  -->
+    <h2 style="margin-top: 3rem">
+      <lightning-icon
+        icon-name="utility:target"
+        alternative-text="Cible"
+        title="Cible"
+        size="medium"
+        class="custom-icon margin-icon"
+      ></lightning-icon>
+      Target Object Configuration
+    </h2>
+    <div class="form-row">
+      <div class="form-group">
+        <lightning-combobox
+          class="rounded-input"
+          name="tickets"
+          label="Target Salesforce Object"
+          id="targetObjet"
+          value={targetObject}
+          options={options}
+          onchange={handleTargetObjectChange}
+          required
+        ></lightning-combobox>
+        <div class="help-text">
+          Select the Salesforce object where data will be imported
+        </div>
+      </div>
+
+      <!-- Import Operation -->
+      <div class="form-group" aria-label="Import Operation ">
+        <!--label for="importOperation">Import Operation <span class="required">*</span></label>
+        <div class="help-text">Choose how the data should be processed</div-->
+      </div>
+    </div>
+
+    <!-- footer with actions buttons-->
+    <c-project-form-footer-component
+      is-button-disabled={isButtonContinueDisabled}
+      onsave={handleCreateProject}
+      oncancel={handleCancel}
+      ongotodatasource={handleGoToDataSource}
+    ></c-project-form-footer-component>
+    <!-- end footer -->
+  </section>
+
+  <!-- end title card -->
+</template>

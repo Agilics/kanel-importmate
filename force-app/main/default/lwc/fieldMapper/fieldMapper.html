@@ -1,7 +1,6 @@
 <template>
   <lightning-card title="Field Mapping" icon-name="custom:custom63">
     <div class="slds-p-around_medium">
-
       <!-- Top controls: Project | Target Object | Version -->
       <div class="header-row">
         <!-- Project (pruned to the selected one) -->
@@ -10,7 +9,8 @@
           value={selectedProjectId}
           options={projectOptions}
           onchange={handleProjectChange}
-          disabled={isProjectLocked}>
+          disabled={isProjectLocked}
+        >
         </lightning-combobox>
 
         <!-- Target Object (read-only, comes from the selected project) -->
@@ -19,7 +19,8 @@
           label="Target Object"
           value={selectedTargetObject}
           disabled
-          class="target-object">
+          class="target-object"
+        >
         </lightning-input>
 
         <!-- Version -->
@@ -27,7 +28,8 @@
           type="text"
           label="Version"
           value={versionInput}
-          onchange={handleVersionChange}>
+          onchange={handleVersionChange}
+        >
         </lightning-input>
       </div>
 
@@ -36,21 +38,24 @@
         <lightning-button
           label="Load Saved Mappings"
           title="Apply previously saved mappings to the board"
-          onclick={handleLoadSavedClick}>
+          onclick={handleLoadSavedClick}
+        >
         </lightning-button>
 
         <lightning-button
           label="Clear All"
           variant="destructive"
           title="Remove all mappings and restore CSV list"
-          onclick={handleClearAllClick}>
+          onclick={handleClearAllClick}
+        >
         </lightning-button>
 
         <lightning-button
           class="slds-m-left_auto"
           label="Save Mappings"
           variant="brand"
-          onclick={handleSave}>
+          onclick={handleSave}
+        >
         </lightning-button>
       </div>
 
@@ -69,7 +74,8 @@
                   class="draggable"
                   draggable="true"
                   data-source={source}
-                  ondragstart={handleDragStart}>
+                  ondragstart={handleDragStart}
+                >
                   {source}
                 </div>
               </template>
@@ -101,14 +107,19 @@
                   <template if:true={field.mappedSources}>
                     <template for:each={field.mappedSources} for:item="ms">
                       <div key={ms.sourceColumn} class="mapped-item">
-                        <div class="slds-grid slds-wrap slds-grid_vertical-align-center">
-                          <div class="slds-col slds-grow">{ms.sourceColumn}</div>
+                        <div
+                          class="slds-grid slds-wrap slds-grid_vertical-align-center"
+                        >
+                          <div class="slds-col slds-grow">
+                            {ms.sourceColumn}
+                          </div>
                           <div class="slds-col">
                             <lightning-button
                               variant="destructive-text"
                               label="Unmap"
                               data-source={ms.sourceColumn}
-                              onclick={handleRemoveMapping}>
+                              onclick={handleRemoveMapping}
+                            >
                             </lightning-button>
                           </div>
                         </div>
@@ -120,7 +131,8 @@
                             label="Use as lookup"
                             checked={ms.mapping.isLookup}
                             data-source={ms.sourceColumn}
-                            onchange={handleLookupToggle}>
+                            onchange={handleLookupToggle}
+                          >
                           </lightning-input>
                         </div>
 
@@ -132,7 +144,8 @@
                               value={ms.mapping.lookupObject}
                               data-source={ms.sourceColumn}
                               options={availableObjectsOptions}
-                              onchange={handleLookupObjectChange}>
+                              onchange={handleLookupObjectChange}
+                            >
                             </lightning-combobox>
 
                             <lightning-combobox
@@ -141,7 +154,8 @@
                               value={ms.mapping.lookupMatchField}
                               data-source={ms.sourceColumn}
                               options={ms.lookupFieldsOptions}
-                              onchange={handleLookupFieldChange}>
+                              onchange={handleLookupFieldChange}
+                            >
                             </lightning-combobox>
                           </div>
                         </template>
@@ -150,14 +164,18 @@
                   </template>
 
                   <template if:false={field.mappedSources}>
-                    <div class="hint slds-m-top_x-small">Drop a source column here…</div>
+                    <div class="hint slds-m-top_x-small">
+                      Drop a source column here…
+                    </div>
                   </template>
                 </div>
               </template>
             </template>
 
             <template if:false={targetFields}>
-              <p class="muted slds-m-top_small">Select a project to load target fields.</p>
+              <p class="muted slds-m-top_small">
+                Select a project to load target fields.
+              </p>
             </template>
           </div>
         </section>
@@ -165,7 +183,5 @@
     </div>
   </lightning-card>
 
-<c-backbutton onback={handleBackFromMapper}></c-backbutton>
-
-
+  <c-backbutton onback={handleBackFromMapper}></c-backbutton>
 </template>

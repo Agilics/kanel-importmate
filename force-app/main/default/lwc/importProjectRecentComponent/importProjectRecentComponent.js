@@ -37,7 +37,7 @@ export default class ImportProjectRecentComponent extends LightningElement {
     const projectId = event.target.dataset.id; // on récupère l'id du projet sélectionné
     //bubbles: true permet à l’événement de remonter jusqu’au mainComponent même s’il est dans plusieurs couches de composants
     this.dispatchEvent(
-      new CustomEvent("selectproject",{ detail: projectId, bubbles: true })
+      new CustomEvent("selectproject", { detail: projectId, bubbles: true })
     );
   }
 

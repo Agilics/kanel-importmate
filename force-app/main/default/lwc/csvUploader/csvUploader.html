@@ -2,7 +2,6 @@
   <!-- Zone de sélection de fichier -->
   <div class="page">
     <div class="section">
-
       <div class="upload-card">
         <div class="upload-pill">
           <div class="upload-head">Import CSV</div>
@@ -38,14 +37,26 @@
       <!-- Boutons d’action -->
       <div class="actions">
         <template if:true={showActions}>
-          <button data-id="load-next" class="btn btn--ghost" onclick={handleLoadNext}>
+          <button
+            data-id="load-next"
+            class="btn btn--ghost"
+            onclick={handleLoadNext}
+          >
             Load next
           </button>
-          <button data-id="load-all" class="btn btn--primary" onclick={handleLoadAll}>
+          <button
+            data-id="load-all"
+            class="btn btn--primary"
+            onclick={handleLoadAll}
+          >
             Load all
           </button>
         </template>
-        <button data-id="reset-view" class="btn btn--outline" onclick={handleResetView}>
+        <button
+          data-id="reset-view"
+          class="btn btn--outline"
+          onclick={handleResetView}
+        >
           Reset view
         </button>
       </div>
@@ -89,21 +100,20 @@
           </button>
         </div>
       </template>
-<template if:true={showFieldMapper}>
-  <!-- 👇 forward the selected project to prefill the combobox -->
-  <c-field-mapper
-    source-columns-csv={headersCsv}
-    preselected-project-id={currentProject.Id}
-    preselected-target-object={currentProject.TargetObject__c} 
-  ></c-field-mapper>
-</template>
+      <template if:true={showFieldMapper}>
+        <!-- 👇 forward the selected project to prefill the combobox -->
+        <c-field-mapper
+          source-columns-csv={headersCsv}
+          preselected-project-id={currentProject.Id}
+          preselected-target-object={currentProject.TargetObject__c}
+        ></c-field-mapper>
+      </template>
       <!-- Mapping table appears only after clicking "Go for mapping" -->
       <template if:true={showFieldMappingTable}>
         <div class="slds-m-top_xx-large">
           <c-field-mapping-table csv-data={csvPayload}></c-field-mapping-table>
         </div>
       </template>
-
     </div>
   </div>
 </template>

@@ -1,0 +1,350 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+.space {
+  margin: 10% 0 0 0;
+}
+
+:active,
+:hover,
+:focus {
+  outline: 0 !important;
+  outline-offset: 0;
+}
+::before,
+::after {
+  position: absolute;
+  content: "";
+}
+
+.btn-holder {
+  display: flex;
+  flex-wrap: wrap;
+  row-gap: 4rem;
+  justify-content: center;
+  max-width: 1000px;
+  margin: 10px auto 35px;
+  padding: 0;
+}
+
+.btn {
+  position: relative;
+  display: inline-block;
+  width: auto;
+  height: auto; 
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  margin: 0px 25px 15px;
+  min-width: 150px;
+}
+.btn span {
+  position: relative;
+  display: inline-block; 
+  font-weight: bold;
+  letter-spacing: 2px; 
+  text-transform: uppercase;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 15px 20px;
+  transition: 0.3s;
+  -webkit-transition: 0.3s;
+  -moz-transition: 0.3s;
+  -ms-transition: 0.3s;
+  -o-transition: 0.3s;
+}
+
+.btn-continue::before {
+  background-color: #265df2;
+  transition: 0.3s ease-out;
+}
+.btn-continue span {
+  color: #ffffff;
+  border: 1px solid #265df2;
+  transition: 0.2s 0.1s;
+}
+/* Style pour le bouton désactivé */
+.btn-continue:disabled {
+  background: #d3d3d3;
+  color: #a8a8a8;
+  cursor: not-allowed;
+}
+
+/* Icône désactivée */
+.btn-continue:disabled .custom-icon-output {
+  --slds-c-icon-color-foreground: #a8a8a8;
+  --slds-c-icon-color-background: #d3d3d3;
+}
+/* Icône du bouton Continue */
+.custom-icon-output {
+  --slds-c-icon-color-foreground: #ffffff;
+  --slds-c-icon-color-background: #265df2;
+}
+/* Ligne de séparation */
+hr.solid {
+  border-top: 1.9px solid #bbb;
+  margin: 1.5rem 0;
+}
+lightning-icon{
+  margin-right: .9em;
+}
+
+/*--- btn-1 ---*/
+.btn-1::before {
+  background-color: rgb(28, 31, 30);
+  transition: 0.3s ease-out;
+  -webkit-transition: 0.3s ease-out;
+  -moz-transition: 0.3s ease-out;
+  -ms-transition: 0.3s ease-out;
+  -o-transition: 0.3s ease-out;
+}
+.btn-1 span {
+  color: rgb(255, 255, 255);
+  border: 1px solid rgb(28, 31, 30);
+  gap: 7.5px;
+  border-radius: 6px; 
+}
+.radius{
+  border-radius: 6px;
+}
+.btn-1 span:hover {
+  color: rgb(28, 31, 30);
+  transition: 0.2s 0.1s;
+}
+
+/* 1.hover-filled-slide-down */
+.btn.hover-filled-slide-down::before {
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  width: 100%;
+}
+.btn.hover-filled-slide-down:hover::before {
+  height: 0%;
+}
+
+/* 2.hover-filled-slide-up */
+.btn.hover-filled-slide-up::before {
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  width: 100%;
+}
+.btn.hover-filled-slide-up:hover::before {
+  height: 0%;
+}
+
+/* 3.hover-filled-slide-left */
+.btn.hover-filled-slide-left::before {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+}
+.btn.hover-filled-slide-left:hover::before {
+  width: 0%;
+}
+
+/* 4. hover-filled-slide-right */
+.btn.hover-filled-slide-right::before {
+  top: 0;
+  bottom: 0;
+  right: 0;
+  height: 100%;
+  width: 100%;
+}
+.btn.hover-filled-slide-right:hover::before {
+  width: 0%;
+}
+
+/* 5. hover-filled-opacity */
+.btn.hover-filled-opacity::before {
+  top: 0;
+  bottom: 0;
+  right: 0;
+  height: 100%;
+  width: 100%;
+  opacity: 1;
+}
+.btn.hover-filled-opacity:hover::before {
+  opacity: 0;
+}
+
+/*--- btn-2 ---*/
+.btn-2::before {
+  background-color: rgb(28, 31, 30);
+  transition: 0.3s ease-out;
+}
+.btn-2 span {
+  color: rgb(28, 31, 30);
+  border: 1px solid rgb(28, 31, 30);
+  transition: 0.2s;
+}
+.btn-2 span:hover {
+  color: rgb(255, 255, 255);
+  transition: 0.2s 0.1s;
+}
+
+/* 6. hover-slide-down */
+.btn.hover-slide-down::before {
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 0%;
+  width: 100%;
+}
+.btn.hover-slide-down:hover::before {
+  height: 100%;
+}
+
+/* 7. hover-slide-up */
+.btn.hover-slide-up::before {
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 0%;
+  width: 100%;
+}
+.btn.hover-slide-up:hover::before {
+  height: 100%;
+}
+
+/* 8. hover-slide-left */
+.btn.hover-slide-left::before {
+  top: 0;
+  bottom: 0;
+  right: 0;
+  height: 100%;
+  width: 0%;
+}
+.btn.hover-slide-left:hover::before {
+  width: 100%;
+}
+
+/* 9. hover-slide-right */
+.btn.hover-slide-right::before {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  height: 100%;
+  width: 0%;
+}
+.btn.hover-slide-right:hover::before {
+  width: 100%;
+}
+
+/* 10. hover-opacity */
+.btn.hover-opacity::before {
+  top: 0;
+  bottom: 0;
+  right: 0;
+  height: 100%;
+  width: 100%;
+  opacity: 0;
+}
+.btn.hover-opacity:hover::before {
+  opacity: 1;
+}
+
+/*--- btn-3 ---*/
+.btn-3 {
+  padding: 5px;
+}
+.btn-3 span {
+  color: rgb(255, 255, 255);
+  background-color: rgb(54, 56, 55);
+}
+.btn-3::before,
+.btn-3::after {
+  background: transparent;
+  z-index: 2;
+}
+
+/* 11. hover-border-1 */
+.btn.hover-border-1::before,
+.btn.hover-border-1::after {
+  width: 10%;
+  height: 25%;
+  transition: 0.35s;
+}
+.btn.hover-border-1::before {
+  top: 0;
+  left: 0;
+  border-left: 1px solid rgb(28, 31, 30);
+  border-top: 1px solid rgb(28, 31, 30);
+}
+.btn.hover-border-1::after {
+  bottom: 0;
+  right: 0;
+  border-right: 1px solid rgb(28, 31, 30);
+  border-bottom: 1px solid rgb(28, 31, 30);
+}
+.btn.hover-border-1:hover::before,
+.btn.hover-border-1:hover::after {
+  width: 99%;
+  height: 98%;
+}
+
+/* 12. hover-border-2 */
+.btn.hover-border-2::before,
+.btn.hover-border-2::after {
+  width: 10%;
+  height: 25%;
+  transition: 0.35s;
+}
+.btn.hover-border-2::before {
+  bottom: 0;
+  left: 0;
+  border-left: 1px solid rgb(28, 31, 30);
+  border-bottom: 1px solid rgb(28, 31, 30);
+}
+.btn.hover-border-2::after {
+  top: 0;
+  right: 0;
+  border-right: 1px solid rgb(28, 31, 30);
+  border-top: 1px solid rgb(28, 31, 30);
+}
+.btn.hover-border-2:hover::before,
+.btn.hover-border-2:hover::after {
+  width: 99%;
+  height: 99%;
+}
+
+/* Tablettes (max 768px) */
+@media (max-width: 768px) {
+  .footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    margin: 1.5rem;
+  }
+  .space {
+    margin: 1rem;
+  }
+}
+/* Petits écrans (max 480px) */
+@media (max-width: 480px) {
+  .footer {
+    margin: 1rem;
+    padding: 8px;
+  }
+  .space {
+    margin: 5px;
+  }
+  button,
+  .btn {
+    font-size: 13px;
+    padding: 8px 14px;
+  }
+  .btn-draft svg {
+    width: 14px;
+    height: 14px;
+  }
+}
