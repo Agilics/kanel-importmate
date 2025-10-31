@@ -29,7 +29,7 @@
   <c-csv-uploader
     current-project={currentProject}
     oncsvloaded={handleCsvLoaded}
-    ongotomapping={handleGoToMappingFromCsv}>   <!-- ✅ Forward this -->
+    ongotomapping={handleGoToMappingFromCsv}> 
   </c-csv-uploader>
 </template>
 
@@ -38,7 +38,5 @@
     <template if:true={showSOQL}>
       <c-soql-builder onsoqlbuilt={handleSoqlBuilt}></c-soql-builder>
     </template>
-
-    <c-backbutton onback={handleBackToSelection}></c-backbutton>
   </div>
 </template>
