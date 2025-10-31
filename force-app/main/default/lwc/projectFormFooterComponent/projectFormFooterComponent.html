@@ -12,7 +12,7 @@
 
   <div class="btn-holder">
     <!-- cancel action -->
-    <button type="button" class="btn btn-2 radius hover-slide-right">
+    <button type="button" class="btn radius btn-2  hover-slide-right">
       <span>
         <lightning-icon
           icon-name="utility:back"
@@ -29,10 +29,10 @@
     <!-- save action-->
     <button
       type="button"
-      class="radius btn btn-1 hover-filled-slide-up "
+      class=" btn btn-2 hover-opacity "
       onclick={handleCreateProject}
     >
-      <span>
+      <span >
         <lightning-icon
           icon-name="utility:save"
           alternative-text="save"
@@ -50,10 +50,11 @@
 
     <button
       type="button"
-      class="btn radius btn-continue gap-1"
+      class="btn-continue btn radius  gap-1"
       onclick={handleGoToDataSource}
       disabled={isButtonDisabled}
     >
+    <span>
       <lightning-icon
         class="custom-icon-output"
         icon-name="standard:output"
@@ -62,6 +63,7 @@
         title="output"
       ></lightning-icon>
       Continue to Data Source
+      </span>
     </button>
     <!-- end actived button -->
     <!-- end Go to Data Source section  -->
