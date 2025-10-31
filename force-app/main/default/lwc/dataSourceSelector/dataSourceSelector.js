@@ -4,7 +4,7 @@ export default class DataSourceSelector extends LightningElement {
   currentStep = 2;
   selectedSource = null; // "CSV" | "SOQL" | null
 
-  @api currentProject; // ✅ received from parent
+  @api currentProject; //  received from parent
 
   // convenience for template
   get projectName() {
@@ -30,6 +30,8 @@ export default class DataSourceSelector extends LightningElement {
     this.dispatchEvent(new CustomEvent("dataloaded", { detail: event.detail }));
   }
 
+
+
  
 
 // Add this method
@@ -38,7 +40,7 @@ handleGoToMappingFromCsv(evt) {
     ? evt.detail.columns.join(',')
     : '';
 
-  // 🔺 Forward to main so it can set Step 3 and render Field Mapper full-page
+  // Forward to main so it can set Step 3 and render Field Mapper full-page
   this.dispatchEvent(
     new CustomEvent('startmapping', {
       detail: {
