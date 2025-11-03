@@ -5,15 +5,14 @@
 }
 
 .footer-separator {
- border-top: 1px solid #E2E8F0;
- margin: 0  0 3rem 0;
+  border-top: 1px solid #e2e8f0;
+  margin: 0 0 3rem 0;
   width: 990;
   height: 83;
   angle: 0 deg;
   opacity: 1;
   top: 904px;
   border-top-width: 1px;
-
 }
 
 .footer-actions {
@@ -24,6 +23,13 @@
 }
 
 .btn {
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 16px;
+  leading-trim: NONE;
+  line-height: 100%;
+  letter-spacing: 0%;
+  text-align: center;
   display: flex;
   align-items: center;
   gap: 0.4rem;
@@ -32,6 +38,14 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.25s ease-in-out;
+  -webkit-border-radius: 0.5rem;
+  -moz-border-radius: 0.5rem;
+  -ms-border-radius: 0.5rem;
+  -o-border-radius: 0.5rem;
+  -webkit-transition: all 0.25s ease-in-out;
+  -moz-transition: all 0.25s ease-in-out;
+  -ms-transition: all 0.25s ease-in-out;
+  -o-transition: all 0.25s ease-in-out;
 }
 
 .btn span {
@@ -68,6 +82,8 @@
   left: 189.39px;
   angle: 0 deg;
   opacity: 1;
+  font-family: Inter;
+
   border-radius: 8px;
 }
 
