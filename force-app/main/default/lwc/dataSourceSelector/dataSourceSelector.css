@@ -1,100 +1,71 @@
-.container {
-  max-width: 1000px;
-  margin: 2rem auto;
-  padding: 2rem;
-  border-radius: 16px;
-  background-color: #ffffff;
-  box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.1);
-}
-
-.con {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-}
-
-.import {
-  display: flex;
-  align-items: center;
-  font-weight: bold;
-  font-size: 1.6rem;
-  color: #333;
-  gap: 0.5rem;
-}
-.import .icon {
-  font-size: 1.8rem;
-  color: white;
+body{
+  /* div */
+  position: absolute;
+  width: 1120px;
+  height: 1517px;
+  left: 320px;
+  top: 0px;
+  border-radius: 0px;
+  background-color: #E5E7EB;
+  }
+.file-upload {
+  width: 512px;
+  height: 330px;
+  border-radius: 12px;
+  border-width: 1px;
+  angle: 0 deg;
+  opacity: 1;
+  border: 1px solid #E2E8F0;
+  background-color: #E2E8F0;
 }
 
 .header {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-.subtitle {
-  font-size: 1rem;
-  color: #666;
-  margin-top: 8%;
-  text-align: justify;
-  font-weight: bolder;
-}
-
-.section-title {
-  margin-bottom: 1.5rem;
-  font-size: 1.4rem;
-  font-weight: 600;
-  color: #333;
-  margin-left: 20%;
-}
-
-.cards {
-  display: flex;
-  justify-content: center;
-  gap: 2rem;
-  flex-wrap: wrap;
-
-  margin-bottom: 2rem;
-}
-.card {
-  background: lightgray;
-  border-radius: 12px;
-  padding: 1.5rem;
-  width: 300px;
-  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.08);
-  cursor: pointer;
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
-  text-align: center;
-  -webkit-border-radius: 12px;
-  -moz-border-radius: 12px;
-  -ms-border-radius: 12px;
-  -o-border-radius: 12px;
-  -webkit-transition:;
-  -moz-transition:;
-  -ms-transition:;
-  -o-transition:;
-}
-.card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0px 6px 16px rgba(0, 0, 0, 0.15);
-  -webkit-transform: translateY(-5px);
-  -moz-transform: translateY(-5px);
-  -ms-transform: translateY(-5px);
-  -o-transform: translateY(-5px);
-}
-
-.card-icon {
-  width: 40px;
-  height: 40px;
-  margin: 0 auto 1rem auto;
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
+  width: 446px;
+  height: 64px;
+  angle: 0 deg;
+  opacity: 1;
+  top: 33px;
+  left: 33px;
 }
 .file-icon {
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="black" width="32" height="32" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>');
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  angle: 0 deg;
+  opacity: 1;
 }
-.soql-icon {
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="black" width="32" height="32" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="2"/><rect x="4" y="11" width="16" height="2"/><rect x="4" y="17" width="16" height="2"/></svg>');
+
+.title {
+  font-family: Inter;
+  font-weight: 700;
+  font-style: Bold;
+  font-size: 20px;
+  leading-trim: NONE;
+  line-height: 28px;
+  letter-spacing: 0%;
+  color: #111827;
+}
+.subtitle {
+  font-family: Inter;
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 16px;
+  leading-trim: NONE;
+  line-height: 24px;
+  letter-spacing: 0%;
+  color: #4b5563;
+}
+
+ 
+/*Add the class name below to the lightning-icon element.*/
+.custom-icon-approval { 
+ --slds-c-icon-color-foreground: #16a34a;
+ --slds-c-icon-color-background: #e5e7eb;
+}
+.support{
+  width: 446px;
+  height: 24px;
+  angle: 0 deg;
+  opacity: 1;
+  border:none;
 }

@@ -1,3 +1,10 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 11-03-2025
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
 <template>
   <div class="container">
     <!-- Selected project banner -->
@@ -5,6 +12,24 @@
       <h1 class="slds-text-align_center">Selected project: {projectName}</h1>
       <br />
     </template>
+
+    <!-- CARD FILE UPLOAD-->
+    <div class="file-upload">
+      <div class="header">
+        <lightning-icon
+          icon-name="utility:paste"
+          alternative-text="paste"
+          size="large"
+          title="paste"
+        ></lightning-icon>
+        <h2 class="title">File Upload</h2>
+        <p class="subtitle">Import from CSV or Excel files</p>
+
+        <div class="custom-icon-approval support">
+
+        </div>
+      </div>
+    </div>
 
     <!-- Selection -->
     <template if:true={showSelection}>
@@ -23,16 +48,16 @@
       </div>
     </template>
 
-  <!-- CSV -->
-<template if:true={showCSV}>
-  <!-- pass the selected project object down -->
-  <c-csv-uploader
-    current-project={currentProject}
-    oncsvloaded={handleCsvLoaded}
-    ongotomapping={handleGoToMappingFromCsv}> 
-  </c-csv-uploader>
-</template>
-
+    <!-- CSV -->
+    <template if:true={showCSV}>
+      <!-- pass the selected project object down -->
+      <c-csv-uploader
+        current-project={currentProject}
+        oncsvloaded={handleCsvLoaded}
+        ongotomapping={handleGoToMappingFromCsv}
+      >
+      </c-csv-uploader>
+    </template>
 
     <!-- SOQL -->
     <template if:true={showSOQL}>
