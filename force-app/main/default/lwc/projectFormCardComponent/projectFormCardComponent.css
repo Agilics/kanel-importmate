@@ -115,12 +115,14 @@ lightning-combobox {
   left: 32px;
   angle: 0 deg;
   opacity: 1;
-
   opacity: 1;
   border-radius: 12px;
   border-width: 1px;
-
   padding: 2rem;
+  -webkit-border-radius: 0.75rem;
+  -moz-border-radius: 0.75rem;
+  -ms-border-radius: 0.75rem;
+  -o-border-radius: 0.75rem;
 }
 
 lightning-input.project-name {
@@ -186,8 +188,7 @@ lightning-textarea .description {
 
 /* INPUTS */
 .input-field {
-  width: 990px;
-  max-width: 990px;
+  width: 990px; 
   height: 50px;
   top: 28px;
   angle: 0 deg;
