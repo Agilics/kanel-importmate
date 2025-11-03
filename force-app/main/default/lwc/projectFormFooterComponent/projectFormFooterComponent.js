@@ -1,7 +1,7 @@
 import { LightningElement, api } from "lwc";
 
 export default class ProjectFormFooterComponent extends LightningElement {
-    //sauvegarde d'un nouveau projet
+  //sauvegarde d'un nouveau projet
   handleCreateProject() {
     this.dispatchEvent(new CustomEvent("save"));
   }

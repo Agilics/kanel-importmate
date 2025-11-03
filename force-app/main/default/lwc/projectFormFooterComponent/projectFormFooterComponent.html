@@ -1,69 +1,33 @@
-<!--
-  @description       : 
-  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
-  @group             : 
-  @last modified on  : 10-31-2025
-  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
--->
-
 <template>
-  <div class="space"></div>
-  <hr class="solid" aria-label="separator" />
-
-  <div class="btn-holder">
-    <!-- cancel action -->
-    <button type="button" class="btn radius btn-2 hover-slide-right">
-      <span>
+  <footer class="footer-container">
+    <div class="footer-separator "></div>
+    <div class="footer-actions">
+      <!-- Cancel Button -->
+      <button type="button" class="btn btn-secondary" onclick={handleCancel}>
         <lightning-icon
           icon-name="utility:back"
-          alternative-text="back"
+          alternative-text="Cancel"
           size="x-small"
-          title="back"
+          title="Cancel"
         ></lightning-icon>
-        Cancel
-      </span>
-    </button>
+        <span>Cancel</span>
+      </button>
 
-    <!-- cancel action -->
-
-    <!--  action
-    <button
-      type="button"
-      class="btn btn-2 hover-opacity"
-     
-    >
-      <span>
+      <!-- Save & Continue Button -->
+      <button
+        type="button"
+        class="btn btn-primary"
+        onclick={handleCreateProject}
+      >
         <lightning-icon
-          icon-name="utility:save"
-          alternative-text="save"
-          size="small"
-          title="save"
-        ></lightning-icon>
-        Save as Draft
-      </span>
-    </button>-->
-    <!-- end save action-->
-
-
-    <!-- saved & Go to Data Source section button -->
-
-    <button
-      type="button"
-      class="btn-continues btn radius gap-1"
-      onclick={handleCreateProject}
-    >
-      <span>
-        <lightning-icon
-          class="custom-icon-output"
+          class="icon-inline custom-icon-output"
           icon-name="standard:output"
-          alternative-text="output"
+          alternative-text="Save & Continue"
           size="small"
-          title="output"
+          title="Save & Continue"
         ></lightning-icon>
-        Save & Continue to Data Source
-      </span>
-    </button> 
-    <!-- end Go to Data Source section  -->
-  </div>
-  <!-- end actions buttons-->
+        <span>Save & Continue to Data Source</span>
+      </button>
+    </div>
+  </footer>
 </template>
