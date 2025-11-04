@@ -16,6 +16,7 @@ body {
 .container{
   padding: 24px;
   height: 900px;
+  max-height: 1517px;
   left: 320px;
   opacity: 1;
   flex-wrap: wrap;

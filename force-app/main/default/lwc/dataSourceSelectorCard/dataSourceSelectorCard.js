@@ -38,7 +38,8 @@ export default class DataSourceSelectorCard extends LightningElement {
   }
 
   // événements de navigation dispatcher vers le parent DataSource
-  handleNagivation() {
-    this.dispatchEvent(new CustomEvent("navigate"));
+    handleNagivation() {
+     console.log('Button clicked!');
+    this.dispatchEvent(new CustomEvent("cardaction"));
   }
 }
