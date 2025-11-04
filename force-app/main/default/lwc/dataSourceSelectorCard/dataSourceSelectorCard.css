@@ -26,9 +26,10 @@ body{
   width: 446px;
   height: 64px; 
   opacity: 1;
-  padding: 20px 0 16px 0;
+  padding: 20px 0 10px 0;
+  margin-left: -9px;
   top: 33px;
-  left: 33px;
+  left: 23px;
 }
 .content{
   list-style: none;
@@ -48,10 +49,10 @@ body{
   align-items: center;
   justify-content: center;
   opacity: 1;
-  -webkit-border-radius: 12px;
-  -moz-border-radius: 12px;
-  -ms-border-radius: 12px;
-  -o-border-radius: 12px;
+  -webkit-border-radius:;
+  -moz-border-radius:;
+  -ms-border-radius:;
+  -o-border-radius:;
 }
 .box-icon-upload {
   background: #dbeafe;
@@ -98,7 +99,7 @@ body{
 }
 
 .support {
-  margin: 24px 0 1.3rem 21px;
+  margin: 24px 0 1.3rem 15px;
   width: 446px;
   height: 24px;
   opacity: 1;
@@ -136,18 +137,14 @@ body{
   font-family: Inter;
   font-weight: 500;
   font-style: Medium;
-  margin-left: 25px;
+  margin-left: 0;
   font-size: 16px;
   color: #ffffff;
   line-height: 100%;
   letter-spacing: 0%;
   text-align: center;
   top: 249px;
-  left: 33px;
-  -webkit-border-radius: 8px;
-  -moz-border-radius: 8px;
-  -ms-border-radius: 8px;
-  -o-border-radius: 8px;
+  left: 33px; 
 }
 
 /* bouton upload de fichier*/
