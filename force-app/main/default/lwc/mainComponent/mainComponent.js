@@ -91,6 +91,40 @@ export default class MainComponent extends LightningElement {
     }
   }
 
+  //Enregistrement d'un nouveau projet
+  async handleCreateProject() {
+    this.isLoading = true;
+    const selectedProjectId = event.detail;
+
+    try {
+      const result = await searchProjetById({ id: selectedProjectId });
+      this.recentProject = result;
+
+      // ✅ toast to confirm selection
+      this.dispatchEvent(
+        new ShowToastEvent({
+          title: "Project selected",
+          message: `You have selected "${result?.Name}" to start.`,
+          variant: "success",
+          mode: "dismissable"
+        })
+      );
+
+      // ✅ proceed to Select Source step
+      this.handleNextStep();
+    } catch (error) {
+      this.dispatchEvent(
+        new ShowToastEvent({
+          title: "Error",
+          message: error?.body?.message || "Failed to load project",
+          variant: "error"
+        })
+      );
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
   //Enregistrement d'un nouveau projet et récupération du projet récent
   async handleCreateProject(event) {
     this.recentProject = event.detail;
