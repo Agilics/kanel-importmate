@@ -1,0 +1,57 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 11-04-2025
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<template>
+  <!-- data source selector -->
+  <div class="card">
+    <!-- header content -->
+    <div class="header">
+      <div class={boxIconClass}>
+        <lightning-icon
+          icon-name={headerIcon}
+          alternative-text="paste"
+          class={headerIconClass}
+          title="paste"
+        ></lightning-icon>
+      </div>
+
+      <div class="text-content">
+        <h3 class="title">{title}</h3>
+        <p class="subtitle">{subtitle}</p>
+      </div>
+    </div>
+    <!-- end header content-->
+
+    <!-- Items content   -->
+    <div class="content">
+      <template for:each={contents} for:item="item">
+        <div class="support" key={item.Id}>
+          <!-- check icon -->
+          <lightning-icon
+            icon-name="utility:check"
+            alternative-text="check"
+            class="custom-icon-check"
+            size="small"
+            title="check"
+          ></lightning-icon>
+          <!-- end check icon -->
+
+          <!-- text content -->
+          <p class="item">{item.Name}</p>
+          <!-- end text content -->
+        </div>
+      </template>
+      <!-- end Items content   -->
+
+      <!-- action button  -->
+      <button class={buttonClass} onclick={handleNagivation} >
+        {textButton}
+      </button>
+      <!-- end action button  -->
+    </div>
+  </div>
+</template>

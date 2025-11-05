@@ -1,13 +1,62 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 11-04-2025
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
 <template>
   <div class="container">
-    <!-- Selected project banner -->
+   
+    <!-- header title -->
+    <div class="header">
+      <h1 class="header-title">Choose Data Source</h1>
+      <p class="header-subtitle">
+        Select how you want to import your data into Salesforce
+      </p>
+    </div>
+
+    <div class="cards">
+      <!-- CARD FILE UPLOAD -->
+      <div class="upload">
+        <c-data-source-selector-card
+        contents={uploadContents}
+        title={uploadTitle}
+        subtitle={uploadSubtitle}
+        is-upload={isUpload}
+        current-project={currentProject}
+        oncardaction={handleCSV}
+      >
+      </c-data-source-selector-card>
+      </div>
+      <!-- END CARD FILE UPLOAD -->
+
+      <!-- CARD QUERY BUILDER -->
+      <div class="query">
+      <c-data-source-selector-card
+        contents={queryContents}
+        title={queryTitle}
+        subtitle={querySubTitle}
+        is-upload={isNotUpload}
+        current-project={currentProject}
+        oncardaction={handleSOQL}
+      >
+      </c-data-source-selector-card>
+      </div>
+       <!-- END CARD QUERY UPLOAD -->
+    </div>
+      
+
+    <!--- OLD CODE I DON'T WHAT IT DOES.THAT'S WHY I COMMENT ITS -->
+
+     <!-- Selected project banner 
     <template if:true={currentProject}>
       <h1 class="slds-text-align_center">Selected project: {projectName}</h1>
       <br />
     </template>
-
+    -->
     <!-- Selection -->
-    <template if:true={showSelection}>
+    <!--<template if:true={showSelection}>
       <h2 class="section-title">Data source</h2>
       <div class="cards">
         <div class="card" onclick={handleCSV}>
@@ -21,29 +70,29 @@
           <p>Build your query interactively from Salesforce objects.</p>
         </div>
       </div>
+    </template>-->
+
+    <!-- CSV -->
+    <template if:true={showCSV}>
+      <!-- pass the selected project object down -->
+      <!--
+        <c-csv-uploader
+        current-project={currentProject}
+        oncsvloaded={handleCsvLoaded}
+        ongotomapping={handleGoToMappingFromCsv}
+      >
+      </c-csv-uploader>
+      -->
+      
     </template>
-
-  <!-- CSV -->
-<template if:true={showCSV}>
-  <!-- pass the selected project object down -->
-  <c-csv-uploader
-    current-project={currentProject}
-    oncsvloaded={handleCsvLoaded}
-    ongotomapping={handleGoToMappingFromCsv}> 
-  </c-csv-uploader>
-</template>
-
+      
 
     <!-- SOQL -->
+     <!--
+      
     <template if:true={showSOQL}>
-    
-      <c-soql-builder
-      onsoqlbuilt={handleSoqlBuilt}
-  selected-project-id={currentProject.Id}
-  selected-project-name={currentProject.Name}
-  onstartmapping={handleStartMapping}>
-</c-soql-builder>
-
+      <c-soql-builder onsoqlbuilt={handleSoqlBuilt}></c-soql-builder>
     </template>
+    -->
   </div>
 </template>

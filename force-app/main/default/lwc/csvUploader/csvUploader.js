@@ -2,6 +2,7 @@ import { LightningElement, track, api } from 'lwc';
 
 const DEFAULT_PREVIEW_LIMIT = 100;
 const DEFAULT_PAGE_SIZE = 5;
+const DEFAULT_PAGE_SIZE = 5;
 
 export default class CsvUploader extends LightningElement {
   // ===== Inputs / Outputs =====
@@ -36,6 +37,9 @@ export default class CsvUploader extends LightningElement {
   fileName = '';
   fileSize = 0;
 
+  @track columns = [];
+  @track _displayColumns = [];
+  @track allRows = [];
   @track columns = [];
   @track _displayColumns = [];
   @track allRows = [];
@@ -326,13 +330,19 @@ export default class CsvUploader extends LightningElement {
     const file = event.target.files?.[0];
     if (file) this.readFile(file);
   }
+    const file = event.target.files?.[0];
+    if (file) this.readFile(file);
+  }
 
+  // ===== File Read & Parse =====
+  readFile(file) {
   // ===== File Read & Parse =====
   readFile(file) {
     this.resetState();
     this.fileName = file.name;
     this.fileSize = file.size;
 
+    this.isLoading = true;
     this.isLoading = true;
     const reader = new FileReader();
     reader.onload = () => {
@@ -370,6 +380,7 @@ export default class CsvUploader extends LightningElement {
     const lines = normalize.split('\n');
     if (!lines.length || (lines.length === 1 && lines[0].trim() === '')) {
       return { columns: [], rows: [] };
+    }
     }
 
     const parseLine = (line) => {
