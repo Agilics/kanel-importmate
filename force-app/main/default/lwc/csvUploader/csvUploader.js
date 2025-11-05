@@ -1,20 +1,22 @@
-import { LightningElement, track, api } from 'lwc';
+import { LightningElement, track, api } from "lwc";
 
 const DEFAULT_PREVIEW_LIMIT = 100;
 const DEFAULT_PAGE_SIZE = 5;
 
 export default class CsvUploader extends LightningElement {
   // ===== Inputs / Outputs =====
-  @api title = 'CSV Data Import & Display';
+  @api title = "CSV Data Import & Display";
 
   // Navigation & save preview events
   fireBack() {
-    this.dispatchEvent(new CustomEvent('previous', { bubbles: true, composed: true }));
+    this.dispatchEvent(
+      new CustomEvent("previous", { bubbles: true, composed: true })
+    );
     console.log("Get it ");
   }
   fireSavePreview() {
     this.dispatchEvent(
-      new CustomEvent('savepreview', {
+      new CustomEvent("savepreview", {
         detail: {
           fileName: this.fileName,
           fileSize: this.fileSize,
@@ -33,7 +35,7 @@ export default class CsvUploader extends LightningElement {
   }
 
   // ===== File / Data =====
-  fileName = '';
+  fileName = "";
   fileSize = 0;
 
   @track columns = [];
@@ -43,17 +45,17 @@ export default class CsvUploader extends LightningElement {
 
   // ===== UI State =====
   isLoading = false;
-  parseError = '';
+  parseError = "";
   isPreview = false;
 
-  @track searchTerm = '';
+  @track searchTerm = "";
   @track showFilters = false;
-  @track filter = { column: '', operator: 'contains', value: '' };
+  @track filter = { column: "", operator: "contains", value: "" };
   @track showSettings = false;
   @track pageSize = DEFAULT_PAGE_SIZE;
   @track previewLimit = DEFAULT_PREVIEW_LIMIT;
 
-  sortBy = '';
+  sortBy = "";
   sortAsc = true;
   pageIndex = 1;
 
@@ -77,7 +79,7 @@ export default class CsvUploader extends LightningElement {
     return this._displayColumns;
   }
   get recordWord() {
-    return this.totalEntries === 1 ? 'record' : 'records';
+    return this.totalEntries === 1 ? "record" : "records";
   }
   get badgeText() {
     return `${this.totalEntries} ${this.recordWord}`;
@@ -87,21 +89,23 @@ export default class CsvUploader extends LightningElement {
   get filteredRows() {
     let rows = this.allRows;
 
-    const q = (this.searchTerm || '').toLowerCase();
+    const q = (this.searchTerm || "").toLowerCase();
     if (q) {
       rows = rows.filter((r) =>
-        r.values.some((c) => (c.value || '').toString().toLowerCase().includes(q))
+        r.values.some((c) =>
+          (c.value || "").toString().toLowerCase().includes(q)
+        )
       );
     }
 
     const { column, operator, value } = this.filter;
-    if (column && value !== '') {
+    if (column && value !== "") {
       const colIdx = this.columns.indexOf(column);
       const needle = value.toString().toLowerCase();
       rows = rows.filter((r) => {
-        const v = (r.values[colIdx]?.value ?? '').toString().toLowerCase();
-        if (operator === 'equals') return v === needle;
-        if (operator === 'starts') return v.startsWith(needle);
+        const v = (r.values[colIdx]?.value ?? "").toString().toLowerCase();
+        if (operator === "equals") return v === needle;
+        if (operator === "starts") return v.startsWith(needle);
         return v.includes(needle);
       });
     }
@@ -110,10 +114,10 @@ export default class CsvUploader extends LightningElement {
       const i = this.columns.indexOf(this.sortBy);
       const asc = this.sortAsc;
       rows = [...rows].sort((a, b) => {
-        const av = (a.values[i]?.value ?? '').toString().toLowerCase();
-        const bv = (b.values[i]?.value ?? '').toString().toLowerCase();
+        const av = (a.values[i]?.value ?? "").toString().toLowerCase();
+        const bv = (b.values[i]?.value ?? "").toString().toLowerCase();
         if (av === bv) return 0;
-        return asc ? (av > bv ? 1 : -1) : (av < bv ? 1 : -1);
+        return asc ? (av > bv ? 1 : -1) : av < bv ? 1 : -1;
       });
     }
 
@@ -150,9 +154,15 @@ export default class CsvUploader extends LightningElement {
     const current = this.pageIndex;
     const out = [];
     const pushPage = (n) =>
-      out.push({ key: `p-${n}`, label: String(n), page: n, isActive: n === current, isEllipsis: false });
+      out.push({
+        key: `p-${n}`,
+        label: String(n),
+        page: n,
+        isActive: n === current,
+        isEllipsis: false
+      });
     const pushEllipsis = (pos) =>
-      out.push({ key: `e-${pos}-${out.length}`, label: '…', isEllipsis: true });
+      out.push({ key: `e-${pos}-${out.length}`, label: "…", isEllipsis: true });
 
     if (total <= 7) {
       for (let i = 1; i <= total; i++) pushPage(i);
@@ -162,9 +172,9 @@ export default class CsvUploader extends LightningElement {
     if (current > 3) pushPage(2);
     const start = Math.max(3, current - 1);
     const end = Math.min(total - 2, current + 1);
-    if (start > 3) pushEllipsis('left');
+    if (start > 3) pushEllipsis("left");
     for (let i = start; i <= end; i++) pushPage(i);
-    if (end < total - 2) pushEllipsis('right');
+    if (end < total - 2) pushEllipsis("right");
     if (current < total - 2) pushPage(total - 1);
     pushPage(total);
     return out;
@@ -174,8 +184,8 @@ export default class CsvUploader extends LightningElement {
   handleDownloadTemplate() {
     const headers = this.columns.length
       ? this.columns
-      : ['Name', 'Email', 'Industry', 'Status', 'City'];
-    const csv = `${headers.join(',')}\n`;
+      : ["Name", "Email", "Industry", "Status", "City"];
+    const csv = `${headers.join(",")}\n`;
 
     // Revoke previous URL (if any)
     if (this._lastObjectUrl) {
@@ -183,16 +193,16 @@ export default class CsvUploader extends LightningElement {
       this._lastObjectUrl = null;
     }
 
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     this._lastObjectUrl = url;
 
     const a = this.template.querySelector('[data-id="download-anchor"]');
     if (!a) return;
 
-    a.setAttribute('href', url);
-    a.setAttribute('download', 'csv_template.csv');
-    a.setAttribute('target', '_self');
+    a.setAttribute("href", url);
+    a.setAttribute("download", "csv_template.csv");
+    a.setAttribute("target", "_self");
     a.click();
     // Keep href; it will be replaced and previous URL revoked next time
   }
@@ -200,18 +210,19 @@ export default class CsvUploader extends LightningElement {
   handleExport() {
     if (!this.columns?.length || !this.filteredRows?.length) return;
 
-    const header = this.columns.join(',');
+    const header = this.columns.join(",");
     const body = this.filteredRows
       .map((r) =>
         r.values
           .map((c) => {
-            const v = (c.value ?? '').toString();
-            const needsQuotes = v.includes(',') || v.includes('"') || v.includes('\n');
+            const v = (c.value ?? "").toString();
+            const needsQuotes =
+              v.includes(",") || v.includes('"') || v.includes("\n");
             return needsQuotes ? `"${v.replace(/"/g, '""')}"` : v;
           })
-          .join(',')
+          .join(",")
       )
-      .join('\n');
+      .join("\n");
     const csv = `${header}\n${body}`;
 
     if (this._lastObjectUrl) {
@@ -219,7 +230,7 @@ export default class CsvUploader extends LightningElement {
       this._lastObjectUrl = null;
     }
 
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     this._lastObjectUrl = url;
 
@@ -227,12 +238,12 @@ export default class CsvUploader extends LightningElement {
     if (!a) return;
 
     const fname = this.fileName
-      ? this.fileName.replace(/\.csv$/i, '') + '_export.csv'
-      : 'export.csv';
+      ? this.fileName.replace(/\.csv$/i, "") + "_export.csv"
+      : "export.csv";
 
-    a.setAttribute('href', url);
-    a.setAttribute('download', fname);
-    a.setAttribute('target', '_self');
+    a.setAttribute("href", url);
+    a.setAttribute("download", fname);
+    a.setAttribute("target", "_self");
     a.click();
   }
 
@@ -240,8 +251,12 @@ export default class CsvUploader extends LightningElement {
   handleGoForMapping() {
     if (!this.columns?.length) return;
     this.dispatchEvent(
-      new CustomEvent('gotomapping', {
-        detail: { columns: this.columns, fileName: this.fileName, fileSize: this.fileSize },
+      new CustomEvent("gotomapping", {
+        detail: {
+          columns: this.columns,
+          fileName: this.fileName,
+          fileSize: this.fileSize
+        },
         bubbles: true,
         composed: true
       })
@@ -250,12 +265,16 @@ export default class CsvUploader extends LightningElement {
 
   // ===== Search / Filters =====
   handleSearchChange(e) {
-    this.searchTerm = e.target.value || '';
+    this.searchTerm = e.target.value || "";
     this.pageIndex = 1;
   }
 
-  openSettings() { this.showSettings = true; }
-  closeSettings() { this.showSettings = false; }
+  openSettings() {
+    this.showSettings = true;
+  }
+  closeSettings() {
+    this.showSettings = false;
+  }
   applySettings() {
     const pageSizeEl = this.template.querySelector('[data-id="page-size"]');
     const previewEl = this.template.querySelector('[data-id="preview-limit"]');
@@ -271,34 +290,43 @@ export default class CsvUploader extends LightningElement {
     this.showSettings = false;
   }
 
-  openFilters() { this.showFilters = true; }
-  closeFilters() { this.showFilters = false; }
+  openFilters() {
+    this.showFilters = true;
+  }
+  closeFilters() {
+    this.showFilters = false;
+  }
   applyFilters() {
     const colEl = this.template.querySelector('[data-id="filter-col"]');
-    const opEl  = this.template.querySelector('[data-id="filter-op"]');
+    const opEl = this.template.querySelector('[data-id="filter-op"]');
     const valEl = this.template.querySelector('[data-id="filter-val"]');
     this.filter = {
-      column: colEl?.value || '',
-      operator: opEl?.value || 'contains',
-      value: valEl?.value || ''
+      column: colEl?.value || "",
+      operator: opEl?.value || "contains",
+      value: valEl?.value || ""
     };
     this.pageIndex = 1;
     this.showFilters = false;
   }
   clearFilters() {
-    this.filter = { column: '', operator: 'contains', value: '' };
+    this.filter = { column: "", operator: "contains", value: "" };
     this.pageIndex = 1;
     this.showFilters = false;
   }
 
   // ===== Pagination =====
-  gotoPrev() { if (!this.isFirstPage) this.pageIndex -= 1; }
-  gotoNext() { if (!this.isLastPage) this.pageIndex += 1; }
+  gotoPrev() {
+    if (!this.isFirstPage) this.pageIndex -= 1;
+  }
+  gotoNext() {
+    if (!this.isLastPage) this.pageIndex += 1;
+  }
   gotoPage(e) {
     const n = e.currentTarget?.dataset?.page;
     if (!n) return;
     const num = Number(n);
-    if (!Number.isNaN(num)) this.pageIndex = Math.min(Math.max(num, 1), this.totalPages);
+    if (!Number.isNaN(num))
+      this.pageIndex = Math.min(Math.max(num, 1), this.totalPages);
   }
 
   // ===== Dropzone =====
@@ -308,17 +336,17 @@ export default class CsvUploader extends LightningElement {
   }
   handleDragOver(ev) {
     ev.preventDefault();
-    const dz = this.template.querySelector('.dropzone');
-    if (dz) dz.classList.add('dropzone--hover');
+    const dz = this.template.querySelector(".dropzone");
+    if (dz) dz.classList.add("dropzone--hover");
   }
   handleDragLeave() {
-    const dz = this.template.querySelector('.dropzone');
-    if (dz) dz.classList.remove('dropzone--hover');
+    const dz = this.template.querySelector(".dropzone");
+    if (dz) dz.classList.remove("dropzone--hover");
   }
   handleDrop(ev) {
     ev.preventDefault();
-    const dz = this.template.querySelector('.dropzone');
-    if (dz) dz.classList.remove('dropzone--hover');
+    const dz = this.template.querySelector(".dropzone");
+    if (dz) dz.classList.remove("dropzone--hover");
     const file = ev.dataTransfer?.files?.[0];
     if (file) this.readFile(file);
   }
@@ -336,7 +364,7 @@ export default class CsvUploader extends LightningElement {
     this.isLoading = true;
     const reader = new FileReader();
     reader.onload = () => {
-      const text = reader.result || '';
+      const text = reader.result || "";
       try {
         const { columns, rows } = this.parseCSV(text);
         this.columns = columns;
@@ -345,17 +373,29 @@ export default class CsvUploader extends LightningElement {
         this.pageIndex = 1;
         this.isPreview = this.totalRows > this.previewLimit;
 
-        this.dispatchEvent(new CustomEvent('csvloaded', {
-          detail: { columns, rows, fileName: this.fileName, fileSize: this.fileSize },
-          bubbles: true, composed: true
-        }));
-        this.dispatchEvent(new CustomEvent('headersready', {
-          detail: { columns }, bubbles: true, composed: true
-        }));
+        this.dispatchEvent(
+          new CustomEvent("csvloaded", {
+            detail: {
+              columns,
+              rows,
+              fileName: this.fileName,
+              fileSize: this.fileSize
+            },
+            bubbles: true,
+            composed: true
+          })
+        );
+        this.dispatchEvent(
+          new CustomEvent("headersready", {
+            detail: { columns },
+            bubbles: true,
+            composed: true
+          })
+        );
 
         this.rebuildDisplayColumns();
       } catch (e) {
-        this.parseError = e?.message || 'Failed to parse CSV.';
+        this.parseError = e?.message || "Failed to parse CSV.";
         this.columns = [];
         this.allRows = [];
       } finally {
@@ -366,15 +406,15 @@ export default class CsvUploader extends LightningElement {
   }
 
   parseCSV(csvText) {
-    const normalize = csvText.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-    const lines = normalize.split('\n');
-    if (!lines.length || (lines.length === 1 && lines[0].trim() === '')) {
+    const normalize = csvText.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+    const lines = normalize.split("\n");
+    if (!lines.length || (lines.length === 1 && lines[0].trim() === "")) {
       return { columns: [], rows: [] };
     }
 
     const parseLine = (line) => {
       const out = [];
-      let cur = '';
+      let cur = "";
       let inQuotes = false;
       for (let i = 0; i < line.length; i++) {
         const ch = line[i];
@@ -385,9 +425,9 @@ export default class CsvUploader extends LightningElement {
           } else {
             inQuotes = !inQuotes;
           }
-        } else if (ch === ',' && !inQuotes) {
+        } else if (ch === "," && !inQuotes) {
           out.push(cur);
-          cur = '';
+          cur = "";
         } else {
           cur += ch;
         }
@@ -397,35 +437,37 @@ export default class CsvUploader extends LightningElement {
     };
 
     // header
-    const header = parseLine(lines[0] || '');
-    const columns = header.map((c, i) => (c || '').trim() || `Column_${i + 1}`);
+    const header = parseLine(lines[0] || "");
+    const columns = header.map((c, i) => (c || "").trim() || `Column_${i + 1}`);
 
     // rows
-    const rows = lines.slice(1).map((line, idx) => this.buildRow(parseLine(line), columns, idx));
+    const rows = lines
+      .slice(1)
+      .map((line, idx) => this.buildRow(parseLine(line), columns, idx));
     return { columns, rows };
   }
 
   computeStatusClass(v) {
-    const s = (v || '').toLowerCase();
-    if (s === 'active') return 'pill pill--green';
-    if (s === 'pending') return 'pill pill--yellow';
-    return 'pill pill--red';
+    const s = (v || "").toLowerCase();
+    if (s === "active") return "pill pill--green";
+    if (s === "pending") return "pill pill--yellow";
+    return "pill pill--red";
   }
 
   buildRow(values, columns, index) {
     return {
       id: index,
       values: columns.map((col, i) => {
-        const val = (values[i] ?? '').trim();
-        const colLower = (col || '').toLowerCase();
-        const isIndustry = colLower === 'industry';
-        const isStatus = colLower === 'status';
+        const val = (values[i] ?? "").trim();
+        const colLower = (col || "").toLowerCase();
+        const isIndustry = colLower === "industry";
+        const isStatus = colLower === "status";
         return {
           key: `${col}_${index}`,
           value: val,
           isIndustry,
           isStatus,
-          statusClass: isStatus ? this.computeStatusClass(val) : ''
+          statusClass: isStatus ? this.computeStatusClass(val) : ""
         };
       })
     };
@@ -459,7 +501,7 @@ export default class CsvUploader extends LightningElement {
     this.currentRowIndex = idx;
     this.previewCells = this.columns.map((label, i) => ({
       label,
-      value: this.allRows[idx].values[i]?.value || ''
+      value: this.allRows[idx].values[i]?.value || ""
     }));
     this.showPreview = true;
   }
@@ -474,7 +516,7 @@ export default class CsvUploader extends LightningElement {
     this.currentRowIndex = idx;
     this.editBuffer = this.columns.map((label, i) => ({
       label,
-      value: this.allRows[idx].values[i]?.value || '',
+      value: this.allRows[idx].values[i]?.value || "",
       idx: i
     }));
     this.showEditor = true;
@@ -525,12 +567,12 @@ export default class CsvUploader extends LightningElement {
     this.totalRows = 0;
     this.isPreview = false;
     this.isLoading = false;
-    this.parseError = '';
-    this.searchTerm = '';
-    this.filter = { column: '', operator: 'contains', value: '' };
+    this.parseError = "";
+    this.searchTerm = "";
+    this.filter = { column: "", operator: "contains", value: "" };
     this.pageSize = DEFAULT_PAGE_SIZE;
     this.pageIndex = 1;
-    this.sortBy = '';
+    this.sortBy = "";
     this.sortAsc = true;
     this.showPreview = false;
     this.showEditor = false;
@@ -539,7 +581,7 @@ export default class CsvUploader extends LightningElement {
     this.editBuffer = [];
   }
 
-   handleBackToSelection() {
+  handleBackToSelection() {
     this.dispatchEvent(new CustomEvent("previous"));
   }
 }
