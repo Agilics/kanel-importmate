@@ -84,30 +84,25 @@
 
         <!-- end child content-->
       </template>
-      <!-- Step 2 -->
-      <!-- Step 2: Data source -->
-      <template if:true={isSelectSource} aria-label="select source section">
-        <c-data-source-selector
-          onprevious={handlePreviousStep}
-          onstartmapping={handleStartMapping}
-          current-project={recentProject}
-        >
-        </c-data-source-selector>
-      </template>
+<!-- Step 2 -->
+<!-- Step 2: Data source -->
+<template if:true={isSelectSource} aria-label="select source section">
+  <c-data-source-selector
+    onprevious={handlePreviousStep}
+    onstartmapping={handleStartMapping}  
+    current-project={recentProject}>
+  </c-data-source-selector>
+</template>
 
-      <!-- Step 3: Full Field Mapper page -->
-      <template
-        if:true={isMappingAndTransformation}
-        aria-label="mapping & transformation section"
-      >
-        <c-field-mapper
-          preselected-project-id={recentProject.Id}
-          preselected-target-object={mappingTargetObject}
-          source-columns-csv={mappingHeadersCsv}
-          onprevious={handleBackToStep2}
-        >
-        </c-field-mapper>
-      </template>
+<!-- Step 3: Full Field Mapper page -->
+<template if:true={isMappingAndTransformation} aria-label="mapping & transformation section">
+  <c-field-mapper
+    preselected-project-id={recentProject.Id}
+    preselected-target-object={mappingTargetObject}
+    source-columns-csv={mappingHeadersCsv}
+    onprevious={handleBackToStep2}>
+  </c-field-mapper>
+</template>
       <template if:true={isScheduling} aria-label="schedule's section">
         <c-schedule-creator-component
           project-id={recentProject.Id}
