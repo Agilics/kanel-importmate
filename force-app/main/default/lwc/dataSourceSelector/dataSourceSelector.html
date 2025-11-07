@@ -7,7 +7,6 @@
 -->
 <template>
   <div class="container">
-   
     <!-- header title -->
     <div class="header">
       <h1 class="header-title">Choose Data Source</h1>
@@ -20,36 +19,35 @@
       <!-- CARD FILE UPLOAD -->
       <div class="upload">
         <c-data-source-selector-card
-        contents={uploadContents}
-        title={uploadTitle}
-        subtitle={uploadSubtitle}
-        is-upload={isUpload}
-        current-project={currentProject}
-        oncardaction={handleCSV}
-      >
-      </c-data-source-selector-card>
+          contents={uploadContents}
+          title={uploadTitle}
+          subtitle={uploadSubtitle}
+          is-upload={isUpload}
+          current-project={currentProject}
+          oncardaction={handleCSV}
+        >
+        </c-data-source-selector-card>
       </div>
       <!-- END CARD FILE UPLOAD -->
 
       <!-- CARD QUERY BUILDER -->
       <div class="query">
-      <c-data-source-selector-card
-        contents={queryContents}
-        title={queryTitle}
-        subtitle={querySubTitle}
-        is-upload={isNotUpload}
-        current-project={currentProject}
-        oncardaction={handleSOQL}
-      >
-      </c-data-source-selector-card>
+        <c-data-source-selector-card
+          contents={queryContents}
+          title={queryTitle}
+          subtitle={querySubTitle}
+          is-upload={isNotUpload}
+          current-project={currentProject}
+          oncardaction={handleSOQL}
+        >
+        </c-data-source-selector-card>
       </div>
-       <!-- END CARD QUERY UPLOAD -->
+      <!-- END CARD QUERY UPLOAD -->
     </div>
-      
 
     <!--- OLD CODE I DON'T WHAT IT DOES.THAT'S WHY I COMMENT ITS -->
 
-     <!-- Selected project banner 
+    <!-- Selected project banner 
     <template if:true={currentProject}>
       <h1 class="slds-text-align_center">Selected project: {projectName}</h1>
       <br />
@@ -83,12 +81,10 @@
       >
       </c-csv-uploader>
       -->
-      
     </template>
-      
 
     <!-- SOQL -->
-     <!--
+    <!--
       
     <template if:true={showSOQL}>
       <c-soql-builder onsoqlbuilt={handleSoqlBuilt}></c-soql-builder>

@@ -312,51 +312,7 @@ export default class MainComponent extends LightningElement {
 
   //Enregistrement  d'une nouvelle planification
   async handleAddSchedule(event) {
-    //Récupération de l'id du projet sélectionné
-    const id = this.recentProject?.Id;
-
-    try {
-      this.isLoading = true; //activer le loading spinner
-
-      if (!id || !this.selectedFrequency || !this.nextRun) {
-        this.showToast("Warning", "All fields are required.", "warning");
-        this.isLoading = false;
-        return;
-      }
-      /**
-       * Création d'une planification via la fréquence , l'id du project
-       * et la date d'éxécution NextRun
-       *  Création d'une tâche Apex
-       */
-
-      await addSchedule({
-        frequency: this.selectedFrequency,
-        nextRun: this.nextRun,
-        projectId: id
-      }).then((data) => {
-        //Affichage du message toast de succès
-        this.showToast(
-          "Success",
-          `Schedule  with ID:\t${data}  created  successfully !`,
-          "success"
-        );
-        this.template
-          .querySelector("c-schedule-creator-component")
-          .resetFields(); // Réintialisation de tous les champs de texte | combo box
-        this.showSchedule = event.detail;
-        this.isLoading = false; //Désactivation du  loading spinner
-        return refreshApex(this.wiredSchedulesResult); //  refresh datatable
-      });
-    } catch (err) {
-      //Affichage d'un toast de message d'erreur
-      this.showToast(
-        "Error",
-        err?.body?.message || "An Error were occured while adding a schedule! ",
-        "error"
-      );
-    } finally {
-      this.isLoading = false;
-    }
+    console.log("nite in tarzana!");
   }
   handleStartMapping(event) {
     // 1) CSV headers (if CSV path)

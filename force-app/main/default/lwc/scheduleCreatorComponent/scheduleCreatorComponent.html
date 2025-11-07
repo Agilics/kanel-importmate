@@ -2,27 +2,219 @@
   @description       : 
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
   @group             : 
-  @last modified on  : 10-01-2025
+  @last modified on  : 11-06-2025
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
-  <h2 class="title">New schedule</h2>
+  <!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 11-06-2025
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+  College DropOut YE 
+-->
+   <!-- text title with buttons-->
+     <div class="main-sub pb-1">
+        <div class="title"> 
+        <h1>Import Scheduling</h1>
+        <p class="subtitle">
+          Set up recurring import schedules and manage scheduled jobs
+        </p> 
+        </div>
+       <div class="btn-header">
+          <button class="btn btn-primary">
+            <lightning-icon
+              icon-name="utility:add"
+              alternative-text="add"
+              class="custom-icon-add icons "
+              size="small"
+              title="add"
+            ></lightning-icon>
+            New Schedule
+          </button>
+          <button class="btn btn-execute">
+            <lightning-icon
+              icon-name="utility:play"
+              alternative-text="play"
+              class="custom-icon-play icons"
+              size="small"
+              title="play"
+            ></lightning-icon>
+            Execute Now
+          </button>
+        </div>
+    </div>
+    <!-- text title with buttons end--> 
+  <div class="main px-3">
+  
+
+    <div class="card">
+      <div class="head p-1">
+        <!-- icon & title-->
+        <div class="card-header">
+          <!-- date icon -->
+          <lightning-icon
+            icon-name="utility:date_input"
+            alternative-text="date_input"
+            class="custom-icon-date_input"
+            title="date_input"
+          ></lightning-icon>
+          <h2 class="card-title">Schedule Configuration</h2>
+        </div>
+       
+      </div>
+
+      <!-- separator-->
+      <hr class="separator" />
+
+      <!-- form content -->
+      <div class="card-content p-1">
+        <!-- frequency settings -->
+        <div class="settings">
+          <h3 class="frequency-settings-title">Frequency Settings</h3>
+          <div class="zone">
+            <!-- ComboBox for Select Frequency DAILY | WEEKLY | MONTHLY -->
+            <lightning-combobox
+              class="frequency-combobox rounded-input"
+              name="frequency"
+              label="Frequency"
+              id="frequency"
+              value={selectedFrequency}
+              options={picklistValues}
+              onchange={handleFrequencyChange}
+            ></lightning-combobox>
+           
+          </div>
+
+          <!-- Next Run date time picker  on local area -->
+          <div class="zone">
+            <lightning-input
+              class="time-input rounded-input"
+              type="datetime"
+              label="Time"
+              id="time"
+              value={nextRun}
+              onchange={handleNextRunChange}
+            >
+            </lightning-input>
+          </div>
+        </div>
+        <!--end frequency settings-->
+        <!-- schedule preview  -->
+         <div class="box ">
+        <div class="schedule-preview">
+          <h3 class="frequency-settings-title">Schedule Preview</h3>
+          <div class="bloc">
+            <div class="card-info px-1">
+              <div class="info-header">
+                <!-- Icon info -->
+                <lightning-icon
+                  icon-name="utility:info"
+                  alternative-text="info"
+                  class="custom-icon-info"
+                  title="info"
+                ></lightning-icon>
+                <!--end Icon info -->
+                <!-- title -->
+                <h4 class="info-title">Next Execution</h4>
+                <!--title end-->
+              </div>
+
+              <!--card info : content next execution day -->
+              <div class="box-execution">
+                <h3 class="next-execution-day">Tomorrow at 9:00 AM UTC</h3>
+                <p class="recurrency">Recurring daily</p>
+              </div>
+              <!-- end next execution day -->
+            </div>
+          </div>
+       
+        </div>
+
+       <div class="upcomings pt-1">
+          <h3 class="upcoming-title">Upcoming Executions</h3>
+        <!--List of upcoming executions date time-->   
+          <template for:each={upcomingExecution} for:item="item">
+            <div key={executionDate}>
+              <ul class="upcoming-item">
+                <li class="upcoming-date"></li>
+              </ul>
+            </div>
+          </template>
+        </div>   
+        </div>
+      
+        
+        <!--end schedule preview -->
+      </div>
+
+      <!-- end form content -->
+
+      <!-- separator-->
+      <div class="separator footer-separator plr-1"></div>
+      <!-- footer -->
+      <div
+        style="
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 0 1.8rem 1rem;
+          margin: 2.5rem 0px 0px;
+        "
+      >
+        <div class="checkbox">
+          <!-- checkbox-->
+          <lightning-input type="checkbox" label="Send email notifications">
+          </lightning-input>
+          <lightning-input type="checkbox" label="Auto-retry on failure">
+          </lightning-input>
+        </div>
+
+        <!-- save schedule btn-->
+        <!-- Save & Continue Button -->
+        <button
+          type="button"
+          class="btn slds-text-align_center btn-primary"
+          style="font-family: Inter;
+font-weight: 500;
+font-style: Medium;
+font-size: 16px;
+leading-trim: NONE;
+line-height: 100%;
+letter-spacing: 0%;
+text-align: center;
+"
+          onclick={handleAddSchedule}
+        >
+          Save Schedule
+        </button>
+      </div>
+
+      <!-- footer end-->
+    </div>
+
+    <!-- end card -->
+  </div>
+
+  <!-- <h2 class="title">New schedule</h2>
   <div class="slds-grid slds-gutters slds-align_absolute-center">
     <section
       class="slds-col slds-medium-size_3-of-12 slds-large-size_6-of-12 container"
       aria-label="New schedule"
-    >
-      <!-- ComboBox for Select Frequency-->
-      <lightning-combobox
+    >-->
+  <!-- ComboBox for Select Frequency-->
+  <!--<lightning-combobox
         class="rounded-input"
         name="frequency"
         label="Select a frequency"
         value={selectedFrequency}
         options={picklistValues}
         onchange={handleFrequencyChange}
-      ></lightning-combobox>
+      ></lightning-combobox>-->
 
-      <!-- Next Run date time picker  on local area -->
+  <!-- Next Run date time picker  on local area -->
+  <!--
       <lightning-input
         class="rounded-input"
         type="datetime-local"
@@ -31,9 +223,9 @@
         onchange={handleNextRunChange}
       >
       </lightning-input>
-
-      <!-- actions buttons-->
-      <div class="btn-groups">
+       -->
+  <!-- actions buttons-->
+  <!--<div class="btn-groups">
         <button class="btn btn-save" onclick={handleAddSchedule}>
           Add Schedule
         </button>
@@ -42,5 +234,5 @@
         </button>
       </div>
     </section>
-  </div>
+  </div>-->
 </template>

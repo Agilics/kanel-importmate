@@ -1,0 +1,76 @@
+.card {
+  width: 1056px;
+  height: 428px;
+  border-radius: 12px;
+  border-width: 1px;
+  opacity: 1;
+  top: 780px;
+  left: 32px;
+  border-width: 1px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+}
+
+/* Schedule Config Card */
+.card {
+  width: 1056px;
+  height: 616px;
+  opacity: 1;
+  border-radius: 12px;
+  border-width: 1px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+}
+
+/* header of card */
+.card-header {
+  display: flex;
+  gap: 2rem;
+  opacity: 1;
+  border-bottom-width: 1px;
+  margin: 0 0 2px 0;
+}
+
+/* card title */
+.card-title {
+  font-weight: 600;
+  font-style: Semi Bold;
+  font-size: 20px;
+  line-height: 28px;
+  letter-spacing: 0%;
+}
+.icon-piclist_size {
+  width: 20px;
+  height: 20px;
+  opacity: 1;
+  top: 10.5px;
+}
+/*Add the class name below to the lightning-icon element.*/
+.custom-icon-groups {
+  --slds-c-icon-color-foreground-default: #1e40af;
+  --slds-c-icon-color-background: #ffffff;
+}
+
+/*padding*/
+
+.px-2 {
+  padding: 6rem 6rem 0 6rem;
+}
+.p-3 {
+  padding: 6rem 6rem 2.3rem 6rem;
+}
+.p-2 {
+  padding: 3rem 0 7px 2rem;
+}
+.px-1 {
+  padding: 0 0 2px 2.7rem;
+}
+.p-1 {
+  padding: 3rem 0 7px 2rem;
+}
+.pt-1 {
+  padding: 20px 0 7px 2rem;
+}
+.plr-1 {
+  padding: 0 3rem 0 3rem;
+}

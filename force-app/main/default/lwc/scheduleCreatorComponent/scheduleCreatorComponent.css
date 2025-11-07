@@ -1,100 +1,377 @@
-/* Create project Action */
-.container {
-  border-radius: 30px;
-  max-width: 1200px;
-  background-color: #ebe3e2;
-  border-radius: 24px;
-  padding: 1.6rem 2rem;
-  -webkit-border-radius: 24px;
-  -moz-border-radius: 24px;
-  -ms-border-radius: 24px;
-  -o-border-radius: 24px;
+body {
+  font-family: Inter;
+  background: #e5e7eb;
 }
-.title {
-  font-weight: 500;
-  margin: 0 0 0.9rem 0;
-  padding: 0 0 0 12%;
-}
-/* display inputs in lines*/
-
-/*Add some rounded buttons*/
-.rounded-input {
-  border-radius: 15px;
-}
-/* inputs */
-lightning-input,
-lightning-combobox {
-  width: 450px;
-  padding: 10px;
-  border-radius: 5px;
-}
-
-/*  */
-.btn-groups {
-  margin: 2rem 0 2rem 0;
+.main-sub{
   display: flex;
+  flex-direction: row;
   flex-wrap: wrap;
-  gap: 5rem;
+  justify-content: space-between;
+  align-items: flex-start;
+  align-content: flex-start;
 }
-.btn {
-  width: 192.125px;
+.title{
+  width: 475px;
+  height: 36px;
+  opacity: 1;
+  font-family: Inter;
+  font-weight: 700;
+  font-style: Bold;
+  font-size: 30px; 
+  line-height: 36px;
+  letter-spacing: 0%;
+  margin-bottom:12px;
+}
+.subtitle{ 
+  width: 475;
+height: 24; 
+opacity: 1;
+top: 44px;
+
+font-weight: 400;
+font-style: Regular;
+font-size: 16px;
+leading-trim: NONE;
+line-height: 24px;
+letter-spacing: 0%;
+
+}
+/* Schedule Config Card */
+.card {
+  width: 1056px;
+  height: 616px;
+  opacity: 1;
+  border-radius: 12px;
+  border-width: 1px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+}
+
+/* header of card */
+.head {
+  display: flex;
+  justify-content: space-between;
+}
+.card-header {
+  display: flex;
+  gap: 2rem;
+  opacity: 1;
+  border-bottom-width: 1px;
+  margin: 0 0 2px 0;
+}
+.text-content {
+  display: flex;
+  justify-content: start;
+  flex-direction: column;
+  align-items: start;
+}
+/* card title */
+.card-title {
+  font-weight: 600;
+  font-style: Semi Bold;
+  font-size: 20px;
+  line-height: 28px;
+  letter-spacing: 0%;
+}
+.subtitle {
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 0%;
+  color: #4b5563;
+}
+.btn-header {
+  gap: 10px 50px ;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  align-content: flex-start;
+}
+.btn-execute {
+  background: #16a34a;
+  margin: 0 20px 0 0;
+}
+
+/*Add the class name below to the lightning-icon element.*/
+ 
+.icons{
+   width: 14px;
+  height: 16px;
+  margin: -10px 12px 0 0;
+  --slds-c-icon-color-foreground-default: #ffffff;
+}
+.custom-icon-add {
+  --slds-c-icon-color-background: #1e40af;
+}
+
+/*Add the class name below to the lightning-icon element.*/
+.custom-icon-play {
+  --slds-c-icon-color-background: #16a34a; 
+}
+
+/*Add the class name below to the lightning-icon element.*/
+.custom-icon-date_input {
+  --slds-c-icon-color-foreground-default: #1e40af;
+  --slds-c-icon-color-background: #ffffff;
+  width: 17.5px;
+  height: 20px;
+  opacity: 1;
+}
+
+.separator {
+  width: 1054px;
+  opacity: 1;
+  border-top: 1px solid #e5e7eb;
+}
+
+/*card content*/
+.card-content {
+  opacity: 1;
+  display: flex;
+  gap: 3rem;
+}
+
+/* frequency settings  & schedule preview */
+.settings {
+  margin: 0 3rem 0 0;
+}
+.frequency-settings-title {
+  opacity: 1;
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 18px;
+  line-height: 28px;
+  letter-spacing: 0%;
+  color: #111827;
+  margin: 0 0 13px 0;
+}
+
+.slds-form-element__label {
+  font-weight: 500 !important ;
+  font-style: Medium !important;
+  font-size: 14px !important;
+  line-height: 100% !important;
+  letter-spacing: 0% !important;
+  color: #374151 !important;
+  opacity: 1 !important;
+  margin: 0 3px 7px 0;
+}
+.custom-label {
+  display: grid;
+  grid-auto-flow: dense; /* NEW */
+}
+/*require * position */
+.target-label {
+  grid-template-columns: 14px 1fr;
+}
+.name-label {
+  grid-template-columns: 8px 1fr;
+}
+
+lightning-combobox .frequency-combobox {
+  width: 487px;
   height: 48px;
   opacity: 1;
-  border-radius: 30px;
+  top: 28px;
+  margin: 0 0 20px 0;
+  --sds-c-input-radius-border: 8px;
+  border-width: 1px;
+}
+
+lightning-input .time-input {
+  width: 487px;
+  height: 52px;
+  border-radius: 8px;
+  opacity: 1;
+  --sds-c-input-radius-border: 8px;
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  -ms-border-radius: 8px;
+  -o-border-radius: 8px;
+}
+
+.setting {
+  margin: 0 3rem 0 0;
+}
+/*schedule preview*/
+.card-info {
+  width: 487px;
+  height: 120px;
+  border-radius: 8px;
+  opacity: 1;
+  color: #1e3a8a;
+  width: 487px;
+  height: 120px;
+  border-radius: 8px;
+  opacity: 1;
+  top: 44px;
+  background: #eff6ff;
+  border-radius: 8px;
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  -ms-border-radius: 8px;
+  -o-border-radius: 8px;
+}
+.info-header {
+  display: flex;
+  justify-content: flex-start;
+  margin: 5px 0 1rem 0;
+  padding: 1.1rem 0 0 0;
+}
+.info-title {
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 0%;
+  margin: 3px 0 0 23px;
+}
+
+.next-execution-day {
+  font-weight: 600;
+  font-style: Semi Bold;
+  font-size: 18px;
+  line-height: 100%;
+  letter-spacing: 0%;
+}
+.recurrency {
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 14px;
+  padding: 12px 0 0 0;
+  line-height: 100%;
+  letter-spacing: 0%;
+  color: #2563eb;
+}
+/*Add the class name below to the lightning-icon element.*/
+.custom-icon-info {
+  --slds-c-icon-color-foreground-default: #2563eb;
+  --slds-c-icon-color-background: #eff6ff;
+  width: 16px;
+  height: 16px;
+  margin:0 0 0 -12px;
+  opacity: 1;
+}
+
+/*upcoming section*/
+.schedule-preview {
+}
+
+li {
+  text-decoration: none;
+}
+.upcomings {
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 0%;
+}
+.upcoming-item {
+  width: 487px;
+  height: 36px;
+  border-radius: 4px;
+  opacity: 1;
+  display: flex;
+  justify-content: space-between;
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  margin-bottom: 9px;
+}
+.upcoming-date {
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: 0%;
+}
+
+/*card footer with actions buttons*/
+.footer-separator {
+  margin-block-start: 5rem;
+  margin-block-end: 4px;
+}
+
+.checkbox {
+  display: flex;
+  justify-content: stretch;
+  align-items: start;
+}
+.btn {
+  display: flex;
+  justify-content:center;
+  align-items:center;
+  color: #ffffff; 
+  border: none;   
+  text-align: center;
+  cursor: pointer;
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 16px;
+  line-height: 100%; 
+  width: 180.3125px;
+  height: 50px;
+  border-radius: 8px; 
+  opacity: 1;
+
+}
+
+.btn-primary {
+  border-radius: 0.5rem;
+  background: #1e40af;
+  color: #ffffff;
   border: none;
-  color: #fff;
-  font-size: 15px;
-  font-weight: 700;
-}
-/*Action button params radius - color &  fonts */
-.btn-save {
-  background-color: #1e3a8a;
-
-  box-shadow: 0 6px 12px rgb(30 58 138 / 0.45);
-}
-.btn-save:hover {
-  background-color: #153071;
-}
-.btn-cancel {
-  background-color: #6b757d;
-  box-shadow: 0 6px 12px rgb(107 117 125 / 0.45);
-}
-.btn-cancel:hover {
-  background-color: #4a5257;
+  opacity: 1;
+  text-align: center;
+  border-radius: 8px;
 }
 
-/* Tablette et en-dessous */
-@media (max-width: 1024px) {
-  .container {
-    flex-wrap: wrap;
-  }
-  .btn-groups {
-    gap: 1.5rem;
-    justify-content: space-between;
-  }
-  .btn {
-    width: 90%;
-    padding: 12px;
-  }
+/* Icône du bouton add new schedule */
+.custom-icon-output {
+  --slds-c-icon-color-foreground: #ffffff;
+  --slds-c-icon-color-background: #1e40af;
+}
+.box{
+display: flex;
+flex-direction: column;
+flex-wrap: wrap;
+justify-content: flex-start;
+align-items: flex-start;
+align-content: flex-start;
+}
+/* custom padding */
+.px-2 {
+  padding: 6rem 6rem 0 6rem;
+}
+.px-3{
+  padding:0.8rem 6rem 6rem;
+}
+.p-3 {
+  padding: 6rem 6rem 2.3rem 6rem;
+}
+.p-2 {
+  padding: 3rem 0 7px 2rem;
+}
+.px-1 {
+  padding: 0 0 2px 2.7rem;
+}
+.pb-1{
+  padding: 10px 1.3rem 21px 6rem;
+  gap:10px 3rem;
 }
 
-/* Mobile */
-@media (max-width: 768px) {
-  .container {
-    flex-direction: column;
-    align-items: stretch;
-    flex-wrap: wrap;
-  }
-
-  .btn-groups {
-    flex-direction: flex;
-    gap: 1rem;
-    align-items: space-between;
-    justify-content: center;
-  }
-
-  .btn {
-    width: 34%;
-    padding: 12px;
-  }
+.p-1 {
+  padding: 3rem 0 7px 2rem;
+}
+.pt-1 {
+  padding: 20px 0 7px 2rem;
+}
+.pt-2 {
+  padding: 2rem 0 7px 2rem;
+}
+.plr-1 {
+  padding: 0 3rem 0 3rem;
 }

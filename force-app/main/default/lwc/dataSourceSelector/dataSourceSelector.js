@@ -1,7 +1,6 @@
 import { LightningElement, api } from "lwc";
 
 export default class DataSourceSelector extends LightningElement {
-  
   //data source selector card's parameters for file Upload
   uploadTitle = "File Upload";
   uploadSubtitle = "Import from CSV or Excel files";
@@ -22,7 +21,7 @@ export default class DataSourceSelector extends LightningElement {
   ];
 
   //data source selector card's parameters for query builder
-   queryContents = [
+  queryContents = [
     {
       Id: 1,
       Name: "Visual query builder interface"
@@ -40,9 +39,8 @@ export default class DataSourceSelector extends LightningElement {
   queryTitle = "Salesforce Query";
   querySubTitle = "Import from Salesforce using SOQL";
 
-
   isUpload = true; // check if upload card
-  isNotUpload = ! true;
+  isNotUpload = !true;
 
   currentStep = 2;
   selectedSource = null; // "CSV" | "SOQL" | null
@@ -69,9 +67,8 @@ export default class DataSourceSelector extends LightningElement {
     //this.currentStep = 3;
   }
   handleSOQL() {
-    
     this.selectedSource = "SOQL";
-  //  this.currentStep = 3;
+    //  this.currentStep = 3;
   }
 
   handleBackToSelection() {
