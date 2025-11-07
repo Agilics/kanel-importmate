@@ -8,7 +8,7 @@ export default class ScheduleCreatorComponent extends LightningElement {
   @track projectId;
   @track nextRun;
   @track picklistValues = []; // liste of frequency  DAILY | WEEKLY | MONTHLY
-  @track selectedFrequency = 'Daily';
+  @track selectedFrequency = "Daily";
   @track showSchedule;
 
   //Récupération des valeurs de la liste de sélection de Frequency__c(Daily | Weekly | Monthly)
@@ -40,7 +40,7 @@ export default class ScheduleCreatorComponent extends LightningElement {
   //Mise à jour de la valeur de selectedFrequency
   //Mise à jour du champs de sélection de Frequency__c
   handleSelectedFrequency(event) {
-    this.selectedFrequency = event.target.value; 
+    this.selectedFrequency = event.target.value;
   }
 
   //Mise à jour du champs de la date d'éxécution
@@ -49,7 +49,7 @@ export default class ScheduleCreatorComponent extends LightningElement {
   }
 
   //Enregistrement  d'une nouvelle planification
-  async handleAddSchedule(event) { 
+  async handleAddSchedule(event) {
     //Récupération de l'id du projet sélectionné
     const id = this.recentProject?.Id;
 
@@ -65,7 +65,7 @@ export default class ScheduleCreatorComponent extends LightningElement {
        *  Création d'une tâche Apex
        */
 
-      await addSchedule({
+      const result = await addSchedule({
         frequency: this.selectedFrequency,
         nextRun: this.nextRun,
         projectId: id
@@ -78,6 +78,7 @@ export default class ScheduleCreatorComponent extends LightningElement {
         );
 
         this.resetFields(); // Réintialisation de tous les champs de texte | combo box
+        //TODO envoyer un boolean pour refresh la liste
         //   this.showSchedule = event.detail;
         // return refreshApex(this.wiredSchedulesResult); //  refresh datatable
       });

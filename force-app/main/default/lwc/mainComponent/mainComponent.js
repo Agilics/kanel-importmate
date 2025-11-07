@@ -9,7 +9,6 @@ import doesProjectExist from "@salesforce/apex/ImportProjectController.doesProje
 import saveProject from "@salesforce/apex/ImportProjectController.saveProject";
 import getRecentsProjects from "@salesforce/apex/ImportProjectController.getRecentsProjects";
 import getAllSchedules from "@salesforce/apex/ScheduleController.getAllSchedules";
-import addSchedule from "@salesforce/apex/ScheduleController.addSchedule";
 export default class MainComponent extends LightningElement {
   @track showCreatorSection = false;
   title = "Imports Projects";
@@ -31,7 +30,7 @@ export default class MainComponent extends LightningElement {
 
   selectedFrequency; // paramètre pour la fréquence sélectionnée
   showSchedule = false;
-  wiredSchedulesResult;
+  wiredSchedulesResult; //schedules
   nextRun; // paramètre de date d'éxécution
 
   // paramètre du stepper

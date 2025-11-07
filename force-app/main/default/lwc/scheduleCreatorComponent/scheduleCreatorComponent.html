@@ -14,41 +14,39 @@
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
   College DropOut YE 
 -->
-   <!-- text title with buttons-->
-     <div class="main-sub pb-1">
-        <div class="title"> 
-        <h1>Import Scheduling</h1>
-        <p class="subtitle">
-          Set up recurring import schedules and manage scheduled jobs
-        </p> 
-        </div>
-       <div class="btn-header">
-          <button class="btn btn-primary">
-            <lightning-icon
-              icon-name="utility:add"
-              alternative-text="add"
-              class="custom-icon-add icons "
-              size="small"
-              title="add"
-            ></lightning-icon>
-            New Schedule
-          </button>
-          <button class="btn btn-execute">
-            <lightning-icon
-              icon-name="utility:play"
-              alternative-text="play"
-              class="custom-icon-play icons"
-              size="small"
-              title="play"
-            ></lightning-icon>
-            Execute Now
-          </button>
-        </div>
+  <!-- text title with buttons-->
+  <div class="main-sub pb-1">
+    <div class="title">
+      <h1>Import Scheduling</h1>
+      <p class="subtitle">
+        Set up recurring import schedules and manage scheduled jobs
+      </p>
     </div>
-    <!-- text title with buttons end--> 
+    <div class="btn-header">
+      <button class="btn btn-primary">
+        <lightning-icon
+          icon-name="utility:add"
+          alternative-text="add"
+          class="custom-icon-add icons"
+          size="small"
+          title="add"
+        ></lightning-icon>
+        New Schedule
+      </button>
+      <button class="btn btn-execute">
+        <lightning-icon
+          icon-name="utility:play"
+          alternative-text="play"
+          class="custom-icon-play icons"
+          size="small"
+          title="play"
+        ></lightning-icon>
+        Execute Now
+      </button>
+    </div>
+  </div>
+  <!-- text title with buttons end-->
   <div class="main px-3">
-  
-
     <div class="card">
       <div class="head p-1">
         <!-- icon & title-->
@@ -62,7 +60,6 @@
           ></lightning-icon>
           <h2 class="card-title">Schedule Configuration</h2>
         </div>
-       
       </div>
 
       <!-- separator-->
@@ -84,7 +81,6 @@
               options={picklistValues}
               onchange={handleFrequencyChange}
             ></lightning-combobox>
-           
           </div>
 
           <!-- Next Run date time picker  on local area -->
@@ -102,50 +98,48 @@
         </div>
         <!--end frequency settings-->
         <!-- schedule preview  -->
-         <div class="box ">
-        <div class="schedule-preview">
-          <h3 class="frequency-settings-title">Schedule Preview</h3>
-          <div class="bloc">
-            <div class="card-info px-1">
-              <div class="info-header">
-                <!-- Icon info -->
-                <lightning-icon
-                  icon-name="utility:info"
-                  alternative-text="info"
-                  class="custom-icon-info"
-                  title="info"
-                ></lightning-icon>
-                <!--end Icon info -->
-                <!-- title -->
-                <h4 class="info-title">Next Execution</h4>
-                <!--title end-->
-              </div>
+        <div class="box">
+          <div class="schedule-preview">
+            <h3 class="frequency-settings-title">Schedule Preview</h3>
+            <div class="bloc">
+              <div class="card-info px-1">
+                <div class="info-header">
+                  <!-- Icon info -->
+                  <lightning-icon
+                    icon-name="utility:info"
+                    alternative-text="info"
+                    class="custom-icon-info"
+                    title="info"
+                  ></lightning-icon>
+                  <!--end Icon info -->
+                  <!-- title -->
+                  <h4 class="info-title">Next Execution</h4>
+                  <!--title end-->
+                </div>
 
-              <!--card info : content next execution day -->
-              <div class="box-execution">
-                <h3 class="next-execution-day">Tomorrow at 9:00 AM UTC</h3>
-                <p class="recurrency">Recurring daily</p>
+                <!--card info : content next execution day -->
+                <div class="box-execution">
+                  <h3 class="next-execution-day">Tomorrow at 9:00 AM UTC</h3>
+                  <p class="recurrency">Recurring daily</p>
+                </div>
+                <!-- end next execution day -->
               </div>
-              <!-- end next execution day -->
             </div>
           </div>
-       
+
+          <div class="upcomings pt-1">
+            <h3 class="upcoming-title">Upcoming Executions</h3>
+            <!--List of upcoming executions date time-->
+            <template for:each={upcomingExecution} for:item="item">
+              <div key={executionDate}>
+                <ul class="upcoming-item">
+                  <li class="upcoming-date"></li>
+                </ul>
+              </div>
+            </template>
+          </div>
         </div>
 
-       <div class="upcomings pt-1">
-          <h3 class="upcoming-title">Upcoming Executions</h3>
-        <!--List of upcoming executions date time-->   
-          <template for:each={upcomingExecution} for:item="item">
-            <div key={executionDate}>
-              <ul class="upcoming-item">
-                <li class="upcoming-date"></li>
-              </ul>
-            </div>
-          </template>
-        </div>   
-        </div>
-      
-        
         <!--end schedule preview -->
       </div>
 
@@ -176,15 +170,16 @@
         <button
           type="button"
           class="btn slds-text-align_center btn-primary"
-          style="font-family: Inter;
-font-weight: 500;
-font-style: Medium;
-font-size: 16px;
-leading-trim: NONE;
-line-height: 100%;
-letter-spacing: 0%;
-text-align: center;
-"
+          style="
+            font-family: Inter;
+            font-weight: 500;
+            font-style: Medium;
+            font-size: 16px;
+            leading-trim: NONE;
+            line-height: 100%;
+            letter-spacing: 0%;
+            text-align: center;
+          "
           onclick={handleAddSchedule}
         >
           Save Schedule
@@ -197,6 +192,8 @@ text-align: center;
     <!-- end card -->
   </div>
 
+  <!----->
+  <c-schedule-jobs-component></c-schedule-jobs-component>
   <!-- <h2 class="title">New schedule</h2>
   <div class="slds-grid slds-gutters slds-align_absolute-center">
     <section

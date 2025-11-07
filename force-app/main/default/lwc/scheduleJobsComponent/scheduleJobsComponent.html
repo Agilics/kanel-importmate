@@ -2,28 +2,104 @@
   @description       : 
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
   @group             : 
-  @last modified on  : 11-06-2025
+  @last modified on  : 11-07-2025
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
-  <div class="card">
-    <div class="card-header p-1">
-      <!-- date icon -->
-      <lightning-icon
-        icon-name="utility:picklist_type"
-        alternative-text="picklist_type"
-        class="custom-icon-groups icon-piclist_size"
-        title="date_input"
-      ></lightning-icon>
-      <h2 class="card-title">Schedule Jobs</h2>
+  <div class="main px-3">
+    <div class="card">
+      <div class="card-header p-1">
+        <!-- date icon -->
+        <lightning-icon
+          icon-name="utility:picklist_type"
+          alternative-text="picklist_type"
+          class="custom-icon-groups icon-piclist_size"
+          title="date_input"
+        ></lightning-icon>
+        <h2 class="card-title">Schedule Jobs</h2>
+      </div>
+      <div class="card-content">
+        <table role="grid" aria-label="Schedule Project Table">
+          <thead>
+            <tr>
+              <template for:each={columns} for:item="item">
+                <th scope="col" key={item.label}>{item.label}</th>
+              </template>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- schedules -->
+            <tr>
+              <td>
+                <div class="project-cell">
+                  <div
+                    class="project-icon icon-contact-import"
+                    aria-hidden="true"
+                    title="Contact Import"
+                  >
+                    <!-- People Icon -->
+                  </div>
+                  <div class="project-info">
+                    <div class="project-name">Contact Import</div>
+                    <div class="project-sub">Q4<br />Target: Contact</div>
+                  </div>
+                </div>
+              </td>
+              <td class="frequency">Daily at 9:00 AM</td>
+              <td class="next-run">Tomorrow 9:00 AM</td>
+              <td class="last-execution">
+                <span>2 hours ago</span><br />
+                <span class="success-text">Success &bull; 15,420 records</span>
+              </td>
+              <td>
+                <!--span class={jobStatusBadgeClass} aria-label="Active status"
+              ></span-->
+                <!-- job status badge -->
+
+                <span
+                  class="status-badge active-status"
+                  aria-label="Active status"
+                  >Active</span
+                >
+                <!-- job status badge -->
+              </td>
+              <td
+                class="actions"
+                role="gridcell"
+                aria-label="Actions for Contact Import"
+              >
+                <!-- Edit Icon -->
+                <button aria-label="Edit Contact Import">
+                  <lightning-icon
+                    icon-name="utility:edit"
+                    alternative-text="edit"
+                    class="slds-icon_action"
+                    title="edit"
+                  ></lightning-icon>
+                </button>
+                <!-- Pause Icon -->
+                <button title="Pause" aria-label="Pause Contact Import">
+                  <lightning-icon
+                    icon-name="utility:pause"
+                    alternative-text="edit"
+                    class="slds-icon_action"
+                    title="edit"
+                  ></lightning-icon>
+                </button>
+                <!-- Delete Icon -->
+                <button title="Delete" aria-label="Delete Contact Import">
+                  <lightning-icon
+                    icon-name="utility:delete"
+                    alternative-text="delete"
+                    class="slds-icon_action"
+                    title="edit"
+                  ></lightning-icon>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
-  <!--icon groups 
-  <lightning-icon
-    icon-name="utility:groups"
-    alternative-text="groups"
-    class="custom-icon-groups"
-    title="groups"
-  ></lightning-icon>
-  end icon groups-->
 </template>

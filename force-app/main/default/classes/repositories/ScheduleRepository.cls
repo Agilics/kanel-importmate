@@ -2,7 +2,7 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 10-14-2025
+ * @last modified on  : 11-07-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 public with sharing class ScheduleRepository {
@@ -32,14 +32,19 @@ public with sharing class ScheduleRepository {
     
     }
 
-    // Récupérer toutes les plannifications
+    // Récupérer toutes les plannifications avec les Status d'execution
     public  static List<Schedule__c> getAllSchedules() {
           if(SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType)){
             try {
                 return [
                     SELECT Id, Name,  Frequency__c,
                     NextRun__c, Project__r.Name, Project__r.TargetObject__c,
-                    Project__r.Description__c
+                    Project__r.Description__c,
+                    (
+                       SELECT Id, Status__c, StartTime__c, EndTime__c, TotalRecords__c, 
+                              ProcessedRecords__c, FailedRecords__c
+                       FROM ImportExecutions__r
+                   )
                     FROM Schedule__c
                 ];
             }catch(ApplicationException e){
@@ -51,7 +56,35 @@ public with sharing class ScheduleRepository {
           return null;
     }
 
-  //
+    //Filtrer planifications par le statut d'éxécution d'importation
+    public static List<Schedule__c> getSchedulesByExecutionStatus(String executionStatus) {
+        try {
+            if(SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType)){
+                // On sélectionne les Schedules dont les ImportExecution__c ont le statut demandé
+                List<Schedule__c> schedules = [
+                    SELECT Id, Name, Frequency__c, NextRun__c,
+                        (SELECT Id, Name, Status__c, StartTime__c, EndTime__c
+                            FROM ImportExecutions__r
+                            WHERE Status__c = :executionStatus
+                        )
+                    FROM Schedule__c
+                    WHERE Id IN (
+                        SELECT Schedule__c
+                        FROM ImportExecution__c
+                        WHERE Status__c = :executionStatus
+                    )
+                    ORDER BY CreatedDate DESC
+                ];
+                return schedules;
+            }
+        } catch (ApplicationException e) {
+            ErrorLogService.logException(e);
+            throw new ApplicationException(e.getMessage());
+            
+        }
+    }
+
+
   public  static List<Schedule__c> getPastSchedules() {
     if(SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType)){
         try {

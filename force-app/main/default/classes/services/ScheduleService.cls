@@ -2,7 +2,7 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 10-03-2025
+ * @last modified on  : 11-07-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 public with sharing class ScheduleService{
@@ -131,13 +131,17 @@ public with sharing class ScheduleService{
     }
 
 
-     /**
+    /**
      * Recherche les planifications par le nom du projet
     */
      public static List<Schedule__c> getSchedulesByProjectName(String name) {
        try {
             if(SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType)) {
-                return  ScheduleRepository.getSchedulesByProjectName(name);   
+                if(String.isNotBlank(name)) {
+                    return  ScheduleRepository.getSchedulesByProjectName(name);     
+                } else { 
+                    return ScheduleRepository.getAllSchedules();
+                }
             }
             return new List<Schedule__c>();
         } catch (ApplicationException e) {
@@ -146,9 +150,19 @@ public with sharing class ScheduleService{
         }  
     } 
 
-     
-
-
+    /**
+     * Recherche les planifications par le statut d'éxécution
+     */
+    public static List<Schedule__c> getSchedulesByExecutionStatus(String status){
+         try {
+            if(SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType)) {
+             return ScheduleRepository.getSchedulesByExecutionStatus(status);
+            }
+        }catch(ApplicationException e){
+            ErrorLogService.logException(e);
+            throw new ApplicationException(e.getMessage());
+        }
+    }
     
     //Execution automatique
  public static void runDueSchedules() {

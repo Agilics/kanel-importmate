@@ -2,7 +2,7 @@ body {
   font-family: Inter;
   background: #e5e7eb;
 }
-.main-sub{
+.main-sub {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
@@ -10,31 +10,30 @@ body {
   align-items: flex-start;
   align-content: flex-start;
 }
-.title{
+.title {
   width: 475px;
   height: 36px;
   opacity: 1;
   font-family: Inter;
   font-weight: 700;
   font-style: Bold;
-  font-size: 30px; 
+  font-size: 30px;
   line-height: 36px;
   letter-spacing: 0%;
-  margin-bottom:12px;
+  margin-bottom: 12px;
 }
-.subtitle{ 
+.subtitle {
   width: 475;
-height: 24; 
-opacity: 1;
-top: 44px;
+  height: 24;
+  opacity: 1;
+  top: 44px;
 
-font-weight: 400;
-font-style: Regular;
-font-size: 16px;
-leading-trim: NONE;
-line-height: 24px;
-letter-spacing: 0%;
-
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 16px;
+  leading-trim: NONE;
+  line-height: 24px;
+  letter-spacing: 0%;
 }
 /* Schedule Config Card */
 .card {
@@ -82,7 +81,7 @@ letter-spacing: 0%;
   color: #4b5563;
 }
 .btn-header {
-  gap: 10px 50px ;
+  gap: 10px 50px;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
@@ -96,9 +95,9 @@ letter-spacing: 0%;
 }
 
 /*Add the class name below to the lightning-icon element.*/
- 
-.icons{
-   width: 14px;
+
+.icons {
+  width: 14px;
   height: 16px;
   margin: -10px 12px 0 0;
   --slds-c-icon-color-foreground-default: #ffffff;
@@ -109,7 +108,7 @@ letter-spacing: 0%;
 
 /*Add the class name below to the lightning-icon element.*/
 .custom-icon-play {
-  --slds-c-icon-color-background: #16a34a; 
+  --slds-c-icon-color-background: #16a34a;
 }
 
 /*Add the class name below to the lightning-icon element.*/
@@ -252,7 +251,7 @@ lightning-input .time-input {
   --slds-c-icon-color-background: #eff6ff;
   width: 16px;
   height: 16px;
-  margin:0 0 0 -12px;
+  margin: 0 0 0 -12px;
   opacity: 1;
 }
 
@@ -302,21 +301,20 @@ li {
 }
 .btn {
   display: flex;
-  justify-content:center;
-  align-items:center;
-  color: #ffffff; 
-  border: none;   
+  justify-content: center;
+  align-items: center;
+  color: #ffffff;
+  border: none;
   text-align: center;
   cursor: pointer;
   font-weight: 500;
   font-style: Medium;
   font-size: 16px;
-  line-height: 100%; 
+  line-height: 100%;
   width: 180.3125px;
   height: 50px;
-  border-radius: 8px; 
+  border-radius: 8px;
   opacity: 1;
-
 }
 
 .btn-primary {
@@ -334,20 +332,20 @@ li {
   --slds-c-icon-color-foreground: #ffffff;
   --slds-c-icon-color-background: #1e40af;
 }
-.box{
-display: flex;
-flex-direction: column;
-flex-wrap: wrap;
-justify-content: flex-start;
-align-items: flex-start;
-align-content: flex-start;
+.box {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: flex-start;
+  align-content: flex-start;
 }
 /* custom padding */
 .px-2 {
   padding: 6rem 6rem 0 6rem;
 }
-.px-3{
-  padding:0.8rem 6rem 6rem;
+.px-3 {
+  padding: 0.8rem 6rem 6rem;
 }
 .p-3 {
   padding: 6rem 6rem 2.3rem 6rem;
@@ -358,9 +356,9 @@ align-content: flex-start;
 .px-1 {
   padding: 0 0 2px 2.7rem;
 }
-.pb-1{
+.pb-1 {
   padding: 10px 1.3rem 21px 6rem;
-  gap:10px 3rem;
+  gap: 10px 3rem;
 }
 
 .p-1 {

@@ -2,7 +2,7 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 10-14-2025
+ * @last modified on  : 11-07-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
  
@@ -67,11 +67,21 @@ public with sharing class ScheduleController {
     public static List<Schedule__c> getSchedulesByProjectName(String name){
         return ScheduleService.getSchedulesByProjectName(name);
     }
- 
+    
+    
+    
+    /**
+     * Recherche les planifications par le statut d'éxécution
+    */
+    public static List<Schedule__c> getSchedulesByExecutionStatus(String status){
+      return ScheduleService.getSchedulesByExecutionStatus(status);
+    }
+
     //supprimer planification par l'id
     @AuraEnabled
     public static void deleteSchedule(Id scheduleId) {
         ScheduleService.deleteScheduleById(scheduleId);
     }
+
 
 }
