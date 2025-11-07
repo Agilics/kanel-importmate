@@ -24,60 +24,70 @@ export default class ScheduleJobsComponent extends LightningElement {
   @wire(getSchedulesByExecutionStatus, { executionStatus: "$selectedStatus" })
   wiredSchedulesByStatus({ error, data }) {
     if (data) {
-      this.schedules = data.map((sch) => ({
-        //mapping entre les Objets de Salesforce et  la variable schedule
-        id: sch.Id,
-        name: sch.Name,
-        project: sch.Project__r?.Name,
-        target: sch.Project__r?.Target_Object__c,
-        status: sch.ImportExecutions__r?.Status__c,
-        nextRun: sch.NextRun__c,
-        frequency: sch.Frequency__c
-      }));
-      this.error = undefined;
+      this.schedules = data.map((sch) => {
+        const status = sch.ImportExecutions__r?.Status__c || "Unknown";
+        const isActive = status === "Active";
+
+        return {
+          id: sch.Id,
+          projectName: sch.Project__r?.Name,
+          target: sch.Project__r?.Target_Object__c,
+          frequency: sch.Frequency__c,
+          nextRun: sch.NextRun__c,
+          lastExecution: sch.LastExecution__c || "—",
+          totalRecord: sch.TotalRecord__c || 0,
+          hasFailRecord: sch.FailRecord__c > 0,
+          failRecord: sch.FailRecord__c || 0,
+          status,
+          badgeStatusClass: `${isActive ? "badge-success" : "badge-paused"}`,
+          iconAction: isActive ? "utility:pause" : "utility:play"
+        };
+      });
     } else if (error) {
-      this.error = error;
-      //en cas d'erreur on affiche un message dans un toast
       this.showToast("Error", error?.body?.message, "error");
       this.schedules = [];
     }
   }
 
-  //Récupérer la liste des planifications dans une tableau
-  @wire(getSchedulesByProjectName, { projectName: "$projectName" })
-  wireAllSchedulesByProjectName({ error, data }) {
-    if (data) {
-      //on récupère la liste de planifications par le nom du projet si le champs de recherche est vide il retourne 200 enregistrements de Planifications
-      this.schedules = data.map((sch) => ({
-        //mapping entre les Objets de Salesforce et  la variable schedule
+  //Récupérer la liste des planifications dans une tableau 
+@wire(getSchedulesByProjectName, { projectName: "$projectName" })
+wireAllSchedulesByProjectName({ error, data }) {
+  if (data) {
+    // On récupère la liste de planifications par le nom du projet
+    // Si le champ de recherche est vide, il retourne 200 enregistrements
+    this.schedules = data.map((sch) => {
+      const exec = sch.ImportExecutions__r || {};
+      const status = exec.Status__c || "Paused";
+      const failRecord = parseInt(exec.FailRecord__c || 0, 10);
+
+      return {
         id: sch.Id,
-        projectName: sch.Project__r?.Name,
-        target: sch.Project__r?.Target_Object__c,
-        status: sch.ImportExecutions__r?.Status__c, //Status d'éxécution
-        nextRun: sch.NextRun__c,
-        frequency: sch.Frequency__c,
-        totalRecord: sch.ImportExecutions__r.TotalRecords__c,
-        failRecord: sch.ImportExecutions__r.FailRecord__c,
-        //on récupére le nom de l'icône sf en fonction du status d'éxécution
-        iconAction:
-          String.valueOf(sch.ImportExecutions__r.Status__c) === "Active"
-            ? "utility:pause "
-            : "utility:play",
-        lastExecute: this.getLastExecution(sch.ImportExecutions__r.EndTime),
-        //on récupére la classe  css du badge en fonction du status d'éxécution
+        projectName: sch.Project__r?.Name || "",
+        target: sch.Project__r?.Target_Object__c || "",
+        status: status, // Statut d'exécution
+        nextRun: sch.NextRun__c || "",
+        frequency: sch.Frequency__c || "",
+        totalRecord: exec.TotalRecords__c || 0,
+        failRecord: failRecord,
+        // Icône selon le statut
+        iconAction: status === "Active" ? "utility:pause" : "utility:play",
+        // Dernière exécution
+        lastExecute: this.getLastExecution(exec.EndTime),
+        // Classe CSS du badge selon le statut
         badgeStatusClass:
-          String.valueOf(sch.ImportExecutions__r.Status__c) === "Active"
-            ? "status-badge active-status "
+          status === "Active"
+            ? "status-badge active-status"
             : "status-badge paused-status",
-        //vérifie si on a au moins un échec d'importation
-        hasFailRecord:
-          parseInt(sch.ImportExecutions__r.FailRecord__c) > 0 ? true : false
-      }));
-    } else if (error) {
-      //en cas d'erreur on affiche un message dans un toast
-      this.showToast("Error", error?.body?.message, "error");
-    }
+        // Indicateur d'échec d'import
+        hasFailRecord: failRecord > 0
+      };
+    });
+  } else if (error) {
+    // En cas d'erreur, on affiche un toast
+    this.showToast("Error", error?.body?.message || "Erreur inconnue", "error");
   }
+}
+
 
   //Récupération des valeurs de la liste de sélection de Status d'éxécution
   @wire(getPickListValues, {

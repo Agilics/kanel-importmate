@@ -6,7 +6,7 @@ import getPickListValues from "@salesforce/apex/ScheduleController.getPickListVa
 export default class ScheduleCreatorComponent extends LightningElement {
   @track executionDate;
   @api projectId;
-
+  nextExecution;
   @track nextRun;
   @track picklistValues = []; // list of frequency  DAILY | WEEKLY | MONTHLY
   @track selectedFrequency = "Daily";
