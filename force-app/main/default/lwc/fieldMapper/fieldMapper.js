@@ -5,14 +5,18 @@ import fetchFields from '@salesforce/apex/FieldMappingController.fetchFields';
 import loadMappings from '@salesforce/apex/FieldMappingController.loadMappings';
 import saveMappingsJson from '@salesforce/apex/FieldMappingController.saveMappingsJson';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { NavigationMixin } from 'lightning/navigation';
 
-export default class FieldMapper extends LightningElement {
+export default class FieldMapper extends NavigationMixin(LightningElement){
   @api sourceColumnsCsv;   
   @api version;            
 
   _preselectedProjectId = '';
   _preselectedTargetObject = '';
   _appliedPreselect = false;
+  @api preselectedProjectName = '';   
+@api currentStep = '';              
+
 
   @api
   set preselectedProjectId(v) {
@@ -42,25 +46,6 @@ export default class FieldMapper extends LightningElement {
   @track hasStartedMapping = false;
   @track lookupFieldsByObject = {}; 
 
-  /** ===== Lifecycle ===== */
-  connectedCallback() {
-    this.versionInput = this.version || '';
-
-    if (this.sourceColumnsCsv) {
-      this.initialSourceColumns = this.sourceColumnsCsv
-        .split(',')
-        .map((c) => c.trim())
-        .filter(Boolean);
-    } else {
-      this.initialSourceColumns = [];
-    }
-    this.availableSourceColumns = [...this.initialSourceColumns];
-
-    this.initMappings();
-    this.loadProjects().then(() => this.tryApplyPreselection());
-    this.loadAvailableObjects();
-  }
-
   /** ===== Getters ===== */
   get projectOptions() {
     return (this.projects || []).map((p) => ({
@@ -83,19 +68,46 @@ export default class FieldMapper extends LightningElement {
   }
 
   /** ===== Data loads ===== */
-  async loadProjects() {
-    try {
-      const result = await fetchProjects();
-      this.projects = (result || []).map((p) => ({
-        id: p.id,
-        name: p.name,
-        targetObject: p.targetObject
-      }));
-    } catch (error) {
-      console.error('Error loading projects:', error);
-      this.projects = [];
-    }
+
+async loadProjects() {
+  try {
+    const result = await fetchProjects();
+    this.projects = (result || []).map(p => ({
+      id:           p.id || p.Id,
+      name:         p.name || p.Name,
+      targetObject: p.targetObject || p.TargetObject || p.Target_Object__c
+    })).filter(p => p.id && p.name);
+    this.tryApplyPreselection();       
+  } catch (e) {
+    this.projects = [];
   }
+}
+
+async tryApplyPreselection() {
+  if (this._appliedPreselect) return;
+  if (!Array.isArray(this.projects) || !this.projects.length) return;
+
+  let project = null;
+  if (this._preselectedProjectId) {
+    project = this.projects.find(p => p.id === this._preselectedProjectId);
+  }
+  if (!project && this.preselectedProjectName) {
+    const want = this.preselectedProjectName.toLowerCase();
+    project = this.projects.find(p => (p.name || '').toLowerCase() === want);
+  }
+  if (!project) return;
+
+  this.selectedProjectId    = project.id;
+  this.selectedTargetObject = this._preselectedTargetObject || project.targetObject || '';
+
+  this.projects = [project];          
+  await this.loadTargetFields();      
+  this.updateMappedSources();
+
+  this._appliedPreselect = true;
+}
+
+
 
   async loadAvailableObjects() {
     try {
@@ -128,32 +140,7 @@ export default class FieldMapper extends LightningElement {
     }
   }
 
-  /** ===== Preselection ===== */
-  async tryApplyPreselection() {
-    if (this._appliedPreselect) return;
-    if (!this._preselectedProjectId) return;
-    if (!Array.isArray(this.projects) || this.projects.length === 0) return;
 
-    const project = this.projects.find((p) => p.id === this._preselectedProjectId);
-    if (!project) return;
-
-    this.selectedProjectId = project.id;
-    this.selectedTargetObject = this._preselectedTargetObject || project.targetObject || '';
-
-    this.projects = [project];
-
-    await this.loadTargetFields();
-    this.updateMappedSources();
-    this._appliedPreselect = true;
-
-    this.dispatchEvent(
-      new ShowToastEvent({
-        title: 'Project preselected',
-        message: `Using "${project.name}" for field mapping.`,
-        variant: 'success'
-      })
-    );
-  }
 
   /** ===== Helpers ===== */
   initMappings() {
@@ -191,8 +178,6 @@ export default class FieldMapper extends LightningElement {
     });
 
     this.targetFields = newTargetFields;
-
-    // Nudge reactivity
     this.mappings = this.mappings ? [...this.mappings] : [];
     this.availableSourceColumns = this.availableSourceColumns ? [...this.availableSourceColumns] : [];
   }
@@ -246,7 +231,6 @@ export default class FieldMapper extends LightningElement {
         const options = (fields || []).map((f) => ({ label: f.label, value: f.apiName }));
         this.lookupFieldsByObject = { ...this.lookupFieldsByObject, [lookupObject]: options };
       } catch (error) {
-        // eslint-disable-next-line no-console
         console.error('Error fetching lookup fields for', lookupObject, error);
         this.lookupFieldsByObject = { ...this.lookupFieldsByObject, [lookupObject]: [] };
       }
@@ -432,7 +416,6 @@ export default class FieldMapper extends LightningElement {
 
       this.toast('Loaded', 'Saved mappings applied.', 'success');
     } catch (error) {
-      // eslint-disable-next-line no-console
       console.error('Error loading saved mappings:', error);
       this.toast('Error', 'Failed to load saved mappings.', 'error');
     }
@@ -456,5 +439,91 @@ export default class FieldMapper extends LightningElement {
     })
   );
 }
+
+
+
+  
+
+ 
+  // Re-usable seed helper
+  _seedSourcesFromCsv(csv) {
+    const cols = (csv || '')
+      .split(',')
+      .map(c => c.trim())
+      .filter(Boolean);
+    this.initialSourceColumns = cols;
+    this.availableSourceColumns = [...cols];
+  }
+
+  // Apply navigation params on top of any @api defaults (once)
+  _tryApplyNavState() {
+    if (this._navStateApplied) return;
+    const projectsReady = Array.isArray(this.projects) && this.projects.length >= 0;
+
+    if (!projectsReady) return; // wait until projects load
+
+    const { projId, tobj, srcCols, ver } = this._navState;
+
+    if (srcCols) {
+      this._seedSourcesFromCsv(srcCols);
+    } else if (this.initialSourceColumns.length === 0 && this.sourceColumnsCsv) {
+      this._seedSourcesFromCsv(this.sourceColumnsCsv);
+    }
+
+    if (ver) this.versionInput = ver;
+    this._preselectedProjectId = projId || '';
+    this._preselectedTargetObject = tobj || '';
+
+    this._navStateApplied = true;
+    this.tryApplyPreselection();
+  }
+
+
+
+connectedCallback() {
+    this.versionInput = this.version || '';
+
+    const qs = new URLSearchParams(window.location.search);
+    this._navState = {
+      projId : qs.get('c__projId')  || '',
+      tobj   : qs.get('c__tobj')    || '',
+      srcCols: qs.get('c__srcCols') || '',
+      ver    : qs.get('c__ver')     || ''
+    };
+
+    const csv = this._navState.srcCols || this.sourceColumnsCsv || '';
+    this.initialSourceColumns = csv
+      ? csv.split(',').map(s => s.trim()).filter(Boolean)
+      : [];
+    this.availableSourceColumns = [...this.initialSourceColumns];
+
+    this.initMappings();
+    this.loadProjects().then(() => {
+      this._applyNavStateOnce();         
+      this.tryApplyPreselection();        
+    });
+    this.loadAvailableObjects();
+  }
+
+  async _applyNavStateOnce() {
+    if (this._navApplied) return;
+    const { projId, tobj } = this._navState;
+    if (!projId || !Array.isArray(this.projects) || !this.projects.length) return;
+
+    const proj = this.projects.find(p => p.id === projId);
+    if (!proj) return;
+
+    this.selectedProjectId    = proj.id;
+    this.selectedTargetObject = proj.targetObject || tobj || '';
+    this.projects = [proj];
+
+    await this.loadTargetFields();  
+    this.updateMappedSources();
+
+    this._navApplied = true;
+  }
+
+
+
 
 }

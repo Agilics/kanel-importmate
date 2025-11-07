@@ -16,9 +16,18 @@ export default class MainComponent extends LightningElement {
   @track mappingHeadersCsv = '';
 @track mappingTargetObject = '';
 
-  @track recentProject;
+  //paramètres pour la création de projet
 
+  isLoading = false;
+  objectList = [];
+  projectName = "";
   @track selectProject = [];
+  description = "";
+  targetObjet = "";
+  projectId;
+  project;
+  recentProject;
+  isProject;
 
   selectedFrequency; // paramètre pour la fréquence sélectionnée
   showSchedule = false;
@@ -95,42 +104,75 @@ async nagivateToSelectdDataSource(event) {
   //Enregistrement d'un nouveau projet
   async handleCreateProject() {
     this.isLoading = true;
-    const selectedProjectId = event.detail;
+
+    // validation UI
+    if (!this.projectName || !this.description || !this.targetObject) {
+      this.showToast("Warning", "All fields are required.", "warning");
+      this.isLoading = false;
+      return;
+    }
 
     try {
-      const result = await searchProjetById({ id: selectedProjectId });
+      // 1) Vérifie l’existence du projet
+      const exists = await doesProjectExist({
+        name: this.projectName,
+        targetObject: this.targetObject
+      });
+
+      if (exists) {
+        this.showToast(
+          "Warning",
+          "This project already exists, please choose another name/target object.",
+          "warning"
+        );
+
+        /**
+         *  Réintialisation de tous les champs de texte | combo box
+         *  dans la section de création de projets
+         * */
+        this.template.querySelector("c-create-project-component").resetFields();
+        this.isLoading = false;
+
+        this.targetObject = "";
+        return;
+      }
+
+      // 2) Crée le projet si inexistant
+      const result = await saveProject({
+        name: this.projectName,
+        description: this.description,
+        targetObject: this.targetObject
+      });
+
       this.recentProject = result;
 
-      // ✅ toast to confirm selection
-      this.dispatchEvent(
-        new ShowToastEvent({
-          title: "Project selected",
-          message: `You have selected "${result?.Name}" to start.`,
-          variant: "success",
-          mode: "dismissable"
-        })
+      //Affichage du message toast de succès
+      this.showToast(
+        "Success",
+        `Record  with ID:\t${result.Id}  created  successfully !`,
+        "success"
       );
 
-      // ✅ proceed to Select Source step
-      this.handleNextStep();
-    } catch (error) {
-      this.dispatchEvent(
-        new ShowToastEvent({
-          title: "Error",
-          message: error?.body?.message || "Failed to load project",
-          variant: "error"
-        })
+      // Réintialisation de tous les champs de texte | combo box
+      this.template.querySelector("c-create-project-component").resetFields();
+
+      this.isLoading = false; //Désactivation du  loading spinner
+
+      //On passe à l'étape 2 Selection du source de données
+      this.handleNextStep(); // mise à jour du stepper
+    } catch (err) {
+      //Affichage d'un toast de message d'erreur
+      this.showToast(
+        "Error",
+        err?.body?.message || "An Error were occured!",
+        "error"
       );
     } finally {
       this.isLoading = false;
     }
   }
 
-  //Enregistrement d'un nouveau projet et récupération du projet récent
-  async handleCreateProject(event) {
-    this.recentProject = event.detail;
-  }
-
+  
   // Retour vers l'étape précédente du stepper
   handlePreviousStep() {
     if (this.currentStep > 1) {
@@ -169,6 +211,26 @@ async nagivateToSelectdDataSource(event) {
     ) {
       this.currentStep++; // Incrémentation du compteur
     }
+  }
+
+  //Masquer la section de création de projet
+  handleCancel() {
+    this.showCreatorSection = false;
+  }
+
+  //Mise à jour de la variable project name via le champs de texte
+  handleProjectNameChange(event) {
+    this.projectName = event.detail;
+  }
+
+  //Mise à jour de la variable description via le champs de texte
+  handleDescriptionChange(event) {
+    this.description = event.detail;
+  }
+
+  //Mise à jour de la variable target Object via le champs de selection
+  handleTargetObjectChange(event) {
+    this.targetObject = event.detail;
   }
 
   //affiche un flash message via un toast
@@ -298,34 +360,83 @@ async nagivateToSelectdDataSource(event) {
       this.isLoading = false;
     }
   }
-handleStartMapping(event) {
-  // 1) CSV headers (if CSV path)
-  this.mappingHeadersCsv = event?.detail?.headersCsv || '';
 
-  // 2) On passe toutes les informations de l'objet selectionnee
-  const rp = this.recentProject || {};
-  this.mappingTargetObject =
-    rp.TargetObject__c ??
-    rp.Target_Object__c ??
-    rp.Target__c ??
-    rp.targetObject ??
-    '';
+handleStartMapping(evt) {
+  const detail = (evt && evt.detail) || {};
 
-  // 3) On migre vers la page Field Mapper 
-  if (this.recentProject) {
+  try {
+    // 1) Headers from SOQL / CSV
+    this.mappingHeadersCsv = (detail.headersCsv || '').trim();
+
+    // 2) Target object: from event, else from project
+    const rp = this.recentProject || {};
+    const fromProject =
+      rp.TargetObject__c ??
+      rp.Target_Object__c ??
+      rp.Target__c ??
+      rp.targetObject ??
+      '';
+    this.mappingTargetObject =
+      (detail.targetObject || '').trim() || fromProject || '';
+
+    // 3) Determine effective project id
+    const effectiveProjectId = rp.Id || detail.projectId || '';
+
+    if (!effectiveProjectId) {
+      this.dispatchEvent(
+        new ShowToastEvent({
+          title: 'Pick a project',
+          message: 'Please select a project before continuing to mapping.',
+          variant: 'warning'
+        })
+      );
+      return;
+    }
+
+    // if we only had id in the event, make sure recentProject at least has Id
+    if (!rp.Id && detail.projectId) {
+      this.recentProject = { ...(this.recentProject || {}), Id: detail.projectId };
+    }
+
+    // 4) Move to step 3
     this.currentStep = 3;
-  } else {
+
+    // 5) Optional nice scroll
+    if (typeof window !== 'undefined' && typeof window.scrollTo === 'function') {
+      try {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch (e) {
+        // ignore scroll issues in Locker
+      }
+    }
+
+    // eslint-disable-next-line no-console
+    console.log('[Main] handleStartMapping OK', {
+      headersCsv: this.mappingHeadersCsv,
+      mappingTargetObject: this.mappingTargetObject,
+      projectId: effectiveProjectId
+    });
+  } catch (err) {
     this.dispatchEvent(
       new ShowToastEvent({
-        title: 'Select a project first',
-        message: 'Please pick a project before starting the mapping.',
-        variant: 'warning'
+        title: 'Open mapper failed',
+        message:
+          (err && err.message) ||
+          'Could not open the Field Mapping step.',
+        variant: 'error'
       })
     );
+    // eslint-disable-next-line no-console
+    console.error('[Main] handleStartMapping CATCH', err, detail);
   }
 }
+
+
+
 handleBackToStep2() {
   this.currentStep = 2;
 }
+
+
 
 }
