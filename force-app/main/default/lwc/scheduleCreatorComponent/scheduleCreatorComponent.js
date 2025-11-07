@@ -1,13 +1,14 @@
-import { LightningElement, track, wire } from "lwc";
+import { LightningElement, track,api, wire } from "lwc";
 import SCHEDULE_OBJECT from "@salesforce/schema/Schedule__c";
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 import FREQUENCY_FIELD from "@salesforce/schema/Schedule__c.Frequency__c";
 import getPickListValues from "@salesforce/apex/ScheduleController.getPickListValues";
 export default class ScheduleCreatorComponent extends LightningElement {
   @track executionDate;
-  @track projectId;
+  @api projectId;
+
   @track nextRun;
-  @track picklistValues = []; // liste of frequency  DAILY | WEEKLY | MONTHLY
+  @track picklistValues = []; // list of frequency  DAILY | WEEKLY | MONTHLY
   @track selectedFrequency = "Daily";
   @track showSchedule;
 
@@ -50,11 +51,14 @@ export default class ScheduleCreatorComponent extends LightningElement {
   //Enregistrement  d'une nouvelle planification
   async handleAddSchedule(event) {
     //Récupération de l'id du projet sélectionné
-    const id = this.recentProject?.Id;
+
     try {
+      if(!this.projectId){
+         this.showToast("Error", "Project no were found .Please select one!", "error");
+        return;
+      }
       if (!this.selectedFrequency || !this.nextRun) {
         this.showToast("Warning", "All fields are required.", "warning");
-        this.isLoading = false;
         return;
       }
       /**
@@ -88,8 +92,6 @@ export default class ScheduleCreatorComponent extends LightningElement {
         "error"
       );
     }
-    const show = true; // show datatable list
-    this.dispatchEvent(new CustomEvent("add", { detail: { show } }));
   }
 
   //cancel all actions

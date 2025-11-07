@@ -4,7 +4,7 @@ import getSchedulesByProjectName from "@salesforce/apex/ScheduleController.getSc
 import getSchedulesByExecutionStatus from "@salesforce/apex/ScheduleController.getSchedulesByExecutionStatus";
 import getPickListValues from "@salesforce/apex/ScheduleController.getPickListValues";
 import STATUS_FIELD from "@salesforce/schema/ImportExecution__c.Status__c";
-import IMPORTEXECUTION_OBJECT from "@salesforce/schema/Schedule__c";
+import IMPORTEXECUTION_OBJECT from "@salesforce/schema/ImportExecution__c";
 
 export default class ScheduleJobsComponent extends LightningElement {
   //schedule jobs list table name
@@ -19,7 +19,7 @@ export default class ScheduleJobsComponent extends LightningElement {
   @track projectName = "";
   @track schedules = [];
   @track selectedStatus = ""; // Status par défaut
-
+  @track picklistStatus =[]; //liste de statut
   //filtrer les planifications associées aux éxécution importé par le statut
   @wire(getSchedulesByExecutionStatus, { executionStatus: "$selectedStatus" })
   wiredSchedulesByStatus({ error, data }) {
@@ -79,14 +79,14 @@ export default class ScheduleJobsComponent extends LightningElement {
     }
   }
 
-  //Récupération des valeurs de la liste de sélection de Frequency__c(Daily | Weekly | Monthly)
+  //Récupération des valeurs de la liste de sélection de Status d'éxécution
   @wire(getPickListValues, {
     objectApiName: IMPORTEXECUTION_OBJECT.objectApiName,
     fieldApiName: STATUS_FIELD.fieldApiName
   })
   wiredPicklistValues({ error, data }) {
     if (data) {
-      this.picklistValues = Object.entries(data).map(([label, value]) => ({
+      this.picklistStatus = Object.entries(data).map(([label, value]) => ({
         label,
         value
       }));
@@ -104,6 +104,7 @@ export default class ScheduleJobsComponent extends LightningElement {
       );
     }
   }
+
   //calculer la date de la dernière éxécution qui est la diffèrence entre aujourd'hui et la fin de d'éxécution en datetime
   getLastExecution(endDate) {
     const today = Date.now();

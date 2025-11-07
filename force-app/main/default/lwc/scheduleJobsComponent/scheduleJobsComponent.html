@@ -9,7 +9,7 @@
   <div class="main px-2">
     <div class="card">
       <div class="head p-1">
-        <div class="card-header">
+        <div class="card-header  ">
           <!-- date icon -->
           <lightning-icon
             icon-name="utility:picklist_type"
@@ -18,15 +18,14 @@
             title="date_input"
           ></lightning-icon>
           <!-- date icon -->
-
           <h2 class="card-title">Schedule Jobs</h2>
-        </div>
-        <div class="filters">
+         </div>
+          <div class="btn-header pr-1" >
           <!-- search field -->
             <div class="search-field">
                <lightning-input
                 type="search"
-                label="Search import project"
+                placeholder="Search schedules..."
                 onchange={handleSearch}
               ></lightning-input>
             </div>
@@ -39,7 +38,8 @@
               name="status" 
               id="status"
               value={selectedStatus}
-              options={picklistValues}
+              options={picklistStatus}
+              placeholder="All Status"
               onchange={handleStatusChange}
             ></lightning-combobox>
           <!-- status filter -->
