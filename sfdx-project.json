@@ -14,5 +14,16 @@
   "sourceApiVersion": "61.0",
   "packageAliases": {
     "KANEL-IMPORTMATE": "0HogL0000000K3ZSAU"
+  },
+  "edition": "Developer",
+  "features": ["EnableSetPasswordInApi"],
+  "settings": {
+    "lightningExperienceSettings": {
+      "enableS1DesktopEnabled": true,
+      "enableLightningPreviewPref": true
+    },
+    "mobileSettings": {
+      "enableS1EncryptedStoragePref2": false
+    }
   }
 }

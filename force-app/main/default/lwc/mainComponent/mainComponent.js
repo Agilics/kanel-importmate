@@ -16,18 +16,9 @@ export default class MainComponent extends LightningElement {
   @track mappingHeadersCsv = '';
 @track mappingTargetObject = '';
 
-  //paramètres pour la création de projet
+  @track recentProject;
 
-  isLoading = false;
-  objectList = [];
-  projectName = "";
   @track selectProject = [];
-  description = "";
-  targetObjet = "";
-  projectId;
-  project;
-  recentProject;
-  isProject;
 
   selectedFrequency; // paramètre pour la fréquence sélectionnée
   showSchedule = false;
@@ -104,75 +95,42 @@ async nagivateToSelectdDataSource(event) {
   //Enregistrement d'un nouveau projet
   async handleCreateProject() {
     this.isLoading = true;
-
-    // validation UI
-    if (!this.projectName || !this.description || !this.targetObject) {
-      this.showToast("Warning", "All fields are required.", "warning");
-      this.isLoading = false;
-      return;
-    }
+    const selectedProjectId = event.detail;
 
     try {
-      // 1) Vérifie l’existence du projet
-      const exists = await doesProjectExist({
-        name: this.projectName,
-        targetObject: this.targetObject
-      });
-
-      if (exists) {
-        this.showToast(
-          "Warning",
-          "This project already exists, please choose another name/target object.",
-          "warning"
-        );
-
-        /**
-         *  Réintialisation de tous les champs de texte | combo box
-         *  dans la section de création de projets
-         * */
-        this.template.querySelector("c-create-project-component").resetFields();
-        this.isLoading = false;
-
-        this.targetObject = "";
-        return;
-      }
-
-      // 2) Crée le projet si inexistant
-      const result = await saveProject({
-        name: this.projectName,
-        description: this.description,
-        targetObject: this.targetObject
-      });
-
+      const result = await searchProjetById({ id: selectedProjectId });
       this.recentProject = result;
 
-      //Affichage du message toast de succès
-      this.showToast(
-        "Success",
-        `Record  with ID:\t${result.Id}  created  successfully !`,
-        "success"
+      // ✅ toast to confirm selection
+      this.dispatchEvent(
+        new ShowToastEvent({
+          title: "Project selected",
+          message: `You have selected "${result?.Name}" to start.`,
+          variant: "success",
+          mode: "dismissable"
+        })
       );
 
-      // Réintialisation de tous les champs de texte | combo box
-      this.template.querySelector("c-create-project-component").resetFields();
-
-      this.isLoading = false; //Désactivation du  loading spinner
-
-      //On passe à l'étape 2 Selection du source de données
-      this.handleNextStep(); // mise à jour du stepper
-    } catch (err) {
-      //Affichage d'un toast de message d'erreur
-      this.showToast(
-        "Error",
-        err?.body?.message || "An Error were occured!",
-        "error"
+      // ✅ proceed to Select Source step
+      this.handleNextStep();
+    } catch (error) {
+      this.dispatchEvent(
+        new ShowToastEvent({
+          title: "Error",
+          message: error?.body?.message || "Failed to load project",
+          variant: "error"
+        })
       );
     } finally {
       this.isLoading = false;
     }
   }
 
-  
+  //Enregistrement d'un nouveau projet et récupération du projet récent
+  async handleCreateProject(event) {
+    this.recentProject = event.detail;
+  }
+
   // Retour vers l'étape précédente du stepper
   handlePreviousStep() {
     if (this.currentStep > 1) {
@@ -211,26 +169,6 @@ async nagivateToSelectdDataSource(event) {
     ) {
       this.currentStep++; // Incrémentation du compteur
     }
-  }
-
-  //Masquer la section de création de projet
-  handleCancel() {
-    this.showCreatorSection = false;
-  }
-
-  //Mise à jour de la variable project name via le champs de texte
-  handleProjectNameChange(event) {
-    this.projectName = event.detail;
-  }
-
-  //Mise à jour de la variable description via le champs de texte
-  handleDescriptionChange(event) {
-    this.description = event.detail;
-  }
-
-  //Mise à jour de la variable target Object via le champs de selection
-  handleTargetObjectChange(event) {
-    this.targetObject = event.detail;
   }
 
   //affiche un flash message via un toast
