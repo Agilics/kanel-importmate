@@ -58,11 +58,13 @@ export default class ScheduleJobsComponent extends LightningElement {
           String.valueOf(sch.ImportExecutions__r.Status__c) === "Active"
             ? "utility:pause "
             : "utility:play",
+        lastExecute: this.getLastExecution(sch.ImportExecutions__r.EndTime),
         //on récupére la classe  css du badge en fonction du status d'éxécution
         badgeStatusClass:
           String.valueOf(sch.ImportExecutions__r.Status__c) === "Active"
             ? "status-badge active-status "
             : "status-badge paused-status",
+        //vérifie si on a au moins un échec d'importation
         hasFailRecord:
           parseInt(sch.ImportExecutions__r.FailRecord__c) > 0 ? true : false
       }));
@@ -72,28 +74,25 @@ export default class ScheduleJobsComponent extends LightningElement {
     }
   }
 
-
   //calculer la date de la dernière éxécution qui est la diffèrence entre aujourd'hui et la fin de d'éxécution en datetime
-  get lastExecution() {
-    this.schedules.forEach((item) => {
-      const today = Date.now();
-      const end = new Date(item.ImportExecutions__r.EndTime__c);
-      var days = this.calculateDays(end);
-      var monthDiff = this.getMonthDifference(end, today);
+  getLastExecution(endDate) {
+    const today = Date.now();
+    const end = new Date(endDate);
 
-      if (this.days < 1) {
-        //convertir en en heures
-        return parseInt(dateDifference / (1000 * 60 * 60)) + "\thours\tago";
-      } else if (days < 7) {
-        //convertir en semaine
-        return (
-          parseInt(dateDifference / (1000 * 60 * 60 * 24 * 7)) + "\tweeks\tago"
-        );
-      } else {
-        //convertir en mois
-        return parseInt(monthDiff) + "\tmonths\tago";
-      }
-    });
+    var days = this.calculateDays(end);
+    var weeks = this.getWeeksDifference(end);
+    var monthDiff = this.getMonthDifference(this.end, this.today);
+
+    if (this.days < 1) {
+      //convertir en en heures
+      return parseInt(this.days) + "\thours\tago";
+    } else if (weeks > 1 || this.days > 7) {
+      //convertir en semaine
+      return parseInt(this.weeks) + "\tweeks\tago";
+    } else {
+      //convertir en mois
+      return parseInt(this.monthDiff) + "\tmonths\tago";
+    }
   }
 
   //mettre à jour le statut en cas de changement sur le champs de selection
@@ -112,6 +111,16 @@ export default class ScheduleJobsComponent extends LightningElement {
     months -= d1.getMonth();
     months += d2.getMonth();
     return months <= 0 ? 0 : months;
+  }
+
+  //calculer la diffèrence de semaine entre aujourd'hui et la dernière date d'éxécution
+  getWeeksDifference(dt1) {
+    // Calculate the difference in milliseconds between dt2 and dt1
+    var diff = (Date.now().getTime() - dt1.getTime()) / 1000;
+    // Convert the difference from milliseconds to weeks by dividing it by the number of milliseconds in a week
+    diff /= 60 * 60 * 24 * 7;
+    // Return the absolute value of the rounded difference as the result
+    return Math.abs(Math.round(diff));
   }
 
   // calculer le nombre de jours depuis la dernière éxécution

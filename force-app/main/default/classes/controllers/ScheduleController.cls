@@ -43,11 +43,6 @@ public with sharing class ScheduleController {
       }
     }
 
-    //récupérer les planifications schedules
-    @AuraEnabled(cacheable = true)
-    public static List<Schedule__c> getAllSchedules(){
-       return ScheduleService.getAllSchedules();
-    }
 
 
    // récupérer la planification par l'id
@@ -64,18 +59,24 @@ public with sharing class ScheduleController {
 
     // récupérer la planification par le nom du projet
     @AuraEnabled(cacheable = true)
-    public static List<Schedule__c> getSchedulesByProjectName(String name){
+    public static List<ScheduleService.ScheduleWrapper> getSchedulesByProjectName(String name){
         return ScheduleService.getSchedulesByProjectName(name);
     }
     
-    
+    /**
+     * Récuperer les planification par l'éxécution d'importation
+     */
+    @AuraEnabled(cacheable = true)
+    public static List<ScheduleService.ScheduleWrapper> getSchedulesWithExecutions(){
+       return   ScheduleService.getSchedulesWithExecutions();
+    }
     
     /**
      * Recherche les planifications par le statut d'éxécution
     */
     @AuraEnabled(cacheable=true)
-    public static List<Schedule__c> getSchedulesByExecutionStatus(String status){
-      return ScheduleService.getSchedulesByExecutionStatus(status);
+    public static List<ScheduleService.ScheduleWrapper> getSchedulesByExecutionStatus(String status){
+      return ScheduleService.getSchedulesWithExecutionsByStatus(status);
     }
 
     //supprimer planification par l'id

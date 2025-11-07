@@ -8,7 +8,7 @@ import doesProjectExist from "@salesforce/apex/ImportProjectController.doesProje
 //importation méthodes depuis le Contrôleur
 import saveProject from "@salesforce/apex/ImportProjectController.saveProject";
 import getRecentsProjects from "@salesforce/apex/ImportProjectController.getRecentsProjects";
-import getAllSchedules from "@salesforce/apex/ScheduleController.getAllSchedules";
+ 
 export default class MainComponent extends LightningElement {
   @track showCreatorSection = false;
   title = "Imports Projects";
@@ -182,24 +182,7 @@ export default class MainComponent extends LightningElement {
     }
   }
 
-  // Récupération de tous les données de plannings
-  @wire(getAllSchedules)
-  wireAllSchedules(result) {
-    this.wiredSchedulesResult = result;
-    const { data, error } = result;
-    if (data) {
-      this.schedules = data.map((sch) => ({
-        id: sch.Id,
-        name: sch.Name,
-        project: sch.Project__r?.Name,
-        nextRun: sch.NextRun__c,
-        frequency: sch.Frequency__c
-      }));
-    } else if (error) {
-      this.showToast("Error", error?.body?.message, "error");
-    }
-  }
-
+   
   //passage à l'étape suivante du stepper
   handleNextStep() {
     if (

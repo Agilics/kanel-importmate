@@ -10,11 +10,21 @@ public with sharing class ScheduleService{
         DAILY ,
         WEEKLY ,
         MONTHLY
+    } 
+
+    // Classe wrapper pour contenir le schedule et ses importations d'executions
+    public class ScheduleWrapper {
+        @AuraEnabled
+        public Schedule__c schedule { get; set; } //attribut avec getters & setters
+        @AuraEnabled
+        public List<ImportExecution__c> importExecutions { get; set; }
+        
+        //constructeur par défaut
+        public ScheduleWrapper(){
+
+        }
     }
 
-    
-
-    
      /**
      * Mettre à jour et enregistrement  d'une planification  Schedule__c
      */
@@ -85,20 +95,34 @@ public with sharing class ScheduleService{
         }
 
     /**
-    *Récupérer toutes les planifications
+    *Récupérer toutes les planifications avec les éxécutions importés
     */
-    public static List<Schedule__c> getAllSchedules() {
+    public static List<ScheduleService.ScheduleWrapper>  getSchedulesWithExecutions() {
        
         try {  
             if(SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType)) {
-                return   ScheduleRepository.getAllSchedules();    
+                return   ScheduleRepository.getAllSchedulesWithExecutions();    
             }
-            return new List<Schedule__c>();
+            return new List<ScheduleService.ScheduleWrapper>();
         } catch (ApplicationException e) {
                 ErrorLogService.logException(e);
                 throw new ApplicationException(e.getMessage());
             }
-        }
+    }
+    /**
+     * Filter planifications par le statut d'éxécution d'importé
+     */
+      public static List<ScheduleService.ScheduleWrapper>  getSchedulesWithExecutionsByStatus(String status) {
+        try {  
+            if(SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType)) {
+                return   ScheduleRepository.getSchedulesByExecutionStatus(status);    
+            }
+            return new List<ScheduleService.ScheduleWrapper>();
+        } catch (ApplicationException e) {
+                ErrorLogService.logException(e);
+                throw new ApplicationException(e.getMessage());
+            }
+    }
 
     /**
      *Filtrer par fréquence (DAILY | WEEKLY | MONTHLY)
@@ -134,16 +158,16 @@ public with sharing class ScheduleService{
     /**
      * Recherche les planifications par le nom du projet
     */
-     public static List<Schedule__c> getSchedulesByProjectName(String name) {
+     public static List<ScheduleWrapper> getSchedulesByProjectName(String name) {
        try {
             if(SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType)) {
                 if(String.isNotBlank(name)) {
                     return  ScheduleRepository.getSchedulesByProjectName(name);     
-                } else { 
-                    return ScheduleRepository.getAllSchedules();
+                } else {
+                    return ScheduleRepository.getAllSchedulesWithExecutions();
                 }
             }
-            return new List<Schedule__c>();
+            return new List<ScheduleWrapper>();
         } catch (ApplicationException e) {
             ErrorLogService.logException(e);
             throw new ApplicationException(e.getMessage());
@@ -153,11 +177,12 @@ public with sharing class ScheduleService{
     /**
      * Recherche les planifications par le statut d'éxécution
      */
-    public static List<Schedule__c> getSchedulesByExecutionStatus(String status){
+    public static List<ScheduleWrapper> getSchedulesByExecutionStatus(String status){
          try {
             if(SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType)) {
              return ScheduleRepository.getSchedulesByExecutionStatus(status);
             }
+            return new List<ScheduleWrapper>();
         }catch(ApplicationException e){
             ErrorLogService.logException(e);
             throw new ApplicationException(e.getMessage());
