@@ -1,6 +1,9 @@
 import { LightningElement, track, wire } from "lwc";
 import getSchedulesByProjectName from "@salesforce/apex/ScheduleController.getSchedulesByProjectName";
 import getSchedulesByExecutionStatus from "@salesforce/apex/ScheduleController.getSchedulesByExecutionStatus";
+import getPickListValues from "@salesforce/apex/ScheduleController.getPickListValues";
+import STATUS_FIELD from "@salesforce/schema/ImportExecution__c.Status__c";
+import IMPORTEXECUTION_OBJECT from "@salesforce/schema/Schedule__c";
 
 export default class ScheduleJobsComponent extends LightningElement {
   //schedule jobs list table name
@@ -16,6 +19,7 @@ export default class ScheduleJobsComponent extends LightningElement {
   @track schedules = [];
   @track selectedStatus = ""; // Status par défaut
 
+  //filtrer les planifications associées aux éxécution importé par le statut
   @wire(getSchedulesByExecutionStatus, { executionStatus: "$selectedStatus" })
   wiredSchedulesByStatus({ error, data }) {
     if (data) {
@@ -74,6 +78,31 @@ export default class ScheduleJobsComponent extends LightningElement {
     }
   }
 
+  //Récupération des valeurs de la liste de sélection de Frequency__c(Daily | Weekly | Monthly)
+  @wire(getPickListValues, {
+    objectApiName: IMPORTEXECUTION_OBJECT.objectApiName,
+    fieldApiName: STATUS_FIELD.fieldApiName
+  })
+  wiredPicklistValues({ error, data }) {
+    if (data) {
+      this.picklistValues = Object.entries(data).map(([label, value]) => ({
+        label,
+        value
+      }));
+      console.log(data);
+    } else if (error) {
+      console.error(
+        "Erreur lors de la récupération des valeurs de picklist : ",
+        error
+      );
+      this.showToast(
+        "Error",
+        error?.body?.message ||
+          "Erreur lors de la récupération des valeurs des planifications",
+        "error"
+      );
+    }
+  }
   //calculer la date de la dernière éxécution qui est la diffèrence entre aujourd'hui et la fin de d'éxécution en datetime
   getLastExecution(endDate) {
     const today = Date.now();
@@ -131,4 +160,15 @@ export default class ScheduleJobsComponent extends LightningElement {
     let daysDifference = timeDifference / (1000 * 3600 * 24);
     return daysDifference;
   }
+
+  //affiche un flash message via un toast
+    showToast(title, message, variant) {
+      const event = new ShowToastEvent({
+        title: title,
+        message: message,
+        variant: variant,
+        mode: "dismissable"
+      });
+      this.dispatchEvent(event);
+    }
 }

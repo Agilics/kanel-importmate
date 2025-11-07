@@ -38,8 +38,7 @@ export default class ScheduleCreatorComponent extends LightningElement {
   }
 
   //Mise à jour de la valeur de selectedFrequency
-  //Mise à jour du champs de sélection de Frequency__c
-  handleSelectedFrequency(event) {
+  handleFrequencyChange(event) {
     this.selectedFrequency = event.target.value;
   }
 
@@ -52,9 +51,8 @@ export default class ScheduleCreatorComponent extends LightningElement {
   async handleAddSchedule(event) {
     //Récupération de l'id du projet sélectionné
     const id = this.recentProject?.Id;
-
     try {
-      if (!id || !this.selectedFrequency || !this.nextRun) {
+      if (!this.selectedFrequency || !this.nextRun) {
         this.showToast("Warning", "All fields are required.", "warning");
         this.isLoading = false;
         return;

@@ -24,7 +24,11 @@ body {
   background: #ffffff;
   border: 1px solid #e2e8f0;
 }
-
+/* header of card */
+.head {
+  display: flex;
+  justify-content: space-between;
+}
 /* header of card */
 .card-header {
   display: flex;
@@ -185,6 +189,26 @@ tbody td {
 .paused-status {
   background-color: #fef9c3;
   color: #854d0e;
+}
+.filters{
+  gap: 10px 20px;
+}
+/* search field */
+.search-field, .slds-p-around_medium .lgc-bg{
+  width: 256px;
+  height: 42px; 
+  opacity: 1;
+
+}
+/* status */
+lightning-combobox .status-combobox {
+  width: 487px;
+  height: 48px;
+  opacity: 1;
+  top: 28px;
+  margin: 0 0 20px 0;
+  --sds-c-input-radius-border: 8px;
+  border-width: 1px;
 }
 
 /* Action icons (edit, pause/play, delete) */

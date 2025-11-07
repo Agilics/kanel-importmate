@@ -6,17 +6,44 @@
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
-  <div class="main px-3">
+  <div class="main px-2">
     <div class="card">
-      <div class="card-header p-1">
-        <!-- date icon -->
-        <lightning-icon
-          icon-name="utility:picklist_type"
-          alternative-text="picklist_type"
-          class="custom-icon-groups icon-piclist_size"
-          title="date_input"
-        ></lightning-icon>
-        <h2 class="card-title">Schedule Jobs</h2>
+      <div class="head p-1">
+        <div class="card-header">
+          <!-- date icon -->
+          <lightning-icon
+            icon-name="utility:picklist_type"
+            alternative-text="picklist_type"
+            class="custom-icon-groups icon-piclist_size"
+            title="date_input"
+          ></lightning-icon>
+          <!-- date icon -->
+
+          <h2 class="card-title">Schedule Jobs</h2>
+        </div>
+        <div class="filters">
+          <!-- search field -->
+            <div class="search-field">
+               <lightning-input
+                type="search"
+                label="Search import project"
+                onchange={handleSearch}
+              ></lightning-input>
+            </div>
+          <!-- search field -->
+
+          <!-- status filter -->
+            <!-- ComboBox for Select Status -->
+            <lightning-combobox
+              class="status-combobox rounded-input"
+              name="status" 
+              id="status"
+              value={selectedStatus}
+              options={picklistValues}
+              onchange={handleStatusChange}
+            ></lightning-combobox>
+          <!-- status filter -->
+        </div>
       </div>
       <div class="card-content">
         <table role="grid" aria-label="Schedule Project Table">
@@ -53,7 +80,7 @@
                 </td>
                 <td class="next-run" key={schedule.Id}>{schedule.nextRun}</td>
                 <td class="last-execution" key={schedule.Id}>
-                  <span>{lastExecution}</span><br />
+                  <span>{schedule.lastExecution}</span><br />
                   <!-- total records on success -->
                   <template if:false={hasFailRecord}>
                     <span class="success-text">
@@ -68,7 +95,6 @@
                       Failed &bull; {schedule.failRecord} errors
                     </span>
                   </template>
-
                   <!-- failed records end -->
                 </td>
                 <td key={schedule.Id}>

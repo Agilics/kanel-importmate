@@ -8,7 +8,7 @@ import doesProjectExist from "@salesforce/apex/ImportProjectController.doesProje
 //importation méthodes depuis le Contrôleur
 import saveProject from "@salesforce/apex/ImportProjectController.saveProject";
 import getRecentsProjects from "@salesforce/apex/ImportProjectController.getRecentsProjects";
- 
+
 export default class MainComponent extends LightningElement {
   @track showCreatorSection = false;
   title = "Imports Projects";
@@ -182,7 +182,6 @@ export default class MainComponent extends LightningElement {
     }
   }
 
-   
   //passage à l'étape suivante du stepper
   handleNextStep() {
     if (
