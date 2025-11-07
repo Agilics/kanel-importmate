@@ -36,7 +36,14 @@
 
     <!-- SOQL -->
     <template if:true={showSOQL}>
-      <c-soql-builder onsoqlbuilt={handleSoqlBuilt}></c-soql-builder>
+    
+      <c-soql-builder
+      onsoqlbuilt={handleSoqlBuilt}
+  selected-project-id={currentProject.Id}
+  selected-project-name={currentProject.Name}
+  onstartmapping={handleStartMapping}>
+</c-soql-builder>
+
     </template>
   </div>
 </template>

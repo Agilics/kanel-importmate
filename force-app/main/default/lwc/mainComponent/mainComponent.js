@@ -360,34 +360,83 @@ async nagivateToSelectdDataSource(event) {
       this.isLoading = false;
     }
   }
-handleStartMapping(event) {
-  // 1) CSV headers (if CSV path)
-  this.mappingHeadersCsv = event?.detail?.headersCsv || '';
 
-  // 2) On passe toutes les informations de l'objet selectionnee
-  const rp = this.recentProject || {};
-  this.mappingTargetObject =
-    rp.TargetObject__c ??
-    rp.Target_Object__c ??
-    rp.Target__c ??
-    rp.targetObject ??
-    '';
+handleStartMapping(evt) {
+  const detail = (evt && evt.detail) || {};
 
-  // 3) On migre vers la page Field Mapper 
-  if (this.recentProject) {
+  try {
+    // 1) Headers from SOQL / CSV
+    this.mappingHeadersCsv = (detail.headersCsv || '').trim();
+
+    // 2) Target object: from event, else from project
+    const rp = this.recentProject || {};
+    const fromProject =
+      rp.TargetObject__c ??
+      rp.Target_Object__c ??
+      rp.Target__c ??
+      rp.targetObject ??
+      '';
+    this.mappingTargetObject =
+      (detail.targetObject || '').trim() || fromProject || '';
+
+    // 3) Determine effective project id
+    const effectiveProjectId = rp.Id || detail.projectId || '';
+
+    if (!effectiveProjectId) {
+      this.dispatchEvent(
+        new ShowToastEvent({
+          title: 'Pick a project',
+          message: 'Please select a project before continuing to mapping.',
+          variant: 'warning'
+        })
+      );
+      return;
+    }
+
+    // if we only had id in the event, make sure recentProject at least has Id
+    if (!rp.Id && detail.projectId) {
+      this.recentProject = { ...(this.recentProject || {}), Id: detail.projectId };
+    }
+
+    // 4) Move to step 3
     this.currentStep = 3;
-  } else {
+
+    // 5) Optional nice scroll
+    if (typeof window !== 'undefined' && typeof window.scrollTo === 'function') {
+      try {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch (e) {
+        // ignore scroll issues in Locker
+      }
+    }
+
+    // eslint-disable-next-line no-console
+    console.log('[Main] handleStartMapping OK', {
+      headersCsv: this.mappingHeadersCsv,
+      mappingTargetObject: this.mappingTargetObject,
+      projectId: effectiveProjectId
+    });
+  } catch (err) {
     this.dispatchEvent(
       new ShowToastEvent({
-        title: 'Select a project first',
-        message: 'Please pick a project before starting the mapping.',
-        variant: 'warning'
+        title: 'Open mapper failed',
+        message:
+          (err && err.message) ||
+          'Could not open the Field Mapping step.',
+        variant: 'error'
       })
     );
+    // eslint-disable-next-line no-console
+    console.error('[Main] handleStartMapping CATCH', err, detail);
   }
 }
+
+
+
 handleBackToStep2() {
   this.currentStep = 2;
 }
+
+
 
 }
