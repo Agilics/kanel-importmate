@@ -73,6 +73,7 @@ public with sharing class ScheduleController {
     /**
      * Recherche les planifications par le statut d'éxécution
     */
+    @AuraEnabled(cacheable=true)
     public static List<Schedule__c> getSchedulesByExecutionStatus(String status){
       return ScheduleService.getSchedulesByExecutionStatus(status);
     }

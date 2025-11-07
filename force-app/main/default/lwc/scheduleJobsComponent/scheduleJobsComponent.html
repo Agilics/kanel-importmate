@@ -28,74 +28,95 @@
             </tr>
           </thead>
           <tbody>
-            <!-- schedules -->
+            <!-- schedules list-->
             <tr>
-              <td>
-                <div class="project-cell">
-                  <div
-                    class="project-icon icon-contact-import"
-                    aria-hidden="true"
-                    title="Contact Import"
-                  >
-                    <!-- People Icon -->
+              <template for:each={schedules} for:item="schedule">
+                <td key={schedule.Id}>
+                  <div class="project-cell">
+                    <div
+                      class="project-icon icon-contact-import"
+                      aria-hidden="true"
+                      title="Contact Import"
+                    >
+                      <!-- People Icon -->
+                    </div>
+                    <div class="project-info">
+                      <div class="project-name">{schedule.projectName}</div>
+                      <div class="project-sub" aria-label="target object">
+                        Target: {schedule.target}
+                      </div>
+                    </div>
                   </div>
-                  <div class="project-info">
-                    <div class="project-name">Contact Import</div>
-                    <div class="project-sub">Q4<br />Target: Contact</div>
-                  </div>
-                </div>
-              </td>
-              <td class="frequency">Daily at 9:00 AM</td>
-              <td class="next-run">Tomorrow 9:00 AM</td>
-              <td class="last-execution">
-                <span>2 hours ago</span><br />
-                <span class="success-text">Success &bull; 15,420 records</span>
-              </td>
-              <td>
-                <!--span class={jobStatusBadgeClass} aria-label="Active status"
-              ></span-->
-                <!-- job status badge -->
+                </td>
+                <td class="frequency" key={schedule.Id}>
+                  {schedule.frequency}
+                </td>
+                <td class="next-run" key={schedule.Id}>{schedule.nextRun}</td>
+                <td class="last-execution" key={schedule.Id}>
+                  <span>{lastExecution}</span><br />
+                  <!-- total records on success -->
+                  <template if:false={hasFailRecord}>
+                    <span class="success-text">
+                      Success &bull; {schedule.totalRecord} records
+                    </span>
+                  </template>
+                  <!-- total records on success end -->
 
-                <span
-                  class="status-badge active-status"
-                  aria-label="Active status"
-                  >Active</span
+                  <!-- failed records -->
+                  <template if:true={schedule.hasFailRecord}>
+                    <span class="failed-text">
+                      Failed &bull; {schedule.failRecord} errors
+                    </span>
+                  </template>
+
+                  <!-- failed records end -->
+                </td>
+                <td key={schedule.Id}>
+                  <!-- job status badge -->
+                  <span
+                    class={schedule.badgeStatusClass}
+                    aria-label="Schedule status"
+                    >Active</span
+                  >
+                  <!-- job status badge end -->
+                </td>
+                <td
+                  key={schedule.Id}
+                  class="actions"
+                  role="gridcell"
+                  aria-label="Actions for Contact Import"
                 >
-                <!-- job status badge -->
-              </td>
-              <td
-                class="actions"
-                role="gridcell"
-                aria-label="Actions for Contact Import"
-              >
-                <!-- Edit Icon -->
-                <button aria-label="Edit Contact Import">
-                  <lightning-icon
-                    icon-name="utility:edit"
-                    alternative-text="edit"
-                    class="slds-icon_action"
-                    title="edit"
-                  ></lightning-icon>
-                </button>
-                <!-- Pause Icon -->
-                <button title="Pause" aria-label="Pause Contact Import">
-                  <lightning-icon
-                    icon-name="utility:pause"
-                    alternative-text="edit"
-                    class="slds-icon_action"
-                    title="edit"
-                  ></lightning-icon>
-                </button>
-                <!-- Delete Icon -->
-                <button title="Delete" aria-label="Delete Contact Import">
-                  <lightning-icon
-                    icon-name="utility:delete"
-                    alternative-text="delete"
-                    class="slds-icon_action"
-                    title="edit"
-                  ></lightning-icon>
-                </button>
-              </td>
+                  <!-- Edit Icon -->
+                  <button aria-label="Edit Contact Import">
+                    <lightning-icon
+                      icon-name="utility:edit"
+                      alternative-text="edit"
+                      class="slds-icon_action"
+                      title="edit"
+                    ></lightning-icon>
+                  </button>
+                  <!-- Pause / Play Icon -->
+                  <button title="Pause" aria-label="Pause Contact Import">
+                    <lightning-icon
+                      icon-name={schedule.iconAction}
+                      alternative-text="play | pause"
+                      class="slds-icon_action"
+                    ></lightning-icon>
+                  </button>
+                  <!-- Pause / Play Icon end -->
+
+                  <!-- Delete Icon -->
+                  <button title="Delete" aria-label="Delete Contact Import">
+                    <lightning-icon
+                      icon-name="utility:delete"
+                      alternative-text="delete"
+                      class="slds-icon_action"
+                      title="edit"
+                    ></lightning-icon>
+                  </button>
+                  <!-- Delete Icon end -->
+                </td>
+              </template>
             </tr>
           </tbody>
         </table>
