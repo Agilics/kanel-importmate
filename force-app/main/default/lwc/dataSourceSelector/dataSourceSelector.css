@@ -24,8 +24,8 @@ body {
 
 .cards {
   margin: 0;
-  display: flex;
-  gap: 52.1%; /* espace entre les cartes */
+  display: flex; /* espace entre les cartes */
+  flex-wrap: wrap;
 }
 
 .header {

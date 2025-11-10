@@ -3,7 +3,7 @@ body {
 }
 .card {
   box-sizing: border-box;
-  position: absolute;
+  position: relative;
   width: 512px;
   height: 330px;
   background: #ffffff;
@@ -49,10 +49,6 @@ body {
   align-items: center;
   justify-content: center;
   opacity: 1;
-  -webkit-border-radius: ;
-  -moz-border-radius: ;
-  -ms-border-radius: ;
-  -o-border-radius: ;
 }
 .box-icon-upload {
   background: #dbeafe;
