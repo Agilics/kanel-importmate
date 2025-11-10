@@ -310,7 +310,7 @@ handleStartMapping(event) {
     rp.Target__c ??
     rp.targetObject ??
     '';
-
+ 
   // 3) On migre vers la page Field Mapper 
   if (this.recentProject) {
     this.currentStep = 3;

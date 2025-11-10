@@ -177,7 +177,6 @@ export default class CsvUploader extends LightningElement {
       : ['Name', 'Email', 'Industry', 'Status', 'City'];
     const csv = `${headers.join(',')}\n`;
 
-    // Revoke previous URL (if any)
     if (this._lastObjectUrl) {
       URL.revokeObjectURL(this._lastObjectUrl);
       this._lastObjectUrl = null;
@@ -194,7 +193,6 @@ export default class CsvUploader extends LightningElement {
     a.setAttribute('download', 'csv_template.csv');
     a.setAttribute('target', '_self');
     a.click();
-    // Keep href; it will be replaced and previous URL revoked next time
   }
 
   handleExport() {
@@ -365,45 +363,63 @@ export default class CsvUploader extends LightningElement {
     reader.readAsText(file);
   }
 
-  parseCSV(csvText) {
-    const normalize = csvText.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-    const lines = normalize.split('\n');
-    if (!lines.length || (lines.length === 1 && lines[0].trim() === '')) {
-      return { columns: [], rows: [] };
-    }
+parseCSV(csvText) {
+  const normalize = csvText.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  const lines = normalize.split('\n');
 
-    const parseLine = (line) => {
-      const out = [];
-      let cur = '';
-      let inQuotes = false;
-      for (let i = 0; i < line.length; i++) {
-        const ch = line[i];
-        if (ch === '"') {
-          if (inQuotes && i + 1 < line.length && line[i + 1] === '"') {
-            cur += '"';
-            i++;
-          } else {
-            inQuotes = !inQuotes;
-          }
-        } else if (ch === ',' && !inQuotes) {
-          out.push(cur);
-          cur = '';
-        } else {
-          cur += ch;
-        }
-      }
-      out.push(cur);
-      return out;
-    };
-
-    // header
-    const header = parseLine(lines[0] || '');
-    const columns = header.map((c, i) => (c || '').trim() || `Column_${i + 1}`);
-
-    // rows
-    const rows = lines.slice(1).map((line, idx) => this.buildRow(parseLine(line), columns, idx));
-    return { columns, rows };
+  if (!lines.length || (lines.length === 1 && lines[0].trim() === '')) {
+    return { columns: [], rows: [] };
   }
+
+  // --- Detect delimiter: comma vs semicolon ---
+  const headerLine = lines[0] || '';
+  let delimiter = ',';
+  const commaCount = (headerLine.match(/,/g) || []).length;
+  const semiCount = (headerLine.match(/;/g) || []).length;
+  if (semiCount > commaCount) {
+    delimiter = ';';
+  }
+
+  const parseLine = (line) => {
+    const out = [];
+    let cur = ''; 
+    let inQuotes = false;
+
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+
+      if (ch === '"') {
+        // handle escaped quotes
+        if (inQuotes && i + 1 < line.length && line[i + 1] === '"') {
+          cur += '"';
+          i++;
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (ch === delimiter && !inQuotes) {
+        out.push(cur);
+        cur = '';
+      } else {
+        cur += ch;
+      }
+    }
+    out.push(cur);
+    return out;
+  };
+
+  // --- Header ---
+  const rawHeader = parseLine(headerLine);
+  const columns = rawHeader.map((c, i) => (c || '').trim() || `Column_${i + 1}`);
+
+  // --- Rows ---
+  const rows = lines.slice(1).map((line, idx) => {
+    const parsed = parseLine(line);
+    return this.buildRow(parsed, columns, idx);
+  });
+
+  return { columns, rows };
+}
+
 
   computeStatusClass(v) {
     const s = (v || '').toLowerCase();
