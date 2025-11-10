@@ -131,7 +131,7 @@ public with sharing class ScheduleServiceTest {
         //Perform test
         Test.startTest();
             String keyword = schedule.Project__r.Name;    // get project's name
-            List<Schedule__c> schedules = ScheduleService.getSchedulesByProjectName(keyword);   //search schedules by project Name   
+            List<ScheduleService.ScheduleWrapper> schedules = ScheduleService.getSchedulesByProjectName(keyword);   //search schedules by project Name   
         Test.stopTest();
         
         //THEN - ASSERTION

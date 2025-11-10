@@ -99,7 +99,7 @@ public with sharing class ScheduleRepositoryTest {
 
         //When 
         Test.startTest();
-         List<Schedule__c> result =  ScheduleRepository.getSchedulesByProjectName(expected);        
+         List<ScheduleService.ScheduleWrapper> result =  ScheduleRepository.getSchedulesByProjectName(expected);        
         Test.stopTest();
 
         //Then - Assertions
