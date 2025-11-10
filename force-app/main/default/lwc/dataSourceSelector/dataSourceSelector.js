@@ -1,7 +1,7 @@
 import { LightningElement, api } from "lwc";
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 export default class DataSourceSelector extends LightningElement {
-    //data source selector card's parameters for file Upload
+    //data source selector card's parameters for file Upload parameter
   uploadTitle = "File Upload";
   uploadSubtitle = "Import from CSV or Excel files";
   uploadTextButton = "Choose File Upload";
@@ -20,7 +20,7 @@ export default class DataSourceSelector extends LightningElement {
     }
   ];
 
-  //data source selector card's parameters for query builder
+  //data source selector card's parameters for query builder parameters
    queryContents = [
     {
       Id: 1,
