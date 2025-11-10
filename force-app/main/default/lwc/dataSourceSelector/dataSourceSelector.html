@@ -1,6 +1,6 @@
 <template>
   <div class="container">
- 
+    <!-- Selected project banner -->
     <template if:true={currentProject}>
       <h1 class="slds-text-align_center">Selected project: {projectName}</h1>
       <br />
@@ -21,26 +21,6 @@
           <p>Build your query interactively from Salesforce objects.</p>
         </div>
       </div>
-<<<<<<< HEAD
-    </template>-->
-
-    <!-- CSV -->
-    <template if:true={showCSV}>
-      <!-- pass the selected project object down -->
-      <!--
-        <c-csv-uploader
-        current-project={currentProject}
-        oncsvloaded={handleCsvLoaded}
-        ongotomapping={handleGoToMappingFromCsv}
-      >
-      </c-csv-uploader>
-      -->
-    </template>
-
-    <!-- SOQL -->
-    <!--
-      
-=======
     </template>
 
   <!-- CSV -->
@@ -55,7 +35,6 @@
 
 
     <!-- SOQL -->
->>>>>>> c521e35ecc0ed2c81e8f5f6eea48f7275f999e4d
     <template if:true={showSOQL}>
     
       <c-soql-builder
