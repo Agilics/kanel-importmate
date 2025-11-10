@@ -1,16 +1,10 @@
-body {
-  /*div*/
-  position: absolute;
-  width: 1120px;
-  height: 1517px;
-  left: 320px;
-  top: 0px;
-  border-radius: 0px;
-  background-color: #e5e7eb;
-  -webkit-border-radius: 0px;
-  -moz-border-radius: 0px;
-  -ms-border-radius: 0px;
-  -o-border-radius: 0px;
+.container {
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 2rem;
+  border-radius: 16px;
+  background-color: #ffffff;
+  box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.1);
 }
 
 .container {
@@ -29,31 +23,48 @@ body {
 }
 
 .header {
-  width: 1056px;
-  height: 68px;
-  opacity: 1;
-  top: 32px;
-  left: 32px;
-  margin: 0 0 0 24px;
-  font-family: "Inter";
-}
-.header-title {
-  width: 1056px;
-  height: 36px;
-  opacity: 1;
-  font-weight: 700;
-  font-style: Bold;
-  font-size: 30px;
-  line-height: 36px;
-  letter-spacing: 0%;
+  text-align: center;
+  margin-bottom: 2rem;
 }
 
-.header-subtitle {
-  font-weight: 400;
-  font-style: Regular;
-  font-size: 16px;
-  line-height: 24px;
-  letter-spacing: 0%;
+.subtitle {
+  font-size: 1rem;
+  color: #666;
+  margin-top: 8%;
+  text-align: justify;
+  font-weight: bolder;
+}
+
+.section-title {
+  margin-bottom: 1.5rem;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #333;
+  margin-left: 20%;
+}
+
+.cards {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+  margin-bottom: 2rem;
+}
+
+.card {
+  background: lightgray;
+  border-radius: 12px;
+  padding: 1.5rem;
+  width: 300px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.08);
+  cursor: pointer;
+  text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0px 6px 16px rgba(0, 0, 0, 0.15);
 }
 
 .automatic {
@@ -64,15 +75,10 @@ body {
   top: 40px;
 }
 
-/*database icon*/
-.db-icon {
-  /*Add the class name below to the lightning-icon element.*/
-  --slds-c-icon-color-foreground-default: #ea580c;
-  --slds-c-icon-color-background: #ffedd5;
+.file-icon {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="black" width="32" height="32" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>');
 }
 
-/*file upload icon*/
-.file-upload-icon {
-  --slds-c-icon-color-foreground-default: #dbeafe;
-  --slds-c-icon-color-background: #1e40af;
+.soql-icon {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="black" width="32" height="32" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="2"/><rect x="4" y="11" width="16" height="2"/><rect x="4" y="17" width="16" height="2"/></svg>');
 }

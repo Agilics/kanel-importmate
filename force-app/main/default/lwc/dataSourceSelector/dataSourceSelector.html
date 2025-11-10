@@ -1,10 +1,3 @@
-<!--
-  @description       : 
-  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
-  @group             : 
-  @last modified on  : 11-10-2025
-  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
--->
 <template>
 
     <!-- Selection -->
@@ -62,12 +55,18 @@
       </c-csv-uploader>
       
     </template>
-      
 
     <!-- SOQL -->
    
     <template if:true={showSOQL}>
-      <c-soql-builder onsoqlbuilt={handleSoqlBuilt}></c-soql-builder>
+    <c-soql-builder
+        project-target-object={projectTargetObject}
+        onsoqlbuilt={handleSoqlBuilt}
+        onstartmapping={handleStartMappingFromSoql}
+    ></c-soql-builder>
+
     </template>
     
 </template> 
+  </div>
+</template>
