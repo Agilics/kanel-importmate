@@ -9,7 +9,13 @@
    <template if:true={showSelection}>
       <div class="container">
          <div class="cards">
-
+                 <!-- header title -->
+          <div class="header">
+            <h1 class="header-title">Choose Data Source</h1>
+            <p class="header-subtitle">
+                Select how you want to import your data into Salesforce
+            </p>
+          </div>
             <!-- CARD FILE UPLOAD -->
             <div class="upload">
                <c-data-source-selector-card

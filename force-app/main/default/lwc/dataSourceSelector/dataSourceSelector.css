@@ -24,12 +24,12 @@ body {
   display: flex;
   width: 1056px;
   height: 330px; 
-  opacity: 1;  
+  opacity: 1;   
   top: 132px;
   left: 32px;
 }
 .query{
-  margin-left:35rem;
+  margin-left:34rem;
 }
 .header {
   width: 1056px;
