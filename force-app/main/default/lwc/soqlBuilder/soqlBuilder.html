@@ -4,16 +4,15 @@
     <aside class="left">
       <h2 class="panel-title">SOQL Query Builder</h2>
 
-      <!-- Select Object -->
+      <!-- Selected Object (read-only, from projectTargetObject) -->
       <div class="card">
-        <div class="section-title">Select Object</div>
-        <lightning-combobox
-          name="object"
+        <div class="section-title">Selected Object</div>
+        <lightning-input
+          type="text"
           value={selectedObject}
-          placeholder="Choose object..."
-          options={objectOptions}
-          onchange={handleObjectChange}
-        ></lightning-combobox>
+          disabled
+          class="selected-object-input"
+        ></lightning-input>
       </div>
 
       <!-- Select Fields -->
@@ -60,7 +59,6 @@
           onchange={handleOrderByChange}
         ></lightning-combobox>
 
-        <!-- Direction (ASC/DESC) -->
         <lightning-combobox
           label="Direction"
           value={orderDirection}
@@ -69,12 +67,28 @@
         ></lightning-combobox>
 
         <div class="btns-vertical">
-          <button class="btn-validate" onclick={handleValidate} disabled={isLoading}>
-            <lightning-icon icon-name="utility:check" size="x-small" class="btn-icon"></lightning-icon>
+          <button
+            class="btn-validate"
+            onclick={handleValidate}
+            disabled={isLoading}
+          >
+            <lightning-icon
+              icon-name="utility:check"
+              size="x-small"
+              class="btn-icon"
+            ></lightning-icon>
             Validate Query
           </button>
-          <button class="btn-preview" onclick={handlePreview} disabled={isLoading}>
-            <lightning-icon icon-name="utility:preview" size="x-small" class="btn-icon"></lightning-icon>
+          <button
+            class="btn-preview"
+            onclick={handlePreview}
+            disabled={isLoading}
+          >
+            <lightning-icon
+              icon-name="utility:preview"
+              size="x-small"
+              class="btn-icon"
+            ></lightning-icon>
             Preview Results
           </button>
         </div>
@@ -109,7 +123,11 @@
         <div class="title-row">
           <h3 class="section-title big">Condition Builder</h3>
           <button class="btn-add-condition" onclick={addCondition}>
-            <lightning-icon icon-name="utility:add" size="x-small" class="btn-icon-right"></lightning-icon>
+            <lightning-icon
+              icon-name="utility:add"
+              size="x-small"
+              class="btn-icon-right"
+            ></lightning-icon>
             Add Condition
           </button>
         </div>
@@ -152,7 +170,6 @@
                   onchange={updateCondJoiner}
                 ></lightning-combobox>
 
-                <!-- red delete icon (kept) -->
                 <lightning-button-icon
                   class="cond-trash"
                   icon-name="utility:delete"
@@ -166,11 +183,11 @@
         </div>
       </div>
 
-      <!-- Generated SOQL -->
+      <!-- Generated SOQL Query -->
       <div class="card card-fixed">
         <div class="title-row">
           <h3 class="section-title big">Generated SOQL Query</h3>
-        <div class="title-actions">
+          <div class="title-actions">
             <lightning-button-icon
               icon-name="utility:copy"
               alternative-text="Copy Query"
@@ -195,7 +212,9 @@
           <h3 class="section-title big">Query Results Preview</h3>
           <div class="meta">
             <template if:true={hasRows}>
-              <span class="found">found <strong>{foundCountText}</strong> records</span>
+              <span class="found">
+                found <strong>{foundCountText}</strong> records
+              </span>
               <a class="export" onclick={exportCsv}>Export</a>
             </template>
           </div>
@@ -229,22 +248,23 @@
           </table>
         </div>
 
-        <!-- Footer (total count + Continue button) -->
         <div class="results-footer">
           <div class="results-count">
             <span class="muted">{foundCountText}</span>
           </div>
 
-        <button class="btn-continue"
+          <button
+            class="btn-continue"
             onclick={handleContinue}
-            disabled={isContinueDisabled}>
-              <lightning-icon icon-name="utility:forward"
-                              size="x-small"
-                              class="btn-icon"></lightning-icon>
-                            Continue to Field Mapping
-         </button>
-
-
+            disabled={isContinueDisabled}
+          >
+            <lightning-icon
+              icon-name="utility:forward"
+              size="x-small"
+              class="btn-icon"
+            ></lightning-icon>
+            Continue to Field Mapping
+          </button>
         </div>
       </div>
     </main>
@@ -255,4 +275,6 @@
       <lightning-spinner alternative-text="Loading"></lightning-spinner>
     </div>
   </template>
+
+  <c-backbutton onback={handleBackToMain}></c-backbutton>
 </template>
