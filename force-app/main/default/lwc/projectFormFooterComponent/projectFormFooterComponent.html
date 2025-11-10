@@ -1,0 +1,33 @@
+<template>
+  <footer class="footer-container">
+    <div class="footer-separator "></div>
+    <div class="footer-actions">
+      <!-- Cancel Button -->
+      <button type="button" class="btn btn-secondary" onclick={handleCancel}>
+        <lightning-icon
+          icon-name="utility:back"
+          alternative-text="Cancel"
+          size="x-small"
+          title="Cancel"
+        ></lightning-icon>
+        <span>Cancel</span>
+      </button>
+
+      <!-- Save & Continue Button -->
+      <button
+        type="button"
+        class="btn btn-primary"
+        onclick={handleCreateProject}
+      >
+        <lightning-icon
+          class="icon-inline custom-icon-output"
+          icon-name="standard:output"
+          alternative-text="Save & Continue"
+          size="small"
+          title="Save & Continue"
+        ></lightning-icon>
+        <span>Save & Continue to Data Source</span>
+      </button>
+    </div>
+  </footer>
+</template>
