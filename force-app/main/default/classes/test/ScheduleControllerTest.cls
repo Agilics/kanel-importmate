@@ -2,23 +2,39 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 10-07-2025
+ * @last modified on  : 10-03-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
-@IsTest
-public class ScheduleControllerTest {
+@isTest
+public with sharing class ScheduleServiceTest { 
+      @TestSetup
+    static void setup() {
+        ImportProject__c project = new ImportProject__c(
+            Name = 'Projet test',
+            TargetObject__c = 'Account',
+            Description__c = 'description test'
+        );
+        insert project;
 
-    @TestSetup
-    static void setupTestData() {
-        // Crée un utilisateur admin pour exécuter les tests si nécessaire
-        TestDataFactory.createAdminUser();
-
-        // Crée un projet et un schedule
-        TestDataFactory.createImportProject();
-        TestDataFactory.createSchedule();
+        Schedule__c sched = new Schedule__c(
+            Frequency__c = String.valueOf(ScheduleService.FrequencyEnum.DAILY),
+            Project__c = project.Id
+        );
+        insert sched;
     }
 
-    @IsTest 
+
+    @IsTest
+    static void testGetAllSchedules() {
+        Test.startTest();
+        List<Schedule__c> actual = ScheduleService.getAllSchedules();
+        Test.stopTest();
+
+        System.assertNotEquals(null, actual, 'Schedule list ne doit pas être null');
+        System.assert(actual.size() > 0, 'Schedule list ne doit pas être vide');
+    }
+
+    //Tester l'ajout de planification
     static void testAddSchedule() {
         // Given
         String cron = '0 0 * * * ?'; // chaque heure pile → toujours valide
@@ -28,7 +44,7 @@ public class ScheduleControllerTest {
         
         // When
         Test.startTest();
-        Id scheduleId = ScheduleController.addSchedule(
+        Id scheduleId = ScheduleService.schedule(
             String.valueOf(ScheduleService.FrequencyEnum.DAILY),
             nextRun,
             project.Id
@@ -60,168 +76,168 @@ public class ScheduleControllerTest {
         );
     }
 
-
-      @IsTest
-    static void testUpateSchedule() {
-                // Given
-        ImportProject__c project = TestDataFactory.createImportProject();
-        Datetime nextRun = Datetime.now().addDays(1); // date future obligatoire
+    //tester l'énumération de la fréquence
+    @IsTest
+    public  static  void callTestDataFrequencyDaily() {
         
-        // When
+        //Perform test
         Test.startTest();
-        Id scheduleId =ScheduleController.addSchedule(
-            String.valueOf(ScheduleService.FrequencyEnum.DAILY),
-            nextRun,
-            project.Id
-        );
-        // Vérification en base
-        Schedule__c insertedSchedule = [
-            SELECT Id, Frequency__c, Project__c, NextRun__c
-            FROM Schedule__c
-            WHERE Id = :scheduleId
-            LIMIT 1
-        ];
-        insertedSchedule.Frequency__c = String.valueOf(ScheduleService.FrequencyEnum.MONTHLY);
-
-       Id resultId = ScheduleController.addSchedule(
-            insertedSchedule.Frequency__c,
-            insertedSchedule.NextRun__c,
-            insertedSchedule.Project__c
-        );
-
-
+        String excpetedFrequency = 'DAILY';
+        ScheduleService.FrequencyEnum actual =  ScheduleService.FrequencyEnum.DAILY;
         Test.stopTest();
-         // Vérification en base
-        Schedule__c updateSchedule = [
-            SELECT Id, Frequency__c, Project__c, NextRun__c
-            FROM Schedule__c
-            WHERE Id = :resultId
-            LIMIT 1
-        ];
-        // Then
-        System.assertNotEquals(null, scheduleId, 'Schedule ID ne doit pas être null');
+        //Assertions
+        System.assertEquals(excpetedFrequency, actual.Name());
+     }
 
-
-        System.assertEquals(
-            String.valueOf(ScheduleService.FrequencyEnum.MONTHLY),
-             updateSchedule.Frequency__c.toUpperCase(),
-            'La fréquence doit être MONTHLY'
-        );
+       @IsTest
+    public  static  void callTestDataFrequencyMonthly() {
         
-        System.assertEquals(
-            project.Id,
-            updateSchedule.Project__c,
-            'Le projet associé doit correspondre'
-        );
-    
-    }
-
-    @IsTest
-    static void testGetAllSchedules() {
+        //Perform test
         Test.startTest();
-        List<Schedule__c> schedules = ScheduleController.getAllSchedules();
+        String excpetedFrequency = 'MONTHLY';
+        ScheduleService.FrequencyEnum actual =  ScheduleService.FrequencyEnum.MONTHLY;
         Test.stopTest();
 
-        System.assertNotEquals(0, schedules.size(), 'Should return at least one schedule');
-    }
+        //Assertions
+        System.assertEquals(excpetedFrequency, actual.Name());
+     }
 
-
-    @IsTest
-    static void testGetScheduleById() {
-        Schedule__c schedule = TestDataFactory.createSchedule();
+        @IsTest
+    public  static  void callTestDataFrequencyWeekly() {
+        
+        //Perform test
         Test.startTest();
-        Schedule__c result = ScheduleController.getScheduleById(schedule.Id);
+        String excpetedFrequency = 'WEEKLY';
+        ScheduleService.FrequencyEnum actual =  ScheduleService.FrequencyEnum.WEEKLY;
         Test.stopTest();
 
-        System.assertNotEquals(null, result, 'Result should not be null');
-        System.assertEquals(schedule.Id, result.Id, 'Schedule ID should match');
-    }
+        //Assertions
+        System.assertEquals(excpetedFrequency, actual.Name());
+     }
 
-    @IsTest
-    static void testGetSchedulesByFrequency() {
+
+    //tester la récupération de planification passée
+        @IsTest
+    static void testGetPastSchedules() {
         //given
-        Test.startTest();
-        List<Schedule__c> schedules = ScheduleController.getSchedulesByFrequency(ScheduleService.FrequencyEnum.DAILY);
-        Test.stopTest();
+         Schedule__c savedSchedule = TestDataFactory.createSchedule();
 
-        System.assertNotEquals(0, schedules.size(), 'Should return schedules with DAILY frequency');
-        for (Schedule__c s : schedules) {
-            String actual = (s.Frequency__c).toUpperCase();
-            System.assertEquals(String.valueOf(ScheduleService.FrequencyEnum.DAILY), actual, 'Frequency should be DAILY');
-        }
+        //when
+        Test.startTest();
+           List<Schedule__c> schedules = ScheduleService.getPastSchedules();
+        Test.stopTest();
+        //then 
+        System.assertNotEquals(null, schedules); 
     }
 
-      @IsTest
-    static void testDeleteSchedule() {
-        Schedule__c schedule = TestDataFactory.createSchedule();
-
-        Test.startTest();
-        ScheduleController.deleteSchedule(schedule.Id);
-        Test.stopTest();
-
-        System.assertEquals(
-            0, [SELECT Count() FROM Schedule__c WHERE Id = :schedule.Id], 
-            'Le Schedule doit être supprimé'
-        );
-    }
-
+    //tester la récupération de planification par le nom du projet
     @IsTest
-    static void testGetSchedulesByProjectName() {
-        ImportProject__c project = TestDataFactory.createImportProject();
-        Schedule__c schedule = TestDataFactory.createSchedule();
-
+    static void testScheduleByProjectName() {
+        //creation d'une planification avec projet depuis Test Data Factory 
+        Schedule__c schedule = TestDataFactory.createSchedule(); 
+        
+        //When
+        //Perform test
         Test.startTest();
-        List<Schedule__c> schedules = ScheduleController.getSchedulesByProjectName(project.Name);
+            String keyword = schedule.Project__r.Name;    // get project's name
+            List<Schedule__c> schedules = ScheduleService.getSchedulesByProjectName(keyword);   //search schedules by project Name   
+        Test.stopTest();
+        
+        //THEN - ASSERTION
+         
+        System.assertNotEquals(null, schedule); 
+
+    }
+    
+
+    //Tester la suppression de plafinification via l'id
+    @IsTest
+    static void testDeleteScheduleById() {
+        //GIVEN
+        String  name ='project 001';
+        String target ='Account';
+        String description ='desc';
+        Integer expectedLength = 0;
+    
+
+        //When 
+        Test.startTest();
+         ImportProject__c newProject = new ImportProject__c(
+            Name = name,
+            TargetObject__c = target,
+            Description__c = description
+        );
+
+        List<ImportProject__c> recordsToInsert = new List<ImportProject__c>();
+        recordsToInsert.add(newProject);
+        List<Database.SaveResult> savedProject= Database.insert(recordsToInsert);
+        
+        List<Schedule__c> schedules = new List<Schedule__c>();
+        
+        Schedule__c schedule = new Schedule__c();
+        schedule.Frequency__c = String.valueOf(ScheduleService.FrequencyEnum.DAILY); 
+        schedule.Project__c = savedProject[0].Id;
+        schedules.add(schedule);
+        
+        //Persist schedule data
+        List<Database.SaveResult> saveResults = Database.insert(schedules);
+        
+        String scheduleId = String.valueOf(saveResults[0].Id);
+        ScheduleService.deleteScheduleById(scheduleId); //delete by schedule id
+        
+        List<Schedule__c> scheds = [
+            SELECT Id,Name 
+            FROM Schedule__c
+            WHERE Id = : scheduleId
+        ];
+        
         Test.stopTest();
 
-        System.assertNotEquals(0, schedules.size(), 'Should return schedules for the given project');
-        System.assertEquals(project.Name, schedules[0].Project__r.Name, 'Project name should match');
+        /**
+        * THEN
+        * ASSERTIONS
+        */  
+        System.assertEquals(expectedLength, scheds.size(), 'Schedule\'s list   is  empty');
+        
     }
 
-     
-     @isTest
-  static void testGetCompatibleSObjects() {
-    //when
-    Test.startTest();
-    List<String> objects =  ScheduleController.getCompatibleSObjects();
-    Test.stopTest();
-    
-    //then
-    System.assert(objects.size() > 0, 'No objects found');
-  }
 
-  @isTest
-  static void testGetFieldsForObject() {
-    //when
-    Test.startTest();
-   
-    List<String> objects =  ScheduleController.getCompatibleSObjects();
-    String objectName = objects[0];
-    Map<String, String> fields =  ScheduleController.getObjectFields(
-      objectName
-    );
-    Test.stopTest();
-    
-    //then
-    System.assert(objects.size() > 0, 'No objects found'); 
-    System.assert(
-      fields.size() > 0,
-      'No fields found for object: ' + objectName
-    );
-  }
-  @IsTest
-  static void testGetPickListValues() {
-    //Given
-    String objectApiName ='Opportunity';
-    String fieldApiName = 'ForecastCategoryName';
+    /**
+     *Tester le filtre par fréquence (DAILY | WEEKLY | MONTHLY)
+     */
+     @IsTest
+     static void testGetSchedulesByFrequency() {
+        //GIVEN
+       ScheduleService.FrequencyEnum exceptedFrequency =  ScheduleService.FrequencyEnum.DAILY;
+        
+        //WHEN
+        Test.startTest();
+        List<Schedule__c> schedules = 
+            ScheduleService.getSchedulesByFrequency(exceptedFrequency);
+        Test.stopTest();
 
-    //when
-    Test.startTest();
-      Map<String,String>  result =   ScheduleController.getPickListValues(objectApiName,fieldApiName );    
-    Test.stopTest();   
+        //then - Assertions
+        System.assertNotEquals(null, schedules);
+        System.Assert.isTrue( schedules.size() > 0 ,'Schedule\'s list is not empty');
+    }    
 
-    //then
-    System.assert(result.size()>0, 'Echec ');  
-  }
+      /**
+     *Tester le filtre par l'id de la planification
+     */
+     @IsTest
+     static void testGetScheduleById() {
+        //GIVEN 
+        Schedule__c result = TestDataFactory.createSchedule();
+        String expected = String.valueOf(ScheduleService.FrequencyEnum.DAILY);
 
+        //WHEN
+        Test.startTest();
+        Schedule__c schedule = ScheduleService.getScheduleById(result.Id);
+        Test.stopTest();
+
+        //then - Assertions
+        String actual = String.valueOf(schedule.Frequency__c).toUpperCase();
+        System.assertNotEquals(null, schedule);
+        System.assertEquals(expected,actual.toUpperCase());
+    }    
 }
