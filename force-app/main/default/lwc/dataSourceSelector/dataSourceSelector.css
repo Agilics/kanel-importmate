@@ -13,7 +13,7 @@ body {
   -o-border-radius: 0px;
 }
 
-.container{
+.container {
   padding: 24px;
   height: 900px;
   max-height: 1517px;
@@ -22,9 +22,9 @@ body {
   flex-wrap: wrap;
 }
 
-.cards{
+.cards {
   margin: 0;
-  display: flex; 
+  display: flex;
   gap: 52.1%; /* espace entre les cartes */
 }
 
@@ -56,7 +56,6 @@ body {
   letter-spacing: 0%;
 }
 
- 
 .automatic {
   width: 446px;
   height: 24px;

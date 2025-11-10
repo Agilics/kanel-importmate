@@ -2,7 +2,7 @@
   @description       : 
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
   @group             : 
-  @last modified on  : 10-27-2025
+  @last modified on  : 11-10-2025
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
@@ -47,13 +47,10 @@
     </header>
 
     <template if:true={currentStep}>
-      <template if:true={isStart} aria-label="section start">
+      <template if:true={isStart}>
         <!-- child here content-->
         <!-- show  recent imported project -->
-        <template
-          if:false={showCreatorSection}
-          aria-label="select project recent section"
-        >
+        <template if:false={showCreatorSection}>
           <c-import-project-recent-component
             onshow={openNewProject}
             onselectproject={nagivateToSelectdDataSource}
@@ -64,10 +61,7 @@
         <!-- end show  recent imported project -->
 
         <!-- project creator section -->
-        <template
-          if:true={showCreatorSection}
-          aria-label="creation project section"
-        >
+        <template if:true={showCreatorSection}>
           <c-create-project-component
             project-name={projectName}
             description={description}
@@ -86,7 +80,7 @@
       </template>
       <!-- Step 2 -->
       <!-- Step 2: Data source -->
-      <template if:true={isSelectSource} aria-label="select source section">
+      <template if:true={isSelectSource}>
         <c-data-source-selector
           onprevious={handlePreviousStep}
           onstartmapping={handleStartMapping}
@@ -96,10 +90,7 @@
       </template>
 
       <!-- Step 3: Full Field Mapper page -->
-      <template
-        if:true={isMappingAndTransformation}
-        aria-label="mapping & transformation section"
-      >
+      <template if:true={isMappingAndTransformation}>
         <c-field-mapper
           preselected-project-id={recentProject.Id}
           preselected-target-object={mappingTargetObject}
@@ -108,7 +99,7 @@
         >
         </c-field-mapper>
       </template>
-      <template if:true={isScheduling} aria-label="schedule's section">
+      <template if:true={isScheduling}>
         <c-schedule-creator-component
           project-id={recentProject.Id}
           show-schedule={showSchedule}

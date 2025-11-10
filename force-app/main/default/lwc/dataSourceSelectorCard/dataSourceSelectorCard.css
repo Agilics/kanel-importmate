@@ -1,4 +1,4 @@
-body{
+body {
   font-family: Inter;
 }
 .card {
@@ -24,14 +24,14 @@ body{
   align-items: center;
   justify-content: start;
   width: 446px;
-  height: 64px; 
+  height: 64px;
   opacity: 1;
   padding: 18px 0 10px 0;
   margin-left: -9px;
   top: 33px;
   left: 23px;
 }
-.content{
+.content {
   list-style: none;
   padding: 0;
   margin: 12px 0 24px;
@@ -49,10 +49,10 @@ body{
   align-items: center;
   justify-content: center;
   opacity: 1;
-  -webkit-border-radius:;
-  -moz-border-radius:;
-  -ms-border-radius:;
-  -o-border-radius:;
+  -webkit-border-radius: ;
+  -moz-border-radius: ;
+  -ms-border-radius: ;
+  -o-border-radius: ;
 }
 .box-icon-upload {
   background: #dbeafe;
@@ -74,13 +74,12 @@ body{
 }
 
 /*Add the class name below to the lightning-icon element.*/
-.custom-icon-database { 
- --slds-c-icon-color-foreground-default: #ea580c;
- --slds-c-icon-color-background: #ffedd5;
+.custom-icon-database {
+  --slds-c-icon-color-foreground-default: #ea580c;
+  --slds-c-icon-color-background: #ffedd5;
 }
 
-
-.title { 
+.title {
   font-weight: 700;
   font-style: Bold;
   font-size: 20px;
@@ -95,7 +94,7 @@ body{
   font-size: 16px;
   line-height: 24px;
   letter-spacing: 0%;
-  color: #4B5563;
+  color: #4b5563;
 }
 
 .support {
@@ -104,7 +103,7 @@ body{
   height: 24px;
   opacity: 1;
   border: none;
-  display: flex; 
+  display: flex;
 }
 
 /*Add the class name below to the lightning-icon element.*/
@@ -144,7 +143,7 @@ body{
   letter-spacing: 0%;
   text-align: center;
   top: 249px;
-  left: 33px; 
+  left: 33px;
 }
 
 /* bouton upload de fichier*/
