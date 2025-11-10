@@ -1,50 +1,6 @@
 <template>
   <div class="container">
-<<<<<<< HEAD
-    <!-- header title -->
-    <div class="header">
-      <h1 class="header-title">Choose Data Source</h1>
-      <p class="header-subtitle">
-        Select how you want to import your data into Salesforce
-      </p>
-    </div>
-
-    <div class="cards">
-      <!-- CARD FILE UPLOAD -->
-      <div class="upload">
-        <c-data-source-selector-card
-          contents={uploadContents}
-          title={uploadTitle}
-          subtitle={uploadSubtitle}
-          is-upload={isUpload}
-          current-project={currentProject}
-          oncardaction={handleCSV}
-        >
-        </c-data-source-selector-card>
-      </div>
-      <!-- END CARD FILE UPLOAD -->
-
-      <!-- CARD QUERY BUILDER -->
-      <div class="query">
-        <c-data-source-selector-card
-          contents={queryContents}
-          title={queryTitle}
-          subtitle={querySubTitle}
-          is-upload={isNotUpload}
-          current-project={currentProject}
-          oncardaction={handleSOQL}
-        >
-        </c-data-source-selector-card>
-      </div>
-      <!-- END CARD QUERY UPLOAD -->
-    </div>
-
-    <!--- OLD CODE I DON'T WHAT IT DOES.THAT'S WHY I COMMENT ITS -->
-
-    <!-- Selected project banner 
-=======
-    <!-- Selected project banner -->
->>>>>>> c521e35ecc0ed2c81e8f5f6eea48f7275f999e4d
+ 
     <template if:true={currentProject}>
       <h1 class="slds-text-align_center">Selected project: {projectName}</h1>
       <br />

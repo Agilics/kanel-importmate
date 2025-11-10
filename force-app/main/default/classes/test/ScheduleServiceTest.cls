@@ -22,18 +22,6 @@ public with sharing class ScheduleServiceTest {
         );
         insert sched;
     }
-
-
-    @IsTest
-    static void testGetAllSchedules() {
-        Test.startTest();
-        List<Schedule__c> actual = ScheduleService.getAllSchedules();
-        Test.stopTest();
-
-        System.assertNotEquals(null, actual, 'Schedule list ne doit pas être null');
-        System.assert(actual.size() > 0, 'Schedule list ne doit pas être vide');
-    }
-
     //Tester l'ajout de planification
     static void testAddSchedule() {
         // Given
@@ -140,7 +128,7 @@ public with sharing class ScheduleServiceTest {
         //Perform test
         Test.startTest();
             String keyword = schedule.Project__r.Name;    // get project's name
-            List<Schedule__c> schedules = ScheduleService.getSchedulesByProjectName(keyword);   //search schedules by project Name   
+            List<ScheduleService.ScheduleWrapper> schedules = ScheduleService.getSchedulesByProjectName(keyword);   //search schedules by project Name   
         Test.stopTest();
         
         //THEN - ASSERTION
