@@ -1,7 +1,6 @@
 import { LightningElement, api } from "lwc";
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 export default class DataSourceSelector extends LightningElement {
- 
   currentStep = 2;
   selectedSource = null; // "CSV" | "SOQL" | null
 
@@ -16,19 +15,8 @@ export default class DataSourceSelector extends LightningElement {
   get showCSV() { return this.selectedSource === "CSV"; }
   get showSOQL() { return this.selectedSource === "SOQL"; }
 
-<<<<<<< HEAD
-  handleCSV() {
-    this.selectedSource = "CSV";
-    //this.currentStep = 3;
-  }
-  handleSOQL() {
-    this.selectedSource = "SOQL";
-    //  this.currentStep = 3;
-  }
-=======
   handleCSV() { this.selectedSource = "CSV"; this.currentStep = 3; }
   handleSOQL() { this.selectedSource = "SOQL"; this.currentStep = 3; }
->>>>>>> c521e35ecc0ed2c81e8f5f6eea48f7275f999e4d
 
   handleBackToSelection() {
     this.dispatchEvent(new CustomEvent("previous"));
