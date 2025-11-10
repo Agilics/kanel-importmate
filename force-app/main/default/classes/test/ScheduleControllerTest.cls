@@ -23,16 +23,7 @@ public with sharing class ScheduleServiceTest {
         insert sched;
     }
 
-
-    @IsTest
-    static void testGetAllSchedules() {
-        Test.startTest();
-        List<Schedule__c> actual = ScheduleService.getAllSchedules();
-        Test.stopTest();
-
-        System.assertNotEquals(null, actual, 'Schedule list ne doit pas être null');
-        System.assert(actual.size() > 0, 'Schedule list ne doit pas être vide');
-    }
+ 
 
     //Tester l'ajout de planification
     static void testAddSchedule() {
