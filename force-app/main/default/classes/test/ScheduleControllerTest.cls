@@ -6,7 +6,7 @@
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 @isTest
-public with sharing class ScheduleServiceTest { 
+public with sharing class ScheduleControllerTest { 
       @TestSetup
     static void setup() {
         ImportProject__c project = new ImportProject__c(
