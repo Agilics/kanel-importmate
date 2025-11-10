@@ -7,7 +7,7 @@
 **/
 @isTest
 public with sharing class ScheduleServiceTest { 
-      @TestSetup
+     @TestSetup
     static void setup() {
         ImportProject__c project = new ImportProject__c(
             Name = 'Projet test',
@@ -21,7 +21,83 @@ public with sharing class ScheduleServiceTest {
             Project__c = project.Id
         );
         insert sched;
+
+        List<ImportExecution__c> executions = new List<ImportExecution__c>{
+            new ImportExecution__c(
+                Project__c = project.Id,
+                Status__c = 'Active',
+                TotalRecords__c = 100,
+                ProcessedRecords__c = 95,
+                FailedRecords__c = 5,
+                StartTime__c = System.now().addMinutes(-40),
+                EndTime__c = System.now().addMinutes(-10)
+            ),
+            new ImportExecution__c(
+                Project__c = project.Id,
+                Status__c = 'Paused',
+                TotalRecords__c = 200,
+                ProcessedRecords__c = 200,
+                FailedRecords__c = 0,
+                StartTime__c = System.now().addHours(-2),
+                EndTime__c = System.now().addHours(-1)
+            )
+        };
+        insert executions;
     }
+
+    @IsTest
+    static void testGetAllSchedulesWithExecutions() {
+        Test.startTest();
+        List<ScheduleService.ScheduleWrapper> results = ScheduleService.getAllSchedulesWithExecutions();
+        Test.stopTest();
+
+        System.assertNotEquals(0, results.size(), 'On doit récupérer au moins une planification');
+        System.assertNotEquals(null, results[0].schedule, 'Le wrapper doit contenir une planification');
+        System.assert(!results[0].executions.isEmpty(), 'Le wrapper doit contenir au moins une exécution');
+    }
+
+    @IsTest
+    static void testGetSchedulesByExecutionStatusActive() {
+        Test.startTest();
+        List<ScheduleService.ScheduleWrapper> results = ScheduleService.getSchedulesByExecutionStatus('Active');
+        Test.stopTest();
+
+        System.assert(!results.isEmpty(), 'Les résultats ne doivent pas être vides pour le statut Active');
+        System.assertEquals('Active', results[0].executions[0].Status__c, 'Le statut doit correspondre à Active');
+    }
+
+    @IsTest
+    static void testGetSchedulesByExecutionStatusPaused() {
+        Test.startTest();
+        List<ScheduleService.ScheduleWrapper> results = ScheduleService.getSchedulesByExecutionStatus('Paused');
+        Test.stopTest();
+
+        System.assert(!results.isEmpty(), 'Les résultats ne doivent pas être vides pour le statut Paused');
+        System.assertEquals('Paused', results[0].executions[0].Status__c, 'Le statut doit correspondre à Paused');
+    }
+
+    @IsTest
+    static void testGetSchedulesByExecutionStatusInvalid() {
+        Test.startTest();
+        List<ScheduleService.ScheduleWrapper> results = ScheduleService.getSchedulesByExecutionStatus('Inexistant');
+        Test.stopTest();
+
+        System.assertEquals(0, results.size(), 'Aucune planification ne doit être renvoyée pour un statut inexistant');
+    }
+
+    @IsTest
+    static void testErrorHandling() {
+        try {
+            Test.startTest();
+            // Forcer une erreur : on passe un statut null
+            ScheduleService.getSchedulesByExecutionStatus(null);
+            Test.stopTest();
+            System.assert(false, 'Une ApplicationException aurait dû être levée');
+        } catch (Exception e) {
+            System.assert(e instanceof ApplicationException, 'Une ApplicationException doit être levée en cas d’erreur');
+        }
+    }
+
 
 
     @IsTest
