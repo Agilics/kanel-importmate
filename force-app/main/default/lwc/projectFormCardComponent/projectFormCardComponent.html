@@ -55,7 +55,7 @@
       <lightning-input
         id="project-name"
         class="rounded-input"
-        style="width: 100%"
+        style="width: 100%;"
         type="text"
         placeholder="Enter a descriptive project name (e.g., Q4 Contact Import)"
         onchange={handleProjectNameChange}
@@ -65,9 +65,10 @@
       </p>
 
       <!--Description textarea -->
-      <label class="description-label" for="project-name"> Description </label>
+      <label class="custom-label description-label" name="description"> Description </label>
       <lightning-textarea
         class="input-field rounded-input"
+        name="description"
         placeholder="Describe the purpose and scope of this import project..."
         onchange={handleDescriptionChange}
       ></lightning-textarea>

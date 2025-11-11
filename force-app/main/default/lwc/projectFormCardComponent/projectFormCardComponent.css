@@ -125,10 +125,10 @@ lightning-combobox {
   border-radius: 12px;
   border-width: 1px;
   padding: 2rem;
-  -webkit-border-radius: 0.75rem;
-  -moz-border-radius: 0.75rem;
-  -ms-border-radius: 0.75rem;
-  -o-border-radius: 0.75rem;
+  -webkit-border-radius: 12px;
+  -moz-border-radius: 12px;
+  -ms-border-radius: 12px;
+  -o-border-radius: 12px;
 }
 
 lightning-input.project-name {
@@ -359,23 +359,20 @@ label .slds-form-element__label .slds-no-flex {
   }
 }
 
-.custom-label {
-  display: grid;
-  grid-auto-flow: dense; /* NEW */
-}
+ 
 /*require * position */
 .target-label {
   grid-template-columns: 140px 1fr;
 }
-.name-label {
-  grid-template-columns: 80px 1fr;
+.name-label { 
+    flex-direction: row-reverse;       
 }
 
 .description-label {
   width: 990;
-  height: 20;
-  angle: 0 deg;
+  height: 20; 
   opacity: 1;
+  color: #374151;
   top: 1px;
   font-family: Inter;
   font-weight: 500;
@@ -385,4 +382,13 @@ label .slds-form-element__label .slds-no-flex {
   line-height: 100%;
   letter-spacing: 0%;
   color: #374151;
+  margin-bottom: -2rem !important;
+}
+ 
+ 
+label .custom-label {
+  margin-bottom: -0.25rem !important;
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content:start;
 }
