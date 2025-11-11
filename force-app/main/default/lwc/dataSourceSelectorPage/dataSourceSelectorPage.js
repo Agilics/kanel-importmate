@@ -1,6 +1,6 @@
-import { LightningElement, api } from "lwc";
-import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-export default class DataSourceSelector extends LightningElement {
+import { LightningElement } from 'lwc';
+
+export default class DataSourceSelectorPage extends LightningElement {
     //data source selector card's parameters for file Upload parameter
   uploadTitle = "File Upload";
   uploadSubtitle = "Import from CSV or Excel files";
@@ -149,5 +149,4 @@ handleStartMapping(evt) {
     console.error('[Main] handleStartMapping CATCH', err, detail);
   }
 }
-
 }

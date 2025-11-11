@@ -2,7 +2,7 @@
   @description       : 
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
   @group             : 
-  @last modified on  : 10-27-2025
+  @last modified on  : 11-11-2025
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
@@ -87,12 +87,12 @@
       <!-- Step 2 -->
       <!-- Step 2: Data source -->
       <template if:true={isSelectSource} aria-label="select source section">
-        <c-data-source-selector
+        <c-data-source-selector-page
           onprevious={handlePreviousStep}
           onstartmapping={handleStartMapping}
           current-project={recentProject}
         >
-        </c-data-source-selector>
+        </c-data-source-selector-page>
       </template>
 
       <!-- Step 3: Full Field Mapper page -->

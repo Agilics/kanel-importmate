@@ -1,12 +1,11 @@
 body {
-  /*div*/
-  position: absolute;
+  /*div*/position: absolute;
   width: 1120px;
   height: 1517px;
   left: 320px;
   top: 0px;
   border-radius: 0px;
-  background-color: #e5e7eb; 
+  background-color: #e5e7eb;
 }
 
 .container{
