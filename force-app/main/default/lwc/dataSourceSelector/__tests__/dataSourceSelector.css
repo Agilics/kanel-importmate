@@ -1,10 +1,12 @@
-.container {
-  max-width: 1000px;
-  margin: 2rem auto;
-  padding: 2rem;
-  border-radius: 16px;
-  background-color: #ffffff;
-  box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.1);
+body {
+  /*div*/
+  position: absolute;
+  width: 1120px;
+  height: 1517px;
+  left: 320px;
+  top: 0px;
+  border-radius: 0px;
+  background-color: #e5e7eb;
 }
 
 .con {
@@ -14,23 +16,24 @@
   margin-bottom: 2rem;
 }
 
-.import {
+.cards {
+  padding: 30px;
   display: flex;
-  align-items: center;
-  font-weight: bold;
-  font-size: 1.6rem;
-  color: #333;
-  gap: 0.5rem;
+  width: 1056px;
+  height: 330px;
+  opacity: 1;
+  margin: 0 0 0 24px;
+  top: 132px;
+  left: 32px;
 }
-.import .icon {
-  font-size: 1.8rem;
-  color: white;
+.query {
+  margin-left: 34rem;
 }
-
 .header {
   text-align: center;
   margin-bottom: 2rem;
 }
+
 .subtitle {
   font-size: 1rem;
   color: #666;
@@ -52,9 +55,9 @@
   justify-content: center;
   gap: 2rem;
   flex-wrap: wrap;
-
   margin-bottom: 2rem;
 }
+
 .card {
   background: lightgray;
   border-radius: 12px;
@@ -62,9 +65,10 @@
   width: 300px;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.08);
   cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
   text-align: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
+
 .card:hover {
   transform: translateY(-5px);
   box-shadow: 0px 6px 16px rgba(0, 0, 0, 0.15);
@@ -78,9 +82,13 @@
   background-repeat: no-repeat;
   background-position: center;
 }
+
 .file-icon {
   background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="black" width="32" height="32" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>');
 }
-.soql-icon {
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="black" width="32" height="32" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="2"/><rect x="4" y="11" width="16" height="2"/><rect x="4" y="17" width="16" height="2"/></svg>');
+
+/*file upload icon*/
+.file-upload-icon {
+  --slds-c-icon-color-foreground-default: #dbeafe;
+  --slds-c-icon-color-background: #1e40af;
 }

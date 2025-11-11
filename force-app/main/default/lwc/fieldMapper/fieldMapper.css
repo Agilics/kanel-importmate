@@ -71,8 +71,12 @@
 }
 
 /* Explicit order: Source left, Target right */
-.column--sources { order: 1; }
-.column--targets { order: 2; }
+.column--sources {
+  order: 1;
+}
+.column--targets {
+  order: 2;
+}
 
 /* ---------- Responsive ---------- */
 @media (max-width: 900px) {

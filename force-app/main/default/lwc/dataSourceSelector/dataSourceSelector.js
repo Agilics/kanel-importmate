@@ -11,12 +11,7 @@ export default class DataSourceSelector extends LightningElement {
   }
   get projectTargetObject() {
     const p = this.currentProject || {};
-    return (
-      p.Target_Object__c ||    
-      p.TargetObject__c ||      
-      p.Target_SObject__c ||    
-      ""
-    );
+    return p.Target_Object__c || p.TargetObject__c || p.Target_SObject__c || "";
   }
 
   get showSelection() {
@@ -44,15 +39,11 @@ export default class DataSourceSelector extends LightningElement {
   }
 
   handleCsvLoaded(event) {
-    this.dispatchEvent(
-      new CustomEvent("dataloaded", { detail: event.detail })
-    );
+    this.dispatchEvent(new CustomEvent("dataloaded", { detail: event.detail }));
   }
 
   handleSoqlBuilt(event) {
-    this.dispatchEvent(
-      new CustomEvent("dataloaded", { detail: event.detail })
-    );
+    this.dispatchEvent(new CustomEvent("dataloaded", { detail: event.detail }));
   }
 
   handleGoToMappingFromCsv(evt) {
@@ -65,8 +56,7 @@ export default class DataSourceSelector extends LightningElement {
         detail: {
           source: "CSV",
           headersCsv,
-          projectId:
-            this.currentProject?.Id || evt?.detail?.projectId || null
+          projectId: this.currentProject?.Id || evt?.detail?.projectId || null
         },
         bubbles: true,
         composed: true

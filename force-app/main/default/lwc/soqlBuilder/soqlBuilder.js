@@ -21,7 +21,7 @@ const uid = () =>
 
 export default class SoqlBuilder extends NavigationMixin(LightningElement) {
   //project target object from parent
-   _projectTargetObject = "";
+  _projectTargetObject = "";
 
   @api
   get projectTargetObject() {
@@ -84,7 +84,14 @@ export default class SoqlBuilder extends NavigationMixin(LightningElement) {
   @track columns = [];
   @track queryResults = [];
   @track displayRows = [];
-  badgeValues = new Set(["Customer", "Prospect", "Partner", "Lead", "Yes", "No"]);
+  badgeValues = new Set([
+    "Customer",
+    "Prospect",
+    "Partner",
+    "Lead",
+    "Yes",
+    "No"
+  ]);
   @track isLoading = false;
 
   // ===== Getters =====
@@ -149,80 +156,81 @@ export default class SoqlBuilder extends NavigationMixin(LightningElement) {
       this.initializeFromTargetObject();
     }
   }
-initializeFromTargetObject() {
-  if (!this._projectTargetObject) {
-    return;
-  }
+  initializeFromTargetObject() {
+    if (!this._projectTargetObject) {
+      return;
+    }
 
-  this.selectedObject = this._projectTargetObject;
-  this.selectedFields = [];
-  this.columns = [];
-  this.queryResults = [];
-  this.displayRows = [];
-  this.orderByField = "";
-  this.conditions = [
-    { id: uid(), field: "Name", operator: "contains", value: "", joiner: "AND" }
-  ];
-
-  this.loadFieldsForObject(this.selectedObject);
-}
-
-loadFieldsForObject(objectName) {
-  if (!objectName) {
-    this.fieldsMeta = [];
-    this.orderByFieldOptions = [];
-    return;
-  }
-
-  fetchFields({ objectName })
-    .then((result) => {
-      let meta;
-
-      if (Array.isArray(result) && typeof result[0] === "string") {
-        meta = result.map((fieldApi) => ({
-          apiName: fieldApi,
-          label: this.prettyLabel(fieldApi),
-          type: "Text",
-          checked: false
-        }));
-      } else {
-        meta = (result || []).map((f) => {
-          const fieldApi = f.apiName || f.name || f;
-          return {
-            apiName: fieldApi,
-            label: f.label || this.prettyLabel(fieldApi),
-            type: f.type || "Text",
-            checked: false
-          };
-        });
+    this.selectedObject = this._projectTargetObject;
+    this.selectedFields = [];
+    this.columns = [];
+    this.queryResults = [];
+    this.displayRows = [];
+    this.orderByField = "";
+    this.conditions = [
+      {
+        id: uid(),
+        field: "Name",
+        operator: "contains",
+        value: "",
+        joiner: "AND"
       }
+    ];
 
-      meta.sort((a, b) => {
-        if (a.apiName === "Id") return -1;
-        if (b.apiName === "Id") return 1;
-        return a.label.localeCompare(b.label);
+    this.loadFieldsForObject(this.selectedObject);
+  }
+
+  loadFieldsForObject(objectName) {
+    if (!objectName) {
+      this.fieldsMeta = [];
+      this.orderByFieldOptions = [];
+      return;
+    }
+
+    fetchFields({ objectName })
+      .then((result) => {
+        let meta;
+
+        if (Array.isArray(result) && typeof result[0] === "string") {
+          meta = result.map((fieldApi) => ({
+            apiName: fieldApi,
+            label: this.prettyLabel(fieldApi),
+            type: "Text",
+            checked: false
+          }));
+        } else {
+          meta = (result || []).map((f) => {
+            const fieldApi = f.apiName || f.name || f;
+            return {
+              apiName: fieldApi,
+              label: f.label || this.prettyLabel(fieldApi),
+              type: f.type || "Text",
+              checked: false
+            };
+          });
+        }
+
+        meta.sort((a, b) => {
+          if (a.apiName === "Id") return -1;
+          if (b.apiName === "Id") return 1;
+          return a.label.localeCompare(b.label);
+        });
+
+        this.fieldsMeta = meta;
+        this.orderByFieldOptions = [
+          { label: "None", value: "" },
+          ...meta.map((m) => ({
+            label: m.label,
+            value: m.apiName
+          }))
+        ];
+
+        this.syncFieldChecks();
+      })
+      .catch(() => {
+        this.showToast("Erreur", "Impossible de charger les champs.", "error");
       });
-
-      this.fieldsMeta = meta;
-      this.orderByFieldOptions = [
-        { label: "None", value: "" },
-        ...meta.map((m) => ({
-          label: m.label,
-          value: m.apiName
-        }))
-      ];
-
-      this.syncFieldChecks();
-    })
-    .catch(() => {
-      this.showToast(
-        "Erreur",
-        "Impossible de charger les champs.",
-        "error"
-      );
-    });
-}
-
+  }
 
   // ===== Field selection =====
   syncFieldChecks() {
@@ -391,9 +399,7 @@ loadFieldsForObject(objectName) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${
-      this.selectedObject || "soql"
-    }-results.csv`;
+    a.download = `${this.selectedObject || "soql"}-results.csv`;
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -504,8 +510,7 @@ loadFieldsForObject(objectName) {
       }
 
       if (
-        !isNumber &&
-        !isDateLike ||
+        (!isNumber && !isDateLike) ||
         c.operator === "contains" ||
         c.operator === "startswith"
       ) {
@@ -525,23 +530,18 @@ loadFieldsForObject(objectName) {
     return parts.join("");
   }
 
-
   handleBackToMain() {
-  this.dispatchEvent(
-    new CustomEvent("previous", {
-      bubbles: true,
-      composed: true
-    })
-  );
-}
-
+    this.dispatchEvent(
+      new CustomEvent("previous", {
+        bubbles: true,
+        composed: true
+      })
+    );
+  }
 
   // ===== Utils =====
   prettyLabel(apiName) {
-    let s = apiName
-      .replace(/__/g, " ")
-      .replace(/\./g, " ")
-      .replace(/_/g, " ");
+    let s = apiName.replace(/__/g, " ").replace(/\./g, " ").replace(/_/g, " ");
     s = s
       .replace(/([a-z])([A-Z])/g, "$1 $2")
       .replace(/\s+/g, " ")
@@ -554,75 +554,70 @@ loadFieldsForObject(objectName) {
   }
 
   copySoql() {
-  const text = this.soqlText || "";
+    const text = this.soqlText || "";
 
-  if (!text.trim()) {
-    this.showToast("Info", "No SOQL query to copy.", "info");
-    return;
-  }
-
-  if (
-    typeof navigator !== "undefined" &&
-    navigator.clipboard &&
-    typeof navigator.clipboard.writeText === "function"
-  ) {
-    navigator.clipboard
-      .writeText(text)
-      .then(() => {
-        this.showToast(
-          "Copied!",
-          "SOQL query copied to clipboard.",
-          "success"
-        );
-      })
-      .catch((err) => {
-        // Fallback if writeText fails
-        console.warn("navigator.clipboard.writeText failed", err);
-        this.copySoqlFallback(text);
-      });
-  } else {
-    this.copySoqlFallback(text);
-  }
-}
-
-// Helper fallback using a hidden textarea
-copySoqlFallback(text) {
-  try {
-    if (typeof document === "undefined") {
-      throw new Error("Document not available");
+    if (!text.trim()) {
+      this.showToast("Info", "No SOQL query to copy.", "info");
+      return;
     }
 
-    const textarea = document.createElement("textarea");
-    textarea.value = text;
-    textarea.setAttribute("readonly", "");
-    textarea.style.position = "absolute";
-    textarea.style.left = "-9999px";
-    document.body.appendChild(textarea);
-    textarea.select();
-
-    const ok = document.execCommand("copy");
-    document.body.removeChild(textarea);
-
-    if (ok) {
-      this.showToast(
-        "Copied!",
-        "SOQL query copied to clipboard.",
-        "success"
-      );
+    if (
+      typeof navigator !== "undefined" &&
+      navigator.clipboard &&
+      typeof navigator.clipboard.writeText === "function"
+    ) {
+      navigator.clipboard
+        .writeText(text)
+        .then(() => {
+          this.showToast(
+            "Copied!",
+            "SOQL query copied to clipboard.",
+            "success"
+          );
+        })
+        .catch((err) => {
+          // Fallback if writeText fails
+          console.warn("navigator.clipboard.writeText failed", err);
+          this.copySoqlFallback(text);
+        });
     } else {
-      throw new Error("execCommand('copy') returned false");
+      this.copySoqlFallback(text);
     }
-  } catch (e) {
-    // eslint-disable-next-line no-console
-    console.error("Copy fallback failed", e);
-    this.showToast(
-      "Copy failed",
-      "Clipboard is not available in this context.",
-      "error"
-    );
   }
-}
 
+  // Helper fallback using a hidden textarea
+  copySoqlFallback(text) {
+    try {
+      if (typeof document === "undefined") {
+        throw new Error("Document not available");
+      }
+
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.setAttribute("readonly", "");
+      textarea.style.position = "absolute";
+      textarea.style.left = "-9999px";
+      document.body.appendChild(textarea);
+      textarea.select();
+
+      const ok = document.execCommand("copy");
+      document.body.removeChild(textarea);
+
+      if (ok) {
+        this.showToast("Copied!", "SOQL query copied to clipboard.", "success");
+      } else {
+        throw new Error("execCommand('copy') returned false");
+      }
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error("Copy fallback failed", e);
+      this.showToast(
+        "Copy failed",
+        "Clipboard is not available in this context.",
+        "error"
+      );
+    }
+  }
 
   handleContinue(event) {
     try {
@@ -733,9 +728,8 @@ function tokenizeSoql(input) {
     } else if (/^(>=|<=|!=|=|>|<)$/.test(lex)) {
       tokens.push({ text: lex, cls: "operator" });
     } else if (/^[A-Za-z_][\w.]*$/.test(lex)) {
-      const isCommon = /^(Id|Name|Email|CreatedDate|Type|Account|Contact)$/i.test(
-        lex
-      );
+      const isCommon =
+        /^(Id|Name|Email|CreatedDate|Type|Account|Contact)$/i.test(lex);
       tokens.push({ text: lex, cls: isCommon ? "field" : "" });
     } else if (/^\s+$/.test(lex)) {
       tokens.push({ text: lex, cls: "" });
@@ -743,11 +737,6 @@ function tokenizeSoql(input) {
       tokens.push({ text: lex, cls: "" });
     }
   }
-  
 
   return tokens.map((t, i) => ({ ...t, key: `tok_${i}` }));
-
-  
-
-  
 }
