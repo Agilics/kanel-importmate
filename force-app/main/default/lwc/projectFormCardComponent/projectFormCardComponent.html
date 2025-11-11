@@ -2,7 +2,7 @@
   @description       : 
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
   @group             : 
-  @last modified on  : 11-03-2025
+  @last modified on  : 11-11-2025
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
@@ -65,9 +65,13 @@
       </p>
 
       <!--Description textarea -->
-      <label class="description-label" for="project-name"> Description </label>
+      <label class="custom-label description-label" name="description">
+        Description
+      </label>
       <lightning-textarea
         class="input-field rounded-input"
+        name="description"
+        style="margin-top: -1.6rem; "
         placeholder="Describe the purpose and scope of this import project..."
         onchange={handleDescriptionChange}
       ></lightning-textarea>

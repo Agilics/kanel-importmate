@@ -45,7 +45,7 @@ body {
   left: 32px;
 }
 .query {
-  margin-left: 34rem;
+  margin-left: 32.6rem;
 }
 .header {
   text-align: center;
@@ -86,7 +86,6 @@ body {
 .automatic {
   width: 446px;
   height: 24px;
-  angle: 0 deg;
   opacity: 1;
   top: 40px;
 }

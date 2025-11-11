@@ -3,10 +3,8 @@ import { ShowToastEvent } from "lightning/platformShowToastEvent";
 import SelectProject from "c/selectProjectComponent";
 import { refreshApex } from "@salesforce/apex";
 import searchProjetById from "@salesforce/apex/ImportProjectController.searchProjetById";
-import doesProjectExist from "@salesforce/apex/ImportProjectController.doesProjectExist";
 
 //importation méthodes depuis le Contrôleur
-import saveProject from "@salesforce/apex/ImportProjectController.saveProject";
 import getRecentsProjects from "@salesforce/apex/ImportProjectController.getRecentsProjects";
 import getAllSchedules from "@salesforce/apex/ScheduleController.getAllSchedules";
 import addSchedule from "@salesforce/apex/ScheduleController.addSchedule";
@@ -100,75 +98,12 @@ export default class MainComponent extends LightningElement {
     }
   }
 
-  //Enregistrement d'un nouveau projet
-  async handleCreateProject() {
+  //Enregistrement d'un nouveau projet et navigation vers souce de séléction de données
+  async handleSaveProject(event) {
     this.isLoading = true;
-
-    // validation UI
-    if (!this.projectName || !this.description || !this.targetObject) {
-      this.showToast("Warning", "All fields are required.", "warning");
-      this.isLoading = false;
-      return;
-    }
-
-    try {
-      // 1) Vérifie l’existence du projet
-      const exists = await doesProjectExist({
-        name: this.projectName,
-        targetObject: this.targetObject
-      });
-
-      if (exists) {
-        this.showToast(
-          "Warning",
-          "This project already exists, please choose another name/target object.",
-          "warning"
-        );
-
-        /**
-         *  Réintialisation de tous les champs de texte | combo box
-         *  dans la section de création de projets
-         * */
-        this.template.querySelector("c-create-project-component").resetFields();
-        this.isLoading = false;
-
-        this.targetObject = "";
-        return;
-      }
-
-      // 2) Crée le projet si inexistant
-      const result = await saveProject({
-        name: this.projectName,
-        description: this.description,
-        targetObject: this.targetObject
-      });
-
-      this.recentProject = result;
-
-      //Affichage du message toast de succès
-      this.showToast(
-        "Success",
-        `Record  with ID:\t${result.Id}  created  successfully !`,
-        "success"
-      );
-
-      // Réintialisation de tous les champs de texte | combo box
-      this.template.querySelector("c-create-project-component").resetFields();
-
-      this.isLoading = false; //Désactivation du  loading spinner
-
-      //On passe à l'étape 2 Selection du source de données
-      this.handleNextStep(); // mise à jour du stepper
-    } catch (err) {
-      //Affichage d'un toast de message d'erreur
-      this.showToast(
-        "Error",
-        err?.body?.message || "An Error were occured!",
-        "error"
-      );
-    } finally {
-      this.isLoading = false;
-    }
+    this.recentProject = event.detail;
+    this.handleNextStep();
+    this.isLoading = false;
   }
 
   // Retour vers l'étape précédente du stepper
