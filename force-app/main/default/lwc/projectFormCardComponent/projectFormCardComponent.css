@@ -45,16 +45,17 @@
   --slds-c-icon-color-foreground-default: #1e40af;
   --slds-c-icon-color-foreground: #1e40af;
   --slds-c-icon-color-background: #e5e7eb;
-  /* div */
-
-  position: absolute;
+  /*div*/position: absolute;
   width: 48px;
   height: 48px;
   left: 0px;
   top: 8px;
-
   background: #1e40af;
   border-radius: 12px;
+  -webkit-border-radius: 12px;
+  -moz-border-radius: 12px;
+  -ms-border-radius: 12px;
+  -o-border-radius: 12px;
 }
 .plus-icons {
   width: 48px;
@@ -66,6 +67,10 @@
   --slds-c-icon-color-foreground-default: #e5e7eb;
   --slds-c-icon-color-foreground: #e5e7eb;
   --slds-c-icon-color-background: #1e40af;
+  -webkit-border-radius: 12px;
+  -moz-border-radius: 12px;
+  -ms-border-radius: 12px;
+  -o-border-radius: 12px;
 }
 lightning-combobox {
   width: 100%;
