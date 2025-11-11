@@ -13,8 +13,8 @@ import addSchedule from "@salesforce/apex/ScheduleController.addSchedule";
 export default class MainComponent extends LightningElement {
   @track showCreatorSection = false;
   title = "Imports Projects";
-  @track mappingHeadersCsv = '';
-@track mappingTargetObject = '';
+  @track mappingHeadersCsv = "";
+  @track mappingTargetObject = "";
 
   //paramètres pour la création de projet
 
@@ -65,41 +65,40 @@ export default class MainComponent extends LightningElement {
   limitor = 3;
   @wire(getRecentsProjects, { limitor: "$limitor" }) importProjects; //affiche 3 projets récents
 
-  //Navigation après sélection d'un project vers l'étape 2 selection de source de donnée dans la rubrique projets récents  
-// mainComponent.js  (inside nagivateToSelectdDataSource)
-async nagivateToSelectdDataSource(event) {
-  this.isLoading = true;
-  const selectedProjectId = event.detail;
+  //Navigation après sélection d'un project vers l'étape 2 selection de source de donnée dans la rubrique projets récents
+  // mainComponent.js  (inside nagivateToSelectdDataSource)
+  async nagivateToSelectdDataSource(event) {
+    this.isLoading = true;
+    const selectedProjectId = event.detail;
 
-  try {
-    const result = await searchProjetById({ id: selectedProjectId });
-    this.recentProject = result;
+    try {
+      const result = await searchProjetById({ id: selectedProjectId });
+      this.recentProject = result;
 
-    // ✅ toast to confirm selection
-    this.dispatchEvent(
-      new ShowToastEvent({
-        title: "Project selected",
-        message: `You have selected "${result?.Name}" to start.`,
-        variant: "success",
-        mode: "dismissable"
-      })
-    );
+      // ✅ toast to confirm selection
+      this.dispatchEvent(
+        new ShowToastEvent({
+          title: "Project selected",
+          message: `You have selected "${result?.Name}" to start.`,
+          variant: "success",
+          mode: "dismissable"
+        })
+      );
 
-    // ✅ proceed to Select Source step
-    this.handleNextStep();
-  } catch (error) {
-    this.dispatchEvent(
-      new ShowToastEvent({
-        title: "Error",
-        message: error?.body?.message || "Failed to load project",
-        variant: "error"
-      })
-    );
-  } finally {
-    this.isLoading = false;
+      // ✅ proceed to Select Source step
+      this.handleNextStep();
+    } catch (error) {
+      this.dispatchEvent(
+        new ShowToastEvent({
+          title: "Error",
+          message: error?.body?.message || "Failed to load project",
+          variant: "error"
+        })
+      );
+    } finally {
+      this.isLoading = false;
+    }
   }
-}
-
 
   //Enregistrement d'un nouveau projet
   async handleCreateProject() {
@@ -172,7 +171,6 @@ async nagivateToSelectdDataSource(event) {
     }
   }
 
-  
   // Retour vers l'étape précédente du stepper
   handlePreviousStep() {
     if (this.currentStep > 1) {
@@ -361,82 +359,82 @@ async nagivateToSelectdDataSource(event) {
     }
   }
 
-handleStartMapping(evt) {
-  const detail = (evt && evt.detail) || {};
+  handleStartMapping(evt) {
+    const detail = (evt && evt.detail) || {};
 
-  try {
-    // 1) Headers from SOQL / CSV
-    this.mappingHeadersCsv = (detail.headersCsv || '').trim();
+    try {
+      // 1) Headers from SOQL / CSV
+      this.mappingHeadersCsv = (detail.headersCsv || "").trim();
 
-    // 2) Target object: from event, else from project
-    const rp = this.recentProject || {};
-    const fromProject =
-      rp.TargetObject__c ??
-      rp.Target_Object__c ??
-      rp.Target__c ??
-      rp.targetObject ??
-      '';
-    this.mappingTargetObject =
-      (detail.targetObject || '').trim() || fromProject || '';
+      // 2) Target object: from event, else from project
+      const rp = this.recentProject || {};
+      const fromProject =
+        rp.TargetObject__c ??
+        rp.Target_Object__c ??
+        rp.Target__c ??
+        rp.targetObject ??
+        "";
+      this.mappingTargetObject =
+        (detail.targetObject || "").trim() || fromProject || "";
 
-    // 3) Determine effective project id
-    const effectiveProjectId = rp.Id || detail.projectId || '';
+      // 3) Determine effective project id
+      const effectiveProjectId = rp.Id || detail.projectId || "";
 
-    if (!effectiveProjectId) {
+      if (!effectiveProjectId) {
+        this.dispatchEvent(
+          new ShowToastEvent({
+            title: "Pick a project",
+            message: "Please select a project before continuing to mapping.",
+            variant: "warning"
+          })
+        );
+        return;
+      }
+
+      // if we only had id in the event, make sure recentProject at least has Id
+      if (!rp.Id && detail.projectId) {
+        this.recentProject = {
+          ...(this.recentProject || {}),
+          Id: detail.projectId
+        };
+      }
+
+      // 4) Move to step 3
+      this.currentStep = 3;
+
+      // 5) Optional nice scroll
+      if (
+        typeof window !== "undefined" &&
+        typeof window.scrollTo === "function"
+      ) {
+        try {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        } catch (e) {
+          // ignore scroll issues in Locker
+        }
+      }
+
+      // eslint-disable-next-line no-console
+      console.log("[Main] handleStartMapping OK", {
+        headersCsv: this.mappingHeadersCsv,
+        mappingTargetObject: this.mappingTargetObject,
+        projectId: effectiveProjectId
+      });
+    } catch (err) {
       this.dispatchEvent(
         new ShowToastEvent({
-          title: 'Pick a project',
-          message: 'Please select a project before continuing to mapping.',
-          variant: 'warning'
+          title: "Open mapper failed",
+          message:
+            (err && err.message) || "Could not open the Field Mapping step.",
+          variant: "error"
         })
       );
-      return;
+      // eslint-disable-next-line no-console
+      console.error("[Main] handleStartMapping CATCH", err, detail);
     }
-
-    // if we only had id in the event, make sure recentProject at least has Id
-    if (!rp.Id && detail.projectId) {
-      this.recentProject = { ...(this.recentProject || {}), Id: detail.projectId };
-    }
-
-    // 4) Move to step 3
-    this.currentStep = 3;
-
-    // 5) Optional nice scroll
-    if (typeof window !== 'undefined' && typeof window.scrollTo === 'function') {
-      try {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      } catch (e) {
-        // ignore scroll issues in Locker
-      }
-    }
-
-    // eslint-disable-next-line no-console
-    console.log('[Main] handleStartMapping OK', {
-      headersCsv: this.mappingHeadersCsv,
-      mappingTargetObject: this.mappingTargetObject,
-      projectId: effectiveProjectId
-    });
-  } catch (err) {
-    this.dispatchEvent(
-      new ShowToastEvent({
-        title: 'Open mapper failed',
-        message:
-          (err && err.message) ||
-          'Could not open the Field Mapping step.',
-        variant: 'error'
-      })
-    );
-    // eslint-disable-next-line no-console
-    console.error('[Main] handleStartMapping CATCH', err, detail);
   }
-}
 
-
-
-handleBackToStep2() {
-  this.currentStep = 2;
-}
-
-
-
+  handleBackToStep2() {
+    this.currentStep = 2;
+  }
 }

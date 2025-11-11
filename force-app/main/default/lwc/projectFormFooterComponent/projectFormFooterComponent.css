@@ -5,15 +5,14 @@
 }
 
 .footer-separator {
- border-top: 1px solid #E2E8F0;
- margin: 0  0 3rem 0;
+  border-top: 1px solid #e2e8f0;
+  margin: 0 0 3rem 0;
   width: 990;
   height: 83;
   angle: 0 deg;
   opacity: 1;
   top: 904px;
   border-top-width: 1px;
-
 }
 
 .footer-actions {

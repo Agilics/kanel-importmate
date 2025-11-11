@@ -45,7 +45,8 @@
   --slds-c-icon-color-foreground-default: #1e40af;
   --slds-c-icon-color-foreground: #1e40af;
   --slds-c-icon-color-background: #e5e7eb;
-  /*div*/position: absolute;
+  /*div*/
+  position: absolute;
   width: 48px;
   height: 48px;
   left: 0px;
@@ -193,7 +194,7 @@ lightning-textarea .description {
 
 /* INPUTS */
 .input-field {
-  width: 990px; 
+  width: 990px;
   height: 50px;
   top: 28px;
   angle: 0 deg;
@@ -370,18 +371,18 @@ label .slds-form-element__label .slds-no-flex {
   grid-template-columns: 80px 1fr;
 }
 
-.description-label{
-width: 990;
-height: 20;
-angle: 0 deg;
-opacity: 1;
-top: 1px;
-font-family: Inter;
-font-weight: 500;
-font-style: Medium;
-font-size: 14px;
-leading-trim: NONE;
-line-height: 100%;
-letter-spacing: 0%;
-color: #374151;
+.description-label {
+  width: 990;
+  height: 20;
+  angle: 0 deg;
+  opacity: 1;
+  top: 1px;
+  font-family: Inter;
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 14px;
+  leading-trim: NONE;
+  line-height: 100%;
+  letter-spacing: 0%;
+  color: #374151;
 }

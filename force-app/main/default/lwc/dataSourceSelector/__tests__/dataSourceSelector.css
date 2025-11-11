@@ -6,7 +6,7 @@ body {
   left: 320px;
   top: 0px;
   border-radius: 0px;
-  background-color: #e5e7eb; 
+  background-color: #e5e7eb;
 }
 
 .con {
@@ -15,20 +15,19 @@ body {
   align-items: center;
   margin-bottom: 2rem;
 }
- 
 
 .cards {
-  padding:  30px;
+  padding: 30px;
   display: flex;
   width: 1056px;
-  height: 330px; 
-  opacity: 1;   
+  height: 330px;
+  opacity: 1;
   margin: 0 0 0 24px;
   top: 132px;
   left: 32px;
 }
-.query{
-  margin-left:34rem;
+.query {
+  margin-left: 34rem;
 }
 .header {
   text-align: center;

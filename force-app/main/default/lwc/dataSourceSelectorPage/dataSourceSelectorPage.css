@@ -1,29 +1,30 @@
 body {
-  /*div*/position: absolute;
+  /*div*/
+  position: absolute;
   width: 1120px;
-  height: 1517px; 
-  background-color: #e5e7eb; 
+  height: 1517px;
+  background-color: #e5e7eb;
 }
-.container{
+.container {
   padding: 24px;
   height: 900px;
-  max-height: 1517px; 
+  max-height: 1517px;
   opacity: 1;
   flex-wrap: wrap;
 }
- .header {
+.header {
   width: 1056px;
   height: 68px;
   opacity: 1;
   top: 32px;
-  align-items:start;
+  align-items: start;
   left: 32px;
   margin: 0 0 0 24px;
   font-family: "Inter";
 }
 .header-title {
   width: 1056px;
-  text-align:left; 
+  text-align: left;
   height: 36px;
   opacity: 1;
   font-weight: 700;
@@ -32,32 +33,29 @@ body {
   line-height: 36px;
   letter-spacing: 0%;
 }
- 
- 
 
 .cards {
-  padding:  10px;
+  padding: 10px;
   display: flex;
   width: 1056px;
-  height: 330px; 
-  opacity: 1;   
+  height: 330px;
+  opacity: 1;
   margin: 0 0 0 24px;
   top: 132px;
   left: 32px;
 }
-.query{
-  margin-left:34rem;
+.query {
+  margin-left: 34rem;
 }
 .header {
   text-align: center;
   margin-bottom: 2rem;
 }
 
-
 .header {
   width: 1056px;
   height: 68px;
-  text-align:left; 
+  text-align: left;
   opacity: 1;
   top: 32px;
   left: 32px;
@@ -73,19 +71,18 @@ body {
   font-size: 30px;
   line-height: 36px;
   letter-spacing: 0%;
-  color:#111827;
+  color: #111827;
 }
 
 .header-subtitle {
   font-weight: 400;
-  font-style: Regular; 
+  font-style: Regular;
   font-size: 16px;
   line-height: 24px;
-  color: #4B5563;
+  color: #4b5563;
   letter-spacing: 0%;
 }
 
- 
 .automatic {
   width: 446px;
   height: 24px;
