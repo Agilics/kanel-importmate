@@ -16,7 +16,7 @@ export default class ProjectFormCardComponent extends LightningElement {
 
   //naviger vers la section data source
   handleGoToDataSource() {
-    this.dispatchEvent= new CustomEvent('gotodatsource');
+    this.dispatchEvent = new CustomEvent("gotodatsource");
   }
 
   // Permet au parent de définir des valeurs initiales dans le champs  target Salesforce object au lancement de la page
@@ -102,7 +102,6 @@ export default class ProjectFormCardComponent extends LightningElement {
           detail: result
         })
       );
- 
     } catch (err) {
       //Affichage d'un toast de message d'erreur
       this.showToast(
@@ -128,8 +127,7 @@ export default class ProjectFormCardComponent extends LightningElement {
     this.targetObject = event.target.value;
   }
 
-
-   //Masquer la section de création de projets
+  //Masquer la section de création de projets
   handleCancel() {
     this.dispatchEvent(new CustomEvent("cancel"));
   }

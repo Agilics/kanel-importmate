@@ -137,6 +137,10 @@ lightning-input.project-name {
   border-radius: 8px;
   opacity: 1;
   margin-top: 28px;
+  -webkit-border-radius:;
+  -moz-border-radius:;
+  -ms-border-radius:;
+  -o-border-radius:;
 }
 
 lightning-input.project-name .slds-form-element__control input {
@@ -144,6 +148,10 @@ lightning-input.project-name .slds-form-element__control input {
   border-radius: 8px;
   font-size: 16px;
   padding: 0 16px;
+  -webkit-border-radius:;
+  -moz-border-radius:;
+  -ms-border-radius:;
+  -o-border-radius:;
 }
 .slds-form-element__help .slds-m-left_none {
   margin: 0 0 1rem 0;
@@ -157,6 +165,10 @@ lightning-textarea .description {
   border-radius: 8px;
   border-width: 1px;
   margin-bottom: 1rem;
+  -webkit-border-radius:;
+  -moz-border-radius:;
+  -ms-border-radius:;
+  -o-border-radius:;
 }
 
 /* SECTION HEADERS */
@@ -317,15 +329,16 @@ label .slds-form-element__label .slds-no-flex {
 }
 
 .actions {
-  /* div */
-
-  position: absolute;
+  /*div*/position: absolute;
   width: 990px;
   height: 83px;
   left: 0px;
   top: 904px;
-
   border-radius: 0px;
+  -webkit-border-radius: 0px;
+  -moz-border-radius: 0px;
+  -ms-border-radius: 0px;
+  -o-border-radius: 0px;
 }
 
 .footer {
@@ -359,18 +372,17 @@ label .slds-form-element__label .slds-no-flex {
   }
 }
 
- 
 /*require * position */
 .target-label {
   grid-template-columns: 140px 1fr;
 }
-.name-label { 
-    flex-direction: row-reverse;       
+.name-label {
+  flex-direction: row-reverse;
 }
 
 .description-label {
   width: 990;
-  height: 20; 
+  height: 20;
   opacity: 1;
   color: #374151;
   top: 1px;
@@ -384,11 +396,10 @@ label .slds-form-element__label .slds-no-flex {
   color: #374151;
   margin-bottom: -2rem !important;
 }
- 
- 
+
 label .custom-label {
   margin-bottom: -0.25rem !important;
   display: flex;
   flex-direction: row-reverse;
-  justify-content:start;
+  justify-content: start;
 }

@@ -2,9 +2,9 @@ import { LightningElement, wire, track } from "lwc";
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 import SelectProject from "c/selectProjectComponent";
 import { refreshApex } from "@salesforce/apex";
-import searchProjetById from "@salesforce/apex/ImportProjectController.searchProjetById"; 
+import searchProjetById from "@salesforce/apex/ImportProjectController.searchProjetById";
 
-//importation méthodes depuis le Contrôleur 
+//importation méthodes depuis le Contrôleur
 import getRecentsProjects from "@salesforce/apex/ImportProjectController.getRecentsProjects";
 import getAllSchedules from "@salesforce/apex/ScheduleController.getAllSchedules";
 import addSchedule from "@salesforce/apex/ScheduleController.addSchedule";
@@ -102,9 +102,8 @@ export default class MainComponent extends LightningElement {
   async handleSaveProject(event) {
     this.isLoading = true;
     this.recentProject = event.detail;
-    this.handleNextStep();  
-      this.isLoading = false;
-
+    this.handleNextStep();
+    this.isLoading = false;
   }
 
   // Retour vers l'étape précédente du stepper
