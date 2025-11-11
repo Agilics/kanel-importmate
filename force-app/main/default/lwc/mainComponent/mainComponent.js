@@ -102,8 +102,7 @@ export default class MainComponent extends LightningElement {
   async handleSaveProject(event) {
     this.isLoading = true;
     this.recentProject = event.detail;
-    this.handleNextStep(); 
-    alert(this.currentStep);
+    this.handleNextStep();  
       this.isLoading = false;
 
   }
