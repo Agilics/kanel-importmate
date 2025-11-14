@@ -1,5 +1,6 @@
 import { LightningElement, api } from "lwc";
-
+const SS_ROWS_KEY = 'IM_csvRows';
+const SS_COLS_KEY = 'IM_sourceColumnsCsv';
 export default class DataSourceSelector extends LightningElement {
   currentStep = 2;
   selectedSource = null;
@@ -74,13 +75,45 @@ export default class DataSourceSelector extends LightningElement {
     );
   }
 
-  handleStartMappingFromSoql(evt) {
+   handleStartMappingFromSoql(evt) {
+    this.handleGoToMapping(evt);
+  }
+
+
+
+  handleGoToMapping(evt) {
+    const d = evt.detail || {};
+    const columns = d.columns || [];
+    const rows = Array.isArray(d.rows) ? d.rows : [];
+    const fileName = (d.fileName || '').trim();
+    try {
+      if (columns.length) {
+        window.sessionStorage.setItem(SS_COLS_KEY, columns.join(','));
+      }
+      if (rows.length) {
+        window.sessionStorage.setItem(SS_ROWS_KEY, JSON.stringify(rows));
+      }
+    } catch (e) {
+      console.debug('[DataSourceSelector] sessionStorage unavailable', e);
+    }
+
     this.dispatchEvent(
-      new CustomEvent("startmapping", {
-        detail: evt.detail,
+      new CustomEvent('startmapping', {
+        detail: {
+          headersCsv: columns.join(','),
+          rows,
+          targetObject:
+            this.currentProject?.TargetObject__c ||
+            this.currentProject?.Target_Object__c ||
+            '',
+          projectId: this.currentProject?.Id || '',
+          sourceLabel: fileName 
+        },
         bubbles: true,
         composed: true
       })
     );
   }
+
+
 }

@@ -641,15 +641,14 @@ copySoqlFallback(text) {
   }
 
   _handleContinueSafe() {
-    let headerApis = [];
-
+    let columns = [];
     if (Array.isArray(this.columns) && this.columns.length > 0) {
-      headerApis = this.columns
+      columns = this.columns
         .map((col) => {
           if (!col) return "";
+          if (col.key) return String(col.key);
           if (col.api) return String(col.api);
           if (col.fieldName) return String(col.fieldName);
-          if (col.key) return String(col.key);
           return "";
         })
         .filter(Boolean);
@@ -657,12 +656,11 @@ copySoqlFallback(text) {
       Array.isArray(this.selectedFields) &&
       this.selectedFields.length > 0
     ) {
-      headerApis = this.selectedFields
+      columns = this.selectedFields
         .map((name) => (name ? String(name).trim() : ""))
         .filter(Boolean);
     }
-
-    const cleaned = headerApis
+    const cleaned = columns
       .map((name) => String(name).trim())
       .filter((name) => name && name !== "Id");
 
@@ -674,31 +672,20 @@ copySoqlFallback(text) {
       );
       return;
     }
-
-    const targetObject = this.selectedObject
-      ? String(this.selectedObject).trim()
-      : "";
-
-    const projectId =
-      this.currentProject && this.currentProject.Id
-        ? this.currentProject.Id
-        : null;
-
-    const detail = {
-      source: "SOQL",
-      headersCsv: cleaned.join(","),
-      targetObject,
-      projectId
-    };
-
+    const rows = Array.isArray(this.queryResults) ? this.queryResults : [];
     this.dispatchEvent(
       new CustomEvent("startmapping", {
-        detail,
+        detail: {
+          source: "SOQL",
+          columns: cleaned,
+          rows
+        },
         bubbles: true,
         composed: true
       })
     );
   }
+
 }
 
 // ===== Tokenizer helper =====
