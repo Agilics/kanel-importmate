@@ -19,6 +19,7 @@ private class FieldMappingServiceTest {
             SObject proj = gd.get('ImportProject__c').newSObject();
             if (proj.getSObjectType().getDescribe().fields.getMap().containsKey('Name')) {
                 proj.put('Name', 'Test Project');
+                proj.put('TargetObject__c', 'Account')
             }
             insert proj;
             return (Id)proj.get('Id');
