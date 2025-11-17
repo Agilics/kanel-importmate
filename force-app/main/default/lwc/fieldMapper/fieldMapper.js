@@ -73,7 +73,7 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
 
   @api
   set preselectedProjectId(v) {
-    this._preselectedProjectId = v || "";
+    this._preselectedProjectId = v || '';
     this.tryApplyPreselection();
   }
   get preselectedProjectId() {
@@ -82,7 +82,7 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
 
   @api
   set preselectedTargetObject(v) {
-    this._preselectedTargetObject = v || "";
+    this._preselectedTargetObject = v || '';
     this.tryApplyPreselection();
   }
   get preselectedTargetObject() {
@@ -317,12 +317,7 @@ computeFieldTypeAndIcon(apiName, label, dataType, isRequired = false) {
   };
 }
 
-    this.projects = [project];
-    await this.loadTargetFields();
-    this.updateMappedSources();
 
-    this._appliedPreselect = true;
-  }
 
   /** ===== Loads ===== */
   async loadProjects() {
@@ -684,9 +679,7 @@ async loadTargetFields() {
     const sourceColumn = e.currentTarget?.dataset?.source || e.target.dataset.source;
     if (!sourceColumn) return;
 
-    this.mappings = (this.mappings || []).filter(
-      (m) => m.sourceColumn !== sourceColumn
-    );
+    this.mappings = (this.mappings || []).filter((m) => m.sourceColumn !== sourceColumn);
 
     if (!(this.availableSourceColumns || []).includes(sourceColumn)) {
       const newAvail = [...this.availableSourceColumns, sourceColumn];
@@ -768,8 +761,8 @@ async loadTargetFields() {
           sourceColumn: m.sourceColumn,
           targetField: m.targetField,
           isLookup: !!m.isLookup,
-          lookupObject: m.lookupObject || "",
-          lookupMatchField: m.lookupMatchField || ""
+          lookupObject: m.lookupObject || '',
+          lookupMatchField: m.lookupMatchField || ''
         }));
       if (!payload.length) throw new Error('No valid mapping rows to save.');
 
@@ -793,18 +786,18 @@ async loadTargetFields() {
 
   async applySavedMappings() {
     if (!this.selectedProjectId) {
-      this.toast("Info", "Select a project first.", "info");
+      this.toast('Info', 'Select a project first.', 'info');
       return;
     }
     try {
       const saved = await loadMappings({
         projectId: this.selectedProjectId,
-        version: this.versionInput || ""
+        version: this.versionInput || ''
       });
       this.mappings = (saved || []).map((r) => ({
         id: r.id || null,
         projectId: r.projectId || this.selectedProjectId,
-        version: r.version || this.versionInput || "",
+        version: r.version || this.versionInput || '',
         sourceColumn: r.sourceColumn,
         targetField: r.targetField,
         isLookup: !!r.isLookup,

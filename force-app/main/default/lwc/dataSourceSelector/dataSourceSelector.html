@@ -12,17 +12,10 @@
     <template if:true={showSelection}>
       <h2 class="section-title">Data source</h2>
       <div class="cards">
-        <!-- CARD FILE UPLOAD -->
-        <div class="upload">
-          <c-data-source-selector-card
-            contents={uploadContents}
-            title={uploadTitle}
-            subtitle={uploadSubtitle}
-            is-upload={isUpload}
-            current-project={currentProject}
-            oncardaction={handleCSV}
-          >
-          </c-data-source-selector-card>
+        <div class="card" onclick={handleCSV}>
+          <div class="card-icon file-icon"></div>
+          <h3>Import CSV</h3>
+          <p>Import a CSV file from your local machine.</p>
         </div>
 
         <div class="card" onclick={handleSOQL}>
@@ -30,7 +23,6 @@
           <h3>SOQL Builder</h3>
           <p>Build your query interactively from Salesforce objects.</p>
         </div>
-        <!-- END CARD QUERY UPLOAD -->
       </div>
     </template>
 

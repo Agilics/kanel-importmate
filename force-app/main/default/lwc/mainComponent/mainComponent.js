@@ -216,14 +216,12 @@ handleStartMapping(evt) {
     if (!effectiveProjectId) {
       this.dispatchEvent(
         new ShowToastEvent({
-          title: "Open mapper failed",
-          message:
-            (err && err.message) || "Could not open the Field Mapping step.",
-          variant: "error"
+          title: 'Pick a project',
+          message: 'Please select a project before continuing to mapping.',
+          variant: 'warning'
         })
       );
-      // eslint-disable-next-line no-console
-      console.error("[Main] handleStartMapping CATCH", err, detail);
+      return;
     }
     if (!rp.Id && detail.projectId) {
       this.recentProject = { ...(this.recentProject || {}), Id: detail.projectId };

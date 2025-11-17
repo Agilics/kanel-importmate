@@ -1,4 +1,4 @@
-import { LightningElement, track, api } from "lwc";
+import { LightningElement, track, api } from 'lwc';
 
 const SS_ROWS_KEY = 'IM_csvRows';
 const SS_COLS_KEY = 'IM_sourceColumnsCsv';
@@ -10,7 +10,7 @@ export default class CsvUploader extends LightningElement {
   @api title = 'CSV Data Import & Display';
 
   // ===== File / Data =====
-  fileName = "";
+  fileName = '';
   fileSize = 0;
 
   @track columns = [];
@@ -20,17 +20,17 @@ export default class CsvUploader extends LightningElement {
 
   // ===== UI State =====
   isLoading = false;
-  parseError = "";
+  parseError = '';
   isPreview = false;
 
-  @track searchTerm = "";
+  @track searchTerm = '';
   @track showFilters = false;
-  @track filter = { column: "", operator: "contains", value: "" };
+  @track filter = { column: '', operator: 'contains', value: '' };
   @track showSettings = false;
   @track pageSize = DEFAULT_PAGE_SIZE;
   @track previewLimit = DEFAULT_PREVIEW_LIMIT;
 
-  sortBy = "";
+  sortBy = '';
   sortAsc = true;
   pageIndex = 1;
 
@@ -53,23 +53,21 @@ export default class CsvUploader extends LightningElement {
   get filteredRows() {
     let rows = this.allRows;
 
-    const q = (this.searchTerm || "").toLowerCase();
+    const q = (this.searchTerm || '').toLowerCase();
     if (q) {
       rows = rows.filter((r) =>
-        r.values.some((c) =>
-          (c.value || "").toString().toLowerCase().includes(q)
-        )
+        r.values.some((c) => (c.value || '').toString().toLowerCase().includes(q))
       );
     }
 
     const { column, operator, value } = this.filter;
-    if (column && value !== "") {
+    if (column && value !== '') {
       const colIdx = this.columns.indexOf(column);
       const needle = value.toString().toLowerCase();
       rows = rows.filter((r) => {
-        const v = (r.values[colIdx]?.value ?? "").toString().toLowerCase();
-        if (operator === "equals") return v === needle;
-        if (operator === "starts") return v.startsWith(needle);
+        const v = (r.values[colIdx]?.value ?? '').toString().toLowerCase();
+        if (operator === 'equals') return v === needle;
+        if (operator === 'starts') return v.startsWith(needle);
         return v.includes(needle);
       });
     }
@@ -78,10 +76,10 @@ export default class CsvUploader extends LightningElement {
       const i = this.columns.indexOf(this.sortBy);
       const asc = this.sortAsc;
       rows = [...rows].sort((a, b) => {
-        const av = (a.values[i]?.value ?? "").toString().toLowerCase();
-        const bv = (b.values[i]?.value ?? "").toString().toLowerCase();
+        const av = (a.values[i]?.value ?? '').toString().toLowerCase();
+        const bv = (b.values[i]?.value ?? '').toString().toLowerCase();
         if (av === bv) return 0;
-        return asc ? (av > bv ? 1 : -1) : av < bv ? 1 : -1;
+        return asc ? (av > bv ? 1 : -1) : (av < bv ? 1 : -1);
       });
     }
 
@@ -113,9 +111,9 @@ export default class CsvUploader extends LightningElement {
     if (current > 3) pushPage(2);
     const start = Math.max(3, current - 1);
     const end = Math.min(total - 2, current + 1);
-    if (start > 3) pushEllipsis("left");
+    if (start > 3) pushEllipsis('left');
     for (let i = start; i <= end; i++) pushPage(i);
-    if (end < total - 2) pushEllipsis("right");
+    if (end < total - 2) pushEllipsis('right');
     if (current < total - 2) pushPage(total - 1);
     pushPage(total);
     return out;
@@ -136,7 +134,7 @@ export default class CsvUploader extends LightningElement {
     this.isLoading = true;
     const reader = new FileReader();
     reader.onload = () => {
-      const text = reader.result || "";
+      const text = reader.result || '';
       try {
         const { columns, rows } = this.parseCSV(text);
         this.columns = columns;
@@ -153,7 +151,7 @@ export default class CsvUploader extends LightningElement {
 
         this.rebuildDisplayColumns();
       } catch (e) {
-        this.parseError = e?.message || "Failed to parse CSV.";
+        this.parseError = e?.message || 'Failed to parse CSV.';
         this.columns = [];
         this.allRows = [];
       } finally {
@@ -164,10 +162,9 @@ export default class CsvUploader extends LightningElement {
   }
 
   parseCSV(csvText) {
-    const normalize = csvText.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
-    const lines = normalize.split("\n");
-
-    if (!lines.length || (lines.length === 1 && lines[0].trim() === "")) {
+    const normalize = csvText.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    const lines = normalize.split('\n');
+    if (!lines.length || (lines.length === 1 && lines[0].trim() === '')) {
       return { columns: [], rows: [] };
     }
 
@@ -181,7 +178,6 @@ export default class CsvUploader extends LightningElement {
       const out = []; let cur = ''; let inQuotes = false;
       for (let i = 0; i < line.length; i++) {
         const ch = line[i];
-
         if (ch === '"') {
           if (inQuotes && i + 1 < line.length && line[i + 1] === '"') { cur += '"'; i++; }
           else { inQuotes = !inQuotes; }
@@ -207,16 +203,16 @@ export default class CsvUploader extends LightningElement {
     return {
       id: index,
       values: columns.map((col, i) => {
-        const val = (values[i] ?? "").trim();
-        const colLower = (col || "").toLowerCase();
-        const isIndustry = colLower === "industry";
-        const isStatus = colLower === "status";
+        const val = (values[i] ?? '').trim();
+        const colLower = (col || '').toLowerCase();
+        const isIndustry = colLower === 'industry';
+        const isStatus = colLower === 'status';
         return {
           key: `${col}_${index}`,
           value: val,
           isIndustry,
           isStatus,
-          statusClass: isStatus ? this.computeStatusClass(val) : ""
+          statusClass: isStatus ? this.computeStatusClass(val) : ''
         };
       })
     };
