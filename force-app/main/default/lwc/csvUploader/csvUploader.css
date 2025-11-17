@@ -88,7 +88,9 @@
   text-align: center;
   background: #fafafa;
   cursor: pointer;
-  transition: border-color 0.2s, background 0.2s;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
 }
 .dropzone--hover {
   border-color: #1e40af;

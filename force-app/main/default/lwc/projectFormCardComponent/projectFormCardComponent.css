@@ -53,10 +53,10 @@
   top: 8px;
   background: #1e40af;
   border-radius: 12px;
-  -webkit-border-radius: 12px;
-  -moz-border-radius: 12px;
-  -ms-border-radius: 12px;
-  -o-border-radius: 12px;
+  -webkit-border-radius:;
+  -moz-border-radius:;
+  -ms-border-radius:;
+  -o-border-radius:;
 }
 .plus-icons {
   width: 48px;
@@ -68,10 +68,10 @@
   --slds-c-icon-color-foreground-default: #e5e7eb;
   --slds-c-icon-color-foreground: #e5e7eb;
   --slds-c-icon-color-background: #1e40af;
-  -webkit-border-radius: 12px;
-  -moz-border-radius: 12px;
-  -ms-border-radius: 12px;
-  -o-border-radius: 12px;
+  -webkit-border-radius:;
+  -moz-border-radius:;
+  -ms-border-radius:;
+  -o-border-radius:;
 }
 lightning-combobox {
   width: 100%;
@@ -329,7 +329,8 @@ label .slds-form-element__label .slds-no-flex {
 }
 
 .actions {
-  /*div*/position: absolute;
+  /*div*/
+  position: absolute;
   width: 990px;
   height: 83px;
   left: 0px;

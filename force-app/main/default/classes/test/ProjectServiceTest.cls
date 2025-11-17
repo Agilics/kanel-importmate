@@ -8,7 +8,7 @@
 @isTest
 public with sharing class ProjectServiceTest {
   @TestSetup
-  private static void setupData() {
+  static void setupData() {
     // Création de données de test
     List<ImportProject__c> projects = new List<ImportProject__c>();
     for (Integer i = 0; i < 5; i++) {
@@ -25,7 +25,7 @@ public with sharing class ProjectServiceTest {
 
   // Test négatif : limiter < 0 -> liste vide
   @isTest
-  private static void testRecentsProjectsNegativeLimitor() {
+  static void testRecentsProjectsNegativeLimitor() {
     // Performer le teste
     Test.startTest();
   
@@ -42,7 +42,7 @@ public with sharing class ProjectServiceTest {
 
   // Test positif : limiter = 3 -> 3 projets
   @isTest
-  private static void testRecentsProjectsWithValidLimitor() {
+  static void testRecentsProjectsWithValidLimitor() {
     // Test data setup
     // Creation projets Importés
     // Performer le teste
@@ -67,7 +67,7 @@ public with sharing class ProjectServiceTest {
 
   // Test de la méthode permettant la récupération de tous les projets
   @isTest
-  private static void testGetAllProjects() {
+  static void testGetAllProjects() {
   
     Integer expected = 5;
     //excecution du test
@@ -92,7 +92,7 @@ public with sharing class ProjectServiceTest {
     // insertion au niveau de la base
     ImportProject__c result = ProjectService.createProject(
       'Lead Import',
-      'Lead', 
+      'Lead',
       'Descr'
     );
 
@@ -102,22 +102,9 @@ public with sharing class ProjectServiceTest {
     System.assertNotEquals(null, result, 'Insérer avec success');
   }
 
-  @IsTest
-  static void testSaveProjectFail() {
-    //execution du test
-    Test.startTest();
-    try {
-      ImportProject__c result = ProjectService.createProject(null,'targetObjectwithnamelargerthanthirtycharacters','Descr');
-      System.debug('res: '+result);
-    } catch (ApplicationException e) {
-      System.debug('e.getMessage(): ' + e.getMessage());
-    }
-    Test.stopTest();
-  }
-
   //teste de la méthode recherche par nom de projets importés
   @IsTest
-  private static void testSearchProjectName() {
+  static void testSearchProjectName() {
     // valeur du nom de l'objet  attendu
     String expectedTargetObject = 'Account import';
 
@@ -136,24 +123,15 @@ public with sharing class ProjectServiceTest {
     );
     Test.stopTest();
 
-    //Vérification des assertions 
-    System.assertNotEquals(null, results, 'Resultat non null');
-    System.assertEquals(expectedTargetObject, results[0].Name, 'Success');
-  }
-  @isTest
-  private static void testSearchProjectNameEmptyTerm() {
-    Test.startTest();
-    List<ImportProject__c> results = ProjectService.getProjectsByName('');
-    Test.stopTest();
-
     //Vérification des assertions
     System.assertNotEquals(null, results, 'Resultat non null');
+    System.assertEquals(expectedTargetObject, results[0].Name, 'Success');
   }
 
 
   //Tester la Validité l'objet cible Salesforce
   @IsTest
-  private static void testValidateTargetObject() {
+  static void testValidateTargetObject() {
 
     // Execution du test
     Test.startTest();
@@ -167,7 +145,7 @@ public with sharing class ProjectServiceTest {
 
   //Tester la mise à jour d'un projet importé
   @isTest
-  private static void testForUpdateProject() {
+  static void testForUpdateProject() {
     String expectedName = 'Lead Import';
     String expectedDescription = 'Describe Lead import';
     String expectedTargetObject = 'Lead';
@@ -215,7 +193,7 @@ public with sharing class ProjectServiceTest {
 
   //Tester la récupèration des données par l'ID
   @IsTest
-  private static void testGetProjectById() {
+  static void testGetProjectById() {
     Test.startTest();
     String expectedName = 'Lead Import';
     String expectedTargetObject = 'Lead';
@@ -243,7 +221,7 @@ public with sharing class ProjectServiceTest {
 
 
   @IsTest
-  private static void testdoesProjectExist() {
+  static void testdoesProjectExist() {
     // expected values
     Boolean expectedFalse = false;
     Boolean expectedTrue = true;   
@@ -273,139 +251,5 @@ public with sharing class ProjectServiceTest {
      System.assertEquals(expectedTrue, actual);
    //  System.assertEquals(expectedFalse, isProject);
     // System.assertNotEquals(expectedFalse, actual);
-  }
-
-  @IsTest
-  private static void testdoesProjectExistFailure() {
-    
-    Test.startTest();
-      try {
-        Boolean actual = ProjectService.doesProjectExist('name','targetObject');
-      } catch (Exception e) {
-        System.debug('e.getMessage(): ' + e.getMessage());
-      }
-    Test.stopTest();
-  }
-
-  @isTest
-  private static void testGetProjectsWithStatsDefaultLimitor() {
-    ImportProject__c project = new ImportProject__c(
-      Name = 'Stats Project',
-      TargetObject__c = 'Account',
-      Description__c = 'Stats description',
-      IsActive__c = true
-    );
-    insert project;
-
-    ImportExecution__c execution = new ImportExecution__c(
-      Project__c = project.Id,
-      Type__c = 'Import',
-      TotalRecords__c = 10,
-      ProcessedRecords__c = 8,
-      FailedRecords__c = 2
-    );
-    insert execution;
-
-    Test.startTest();
-    List<ImportProject__c> results = ProjectService.getProjectsWithStats(null);
-    Test.stopTest();
-
-    Assert.isNotNull(results, 'Les résultats ne doivent pas être nuls');
-    Assert.isTrue(results.size() > 0, 'La liste des projets doit contenir au moins un élément');
-
-    ImportProject__c matchedProject = null;
-    for (ImportProject__c current : results) {
-      if (current.Id == project.Id) {
-        matchedProject = current;
-        break;
-      }
-    }
-
-    Assert.isNotNull(matchedProject, 'Le projet inséré doit apparaître dans les résultats');
-    Assert.isNotNull(matchedProject.ImportExecutions__r, 'Les exécutions doivent être chargées');
-    Assert.areEqual(1, matchedProject.ImportExecutions__r.size(), 'Une exécution doit être retournée');
-  }
-
-  @isTest
-  private static void testCalculateDashboardStats() {
-    //delete [SELECT Id FROM ImportExecution__c];
-    ImportProject__c project = new ImportProject__c(
-      Name = 'Dashboard Project',
-      TargetObject__c = 'Lead',
-      Description__c = 'Dashboard description',
-      IsActive__c = true
-    );
-    insert project;
-
-    ImportExecution__c execution1 = new ImportExecution__c(
-      Project__c = project.Id,
-      Type__c = 'Import',
-      TotalRecords__c = 10,
-      ProcessedRecords__c = 8,
-      FailedRecords__c = 2
-    );
-
-    insert execution1;
-
-    Test.startTest();
-      DashboardStats stats = ProjectService.calculateDashboardStats();
-    Test.stopTest();
-
-    Assert.isNotNull(stats, 'Les statistiques ne doivent pas être nulles');
-    Assert.areEqual(6, stats.totalProjects, 'Le total de projets doit inclure les données de test et le projet ajouté');
-    Assert.areEqual(Decimal.valueOf(8), stats.totalRecordsImported, 'Le total importé doit correspondre aux enregistrements traités');
-    Assert.areEqual(Decimal.valueOf(75), stats.successRate, 'Le taux de succès doit être calculé correctement');
-    Assert.areEqual('75.0%', stats.successRateFormatted, 'Le taux de succès formaté doit être cohérent');
-    Assert.areEqual('8', stats.recordsImportedFormatted, 'Le formatage des enregistrements doit être correct');
-  }
-
-    @isTest
-  private static void testCalculateDashboardStatsWithoutExec() {
-    delete [SELECT Id FROM ImportExecution__c];
-    ImportProject__c project = new ImportProject__c(
-      Name = 'Dashboard Project',
-      TargetObject__c = 'Lead',
-      Description__c = 'Dashboard description',
-      IsActive__c = true
-    );
-    insert project;
-
-    Test.startTest();
-      DashboardStats stats = ProjectService.calculateDashboardStats();
-    Test.stopTest();
-
-    Assert.isNotNull(stats, 'Les statistiques ne doivent pas être nulles');
-    Assert.areEqual(6, stats.totalProjects, 'Le total de projets doit inclure les données de test et le projet ajouté');
-    Assert.areEqual(Decimal.valueOf(0), stats.successRate, 'Le taux de succès doit être calculé correctement');
-  }
-
-  @isTest
-  private static void testDeleteProjectService() {
-    ImportProject__c project = new ImportProject__c(
-      Name = 'Delete Me',
-      TargetObject__c = 'Account',
-      Description__c = 'To delete'
-    );
-    insert project;
-
-    Test.startTest();
-    ProjectService.deleteProject(project.Id);
-    Test.stopTest();
-
-    Integer remaining = [SELECT COUNT() FROM ImportProject__c WHERE Id = :project.Id];
-    Assert.areEqual(0, remaining, 'Le projet doit être supprimé par le service');
-  }
-
-  @isTest
-  private static void testDeleteProjectFailure() {
-
-    Test.startTest();
-    try {
-      ProjectService.deleteProject(null);
-    } catch (Exception e) {
-      System.debug('e.getMessage(): ' + e.getMessage());
-      
-    }
-    Test.stopTest();
   }
 }

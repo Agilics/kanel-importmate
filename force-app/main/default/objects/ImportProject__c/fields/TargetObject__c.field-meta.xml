@@ -3,8 +3,8 @@
     <fullName>TargetObject__c</fullName>
     <externalId>false</externalId>
     <label>Target Object</label>
-    <length>30</length>
-    <required>true</required>
+    <length>255</length>
+    <required>false</required>
     <trackTrending>false</trackTrending>
     <type>Text</type>
     <unique>false</unique>

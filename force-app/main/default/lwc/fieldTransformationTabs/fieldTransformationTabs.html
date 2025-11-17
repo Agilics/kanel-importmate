@@ -1,0 +1,14 @@
+<template>
+  <div class="tab-container">
+    <template for:each={computedTabs} for:item="tab">
+      <button
+        key={tab.id}
+        class={tab.tabClass}
+        data-value={tab.value}
+        onclick={handleTabChange}
+      >
+        {tab.label}
+      </button>
+    </template>
+  </div>
+</template>

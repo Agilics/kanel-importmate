@@ -73,5 +73,3 @@ public with sharing class ConcatenationTransformation implements ITransformation
     }
 
 }
-
-
