@@ -4,9 +4,8 @@ export default class DataSourceSelectorCard extends LightningElement {
   @api title = "";
   @api subtitle = "";
   @api contents;
-    @api isUpload;
+  @api isUpload;
   @api currentProject; //  received from parent
-    
 
   //retourne l'icône de l'en tête
   get headerIcon() {
@@ -38,8 +37,8 @@ export default class DataSourceSelectorCard extends LightningElement {
   }
 
   // événements de navigation dispatcher vers le parent DataSource
-    handleNagivation() {
-     console.log('Button clicked!');
+  handleNagivation() {
+    console.log("Button clicked!");
     this.dispatchEvent(new CustomEvent("cardaction"));
   }
 }

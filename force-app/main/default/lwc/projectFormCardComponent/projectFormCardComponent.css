@@ -45,16 +45,18 @@
   --slds-c-icon-color-foreground-default: #1e40af;
   --slds-c-icon-color-foreground: #1e40af;
   --slds-c-icon-color-background: #e5e7eb;
-  /* div */
-
+  /*div*/
   position: absolute;
   width: 48px;
   height: 48px;
   left: 0px;
   top: 8px;
-
   background: #1e40af;
   border-radius: 12px;
+  -webkit-border-radius: 12px;
+  -moz-border-radius: 12px;
+  -ms-border-radius: 12px;
+  -o-border-radius: 12px;
 }
 .plus-icons {
   width: 48px;
@@ -66,6 +68,10 @@
   --slds-c-icon-color-foreground-default: #e5e7eb;
   --slds-c-icon-color-foreground: #e5e7eb;
   --slds-c-icon-color-background: #1e40af;
+  -webkit-border-radius: 12px;
+  -moz-border-radius: 12px;
+  -ms-border-radius: 12px;
+  -o-border-radius: 12px;
 }
 lightning-combobox {
   width: 100%;
@@ -119,10 +125,10 @@ lightning-combobox {
   border-radius: 12px;
   border-width: 1px;
   padding: 2rem;
-  -webkit-border-radius: 0.75rem;
-  -moz-border-radius: 0.75rem;
-  -ms-border-radius: 0.75rem;
-  -o-border-radius: 0.75rem;
+  -webkit-border-radius: 12px;
+  -moz-border-radius: 12px;
+  -ms-border-radius: 12px;
+  -o-border-radius: 12px;
 }
 
 lightning-input.project-name {
@@ -131,6 +137,10 @@ lightning-input.project-name {
   border-radius: 8px;
   opacity: 1;
   margin-top: 28px;
+  -webkit-border-radius:;
+  -moz-border-radius:;
+  -ms-border-radius:;
+  -o-border-radius:;
 }
 
 lightning-input.project-name .slds-form-element__control input {
@@ -138,6 +148,10 @@ lightning-input.project-name .slds-form-element__control input {
   border-radius: 8px;
   font-size: 16px;
   padding: 0 16px;
+  -webkit-border-radius:;
+  -moz-border-radius:;
+  -ms-border-radius:;
+  -o-border-radius:;
 }
 .slds-form-element__help .slds-m-left_none {
   margin: 0 0 1rem 0;
@@ -151,6 +165,10 @@ lightning-textarea .description {
   border-radius: 8px;
   border-width: 1px;
   margin-bottom: 1rem;
+  -webkit-border-radius:;
+  -moz-border-radius:;
+  -ms-border-radius:;
+  -o-border-radius:;
 }
 
 /* SECTION HEADERS */
@@ -188,7 +206,7 @@ lightning-textarea .description {
 
 /* INPUTS */
 .input-field {
-  width: 990px; 
+  width: 990px;
   height: 50px;
   top: 28px;
   angle: 0 deg;
@@ -311,15 +329,16 @@ label .slds-form-element__label .slds-no-flex {
 }
 
 .actions {
-  /* div */
-
-  position: absolute;
+  /*div*/position: absolute;
   width: 990px;
   height: 83px;
   left: 0px;
   top: 904px;
-
   border-radius: 0px;
+  -webkit-border-radius: 0px;
+  -moz-border-radius: 0px;
+  -ms-border-radius: 0px;
+  -o-border-radius: 0px;
 }
 
 .footer {
@@ -353,30 +372,34 @@ label .slds-form-element__label .slds-no-flex {
   }
 }
 
-.custom-label {
-  display: grid;
-  grid-auto-flow: dense; /* NEW */
-}
 /*require * position */
 .target-label {
   grid-template-columns: 140px 1fr;
 }
 .name-label {
-  grid-template-columns: 80px 1fr;
+  flex-direction: row-reverse;
 }
 
-.description-label{
-width: 990;
-height: 20;
-angle: 0 deg;
-opacity: 1;
-top: 1px;
-font-family: Inter;
-font-weight: 500;
-font-style: Medium;
-font-size: 14px;
-leading-trim: NONE;
-line-height: 100%;
-letter-spacing: 0%;
-color: #374151;
+.description-label {
+  width: 990;
+  height: 20;
+  opacity: 1;
+  color: #374151;
+  top: 1px;
+  font-family: Inter;
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 14px;
+  leading-trim: NONE;
+  line-height: 100%;
+  letter-spacing: 0%;
+  color: #374151;
+  margin-bottom: -2rem !important;
+}
+
+label .custom-label {
+  margin-bottom: -0.25rem !important;
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: start;
 }
