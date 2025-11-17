@@ -1,171 +1,320 @@
 <template>
-  <lightning-card title="Field Mapping" icon-name="custom:custom63">
-    <div class="slds-p-around_medium">
+  <lightning-card>
+    <div class="fm-root">
+      <!-- Header -->
+      <div class="fm-header slds-p-horizontal_medium slds-p-top_medium">
+        <div class="fm-title">
+          <h1 class="fm-heading">Field Mapping</h1>
+          <p class="fm-subtitle">Map source columns to Salesforce fields</p>
+        </div>
 
-      <!-- Top controls: Project | Target Object | Version -->
-      <div class="header-row">
-        <!-- Project (pruned to the selected one) -->
+        <div class="fm-actions">
+          <lightning-button
+            label="Auto-Map"
+            class="ghost"
+            onclick={handleAutoMapClick}
+          ></lightning-button>
+          <lightning-button
+            label="Clear All"
+            onclick={handleClearAllClick}
+          ></lightning-button>
+          <lightning-button
+            label="Save Mapping"
+            onclick={handleSaveMapping}
+          ></lightning-button>
+          <lightning-button
+            label="Back"
+            onclick={handleBackClick}
+          ></lightning-button>
+          <lightning-button
+            variant="brand"
+            label="Continue"
+            onclick={handleContinueClick}
+          ></lightning-button>
+        </div>
+      </div>
+
+      <!-- Controls kept for logic but visually hidden -->
+      <div
+        class="fm-controls fm-controls--hidden slds-p-horizontal_medium slds-p-top_small"
+      >
         <lightning-combobox
           label="Project"
           value={selectedProjectId}
           options={projectOptions}
           onchange={handleProjectChange}
-          disabled={isProjectLocked}>
-        </lightning-combobox>
+          disabled={isProjectLocked}
+        ></lightning-combobox>
 
-        <!-- Target Object (read-only, comes from the selected project) -->
         <lightning-input
           type="text"
-          label="Target Object"
+          label="Salesforce Object"
           value={selectedTargetObject}
           disabled
-          class="target-object">
-        </lightning-input>
+        ></lightning-input>
 
-        <!-- Version -->
         <lightning-input
           type="text"
           label="Version"
           value={versionInput}
-          onchange={handleVersionChange}>
-        </lightning-input>
-      </div>
-
-      <!-- Actions -->
-      <div class="actions-row">
-        <lightning-button
-          label="Load Saved Mappings"
-          title="Apply previously saved mappings to the board"
-          onclick={handleLoadSavedClick}>
-        </lightning-button>
+          onchange={handleVersionChange}
+        ></lightning-input>
 
         <lightning-button
-          label="Clear All"
-          variant="destructive"
-          title="Remove all mappings and restore CSV list"
-          onclick={handleClearAllClick}>
-        </lightning-button>
-
+          label="Load Saved"
+          onclick={handleLoadSavedClick}
+        ></lightning-button>
         <lightning-button
-          class="slds-m-left_auto"
-          label="Save Mappings"
           variant="brand"
-          onclick={handleSave}>
-        </lightning-button>
+          label="Save"
+          onclick={handleSave}
+        ></lightning-button>
       </div>
 
-      <!-- ===== BOARD: Source LEFT | Target RIGHT ===== -->
-      <div class="field-map-board">
-        <!-- SOURCES LEFT -->
-        <section class="column column--sources">
-          <div class="column__header">
-            <h2 class="slds-text-heading_small">Source Fields (CSV)</h2>
+      <!-- Two columns -->
+      <div class="fm-grid slds-p-around_medium">
+        <!-- Left: Sources -->
+        <section class="fm-panel">
+          <div class="fm-panel__header">
+            <h2>{sourceTitle}</h2>
+            <span class="fm-count">{_csvRows.length} rows</span>
           </div>
-          <div class="column__body">
-            <template if:true={availableSourceColumns}>
-              <template for:each={availableSourceColumns} for:item="source">
+
+          <div class="fm-source-list">
+            <template if:true={hasSourceList}>
+              <template for:each={sourceList} for:item="item">
                 <div
-                  key={source}
-                  class="draggable"
+                  key={item.name}
+                  class="fm-source-row"
                   draggable="true"
-                  data-source={source}
-                  ondragstart={handleDragStart}>
-                  {source}
+                  data-source={item.name}
+                  ondragstart={handleDragStart}
+                >
+                  <div class="fm-source-main">
+                    <div class="src-icon" aria-hidden="true"></div>
+                    <div class="name-wrap">
+                 
+                      <div class="name">{item.name}</div>
+                      <div class="sub">{item.subtitle}</div>
+                    </div>
+                  </div>
+
+                  <template if:true={item.isMapped}>
+                    <span class={item.pillClass}>Mapped</span>
+                  </template>
+                  <template if:true={item.isUnmapped}>
+                    <span class={item.pillClass}>Unmapped</span>
+                  </template>
+                  <template if:true={item.isTransform}>
+                    <span class={item.pillClass}>+Transform</span>
+                  </template>
                 </div>
               </template>
             </template>
-            <template if:false={availableSourceColumns}>
-              <p class="muted slds-m-top_small">No source columns to show.</p>
+
+            <template if:false={hasSourceList}>
+              <p class="muted">No source columns.</p>
             </template>
           </div>
         </section>
 
-        <!-- TARGETS RIGHT (scrollable) -->
-        <section class="column column--targets">
-          <div class="column__header">
-            <h2 class="slds-text-heading_small">Target Fields</h2>
-          </div>
-          <div class="column__body">
-            <template if:true={targetFields}>
-              <template for:each={targetFields} for:item="field">
-                <div
-                  key={field.apiName}
-                  class="drop-zone"
-                  data-target={field.apiName}
-                  ondragover={handleDragOver}
-                  ondrop={handleDrop}
-                >
-                  <strong>{field.label}</strong>
+        <!-- Right: Targets & summary -->
+        <section class="fm-right">
+          <div class="fm-target-header">
+            <div class="title">
+              <h2>Salesforce Fields ({selectedTargetObject})</h2>
+            </div>
+            <button
+              class="fm-settings-btn"
+              type="button"
+              title="Preview settings"
+              aria-label="Preview settings"
+              onclick={openSettings}
+            >
+              <span class="gear" aria-hidden="true"></span>
+          </button>
 
-                  <!-- Mapped sources under this target field -->
+          </div>
+
+          <div class="fm-target-list">
+            <template for:each={targetFields} for:item="field">
+              <article
+                key={field.apiName}
+                class={field.cardClass}
+                data-target={field.apiName}
+                ondragover={handleDragOver}
+                ondrop={handleDrop}
+              >
+                <div class="fm-target-top">
+                  <div class="left">
+                    <div class={field.iconCssClass} aria-hidden="true"></div>
+                    <div class="labels">
+                      <div class="t-label">{field.label}</div>
+                      <div class="t-sub">{field.typeLabel}</div>
+                    </div>
+                  </div>
+
                   <template if:true={field.mappedSources}>
                     <template for:each={field.mappedSources} for:item="ms">
-                      <div key={ms.sourceColumn} class="mapped-item">
-                        <div class="slds-grid slds-wrap slds-grid_vertical-align-center">
-                          <div class="slds-col slds-grow">{ms.sourceColumn}</div>
-                          <div class="slds-col">
-                            <lightning-button
-                              variant="destructive-text"
-                              label="Unmap"
-                              data-source={ms.sourceColumn}
-                              onclick={handleRemoveMapping}>
-                            </lightning-button>
-                          </div>
-                        </div>
-
-                        <!-- Lookup toggle -->
-                        <div class="slds-m-top_x-small">
-                          <lightning-input
-                            type="checkbox"
-                            label="Use as lookup"
-                            checked={ms.mapping.isLookup}
-                            data-source={ms.sourceColumn}
-                            onchange={handleLookupToggle}>
-                          </lightning-input>
-                        </div>
-
-                        <!-- Lookup object + match field -->
-                        <template if:true={ms.mapping.isLookup}>
-                          <div class="slds-m-top_x-small">
-                            <lightning-combobox
-                              label="Lookup Object"
-                              value={ms.mapping.lookupObject}
-                              data-source={ms.sourceColumn}
-                              options={availableObjectsOptions}
-                              onchange={handleLookupObjectChange}>
-                            </lightning-combobox>
-
-                            <lightning-combobox
-                              class="slds-m-top_x-small"
-                              label="Match Field"
-                              value={ms.mapping.lookupMatchField}
-                              data-source={ms.sourceColumn}
-                              options={ms.lookupFieldsOptions}
-                              onchange={handleLookupFieldChange}>
-                            </lightning-combobox>
-                          </div>
-                        </template>
+                      <div key={ms.key} class={ms.chipClass}>
+                        <span class="chip-text">{ms.sourceColumn}</span>
+                        <lightning-button-icon
+                          icon-name="utility:close"
+                          variant="bare"
+                          size="x-small"
+                          alternative-text="Unmap"
+                          title="Unmap"
+                          data-source={ms.sourceColumn}
+                          onclick={handleRemoveMapping}
+                        ></lightning-button-icon>
                       </div>
                     </template>
                   </template>
-
-                  <template if:false={field.mappedSources}>
-                    <div class="hint slds-m-top_x-small">Drop a source column here…</div>
-                  </template>
                 </div>
-              </template>
-            </template>
 
-            <template if:false={targetFields}>
-              <p class="muted slds-m-top_small">Select a project to load target fields.</p>
+                <!-- Lookup / drop area -->
+                <template if:true={field.mappedSources}>
+                  <template for:each={field.mappedSources} for:item="ms">
+                    <div key={ms.key} class="lookup-block">
+                      <lightning-input
+                        type="checkbox"
+                        label="Use as lookup"
+                        checked={ms.mapping.isLookup}
+                        data-source={ms.sourceColumn}
+                        onchange={handleLookupToggle}
+                      ></lightning-input>
+
+                      <template if:true={ms.mapping.isLookup}>
+                        <div class="lookup-row">
+                          <lightning-combobox
+                            class="lkp"
+                            label="Lookup Object"
+                            value={ms.mapping.lookupObject}
+                            data-source={ms.sourceColumn}
+                            options={availableObjectsOptions}
+                            onchange={handleLookupObjectChange}
+                          ></lightning-combobox>
+
+                          <lightning-combobox
+                            class="lkp"
+                            label="Match Field"
+                            value={ms.mapping.lookupMatchField}
+                            data-source={ms.sourceColumn}
+                            options={ms.lookupFieldsOptions}
+                            onchange={handleLookupFieldChange}
+                          ></lightning-combobox>
+                        </div>
+                      </template>
+                    </div>
+                  </template>
+                </template>
+
+                <template if:false={field.mappedSources}>
+                  <div class="fm-drop-hint">Drop here or select</div>
+                </template>
+              </article>
             </template>
           </div>
+
+          <!-- Summary -->
+          <aside class="fm-summary">
+            <div class="sum-title">Mapping Summary</div>
+            <div class="sum-row">
+              <span class="sum-label">Total Fields:</span>
+              <span class="sum-val">{summaryTotalFields}</span>
+            </div>
+            <div class="sum-row">
+              <span class="sum-label">Mapped:</span>
+              <span class="sum-val sum-green">{summaryMappedCount}</span>
+            </div>
+            <div class="sum-row">
+              <span class="sum-label">Unmapped:</span>
+              <span class="sum-val sum-red">{summaryUnmappedCount}</span>
+            </div>
+            <div class="sum-row">
+              <span class="sum-label">With Transformations:</span>
+              <span class="sum-val sum-blue">{summaryWithTransformCount}</span>
+            </div>
+          </aside>
         </section>
       </div>
+
+      <!-- Preview -->
+      <div class="fm-preview slds-p-horizontal_medium slds-p-bottom_large">
+        <div class="prev-title">Data Preview</div>
+        <div class="prev-sub">
+          Preview of mapped data with transformations applied
+        </div>
+
+        <div class="table-wrap">
+          <table class="prev-table">
+            <thead>
+              <tr>
+                <template if:true={hasMappedFields}>
+                  <template for:each={mappedFields} for:item="f">
+                    <th key={f.apiName}>{f.label}</th>
+                  </template>
+                </template>
+              </tr>
+            </thead>
+            <tbody>
+              <template if:true={hasClientPreview}>
+                <template for:each={clientPreviewRows} for:item="row">
+                  <tr key={row._key}>
+                    <template for:each={row.cells} for:item="cell">
+                      <td key={cell.key}>{cell.value}</td>
+                    </template>
+                  </tr>
+                </template>
+              </template>
+
+              <template if:false={hasClientPreview}>
+                <tr>
+                  <td colspan={previewColspan} class="muted">
+                    No preview available.
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
+    <!-- Settings modal -->
+    <template if:true={showSettingsModal}>
+      <section class="fm-modal-backdrop" role="presentation">
+        <div
+          class="fm-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Preview settings"
+        >
+          <header class="fm-modal__header">
+            <h2>Preview settings</h2>
+          </header>
+          <div class="fm-modal__body">
+            <lightning-input
+              type="number"
+              label="Number of preview rows"
+              value={settingsPreviewRowLimit}
+              min="1"
+              max="50"
+              onchange={handleSettingsRowLimitChange}
+            ></lightning-input>
+          </div>
+          <footer class="fm-modal__footer">
+            <lightning-button
+              label="Cancel"
+              onclick={handleSettingsCancel}
+            ></lightning-button>
+            <lightning-button
+              variant="brand"
+              label="Apply"
+              onclick={handleSettingsApply}
+            ></lightning-button>
+          </footer>
+        </div>
+      </section>
+    </template>
   </lightning-card>
-
-<c-backbutton onback={handleBackFromMapper}></c-backbutton>
-
-
 </template>
