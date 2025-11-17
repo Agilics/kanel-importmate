@@ -11,8 +11,7 @@ export default class TransformationCardComponent extends LightningElement {
   @api cardHeadTitle;
   @api cardHeadSubtitle;
   @api mappings ;//propriété de mappings dispatcher vers le parent
-  @api isWarningBadge = false;
-  @api cardClass ;
+  @api isWarningBadge = false; 
 
   //Getter style du badge 
   get badgeClass(){

@@ -2,7 +2,7 @@
  * @description       :
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             :
- * @last modified on  : 09-16-2025
+ * @last modified on  : 11-17-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
  **/
 @isTest
@@ -252,4 +252,52 @@ public with sharing class ProjectServiceTest {
    //  System.assertEquals(expectedFalse, isProject);
     // System.assertNotEquals(expectedFalse, actual);
   }
+
+  @isTest
+    static void testDeleteProjectById() {
+        // Récupérer le projet inséré
+        ImportProject__c proj = [
+            SELECT Id, Name 
+            FROM ImportProject__c 
+            WHERE Name = 'Projet 1'
+            LIMIT 1
+        ];
+
+        // Vérifier qu'il existe
+        System.assertNotEquals(null, proj.Id, 'Le projet doit exister avant suppression');
+
+        // Exécuter la méthode
+        Test.startTest();
+        ProjectService.deleteProjectById(proj.Id);
+        Test.stopTest();
+
+        // Vérifier la suppression
+        ImportProject__c deletedProject = [
+            SELECT Id, IsDeleted 
+            FROM ImportProject__c 
+            WHERE Id = :proj.Id 
+            ALL ROWS
+        ];
+
+        System.assertEquals(true, deletedProject.IsDeleted, 'Le projet aurait dû être supprimé');
+    }
+
+
+    @isTest
+    static void testDeleteProjectById_ProjectNotFound() {
+        // Cas : suppression d’un ID inexistant doit lancer une exception
+
+        Boolean exceptionThrown = false;
+
+        Test.startTest();
+        try {
+            ProjectService.deleteProjectById('a01234567890123456'); // ID bidon
+        } catch (Exception e) {
+            exceptionThrown = true;
+        }
+        Test.stopTest();
+
+        System.assertEquals(true, exceptionThrown,
+            'Une exception doit être levée si le projet est introuvable');
+    }
 }

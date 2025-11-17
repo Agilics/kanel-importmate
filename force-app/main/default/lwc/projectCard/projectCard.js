@@ -1,5 +1,5 @@
 import { LightningElement, api } from 'lwc';
-import { navigateToPage } from 'c/utility'
+//import { navigateToPage } from 'c/utility'
 
 export default class ProjectCard extends LightningElement {
     @api project;

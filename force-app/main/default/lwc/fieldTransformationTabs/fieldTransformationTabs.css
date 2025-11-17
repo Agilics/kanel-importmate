@@ -23,11 +23,7 @@ body {
   opacity: 1;
   top: 124px;
   left: 32px;
-  background: #ffffff;
-  -webkit-border-radius:;
-  -moz-border-radius:;
-  -ms-border-radius:;
-  -o-border-radius:;
+  background: #ffffff; 
 }
 
 .tab {
@@ -75,10 +71,6 @@ body {
   background-color: #eaeaea;
   color: #000;
   border-radius: 6px;
-  -webkit-border-radius:;
-  -moz-border-radius:;
-  -ms-border-radius:;
-  -o-border-radius:;
 }
 
 .tab.active {

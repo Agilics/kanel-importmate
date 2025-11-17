@@ -1,3 +1,10 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 11-17-2025
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
 <template>
   <div class="tab-container">
     <template for:each={computedTabs} for:item="tab">
@@ -5,7 +12,7 @@
         key={tab.id}
         class={tab.tabClass}
         data-value={tab.value}
-        onclick={handleTabChange}
+        onclick={handleTransformationChange}
       >
         {tab.label}
       </button>

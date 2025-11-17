@@ -2,7 +2,7 @@
  * @description       :
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 10-03-2025
+ * @last modified on  : 11-17-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
  **/
 public with sharing class ProjectRepository {
@@ -36,6 +36,23 @@ public static ImportProject__c saveProject(ImportProject__c project) {
     }
     return null;
   }
+  
+   //suppression d'un projet importé
+  public static void deleteProjectById(String projectId){
+     if (SecurityUtils.isAccessible(ImportProject__c.SObjectType)) {
+     try {
+      //récupèrer le project importé par l'id
+      ImportProject__c project = ProjectRepository.getProjectById(projectId);
+      
+      delete project;
+     } catch (DmlException e) {
+         ErrorLogService.logException(e);
+        throw new DmlException(e.getMessage());
+     }
+    }
+     
+  }
+  
 
   // Récupère tous les projets importés
   public static List<ImportProject__c> getAllProjects() {

@@ -19,16 +19,10 @@ export default class FieldTransformationTabs extends LightningElement {
   }
 
   // Gestion du changement d'onglet
-  handleTabChange(event) {
-    const selectedTab = event.currentTarget.dataset.value;
-    this.activeTab = selectedTab;
-
-    this.dispatchEvent(
-      new CustomEvent("movetransformation", {
-        detail: { activetab: this.activeTab }
-      })
-    );
-
-    console.log("Onglet sélectionné:", this.activeTab);
-  }
+ handleTransformationChange(event) {
+    // Le parent met à jour son state
+    this.activeTransformationTab = event.detail.activetab;
+    // du composant fieldTransformationTabs via le binding
+    console.log("Onglet actif:", this.activeTransformationTab);
+}
 }

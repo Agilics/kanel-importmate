@@ -2,7 +2,7 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 10-03-2025
+ * @last modified on  : 11-17-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 public with sharing class ProjectService {
@@ -112,6 +112,17 @@ public with sharing class ProjectService {
       }
   }
 
+  //suppression d'un projet importé via l'id
+  public static void deleteProjectById(String projectId){
+     try {
+        ProjectRepository.deleteProjectById(projectId);
+     } catch (DmlException e) {
+         ErrorLogService.logException(e);
+        throw new DmlException(e.getMessage());
+     }
+     
+  }
+  
   
   // Valide l'objet cible Salesforce
   public static Boolean validateTargetObject(String targetObject) {

@@ -2,7 +2,7 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 09-16-2025
+ * @last modified on  : 11-17-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 @IsTest
@@ -169,5 +169,50 @@ private class ProjectRepositoryTest {
         }
     }
 
+     @isTest
+    static void testDeleteProjectById() {
+        ImportProject__c proj = [
+            SELECT Id, Name 
+            FROM ImportProject__c 
+            WHERE Name = 'Projet Test'
+            LIMIT 1
+        ];
+
+        Assert.notEquals(null, proj.Id, 'Le projet doit exister avant suppression');
+
+        Test.startTest();
+        ProjectService.deleteProjectById(proj.Id);
+        Test.stopTest();
+
+        ImportProject__c deletedProject = [
+            SELECT Id, IsDeleted 
+            FROM ImportProject__c 
+            WHERE Id = :proj.Id 
+            ALL ROWS
+        ];
+
+        Assert.isTrue(
+            deletedProject.IsDeleted,
+            'Le projet aurait dû être supprimé'
+        );
+    }
+
+    @isTest
+    static void testDeleteProjectById_ProjectNotFound() {
+        Boolean exceptionThrown = false;
+
+        Test.startTest();
+        try {
+            ProjectService.deleteProjectById('a01234567890123456');
+        } catch (Exception e) {
+            exceptionThrown = true;
+        }
+        Test.stopTest();
+
+        Assert.isTrue(
+            exceptionThrown,
+            'Une exception doit être levée si le projet est introuvable'
+        );
+    }
 
 }

@@ -4,7 +4,7 @@ import LightningModal from 'lightning/modal';
 import TRANSORMATION_OBJECT from "@salesforce/schema/TransformationRule__c";
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 import RULE_TYPE_FIELD from "@salesforce/schema/TransformationRule__c.RuleType__c"; 
-import getPickListValues from '@salesforce/apex/TransformationController.getPickListValues';;
+import getPickListValues from "@salesforce/apex/TransformationController.getPickListValues";
 export default class TransformationSaveFormModal extends LightningModal {
  
   @track sourceField="";
@@ -55,9 +55,9 @@ export default class TransformationSaveFormModal extends LightningModal {
         this.close('okay');
     }
     
-    //sauvegarde d'une nouvelle transformation
-  handleAddTransformation(event) {
-    //TODO 
+    //TODO sauvegarde d'une nouvelle transformation
+  handleAddTransformation() {
+    
    // this.close();
   }
 }
