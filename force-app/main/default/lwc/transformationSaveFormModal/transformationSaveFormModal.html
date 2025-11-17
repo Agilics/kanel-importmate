@@ -13,10 +13,14 @@
         <!-- -->  
            
           <!-- source field -->
-          <lightning-input label="Source Field" value={sourceField}></lightning-input>
+          <lightning-input label="Source Field"
+          placeholder="Source Field"
+          value={sourceField}></lightning-input>
           
           <!-- target source -->
-          <lightning-input label="Target Field" value={targetField}></lightning-input>
+          <lightning-input label="Target Field"
+          placeholder="Target Field"
+           value={targetField}></lightning-input>
 
           <!-- règle de transfromation -->
           <lightning-combobox
@@ -33,7 +37,11 @@
         data-field="Parameters__c"></lightning-textarea>
         
       <!-- ordre -->
-       <lightning-input label="Ordre d'application" type="number" value={order} onchange={handleChange} data-field="Order__c"></lightning-input>
+       <lightning-input label="Ordre d'application" 
+        minlength="1"
+      maxlength="99" 
+      placeholder="Order"
+       type="number" value={order} onchange={handleChange} data-field="Order__c"></lightning-input>
       <br/>
       
       <div class="actions">
