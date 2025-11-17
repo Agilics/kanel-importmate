@@ -1,105 +1,105 @@
 .app-header {
-    background: #ffffff;
-    border-bottom: 1px solid #e5e7eb;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
 }
 
 .header-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 1.5rem;
-    height: 3.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  height: 3.5rem;
 }
 
 /* Logo Section */
 .logo-section {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .logo-image {
-    width: 8rem;
-    height: 3.5rem;
-    object-fit: contain;
+  width: 8rem;
+  height: 3.5rem;
+  object-fit: contain;
 }
 
 .logo-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.5rem;
-    height: 2.5rem;
-    background: #1e40af;
-    border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: #1e40af;
+  border-radius: 0.5rem;
 }
 
 .logo-icon lightning-icon {
-    --slds-c-icon-color-foreground: white;
-    --slds-c-icon-color-foreground-default: white;
+  --slds-c-icon-color-foreground: white;
+  --slds-c-icon-color-foreground-default: white;
 }
 
 .app-title {
-    font-size: 1.25rem;
-    font-weight: 700;
-    color: #111827;
-    margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
 }
 
 /* Navigation Tabs */
 .nav-tabs {
-    margin-left: 6.5%;
-    display: flex;
-    gap: 0.25rem;
-    flex: 1;
-    justify-content: left;
+  margin-left: 6.5%;
+  display: flex;
+  gap: 0.25rem;
+  flex: 1;
+  justify-content: left;
 }
 
 .nav-tabs button {
-    padding: 0.625rem 1.25rem;
-    background: transparent;
-    border: none;
-    color: #6b7280;
-    font-size: 0.875rem;
-    font-weight: 500;
-    cursor: pointer;
-    border-radius: 0.375rem;
-    transition: all 0.2s ease;
-    position: relative;
+  padding: 0.625rem 1.25rem;
+  background: transparent;
+  border: none;
+  color: #6b7280;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 0.375rem;
+  transition: all 0.2s ease;
+  position: relative;
 }
 
 .nav-tabs button:hover {
-    background: #f3f4f6;
-    color: #374151;
+  background: #f3f4f6;
+  color: #374151;
 }
 
 .nav-tabs button.active {
-    background: #1e40af;
-    color: white;
-    font-weight: 600;
+  background: #1e40af;
+  color: white;
+  font-weight: 600;
 }
 
 /* Header Actions */
 .header-actions {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .action-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 2.25rem;
-    height: 2.25rem;
-    background: transparent;
-    border: none;
-    border-radius: 0.375rem;
-    cursor: pointer;
-    transition: background 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  background: transparent;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
 }
 
 .action-btn:hover {
-    background: #f3f4f6;
+  background: #f3f4f6;
 }

@@ -23,7 +23,7 @@ body {
   opacity: 1;
   top: 124px;
   left: 32px;
-  background:#FFFFFF;
+  background: #ffffff;
   -webkit-border-radius:;
   -moz-border-radius:;
   -ms-border-radius:;
@@ -56,7 +56,7 @@ body {
   text-align: center;
   -webkit-border-radius: 8px;
   -moz-border-radius: 8px;
-  font-family:"Inter";
+  font-family: "Inter";
   -ms-border-radius: 8px;
   -o-border-radius: 8px;
   -webkit-transition: all 0.2s ease-in-out;
