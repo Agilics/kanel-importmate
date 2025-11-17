@@ -140,4 +140,9 @@ export default class TransformationPage extends LightningElement {
   get dateBoxIcon() {
     return "box-icon is-centered date-card-icon-box";
   }
+
+
+  handleBackToMapping(){
+    this.dispatchEvent(new CustomEvent("previous"));
+  }
 }

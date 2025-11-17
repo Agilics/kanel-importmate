@@ -201,20 +201,29 @@ export default class MainComponent extends LightningElement {
     return this.currentStep === 2;
   }
 
-  //Navigation vers l'étape 3 Mapping & transformation
-  get isMappingAndTransformation() {
+  //Navigation vers l'étape 3 Mapping
+  get isMapping() {
     if (!this.recentProject) {
       return false;
     }
     return this.currentStep === 3;
   }
 
-  //Navigation vers l'étape 4 Schedule
+  //Navigation vers l'étape 4 transformation
+
+  get isTransformation(){
+      if (!this.recentProject) {
+      return false;
+    }
+    return this.currentStep === 4;
+  }
+
+  //Navigation vers l'étape 5 Schedule
   get isScheduling() {
     if (!this.recentProject) {
       return false;
     }
-    return this.currentStep === 4;
+    return this.currentStep === 5;
   }
 
   // rechercher les projets importés par nom

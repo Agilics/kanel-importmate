@@ -14,6 +14,12 @@ export default class TransformationSaveFormModal extends LightningModal {
   @track order;
   @track ruleOptions =[];
 
+    
+  //TODO: sauvegarde d'une nouvelle transformation
+  handleAddTransformation() {
+    
+  }
+
   //on récupère ici les valeurs du champs de sélection rule type
   @wire(getPickListValues, {
     objectApiName: TRANSORMATION_OBJECT.objectApiName,
@@ -54,10 +60,5 @@ export default class TransformationSaveFormModal extends LightningModal {
     handleCancel() {
         this.close('okay');
     }
-    
-    //TODO sauvegarde d'une nouvelle transformation
-  handleAddTransformation() {
-    
-   // this.close();
-  }
+  
 }

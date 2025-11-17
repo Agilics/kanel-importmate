@@ -2,7 +2,7 @@
   @description       : 
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
   @group             : 
-  @last modified on  : 11-11-2025
+  @last modified on  : 11-17-2025
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
@@ -47,12 +47,11 @@
     </header>
 
     <template if:true={currentStep}>
-      <template if:true={isStart} aria-label="section start">
+      <template if:true={isStart}>
         <!-- child here content-->
         <!-- show  recent imported project -->
         <template
-          if:false={showCreatorSection}
-          aria-label="select project recent section"
+          if:false={showCreatorSection} 
         >
           <c-import-project-recent-component
             onshow={openNewProject}
@@ -65,8 +64,7 @@
 
         <!-- project creator section -->
         <template
-          if:true={showCreatorSection}
-          aria-label="creation project section"
+          if:true={showCreatorSection} 
         >
           <c-project-form-card-component
             recent-projet={recentProject}
@@ -81,7 +79,7 @@
       </template>
       <!-- Step 2 -->
       <!-- Step 2: Data source -->
-      <template if:true={isSelectSource} aria-label="select source section">
+      <template if:true={isSelectSource} >
         <c-data-source-selector-page
           onprevious={handlePreviousStep}
           onstartmapping={handleStartMapping}
@@ -92,8 +90,7 @@
 
       <!-- Step 3: Full Field Mapper page -->
       <template
-        if:true={isMappingAndTransformation}
-        aria-label="mapping & transformation section"
+        if:true={isMapping} 
       >
         <c-field-mapper
           preselected-project-id={recentProject.Id}
@@ -102,6 +99,15 @@
           onprevious={handleBackToStep2}
         >
         </c-field-mapper>
+      </template>
+
+       <template
+        if:true={isTransformation} 
+      >
+        <c-transformation-page
+          onprevious={handlePreviousStep}
+        >
+        </c-transformation-page>
       </template>
 
       <template if:true={isScheduling} aria-label="schedule's section">
