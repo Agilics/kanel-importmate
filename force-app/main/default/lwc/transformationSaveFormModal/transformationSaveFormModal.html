@@ -1,0 +1,71 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 11-18-2025
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+
+<template>
+    <lightning-modal-header class="modal_header" label="Add Transformation"></lightning-modal-header>
+    <lightning-modal-body>
+       <div class="slds-m-top_medium slds-m-bottom_x-large">
+        <!-- -->  
+           
+          <!-- source field -->
+          <lightning-input label="Source Field"
+          placeholder="Source Field"
+          value={sourceField}></lightning-input>
+          
+          <!-- target source -->
+          <lightning-input label="Target Field"
+          placeholder="Target Field"
+           value={targetField}></lightning-input>
+
+          <!-- règle de transfromation -->
+          <lightning-combobox
+            label="Rule Type"
+            placeholder="Select a transformation rule"
+            options={ruleOptions}
+            value={selectedRule}>
+          </lightning-combobox>
+      </div>
+      <!-- paramètre de transformation -->
+      <lightning-textarea label="Paramters (JSON)" 
+      placeholder="Parameters"
+        value={parameters} onchange={handleChange} 
+        data-field="Parameters__c"></lightning-textarea>
+        
+      <!-- ordre  -->
+       <lightning-input label="Ordre d'application" 
+        minlength="1"
+      maxlength="99" 
+      placeholder="Order"
+       type="number" value={order} onchange={handleChange} data-field="Order__c"></lightning-input>
+      <br/>
+      
+      <div class="actions">
+      
+       <!-- button cancel  -->
+
+       <button
+        type="button"
+        class="mr-2 btn btn-secondary"
+       onclick={handleCancel}
+      > 
+        Cancel
+      </button>
+        <!-- button save transformation -->
+        
+        <button
+        type="button"
+        class=" btn btn-primary"
+        onclick={handleCreateProject}
+      > 
+        Save Transformation
+      </button>
+      </div>
+       
+ 
+    </lightning-modal-body> 
+</template>
