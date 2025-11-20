@@ -1,0 +1,154 @@
+<!--
+   @description       : Modal pour créer/éditer une règle de transformation
+   @author            : Expert Salesforce LWC
+   @group             : ImportMate
+   @last modified on  : 11-19-2025
+   -->
+<template>
+   <!-- Modal Header -->
+   <lightning-modal-header label="Add Transformation Rule"> 
+   </lightning-modal-header>
+   <!-- Modal Body -->
+   <lightning-modal-body>
+      <!-- Form Section -->
+      <div class="slds-form" role="list">
+         <!-- Field Mapping Selection -->
+         <lightning-combobox
+            name="fieldMapping"
+            label="Field Mapping"
+            placeholder="-- Select Field Mapping --"
+            options={fieldMappingOptions}
+            value={fieldMappingId}
+            onchange={handleFieldMappingChange}
+            required
+            message-when-value-missing="Please select a field mapping"
+            class="slds-m-bottom_small">
+         </lightning-combobox>
+         <!-- Help text for Field Mapping -->
+         <div class="slds-form-element__help slds-m-bottom_medium">
+            The source field from this mapping will be transformed
+         </div>
+         <!-- source fields -->
+         <lightning-dual-listbox name="source fields"
+            label="Select Source fields"
+            source-label="Source Fields"
+            selected-label="Selected"
+            field-level-help="Select  source field"
+            options={sourceFieldOptions}
+            onchange={handleSourceFieldsChange}></lightning-dual-listbox>
+         <div class="slds-box" >
+            <p>Selected values are: {selected}</p>
+         </div>
+         <!-- source fields end -->
+         <!-- Rule Type Selection -->
+         <lightning-combobox
+            name="ruleType"
+            label="Rule Type"
+            placeholder="-- Select Transformation Rule --"
+            options={ruleTypeOptions}
+            value={selectedRuleType}
+            onchange={handleRuleTypeChange}
+            required
+            message-when-value-missing="Please select a rule type"
+            class="slds-m-bottom_small">
+         </lightning-combobox>
+         <!-- Dynamic Help Text for Rule Type -->
+         <template if:true={ruleTypeHelp}>
+            <div class="slds-box slds-box_x-small slds-theme_shade slds-m-bottom_medium">
+               <p class="slds-text-body_small">{ruleTypeHelp}</p>
+            </div>
+         </template>
+         <!-- Parameters JSON -->
+         <template if:true={isParameterVisible}>
+            <lightning-textarea
+               name="parameters"
+               label="Parameters (JSON)"
+               placeholder="\{'key':'value'}"
+               value={parameters}
+               onchange={handleParametersChange}
+               rows="6"
+               field-level-help="Enter transformation parameters in JSON format"
+               class="slds-m-bottom_small code-textarea">
+            </lightning-textarea>
+         </template>
+         <!-- Quick Actions for JSON 
+            <div class="slds-button-group slds-m-bottom_medium" role="group">
+                <lightning-button 
+                    label="Format JSON" 
+                    icon-name="utility:preview"
+                    onclick={handleFormatJson}
+                    variant="neutral"
+                    class="slds-m-right_x-small">
+                </lightning-button>
+                <lightning-button 
+                    label="Insert Template" 
+                    icon-name="utility:insert_template"
+                    onclick={handleInsertTemplate}
+                    variant="neutral"
+                    class="slds-m-right_x-small">
+                </lightning-button>
+                <lightning-button 
+                    label="Clear" 
+                    icon-name="utility:clear"
+                    onclick={handleClearParameters}
+                    variant="neutral">
+                </lightning-button>
+            </div>-->
+         <!-- Example Section (conditionally displayed) -->
+         <template if:true={exampleParameters}>
+            <div class="slds-box slds-theme_info slds-m-bottom_medium">
+               <div class="slds-media slds-media_center">
+                  <div class="slds-media__figure">
+                     <lightning-icon 
+                        icon-name="utility:info_alt" 
+                        size="small"
+                        alternative-text="Example">
+                     </lightning-icon>
+                  </div>
+                  <div class="slds-media__body">
+                     <h3 class="slds-text-heading_small slds-m-bottom_x-small">
+                        Example Configuration
+                     </h3>
+                     <pre class="slds-text-body_small">{exampleParameters}</pre>
+                  </div>
+               </div>
+            </div>
+         </template>
+         <!-- Two Column Layout -->
+         <div class="slds-grid slds-gutters slds-m-top_medium">
+            <!-- Left Column -->
+            <div class="slds-col slds-size_1-of-2">
+               <!-- Order -->
+               <lightning-input
+                  type="number"
+                  name="order"
+                  label="Ordre d'application"
+                  value={order}
+                  min="1"
+                  max="3"
+                  step="1"
+                  onchange={handleOrderChange}
+                  field-level-help="Plus le numéro est bas, plus la règle s'applique tôt"
+                  required>
+               </lightning-input>
+            </div>
+         </div>
+      </div>
+   </lightning-modal-body>
+   <!-- Modal Footer -->
+   <lightning-modal-footer>
+      <div class="btns">
+         <button 
+            label="Cancel" 
+            onclick={handleCancel}
+            class="btn btn-secondary">
+         Cancel
+         </button>
+         <button  class="btn btn-primary"
+            label="Save Transformation" 
+            onclick={handleSaveTransformation}
+            disabled={isSaveDisabled}> Save rule
+         </button>
+      </div>
+   </lightning-modal-footer>
+</template>

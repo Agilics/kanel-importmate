@@ -1,0 +1,151 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 11-18-2025
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<template>
+  <div class="main">
+    <!-- Header -->
+    <div class="header">
+      <div class="text-header">
+        <h1 class="header-title">Data Transformations</h1>
+        <p class="subtitle">
+          Set up your data import project with target object and configuration
+        </p>
+      </div>
+
+      <!-- Button  -->
+      <button class="btn btn-primary" onclick={handleAddTransformation}>
+        <lightning-icon
+          class="icon-inline icon-colors"
+          icon-name="utility:add"
+          alternative-text="Save & Continue"
+          size="small"
+          title="Add rule"
+        ></lightning-icon>
+        Add Rule
+      </button>
+    </div>
+
+    <!-- Tabs transformation select -->
+    <c-transformation-field-tabs
+      active-tab={activeTransformationTab}
+      onmovetransformation={handleTransformationChange}
+    >
+    </c-transformation-field-tabs>
+    <!-- End tabs transformation select -->
+
+    <!-- Contenu conditionnel basé sur l'onglet actif -->
+
+    <!-- Onglet "All" - Afficher toutes les cartes -->
+    <template if:true={isAll}>
+      <!-- Email transformation Card -->
+      <c-transformation-card-component
+        card-head-title={emailCardHeaderTitle}
+        card-head-subtitle={emailCardHeaderSubtitle}
+        icon-name={iconEmailName}
+        icon-box-class={emailBoxIcon}
+        head-icon-class={iconEmailClass} 
+        transformations-rules-content={emailTransformationsRulesContent}
+      >
+      </c-transformation-card-component>
+
+      <!-- Phone transformation Card -->
+      <c-transformation-card-component
+        card-head-title={phoneCardHeaderTitle}
+        card-head-subtitle={phoneCardHeaderSubtitle}
+        icon-name={iconPhoneNumberName}
+        icon-box-class={phoneBoxIcon} 
+        head-icon-class={iconPhoneNumberClass}
+        transformations-rules-content={phoneTransformationsRulesContent}
+      >
+      </c-transformation-card-component>
+
+      <!-- Lead transformation Card -->
+      <c-transformation-card-component
+      
+        card-head-title={leadCardHeaderTitle}
+        card-head-subtitle={leadCardHeaderSubtitle}
+        icon-name={iconLeadName}
+        icon-box-class={leadBoxIcon}
+        head-icon-class={iconLeadClass}
+        is-lead-status={isLeadStatus}
+        mappings={mappings}
+        transformations-rules-content={leadTransformationsRulesContent}
+      >
+      </c-transformation-card-component>
+
+      <!-- Date transformation Card -->
+      <c-transformation-card-component
+        card-head-title={dateCardHeaderTitle}
+        card-head-subtitle={dateCardHeaderSubtitle}
+        icon-name={iconDateName}
+        icon-box-class={dateBoxIcon}
+        head-icon-class={iconDateClass}
+        is-warning-badge={isWarningBadge}
+        transformations-rules-content={dateTransformationsRulesContent}
+      >
+      </c-transformation-card-component>
+    </template>
+
+    <!-- Onglets  Transformation Booléenne -->
+    <template if:true={isBoolean}> </template>
+
+    <!-- Onglets  Transformation Requête (CASE) -->
+
+    <template if:true={isCase}> </template>
+
+    <!-- Onglets  Transformation Masque du téléphone -->
+
+    <template if:true={isMask}> </template>
+  </div>
+  <!-- footer action buttons -->
+  <footer class="footer-container">
+    <div class="footer-separator"></div>
+    <div class="footer-actions">
+      <!-- Cancel Button -->
+      <button
+        type="button"
+        class="btn btn-secondary"
+        onclick={handleBackToMapping}
+      >
+        <lightning-icon
+          icon-name="utility:back"
+          alternative-text="Cancel"
+          size="x-small"
+          title="Back to mapping"
+        ></lightning-icon>
+        <span>Back to Mapping</span>
+      </button>
+
+      <!-- Save as Template & Continue Button -->
+      <div class="btns">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          onclick={handleBackToMapping}
+        >
+          Save as Template
+        </button>
+
+        <button
+          type="button"
+          class="btn-continue btn-primary"
+          onclick={handleCreateProject}
+        >
+          Continue to Validation
+          <lightning-icon
+            class="icon-inline custom-icon-output"
+            icon-name="standard:output"
+            alternative-text="Save & Continue"
+            size="small"
+            title="Continue to Validation"
+          ></lightning-icon>
+        </button>
+      </div>
+    </div>
+  </footer>
+  <!-- end footer -->
+</template>

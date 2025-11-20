@@ -1,3 +1,10 @@
+/**
+ * @description       : 
+ * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @group             : 
+ * @last modified on  : 11-19-2025
+ * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+**/
 public with sharing class FieldMappingController {
 
     @AuraEnabled(cacheable=true)
@@ -56,6 +63,12 @@ public with sharing class FieldMappingController {
         return FieldMappingService.getMappingsByProject(projectId, version);
     }
 
+    @AuraEnabled(cacheable= true)
+    public static  List<FieldMappingRepository.FieldMappingDTO> getAllMappingsByProjectId(Id projectId){
+        return FieldMappingService.getAllMappingsByProject(projectId);
+    }
+    
+    
     @AuraEnabled
     public static List<FieldMapping__c> saveMappingsJson(
         String targetObjectApiName,

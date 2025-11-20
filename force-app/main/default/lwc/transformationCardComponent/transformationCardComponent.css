@@ -1,0 +1,321 @@
+body {
+  font-family:"Inter";
+}
+
+.card {
+  width: 1054px;
+  font-family:"Inter";
+  border-radius: 12px;
+  padding: 20px 20px;
+  flex-wrap: wrap;
+  opacity: 1;
+  background: #fff;
+  max-height: 310px;
+  border-radius: 8px;
+  margin: 0 0 2rem 0;
+  box-shadow: 0px 1px 2px 0px #0000000D;
+  -webkit-border-radius:;
+  -moz-border-radius:;
+  -ms-border-radius:;
+  -o-border-radius:;
+}
+/* taille d'une carte de piste*/
+.card-lead-height{ 
+  height: 308px;
+}
+/* taille d'une simple carte*/
+.card-regular-height{
+  height: 216px;
+}
+.card-header {
+  font-family:"Inter";
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  align-content: flex-start;
+}
+.title-with-icon {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: flex-start;
+  align-content: flex-start;
+  margin: 0 0 13px 0;
+  font-family:"Inter";
+
+}
+.regular-text {
+  font-family:"Inter";
+  font-weight: 400;
+  font-style: Regular;
+  line-height: 20px;
+  letter-spacing: 0%;
+}
+.regular-text-size {
+  font-size: 14px;
+}
+.header-content {
+  margin-bottom: 5px;
+}
+.header-title {
+  font-weight: 600;
+  font-style: Semi Bold;
+  font-size: 16px;
+  font-family:"Inter";
+  leading-trim: NONE;
+  line-height: 24px;
+  letter-spacing: 0%;
+}
+
+.btn-action-icons {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  align-content: flex-start;
+}
+.btn-action-icon {
+  width: 14px;
+  height: 16px;
+  angle: 0 deg;
+  opacity: 1;
+  --slds-c-icon-color-foreground: #9ca3af;
+  --slds-c-icon-color-background: #dbeafe;
+}
+
+/* card content under header block*/
+.card-content {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  align-content: flex-start;
+  padding: 0 0 2rem 0;
+}
+.content-title {
+  font-weight: 500;
+  font-family:"Inter";
+  font-style: Medium;
+  leading-trim: NONE;
+  line-height: 20px;
+  letter-spacing: 0%;
+  margin: 0 0 4px 0;
+}
+.infos {
+  margin: 5px 0 20px 0;
+  gap: 0;
+  width: 491px;
+  height: 76px;
+  angle: 0 deg;
+  opacity: 1;
+  top: 32px;
+}
+.check-list {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: start;
+  align-items: flex-start;
+  align-content: flex-start;
+  margin-bottom: 12px;
+}
+.dot{
+  margin: 0 15px 0 0;
+  background:#22C55E;
+  height: 22px;
+  width: 22px;
+  border-radius: 50%;
+}
+.is-centered{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  align-content: center; 
+   display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.custom-icon-check {
+  opacity: 1;
+  opacity: 1;
+  --slds-c-icon-color-foreground-default: #e5e7eb;
+  --slds-c-icon-color-background: #22c55e; 
+  opacity: 1;
+  top: 2px;
+
+}
+.lead-content {
+  width: 491px;
+  height: 36px;
+  border-radius: 4px;
+  opacity: 1;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  margin-bottom: 15px; 
+  padding: 9px 0 0 12px;
+
+}
+.preview-bloc {
+  width: 491px;
+  height: 76px;
+  border-radius: 8px;
+  angle: 0 deg;
+  opacity: 1;
+  top: 32px;
+  background: #f9fafb;
+  padding: 10px 13px;
+  border: 1px solid #e5e7eb;
+  -webkit-border-radius: 8px;
+  -moz-border-radius: 8px;
+  -ms-border-radius: 8px;
+  -o-border-radius: 8px;
+}
+
+.is-danger {
+  color: #dc2626;
+}
+.is-success {
+  color: #16a34a;
+}
+
+.box-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  padding: 0;
+  margin: 25px 25px 0 20px;
+  border-radius: 12px;
+  opacity: 1; 
+}
+
+/* icon default  size & position */
+.icon {
+  width: 16px;
+  height: 16px;
+  opacity: 1;
+}
+.box-icon {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 8px;
+  margin: 0 16px 0 0;
+}
+
+/* Email box */
+.email-card-icon-box {
+  background: #dbeafe;
+  border: 1px solid #e5e7eb; 
+  
+}
+
+/* Email icon */
+.custom-icon-email {
+  --slds-c-icon-color-foreground-default: #1e40af;
+  --slds-c-icon-color-foreground: #1e40af;
+  --slds-c-icon-color-background: #dbeafe;
+}
+
+/*call box icon*/
+.phone-card-icon-box {
+  background: #dcfce7;
+  border: 1px solid #e5e7eb;
+  opacity: 1;
+}
+
+/* call icon*/
+
+/*Add the class name below to the lightning-icon element.*/
+.custom-icon-call {
+  --slds-c-icon-color-foreground-default: #16a34a;
+  --slds-c-icon-color-foreground: #16a34a;
+  --slds-c-icon-color-background: #dcfce7;
+}
+/*lead box icon*/
+.lead-card-icon-box {
+  background: #f3e8ff;
+  border: 1px solid #e5e7eb;
+}
+
+/*lead icon*/
+.custom-icon-product_transfer {
+  --slds-c-icon-color-foreground-default: #9333ea;
+  --slds-c-icon-color-foreground: #9333ea;
+  --slds-c-icon-color-background: #f3e8ff;
+}
+
+/*date box icon*/
+.date-card-icon-box {
+  background: #ffedd5;
+  border: 1px solid #e5e7eb;
+}
+
+/*calendar icon.*/
+.custom-icon-date_input {
+  --slds-c-icon-color-foreground-default: #ea580c;
+  --slds-c-icon-color-background: #ffedd5;
+}
+
+/*badge status style*/
+.badge {
+  text-align: center;
+  align-content: center;
+  font-weight: 500;
+  font-size: 12px;
+  cursor: pointer;
+}
+/*active badge*/
+.badge-active {
+  background: #dcfce7;
+  border: 1px solid #e5e7eb;
+  width: 52.171875px;
+  height: 24px;
+  border-radius: 9999px;
+  opacity: 1;
+  top: 8px;
+  -webkit-border-radius: 9999px;
+  -moz-border-radius: 9999px;
+  -ms-border-radius: 9999px;
+  -o-border-radius: 9999px;
+}
+
+/*warning badge*/
+.badge-warning {
+  width: 63.90625px;
+  height: 24px;
+  border-radius: 9999px;
+  opacity: 1;
+  opacity: 1;
+  top: 8px;
+  background: #fef9c3;
+  color: #854D0E;
+  border: 1px solid #e5e7eb;
+  -webkit-border-radius: 9999px;
+  -moz-border-radius: 9999px;
+  -ms-border-radius: 9999px;
+  -o-border-radius: 9999px;
+}
+.actions {
+  margin: 0 0 0 -30px;
+  gap: 10px 20px;
+}
+.ml-2 {
+  margin-left: 12px;
+}
+.lead-content{
+  width: 491px;
+  height: 36px; 
+  opacity: 1;
+  border-radius: 4px;
+  background: #F9FAFB;
+  border: 1px solid #E5E7EB;
+}

@@ -92,7 +92,7 @@
 
       <!-- Step 3: Full Field Mapper page -->
       <template
-        if:true={isMappingAndTransformation}
+        if:true={isMapping}
         aria-label="mapping & transformation section"
       >
         <c-field-mapper
@@ -103,7 +103,13 @@
         >
         </c-field-mapper>
       </template>
-
+      <template if:true={isTransformation}>
+         <c-transformation-page
+          onprevious={handlePreviousStep}
+          project-id={recentProject.Id}
+        >
+        </c-transformation-page>
+      </template>
       <template if:true={isScheduling} aria-label="schedule's section">
         <c-schedule-creator-component
           project-id={recentProject.Id}

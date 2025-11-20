@@ -1,3 +1,10 @@
+/**
+ * @description       : 
+ * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @group             : 
+ * @last modified on  : 11-19-2025
+ * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+**/
 public with sharing class TransformationService {
 
     //Créer une règle de transformation
@@ -22,6 +29,8 @@ public with sharing class TransformationService {
             );
         }
     }
+
+    
 
     //Appliquer les transformations à une ligne de données
     public static Map<String, String> applyTransformations(String mappingId, Map<String, String> row, Map<String, List<TransformationRule__c>> rulesByMappingId) {
@@ -86,6 +95,8 @@ public with sharing class TransformationService {
             );
         } 
     }
+
+    
     
     //Valider une règle de transformation avant de l'appliquer
     public static void validateTransformationRule(TransformationRule__c rule, Map<String, String> sampleData) {
