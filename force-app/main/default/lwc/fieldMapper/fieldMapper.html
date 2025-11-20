@@ -6,6 +6,27 @@
         <div class="fm-title">
           <h1 class="fm-heading">Field Mapping</h1>
           <p class="fm-subtitle">Map source columns to Salesforce fields</p>
+
+          <template if:true={selectedProjectId}>
+            <div class="fm-meta">
+              <button
+                class="fm-meta-pill fm-meta-pill--clickable"
+                type="button"
+                onclick={openVersionModal}
+              >
+                {currentProjectName}
+              </button>
+
+              <template if:true={versionInput}>
+                <button
+                  class="fm-meta-pill fm-meta-pill--clickable"
+                  type="button"
+                >
+                  Version {versionInput}
+                </button>
+              </template>
+            </div>
+          </template>
         </div>
 
         <div class="fm-actions">
@@ -77,7 +98,8 @@
         <section class="fm-panel">
           <div class="fm-panel__header">
             <h2>{sourceTitle}</h2>
-            <span class="fm-count">{_csvRows.length} rows</span>
+        <span class="fm-count">{rowCountLabel} rows </span>
+
           </div>
 
           <div class="fm-source-list">
@@ -91,13 +113,21 @@
                   ondragstart={handleDragStart}
                 >
                   <div class="fm-source-main">
-                    <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M10 16H0V0H10V16Z" stroke="#E5E7EB"/>
-                    <path d="M1.25 11H2.75C3.44062 11 4 11.5594 4 12.25V13.75C4 14.4406 3.44062 15 2.75 15H1.25C0.559375 15 0 14.4406 0 13.75V12.25C0 11.5594 0.559375 11 1.25 11ZM7.25 11H8.75C9.44063 11 10 11.5594 10 12.25V13.75C10 14.4406 9.44063 15 8.75 15H7.25C6.55937 15 6 14.4406 6 13.75V12.25C6 11.5594 6.55937 11 7.25 11ZM1.25 10C0.559375 10 0 9.44063 0 8.75V7.25C0 6.55937 0.559375 6 1.25 6H2.75C3.44062 6 4 6.55937 4 7.25V8.75C4 9.44063 3.44062 10 2.75 10H1.25ZM7.25 6H8.75C9.44063 6 10 6.55937 10 7.25V8.75C10 9.44063 9.44063 10 8.75 10H7.25C6.55937 10 6 9.44063 6 8.75V7.25C6 6.55937 6.55937 6 7.25 6ZM1.25 5C0.559375 5 0 4.44062 0 3.75V2.25C0 1.55937 0.559375 1 1.25 1H2.75C3.44062 1 4 1.55937 4 2.25V3.75C4 4.44062 3.44062 5 2.75 5H1.25ZM7.25 1H8.75C9.44063 1 10 1.55937 10 2.25V3.75C10 4.44062 9.44063 5 8.75 5H7.25C6.55937 5 6 4.44062 6 3.75V2.25C6 1.55937 6.55937 1 7.25 1Z" fill="#9CA3AF"/>
-                    </svg> 
+                    <svg
+                      width="10"
+                      height="16"
+                      viewBox="0 0 10 16"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path d="M10 16H0V0H10V16Z" stroke="#E5E7EB"></path>
+                      <path
+                        d="M1.25 11H2.75C3.44062 11 4 11.5594 4 12.25V13.75C4 14.4406 3.44062 15 2.75 15H1.25C0.559375 15 0 14.4406 0 13.75V12.25C0 11.5594 0.559375 11 1.25 11ZM7.25 11H8.75C9.44063 11 10 11.5594 10 12.25V13.75C10 14.4406 9.44063 15 8.75 15H7.25C6.55937 15 6 14.4406 6 13.75V12.25C6 11.5594 6.55937 11 7.25 11ZM1.25 10C0.559375 10 0 9.44063 0 8.75V7.25C0 6.55937 0.559375 6 1.25 6H2.75C3.44062 6 4 6.55937 4 7.25V8.75C4 9.44063 3.44062 10 2.75 10H1.25ZM7.25 6H8.75C9.44063 6 10 6.55937 10 7.25V8.75C10 9.44063 9.44063 10 8.75 10H7.25C6.55937 10 6 9.44063 6 8.75V7.25C6 6.55937 6.55937 6 7.25 6ZM1.25 5C0.559375 5 0 4.44062 0 3.75V2.25C0 1.55937 0.559375 1 1.25 1H2.75C3.44062 1 4 1.55937 4 2.25V3.75C4 4.44062 3.44062 5 2.75 5H1.25ZM7.25 1H8.75C9.44063 1 10 1.55937 10 2.25V3.75C10 4.44062 9.44063 5 8.75 5H7.25C6.55937 5 6 4.44062 6 3.75V2.25C6 1.55937 6.55937 1 7.25 1Z"
+                        fill="#9CA3AF"
+                      ></path>
+                    </svg>
                     <div class="src-icon" aria-hidden="true"></div>
-                    <div class="name-wrap" >
-                 
+                    <div class="name-wrap">
                       <div class="name">{item.name}</div>
                       <div class="sub">{item.subtitle}</div>
                     </div>
@@ -122,7 +152,7 @@
           </div>
         </section>
 
-        <!-- Right: Targets & summary -->
+        <!-- Right: Targets -->
         <section class="fm-right">
           <div class="fm-target-header">
             <div class="title">
@@ -136,8 +166,7 @@
               onclick={openSettings}
             >
               <span class="gear" aria-hidden="true"></span>
-          </button>
-
+            </button>
           </div>
 
           <div class="fm-target-list">
@@ -149,6 +178,7 @@
                 ondragover={handleDragOver}
                 ondrop={handleDrop}
               >
+
                 <div class="fm-target-top">
                   <div class="left">
                     <div class={field.iconCssClass} aria-hidden="true"></div>
@@ -219,27 +249,6 @@
               </article>
             </template>
           </div>
-
-          <!-- Summary -->
-          <aside class="fm-summary">
-            <div class="sum-title">Mapping Summary</div>
-            <div class="sum-row">
-              <span class="sum-label">Total Fields:</span>
-              <span class="sum-val">{summaryTotalFields}</span>
-            </div>
-            <div class="sum-row">
-              <span class="sum-label">Mapped:</span>
-              <span class="sum-val sum-green">{summaryMappedCount}</span>
-            </div>
-            <div class="sum-row">
-              <span class="sum-label">Unmapped:</span>
-              <span class="sum-val sum-red">{summaryUnmappedCount}</span>
-            </div>
-            <div class="sum-row">
-              <span class="sum-label">With Transformations:</span>
-              <span class="sum-val sum-blue">{summaryWithTransformCount}</span>
-            </div>
-          </aside>
         </section>
       </div>
 
@@ -284,6 +293,7 @@
         </div>
       </div>
     </div>
+
     <!-- Settings modal -->
     <template if:true={showSettingsModal}>
       <section class="fm-modal-backdrop" role="presentation">
@@ -320,5 +330,95 @@
         </div>
       </section>
     </template>
+
+    <!-- Versions modal -->
+<template if:true={showVersionModal}>
+  <section class="fm-modal-backdrop" role="presentation">
+    <div
+      class="fm-modal fm-modal--versions"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Mapping versions"
+    >
+      <header class="fm-modal__header">
+        <h2>Mapping versions</h2>
+      </header>
+
+      <div class="fm-modal__body">
+        <template if:true={versionModalLoading}>
+          <p class="muted">Loading versions…</p>
+        </template>
+
+        <template if:false={versionModalLoading}>
+          <template if:true={versionModalError}>
+            <p class="muted">{versionModalError}</p>
+          </template>
+
+          <template if:false={versionModalError}>
+            <template if:true={hasVersionOptions}>
+              <div class="ver-pills-row">
+                <template for:each={versionOptionsWithClass} for:item="ver">
+                  <button
+                    key={ver.value}
+                    type="button"
+                    data-version={ver.value}
+                    class={ver.cssClass}
+                    onclick={handleVersionSelect}
+                  >
+                    Version {ver.value}
+                  </button>
+                </template>
+              </div>
+
+              <div class="ver-preview-wrap">
+                <table class="ver-prev-table">
+                  <thead>
+                    <tr>
+                      <template
+                        for:each={versionPreviewHeaders}
+                        for:item="hdr"
+                      >
+                        <th key={hdr}>{hdr}</th>
+                      </template>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <template if:true={versionPreviewRows}>
+                      <template
+                        for:each={versionPreviewRows}
+                        for:item="row"
+                      >
+                        <tr key={row._key}>
+                          <template for:each={row.cells} for:item="cell">
+                            <td key={cell}>{cell}</td>
+                          </template>
+                        </tr>
+                      </template>
+                    </template>
+                    <template if:false={versionPreviewRows}>
+                      <tr>
+                        <td colspan="1" class="muted">
+                          No preview data for this version.
+                        </td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+              </div>
+            </template>
+          </template>
+        </template>
+      </div>
+
+      <footer class="fm-modal__footer">
+        <lightning-button
+          label="Close"
+          onclick={handleVersionModalClose}
+        ></lightning-button>
+      </footer>
+    </div>
+  </section>
+</template>
+
   </lightning-card>
 </template>

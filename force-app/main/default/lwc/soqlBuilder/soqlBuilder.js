@@ -398,85 +398,92 @@ loadFieldsForObject(objectName) {
     URL.revokeObjectURL(url);
   }
 
-  // ===== Run Query =====
-  runQuery() {
-    if (!this.selectedObject || this.selectedFields.length === 0) {
-      this.showToast(
-        "Attention",
-        "Veuillez sélectionner au moins un champ.",
-        "warning"
+// ===== Run Query =====
+runQuery() {
+  if (
+    !this.selectedObject ||
+    !Array.isArray(this.selectedFields) ||
+    this.selectedFields.length === 0
+  ) {
+    this.showToast(
+      "Attention",
+      "Veuillez sélectionner au moins un champ.",
+      "warning"
+    );
+    return;
+  }
+
+  const where = this.buildWhereClause();
+
+  this.isLoading = true;
+  this.queryResults = [];
+  this.columns = [];
+  this.displayRows = [];
+
+  const params = {
+    objectName: this.selectedObject,
+    fieldList: this.selectedFields,
+    whereClause: where,
+    orderByField: this.orderByField || "",
+    orderDirection: this.orderDirection || "ASC",
+    nullsBehavior: this.nullsBehavior || "",
+    limitRows: this.coerceInt(this.limitRows, 200),
+    offsetRows: this.coerceInt(this.offsetRows, 0)
+  };
+
+  buildAndRunQueryEx({ params })
+    .then((rows) => {
+      const safeRows = Array.isArray(rows) ? rows : [];
+      const toKey = (fieldApi) => (
+        fieldApi.includes(".")
+          ? fieldApi.replace(/\./g, "__")
+          : fieldApi
       );
-      return;
-    }
 
-    const where = this.buildWhereClause();
+      this.columns = ["Id", ...this.selectedFields].map((fieldApi) => ({
+        api: fieldApi,
+        key: toKey(fieldApi),
+        label: this.prettyLabel(fieldApi)
+      }));
 
-    this.isLoading = true;
-    this.queryResults = [];
-    this.columns = [];
-    this.displayRows = [];
+      const makeId = (record, index) => {
+        if (record && record.Id) {
+          return record.Id;
+        }
+        return `row_${index}_${Math.random().toString(36).slice(2, 7)}`;
+      };
 
-    buildAndRunQueryEx({
-      params: {
-        objectName: this.selectedObject,
-        fieldList: this.selectedFields,
-        whereClause: where,
-        orderByField: this.orderByField || "",
-        orderDirection: this.orderDirection || "ASC",
-        nullsBehavior: this.nullsBehavior || "",
-        limitRows: this.coerceInt(this.limitRows, 200),
-        offsetRows: this.coerceInt(this.offsetRows, 0)
+      this.displayRows = safeRows.map((record, index) => ({
+        id: makeId(record, index),
+        cells: this.columns.map((column) => {
+          const value = record[column.key];
+          const str = value != null ? String(value) : "";
+          return {
+            key: column.key,
+            value,
+            isBadge: str && this.badgeValues.has(str)
+          };
+        })
+      }));
+
+      this.queryResults = safeRows;
+
+      if (safeRows.length === 0) {
+        this.showToast("Info", "Aucun enregistrement trouvé.", "info");
       }
     })
-      .then((rows) => {
-        const safeRows = rows || [];
+    .catch((err) => {
+      const msg =
+        (err && err.body && err.body.message) ||
+        err?.message ||
+        "Échec de l’exécution de la requête.";
+      this.showToast("Erreur", msg, "error");
+    })
+    .finally(() => {
+      this.isLoading = false;
+    });
+}
 
-        const toKey = (fieldApi) => {
-          return fieldApi.includes(".")
-            ? fieldApi.replace(/\./g, "__")
-            : fieldApi;
-        };
-
-        this.columns = ["Id", ...this.selectedFields].map((fieldApi) => ({
-          api: fieldApi,
-          key: toKey(fieldApi),
-          label: this.prettyLabel(fieldApi)
-        }));
-
-        const makeId = (r, idx) => {
-          if (r.Id) return r.Id;
-          return `row_${idx}_${Math.random().toString(36).slice(2, 7)}`;
-        };
-
-        this.displayRows = safeRows.map((r, idx) => ({
-          id: makeId(r, idx),
-          cells: this.columns.map((c) => {
-            const val = r[c.key];
-            return {
-              key: c.key,
-              value: val,
-              isBadge: this.badgeValues.has(String(val))
-            };
-          })
-        }));
-
-        this.queryResults = safeRows;
-
-        if (safeRows.length === 0) {
-          this.showToast("Info", "Aucun enregistrement trouvé.", "info");
-        }
-      })
-      .catch((err) => {
-        const msg =
-          err?.body?.message ||
-          err?.message ||
-          "Échec de l’exécution de la requête.";
-        this.showToast("Erreur", msg, "error");
-      })
-      .finally(() => {
-        this.isLoading = false;
-      });
-  }
 
   // ===== WHERE builder =====
   buildWhereClause() {
@@ -613,7 +620,6 @@ copySoqlFallback(text) {
       throw new Error("execCommand('copy') returned false");
     }
   } catch (e) {
-    // eslint-disable-next-line no-console
     console.error("Copy fallback failed", e);
     this.showToast(
       "Copy failed",
@@ -624,67 +630,86 @@ copySoqlFallback(text) {
 }
 
 
-  handleContinue(event) {
-    try {
-      event?.preventDefault?.();
-      event?.stopPropagation?.();
-      this._handleContinueSafe();
-    } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error("[SOQL Builder] handleContinue error", err);
-      this.showToast(
-        "Erreur",
-        err?.message || "Erreur interne lors du passage au mapping.",
-        "error"
-      );
-    }
-  }
-
-  _handleContinueSafe() {
-    let columns = [];
-    if (Array.isArray(this.columns) && this.columns.length > 0) {
-      columns = this.columns
-        .map((col) => {
-          if (!col) return "";
-          if (col.key) return String(col.key);
-          if (col.api) return String(col.api);
-          if (col.fieldName) return String(col.fieldName);
-          return "";
+ handleContinue(event) {
+  try {
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+    // If no results yet, run the query first, then continue
+    if (!Array.isArray(this.queryResults) || this.queryResults.length === 0) {
+      this.runQuery()
+        ?.then(() => {
+          this._handleContinueSafe();
         })
-        .filter(Boolean);
-    } else if (
-      Array.isArray(this.selectedFields) &&
-      this.selectedFields.length > 0
-    ) {
-      columns = this.selectedFields
-        .map((name) => (name ? String(name).trim() : ""))
-        .filter(Boolean);
+        .catch((err) => {
+          console.error("[SOQL Builder] handleContinue/runQuery error", err);
+        });
+    } else {
+      this._handleContinueSafe();
     }
-    const cleaned = columns
-      .map((name) => String(name).trim())
-      .filter((name) => name && name !== "Id");
-
-    if (!cleaned.length) {
-      this.showToast(
-        "Attention",
-        "Veuillez sélectionner au moins un champ avant de continuer.",
-        "warning"
-      );
-      return;
-    }
-    const rows = Array.isArray(this.queryResults) ? this.queryResults : [];
-    this.dispatchEvent(
-      new CustomEvent("startmapping", {
-        detail: {
-          source: "SOQL",
-          columns: cleaned,
-          rows
-        },
-        bubbles: true,
-        composed: true
-      })
+  } catch (err) {
+    console.error("[SOQL Builder] handleContinue error", err);
+    this.showToast(
+      "Erreur",
+      err?.message || "Erreur interne lors du passage au mapping.",
+      "error"
     );
   }
+}
+
+
+ _handleContinueSafe() {
+  // Basic validation
+  if (!this.selectedObject || !Array.isArray(this.selectedFields) || this.selectedFields.length === 0) {
+    this.showToast(
+      'Attention',
+      'Veuillez sélectionner un objet et au moins un champ avant de continuer.',
+      'warning'
+    );
+    return;
+  }
+  const cleaned = this.selectedFields
+    .map((f) => (f || '').trim())
+    .filter((f) => !!f);
+
+  if (!cleaned.length) {
+    this.showToast(
+      'Attention',
+      'Veuillez sélectionner au moins un champ valide.',
+      'warning'
+    );
+    return;
+  }
+
+  const rawRows = Array.isArray(this.queryResults) ? this.queryResults : [];
+  const totalRowCount = rawRows.length;
+  const rowsForMapping = rawRows.map((r) => {
+    const obj = {};
+    cleaned.forEach((fieldApi) => {
+      const key =
+        fieldApi && fieldApi.includes('.')
+          ? fieldApi.replace(/\./g, '__')
+          : fieldApi;
+
+      obj[fieldApi] = r[key];
+    });
+    return obj;
+  });
+
+  this.dispatchEvent(
+    new CustomEvent('startmapping', {
+      detail: {
+        source: 'SOQL',
+        columns: cleaned,               
+        rows: rowsForMapping,           
+        totalRowCount,                  
+        sourceLabel: this.selectedObject || 'SOQL results'
+      },
+      bubbles: true,
+      composed: true
+    })
+  );
+}
+
 
 }
 

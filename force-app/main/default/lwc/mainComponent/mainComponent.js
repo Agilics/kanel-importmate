@@ -11,7 +11,6 @@ import getRecentsProjects from '@salesforce/apex/ImportProjectController.getRece
 import getAllSchedules from '@salesforce/apex/ScheduleController.getAllSchedules';
 import addSchedule from '@salesforce/apex/ScheduleController.addSchedule';
 
-
 const SS_ROWS_KEY = 'IM_csvRows';
 const SS_COLS_KEY = 'IM_sourceColumnsCsv';
 
@@ -21,7 +20,10 @@ export default class MainComponent extends LightningElement {
   @track mappingHeadersCsv = '';
   @track mappingTargetObject = '';
   @track mappingSampleRows = [];
-    @track mappingSourceLabel = '';
+  @track mappingSourceLabel = '';
+  @track mappingTotalRowCount = 0; 
+
+  allRows;
 
   // ===== UI / state =====
   @track showCreatorSection = false;
@@ -31,7 +33,7 @@ export default class MainComponent extends LightningElement {
   projectName = '';
   description = '';
   targetObject = '';
-  recentProject; 
+  recentProject;
 
   // schedules
   @track schedules = [];
@@ -133,11 +135,15 @@ export default class MainComponent extends LightningElement {
 
       this.recentProject = result;
 
-      this.showToast('Success', `Record with ID ${result.Id} created successfully!`, 'success');
+      this.showToast(
+        'Success',
+        `Record with ID ${result.Id} created successfully!`,
+        'success'
+      );
       this.template.querySelector('c-create-project-component')?.resetFields();
 
       this.isLoading = false;
-      this.handleNextStep(); 
+      this.handleNextStep();
     } catch (err) {
       this.showToast('Error', err?.body?.message || 'An error occurred!', 'error');
     } finally {
@@ -154,7 +160,7 @@ export default class MainComponent extends LightningElement {
         const id = e.detail;
         searchProjetById({ id }).then((data) => {
           this.recentProject = data;
-          this.handleNextStep(); 
+          this.handleNextStep();
         });
       }
     });
@@ -177,7 +183,7 @@ export default class MainComponent extends LightningElement {
         })
       );
 
-      this.handleNextStep(); 
+      this.handleNextStep();
     } catch (error) {
       this.dispatchEvent(
         new ShowToastEvent({
@@ -191,71 +197,102 @@ export default class MainComponent extends LightningElement {
     }
   }
 
-handleStartMapping(evt) {
-  const detail = (evt && evt.detail) || {};
-  try {
-    const headersCsv = (detail.headersCsv || '').trim();
-    const rows = Array.isArray(detail.rows) ? detail.rows : [];
-    this.mappingHeadersCsv = headersCsv;
-    this.mappingSampleRows = rows;
-    const rp = this.recentProject || {};
-    const fromProject =
-      rp.TargetObject__c ??
-      rp.Target_Object__c ??
-      rp.Target__c ??
-      rp.targetObject ??
-      '';
+  // ===== Step 2 → 3 (Start mapping) =====
+  handleStartMapping(evt) {
+    const detail = (evt && evt.detail) || {};
 
-    this.mappingTargetObject =
-      (detail.targetObject || '').trim() || fromProject || '';
-    const rawLabel = (detail.sourceLabel || '').trim();
-    this.mappingSourceLabel = rawLabel || this.mappingTargetObject || '';
+    try {
+      const headersCsv = (detail.headersCsv || '').trim();
+      const rows = Array.isArray(detail.rows) ? detail.rows : [];
+      this.mappingHeadersCsv = headersCsv;
+      this.mappingSampleRows = rows;
+      const totalFromDetail = detail.totalRowCount;
+      let total = rows.length;
+      if (typeof totalFromDetail === 'number' && Number.isFinite(totalFromDetail)) {
+        total = totalFromDetail;
+      }
+      this.mappingTotalRowCount = total;
+      const rp = this.recentProject || {};
+      const fromProject =
+        rp.TargetObject__c ??
+        rp.Target_Object__c ??
+        rp.Target__c ??
+        rp.targetObject ??
+        '';
 
-    // Ensure we have a project id
-    const effectiveProjectId = rp.Id || detail.projectId || '';
-    if (!effectiveProjectId) {
+      this.mappingTargetObject =
+        (detail.targetObject || '').trim() || fromProject || '';
+      const rawLabel = (detail.sourceLabel || '').trim();
+      this.mappingSourceLabel = rawLabel || this.mappingTargetObject || '';
+      const effectiveProjectId = rp.Id || detail.projectId || '';
+      if (!effectiveProjectId) {
+        this.dispatchEvent(
+          new ShowToastEvent({
+            title: 'Pick a project',
+            message: 'Please select a project before continuing to mapping.',
+            variant: 'warning'
+          })
+        );
+        return;
+      }
+      if (!rp.Id && detail.projectId) {
+        this.recentProject = { ...(this.recentProject || {}), Id: detail.projectId };
+      }
+      try {
+        if (headersCsv) {
+          window.sessionStorage.setItem(SS_COLS_KEY, headersCsv);
+        }
+        if (rows && rows.length) {
+          window.sessionStorage.setItem(SS_ROWS_KEY, JSON.stringify(rows));
+        }
+      } catch (e) {
+        console.debug('[Main] sessionStorage unavailable or quota exceeded', e);
+      }
+
+      // Navigate to step 3 (Mapping & transformation)
+      this.currentStep = 3;
+      if (typeof window !== 'undefined' && typeof window.scrollTo === 'function') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    } catch (err) {
       this.dispatchEvent(
         new ShowToastEvent({
-          title: 'Pick a project',
-          message: 'Please select a project before continuing to mapping.',
-          variant: 'warning'
+          title: 'Open mapper failed',
+          message: err?.message || 'Could not open the Field Mapping step.',
+          variant: 'error'
         })
       );
-      return;
     }
-    if (!rp.Id && detail.projectId) {
-      this.recentProject = { ...(this.recentProject || {}), Id: detail.projectId };
-    }
-    try {
-      if (headersCsv) {
-        window.sessionStorage.setItem(SS_COLS_KEY, headersCsv);
-      }
-      if (rows && rows.length) {
-        window.sessionStorage.setItem(SS_ROWS_KEY, JSON.stringify(rows));
-      }
-    } catch (e) {
-      console.debug('[Main] sessionStorage unavailable or quota exceeded', e);
-    }
-
-    // Go to step 3 (Mapping & transformation)
-    this.currentStep = 3;
-    if (typeof window !== 'undefined' && typeof window.scrollTo === 'function') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  } catch (err) {
-    this.dispatchEvent(
-      new ShowToastEvent({
-        title: 'Open mapper failed',
-        message: err?.message || 'Could not open the Field Mapping step.',
-        variant: 'error'
-      })
-    );
   }
-}
 
   handleCsvParsed({ detail }) {
     this.mappingHeadersCsv = (detail.headers || []).join(',');
     this.mappingSampleRows = Array.isArray(detail.rows) ? detail.rows : [];
+
+    const totalFromDetail = detail.totalRowCount;
+    let total = this.mappingSampleRows.length;
+    if (typeof totalFromDetail === 'number' && Number.isFinite(totalFromDetail)) {
+      total = totalFromDetail;
+    }
+    this.mappingTotalRowCount = total;
+
+    if (Array.isArray(detail.allRows)) {
+      this.allRows = detail.allRows;
+    }
+
+    try {
+      if (this.mappingHeadersCsv) {
+        window.sessionStorage.setItem(SS_COLS_KEY, this.mappingHeadersCsv);
+      }
+      if (this.mappingSampleRows.length) {
+        window.sessionStorage.setItem(
+          SS_ROWS_KEY,
+          JSON.stringify(this.mappingSampleRows)
+        );
+      }
+    } catch (e) {
+      console.debug('[Main] sessionStorage unavailable or exceeded quota', e);
+    }
   }
 
   // ===== Stepper navigation =====
@@ -302,7 +339,11 @@ handleStartMapping(evt) {
         nextRun: this.nextRun,
         projectId: id
       }).then((data) => {
-        this.showToast('Success', `Schedule with ID ${data} created successfully!`, 'success');
+        this.showToast(
+          'Success',
+          `Schedule with ID ${data} created successfully!`,
+          'success'
+        );
         this.template.querySelector('c-schedule-creator-component')?.resetFields();
         this.showSchedule = event.detail;
         this.isLoading = false;

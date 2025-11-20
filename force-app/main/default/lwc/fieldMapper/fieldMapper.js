@@ -4,6 +4,7 @@ import fetchObjects from '@salesforce/apex/FieldMappingController.fetchObjects';
 import fetchFields from '@salesforce/apex/FieldMappingController.fetchFields';
 import loadMappings from '@salesforce/apex/FieldMappingController.loadMappings';
 import saveMappingsJson from '@salesforce/apex/FieldMappingController.saveMappingsJson';
+
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin } from 'lightning/navigation';
 
@@ -27,10 +28,13 @@ function microtaskDebounce(fn) {
 
 const SS_ROWS_KEY = 'IM_csvRows';
 const SS_COLS_KEY = 'IM_sourceColumnsCsv';
+const SS_VER_PREFIX = 'IM_ver_';
 
 export default class FieldMapper extends NavigationMixin(LightningElement) {
   _csvRows = [];
   _sourceColumnsCsv = '';
+
+  @api totalRowCount;
 
   @api
   get csvRows() {
@@ -43,6 +47,13 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
       this.availableSourceColumns = [...this.initialSourceColumns];
       this._refreshPreviewDebounced();
     }
+  }
+  get rowCountLabel() {
+    const n = this.totalRowCount;
+    if (typeof n === 'number' && Number.isFinite(n) && n >= 0) {
+      return n;
+    }
+    return Array.isArray(this._csvRows) ? this._csvRows.length : 0;
   }
 
   @api
@@ -63,8 +74,7 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
   @api version;
   @api preselectedProjectName = '';
   @api currentStep = '';
-
-   @api sourceLabel = ''; 
+  @api sourceLabel = '';
 
   /** ===== Preselect plumbing ===== */
   _preselectedProjectId = '';
@@ -88,6 +98,7 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
   get preselectedTargetObject() {
     return this._preselectedTargetObject;
   }
+
   get sourceTitle() {
     if (this.sourceLabel) {
       return `Source Data (${this.sourceLabel})`;
@@ -97,6 +108,12 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
     }
     return 'Source Data';
   }
+
+ get currentProjectName() {
+  const p = (this.projects || []).find((x) => x.id === this.selectedProjectId);
+  return p ? p.name : this.preselectedProjectName || '';
+}
+
 
   /** ===== State ===== */
   @track versionInput = '';
@@ -113,13 +130,43 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
 
   /** Preview: default 4 rows */
   @track clientPreviewRows = [];
-  @track previewRowLimit = 4; 
+  @track previewRowLimit = 4;
 
-  /** Settings modal */
+  /** Settings modal (preview row count) */
   @track showSettingsModal = false;
   @track settingsPreviewRowLimit = 4;
 
+  /** Versions modal */
+  @track showVersionModal = false;
+  @track versionModalLoading = false;
+  @track versionModalError = '';
+  // array of { value: '1.0' }
+  @track versionOptions = [];
+  @track selectedPreviewVersion = '';
+  @track versionPreviewHeaders = [];
+  @track versionPreviewRows = [];
+  // not reactive: { [version]: mappedRows[] }
+  versionModalMappingsByVersion = {};
+
   _refreshPreviewDebounced = microtaskDebounce(() => this.rebuildClientPreview());
+
+  /** ===== Template helpers for versions ===== */
+  get hasVersionOptions() {
+    return Array.isArray(this.versionOptions) && this.versionOptions.length > 0;
+  }
+
+  // returns [{ value, cssClass }]
+  get versionOptionsWithClass() {
+    const selected = this.selectedPreviewVersion;
+    return (this.versionOptions || []).map((v) => {
+      const value = v.value || v;
+      return {
+        value,
+        cssClass:
+          value === selected ? 'ver-pill ver-pill--active' : 'ver-pill'
+      };
+    });
+  }
 
   /** ===== Options & helpers ===== */
   get projectOptions() {
@@ -145,7 +192,7 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
     return !!this.selectedProjectId;
   }
 
-  /** subtitle & preview fallback) */
+  /** subtitle & preview fallback */
   _examplesForSource(col, limit = 2) {
     const rows = Array.isArray(this._csvRows) ? this._csvRows : [];
     const seen = new Set();
@@ -191,7 +238,7 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
     return this.sourceList.length > 0;
   }
 
-  /** Summary */
+  /** Summary (for sidebar only) */
   get summaryTotalFields() {
     return (this.targetFields || []).length;
   }
@@ -201,8 +248,20 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
   get summaryUnmappedCount() {
     return Math.max(this.summaryTotalFields - this.summaryMappedCount, 0);
   }
+  // used by notifySidebar
   get summaryWithTransformCount() {
-    return (this.mappings || []).filter((m) => !!m.isLookup).length;
+    return (this.targetFields || []).filter((f) =>
+      (f.mappedSources || []).some(
+        (ms) => ms.mapping && ms.mapping.isLookup
+      )
+    ).length;
+  }
+
+  get totalRecords() {
+    return this.summaryTotalFields;
+  }
+  get unmappedFieldsCount() {
+    return this.summaryUnmappedCount;
   }
 
   /** Preview helpers */
@@ -220,145 +279,191 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
     return Array.isArray(this.clientPreviewRows) && this.clientPreviewRows.length > 0;
   }
 
- /** Field type → label & icon */
-computeFieldTypeAndIcon(apiName, label, dataType, isRequired = false) {
-  const name = (apiName || '').toLowerCase();
-  const lbl = (label || '').toLowerCase();
-  const typeRaw = (dataType || '').toLowerCase();
+  /** ===== Field type → label & icon ===== */
+  computeFieldTypeAndIcon(apiName, label, dataType, isRequired = false) {
+    const name = (apiName || '').toLowerCase();
+    const lbl = (label || '').toLowerCase();
+    const typeRaw = (dataType || '').toLowerCase();
 
-  let uiType = 'Text';
-  let iconKind = 'text';
+    let uiType = 'Text';
+    let iconKind = 'text';
 
-  const t = typeRaw;
+    const t = typeRaw;
 
-  // (person fields)
-  const isPersonField =
-    /firstname/.test(name) ||
-    /lastname/.test(name) ||
-    /first name/.test(lbl) ||
-    /last name/.test(lbl);
+    const isPersonField =
+      /firstname/.test(name) ||
+      /lastname/.test(name) ||
+      /first name/.test(lbl) ||
+      /last name/.test(lbl);
 
-  if (isPersonField) {
-    uiType = 'Text';
-    iconKind = 'person';
+    if (isPersonField) {
+      uiType = 'Text';
+      iconKind = 'person';
+    } else if (t.includes('email') || name.includes('email') || lbl.includes('email')) {
+      uiType = 'Email';
+      iconKind = 'email';
+    } else if (t.includes('phone') || name.includes('phone') || lbl.includes('phone')) {
+      uiType = 'Phone';
+      iconKind = 'phone';
+    } else if (t.includes('url') || t.includes('link') || name.includes('website')) {
+      uiType = 'URL';
+      iconKind = name.includes('website') ? 'website' : 'url';
+    } else if (t.includes('multipicklist') || t.includes('multi-select')) {
+      uiType = 'Multi-Select';
+      iconKind = 'multipicklist';
+    } else if (t.includes('picklist')) {
+      uiType = 'Picklist';
+      iconKind = 'picklist';
+    } else if (t.includes('datetime') || t.includes('date/time')) {
+      uiType = 'Date/Time';
+      iconKind = 'date';
+    } else if (t.includes('date')) {
+      uiType = 'Date';
+      iconKind = 'date';
+    } else if (t.includes('boolean') || t === 'checkbox') {
+      uiType = 'Checkbox';
+      iconKind = 'boolean';
+    } else if (
+      t.includes('currency') ||
+      t.includes('double') ||
+      t.includes('int') ||
+      t.includes('integer') ||
+      t.includes('long') ||
+      t.includes('percent') ||
+      t.includes('number')
+    ) {
+      uiType = t.includes('currency') ? 'Currency' : 'Number';
+      iconKind = 'number';
+    } else if (
+      t.includes('reference') ||
+      t.includes('lookup') ||
+      name.endsWith('id') ||
+      (name.endsWith('__c') && (lbl.includes('account') || lbl.includes('contact')))
+    ) {
+      uiType = 'Lookup';
+      iconKind = 'lookup';
+    } else {
+      uiType = 'Text';
+      iconKind = isPersonField ? 'person' : 'text';
+    }
+
+    const optionality = isRequired ? 'Required' : 'Optional';
+    const typeLabel = `${uiType} • ${optionality}`;
+
+    return {
+      typeLabel,
+      iconKind,
+      iconCssClass: `t-icon t-icon_${iconKind}`
+    };
   }
-  // Email
-  else if (t.includes('email') || name.includes('email') || lbl.includes('email')) {
-    uiType = 'Email';
-    iconKind = 'email';
+
+  /** ===== Version helpers (per project) ===== */
+  getLastVersionForProject(projectId) {
+    if (!projectId) return null;
+    if (typeof window === 'undefined') return null;
+    try {
+      const raw = window.sessionStorage.getItem(`${SS_VER_PREFIX}${projectId}`);
+      return raw || null;
+    } catch (e) {
+      return null;
+    }
   }
-  //Phone
-  else if (t.includes('phone') || name.includes('phone') || lbl.includes('phone')) {
-    uiType = 'Phone';
-    iconKind = 'phone';
+
+  setLastVersionForProject(projectId, version) {
+    if (!projectId || !version) return;
+    if (typeof window === 'undefined') return;
+    try {
+      window.sessionStorage.setItem(`${SS_VER_PREFIX}${projectId}`, version);
+    } catch (e) {
+      // ignore
+    }
   }
-  // URL / Website
-  else if (t.includes('url') || t.includes('link') || name.includes('website')) {
-    uiType = 'URL';
-    iconKind = 'url';
+
+  computeNextVersionForProject(projectId) {
+    const last = this.getLastVersionForProject(projectId);
+    if (!last) {
+      return '1.0';
+    }
+    const n = parseFloat(last);
+    if (!Number.isFinite(n)) {
+      return '1.0';
+    }
+    const inc = Math.round((n + 0.1) * 10) / 10;
+    return inc.toFixed(1);
   }
-  // Picklist / Multi-picklist
-  else if (t.includes('multipicklist') || t.includes('multi-select')) {
-    uiType = 'Multi-Select';
-    iconKind = 'multipicklist';
-  } else if (t.includes('picklist')) {
-    uiType = 'Picklist';
-    iconKind = 'picklist';
+
+  /** ===== Loads ===== */
+ async loadProjects() {
+  try {
+    const result = await fetchProjects();
+    this.projects = (result || [])
+      .map((p) => ({
+        id: p.id || p.Id,
+        name: p.name || p.Name,
+        targetObject:
+          p.targetObject ||
+          p.TargetObject ||
+          p.Target_Object__c ||
+          p.Target_SObject__c 
+      }))
+      .filter((p) => p.id && p.name);
+
+    this.tryApplyPreselection();
+  } catch (e) {
+    this.projects = [];
+    console.error('[FieldMapper] loadProjects error', e);
   }
-  //  Date / DateTime
-  else if (t.includes('datetime') || t.includes('date/time')) {
-    uiType = 'Date/Time';
-    iconKind = 'date';
-  } else if (t.includes('date')) {
-    uiType = 'Date';
-    iconKind = 'date';
+}
+
+
+async tryApplyPreselection() {
+  if (this._appliedPreselect) {
+    return;
   }
-  // Boolean
-  else if (t.includes('boolean') || t === 'checkbox') {
-    uiType = 'Checkbox';
-    iconKind = 'boolean';
+
+  let project = null;
+  if (this._preselectedProjectId && Array.isArray(this.projects) && this.projects.length) {
+    project = this.projects.find((p) => p.id === this._preselectedProjectId);
   }
-  //Currency / Number / Percent
-  else if (
-    t.includes('currency') ||
-    t.includes('double') ||
-    t.includes('int') ||
-    t.includes('integer') ||
-    t.includes('long') ||
-    t.includes('percent') ||
-    t.includes('number')
+
+  if (
+    !project &&
+    this.preselectedProjectName &&
+    Array.isArray(this.projects) &&
+    this.projects.length
   ) {
-    uiType = t.includes('currency') ? 'Currency' : 'Number';
-    iconKind = 'number';
+    const want = this.preselectedProjectName.toLowerCase();
+    project = this.projects.find((p) => (p.name || '').toLowerCase() === want);
   }
-  // Lookup / Reference / Id
-  else if (
-    t.includes('reference') ||
-    t.includes('lookup') ||
-    name.endsWith('id') ||
-    name.endsWith('__c') && (lbl.includes('account') || lbl.includes('contact'))
-  ) {
-    uiType = 'Lookup';
-    iconKind = 'lookup';
+  if (!project) {
+    if (!this._preselectedProjectId && !this.preselectedProjectName) {
+      return;
+    }
+
+    project = {
+      id: this._preselectedProjectId || `tmp-${Date.now()}`,
+      name: this.preselectedProjectName || 'Current Project',
+      targetObject: this._preselectedTargetObject || ''
+    };
+    this.projects = [...(this.projects || []), project];
   }
-  // Fallback: plain text
-  else {
-    uiType = 'Text';
-    iconKind = isPersonField ? 'person' : 'text';
+  this.selectedProjectId = project.id;
+  this.selectedTargetObject =
+    this._preselectedTargetObject || project.targetObject || '';
+  await this.loadTargetFields();
+  this.updateMappedSources();
+
+  await this.applySavedMappings({ useLatest: true, silent: true });
+  if (!this.versionInput) {
+    const last = this.getLastVersionForProject(this.selectedProjectId);
+    this.versionInput = last || '';
   }
 
-  const optionality = isRequired ? 'Required' : 'Optional';
-  const typeLabel = `${uiType} • ${optionality}`;
-
-  return {
-    typeLabel,                          
-    iconKind,                           
-    iconCssClass: `t-icon t-icon_${iconKind}`
-  };
+  this._appliedPreselect = true;
 }
 
 
 
-  /** ===== Loads ===== */
-  async loadProjects() {
-    try {
-      const result = await fetchProjects();
-      this.projects = (result || [])
-        .map((p) => ({
-          id: p.id || p.Id,
-          name: p.name || p.Name,
-          targetObject: p.targetObject || p.TargetObject || p.Target_Object__c
-        }))
-        .filter((p) => p.id && p.name);
-      this.tryApplyPreselection();
-    } catch (e) {
-      this.projects = [];
-      console.error('[FieldMapper] loadProjects error', e);
-    }
-  }
-
-  async tryApplyPreselection() {
-    if (this._appliedPreselect) return;
-    if (!this.projects.length) return;
-
-    let project = null;
-    if (this._preselectedProjectId) {
-      project = this.projects.find((p) => p.id === this._preselectedProjectId);
-    }
-    if (!project && this.preselectedProjectName) {
-      const want = this.preselectedProjectName.toLowerCase();
-      project = this.projects.find((p) => (p.name || '').toLowerCase() === want);
-    }
-    if (!project) return;
-
-    this.selectedProjectId = project.id;
-    this.selectedTargetObject = this._preselectedTargetObject || project.targetObject || '';
-    this.projects = [project];
-
-    await this.loadTargetFields();
-    this.updateMappedSources();
-    this._appliedPreselect = true;
-  }
 
   async loadAvailableObjects() {
     try {
@@ -369,45 +474,44 @@ computeFieldTypeAndIcon(apiName, label, dataType, isRequired = false) {
     }
   }
 
-async loadTargetFields() {
-  if (!this.selectedTargetObject) {
-    this.targetFields = [];
-    return;
+  async loadTargetFields() {
+    if (!this.selectedTargetObject) {
+      this.targetFields = [];
+      return;
+    }
+    try {
+      const result = await fetchFields({ objectApiName: this.selectedTargetObject });
+
+      this.targetFields = (result || []).map((f) => {
+        const apiName = f.apiName || f.ApiName;
+        const label = f.label || f.Label;
+        const dataType = f.dataType || f.type || f.DataType;
+
+        const isRequired =
+          f.isRequired === true ||
+          f.required === true ||
+          f.nillable === false ||
+          f.isNillable === false;
+
+        const meta = this.computeFieldTypeAndIcon(apiName, label, dataType, isRequired);
+
+        return {
+          apiName,
+          label,
+          dataType,
+          typeLabel: meta.typeLabel,
+          iconKind: meta.iconKind,
+          iconCssClass: meta.iconCssClass,
+          mappedSources: []
+        };
+      });
+
+      this.updateMappedSources();
+    } catch (e) {
+      this.targetFields = [];
+      console.error('[FieldMapper] loadTargetFields error', e);
+    }
   }
-  try {
-    const result = await fetchFields({ objectApiName: this.selectedTargetObject });
-
-    this.targetFields = (result || []).map((f) => {
-      const apiName = f.apiName || f.ApiName;
-      const label = f.label || f.Label;
-      const dataType = f.dataType || f.type || f.DataType;
-
-      // Try to detect "required" from describe info your Apex sends
-      const isRequired =
-        f.isRequired === true ||
-        f.required === true ||
-        f.nillable === false ||
-        f.isNillable === false;
-
-      const meta = this.computeFieldTypeAndIcon(apiName, label, dataType, isRequired);
-
-      return {
-        apiName,
-        label,
-        dataType,
-        typeLabel: meta.typeLabel,     
-        iconKind: meta.iconKind,      
-        iconCssClass: meta.iconCssClass,
-        mappedSources: []
-      };
-    });
-
-    this.updateMappedSources();
-  } catch (e) {
-    this.targetFields = [];
-    console.error('[FieldMapper] loadTargetFields error', e);
-  }
-}
 
   /** Helpers */
   initMappings() {
@@ -415,59 +519,65 @@ async loadTargetFields() {
     this.updateMappedSources();
   }
 
- updateMappedSources() {
-  const newTargets = (this.targetFields || []).map((field) => {
-    // Collect unique mappings for this field
-    const uniq = new Map();
-    (this.mappings || [])
-      .filter((m) => m.targetField === field.apiName)
-      .forEach((m) => {
-        if (!m || !m.sourceColumn) return;
-        if (!uniq.has(m.sourceColumn)) {
-          uniq.set(m.sourceColumn, m);
-        }
+  updateMappedSources() {
+    const newTargets = (this.targetFields || []).map((field) => {
+      const uniq = new Map();
+      (this.mappings || [])
+        .filter((m) => m.targetField === field.apiName)
+        .forEach((m) => {
+          if (!m || !m.sourceColumn) return;
+          if (!uniq.has(m.sourceColumn)) {
+            uniq.set(m.sourceColumn, m);
+          }
+        });
+
+      const mappedSources = Array.from(uniq.values()).map((m) => {
+        const isTransform = !!m.isLookup;
+        const chipClass = `chip ${isTransform ? 'chip--transform' : 'chip--mapped'}`;
+
+        return {
+          key: `${field.apiName}__${m.sourceColumn}`,
+          sourceColumn: m.sourceColumn,
+          mapping: m,
+          lookupFieldsOptions: Array.isArray(this.lookupFieldsByObject[m.lookupObject])
+            ? this.lookupFieldsByObject[m.lookupObject]
+            : [],
+          chipClass
+        };
       });
 
-    //  Build mappedSources with chipClass (green vs blue)
-    const mappedSources = Array.from(uniq.values()).map((m) => {
-      const isTransform = !!m.isLookup; 
-      const chipClass = `chip ${isTransform ? 'chip--transform' : 'chip--mapped'}`;
+      const hasMappings = mappedSources.length > 0;
+      const hasTransform = mappedSources.some((ms) => ms.mapping && ms.mapping.isLookup);
+
+      const cardClasses = ['fm-target-card'];
+      if (hasTransform) {
+        cardClasses.push('fm-target-card--transform');
+      } else if (hasMappings) {
+        cardClasses.push('fm-target-card--mapped');
+      }
 
       return {
-        key: `${field.apiName}__${m.sourceColumn}`,
-        sourceColumn: m.sourceColumn,
-        mapping: m,
-        lookupFieldsOptions: Array.isArray(this.lookupFieldsByObject[m.lookupObject])
-          ? this.lookupFieldsByObject[m.lookupObject]
-          : [],
-        chipClass
+        ...field,
+        mappedSources,
+        cardClass: cardClasses.join(' ')
       };
     });
 
-    const hasMappings = mappedSources.length > 0;
-    const hasTransform = mappedSources.some((ms) => ms.mapping && ms.mapping.isLookup);
+    // mapped first
+    newTargets.sort((a, b) => {
+      const am = a.mappedSources && a.mappedSources.length ? 1 : 0;
+      const bm = b.mappedSources && b.mappedSources.length ? 1 : 0;
+      if (am !== bm) return bm - am;
+      return (a.label || '').localeCompare(b.label || '');
+    });
 
-    const cardClasses = ['fm-target-card'];
-    if (hasTransform) {
-      cardClasses.push('fm-target-card--transform'); 
-    } else if (hasMappings) {
-      cardClasses.push('fm-target-card--mapped'); 
-    }
+    this.targetFields = newTargets;
+    this.mappings = [...(this.mappings || [])];
+    this.availableSourceColumns = [...(this.availableSourceColumns || [])];
 
-    return {
-      ...field,
-      mappedSources,
-      cardClass: cardClasses.join(' ')
-    };
-  });
-
-  this.targetFields = newTargets;
-  this.mappings = [...(this.mappings || [])];
-  this.availableSourceColumns = [...(this.availableSourceColumns || [])];
-
-  this._refreshPreviewDebounced();
-}
-
+    this._refreshPreviewDebounced();
+    this.notifySidebar();
+  }
 
   ensureCsvSamplesFromSession() {
     if (Array.isArray(this._csvRows) && this._csvRows.length) return;
@@ -529,7 +639,6 @@ async loadTargetFields() {
       return;
     }
 
-    // rows path
     this.clientPreviewRows = srcRows.map((src, i) => {
       const cells = mappedTargets.map((f, colIdx) => {
         const col = f.mappedSources[0]?.sourceColumn || '';
@@ -566,6 +675,13 @@ async loadTargetFields() {
     await this.loadTargetFields();
     this.ensureCsvSamplesFromSession();
     this.updateMappedSources();
+
+    await this.applySavedMappings({ useLatest: true, silent: true });
+
+    if (!this.versionInput) {
+      const last = this.getLastVersionForProject(this.selectedProjectId);
+      this.versionInput = last || '';
+    }
   }
 
   /** ===== Lookup controls ===== */
@@ -716,20 +832,20 @@ async loadTargetFields() {
 
       const normLabel = this.normalizeName(f.label);
       const normApi = this.normalizeName(f.apiName);
-      let found =
+      const candidate =
         srcByNorm.get(normLabel) ||
         srcByNorm.get(normApi) ||
         (normLabel.endsWith('name') && srcByNorm.get('name'));
 
-      if (!found) return;
-      if (mappedSources.has(found)) return;
+      if (!candidate) return;
+      if (mappedSources.has(candidate)) return;
 
-      mappedSources.add(found);
+      mappedSources.add(candidate);
       newMappings.push({
         id: null,
         projectId: this.selectedProjectId,
         version: this.versionInput || '',
-        sourceColumn: found,
+        sourceColumn: candidate,
         targetField: f.apiName,
         isLookup: false,
         lookupObject: null,
@@ -748,9 +864,13 @@ async loadTargetFields() {
   /** ===== Save / load ===== */
   async handleSave() {
     try {
-      const ver = (this.versionInput || '').trim();
-      if (!ver) throw new Error('Version is required to save mappings.');
-      if (!this.selectedProjectId) throw new Error('Please select a Project before saving.');
+      if (!this.selectedProjectId) {
+        throw new Error('Please select a Project before saving.');
+      }
+
+      const nextVersion = this.computeNextVersionForProject(this.selectedProjectId);
+      const ver = nextVersion;
+      this.versionInput = ver;
 
       const payload = (this.mappings || [])
         .filter((m) => m.sourceColumn && m.targetField && this.selectedProjectId)
@@ -764,14 +884,19 @@ async loadTargetFields() {
           lookupObject: m.lookupObject || '',
           lookupMatchField: m.lookupMatchField || ''
         }));
-      if (!payload.length) throw new Error('No valid mapping rows to save.');
+
+      if (!payload.length) {
+        throw new Error('No valid mapping rows to save.');
+      }
 
       await saveMappingsJson({
         targetObjectApiName: this.selectedTargetObject,
         rowsJson: JSON.stringify(payload)
       });
 
-      this.toast('Success', 'Mappings saved successfully!', 'success');
+      this.setLastVersionForProject(this.selectedProjectId, ver);
+
+      this.toast('Success', `Mappings saved as Version ${ver}`, 'success');
       this._refreshPreviewDebounced();
     } catch (error) {
       const msg =
@@ -784,46 +909,117 @@ async loadTargetFields() {
     this.handleSave();
   }
 
-  async applySavedMappings() {
-    if (!this.selectedProjectId) {
+  async applySavedMappings(opts = {}) {
+  const { useLatest = false, silent = false } = opts;
+
+  if (!this.selectedProjectId) {
+    if (!silent) {
       this.toast('Info', 'Select a project first.', 'info');
+    }
+    return;
+  }
+
+  if (!this.selectedTargetObject) {
+    if (!silent) {
+      this.toast('Info', 'Target object is missing for this project.', 'info');
+    }
+    return;
+  }
+
+  try {
+    let saved;
+    if (useLatest) {
+      saved = await loadMappings({
+        projectId: this.selectedProjectId,
+        version: '',
+        objectApiName: this.selectedTargetObject
+      });
+    } else {
+      saved = await loadMappings({
+        projectId: this.selectedProjectId,
+        version: this.versionInput || '',
+        objectApiName: this.selectedTargetObject
+      });
+    }
+
+    const rows = Array.isArray(saved) ? saved : [];
+    if (!rows.length) {
+      if (!silent) {
+        this.toast('Info', 'No saved mappings found for this project.', 'info');
+      }
       return;
     }
-    try {
-      const saved = await loadMappings({
-        projectId: this.selectedProjectId,
-        version: this.versionInput || ''
-      });
-      this.mappings = (saved || []).map((r) => ({
-        id: r.id || null,
-        projectId: r.projectId || this.selectedProjectId,
-        version: r.version || this.versionInput || '',
-        sourceColumn: r.sourceColumn,
-        targetField: r.targetField,
-        isLookup: !!r.isLookup,
-        lookupObject: r.lookupObject || null,
-        lookupMatchField: r.lookupMatchField || null
-      }));
+    const versionsSet = new Set();
+    rows.forEach((r) => {
+      const v = (r.version || r.Version__c || r.Version || '').toString();
+      if (v) versionsSet.add(v);
+    });
 
-      const mapped = new Set();
-      (this.mappings || []).forEach((m) => {
-        if (m?.sourceColumn) mapped.add(m.sourceColumn);
-      });
-      this.availableSourceColumns = this.initialSourceColumns.filter(
-        (c) => !mapped.has(c)
+    let effectiveVersion = this.versionInput;
+
+    if (useLatest || !effectiveVersion) {
+      const sorted = Array.from(versionsSet).sort(
+        (a, b) => parseFloat(b) - parseFloat(a)
       );
+      effectiveVersion = sorted[0];
+    }
 
-      this.updateMappedSources();
-      this.toast('Loaded', 'Saved mappings applied.', 'success');
-      this._refreshPreviewDebounced();
-    } catch (e) {
+    const filteredRows = rows.filter((r) => {
+      const v = (r.version || r.Version__c || r.Version || '').toString();
+      return v === effectiveVersion;
+    });
+
+    if (!filteredRows.length) {
+      if (!silent) {
+        this.toast('Info', 'No rows for selected version.', 'info');
+      }
+      return;
+    }
+
+    this.versionInput = effectiveVersion;
+    this.setLastVersionForProject(this.selectedProjectId, effectiveVersion);
+
+    this.mappings = filteredRows.map((r) => ({
+      id: r.id || null,
+      projectId: r.projectId || this.selectedProjectId,
+      version: effectiveVersion,
+      sourceColumn: r.sourceColumn,
+      targetField: r.targetField,
+      isLookup: !!r.isLookup,
+      lookupObject: r.lookupObject || null,
+      lookupMatchField: r.lookupMatchField || null
+    }));
+
+    const mapped = new Set();
+    (this.mappings || []).forEach((m) => {
+      if (m?.sourceColumn) mapped.add(m.sourceColumn);
+    });
+    this.availableSourceColumns = this.initialSourceColumns.filter(
+      (c) => !mapped.has(c)
+    );
+
+    this.updateMappedSources();
+    this._refreshPreviewDebounced();
+
+    if (!silent) {
+      this.toast(
+        'Loaded',
+        `Loaded mappings for Version ${effectiveVersion}.`,
+        'success'
+      );
+    }
+  } catch (e) {
+    if (!silent) {
       this.toast(
         'Error',
         e?.body?.message || 'Failed to load saved mappings.',
         'error'
       );
+    } else {
+      console.error('[FieldMapper] applySavedMappings error', e);
     }
   }
+}
 
   handleLoadSavedClick() {
     this.applySavedMappings();
@@ -882,31 +1078,231 @@ async loadTargetFields() {
     this._refreshPreviewDebounced();
   }
 
+  /** ===== Versions Modal ===== */
+async openVersionModal() {
+  if (!this.selectedProjectId) {
+    this.toast('Info', 'Select a project first.', 'info');
+    return;
+  }
 
-  connectedCallback() {
-    this.versionInput = this.version || `v${Math.floor(Math.random() * 9000) + 1000}`;
-    if (
-      Array.isArray(this._csvRows) &&
-      this._csvRows.length > 0 &&
-      !this._sourceColumnsCsv
-    ) {
-      const first = this._csvRows[0] || {};
-      this.initialSourceColumns = Object.keys(first);
-      this.availableSourceColumns = [...this.initialSourceColumns];
-    } else {
-      const csv = this._sourceColumnsCsv || '';
-      this.initialSourceColumns = csv
-        ? csv
-            .split(',')
-            .map((s) => s.trim())
-            .filter(Boolean)
-        : [];
-      this.availableSourceColumns = [...this.initialSourceColumns];
+  if (!this.selectedTargetObject) {
+    this.toast('Info', 'Target object is missing for this project.', 'info');
+    return;
+  }
+
+  this.showVersionModal = true;
+  this.versionModalLoading = true;
+  this.versionModalError = '';
+  this.versionOptions = [];
+  this.versionPreviewHeaders = [];
+  this.versionPreviewRows = [];
+  this.versionModalMappingsByVersion = {};
+
+  try {
+    const saved = await loadMappings({
+      projectId: this.selectedProjectId,
+      version: '',
+      objectApiName: this.selectedTargetObject
+    });
+
+    const rows = Array.isArray(saved) ? saved : [];
+
+    if (!rows.length) {
+      this.versionModalError = 'No previous mappings found for this project.';
+      this.versionModalLoading = false;
+      return;
     }
 
-    this.ensureCsvSamplesFromSession();
-    this.initMappings();
-    this.loadProjects();
-    this.loadAvailableObjects();
+    const byVersion = new Map();
+    rows.forEach((r) => {
+      const v = (r.version || r.Version__c || r.Version || '').toString() || '1.0';
+      if (!byVersion.has(v)) byVersion.set(v, []);
+      byVersion.get(v).push(r);
+    });
+
+    const versions = Array.from(byVersion.keys()).sort(
+      (a, b) => parseFloat(b) - parseFloat(a)
+    );
+
+    this.versionOptions = versions.map((v) => ({ value: v }));
+    this.versionModalMappingsByVersion = {};
+
+    versions.forEach((v) => {
+      this.versionModalMappingsByVersion[v] = (byVersion.get(v) || []).map((r) => ({
+        id: r.id || null,
+        projectId: r.projectId || this.selectedProjectId,
+        version: v,
+        sourceColumn: r.sourceColumn,
+        targetField: r.targetField,
+        isLookup: !!r.isLookup,
+        lookupObject: r.lookupObject || null,
+        lookupMatchField: r.lookupMatchField || null
+      }));
+    });
+
+    this.selectedPreviewVersion = versions[0];
+    this.buildVersionPreview(this.selectedPreviewVersion);
+  } catch (e) {
+    this.versionModalError =
+      e?.body?.message || 'Failed to load mappings for this project.';
+  } finally {
+    this.versionModalLoading = false;
   }
+}
+
+
+  buildVersionPreview(version) {
+    const mappings = this.versionModalMappingsByVersion[version] || [];
+    if (!mappings.length) {
+      this.versionPreviewHeaders = [];
+      this.versionPreviewRows = [];
+      return;
+    }
+
+    const mappingByTarget = new Map();
+    mappings.forEach((m) => {
+      if (!mappingByTarget.has(m.targetField)) {
+        mappingByTarget.set(m.targetField, m);
+      }
+    });
+
+    const mappedTargets = (this.targetFields || [])
+      .filter((f) => mappingByTarget.has(f.apiName))
+      .map((f) => {
+        const m = mappingByTarget.get(f.apiName);
+        return {
+          ...f,
+          mappedSources: [
+            {
+              sourceColumn: m.sourceColumn
+            }
+          ]
+        };
+      });
+
+    this.versionPreviewHeaders = mappedTargets.map((f) => f.label);
+
+    const limit = this.previewRowLimit || 4;
+    const srcRows = Array.isArray(this._csvRows) ? this._csvRows : [];
+
+    if (!srcRows.length) {
+      const byColExamples = new Map();
+      mappedTargets.forEach((f) => {
+        const col = f.mappedSources[0]?.sourceColumn;
+        byColExamples.set(col, this._examplesForSource(col, limit));
+      });
+      const rowCount = Math.max(
+        1,
+        ...Array.from(byColExamples.values()).map((a) => a.length || 0)
+      );
+
+      this.versionPreviewRows = Array.from({ length: rowCount }).map((_, i) => {
+        const cells = mappedTargets.map((f) => {
+          const col = f.mappedSources[0]?.sourceColumn || '';
+          const ex = byColExamples.get(col) || [];
+          return ex[i] ?? '';
+        });
+        return { _key: `vrow-${version}-${i}`, cells };
+      });
+      return;
+    }
+
+    this.versionPreviewRows = srcRows.map((src, i) => {
+      const cells = mappedTargets.map((f) => {
+        const col = f.mappedSources[0]?.sourceColumn || '';
+        return col ? src?.[col] ?? '' : '';
+      });
+      return { _key: `vrow-${version}-${i}`, cells };
+    });
+  }
+
+  handleVersionSelect(e) {
+    const v = e.currentTarget?.dataset?.version;
+    if (!v) return;
+    this.selectedPreviewVersion = v;
+    this.buildVersionPreview(v);
+  }
+
+  handleVersionModalClose() {
+    this.showVersionModal = false;
+  }
+
+  /** ===== Sidebar event ===== */
+  notifySidebar() {
+    try {
+      const totalFields = this.summaryTotalFields;
+      const mapped = this.summaryMappedCount;
+      const unmapped = this.summaryUnmappedCount;
+      const withTransforms = this.summaryWithTransformCount;
+
+      this.dispatchEvent(
+        new CustomEvent('feedSideBar', {
+          detail: {
+            title: 'Mapping Summary',
+            data: {
+              totalFields: {
+                label: 'Total Fields',
+                cssClass: 'sidebarfeed__mapping_total-fields',
+                value: totalFields
+              },
+              mappedFieldsCount: {
+                label: 'Mapped',
+                cssClass: 'sidebarfeed__mapping_mapped-fields',
+                value: mapped
+              },
+              unmappedFieldsCount: {
+                label: 'Unmapped',
+                cssClass: 'sidebarfeed__mapping_unmapped-fields',
+                value: unmapped
+              },
+              withTransformationsCount: {
+                label: 'With Transformations',
+                cssClass: 'sidebarfeed__mapping_with-transformations',
+                value: withTransforms
+              }
+            }
+          },
+          bubbles: true,
+          composed: true
+        })
+      );
+    } catch (e) {
+      console.error('[FieldMapper] notifySidebar error', e);
+    }
+  }
+
+ connectedCallback() {
+  this.versionInput = this.version || '';
+
+  if (
+    Array.isArray(this._csvRows) &&
+    this._csvRows.length > 0 &&
+    !this._sourceColumnsCsv
+  ) {
+    const first = this._csvRows[0] || {};
+    this.initialSourceColumns = Object.keys(first);
+    this.availableSourceColumns = [...this.initialSourceColumns];
+  } else {
+    const csv = this._sourceColumnsCsv || '';
+    this.initialSourceColumns = csv
+      ? csv
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean)
+      : [];
+    this.availableSourceColumns = [...this.initialSourceColumns];
+  }
+
+  this.ensureCsvSamplesFromSession();
+  this.initMappings();
+
+  if (this._preselectedTargetObject && !this.selectedTargetObject) {
+    this.selectedTargetObject = this._preselectedTargetObject;
+    this.loadTargetFields();
+  }
+
+  this.loadProjects();
+  this.loadAvailableObjects();
+}
+
 }

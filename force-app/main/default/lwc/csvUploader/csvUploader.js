@@ -127,77 +127,150 @@ export default class CsvUploader extends LightningElement {
   handleFileUpload(e) { const f = e.target.files?.[0]; if (f) this.readFile(f); }
 
   readFile(file) {
-    this.resetState();
-    this.fileName = file.name;
-    this.fileSize = file.size;
+  this.resetState();
+  this.fileName = file.name;
+  this.fileSize = file.size;
 
-    this.isLoading = true;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const text = reader.result || '';
-      try {
-        const { columns, rows } = this.parseCSV(text);
-        this.columns = columns;
-        this.allRows = rows;
-        this.totalRows = rows.length;
-        this.pageIndex = 1;
-        this.isPreview = this.totalRows > this.previewLimit;
+  this.isLoading = true;
+  const reader = new FileReader();
 
-        // Let parent(s) know headers/rows are ready if they want
-        this.dispatchEvent(new CustomEvent('csvloaded', {
-          detail: { columns, rows: this.toObjectRows(rows, columns, this.previewLimit), fileName: this.fileName, fileSize: this.fileSize },
-          bubbles: true, composed: true
-        }));
+  reader.onload = () => {
+    const text = reader.result || '';
+    try {
+      const parsed = this.parseCSV(text);
+      const columns = parsed.columns || [];
+      const allRows = Array.isArray(parsed.allRows) ? parsed.allRows : [];
+      const previewRows = Array.isArray(parsed.rows) ? parsed.rows : allRows;
+      const totalRowCount =
+        typeof parsed.totalRowCount === 'number'
+          ? parsed.totalRowCount
+          : allRows.length;
 
-        this.rebuildDisplayColumns();
-      } catch (e) {
-        this.parseError = e?.message || 'Failed to parse CSV.';
-        this.columns = [];
-        this.allRows = [];
-      } finally {
-        this.isLoading = false;
-      }
+      // Keep the FULL dataset here
+      this.columns = columns;
+      this.allRows = allRows;
+      this.totalRows = totalRowCount;
+      this.pageIndex = 1;
+      this.isPreview = totalRowCount > this.previewLimit;
+      this.dispatchEvent(
+        new CustomEvent('csvloaded', {
+          detail: {
+            columns,
+            rows: this.toObjectRows(
+              previewRows,
+              columns,
+              this.previewLimit
+            ),
+            totalRowCount,
+            fileName: this.fileName,
+            fileSize: this.fileSize
+          },
+          bubbles: true,
+          composed: true
+        })
+      );
+
+      this.rebuildDisplayColumns();
+    } catch (e) {
+      this.parseError =
+        (e && e.message) || 'Failed to parse CSV.';
+      this.columns = [];
+      this.allRows = [];
+      this.totalRows = 0;
+    } finally {
+      this.isLoading = false;
+    }
+  };
+
+  reader.readAsText(file);
+}
+
+
+parseCSV(csvText) {
+  const normalize = (csvText || '')
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n');
+  const lines = normalize.split('\n');
+
+  if (!lines.length || (lines.length === 1 && lines[0].trim() === '')) {
+    return {
+      columns: [],
+      rows: [],
+      allRows: [],
+      totalRowCount: 0
     };
-    reader.readAsText(file);
   }
 
-  parseCSV(csvText) {
-    const normalize = csvText.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-    const lines = normalize.split('\n');
-    if (!lines.length || (lines.length === 1 && lines[0].trim() === '')) {
-      return { columns: [], rows: [] };
+  const headerLine = lines[0] || '';
+
+  // ===== Detect delimiter =====
+  let delimiter = ',';
+  const commaCount = (headerLine.match(/,/g) || []).length;
+  const semiCount = (headerLine.match(/;/g) || []).length;
+  if (semiCount > commaCount) {
+    delimiter = ';';
+  }
+
+  const parseLine = (line) => {
+    const out = [];
+    let cur = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < line.length; i += 1) {
+      const ch = line[i];
+
+      if (ch === '"') {
+        if (inQuotes && i + 1 < line.length && line[i + 1] === '"') {
+          cur += '"';
+          i += 1;
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (ch === delimiter && !inQuotes) {
+        out.push(cur);
+        cur = '';
+      } else {
+        cur += ch;
+      }
     }
 
-    const headerLine = lines[0] || '';
-    let delimiter = ',';
-    const commaCount = (headerLine.match(/,/g) || []).length;
-    const semiCount = (headerLine.match(/;/g) || []).length;
-    if (semiCount > commaCount) delimiter = ';';
+    out.push(cur);
+    return out;
+  };
 
-    const parseLine = (line) => {
-      const out = []; let cur = ''; let inQuotes = false;
-      for (let i = 0; i < line.length; i++) {
-        const ch = line[i];
-        if (ch === '"') {
-          if (inQuotes && i + 1 < line.length && line[i + 1] === '"') { cur += '"'; i++; }
-          else { inQuotes = !inQuotes; }
-        } else if (ch === delimiter && !inQuotes) { out.push(cur); cur = ''; }
-        else { cur += ch; }
-      }
-      out.push(cur);
-      return out;
-    };
+  // ===== Build columns =====
+  const rawHeader = parseLine(headerLine);
+  const columns = rawHeader.map((c, index) => {
+    const trimmed = (c || '').trim();
+    if (trimmed) {
+      return trimmed;
+    }
+    return `Column_${index + 1}`;
+  });
 
-    const rawHeader = parseLine(headerLine);
-    const columns = rawHeader.map((c, i) => (c || '').trim() || `Column_${i + 1}`);
-
-    const rows = lines.slice(1).map((line, idx) => {
+  // ===== Build ALL rows =====
+  const allRows = lines
+    .slice(1)
+    .filter((line) => line !== '')
+    .map((line, rowIdx) => {
       const parsed = parseLine(line);
-      return this.buildRow(parsed, columns, idx);
+      return this.buildRow(parsed, columns, rowIdx);
     });
 
-    return { columns, rows };
-  }
+  const totalRowCount = allRows.length;
+  const limit =
+    this.previewLimit || DEFAULT_PREVIEW_LIMIT;
+  const previewRows = allRows.slice(0, limit);
+
+  return {
+    columns,
+    rows: previewRows, 
+    allRows,               
+    totalRowCount
+  };
+}
+
+
 
   buildRow(values, columns, index) {
     return {
@@ -242,9 +315,20 @@ export default class CsvUploader extends LightningElement {
 
   // ===== Mapping  =====
 handleGoForMapping() {
-  if (!this.columns?.length) return;
+  if (!Array.isArray(this.columns) || !this.columns.length) {
+    return;
+  }
 
-  const plainRows = this.toObjectRows(this.allRows, this.columns, this.previewLimit);
+  const totalRowCount = Array.isArray(this.allRows)
+    ? this.allRows.length
+    : 0;
+
+  const plainRows = this.toObjectRows(
+    this.allRows,
+    this.columns,
+    totalRowCount || this.previewLimit
+  );
+
   try {
     window.sessionStorage.setItem(SS_COLS_KEY, this.columns.join(','));
     window.sessionStorage.setItem(SS_ROWS_KEY, JSON.stringify(plainRows));
@@ -256,6 +340,7 @@ handleGoForMapping() {
       detail: {
         columns: this.columns,
         rows: plainRows,
+        totalRowCount,      
         fileName: this.fileName,
         fileSize: this.fileSize
       },
@@ -264,6 +349,8 @@ handleGoForMapping() {
     })
   );
 }
+
+
 
   // ===== Sorting & UI bits =====
   rebuildDisplayColumns() {
@@ -357,4 +444,6 @@ handleGoForMapping() {
     this.pageSize = DEFAULT_PAGE_SIZE; this.pageIndex = 1; this.sortBy = ''; this.sortAsc = true;
     this.showPreview = false; this.showEditor = false; this.currentRowIndex = -1; this.previewCells = []; this.editBuffer = [];
   }
+
+  
 }
