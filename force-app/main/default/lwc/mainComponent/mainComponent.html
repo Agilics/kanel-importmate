@@ -1,20 +1,11 @@
-<!--
-  @description       : 
-  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
-  @group             : 
-  @last modified on  : 11-11-2025
-  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
--->
 <template>
   <template if:true={isLoading}>
-    <!-- spinner plein écran SLDS -->
     <div class="slds-spinner_container">
       <lightning-spinner
         alternative-text="Loading"
         size="medium"
         variant="inverse"
-      >
-      </lightning-spinner>
+      ></lightning-spinner>
     </div>
   </template>
 
@@ -31,25 +22,20 @@
           ImportMate
           <div class="stepper">
             <c-stepper-component
-              current-step={activeStep}
+              current-step={currentStep}
               steps={steps}
               onstepchange={handleStepClick}
-            ></c-stepper-component>
+            >
+            </c-stepper-component>
           </div>
         </div>
       </div>
-
-      <!--p class="intro-text">
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi sodales
-        nulla ligula, non lacinia felis finibus in. Proin id mattis elit. Donec
-        at nulla metus.
-      </p-->
     </header>
 
     <template if:true={currentStep}>
+      <!-- ===== Step 1: Start ===== -->
       <template if:true={isStart} aria-label="section start">
-        <!-- child here content-->
-        <!-- show  recent imported project -->
+        <!-- Recent projects list -->
         <template
           if:false={showCreatorSection}
           aria-label="select project recent section"
@@ -59,51 +45,59 @@
             onselectproject={nagivateToSelectdDataSource}
             onsearchproject={handleFindExistingProject}
             projects={importProjects}
-          ></c-import-project-recent-component>
+          >
+          </c-import-project-recent-component>
         </template>
-        <!-- end show  recent imported project -->
 
-        <!-- project creator section -->
+        <!-- New project creator -->
         <template
           if:true={showCreatorSection}
           aria-label="creation project section"
         >
-          <c-project-form-card-component
-            recent-projet={recentProject}
-            onsaveproject={handleSaveProject}
+          <c-create-project-component
+            project-name={projectName}
+            description={description}
+            target-object={targetObject}
+            onnamechange={handleProjectNameChange}
+            ondescriptionchange={handleDescriptionChange}
+            ontargetchange={handleTargetObjectChange}
+            onsave={handleCreateProject}
             oncancel={handleCancel}
           >
-          </c-project-form-card-component>
+          </c-create-project-component>
         </template>
-        <!-- end project creator section -->
-
-        <!-- end child content-->
       </template>
-      <!-- Step 2 -->
-      <!-- Step 2: Data source -->
+
+      <!-- ===== Step 2: Select source ===== -->
       <template if:true={isSelectSource} aria-label="select source section">
-        <c-data-source-selector-page
+        <c-data-source-selector
+          current-project={recentProject}
           onprevious={handlePreviousStep}
           onstartmapping={handleStartMapping}
-          current-project={recentProject}
+          oncsvparsed={handleCsvParsed}
         >
-        </c-data-source-selector-page>
+        </c-data-source-selector>
       </template>
 
-      <!-- Step 3: Full Field Mapper page -->
+      <!-- ===== Step 3: Mapping & transformation ===== -->
       <template
         if:true={isMappingAndTransformation}
         aria-label="mapping & transformation section"
       >
-        <c-field-mapper
+       <c-field-mapper
           preselected-project-id={recentProject.Id}
+          preselected-project-name={recentProject.Name} 
           preselected-target-object={mappingTargetObject}
           source-columns-csv={mappingHeadersCsv}
-          onprevious={handleBackToStep2}
-        >
-        </c-field-mapper>
+          csv-rows={mappingSampleRows}
+          total-row-count={mappingTotalRowCount}
+          source-label={mappingSourceLabel}
+          onprevious={handleBackToStep2}>
+      </c-field-mapper>
+
       </template>
 
+      <!-- ===== Step 4: Scheduling ===== -->
       <template if:true={isScheduling} aria-label="schedule's section">
         <c-schedule-creator-component
           project-id={recentProject.Id}
