@@ -444,6 +444,11 @@ handleGoForMapping() {
     this.pageSize = DEFAULT_PAGE_SIZE; this.pageIndex = 1; this.sortBy = ''; this.sortAsc = true;
     this.showPreview = false; this.showEditor = false; this.currentRowIndex = -1; this.previewCells = []; this.editBuffer = [];
   }
+ handleBackClick() {
+    this.dispatchEvent(
+      new CustomEvent('previous', { bubbles: true, composed: true })
+    );
+  }
 
   
 }
