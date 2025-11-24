@@ -109,11 +109,10 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
     return 'Source Data';
   }
 
- get currentProjectName() {
-  const p = (this.projects || []).find((x) => x.id === this.selectedProjectId);
-  return p ? p.name : this.preselectedProjectName || '';
-}
-
+  get currentProjectName() {
+    const p = (this.projects || []).find((x) => x.id === this.selectedProjectId);
+    return p ? p.name : this.preselectedProjectName || '';
+  }
 
   /** ===== State ===== */
   @track versionInput = '';
@@ -148,7 +147,9 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
   // not reactive: { [version]: mappedRows[] }
   versionModalMappingsByVersion = {};
 
-  _refreshPreviewDebounced = microtaskDebounce(() => this.rebuildClientPreview());
+  _refreshPreviewDebounced = microtaskDebounce(() =>
+    this.rebuildClientPreview()
+  );
 
   /** ===== Template helpers for versions ===== */
   get hasVersionOptions() {
@@ -177,7 +178,9 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
   }
 
   get availableObjectsOptions() {
-    const list = Array.isArray(this.availableObjects) ? this.availableObjects : [];
+    const list = Array.isArray(this.availableObjects)
+      ? this.availableObjects
+      : [];
     return list.map((o) => {
       if (typeof o === 'string') {
         return { label: o, value: o };
@@ -214,7 +217,9 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
     (this.mappings || []).forEach((m) => {
       if (m?.sourceColumn) bySource.set(m.sourceColumn, m);
     });
-    const cols = Array.isArray(this.initialSourceColumns) ? this.initialSourceColumns : [];
+    const cols = Array.isArray(this.initialSourceColumns)
+      ? this.initialSourceColumns
+      : [];
     return cols.map((name) => {
       const m = bySource.get(name);
       const status = !m ? 'unmapped' : m.isLookup ? 'transform' : 'mapped';
@@ -243,7 +248,9 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
     return (this.targetFields || []).length;
   }
   get summaryMappedCount() {
-    return (this.targetFields || []).filter((f) => f.mappedSources?.length).length;
+    return (this.targetFields || []).filter(
+      (f) => f.mappedSources?.length
+    ).length;
   }
   get summaryUnmappedCount() {
     return Math.max(this.summaryTotalFields - this.summaryMappedCount, 0);
@@ -264,10 +271,19 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
     return this.summaryUnmappedCount;
   }
 
+  /**Nombre de mappings lookup actuellement cochés (max 3) */
+  get currentLookupCount() {
+    return (this.mappings || []).filter(
+      (m) => m && m.isLookup === true
+    ).length;
+  }
+
   /** Preview helpers */
   get mappedFields() {
     const tf = Array.isArray(this.targetFields) ? this.targetFields : [];
-    return tf.filter((f) => Array.isArray(f.mappedSources) && f.mappedSources.length > 0);
+    return tf.filter(
+      (f) => Array.isArray(f.mappedSources) && f.mappedSources.length > 0
+    );
   }
   get hasMappedFields() {
     return this.mappedFields.length > 0;
@@ -276,7 +292,10 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
     return Math.max(this.mappedFields.length, 1);
   }
   get hasClientPreview() {
-    return Array.isArray(this.clientPreviewRows) && this.clientPreviewRows.length > 0;
+    return (
+      Array.isArray(this.clientPreviewRows) &&
+      this.clientPreviewRows.length > 0
+    );
   }
 
   /** ===== Field type → label & icon ===== */
@@ -338,7 +357,8 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
       t.includes('reference') ||
       t.includes('lookup') ||
       name.endsWith('id') ||
-      (name.endsWith('__c') && (lbl.includes('account') || lbl.includes('contact')))
+      (name.endsWith('__c') &&
+        (lbl.includes('account') || lbl.includes('contact')))
     ) {
       uiType = 'Lookup';
       iconKind = 'lookup';
@@ -393,77 +413,79 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
   }
 
   /** ===== Loads ===== */
- async loadProjects() {
-  try {
-    const result = await fetchProjects();
-    this.projects = (result || [])
-      .map((p) => ({
-        id: p.id || p.Id,
-        name: p.name || p.Name,
-        targetObject:
-          p.targetObject ||
-          p.TargetObject ||
-          p.Target_Object__c ||
-          p.Target_SObject__c 
-      }))
-      .filter((p) => p.id && p.name);
+  async loadProjects() {
+    try {
+      const result = await fetchProjects();
+      this.projects = (result || [])
+        .map((p) => ({
+          id: p.id || p.Id,
+          name: p.name || p.Name,
+          targetObject:
+            p.targetObject ||
+            p.TargetObject ||
+            p.Target_Object__c ||
+            p.Target_SObject__c
+        }))
+        .filter((p) => p.id && p.name);
 
-    this.tryApplyPreselection();
-  } catch (e) {
-    this.projects = [];
-    console.error('[FieldMapper] loadProjects error', e);
-  }
-}
-
-
-async tryApplyPreselection() {
-  if (this._appliedPreselect) {
-    return;
+      this.tryApplyPreselection();
+    } catch (e) {
+      this.projects = [];
+      console.error('[FieldMapper] loadProjects error', e);
+    }
   }
 
-  let project = null;
-  if (this._preselectedProjectId && Array.isArray(this.projects) && this.projects.length) {
-    project = this.projects.find((p) => p.id === this._preselectedProjectId);
-  }
-
-  if (
-    !project &&
-    this.preselectedProjectName &&
-    Array.isArray(this.projects) &&
-    this.projects.length
-  ) {
-    const want = this.preselectedProjectName.toLowerCase();
-    project = this.projects.find((p) => (p.name || '').toLowerCase() === want);
-  }
-  if (!project) {
-    if (!this._preselectedProjectId && !this.preselectedProjectName) {
+  async tryApplyPreselection() {
+    if (this._appliedPreselect) {
       return;
     }
 
-    project = {
-      id: this._preselectedProjectId || `tmp-${Date.now()}`,
-      name: this.preselectedProjectName || 'Current Project',
-      targetObject: this._preselectedTargetObject || ''
-    };
-    this.projects = [...(this.projects || []), project];
+    let project = null;
+    if (
+      this._preselectedProjectId &&
+      Array.isArray(this.projects) &&
+      this.projects.length
+    ) {
+      project = this.projects.find((p) => p.id === this._preselectedProjectId);
+    }
+
+    if (
+      !project &&
+      this.preselectedProjectName &&
+      Array.isArray(this.projects) &&
+      this.projects.length
+    ) {
+      const want = this.preselectedProjectName.toLowerCase();
+      project = this.projects.find(
+        (p) => (p.name || '').toLowerCase() === want
+      );
+    }
+    if (!project) {
+      if (!this._preselectedProjectId && !this.preselectedProjectName) {
+        return;
+      }
+
+      project = {
+        id: this._preselectedProjectId || `tmp-${Date.now()}`,
+        name: this.preselectedProjectName || 'Current Project',
+        targetObject: this._preselectedTargetObject || ''
+      };
+      this.projects = [...(this.projects || []), project];
+    }
+    this.selectedProjectId = project.id;
+    this.selectedTargetObject =
+      this._preselectedTargetObject || project.targetObject || '';
+    await this.loadTargetFields();
+    this.updateMappedSources();
+
+    await this.applySavedMappings({ useLatest: true, silent: true });
+    if (!this.versionInput) {
+      const last = this.getLastVersionForProject(this.selectedProjectId);
+      this.versionInput = last || '';
+    }
+
+    this._appliedPreselect = true;
   }
-  this.selectedProjectId = project.id;
-  this.selectedTargetObject =
-    this._preselectedTargetObject || project.targetObject || '';
-  await this.loadTargetFields();
-  this.updateMappedSources();
-
-  await this.applySavedMappings({ useLatest: true, silent: true });
-  if (!this.versionInput) {
-    const last = this.getLastVersionForProject(this.selectedProjectId);
-    this.versionInput = last || '';
-  }
-
-  this._appliedPreselect = true;
-}
-
-
-
 
   async loadAvailableObjects() {
     try {
@@ -480,7 +502,9 @@ async tryApplyPreselection() {
       return;
     }
     try {
-      const result = await fetchFields({ objectApiName: this.selectedTargetObject });
+      const result = await fetchFields({
+        objectApiName: this.selectedTargetObject
+      });
 
       this.targetFields = (result || []).map((f) => {
         const apiName = f.apiName || f.ApiName;
@@ -493,7 +517,12 @@ async tryApplyPreselection() {
           f.nillable === false ||
           f.isNillable === false;
 
-        const meta = this.computeFieldTypeAndIcon(apiName, label, dataType, isRequired);
+        const meta = this.computeFieldTypeAndIcon(
+          apiName,
+          label,
+          dataType,
+          isRequired
+        );
 
         return {
           apiName,
@@ -533,13 +562,17 @@ async tryApplyPreselection() {
 
       const mappedSources = Array.from(uniq.values()).map((m) => {
         const isTransform = !!m.isLookup;
-        const chipClass = `chip ${isTransform ? 'chip--transform' : 'chip--mapped'}`;
+        const chipClass = `chip ${
+          isTransform ? 'chip--transform' : 'chip--mapped'
+        }`;
 
         return {
           key: `${field.apiName}__${m.sourceColumn}`,
           sourceColumn: m.sourceColumn,
           mapping: m,
-          lookupFieldsOptions: Array.isArray(this.lookupFieldsByObject[m.lookupObject])
+          lookupFieldsOptions: Array.isArray(
+            this.lookupFieldsByObject[m.lookupObject]
+          )
             ? this.lookupFieldsByObject[m.lookupObject]
             : [],
           chipClass
@@ -547,7 +580,9 @@ async tryApplyPreselection() {
       });
 
       const hasMappings = mappedSources.length > 0;
-      const hasTransform = mappedSources.some((ms) => ms.mapping && ms.mapping.isLookup);
+      const hasTransform = mappedSources.some(
+        (ms) => ms.mapping && ms.mapping.isLookup
+      );
 
       const cardClasses = ['fm-target-card'];
       if (hasTransform) {
@@ -615,7 +650,10 @@ async tryApplyPreselection() {
     }
 
     const limit = this.previewRowLimit || 4;
-    const srcRows = (Array.isArray(this._csvRows) ? this._csvRows : []).slice(0, limit);
+    const srcRows = (Array.isArray(this._csvRows) ? this._csvRows : []).slice(
+      0,
+      limit
+    );
 
     if (!srcRows.length) {
       const byColExamples = new Map();
@@ -688,7 +726,9 @@ async tryApplyPreselection() {
   async handleLookupObjectChange(e) {
     const sourceColumn = e.target.dataset.source;
     const lookupObject = e.detail?.value || e.target.value;
-    const m = (this.mappings || []).find((x) => x.sourceColumn === sourceColumn);
+    const m = (this.mappings || []).find(
+      (x) => x.sourceColumn === sourceColumn
+    );
     if (!m) return;
     m.lookupObject = lookupObject || null;
     m.lookupMatchField = null;
@@ -717,26 +757,50 @@ async tryApplyPreselection() {
   handleLookupFieldChange(e) {
     const sourceColumn = e.target.dataset.source;
     const val = e.detail?.value || e.target.value;
-    const m = (this.mappings || []).find((x) => x.sourceColumn === sourceColumn);
+    const m = (this.mappings || []).find(
+      (x) => x.sourceColumn === sourceColumn
+    );
     if (m) {
       m.lookupMatchField = val || null;
       this.updateMappedSources();
     }
   }
 
-  handleLookupToggle(e) {
-    const sourceColumn = e.target.dataset.source;
-    const checked = e.target.checked;
-    const m = (this.mappings || []).find((x) => x.sourceColumn === sourceColumn);
-    if (m) {
-      m.isLookup = checked;
-      if (!checked) {
-        m.lookupObject = null;
-        m.lookupMatchField = null;
-      }
-      this.updateMappedSources();
+ handleLookupToggle(e) {
+  const sourceColumn = e.target.dataset.source;
+  const checked = e.target.checked;
+
+  const m = (this.mappings || []).find(
+    (x) => x.sourceColumn === sourceColumn
+  );
+  if (!m) {
+    return;
+  }
+
+  // Si on essaie d'activer un lookup en plus
+  if (checked && !m.isLookup) {
+    const current = this.currentLookupCount;
+    if (current >= 3) {
+      e.target.checked = false;
+
+      this.toast(
+        'Limit reached',
+        'You can configure at most 3 lookup fields in this mapping.',
+        'warning'
+      );
+      return;
     }
   }
+
+  // Sinon on applique normalement
+  m.isLookup = checked;
+  if (!checked) {
+    m.lookupObject = null;
+    m.lookupMatchField = null;
+  }
+  this.updateMappedSources();
+}
+
 
   /** ===== Drag & drop ===== */
   handleDragStart(e) {
@@ -762,7 +826,9 @@ async tryApplyPreselection() {
     );
     if (already) return;
 
-    const idx = (this.mappings || []).findIndex((m) => m.sourceColumn === sourceColumn);
+    const idx = (this.mappings || []).findIndex(
+      (m) => m.sourceColumn === sourceColumn
+    );
     if (idx >= 0) {
       this.mappings[idx] = {
         ...this.mappings[idx],
@@ -784,18 +850,22 @@ async tryApplyPreselection() {
           lookupMatchField: null
         }
       ];
-      this.availableSourceColumns =
-        (this.availableSourceColumns || []).filter((c) => c !== sourceColumn);
+      this.availableSourceColumns = (this.availableSourceColumns || []).filter(
+        (c) => c !== sourceColumn
+      );
     }
 
     this.updateMappedSources();
   }
 
   handleRemoveMapping(e) {
-    const sourceColumn = e.currentTarget?.dataset?.source || e.target.dataset.source;
+    const sourceColumn =
+      e.currentTarget?.dataset?.source || e.target.dataset.source;
     if (!sourceColumn) return;
 
-    this.mappings = (this.mappings || []).filter((m) => m.sourceColumn !== sourceColumn);
+    this.mappings = (this.mappings || []).filter(
+      (m) => m.sourceColumn !== sourceColumn
+    );
 
     if (!(this.availableSourceColumns || []).includes(sourceColumn)) {
       const newAvail = [...this.availableSourceColumns, sourceColumn];
@@ -808,13 +878,13 @@ async tryApplyPreselection() {
 
   /** ===== Auto-map ===== */
   normalizeName(str) {
-    return (str || '')
-      .toLowerCase()
-      .replace(/[^a-z0-9]/g, '');
+    return (str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
   }
 
   handleAutoMapClick() {
-    const srcCols = Array.isArray(this.initialSourceColumns) ? this.initialSourceColumns : [];
+    const srcCols = Array.isArray(this.initialSourceColumns)
+      ? this.initialSourceColumns
+      : [];
     if (!srcCols.length || !(this.targetFields || []).length) return;
 
     const srcByNorm = new Map();
@@ -822,7 +892,9 @@ async tryApplyPreselection() {
       srcByNorm.set(this.normalizeName(c), c);
     });
 
-    const mappedSources = new Set((this.mappings || []).map((m) => m.sourceColumn));
+    const mappedSources = new Set(
+      (this.mappings || []).map((m) => m.sourceColumn)
+    );
 
     const newMappings = [...(this.mappings || [])];
 
@@ -856,7 +928,9 @@ async tryApplyPreselection() {
     this.mappings = newMappings;
 
     const mapped = new Set(this.mappings.map((m) => m.sourceColumn));
-    this.availableSourceColumns = this.initialSourceColumns.filter((c) => !mapped.has(c));
+    this.availableSourceColumns = this.initialSourceColumns.filter(
+      (c) => !mapped.has(c)
+    );
 
     this.updateMappedSources();
   }
@@ -868,12 +942,28 @@ async tryApplyPreselection() {
         throw new Error('Please select a Project before saving.');
       }
 
-      const nextVersion = this.computeNextVersionForProject(this.selectedProjectId);
+      /**limite 3 champs lookup max */
+      const lookupCount = this.currentLookupCount;
+      if (lookupCount > 3) {
+        this.toast(
+          'Limit reached',
+          'You can configure at most 3 lookup fields in this mapping.',
+          'warning'
+        );
+        return;
+      }
+
+      const nextVersion = this.computeNextVersionForProject(
+        this.selectedProjectId
+      );
       const ver = nextVersion;
       this.versionInput = ver;
 
       const payload = (this.mappings || [])
-        .filter((m) => m.sourceColumn && m.targetField && this.selectedProjectId)
+        .filter(
+          (m) =>
+            m.sourceColumn && m.targetField && this.selectedProjectId
+        )
         .map((m) => ({
           id: m.id || null,
           projectId: this.selectedProjectId,
@@ -900,7 +990,9 @@ async tryApplyPreselection() {
       this._refreshPreviewDebounced();
     } catch (error) {
       const msg =
-        error?.body?.message || error?.message || 'Failed to save mappings.';
+        error?.body?.message ||
+        error?.message ||
+        'Failed to save mappings.';
       this.toast('Error', msg, 'error');
     }
   }
@@ -910,116 +1002,130 @@ async tryApplyPreselection() {
   }
 
   async applySavedMappings(opts = {}) {
-  const { useLatest = false, silent = false } = opts;
+    const { useLatest = false, silent = false } = opts;
 
-  if (!this.selectedProjectId) {
-    if (!silent) {
-      this.toast('Info', 'Select a project first.', 'info');
-    }
-    return;
-  }
-
-  if (!this.selectedTargetObject) {
-    if (!silent) {
-      this.toast('Info', 'Target object is missing for this project.', 'info');
-    }
-    return;
-  }
-
-  try {
-    let saved;
-    if (useLatest) {
-      saved = await loadMappings({
-        projectId: this.selectedProjectId,
-        version: '',
-        objectApiName: this.selectedTargetObject
-      });
-    } else {
-      saved = await loadMappings({
-        projectId: this.selectedProjectId,
-        version: this.versionInput || '',
-        objectApiName: this.selectedTargetObject
-      });
-    }
-
-    const rows = Array.isArray(saved) ? saved : [];
-    if (!rows.length) {
+    if (!this.selectedProjectId) {
       if (!silent) {
-        this.toast('Info', 'No saved mappings found for this project.', 'info');
-      }
-      return;
-    }
-    const versionsSet = new Set();
-    rows.forEach((r) => {
-      const v = (r.version || r.Version__c || r.Version || '').toString();
-      if (v) versionsSet.add(v);
-    });
-
-    let effectiveVersion = this.versionInput;
-
-    if (useLatest || !effectiveVersion) {
-      const sorted = Array.from(versionsSet).sort(
-        (a, b) => parseFloat(b) - parseFloat(a)
-      );
-      effectiveVersion = sorted[0];
-    }
-
-    const filteredRows = rows.filter((r) => {
-      const v = (r.version || r.Version__c || r.Version || '').toString();
-      return v === effectiveVersion;
-    });
-
-    if (!filteredRows.length) {
-      if (!silent) {
-        this.toast('Info', 'No rows for selected version.', 'info');
+        this.toast('Info', 'Select a project first.', 'info');
       }
       return;
     }
 
-    this.versionInput = effectiveVersion;
-    this.setLastVersionForProject(this.selectedProjectId, effectiveVersion);
-
-    this.mappings = filteredRows.map((r) => ({
-      id: r.id || null,
-      projectId: r.projectId || this.selectedProjectId,
-      version: effectiveVersion,
-      sourceColumn: r.sourceColumn,
-      targetField: r.targetField,
-      isLookup: !!r.isLookup,
-      lookupObject: r.lookupObject || null,
-      lookupMatchField: r.lookupMatchField || null
-    }));
-
-    const mapped = new Set();
-    (this.mappings || []).forEach((m) => {
-      if (m?.sourceColumn) mapped.add(m.sourceColumn);
-    });
-    this.availableSourceColumns = this.initialSourceColumns.filter(
-      (c) => !mapped.has(c)
-    );
-
-    this.updateMappedSources();
-    this._refreshPreviewDebounced();
-
-    if (!silent) {
-      this.toast(
-        'Loaded',
-        `Loaded mappings for Version ${effectiveVersion}.`,
-        'success'
-      );
+    if (!this.selectedTargetObject) {
+      if (!silent) {
+        this.toast('Info', 'Target object is missing for this project.', 'info');
+      }
+      return;
     }
-  } catch (e) {
-    if (!silent) {
-      this.toast(
-        'Error',
-        e?.body?.message || 'Failed to load saved mappings.',
-        'error'
+
+    try {
+      let saved;
+      if (useLatest) {
+        saved = await loadMappings({
+          projectId: this.selectedProjectId,
+          version: '',
+          objectApiName: this.selectedTargetObject
+        });
+      } else {
+        saved = await loadMappings({
+          projectId: this.selectedProjectId,
+          version: this.versionInput || '',
+          objectApiName: this.selectedTargetObject
+        });
+      }
+
+      const rows = Array.isArray(saved) ? saved : [];
+      if (!rows.length) {
+        if (!silent) {
+          this.toast(
+            'Info',
+            'No saved mappings found for this project.',
+            'info'
+          );
+        }
+        return;
+      }
+      const versionsSet = new Set();
+      rows.forEach((r) => {
+        const v = (
+          r.version ||
+          r.Version__c ||
+          r.Version ||
+          ''
+        ).toString();
+        if (v) versionsSet.add(v);
+      });
+
+      let effectiveVersion = this.versionInput;
+
+      if (useLatest || !effectiveVersion) {
+        const sorted = Array.from(versionsSet).sort(
+          (a, b) => parseFloat(b) - parseFloat(a)
+        );
+        effectiveVersion = sorted[0];
+      }
+
+      const filteredRows = rows.filter((r) => {
+        const v = (
+          r.version ||
+          r.Version__c ||
+          r.Version ||
+          ''
+        ).toString();
+        return v === effectiveVersion;
+      });
+
+      if (!filteredRows.length) {
+        if (!silent) {
+          this.toast('Info', 'No rows for selected version.', 'info');
+        }
+        return;
+      }
+
+      this.versionInput = effectiveVersion;
+      this.setLastVersionForProject(this.selectedProjectId, effectiveVersion);
+
+      this.mappings = filteredRows.map((r) => ({
+        id: r.id || null,
+        projectId: r.projectId || this.selectedProjectId,
+        version: effectiveVersion,
+        sourceColumn: r.sourceColumn,
+        targetField: r.targetField,
+        isLookup: !!r.isLookup,
+        lookupObject: r.lookupObject || null,
+        lookupMatchField: r.lookupMatchField || null
+      }));
+
+      const mapped = new Set();
+      (this.mappings || []).forEach((m) => {
+        if (m?.sourceColumn) mapped.add(m.sourceColumn);
+      });
+      this.availableSourceColumns = this.initialSourceColumns.filter(
+        (c) => !mapped.has(c)
       );
-    } else {
-      console.error('[FieldMapper] applySavedMappings error', e);
+
+      this.updateMappedSources();
+      this._refreshPreviewDebounced();
+
+      if (!silent) {
+        this.toast(
+          'Loaded',
+          `Loaded mappings for Version ${effectiveVersion}.`,
+          'success'
+        );
+      }
+    } catch (e) {
+      if (!silent) {
+        this.toast(
+          'Error',
+          e?.body?.message || 'Failed to load saved mappings.',
+          'error'
+        );
+      } else {
+        console.error('[FieldMapper] applySavedMappings error', e);
+      }
     }
   }
-}
 
   handleLoadSavedClick() {
     this.applySavedMappings();
@@ -1079,77 +1185,88 @@ async tryApplyPreselection() {
   }
 
   /** ===== Versions Modal ===== */
-async openVersionModal() {
-  if (!this.selectedProjectId) {
-    this.toast('Info', 'Select a project first.', 'info');
-    return;
-  }
-
-  if (!this.selectedTargetObject) {
-    this.toast('Info', 'Target object is missing for this project.', 'info');
-    return;
-  }
-
-  this.showVersionModal = true;
-  this.versionModalLoading = true;
-  this.versionModalError = '';
-  this.versionOptions = [];
-  this.versionPreviewHeaders = [];
-  this.versionPreviewRows = [];
-  this.versionModalMappingsByVersion = {};
-
-  try {
-    const saved = await loadMappings({
-      projectId: this.selectedProjectId,
-      version: '',
-      objectApiName: this.selectedTargetObject
-    });
-
-    const rows = Array.isArray(saved) ? saved : [];
-
-    if (!rows.length) {
-      this.versionModalError = 'No previous mappings found for this project.';
-      this.versionModalLoading = false;
+  async openVersionModal() {
+    if (!this.selectedProjectId) {
+      this.toast('Info', 'Select a project first.', 'info');
       return;
     }
 
-    const byVersion = new Map();
-    rows.forEach((r) => {
-      const v = (r.version || r.Version__c || r.Version || '').toString() || '1.0';
-      if (!byVersion.has(v)) byVersion.set(v, []);
-      byVersion.get(v).push(r);
-    });
+    if (!this.selectedTargetObject) {
+      this.toast(
+        'Info',
+        'Target object is missing for this project.',
+        'info'
+      );
+      return;
+    }
 
-    const versions = Array.from(byVersion.keys()).sort(
-      (a, b) => parseFloat(b) - parseFloat(a)
-    );
-
-    this.versionOptions = versions.map((v) => ({ value: v }));
+    this.showVersionModal = true;
+    this.versionModalLoading = true;
+    this.versionModalError = '';
+    this.versionOptions = [];
+    this.versionPreviewHeaders = [];
+    this.versionPreviewRows = [];
     this.versionModalMappingsByVersion = {};
 
-    versions.forEach((v) => {
-      this.versionModalMappingsByVersion[v] = (byVersion.get(v) || []).map((r) => ({
-        id: r.id || null,
-        projectId: r.projectId || this.selectedProjectId,
-        version: v,
-        sourceColumn: r.sourceColumn,
-        targetField: r.targetField,
-        isLookup: !!r.isLookup,
-        lookupObject: r.lookupObject || null,
-        lookupMatchField: r.lookupMatchField || null
-      }));
-    });
+    try {
+      const saved = await loadMappings({
+        projectId: this.selectedProjectId,
+        version: '',
+        objectApiName: this.selectedTargetObject
+      });
 
-    this.selectedPreviewVersion = versions[0];
-    this.buildVersionPreview(this.selectedPreviewVersion);
-  } catch (e) {
-    this.versionModalError =
-      e?.body?.message || 'Failed to load mappings for this project.';
-  } finally {
-    this.versionModalLoading = false;
+      const rows = Array.isArray(saved) ? saved : [];
+
+      if (!rows.length) {
+        this.versionModalError =
+          'No previous mappings found for this project.';
+        this.versionModalLoading = false;
+        return;
+      }
+
+      const byVersion = new Map();
+      rows.forEach((r) => {
+        const v = (
+          r.version ||
+          r.Version__c ||
+          r.Version ||
+          ''
+        ).toString() || '1.0';
+        if (!byVersion.has(v)) byVersion.set(v, []);
+        byVersion.get(v).push(r);
+      });
+
+      const versions = Array.from(byVersion.keys()).sort(
+        (a, b) => parseFloat(b) - parseFloat(a)
+      );
+
+      this.versionOptions = versions.map((v) => ({ value: v }));
+      this.versionModalMappingsByVersion = {};
+
+      versions.forEach((v) => {
+        this.versionModalMappingsByVersion[v] = (byVersion.get(v) || []).map(
+          (r) => ({
+            id: r.id || null,
+            projectId: r.projectId || this.selectedProjectId,
+            version: v,
+            sourceColumn: r.sourceColumn,
+            targetField: r.targetField,
+            isLookup: !!r.isLookup,
+            lookupObject: r.lookupObject || null,
+            lookupMatchField: r.lookupMatchField || null
+          })
+        );
+      });
+
+      this.selectedPreviewVersion = versions[0];
+      this.buildVersionPreview(this.selectedPreviewVersion);
+    } catch (e) {
+      this.versionModalError =
+        e?.body?.message || 'Failed to load mappings for this project.';
+    } finally {
+      this.versionModalLoading = false;
+    }
   }
-}
-
 
   buildVersionPreview(version) {
     const mappings = this.versionModalMappingsByVersion[version] || [];
@@ -1196,14 +1313,16 @@ async openVersionModal() {
         ...Array.from(byColExamples.values()).map((a) => a.length || 0)
       );
 
-      this.versionPreviewRows = Array.from({ length: rowCount }).map((_, i) => {
-        const cells = mappedTargets.map((f) => {
-          const col = f.mappedSources[0]?.sourceColumn || '';
-          const ex = byColExamples.get(col) || [];
-          return ex[i] ?? '';
-        });
-        return { _key: `vrow-${version}-${i}`, cells };
-      });
+      this.versionPreviewRows = Array.from({ length: rowCount }).map(
+        (_, i) => {
+          const cells = mappedTargets.map((f) => {
+            const col = f.mappedSources[0]?.sourceColumn || '';
+            const ex = byColExamples.get(col) || [];
+            return ex[i] ?? '';
+          });
+          return { _key: `vrow-${version}-${i}`, cells };
+        }
+      );
       return;
     }
 
@@ -1271,38 +1390,37 @@ async openVersionModal() {
     }
   }
 
- connectedCallback() {
-  this.versionInput = this.version || '';
+  connectedCallback() {
+    this.versionInput = this.version || '';
 
-  if (
-    Array.isArray(this._csvRows) &&
-    this._csvRows.length > 0 &&
-    !this._sourceColumnsCsv
-  ) {
-    const first = this._csvRows[0] || {};
-    this.initialSourceColumns = Object.keys(first);
-    this.availableSourceColumns = [...this.initialSourceColumns];
-  } else {
-    const csv = this._sourceColumnsCsv || '';
-    this.initialSourceColumns = csv
-      ? csv
-          .split(',')
-          .map((s) => s.trim())
-          .filter(Boolean)
-      : [];
-    this.availableSourceColumns = [...this.initialSourceColumns];
+    if (
+      Array.isArray(this._csvRows) &&
+      this._csvRows.length > 0 &&
+      !this._sourceColumnsCsv
+    ) {
+      const first = this._csvRows[0] || {};
+      this.initialSourceColumns = Object.keys(first);
+      this.availableSourceColumns = [...this.initialSourceColumns];
+    } else {
+      const csv = this._sourceColumnsCsv || '';
+      this.initialSourceColumns = csv
+        ? csv
+            .split(',')
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : [];
+      this.availableSourceColumns = [...this.initialSourceColumns];
+    }
+
+    this.ensureCsvSamplesFromSession();
+    this.initMappings();
+
+    if (this._preselectedTargetObject && !this.selectedTargetObject) {
+      this.selectedTargetObject = this._preselectedTargetObject;
+      this.loadTargetFields();
+    }
+
+    this.loadProjects();
+    this.loadAvailableObjects();
   }
-
-  this.ensureCsvSamplesFromSession();
-  this.initMappings();
-
-  if (this._preselectedTargetObject && !this.selectedTargetObject) {
-    this.selectedTargetObject = this._preselectedTargetObject;
-    this.loadTargetFields();
-  }
-
-  this.loadProjects();
-  this.loadAvailableObjects();
-}
-
 }
