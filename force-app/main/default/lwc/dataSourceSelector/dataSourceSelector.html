@@ -48,18 +48,17 @@
   </template>
 
   <!-- CSV -->
-  <template if:true={showCSV}>
-    <!-- pass the selected project object down -->
+<!--   <template if:true={showCSV}>
     <c-csv-uploader
       current-project={currentProject}
       oncsvloaded={handleCsvLoaded}
       ongotomapping={handleGoToMappingFromCsv}
     >
     </c-csv-uploader>
-  </template>
+  </template> -->
 
   <!-- SOQL -->
-  <template if:true={showSOQL}>
+<!--   <template if:true={showSOQL}>
     <c-soql-builder onsoqlbuilt={handleSoqlBuilt}></c-soql-builder>
-  </template>
+  </template> -->
 </template>
