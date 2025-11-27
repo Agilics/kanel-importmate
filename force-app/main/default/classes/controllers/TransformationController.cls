@@ -2,7 +2,7 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 11-13-2025
+ * @last modified on  : 11-24-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 public with sharing class TransformationController {
@@ -13,10 +13,12 @@ public with sharing class TransformationController {
        return  TransformationService.applyTransformations(mappingId, row, rulesByMappingId);
    }
 
+   //construire une règle de transformation
    @AuraEnabled
     public static TransformationRule__c createRule(String projectId, String mappingId, String ruleType, String parameters, String sourceFields, String targetValue) {
         return TransformationService.createRule(projectId,mappingId,ruleType,parameters,sourceFields,targetValue) ;
     }
+
     //Générer un aperçu 
     @AuraEnabled(cacheable = true)
     public static List<Map<String, String>> generatePreview(String mappingId, List<Map<String, String>> sampleData){
@@ -42,6 +44,15 @@ public with sharing class TransformationController {
         return TransformationService.getTransformationSummary(mappingId);
     }
 
+      
+
+    //récuperer les transformations par l'id du mapping
+    @AuraEnabled(cacheable =true)
+    public static List<TransformationRule__c> getRulesByVersionAndMappingId(String mappingId,String version) {
+        return TransformationService.getRulesByVersionAndMappingId(mappingId,version);
+    }
+
+
       //Récupére les valeurs du picklist
     @AuraEnabled(cacheable = true)
     public static Map<String, String> getPickListValues(String objectApiName, String fieldApiName) {
@@ -51,4 +62,6 @@ public with sharing class TransformationController {
         throw new ApplicationException(e.getMessage());
       }
     }
+ 
+
 }

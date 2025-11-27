@@ -130,6 +130,7 @@ public with sharing class TransformationService {
         }
     }
     
+    
     //Valider toutes les transformations d'un mapping
     public static void validateMappingTransformations(String mappingId, Map<String, String> sampleData, String importLogId) {
         try {
@@ -152,6 +153,24 @@ public with sharing class TransformationService {
         }
     }
     
+     
+
+       //récuperer les transformations par l'id du mapping et la version 
+    public static List<TransformationRule__c> getRulesByVersionAndMappingId(String mappingId,String version) {
+        try {
+            if(String.isBlank(version)){
+                return TransformationRepository.getRulesByMappingId(mappingId);
+            }
+            return TransformationRepository.getRulesByVersionAndMappingId(mappingId,version);
+        } catch (QueryException ex) {
+            System.debug('CALL STACK: ' + ex.getStackTraceString());
+             ErrorLogService.logException(ex);
+            return new List<TransformationRule__c>();
+        }
+    
+    }
+
+
     //résumé des transformations
     public static Map<String, Object> getTransformationSummary(String mappingId) {
         try {

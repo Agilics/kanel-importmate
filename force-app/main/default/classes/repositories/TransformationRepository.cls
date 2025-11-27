@@ -53,6 +53,27 @@ public with sharing class TransformationRepository {
         return new List<TransformationRule__c>();
     }
 
+
+      //récupère rules by mapping id et la version
+    public static List<TransformationRule__c> getRulesByVersionAndMappingId(String mappingId,String version) {
+        if (SecurityUtils.isAccessible(Schema.TransformationRule__c.SObjectType)) {
+            try {
+                return [SELECT Id, RuleType__c, Parameters__c, FieldMapping__r.TargetField__c,
+                        SourceFields__c, TargetValue__c, Order__c,FieldMapping__r.version 
+                        FROM TransformationRule__c 
+                        WHERE FieldMapping__c = :mappingId 
+                        AND FieldMapping__r.version = :version
+                        /* WITH SECURITY_ENFORCED  */
+                        ORDER BY Order__c
+                        LIMIT 1000];
+            } catch (QueryException e) {
+                ErrorLogService.logException(e);
+                return new List<TransformationRule__c>();
+            }
+        }
+        return new List<TransformationRule__c>();
+    }
+
     //récupère rules by project id grouped by mapping id
     public static Map<String, List<TransformationRule__c>> getRulesByProjectIdGroupedByMapping(String projectId) {
         Map<String, List<TransformationRule__c>> rulesByMappingId = new Map<String, List<TransformationRule__c>>();

@@ -60,7 +60,7 @@ public with sharing class ObjectMetadataService {
             //capitalize the field names and exclude the Id field and formula fields
             for (String fieldName : originalFieldsMap.keySet()) {
                 if (fieldName != 'Id' && !originalFieldsMap.get(fieldName).getDescribe().isCalculated()) {
-                    fieldsMap.put(fieldName.capitalize(), originalFieldsMap.get(fieldName));
+                    fieldsMap.put(fieldName, originalFieldsMap.get(fieldName));
                 }
             }
             

@@ -2,7 +2,7 @@
   @description       : 
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
   @group             : 
-  @last modified on  : 11-11-2025
+  @last modified on  : 11-24-2025
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
@@ -100,13 +100,16 @@
           preselected-target-object={mappingTargetObject}
           source-columns-csv={mappingHeadersCsv}
           onprevious={handleBackToStep2}
+          onmappingsaved={handleMappingSave}
         >
         </c-field-mapper>
       </template>
       <template if:true={isTransformation}>
          <c-transformation-page
           onprevious={handlePreviousStep}
-          project-id={recentProject.Id}
+          project-id={recentProject.Id} 
+          selected-version={selectedVersion}
+          target-object={recentProject.TargetObject__c}
         >
         </c-transformation-page>
       </template>

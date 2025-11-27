@@ -1,9 +1,19 @@
-body {
-  background: #e5e7eb;
-  font-family: "Inter";
+.page {
+  width: 1, 120px;
+  height: 1, 517px;
+  left: 320px;
+  padding: 1.5rem 2rem;
 }
 .main {
   padding: 20px 1.5rem;
+  background: #f9fafb;
+  width: 1120px;
+  height: 1517px;
+  angle: 0 deg;
+  opacity: 1;
+  left: 320px;
+
+  font-family: "Inter","Salesforce Sans" ;
 }
 /* HEADER */
 .header {
@@ -54,7 +64,7 @@ body {
 
 /* footer action css style*/
 .footer-container {
-  margin: 5px 0 12px 0;
+  margin: 5rem 0 12px 0;
   padding: 0 3.5em 0.3em 5.5em;
 }
 

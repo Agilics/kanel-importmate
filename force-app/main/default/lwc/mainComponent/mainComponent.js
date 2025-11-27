@@ -13,6 +13,7 @@ export default class MainComponent extends LightningElement {
   title = "Imports Projects";
   @track mappingHeadersCsv = "";
   @track mappingTargetObject = "";
+  selectedVersion="" ;
 
   //paramètres pour la création de projet
 
@@ -223,6 +224,12 @@ export default class MainComponent extends LightningElement {
       return false;
     }
     return this.currentStep === 5;
+  }
+
+  // enregistrement de la méthode et récupération de la version du mapping
+  handleMappingSave(event){
+    this.selectedVersion = event.detail.version;
+    this.handleNextStep(); //Passage à l'étape de transformation et incrémentation du stepper
   }
 
   // rechercher les projets importés par nom
