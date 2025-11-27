@@ -1,64 +1,57 @@
 <!--
-   @description       : 
-   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
-   @group             : 
-   @last modified on  : 11-11-2025
-   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+  @description       : 
+  @author            : khalidousowba
+  @group             : 
+  @last modified on  : 11-27-2025
+  @last modified by  : khalidousowba
 -->
 <template>
-  <template if:true={showSelection}>
-    <div class="container">
-      <!-- header title -->
-      <div class="header">
-        <h1 class="header-title">Choose Data Source</h1>
-        <p class="header-subtitle">
-          Select how you want to import your data into Salesforce
-        </p>
-      </div>
+  <div class="container">
+    <!-- Selected project banner -->
+    <template if:true={currentProject}>
+      <h1 class="slds-text-align_center">
+        Selected project: {projectName}
+      </h1>
+      <br />
+    </template>
+
+    <!-- Source selection -->
+    <template if:true={showSelection}>
+      <h2 class="section-title">Data source</h2>
       <div class="cards">
-        <!-- CARD FILE UPLOAD -->
-        <div class="upload">
-          <c-data-source-selector-card
-            contents={uploadContents}
-            title={uploadTitle}
-            subtitle={uploadSubtitle}
-            is-upload={isUpload}
-            current-project={currentProject}
-            oncardaction={handleCSV}
-          >
-          </c-data-source-selector-card>
+        <div class="card" onclick={handleCSV}>
+          <div class="card-icon file-icon"></div>
+          <h3>Import CSV</h3>
+          <p>Import a CSV file from your local machine.</p>
         </div>
-        <!-- END CARD FILE UPLOAD -->
 
-        <!-- CARD QUERY BUILDER -->
-        <div class="query">
-          <c-data-source-selector-card
-            contents={queryContents}
-            title={queryTitle}
-            subtitle={querySubTitle}
-            is-upload={isNotUpload}
-            current-project={currentProject}
-            oncardaction={handleSOQL}
-          >
-          </c-data-source-selector-card>
+        <div class="card" onclick={handleSOQL}>
+          <div class="card-icon soql-icon"></div>
+          <h3>SOQL Builder</h3>
+          <p>Build your query interactively from Salesforce objects.</p>
         </div>
-        <!-- END CARD QUERY UPLOAD -->
       </div>
-    </div>
-  </template>
+    </template>
 
-  <!-- CSV -->
-<!--   <template if:true={showCSV}>
-    <c-csv-uploader
-      current-project={currentProject}
-      oncsvloaded={handleCsvLoaded}
-      ongotomapping={handleGoToMappingFromCsv}
-    >
-    </c-csv-uploader>
-  </template> -->
+    <!-- CSV -->
+    <template if:true={showCSV}>
+      <c-csv-uploader
+          current-project={currentProject}
+          oncsvloaded={handleCsvLoaded}
+          ongotomapping={handleGoToMapping}
+      >
+      </c-csv-uploader>
+    </template>
 
-  <!-- SOQL -->
-<!--   <template if:true={showSOQL}>
-    <c-soql-builder onsoqlbuilt={handleSoqlBuilt}></c-soql-builder>
-  </template> -->
+    <!-- SOQL -->
+    <template if:true={showSOQL}>
+    <c-soql-builder
+        project-target-object={projectTargetObject}
+        onsoqlbuilt={handleSoqlBuilt}
+        onstartmapping={handleStartMappingFromSoql}
+    ></c-soql-builder>
+
+    </template>
+  </div>
+   <c-backbutton onback={handleBackToMain}></c-backbutton>
 </template>

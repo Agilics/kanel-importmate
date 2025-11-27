@@ -1,104 +1,115 @@
-import { LightningElement, wire } from "lwc";
-import { ShowToastEvent } from "lightning/platformShowToastEvent";
-import doesProjectExist from "@salesforce/apex/ImportProjectController.doesProjectExist";
-import saveProject from "@salesforce/apex/ImportProjectController.saveProject";
-import getRecentsProjects from "@salesforce/apex/ImportProjectController.getRecentsProjects";
-import {
-  STEPS,
-  STEP_CONFIG,
-  RECENT_PROJECTS_LIMIT,
-  MESSAGES,
-  PAGES,
-  QUICK_ACTIONS,
-  TOAST_VARIANTS,
-  PROJECT_FIELD_NAMES
-} from './constants';
+import { LightningElement, wire, track } from 'lwc';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import SelectProject from 'c/selectProjectComponent';
+import { refreshApex } from '@salesforce/apex';
 
-/**
- * Main component for the ImportMate application
- * Handles project workflow navigation and state management
- */
+// Project + schedule apex
+import searchProjetById from '@salesforce/apex/ImportProjectController.searchProjetById';
+import doesProjectExist from '@salesforce/apex/ImportProjectController.doesProjectExist';
+import saveProject from '@salesforce/apex/ImportProjectController.saveProject';
+import getRecentsProjects from '@salesforce/apex/ImportProjectController.getRecentsProjects';
+import getAllSchedules from '@salesforce/apex/ScheduleController.getAllSchedules';
+import addSchedule from '@salesforce/apex/ScheduleController.addSchedule';
+
+const SS_ROWS_KEY = 'IM_csvRows';
+const SS_COLS_KEY = 'IM_sourceColumnsCsv';
+
 export default class MainComponent extends LightningElement {
-  //UI state
-  showCreatorSection = false;
-  showDashboard = true;
+  title = 'Imports Projects';
+
+  @track mappingHeadersCsv = '';
+  @track mappingTargetObject = '';
+  @track mappingSampleRows = [];
+  @track mappingSourceLabel = '';
+  @track mappingTotalRowCount = 0; 
+
+  allRows;
+
+  // ===== UI / state =====
+  @track showCreatorSection = false;
   isLoading = false;
-  activePage = PAGES.DASHBOARD;
 
-  //Mapping data
-  mappingHeadersCsv = '';
-  mappingTargetObject = '';
-  csvData = null;
-  
-  //Data source selection
-  selectedDataSource = null;
+  // project state
+  projectName = '';
+  description = '';
+  targetObject = '';
+  recentProject;
 
-  //Project data
-  projectName = "";
-  description = "";
-  targetObject = "";
-  currentProject;
+  // schedules
+  @track schedules = [];
+  selectedFrequency;
+  showSchedule = false;
+  wiredSchedulesResult;
+  nextRun;
 
-  //Stepper configuration
-  currentStep = STEPS.PROJECT_SETUP;
-  baseSteps = STEP_CONFIG;
+  // stepper
+  currentStep = 1;
+  baseSteps = [
+    { number: 1, label: 'Start', hasLine: true },
+    { number: 2, label: 'Select source', hasLine: true },
+    { number: 3, label: 'Mapping & transformation', hasLine: true },
+    { number: 4, label: 'Preview', hasLine: true },
+    { number: 5, label: 'Execution', hasLine: false }
+  ];
 
-  //Wire service configuration
-  recentProjectsLimit = RECENT_PROJECTS_LIMIT;
-  @wire(getRecentsProjects, { limitor: "$recentProjectsLimit" })
-  importProjects;
-
-
+  // computed steps (adds CSS + aria-current)
   get steps() {
     return this.baseSteps.map((step) => {
-      let cssClass = "step";
-      if (step.number < this.currentStep) {
-        cssClass = "step completed";
-      } else if (step.number === this.currentStep) {
-        cssClass = "step active";
-      }
-
-      const ariaCurrent = step.number === this.currentStep ? "step" : "false";
+      let cssClass = 'step';
+      if (step.number < this.currentStep) cssClass = 'step completed';
+      else if (step.number === this.currentStep) cssClass = 'step active';
+      const ariaCurrent = step.number === this.currentStep ? 'step' : 'false';
       return { ...step, cssClass, ariaCurrent };
     });
   }
 
+  // ===== Recent projects wire =====
+  limitor = 3;
+  @wire(getRecentsProjects, { limitor: '$limitor' }) importProjects;
 
-  get currentStepLabel() {
-    const step = this.baseSteps.find(s => s.number === this.currentStep);
-    return step ? step.label : '';
-  }
-
-
-  get projectDisplayName() {
-    return this.currentProject?.Name;
-  }
-
-  navigateToSelectedDataSource(event) {
-    this.currentProject = event.detail;
-    this.selectedDataSource = null; //Reset selection when navigating to data source step
-    this.currentStep = STEPS.DATA_SOURCE;
-    this.updateUIForStep(this.currentStep);
-  }
-
-  handleNextStep(event) {
-    if (event?.detail?.csvData) {
-      this.csvData = event.detail.csvData;
-    }
-
-    const maxStep = this.baseSteps.length;
-    if (this.currentStep < maxStep && this.currentProject) {
-      this.currentStep++;
-      this.updateUIForStep(this.currentStep);
+  // ===== Schedules wire =====
+  @wire(getAllSchedules)
+  wireAllSchedules(result) {
+    this.wiredSchedulesResult = result;
+    const { data, error } = result;
+    if (data) {
+      this.schedules = data.map((sch) => ({
+        id: sch.Id,
+        name: sch.Name,
+        project: sch.Project__r?.Name,
+        nextRun: sch.NextRun__c,
+        frequency: sch.Frequency__c
+      }));
+    } else if (error) {
+      this.showToast('Error', error?.body?.message, 'error');
     }
   }
 
+  // ===== Step 1 (Start) actions =====
+  openNewProject() {
+    console.log('open');
+    
+    this.currentStep = STEPS.PROJECT_SETUP;
+    //this.updateUIForStep(this.currentStep);
+    this.showDashboard = false;
+    this.showCreatorSection = true;
+  }
+
+  handleProjectNameChange(event) {
+    this.projectName = event.detail;
+  }
+  handleDescriptionChange(event) {
+    this.description = event.detail;
+  }
+  handleTargetObjectChange(event) {
+    this.targetObject = event.detail;
+  }
 
   async handleCreateProject() {
     this.isLoading = true;
 
-    if (!this.validateProjectFields()) {
-      this.showToast(TOAST_VARIANTS.WARNING, MESSAGES.ALL_FIELDS_REQUIRED, TOAST_VARIANTS.WARNING);
+    if (!this.projectName || !this.description || !this.targetObject) {
+      this.showToast('Warning', 'All fields are required.', 'warning');
       this.isLoading = false;
       return;
     }
@@ -110,9 +121,14 @@ export default class MainComponent extends LightningElement {
       });
 
       if (exists) {
-        this.showToast(TOAST_VARIANTS.WARNING, MESSAGES.PROJECT_EXISTS, TOAST_VARIANTS.WARNING);
-        this.resetProjectForm();
+        this.showToast(
+          'Warning',
+          'This project already exists, please choose another name/target object.',
+          'warning'
+        );
+        this.template.querySelector('c-create-project-component')?.resetFields();
         this.isLoading = false;
+        this.targetObject = '';
         return;
       }
 
@@ -122,312 +138,254 @@ export default class MainComponent extends LightningElement {
         targetObject: this.targetObject
       });
 
-      this.currentProject = result;
-      this.showToast(
-        TOAST_VARIANTS.SUCCESS,
-        MESSAGES.PROJECT_CREATED.replace('{0}', result.Id),
-        TOAST_VARIANTS.SUCCESS
-      );
+      this.recentProject = result;
 
-      this.resetProjectForm();
+      this.showToast(
+        'Success',
+        `Record with ID ${result.Id} created successfully!`,
+        'success'
+      );
+      this.template.querySelector('c-create-project-component')?.resetFields();
+
+      this.isLoading = false;
       this.handleNextStep();
     } catch (err) {
+      this.showToast('Error', err?.body?.message || 'An error occurred!', 'error');
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  async handleFindExistingProject() {
+    await SelectProject.open({
+      size: 'large',
+      description: 'modal permettant la recherche de projets importés',
+      columns: this.columns,
+      onselect: (e) => {
+        const id = e.detail;
+        searchProjetById({ id }).then((data) => {
+          this.recentProject = data;
+          this.handleNextStep();
+        });
+      }
+    });
+  }
+
+  async nagivateToSelectdDataSource(event) {
+    this.isLoading = true;
+    const selectedProjectId = event.detail;
+
+    try {
+      const result = await searchProjetById({ id: selectedProjectId });
+      this.recentProject = result;
+
+      this.dispatchEvent(
+        new ShowToastEvent({
+          title: 'Project selected',
+          message: `You have selected "${result?.Name}" to start.`,
+          variant: 'success',
+          mode: 'dismissable'
+        })
+      );
+
+      this.handleNextStep();
+    } catch (error) {
+      this.dispatchEvent(
+        new ShowToastEvent({
+          title: 'Error',
+          message: error?.body?.message || 'Failed to load project',
+          variant: 'error'
+        })
+      );
+    }
+  }
+
+  // ===== Step 2 → 3 (Start mapping) =====
+  handleStartMapping(evt) {
+    const detail = (evt && evt.detail) || {};
+
+    try {
+      const headersCsv = (detail.headersCsv || '').trim();
+      const rows = Array.isArray(detail.rows) ? detail.rows : [];
+      this.mappingHeadersCsv = headersCsv;
+      this.mappingSampleRows = rows;
+      const totalFromDetail = detail.totalRowCount;
+      let total = rows.length;
+      if (typeof totalFromDetail === 'number' && Number.isFinite(totalFromDetail)) {
+        total = totalFromDetail;
+      }
+      this.mappingTotalRowCount = total;
+      const rp = this.recentProject || {};
+      const fromProject =
+        rp.TargetObject__c ??
+        rp.Target_Object__c ??
+        rp.Target__c ??
+        rp.targetObject ??
+        '';
+
+      this.mappingTargetObject =
+        (detail.targetObject || '').trim() || fromProject || '';
+      const rawLabel = (detail.sourceLabel || '').trim();
+      this.mappingSourceLabel = rawLabel || this.mappingTargetObject || '';
+      const effectiveProjectId = rp.Id || detail.projectId || '';
+      if (!effectiveProjectId) {
+        this.dispatchEvent(
+          new ShowToastEvent({
+            title: 'Pick a project',
+            message: 'Please select a project before continuing to mapping.',
+            variant: 'warning'
+          })
+        );
+        return;
+      }
+      if (!rp.Id && detail.projectId) {
+        this.recentProject = { ...(this.recentProject || {}), Id: detail.projectId };
+      }
+      try {
+        if (headersCsv) {
+          window.sessionStorage.setItem(SS_COLS_KEY, headersCsv);
+        }
+        if (rows && rows.length) {
+          window.sessionStorage.setItem(SS_ROWS_KEY, JSON.stringify(rows));
+        }
+      } catch (e) {
+        console.debug('[Main] sessionStorage unavailable or quota exceeded', e);
+      }
+
+      // Navigate to step 3 (Mapping & transformation)
+      this.currentStep = 3;
+      if (typeof window !== 'undefined' && typeof window.scrollTo === 'function') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    } catch (err) {
+      this.dispatchEvent(
+        new ShowToastEvent({
+          title: 'Open mapper failed',
+          message: err?.message || 'Could not open the Field Mapping step.',
+          variant: 'error'
+        })
+      );
+    }
+  }
+
+  handleCsvParsed({ detail }) {
+    this.mappingHeadersCsv = (detail.headers || []).join(',');
+    this.mappingSampleRows = Array.isArray(detail.rows) ? detail.rows : [];
+
+    const totalFromDetail = detail.totalRowCount;
+    let total = this.mappingSampleRows.length;
+    if (typeof totalFromDetail === 'number' && Number.isFinite(totalFromDetail)) {
+      total = totalFromDetail;
+    }
+    this.mappingTotalRowCount = total;
+
+    if (Array.isArray(detail.allRows)) {
+      this.allRows = detail.allRows;
+    }
+
+    try {
+      if (this.mappingHeadersCsv) {
+        window.sessionStorage.setItem(SS_COLS_KEY, this.mappingHeadersCsv);
+      }
+      if (this.mappingSampleRows.length) {
+        window.sessionStorage.setItem(
+          SS_ROWS_KEY,
+          JSON.stringify(this.mappingSampleRows)
+        );
+      }
+    } catch (e) {
+      console.debug('[Main] sessionStorage unavailable or exceeded quota', e);
+    }
+  }
+
+  // ===== Stepper navigation =====
+  handleNextStep() {
+    if (this.currentStep < this.baseSteps.length && this.recentProject) {
+      this.currentStep += 1;
+    }
+  }
+  handlePreviousStep() {
+    if (this.currentStep > 1) {
+      this.currentStep -= 1;
+      this.showCreatorSection = false;
+      this.targetObject = '';
+      if (this.currentStep !== 2) this.selectedSource = null;
+    }
+  }
+  handleBackToStep2() {
+    this.currentStep = 2;
+  }
+  handleStepClick(event) {
+    this.currentStep = parseInt(event.detail, 10);
+  }
+
+  // ===== Step 4/5 (Schedules) =====
+  handleSelectedFrequency(event) {
+    this.selectedFrequency = event.detail.frequency;
+  }
+  handleNextRunChange(event) {
+    this.nextRun = event.detail.nextRun;
+  }
+  async handleAddSchedule(event) {
+    const id = this.recentProject?.Id;
+    try {
+      this.isLoading = true;
+
+      if (!id || !this.selectedFrequency || !this.nextRun) {
+        this.showToast('Warning', 'All fields are required.', 'warning');
+        this.isLoading = false;
+        return;
+      }
+
+      await addSchedule({
+        frequency: this.selectedFrequency,
+        nextRun: this.nextRun,
+        projectId: id
+      }).then((data) => {
+        this.showToast(
+          'Success',
+          `Schedule with ID ${data} created successfully!`,
+          'success'
+        );
+        this.template.querySelector('c-schedule-creator-component')?.resetFields();
+        this.showSchedule = event.detail;
+        this.isLoading = false;
+        return refreshApex(this.wiredSchedulesResult);
+      });
+    } catch (err) {
       this.showToast(
-        TOAST_VARIANTS.ERROR,
-        err?.body?.message || MESSAGES.ERROR_OCCURRED,
-        TOAST_VARIANTS.ERROR
+        'Error',
+        err?.body?.message || 'An error occurred while adding a schedule!',
+        'error'
       );
     } finally {
       this.isLoading = false;
     }
   }
 
-  validateProjectFields() {
-    return this.projectName && this.description && this.targetObject;
-  }
-
-
-  resetProjectForm() {
-    const createProjectComponent = this.template.querySelector("c-create-project-component");
-    if (createProjectComponent) {
-      createProjectComponent.resetFields();
-    }
-    this.targetObject = "";
-  }
-
-
-  handleDataSourceSelected(event) {
-    this.selectedDataSource = event.detail?.source || null;
-  }
-
-
-  handleCsvLoaded(event) {
-    // Extract csvData from nested structure: event.detail.csvData or use event.detail directly
-    this.csvData = event.detail?.csvData || event.detail || {};
-    console.log('csvData loaded in mainComponent:', 
-      this.csvData?.allRows ? 
-        `Object with ${this.csvData.allRows.length} rows` : 
-        JSON.stringify(this.csvData));
-  }
-
-
-
-  handlePreviousStep() {
-    if (this.currentStep > STEPS.PROJECT_SETUP) {
-      this.currentStep--;
-      this.updateUIForStep(this.currentStep);
-    }
-  }
-
- 
-  handleCancel() {
-    this.currentStep = STEPS.PROJECT_SETUP;
-    this.updateUIForStep(this.currentStep);
-  }
-
-  /**
-   * Reset all project form fields
-   */
-  resetProjectFormFields() {
-    this.projectName = "";
-    this.description = "";
-    this.targetObject = "";
-  }
-
-
-  handleProjectNameChange(event) {
-    this.projectName = event.detail;
-  }
-
-
-  handleDescriptionChange(event) {
-    this.description = event.detail;
-  }
-
-  handleTargetObjectChange(event) {
-    this.targetObject = event.detail;
-  }
-
+  // ===== Utilities =====
   showToast(title, message, variant) {
-    const toastEvent = new ShowToastEvent({
-      title: title,
-      message: message,
-      variant: variant,
-      mode: "dismissable"
-    });
-    this.dispatchEvent(toastEvent);
+    this.dispatchEvent(
+      new ShowToastEvent({
+        title,
+        message,
+        variant,
+        mode: 'dismissable'
+      })
+    );
   }
 
-
-  openNewProject() {
-    console.log('open');
-    
-    this.currentStep = STEPS.PROJECT_SETUP;
-    //this.updateUIForStep(this.currentStep);
-    this.showDashboard = false;
-    this.showCreatorSection = true;
-  }
-
-  handleStepClick(event) {
-    this.currentStep = parseInt(event.detail, 10);
-  }
-
-
+  // ===== Section guards =====
   get isStart() {
-    return this.currentStep === STEPS.PROJECT_SETUP;
+    return this.currentStep === 1;
   }
-
-
   get isSelectSource() {
-    return this.currentProject && this.currentStep === STEPS.DATA_SOURCE;
+    return !!this.recentProject && this.currentStep === 2;
   }
-
- 
-  get showDataSourceSelection() {
-    return this.isSelectSource && !this.selectedDataSource;
-  }
-
- 
-  get showCsvUploader() {
-    return this.isSelectSource && this.selectedDataSource === 'CSV';
-  }
-
-
-  get showSoqlBuilder() {
-    return this.isSelectSource && this.selectedDataSource === 'SOQL';
-  }
-
-
   get isMappingAndTransformation() {
-    return this.currentProject && 
-           (this.currentStep === STEPS.FIELD_MAPPING );
+    return !!this.recentProject && this.currentStep === 3;
   }
-
-  get isTransformations() {
-    return this.currentProject && this.currentStep === STEPS.TRANSFORMATIONS;
-  }
-
-
-  get isDryRunExecution() {
-    return this.currentProject && this.currentStep === STEPS.VALIDATION;
-  }
-
-
-  get isRealExecution() {
-    return this.currentProject && this.currentStep === STEPS.EXECUTION;
-  }
-
-
-  handleStartMapping(event) {
-    const headersCsv = Array.isArray(event?.detail?.columns)
-      ? event.detail.columns.join(",")
-      : event?.detail?.headersCsv || '';
-    
-    this.mappingHeadersCsv = headersCsv;
-    if (event?.detail?.csvData) {
-      this.csvData = event.detail.csvData;
-    } else if (event?.detail?.allRows && event?.detail?.columns) {
-      this.csvData = { allRows: event.detail.allRows, columns: event.detail.columns };
-    } 
-
-    const project = this.currentProject || {};
-    this.mappingTargetObject = this.getTargetObjectFromProject(project);
-
-    if (this.currentProject) {
-      this.currentStep = STEPS.FIELD_MAPPING;
-      this.updateUIForStep(this.currentStep);
-    } else {
-      this.showToast(
-        TOAST_VARIANTS.WARNING,
-        MESSAGES.SELECT_PROJECT_FIRST,
-        TOAST_VARIANTS.WARNING
-      );
-    }
-  }
-
-  /**
-   * Handle back to data source selection
-   */
-  handleBackToDataSourceSelection() {
-    this.selectedDataSource = null;
-  }
-
-
-  getTargetObjectFromProject(project) {
-    for (const fieldName of PROJECT_FIELD_NAMES.TARGET_OBJECT) {
-      if (project[fieldName]) {
-        return project[fieldName];
-      }
-    }
-    return '';
-  }
-
-
-  handleBackToStep() {
-    this.handlePreviousStep();
-  }
-
-
-  handleStartImport(event) {
-    const importDetails = event.detail;
-    const message = MESSAGES.IMPORT_STARTED
-      .replace('{0}', importDetails.executionMode)
-      .replace('{1}', importDetails.batchSize);
-
-    this.showToast(TOAST_VARIANTS.SUCCESS, message, TOAST_VARIANTS.SUCCESS);
-  }
-
-
-  handleNavigation(event) {
-    const page = event.detail?.page || event.detail;
-    this.activePage = page;
-
-    switch (page) {
-      case PAGES.DASHBOARD:
-        this.currentStep = STEPS.PROJECT_SETUP;
-        this.updateUIForStep(this.currentStep);
-        break;
-      case PAGES.PROJECTS:
-        this.currentStep = STEPS.PROJECT_SETUP;
-        this.updateUIForStep(this.currentStep);
-        break;
-      case PAGES.LOGS:
-        this.showToast(TOAST_VARIANTS.INFO, MESSAGES.LOGS_COMING_SOON, TOAST_VARIANTS.INFO);
-        break;
-      case PAGES.SETTINGS:
-        this.showToast(TOAST_VARIANTS.INFO, MESSAGES.SETTINGS_COMING_SOON, TOAST_VARIANTS.INFO);
-        break;
-      default:
-        break;
-    }
-  }
-
-
-  async handleFindExistingProject() {
-    this.showToast(TOAST_VARIANTS.INFO, "Search projects feature", TOAST_VARIANTS.INFO);
-  }
-
-
-  handleSidebarStepClick(event) {
-    const stepNumber = parseInt(event.detail, 10);
-
-    if (stepNumber === STEPS.PROJECT_SETUP || this.currentProject) {
-      this.currentStep = stepNumber;
-      this.updateUIForStep(this.currentStep);
-    } else {
-      this.showToast(
-        TOAST_VARIANTS.WARNING,
-        MESSAGES.CREATE_PROJECT_FIRST,
-        TOAST_VARIANTS.WARNING
-      );
-    }
-  }
-
-
-  handleProjectSelect(event) {
-    const project = event.detail.project || event.detail;
-    this.currentProject = project;
-    this.currentStep = STEPS.DATA_SOURCE;
-    this.updateUIForStep(this.currentStep);
-  }
-
-
-  handleQuickAction(event) {
-    const actionName = event.detail;
-
-    switch (actionName) {
-      case QUICK_ACTIONS.NEW_PROJECT:
-        this.currentStep = STEPS.PROJECT_SETUP;
-        this.updateUIForStep(this.currentStep);
-        this.showCreatorSection = true;
-        break;
-      case QUICK_ACTIONS.VIEW_LOGS:
-        this.showToast(TOAST_VARIANTS.INFO, MESSAGES.VIEW_LOGS, TOAST_VARIANTS.INFO);
-        break;
-      case QUICK_ACTIONS.EXPORT_DATA:
-        this.showToast(TOAST_VARIANTS.INFO, MESSAGES.EXPORT_COMING_SOON, TOAST_VARIANTS.INFO);
-        break;
-      default:
-        break;
-    }
-  }
-
-  updateUIForStep(stepNumber) {
-    //Show dashboard only for Project Setup step (step 1)
-    if (stepNumber === STEPS.PROJECT_SETUP) {
-      this.showDashboard = true;
-      this.activePage = PAGES.DASHBOARD;
-      this.showCreatorSection = false;
-      this.selectedDataSource = null; //Reset data source selection
-    } else if (stepNumber === STEPS.DATA_SOURCE) {
-      this.selectedDataSource = null;
-      this.showDashboard = false;
-      this.activePage = PAGES.PROJECTS;
-      this.showCreatorSection = false;
-    } else {
-      this.showDashboard = false;
-      this.activePage = PAGES.PROJECTS;
-      this.showCreatorSection = false;
-    }
+  get isScheduling() {
+    return !!this.recentProject && this.currentStep === 4;
   }
 }
