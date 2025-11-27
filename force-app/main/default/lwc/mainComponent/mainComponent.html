@@ -2,7 +2,7 @@
   @description       : Main component hosting all ImportMate application components
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
   @group             : 
-  @last modified on  : 11-23-2025
+  @last modified on  : 11-27-2025
   @last modified by  : khalidousowba
 -->
 <template>
@@ -105,29 +105,29 @@
 
               <!-- Step 4: Transformations -->
               <template if:true={isTransformations}>
-                <c-transformation-cmp
+                <!-- <c-transformation-cmp
                   onprevious={handleBackToStep}
                   onnext={handleNextStep}
-                ></c-transformation-cmp>
+                ></c-transformation-cmp> -->
               </template>
 
               <!-- Step 5: Validation (Dry Run) -->
               <template if:true={isDryRunExecution}>
-                <c-dry-run-validator
+                <!-- <c-dry-run-validator
                   project-id={currentProject.Id}
                   csv-data={csvData}
                   onprevious={handleBackToStep}
                   onnext={handleNextStep}
-                ></c-dry-run-validator>
+                ></c-dry-run-validator> -->
               </template>
 
               <!-- Step 6: Execution & scheduling-->
               <template if:true={isRealExecution}>
-                <c-execution-cmp
+                <!-- <c-execution-cmp
                   project-id={currentProject.Id}
                   csv-data={csvData}
                   onprevious={handleBackToStep}
-                ></c-execution-cmp>
+                ></c-execution-cmp> -->
               </template>
             <!-- </div> -->
           </div>
