@@ -140,7 +140,24 @@ public with sharing class TransformationService {
             );
         }
     }
-    
+
+    //récuperer les transformations par l'id du mapping 
+    public static List<TransformationRule__c> getRulesByMappingId(String mappingId) {
+         try {
+           return  TransformationRepository.getRulesByMappingId(mappingId);
+         }catch(Exception e){
+             Map<String, Object> context = new Map<String, Object>{
+                'mappingId' => mappingId, 
+                'originalError' => e.getMessage()
+            };
+            throw new TransformationException(
+                'Erreur lors de la génération du résumé des transformations: ' + e.getMessage(),
+                Constants.ERROR_CODE_TRANSFORMATION,
+                context
+            );
+         }
+    }
+
     //résumé des transformations
     public static Map<String, Object> getTransformationSummary(String mappingId) {
         try {

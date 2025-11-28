@@ -1,0 +1,112 @@
+<!--
+   @description       : 
+   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+   @group             : 
+   @last modified on  : 11-24-2025
+   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+   -->
+<template>
+   <lightning-modal-header label={label}></lightning-modal-header>
+   <lightning-modal-body>
+      <div class="slds-form slds-form_stacked">
+         <!-- Sélection du mapping -->
+            <label class="slds-form-element__label" for="fieldMapping">
+             Mapping Field<abbr class="slds-required" title="required">*</abbr>
+            </label>
+           <lightning-input  id="fieldMapping" type="text" value={mappingInfo} disabled></lightning-input>
+        <!-- <div class="slds-form-element slds-m-bottom_medium">
+            <label class="slds-form-element__label" for="fieldMapping">
+            Mapping Field<abbr class="slds-required" title="required">*</abbr>
+            </label>
+            <div class="slds-form-element__control">
+               <lightning-combobox id="fieldMapping" name="fieldMapping" value={mappingId}
+                  options={fieldMappingOptions} onchange={handleFieldMappingChange}>
+               </lightning-combobox>
+            </div>
+            <div class="slds-form-element__help">
+               Sélectionnez le mapping de champ auquel appliquer cette transformation
+            </div>
+         </div>
+          -->
+         <!-- Type de règle 
+            <lightning-dual-listbox name="transformations"
+                            label="Select transformations"
+                            source-label="Available"
+                            selected-label="Selected"
+                            options={ruleTypeOptions}
+                            field-level-help="Select your transformation" 
+                            onchange={handleRuleTypeChange}>
+                </lightning-dual-listbox>
+             -->   
+         <div class="slds-form-element slds-m-bottom_medium">
+            <label class="slds-form-element__label" for="ruleType">
+            Rule Type <abbr class="slds-required" title="required">*</abbr>
+            </label>
+            <div class="slds-form-element__control">
+               <lightning-combobox id="ruleType" name="ruleType" value={ruleType} options={ruleTypeOptions}
+                  onchange={handleRuleTypeChange} >
+               </lightning-combobox>
+            </div>
+         </div>
+         <!-- Champs pour la concaténation -->
+         <template if:true={showConcatenationFields}>
+            <div class="slds-form-element slds-m-bottom_medium">
+               <label class="slds-form-element__label" for="sourceFields">
+               Source Fields <abbr class="slds-required" title="required">*</abbr>
+               </label>
+               <div class="slds-form-element__control">
+                  <lightning-dual-listbox id="sourceFields" name="sourceFields" label="Champs sources"
+                     source-label="Source Fields" selected-label="Target Fields"
+                     options={targetFieldOptions} value={selectedColumns} onchange={handleSourceFieldsChange}
+                     max="3">
+                  </lightning-dual-listbox>
+               </div>
+               <div class="slds-form-element__help">
+                  Select 1 to a maximum of 3 fields. {selectedFieldsCount} on 3 selected
+               </div>
+            </div>
+            <div class="slds-form-element slds-m-bottom_medium">
+               <label class="slds-form-element__label" for="separator">
+               Separator
+               </label>
+               <div class="slds-form-element__control">
+                  <lightning-combobox id="separator" name="separator" value={separator} options={separatorOptions}
+                     onchange={handleSeparatorChange}>
+                  </lightning-combobox>
+               </div>
+            </div>
+         </template>
+
+         
+         <!-- boolean transformation -->
+          <template if:true={isBooleanTransformation}>
+            <div class="slds-form-element slds-m-bottom_medium">
+               <label class="slds-form-element__label" for="sourceFields">
+              Choose the boolean value <abbr class="slds-required" title="required">*</abbr>
+               </label>
+               <div class="slds-form-element__control">
+                  <lightning-input  
+                     onchange={handleBooleanValueChange}
+                     type="checkbox"  
+                     checked={booleanValue}>
+                  </lightning-input> 
+               </div>
+            </div>
+         
+          </template>
+
+         
+      </div>
+   </lightning-modal-body>
+   <lightning-modal-footer>
+      <div class="btns">
+         <button aria-label="Cancel transformation rule creation" onclick={handleCancel}
+            class="btn btn-secondary">Cancel
+         </button>
+         <button aria-label="Save  transformation rule" class="btn btn-primary"
+            onclick={handleSaveTransformation}>
+         Save  rule
+         </button>
+      </div>
+   </lightning-modal-footer>
+</template>

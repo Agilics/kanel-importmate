@@ -3,7 +3,7 @@
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
   @group             : 
   @last modified on  : 11-28-2025
-  @last modified by  : khalidousowba
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
   <template if:true={isLoading}>
@@ -104,12 +104,14 @@
               </template>
 
               <!-- Step 4: Transformations -->
-              <!-- <template if:true={isTransformations}>
-                <c-transformation-cmp
+              <template if:true={isTransformations}>
+                <c-transformation-page
                   onprevious={handleBackToStep}
                   onnext={handleNextStep}
-                ></c-transformation-cmp>
-              </template> -->
+                  project-id={currentProject.Id}
+                ></c-transformation-page>
+            </template>
+
 
               <!-- Step 5: Validation (Dry Run) -->
               <!-- <template if:true={isDryRunExecution}>
