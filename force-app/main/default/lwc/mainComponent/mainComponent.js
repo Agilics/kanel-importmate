@@ -1,15 +1,32 @@
-import { LightningElement, wire, track } from "lwc";
-import { ShowToastEvent } from "lightning/platformShowToastEvent";
-import SelectProject from "c/selectProjectComponent";
-import { refreshApex } from "@salesforce/apex";
-import searchProjetById from "@salesforce/apex/ImportProjectController.searchProjetById";
+import { LightningElement, wire, track } from 'lwc';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import SelectProject from 'c/selectProjectComponent';
+import { refreshApex } from '@salesforce/apex';
 
-//importation méthodes depuis le Contrôleur
-import getRecentsProjects from "@salesforce/apex/ImportProjectController.getRecentsProjects";
-import getAllSchedules from "@salesforce/apex/ScheduleController.getAllSchedules";
-import addSchedule from "@salesforce/apex/ScheduleController.addSchedule";
+// Project + schedule apex
+import searchProjetById from '@salesforce/apex/ImportProjectController.searchProjetById';
+import doesProjectExist from '@salesforce/apex/ImportProjectController.doesProjectExist';
+import saveProject from '@salesforce/apex/ImportProjectController.saveProject';
+import getRecentsProjects from '@salesforce/apex/ImportProjectController.getRecentsProjects';
+import getAllSchedules from '@salesforce/apex/ScheduleController.getAllSchedules';
+import addSchedule from '@salesforce/apex/ScheduleController.addSchedule';
+
+const SS_ROWS_KEY = 'IM_csvRows';
+const SS_COLS_KEY = 'IM_sourceColumnsCsv';
+
 export default class MainComponent extends LightningElement {
-  @track showCreatorSection = false;
+  title = 'Imports Projects';
+
+  @track mappingHeadersCsv = '';
+  @track mappingTargetObject = '';
+  @track mappingSampleRows = [];
+  @track mappingSourceLabel = '';
+  @track mappingTotalRowCount = 0; 
+
+  allRows;
+
+  // ===== UI / state =====
+  @track showCreatorSection = false; 
   title = "Imports Projects";
   @track mappingHeadersCsv = "";
   @track mappingTargetObject = "";
@@ -18,108 +35,46 @@ export default class MainComponent extends LightningElement {
   //paramètres pour la création de projet
 
   isLoading = false;
-  objectList = [];
-  projectName = "";
-  @track selectProject = [];
-  description = "";
-  targetObjet = "";
-  projectId;
-  project;
-  recentProject;
-  isProject;
 
-  selectedFrequency; // paramètre pour la fréquence sélectionnée
+  // project state
+  projectName = '';
+  description = '';
+  targetObject = '';
+  recentProject;
+
+  // schedules
+  @track schedules = [];
+  selectedFrequency;
   showSchedule = false;
   wiredSchedulesResult;
-  nextRun; // paramètre de date d'éxécution
+  nextRun;
 
-  // paramètre du stepper
-  currentStep = 1; // le step courrant
+  // stepper
+  currentStep = 1;
   baseSteps = [
-    { number: 1, label: "Start", hasLine: true },
-    { number: 2, label: "Select source", hasLine: true },
-    { number: 3, label: "Mapping & transformation", hasLine: true },
-    { number: 4, label: "Preview", hasLine: true },
-    { number: 5, label: "Execution", hasLine: false }
+    { number: 1, label: 'Start', hasLine: true },
+    { number: 2, label: 'Select source', hasLine: true },
+    { number: 3, label: 'Mapping & transformation', hasLine: true },
+    { number: 4, label: 'Preview', hasLine: true },
+    { number: 5, label: 'Execution', hasLine: false }
   ];
 
-  // getter calculé qui ajoute la classe CSS
-
+  // computed steps (adds CSS + aria-current)
   get steps() {
     return this.baseSteps.map((step) => {
-      let cssClass = "step";
-      if (step.number < this.currentStep) {
-        cssClass = "step completed";
-      } else if (step.number === this.currentStep) {
-        cssClass = "step active";
-      }
-
-      // on renvoie aussi ariaCurrent ici
-      let ariaCurrent = step.number === this.currentStep ? "step" : "false";
+      let cssClass = 'step';
+      if (step.number < this.currentStep) cssClass = 'step completed';
+      else if (step.number === this.currentStep) cssClass = 'step active';
+      const ariaCurrent = step.number === this.currentStep ? 'step' : 'false';
       return { ...step, cssClass, ariaCurrent };
     });
   }
 
-  //paramètres pour la section projets récents
+  // ===== Recent projects wire =====
   limitor = 3;
-  @wire(getRecentsProjects, { limitor: "$limitor" }) importProjects; //affiche 3 projets récents
+  @wire(getRecentsProjects, { limitor: '$limitor' }) importProjects;
 
-  //Navigation après sélection d'un project vers l'étape 2 selection de source de donnée dans la rubrique projets récents
-  // mainComponent.js  (inside nagivateToSelectdDataSource)
-  async nagivateToSelectdDataSource(event) {
-    this.isLoading = true;
-    const selectedProjectId = event.detail;
-
-    try {
-      const result = await searchProjetById({ id: selectedProjectId });
-      this.recentProject = result;
-
-      // ✅ toast to confirm selection
-      this.dispatchEvent(
-        new ShowToastEvent({
-          title: "Project selected",
-          message: `You have selected "${result?.Name}" to start.`,
-          variant: "success",
-          mode: "dismissable"
-        })
-      );
-
-      // ✅ proceed to Select Source step
-      this.handleNextStep();
-    } catch (error) {
-      this.dispatchEvent(
-        new ShowToastEvent({
-          title: "Error",
-          message: error?.body?.message || "Failed to load project",
-          variant: "error"
-        })
-      );
-    } finally {
-      this.isLoading = false;
-    }
-  }
-
-  //Enregistrement d'un nouveau projet et navigation vers souce de séléction de données
-  async handleSaveProject(event) {
-    this.isLoading = true;
-    this.recentProject = event.detail;
-    this.handleNextStep();
-    this.isLoading = false;
-  }
-
-  // Retour vers l'étape précédente du stepper
-  handlePreviousStep() {
-    if (this.currentStep > 1) {
-      this.currentStep--; // décrementation du compteur
-      this.showCreatorSection = false;
-      this.targetObject = "";
-      if (this.currentStep !== 2) {
-        this.selectedSource = null;
-      }
-    }
-  }
-
-  // Récupération de tous les données de plannings
+  // ===== Schedules wire =====
   @wire(getAllSchedules)
   wireAllSchedules(result) {
     this.wiredSchedulesResult = result;
@@ -133,81 +88,89 @@ export default class MainComponent extends LightningElement {
         frequency: sch.Frequency__c
       }));
     } else if (error) {
-      this.showToast("Error", error?.body?.message, "error");
+      this.showToast('Error', error?.body?.message, 'error');
     }
   }
 
-  //passage à l'étape suivante du stepper
-  handleNextStep() {
-    if (
-      this.currentStep < this.baseSteps.length &&
-      this.recentProject != null
-    ) {
-      this.currentStep++; // Incrémentation du compteur
-    }
-  }
-
-  //Masquer la section de création de projet
-  handleCancel() {
-    this.showCreatorSection = false;
-  }
-
-  //Mise à jour de la variable project name via le champs de texte
-  handleProjectNameChange(event) {
-    this.projectName = event.detail;
-  }
-
-  //Mise à jour de la variable description via le champs de texte
-  handleDescriptionChange(event) {
-    this.description = event.detail;
-  }
-
-  //Mise à jour de la variable target Object via le champs de selection
-  handleTargetObjectChange(event) {
-    this.targetObject = event.detail;
-  }
-
-  //affiche un flash message via un toast
-  showToast(title, message, variant) {
-    const event = new ShowToastEvent({
-      title: title,
-      message: message,
-      variant: variant,
-      mode: "dismissable"
-    });
-    this.dispatchEvent(event);
-  }
-
-  //Affiche de la section Creation de projet et on ferme la section de projet récents
+  // ===== Step 1 (Start) actions =====
   openNewProject() {
     this.showCreatorSection = true;
   }
 
-  // navigation du stepper
-  handleStepClick(event) {
-    this.currentStep = parseInt(event.detail, 10);
+  handleProjectNameChange(event) {
+    this.projectName = event.detail;
+  }
+  handleDescriptionChange(event) {
+    this.description = event.detail;
+  }
+  handleTargetObjectChange(event) {
+    this.targetObject = event.detail;
   }
 
-  //vérifie l'étape du stepper
-  // on affiche une section en fonction de l'étape cliquer par l'utilisateur
-  get isStart() {
-    return this.currentStep === 1;
-  }
+  async handleCreateProject() {
+    this.isLoading = true;
 
-  //Navigation vers l'étape 2 Selection de source
-  get isSelectSource() {
-    if (!this.recentProject) {
-      return false;
+    if (!this.projectName || !this.description || !this.targetObject) {
+      this.showToast('Warning', 'All fields are required.', 'warning');
+      this.isLoading = false;
+      return;
     }
-    return this.currentStep === 2;
-  }
 
+  }
     //Navigation vers l'étape 3 Mapping
   get isMapping() {
-    if (!this.recentProject) {
-      return false;
+     return !!this.recentProject && this.currentStep === 3;
+     
+  }
+  
+  async handleCreateProject() {
+    this.isLoading = true;
+
+    if (!this.projectName || !this.description || !this.targetObject) {
+      this.showToast('Warning', 'All fields are required.', 'warning');
+      this.isLoading = false;
+      return;
     }
-    return this.currentStep === 3;
+    try {
+      const exists = await doesProjectExist({
+        name: this.projectName,
+        targetObject: this.targetObject
+      });
+
+      if (exists) {
+        this.showToast(
+          'Warning',
+          'This project already exists, please choose another name/target object.',
+          'warning'
+        );
+        this.template.querySelector('c-create-project-component')?.resetFields();
+        this.isLoading = false;
+        this.targetObject = '';
+        return;
+      }
+
+      const result = await saveProject({
+        name: this.projectName,
+        description: this.description,
+        targetObject: this.targetObject
+      });
+
+      this.recentProject = result;
+
+      this.showToast(
+        'Success',
+        `Record with ID ${result.Id} created successfully!`,
+        'success'
+      );
+      this.template.querySelector('c-create-project-component')?.resetFields();
+
+      this.isLoading = false;
+      this.handleNextStep();
+    } catch (err) {
+      this.showToast('Error', err?.body?.message || 'An error occurred!', 'error');
+    } finally {
+      this.isLoading = false; 
+    }
   }
 
   //Navigation vers l'étape 4 transformation
@@ -227,8 +190,7 @@ export default class MainComponent extends LightningElement {
   }
 
   // enregistrement de la méthode et récupération de la version du mapping
-  handleMappingSave(event){
-    this.selectedVersion = event.detail.version;
+  handleMappingSave(event){ 
     this.handleNextStep(); //Passage à l'étape de transformation et incrémentation du stepper
   }
 
@@ -236,155 +198,236 @@ export default class MainComponent extends LightningElement {
   //  Ouverture Modal permettant de la recherche et la selection d'existant  projets
   async handleFindExistingProject() {
     await SelectProject.open({
-      size: "large",
-      description: "modal permettant la recherche de projets importés",
+      size: 'large',
+      description: 'modal permettant la recherche de projets importés',
       columns: this.columns,
       onselect: (e) => {
         const id = e.detail;
-        searchProjetById({ id }) //récupération de projets importés par l'id
-          .then((data) => {
-            this.recentProject = data;
-            this.handleNextStep(); //Passage à l'étape 2 selection de source
-          });
+        searchProjetById({ id }).then((data) => {
+          this.recentProject = data;
+          this.handleNextStep();
+        });
       }
     });
   }
 
-  //Mise à jour du champs de sélection de Frequency__c
-  handleSelectedFrequency(event) {
-    this.selectedFrequency = event.detail.frequency;
-  }
-
-  //Mise à jour du champs de la date d'éxécution
-  handleNextRunChange(event) {
-    this.nextRun = event.detail.nextRun;
-  }
-
-  //Enregistrement  d'une nouvelle planification
-  async handleAddSchedule(event) {
-    //Récupération de l'id du projet sélectionné
-    const id = this.recentProject?.Id;
+  async nagivateToSelectdDataSource(event) {
+    this.isLoading = true;
+    const selectedProjectId = event.detail;
 
     try {
-      this.isLoading = true; //activer le loading spinner
+      const result = await searchProjetById({ id: selectedProjectId });
+      this.recentProject = result;
 
-      if (!id || !this.selectedFrequency || !this.nextRun) {
-        this.showToast("Warning", "All fields are required.", "warning");
-        this.isLoading = false;
-        return;
-      }
-      /**
-       * Création d'une planification via la fréquence , l'id du project
-       * et la date d'éxécution NextRun
-       *  Création d'une tâche Apex
-       */
+      this.dispatchEvent(
+        new ShowToastEvent({
+          title: 'Project selected',
+          message: `You have selected "${result?.Name}" to start.`,
+          variant: 'success',
+          mode: 'dismissable'
+        })
+      );
 
-      await addSchedule({
-        frequency: this.selectedFrequency,
-        nextRun: this.nextRun,
-        projectId: id
-      }).then((data) => {
-        //Affichage du message toast de succès
-        this.showToast(
-          "Success",
-          `Schedule  with ID:\t${data}  created  successfully !`,
-          "success"
-        );
-        this.template
-          .querySelector("c-schedule-creator-component")
-          .resetFields(); // Réintialisation de tous les champs de texte | combo box
-        this.showSchedule = event.detail;
-        this.isLoading = false; //Désactivation du  loading spinner
-        return refreshApex(this.wiredSchedulesResult); //  refresh datatable
-      });
-    } catch (err) {
-      //Affichage d'un toast de message d'erreur
-      this.showToast(
-        "Error",
-        err?.body?.message || "An Error were occured while adding a schedule! ",
-        "error"
+      this.handleNextStep();
+    } catch (error) {
+      this.dispatchEvent(
+        new ShowToastEvent({
+          title: 'Error',
+          message: error?.body?.message || 'Failed to load project',
+          variant: 'error'
+        })
       );
     } finally {
       this.isLoading = false;
     }
   }
 
+  // ===== Step 2 → 3 (Start mapping) =====
   handleStartMapping(evt) {
     const detail = (evt && evt.detail) || {};
 
     try {
-      // 1) Headers from SOQL / CSV
-      this.mappingHeadersCsv = (detail.headersCsv || "").trim();
-
-      // 2) Target object: from event, else from project
+      const headersCsv = (detail.headersCsv || '').trim();
+      const rows = Array.isArray(detail.rows) ? detail.rows : [];
+      this.mappingHeadersCsv = headersCsv;
+      this.mappingSampleRows = rows;
+      const totalFromDetail = detail.totalRowCount;
+      let total = rows.length;
+      if (typeof totalFromDetail === 'number' && Number.isFinite(totalFromDetail)) {
+        total = totalFromDetail;
+      }
+      this.mappingTotalRowCount = total;
       const rp = this.recentProject || {};
       const fromProject =
         rp.TargetObject__c ??
         rp.Target_Object__c ??
         rp.Target__c ??
         rp.targetObject ??
-        "";
+        '';
+
       this.mappingTargetObject =
-        (detail.targetObject || "").trim() || fromProject || "";
-
-      // 3) Determine effective project id
-      const effectiveProjectId = rp.Id || detail.projectId || "";
-
+        (detail.targetObject || '').trim() || fromProject || '';
+      const rawLabel = (detail.sourceLabel || '').trim();
+      this.mappingSourceLabel = rawLabel || this.mappingTargetObject || '';
+      const effectiveProjectId = rp.Id || detail.projectId || '';
       if (!effectiveProjectId) {
         this.dispatchEvent(
           new ShowToastEvent({
-            title: "Pick a project",
-            message: "Please select a project before continuing to mapping.",
-            variant: "warning"
+            title: 'Pick a project',
+            message: 'Please select a project before continuing to mapping.',
+            variant: 'warning'
           })
         );
         return;
       }
-
-      // if we only had id in the event, make sure recentProject at least has Id
       if (!rp.Id && detail.projectId) {
-        this.recentProject = {
-          ...(this.recentProject || {}),
-          Id: detail.projectId
-        };
+        this.recentProject = { ...(this.recentProject || {}), Id: detail.projectId };
       }
-
-      // 4) Move to step 3
-      this.currentStep = 3;
-
-      // 5) Optional nice scroll
-      if (
-        typeof window !== "undefined" &&
-        typeof window.scrollTo === "function"
-      ) {
-        try {
-          window.scrollTo({ top: 0, behavior: "smooth" });
-        } catch (e) {
-          // ignore scroll issues in Locker
+      try {
+        if (headersCsv) {
+          window.sessionStorage.setItem(SS_COLS_KEY, headersCsv);
         }
+        if (rows && rows.length) {
+          window.sessionStorage.setItem(SS_ROWS_KEY, JSON.stringify(rows));
+        }
+      } catch (e) {
+        console.debug('[Main] sessionStorage unavailable or quota exceeded', e);
       }
 
-      // eslint-disable-next-line no-console
-      console.log("[Main] handleStartMapping OK", {
-        headersCsv: this.mappingHeadersCsv,
-        mappingTargetObject: this.mappingTargetObject,
-        projectId: effectiveProjectId
-      });
+      // Navigate to step 3 (Mapping & transformation)
+      this.currentStep = 3;
+      if (typeof window !== 'undefined' && typeof window.scrollTo === 'function') {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     } catch (err) {
       this.dispatchEvent(
         new ShowToastEvent({
-          title: "Open mapper failed",
-          message:
-            (err && err.message) || "Could not open the Field Mapping step.",
-          variant: "error"
+          title: 'Open mapper failed',
+          message: err?.message || 'Could not open the Field Mapping step.',
+          variant: 'error'
         })
       );
-      // eslint-disable-next-line no-console
-      console.error("[Main] handleStartMapping CATCH", err, detail);
     }
   }
 
+  handleCsvParsed({ detail }) {
+    this.mappingHeadersCsv = (detail.headers || []).join(',');
+    this.mappingSampleRows = Array.isArray(detail.rows) ? detail.rows : [];
+
+    const totalFromDetail = detail.totalRowCount;
+    let total = this.mappingSampleRows.length;
+    if (typeof totalFromDetail === 'number' && Number.isFinite(totalFromDetail)) {
+      total = totalFromDetail;
+    }
+    this.mappingTotalRowCount = total;
+
+    if (Array.isArray(detail.allRows)) {
+      this.allRows = detail.allRows;
+    }
+
+    try {
+      if (this.mappingHeadersCsv) {
+        window.sessionStorage.setItem(SS_COLS_KEY, this.mappingHeadersCsv);
+      }
+      if (this.mappingSampleRows.length) {
+        window.sessionStorage.setItem(
+          SS_ROWS_KEY,
+          JSON.stringify(this.mappingSampleRows)
+        );
+      }
+    } catch (e) {
+      console.debug('[Main] sessionStorage unavailable or exceeded quota', e);
+    }
+  }
+
+  // ===== Stepper navigation =====
+  handleNextStep() {
+    if (this.currentStep < this.baseSteps.length && this.recentProject) {
+      this.currentStep += 1;
+    }
+  }
+  handlePreviousStep() {
+    if (this.currentStep > 1) {
+      this.currentStep -= 1;
+      this.showCreatorSection = false;
+      this.targetObject = '';
+      if (this.currentStep !== 2) this.selectedSource = null;
+    }
+  }
   handleBackToStep2() {
     this.currentStep = 2;
+  }
+  handleStepClick(event) {
+    this.currentStep = parseInt(event.detail, 10);
+  }
+
+  // ===== Step 4/5 (Schedules) =====
+  handleSelectedFrequency(event) {
+    this.selectedFrequency = event.detail.frequency;
+  }
+  handleNextRunChange(event) {
+    this.nextRun = event.detail.nextRun;
+  }
+  async handleAddSchedule(event) {
+    const id = this.recentProject?.Id;
+    try {
+      this.isLoading = true;
+
+      if (!id || !this.selectedFrequency || !this.nextRun) {
+        this.showToast('Warning', 'All fields are required.', 'warning');
+        this.isLoading = false;
+        return;
+      }
+
+      await addSchedule({
+        frequency: this.selectedFrequency,
+        nextRun: this.nextRun,
+        projectId: id
+      }).then((data) => {
+        this.showToast(
+          'Success',
+          `Schedule with ID ${data} created successfully!`,
+          'success'
+        );
+        this.template.querySelector('c-schedule-creator-component')?.resetFields();
+        this.showSchedule = event.detail;
+        this.isLoading = false;
+        return refreshApex(this.wiredSchedulesResult);
+      });
+    } catch (err) {
+      this.showToast(
+        'Error',
+        err?.body?.message || 'An error occurred while adding a schedule!',
+        'error'
+      );
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  // ===== Utilities =====
+  showToast(title, message, variant) {
+    this.dispatchEvent(
+      new ShowToastEvent({
+        title,
+        message,
+        variant,
+        mode: 'dismissable'
+      })
+    );
+  }
+
+  // ===== Section guards =====
+  get isStart() {
+    return this.currentStep === 1;
+  }
+  get isSelectSource() {
+    return !!this.recentProject && this.currentStep === 2;
+  }
+  get isMappingAndTransformation() {
+    return !!this.recentProject && this.currentStep === 3;
+  }
+  get isScheduling() {
+    return !!this.recentProject && this.currentStep === 4;
   }
 }

@@ -3,7 +3,7 @@ import { LightningElement,api, wire ,track} from "lwc";
 import TransformationModal from 'c/transformationSaveModal';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import searchProjetById from '@salesforce/apex/ImportProjectController.searchProjetById';
-import getRulesByVersionAndMappingId from '@salesforce/apex/TransformationController.getRulesByVersionAndMappingId';
+import getRulesByMappingId from '@salesforce/apex/TransformationController.getRulesByMappingId';
 
 export default class TransformationPage extends LightningElement {
   isWarningBadge = true; // affiche du badge warning
@@ -33,7 +33,7 @@ export default class TransformationPage extends LightningElement {
         return;
     }
 
-    getRulesByVersionAndMappingId(mappingId,version)
+    getRulesByMappingId(mappingId)
         .then(data => {
             console.log('Transformations reçues :', JSON.stringify(data));
 
@@ -102,7 +102,7 @@ export default class TransformationPage extends LightningElement {
             mapping: event.detail.mapping
     }); 
     this.handleShowMappings();
-    this.loadTransformations({mappingId:event.detail.mappingId,version:this.selectedVersion}); //affichage des transformation via l'id du mapping 
+    this.loadTransformations({mappingId:event.detail.mappingId}); //affichage des transformation via l'id du mapping 
   }
 
 
