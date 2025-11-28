@@ -46,7 +46,7 @@ public with sharing class TransformationController {
 
       
 
-    //récuperer les transformations par l'id du mapping
+    //récuperer les transformations par l'id du mapping &  version
       @AuraEnabled(cacheable = true)
     public static List<TransformationRule__c> getRulesByMappingId(String mappingId) {
         return TransformationService.getRulesByMappingId(mappingId);

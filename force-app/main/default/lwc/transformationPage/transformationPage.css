@@ -1,19 +1,6 @@
-.page {
-  width: 1, 120px;
-  height: 1, 517px;
-  left: 320px;
-  padding: 1.5rem 2rem;
-}
+ 
 .main {
-  padding: 20px 1.5rem;
-  background: #f9fafb;
-  width: 1120px;
-  height: 1517px;
-  angle: 0 deg;
-  opacity: 1;
-  left: 320px;
-
-  font-family: "Inter","Salesforce Sans" ;
+ width:auto;height: 1517px;left: 320px;padding: 1.5rem 2rem; background: #f9fafb; font-family: "Salesforce Sans", Arial, sans-serif;
 }
 /* HEADER */
 .header {
@@ -36,8 +23,7 @@
 }
 .header-title {
   font-weight: 700;
-  font-style: Bold;
-    font-family:"Inter";
+  font-style: Bold; 
   font-size: 24px;
   leading-trim: NONE;
   line-height: 32px;
@@ -64,14 +50,17 @@
 
 /* footer action css style*/
 .footer-container {
-  margin: 5rem 0 12px 0;
-  padding: 0 3.5em 0.3em 5.5em;
+  margin-top: 12px;
+  padding-bottom: 0.3em;
+  padding-top: 1.5rem;
 }
 
 .footer-separator {
   border-top: 1px solid #e2e8f0;
-  margin: 0 0 20px 0;
-  width: 990px;
+  margin: 0 0 3rem 0;
+  width: 990;
+  height: 83;
+  angle: 0 deg;
   opacity: 1;
   top: 904px;
   border-top-width: 1px;
@@ -91,7 +80,6 @@
   gap: 0.4rem;
   padding: 0.6rem 1.2rem;
   border-radius: 0.5rem;
-  font-family: Inter;
   font-weight: 500;
   font-style: Medium;
   line-height: 100%;

@@ -7,16 +7,6 @@
 -->
 <template>
   <div style="margin-bottom: 3.5rem:">
-    <!-- Header -->
-    <div class="page-header">
-      <div class="page-header__right">
-        <button type="button" class="btn btn--ghost" onclick={handleRefresh}>
-          <lightning-icon icon-name="utility:refresh" size="x-small"></lightning-icon>
-          <span>Refresh</span>
-        </button>
-      </div>
-    </div>
-
     <!-- Loading State -->
     <template if:true={isLoading}>
       <div class="card">

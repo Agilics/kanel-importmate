@@ -39,7 +39,7 @@ public with sharing class TransformationRepository {
         if (SecurityUtils.isAccessible(Schema.TransformationRule__c.SObjectType)) {
             try {
                 return [SELECT Id, RuleType__c, Parameters__c, FieldMapping__r.TargetField__c,
-                        SourceFields__c, TargetValue__c, Order__c
+                        SourceFields__c, TargetValue__c, Order__c, FieldMapping__r.SourceColumn__c
                         FROM TransformationRule__c 
                         WHERE FieldMapping__c = :mappingId 
                         /* WITH SECURITY_ENFORCED  */
@@ -61,7 +61,7 @@ public with sharing class TransformationRepository {
         if (SecurityUtils.isAccessible(Schema.TransformationRule__c.SObjectType)) {
             try {
                 List<TransformationRule__c> rules = [SELECT Id, RuleType__c, Parameters__c,
-                FieldMapping__c, FieldMapping__r.TargetField__c, 
+                FieldMapping__c, FieldMapping__r.TargetField__c, FieldMapping__r.SourceColumn__c,
                 SourceFields__c, TargetValue__c, Order__c
                         FROM TransformationRule__c 
                         WHERE Project__c = :projectId 

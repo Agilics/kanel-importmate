@@ -93,22 +93,6 @@
             </div>
          
           </template>
-
-         <!-- Ordre d'exécution -->
-         <div class="slds-form-element slds-m-bottom_medium">
-            <label class="slds-form-element__label" for="order">
-            Execution Order
-            </label>
-            <div class="slds-form-element__control">
-               <lightning-input id="order" name="order" type="number" min="1" max="3" value={order}
-                  onchange={handleOrderChange} message-when-range-underflow="L'ordre doit être au moins 1"
-                  message-when-range-overflow="L'ordre ne peut pas dépasser 3">
-               </lightning-input>
-            </div>
-            <div class="slds-form-element__help">
-               Détermine l'ordre d'application des règles (1 = première)
-            </div>
-         </div>
       </div>
    </lightning-modal-body>
    <lightning-modal-footer>

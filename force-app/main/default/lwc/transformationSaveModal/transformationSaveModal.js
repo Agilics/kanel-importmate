@@ -178,9 +178,11 @@ export default class TransformationSaveModal extends LightningModal {
         
            
             const rule = await createRule(payload);
-        
-             this.close(rule);
-           this.showToast('Success', 'Rule added successfully with record ID:\t'+ rule.Id , 'success');
+            const ruleId = rule.Id; 
+            
+            this.close(ruleId);
+            
+           this.showToast('Success', 'Rule added successfully with record ID:\t'+ ruleId , 'success');
            
         }catch(error){
            this.handleError(error); 
