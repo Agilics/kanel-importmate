@@ -37,7 +37,7 @@ export default class TransformationPage extends LightningElement {
                     rule:rule?.RuleType__c,
                     category,       
                     displayTitle: iconConfig.title ?? rule.RuleType__c,
-                    displaySubtitle: `${rule.FieldMapping__r?.SourceColumn__c ?? 'Unknown Field'} → ${rule.FieldMapping__r?.TargetField__c ?? 'Unknown Field'}`,
+                    displaySubtitle: `Source : ${rule.FieldMapping__r?.SourceColumn__c ?? 'Unknown Field'} → ${rule.FieldMapping__r?.TargetField__c ?? 'Unknown Field'}`,
                     iconName: iconConfig.icon,
                     iconBoxClass: iconConfig.boxClass,
                     headIconClass: iconConfig.iconClass,
