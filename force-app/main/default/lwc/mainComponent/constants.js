@@ -64,8 +64,8 @@ export const TOAST_VARIANTS = {
 export const PROJECT_FIELD_NAMES = {
   TARGET_OBJECT: [
     "TargetObject__c"
-  ] 
-}; 
+  ]
+};
 
 // Recent projects limit
-export const RECENT_PROJECTS_LIMIT = 3; 
+export const RECENT_PROJECTS_LIMIT = 3;
