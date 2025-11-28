@@ -39,15 +39,16 @@ export function parseCsvData(csvString) {
         return [];
     }
 
-    // Detect delimiter from first line
+    // Detect delimiter from first line (header row)
     const delimiter = detectDelimiter(lines[0]);
     console.log('Detected delimiter:', delimiter);
 
-    // Parse headers
+    // Parse headers from first line - this row will NOT be included in data
     const headers = parseCsvLine(lines[0], delimiter);
     const data = [];
 
-    // Parse data rows
+    // Parse data rows - start from index 1 to skip header row
+    // Only process non-empty lines with actual data
     for (let i = 1; i < lines.length; i++) {
         const line = lines[i].trim();
         if (!line) continue; // Skip empty lines
