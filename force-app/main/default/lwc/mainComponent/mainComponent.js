@@ -87,6 +87,11 @@ export default class MainComponent extends LightningElement {
 
   // ===== Step 1 (Start) actions =====
   openNewProject() {
+    console.log('open');
+    
+    this.currentStep = STEPS.PROJECT_SETUP;
+    //this.updateUIForStep(this.currentStep);
+    this.showDashboard = false;
     this.showCreatorSection = true;
   }
 
@@ -192,8 +197,6 @@ export default class MainComponent extends LightningElement {
           variant: 'error'
         })
       );
-    } finally {
-      this.isLoading = false;
     }
   }
 

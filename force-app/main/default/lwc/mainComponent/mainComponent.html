@@ -1,3 +1,10 @@
+<!--
+  @description       : 
+  @author            : khalidousowba
+  @group             : 
+  @last modified on  : 11-27-2025
+  @last modified by  : khalidousowba
+-->
 <template>
   <template if:true={isLoading}>
     <div class="slds-spinner_container">
@@ -29,6 +36,91 @@
             </c-stepper-component>
           </div>
         </div>
+
+        <!-- Projects Workflow View -->
+        <template if:false={showDashboard}>
+          <div class="content-container">
+            <!-- <div class="container"> -->
+              <!-- Step 1: Project Setup -->
+
+                <template if:true={showCreatorSection}>
+                  <c-project-form-card-component
+                    recent-projet={currentProject}
+                    onsaveproject={handleCreateProject}
+                    oncancel={handleCancel}
+                    onprojectnamechange={handleProjectNameChange}
+                    ondescriptionchange={handleDescriptionChange}
+                    ontargetobjectchange={handleTargetObjectChange}
+                  ></c-project-form-card-component>
+                </template>
+
+              <!-- Step 2: Data Source Selection -->
+              <template if:true={showDataSourceSelection}>
+                <c-data-source-selector-page
+                  current-project={currentProject}
+                  onsourceselected={handleDataSourceSelected}
+                ></c-data-source-selector-page>
+              </template>
+
+              <!-- Step 2: CSV Uploader -->
+              <template if:true={showCsvUploader}>
+                <c-csv-uploader
+                  current-project={currentProject}
+                  oncsvloaded={handleCsvLoaded}
+                  ongotomapping={handleStartMapping}
+                  onprevious={handleBackToDataSourceSelection}
+                ></c-csv-uploader>
+              </template>
+
+              <!-- Step 2: SOQL Builder -->
+              <template if:true={showSoqlBuilder}>
+                <c-soql-builder
+                  project-target-object={mappingTargetObject}
+                  onstartmapping={handleStartMapping}
+                  onprevious={handleBackToDataSourceSelection}
+                ></c-soql-builder>
+              </template>
+
+              <!-- Step 3 & 4: Field Mapping & Transformations -->
+              <template if:true={isMappingAndTransformation}>
+                <c-field-mapper
+                  preselected-project-id={currentProject.Id}
+                  preselected-target-object={mappingTargetObject}
+                  source-columns-csv={mappingHeadersCsv}
+                  onprevious={handleBackToStep}
+                  onnext={handleNextStep}
+                ></c-field-mapper>
+              </template>
+
+              <!-- Step 4: Transformations -->
+              <template if:true={isTransformations}>
+                <!-- <c-transformation-cmp
+                  onprevious={handleBackToStep}
+                  onnext={handleNextStep}
+                ></c-transformation-cmp> -->
+              </template>
+
+              <!-- Step 5: Validation (Dry Run) -->
+              <template if:true={isDryRunExecution}>
+                <!-- <c-dry-run-validator
+                  project-id={currentProject.Id}
+                  csv-data={csvData}
+                  onprevious={handleBackToStep}
+                  onnext={handleNextStep}
+                ></c-dry-run-validator> -->
+              </template>
+
+              <!-- Step 6: Execution & scheduling-->
+              <template if:true={isRealExecution}>
+                <!-- <c-execution-cmp
+                  project-id={currentProject.Id}
+                  csv-data={csvData}
+                  onprevious={handleBackToStep}
+                ></c-execution-cmp> -->
+              </template>
+            <!-- </div> -->
+          </div>
+        </template>
       </div>
     </header>
 
