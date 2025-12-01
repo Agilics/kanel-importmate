@@ -184,6 +184,12 @@ export default class TransformationPage extends LightningElement {
                 boxClass: 'box-icon is-centered lead-card-icon-box',
                 iconClass: 'icon is-centered custom-icon-product_transfer'
             };
+        case 'UppercaseTransformation':
+            return {
+                icon: 'utility:display_rich_text',
+                boxClass: 'box-icon is-centered lead-card-icon-box',
+                iconClass: 'icon is-centered custom-icon-product_transfer'
+            };
 
         default:
             return {

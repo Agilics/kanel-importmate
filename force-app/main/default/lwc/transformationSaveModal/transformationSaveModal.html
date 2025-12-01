@@ -2,7 +2,7 @@
    @description       : 
    @author            : ChangeMeIn@UserSettingsUnder.SFDoc
    @group             : 
-   @last modified on  : 11-24-2025
+   @last modified on  : 12-01-2025
    @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
    -->
 <template>
@@ -81,13 +81,16 @@
          <!-- boolean transformation -->
           <template if:true={isBooleanTransformation}>
             <div class="slds-form-element slds-m-bottom_medium">
-               <label class="slds-form-element__label" for="sourceFields">
-              Choose the boolean value <abbr class="slds-required" title="required">*</abbr>
-               </label>
                <div class="slds-form-element__control">
+                      <label class="slds-form-element__label" for="sourceFields">
+                        Choose the boolean value <abbr class="slds-required" title="required">*</abbr>
+                     </label>
                   <lightning-input  
                      onchange={handleBooleanValueChange}
-                     type="checkbox"  
+                     type="toggle"  
+                     label='Boolean Value'
+                     message-toggle-active= 'Yes'
+                     message-toggle-inactive = 'No'
                      checked={booleanValue}>
                   </lightning-input> 
                </div>

@@ -48,6 +48,8 @@ export default class TransformationSaveModal extends LightningModal {
     get mappingInfo(){
         return `${this.mapping.version} -> ${this.mapping.sourceColumn} `
     }
+
+
     handleFieldMappingChange(event) {
         this.mappingId = event.detail.value;
         console.log('Mapping sélectionné - ID:', this.mappingId);
