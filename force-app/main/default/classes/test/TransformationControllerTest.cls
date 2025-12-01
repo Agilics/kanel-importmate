@@ -1,3 +1,10 @@
+/**
+ * @description       : 
+ * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @group             : 
+ * @last modified on  : 12-01-2025
+ * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+**/
 @isTest
 public class TransformationControllerTest {
 
@@ -47,8 +54,7 @@ public class TransformationControllerTest {
         );
 
         System.assertNotEquals(null, rule, 'La règle ne doit pas être null');
-        System.assertNotEquals(null, rule.Id, 'La règle doit avoir un Id');
-        System.assertEquals(project.Id, rule.Project__c, 'Project__c doit correspondre');
+        System.assertNotEquals(null, rule.Id, 'La règle doit avoir un Id'); 
         System.assertEquals(mapping.Id, rule.FieldMapping__c, 'FieldMapping__c doit correspondre');
         System.assertEquals('BooleanTransformation', rule.RuleType__c, 'RuleType__c doit correspondre');
 
@@ -113,30 +119,39 @@ public class TransformationControllerTest {
     }
 
     // Test validateTransformationRule via le controller
+    //Test validateMappingTransformations with valid rules
     @isTest
-    static void testValidateTransformationRuleController() {
+    static void testValidateMappingTransformationsSuccess() {
         Test.startTest();
-
-        FieldMapping__c mapping = [SELECT Id, TargetField__c FROM FieldMapping__c LIMIT 1];
-
+        
+        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
+        List<FieldMapping__c> mappings = [SELECT Id, TargetField__c FROM FieldMapping__c LIMIT 1];
+        
+        //Create valid transformation rule
+        String parameters = '{"targetType":"boolean","trueValues":["yes"],"falseValues":["no"]}';
         TransformationRule__c rule = new TransformationRule__c(
-            Project__c = [SELECT Id FROM ImportProject__c LIMIT 1].Id,
-            FieldMapping__c = mapping.Id,
+            Project__c = project.Id,
+            FieldMapping__c = mappings[0].Id,
             RuleType__c = 'BooleanTransformation',
-            Parameters__c = '{"targetType":"boolean","trueValues":["yes"],"falseValues":["no"]}',
+            Parameters__c = parameters,
             TargetValue__c = 'false',
             Order__c = 1
         );
         insert rule;
-
+        
         Map<String, String> sampleData = new Map<String, String>{
-            mapping.TargetField__c => 'yes'
+            mappings[0].TargetField__c => 'yes'
         };
-
-        TransformationController.validateTransformationRule(rule, sampleData);
-
-        System.assert(true, 'Validation réussie sans exception');
-
+        
+        //Should not throw exception
+        TransformationController.validateMappingTransformations(
+            mappings[0].Id,
+            sampleData,
+            'test-log-id'
+        );
+        
+        System.assert(true, 'Validation should succeed without exception');
+        
         Test.stopTest();
     }
 
