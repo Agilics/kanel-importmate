@@ -152,7 +152,7 @@ export default class TransformationPage extends LightningElement {
     }
   }
 
-   
+   // configuration nom des icônes, et des cartes des icônes et de leur contour (box)
   getIconConfig(type) {
     switch(type) {
         case 'EmailMask':
