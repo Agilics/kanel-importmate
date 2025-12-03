@@ -2,7 +2,7 @@
   @description       : Main component hosting all ImportMate application components
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
   @group             : 
-  @last modified on  : 11-28-2025
+  @last modified on  : 12-03-2025
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
@@ -104,7 +104,7 @@
               </template>
 
               <!-- Step 4: Transformations -->
-              <template if:true={isTransformations}>
+            <template if:true={isTransformations}>
                 <c-transformation-page
                   onprevious={handleBackToStep}
                   onnext={handleNextStep}
