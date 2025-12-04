@@ -1,3 +1,10 @@
+<!--
+  @description       : 
+  @author            : khalidousowba
+  @group             : 
+  @last modified on  : 11-27-2025
+  @last modified by  : khalidousowba
+-->
 <template>
   <div class="container">
     <!-- Selected project banner -->
@@ -31,7 +38,11 @@
       <c-csv-uploader
           current-project={currentProject}
           oncsvloaded={handleCsvLoaded}
+<<<<<<< HEAD
           ongotomapping={handleGoToMappingFromCsv}
+=======
+          ongotomapping={handleGoToMapping}
+>>>>>>> dfefefbc2af9ece4b175900751a171b4a5cbd597
       >
       </c-csv-uploader>
     </template>
@@ -46,4 +57,5 @@
 
     </template>
   </div>
+   <c-backbutton onback={handleBackToMain}></c-backbutton>
 </template>

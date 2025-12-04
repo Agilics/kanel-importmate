@@ -1,41 +1,53 @@
-import { LightningElement, wire, track } from "lwc";
+import { LightningElement, wire } from "lwc";
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
-import SelectProject from "c/selectProjectComponent";
-import { refreshApex } from "@salesforce/apex";
-import searchProjetById from "@salesforce/apex/ImportProjectController.searchProjetById";
 import doesProjectExist from "@salesforce/apex/ImportProjectController.doesProjectExist";
-
-//importation méthodes depuis le Contrôleur
 import saveProject from "@salesforce/apex/ImportProjectController.saveProject";
 import getRecentsProjects from "@salesforce/apex/ImportProjectController.getRecentsProjects";
-import getAllSchedules from "@salesforce/apex/ScheduleController.getAllSchedules";
-import addSchedule from "@salesforce/apex/ScheduleController.addSchedule";
+import {
+  STEPS,
+  STEP_CONFIG,
+  RECENT_PROJECTS_LIMIT,
+  MESSAGES,
+  PAGES,
+  QUICK_ACTIONS,
+  TOAST_VARIANTS,
+  PROJECT_FIELD_NAMES
+} from './constants';
+
+/**
+ * Main component for the ImportMate application
+ * Handles project workflow navigation and state management
+ */
 export default class MainComponent extends LightningElement {
-  @track showCreatorSection = false;
-  title = "Imports Projects";
-  @track mappingHeadersCsv = '';
-@track mappingTargetObject = '';
+  //UI state
+  showCreatorSection = false;
+  showDashboard = true;
+  isLoading = false;
+  activePage = PAGES.DASHBOARD;
 
-  @track recentProject;
+  //Mapping data
+  mappingHeadersCsv = '';
+  mappingTargetObject = '';
+  csvData = null;
+  
+  //Data source selection
+  selectedDataSource = null;
 
-  @track selectProject = [];
+  //Project data
+  projectName = "";
+  description = "";
+  targetObject = "";
+  currentProject;
 
-  selectedFrequency; // paramètre pour la fréquence sélectionnée
-  showSchedule = false;
-  wiredSchedulesResult;
-  nextRun; // paramètre de date d'éxécution
+  //Stepper configuration
+  currentStep = STEPS.PROJECT_SETUP;
+  baseSteps = STEP_CONFIG;
 
-  // paramètre du stepper
-  currentStep = 1; // le step courrant
-  baseSteps = [
-    { number: 1, label: "Start", hasLine: true },
-    { number: 2, label: "Select source", hasLine: true },
-    { number: 3, label: "Mapping & transformation", hasLine: true },
-    { number: 4, label: "Preview", hasLine: true },
-    { number: 5, label: "Execution", hasLine: false }
-  ];
+  //Wire service configuration
+  recentProjectsLimit = RECENT_PROJECTS_LIMIT;
+  @wire(getRecentsProjects, { limitor: "$recentProjectsLimit" })
+  importProjects;
 
-  // getter calculé qui ajoute la classe CSS
 
   get steps() {
     return this.baseSteps.map((step) => {
@@ -46,262 +58,254 @@ export default class MainComponent extends LightningElement {
         cssClass = "step active";
       }
 
-      // on renvoie aussi ariaCurrent ici
-      let ariaCurrent = step.number === this.currentStep ? "step" : "false";
+      const ariaCurrent = step.number === this.currentStep ? "step" : "false";
       return { ...step, cssClass, ariaCurrent };
     });
   }
 
-  //paramètres pour la section projets récents
-  limitor = 3;
-  @wire(getRecentsProjects, { limitor: "$limitor" }) importProjects; //affiche 3 projets récents
 
-  //Navigation après sélection d'un project vers l'étape 2 selection de source de donnée dans la rubrique projets récents  
-// mainComponent.js  (inside nagivateToSelectdDataSource)
-async nagivateToSelectdDataSource(event) {
-  this.isLoading = true;
-  const selectedProjectId = event.detail;
-
-  try {
-    const result = await searchProjetById({ id: selectedProjectId });
-    this.recentProject = result;
-
-    // ✅ toast to confirm selection
-    this.dispatchEvent(
-      new ShowToastEvent({
-        title: "Project selected",
-        message: `You have selected "${result?.Name}" to start.`,
-        variant: "success",
-        mode: "dismissable"
-      })
-    );
-
-    // ✅ proceed to Select Source step
-    this.handleNextStep();
-  } catch (error) {
-    this.dispatchEvent(
-      new ShowToastEvent({
-        title: "Error",
-        message: error?.body?.message || "Failed to load project",
-        variant: "error"
-      })
-    );
-  } finally {
-    this.isLoading = false;
+  get currentStepLabel() {
+    const step = this.baseSteps.find(s => s.number === this.currentStep);
+    return step ? step.label : '';
   }
-}
 
 
-  //Enregistrement d'un nouveau projet
+  get projectDisplayName() {
+    return this.currentProject?.Name;
+  }
+
+  navigateToSelectedDataSource(event) {
+    this.currentProject = event.detail;
+    this.selectedDataSource = null; //Reset selection when navigating to data source step
+    this.currentStep = STEPS.DATA_SOURCE;
+    this.updateUIForStep(this.currentStep);
+  }
+
+  handleNextStep(event) {
+    if (event?.detail?.csvData) {
+      this.csvData = event.detail.csvData;
+    }
+
+    const maxStep = this.baseSteps.length;
+    if (this.currentStep < maxStep && this.currentProject) {
+      this.currentStep++;
+      this.updateUIForStep(this.currentStep);
+    }
+  }
+
+
   async handleCreateProject() {
     this.isLoading = true;
-    const selectedProjectId = event.detail;
+
+    if (!this.validateProjectFields()) {
+      this.showToast(TOAST_VARIANTS.WARNING, MESSAGES.ALL_FIELDS_REQUIRED, TOAST_VARIANTS.WARNING);
+      this.isLoading = false;
+      return;
+    }
 
     try {
-      const result = await searchProjetById({ id: selectedProjectId });
-      this.recentProject = result;
+      const exists = await doesProjectExist({
+        name: this.projectName,
+        targetObject: this.targetObject
+      });
 
-      // ✅ toast to confirm selection
-      this.dispatchEvent(
-        new ShowToastEvent({
-          title: "Project selected",
-          message: `You have selected "${result?.Name}" to start.`,
-          variant: "success",
-          mode: "dismissable"
-        })
+      if (exists) {
+        this.showToast(TOAST_VARIANTS.WARNING, MESSAGES.PROJECT_EXISTS, TOAST_VARIANTS.WARNING);
+        this.resetProjectForm();
+        this.isLoading = false;
+        return;
+      }
+
+      const result = await saveProject({
+        name: this.projectName,
+        description: this.description,
+        targetObject: this.targetObject
+      });
+
+      this.currentProject = result;
+      this.showToast(
+        TOAST_VARIANTS.SUCCESS,
+        MESSAGES.PROJECT_CREATED.replace('{0}', result.Id),
+        TOAST_VARIANTS.SUCCESS
       );
 
-      // ✅ proceed to Select Source step
+      this.resetProjectForm();
       this.handleNextStep();
-    } catch (error) {
-      this.dispatchEvent(
-        new ShowToastEvent({
-          title: "Error",
-          message: error?.body?.message || "Failed to load project",
-          variant: "error"
-        })
+    } catch (err) {
+      this.showToast(
+        TOAST_VARIANTS.ERROR,
+        err?.body?.message || MESSAGES.ERROR_OCCURRED,
+        TOAST_VARIANTS.ERROR
       );
     } finally {
       this.isLoading = false;
     }
   }
 
-  //Enregistrement d'un nouveau projet et récupération du projet récent
-  async handleCreateProject(event) {
-    this.recentProject = event.detail;
+  validateProjectFields() {
+    return this.projectName && this.description && this.targetObject;
   }
 
-  // Retour vers l'étape précédente du stepper
+
+  resetProjectForm() {
+    const createProjectComponent = this.template.querySelector("c-create-project-component");
+    if (createProjectComponent) {
+      createProjectComponent.resetFields();
+    }
+    this.targetObject = "";
+  }
+
+
+  handleDataSourceSelected(event) {
+    this.selectedDataSource = event.detail?.source || null;
+  }
+
+
+  handleCsvLoaded(event) {
+    // Extract csvData from nested structure: event.detail.csvData or use event.detail directly
+    this.csvData = event.detail?.csvData || event.detail || {};
+    console.log('csvData loaded in mainComponent:', 
+      this.csvData?.allRows ? 
+        `Object with ${this.csvData.allRows.length} rows` : 
+        JSON.stringify(this.csvData));
+  }
+
+
+
   handlePreviousStep() {
-    if (this.currentStep > 1) {
-      this.currentStep--; // décrementation du compteur
-      this.showCreatorSection = false;
-      this.targetObject = "";
-      if (this.currentStep !== 2) {
-        this.selectedSource = null;
-      }
+    if (this.currentStep > STEPS.PROJECT_SETUP) {
+      this.currentStep--;
+      this.updateUIForStep(this.currentStep);
     }
   }
 
-  // Récupération de tous les données de plannings
-  @wire(getAllSchedules)
-  wireAllSchedules(result) {
-    this.wiredSchedulesResult = result;
-    const { data, error } = result;
-    if (data) {
-      this.schedules = data.map((sch) => ({
-        id: sch.Id,
-        name: sch.Name,
-        project: sch.Project__r?.Name,
-        nextRun: sch.NextRun__c,
-        frequency: sch.Frequency__c
-      }));
-    } else if (error) {
-      this.showToast("Error", error?.body?.message, "error");
-    }
+ 
+  handleCancel() {
+    this.currentStep = STEPS.PROJECT_SETUP;
+    this.updateUIForStep(this.currentStep);
   }
 
-  //passage à l'étape suivante du stepper
-  handleNextStep() {
-    if (
-      this.currentStep < this.baseSteps.length &&
-      this.recentProject != null
-    ) {
-      this.currentStep++; // Incrémentation du compteur
-    }
+  /**
+   * Reset all project form fields
+   */
+  resetProjectFormFields() {
+    this.projectName = "";
+    this.description = "";
+    this.targetObject = "";
   }
 
-  //affiche un flash message via un toast
+
+  handleProjectNameChange(event) {
+    this.projectName = event.detail;
+  }
+
+
+  handleDescriptionChange(event) {
+    this.description = event.detail;
+  }
+
+  handleTargetObjectChange(event) {
+    this.targetObject = event.detail;
+  }
+
   showToast(title, message, variant) {
-    const event = new ShowToastEvent({
+    const toastEvent = new ShowToastEvent({
       title: title,
       message: message,
       variant: variant,
       mode: "dismissable"
     });
-    this.dispatchEvent(event);
+    this.dispatchEvent(toastEvent);
   }
 
-  //Affiche de la section Creation de projet et on ferme la section de projet récents
+
   openNewProject() {
+    console.log('open');
+    
+    this.currentStep = STEPS.PROJECT_SETUP;
+    //this.updateUIForStep(this.currentStep);
+    this.showDashboard = false;
     this.showCreatorSection = true;
   }
 
-  // navigation du stepper
   handleStepClick(event) {
     this.currentStep = parseInt(event.detail, 10);
   }
 
-  //vérifie l'étape du stepper
-  // on affiche une section en fonction de l'étape cliquer par l'utilisateur
+
   get isStart() {
-    return this.currentStep === 1;
+    return this.currentStep === STEPS.PROJECT_SETUP;
   }
 
-  //Navigation vers l'étape 2 Selection de source
+
   get isSelectSource() {
-    if (!this.recentProject) {
-      return false;
-    }
-    return this.currentStep === 2;
+    return this.currentProject && this.currentStep === STEPS.DATA_SOURCE;
   }
 
-  //Navigation vers l'étape 3 Mapping & transformation
+ 
+  get showDataSourceSelection() {
+    return this.isSelectSource && !this.selectedDataSource;
+  }
+
+ 
+  get showCsvUploader() {
+    return this.isSelectSource && this.selectedDataSource === 'CSV';
+  }
+
+
+  get showSoqlBuilder() {
+    return this.isSelectSource && this.selectedDataSource === 'SOQL';
+  }
+
+
   get isMappingAndTransformation() {
-    if (!this.recentProject) {
-      return false;
-    }
-    return this.currentStep === 3;
+    return this.currentProject && 
+           (this.currentStep === STEPS.FIELD_MAPPING );
   }
 
-  //Navigation vers l'étape 4 Schedule
-  get isScheduling() {
-    if (!this.recentProject) {
-      return false;
-    }
-    return this.currentStep === 4;
+  get isTransformations() {
+    return this.currentProject && this.currentStep === STEPS.TRANSFORMATIONS;
   }
 
-  // rechercher les projets importés par nom
-  //  Ouverture Modal permettant de la recherche et la selection d'existant  projets
-  async handleFindExistingProject() {
-    await SelectProject.open({
-      size: "large",
-      description: "modal permettant la recherche de projets importés",
-      columns: this.columns,
-      onselect: (e) => {
-        const id = e.detail;
-        searchProjetById({ id }) //récupération de projets importés par l'id
-          .then((data) => {
-            this.recentProject = data;
-            this.handleNextStep(); //Passage à l'étape 2 selection de source
-          });
-      }
-    });
+
+  get isDryRunExecution() {
+    return this.currentProject && this.currentStep === STEPS.VALIDATION;
   }
 
-  //Mise à jour du champs de sélection de Frequency__c
-  handleSelectedFrequency(event) {
-    this.selectedFrequency = event.detail.frequency;
+
+  get isRealExecution() {
+    return this.currentProject && this.currentStep === STEPS.EXECUTION;
   }
 
-  //Mise à jour du champs de la date d'éxécution
-  handleNextRunChange(event) {
-    this.nextRun = event.detail.nextRun;
-  }
 
-  //Enregistrement  d'une nouvelle planification
-  async handleAddSchedule(event) {
-    //Récupération de l'id du projet sélectionné
-    const id = this.recentProject?.Id;
+  handleStartMapping(event) {
+    const headersCsv = Array.isArray(event?.detail?.columns)
+      ? event.detail.columns.join(",")
+      : event?.detail?.headersCsv || '';
+    
+    this.mappingHeadersCsv = headersCsv;
+    if (event?.detail?.csvData) {
+      this.csvData = event.detail.csvData;
+    } else if (event?.detail?.allRows && event?.detail?.columns) {
+      this.csvData = { allRows: event.detail.allRows, columns: event.detail.columns };
+    } 
 
-    try {
-      this.isLoading = true; //activer le loading spinner
+    const project = this.currentProject || {};
+    this.mappingTargetObject = this.getTargetObjectFromProject(project);
 
-      if (!id || !this.selectedFrequency || !this.nextRun) {
-        this.showToast("Warning", "All fields are required.", "warning");
-        this.isLoading = false;
-        return;
-      }
-      /**
-       * Création d'une planification via la fréquence , l'id du project
-       * et la date d'éxécution NextRun
-       *  Création d'une tâche Apex
-       */
-
-      await addSchedule({
-        frequency: this.selectedFrequency,
-        nextRun: this.nextRun,
-        projectId: id
-      }).then((data) => {
-        //Affichage du message toast de succès
-        this.showToast(
-          "Success",
-          `Schedule  with ID:\t${data}  created  successfully !`,
-          "success"
-        );
-        this.template
-          .querySelector("c-schedule-creator-component")
-          .resetFields(); // Réintialisation de tous les champs de texte | combo box
-        this.showSchedule = event.detail;
-        this.isLoading = false; //Désactivation du  loading spinner
-        return refreshApex(this.wiredSchedulesResult); //  refresh datatable
-      });
-    } catch (err) {
-      //Affichage d'un toast de message d'erreur
+    if (this.currentProject) {
+      this.currentStep = STEPS.FIELD_MAPPING;
+      this.updateUIForStep(this.currentStep);
+    } else {
       this.showToast(
-        "Error",
-        err?.body?.message || "An Error were occured while adding a schedule! ",
-        "error"
+        TOAST_VARIANTS.WARNING,
+        MESSAGES.SELECT_PROJECT_FIRST,
+        TOAST_VARIANTS.WARNING
       );
-    } finally {
-      this.isLoading = false;
     }
   }
-handleStartMapping(event) {
-  // 1) CSV headers (if CSV path)
-  this.mappingHeadersCsv = event?.detail?.headersCsv || '';
 
+<<<<<<< HEAD
   // 2) On passe toutes les informations de l'objet selectionnee
   const rp = this.recentProject || {};
   this.mappingTargetObject =
@@ -322,10 +326,131 @@ handleStartMapping(event) {
         variant: 'warning'
       })
     );
+=======
+  /**
+   * Handle back to data source selection
+   */
+  handleBackToDataSourceSelection() {
+    this.selectedDataSource = null;
+>>>>>>> dfefefbc2af9ece4b175900751a171b4a5cbd597
   }
-}
-handleBackToStep2() {
-  this.currentStep = 2;
-}
 
+
+  getTargetObjectFromProject(project) {
+    for (const fieldName of PROJECT_FIELD_NAMES.TARGET_OBJECT) {
+      if (project[fieldName]) {
+        return project[fieldName];
+      }
+    }
+    return '';
+  }
+
+
+  handleBackToStep() {
+    this.handlePreviousStep();
+  }
+
+
+  handleStartImport(event) {
+    const importDetails = event.detail;
+    const message = MESSAGES.IMPORT_STARTED
+      .replace('{0}', importDetails.executionMode)
+      .replace('{1}', importDetails.batchSize);
+
+    this.showToast(TOAST_VARIANTS.SUCCESS, message, TOAST_VARIANTS.SUCCESS);
+  }
+
+
+  handleNavigation(event) {
+    const page = event.detail?.page || event.detail;
+    this.activePage = page;
+
+    switch (page) {
+      case PAGES.DASHBOARD:
+        this.currentStep = STEPS.PROJECT_SETUP;
+        this.updateUIForStep(this.currentStep);
+        break;
+      case PAGES.PROJECTS:
+        this.currentStep = STEPS.PROJECT_SETUP;
+        this.updateUIForStep(this.currentStep);
+        break;
+      case PAGES.LOGS:
+        this.showToast(TOAST_VARIANTS.INFO, MESSAGES.LOGS_COMING_SOON, TOAST_VARIANTS.INFO);
+        break;
+      case PAGES.SETTINGS:
+        this.showToast(TOAST_VARIANTS.INFO, MESSAGES.SETTINGS_COMING_SOON, TOAST_VARIANTS.INFO);
+        break;
+      default:
+        break;
+    }
+  }
+
+
+  async handleFindExistingProject() {
+    this.showToast(TOAST_VARIANTS.INFO, "Search projects feature", TOAST_VARIANTS.INFO);
+  }
+
+
+  handleSidebarStepClick(event) {
+    const stepNumber = parseInt(event.detail, 10);
+
+    if (stepNumber === STEPS.PROJECT_SETUP || this.currentProject) {
+      this.currentStep = stepNumber;
+      this.updateUIForStep(this.currentStep);
+    } else {
+      this.showToast(
+        TOAST_VARIANTS.WARNING,
+        MESSAGES.CREATE_PROJECT_FIRST,
+        TOAST_VARIANTS.WARNING
+      );
+    }
+  }
+
+
+  handleProjectSelect(event) {
+    const project = event.detail.project || event.detail;
+    this.currentProject = project;
+    this.currentStep = STEPS.DATA_SOURCE;
+    this.updateUIForStep(this.currentStep);
+  }
+
+
+  handleQuickAction(event) {
+    const actionName = event.detail;
+
+    switch (actionName) {
+      case QUICK_ACTIONS.NEW_PROJECT:
+        this.currentStep = STEPS.PROJECT_SETUP;
+        this.updateUIForStep(this.currentStep);
+        this.showCreatorSection = true;
+        break;
+      case QUICK_ACTIONS.VIEW_LOGS:
+        this.showToast(TOAST_VARIANTS.INFO, MESSAGES.VIEW_LOGS, TOAST_VARIANTS.INFO);
+        break;
+      case QUICK_ACTIONS.EXPORT_DATA:
+        this.showToast(TOAST_VARIANTS.INFO, MESSAGES.EXPORT_COMING_SOON, TOAST_VARIANTS.INFO);
+        break;
+      default:
+        break;
+    }
+  }
+
+  updateUIForStep(stepNumber) {
+    //Show dashboard only for Project Setup step (step 1)
+    if (stepNumber === STEPS.PROJECT_SETUP) {
+      this.showDashboard = true;
+      this.activePage = PAGES.DASHBOARD;
+      this.showCreatorSection = false;
+      this.selectedDataSource = null; //Reset data source selection
+    } else if (stepNumber === STEPS.DATA_SOURCE) {
+      this.selectedDataSource = null;
+      this.showDashboard = false;
+      this.activePage = PAGES.PROJECTS;
+      this.showCreatorSection = false;
+    } else {
+      this.showDashboard = false;
+      this.activePage = PAGES.PROJECTS;
+      this.showCreatorSection = false;
+    }
+  }
 }

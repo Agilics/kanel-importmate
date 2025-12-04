@@ -169,7 +169,7 @@
 
     <!-- Footer actions -->
     <div class="footer-actions">
-      <button type="button" class="btn btn--ghost btn--xl" onclick={fireBack}>
+      <button type="button" class="btn btn--ghost btn--xl" onclick={handleBackClick}>
         <lightning-icon icon-name="utility:back" size="x-small"></lightning-icon>
         <span >Back to Data Source</span>
       </button>
@@ -178,10 +178,14 @@
           <lightning-icon icon-name="utility:save" size="x-small"></lightning-icon>
           <span>Save Data Preview</span>
         </button>-->
-        <button type="button" class="btn btn--primary" onclick={handleGoForMapping} disabled={disableGoForMapping}>
+            <button type="button"
+            class="btn btn--primary"
+            onclick={handleGoForMapping}
+            disabled={disableGoForMapping}>
           <span>Continue to Mapping</span>
           <lightning-icon icon-name="utility:chevronright" size="x-small"></lightning-icon>
-        </button>
+            </button>
+
       </div>
     </div>
 

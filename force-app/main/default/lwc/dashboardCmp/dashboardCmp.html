@@ -1,0 +1,96 @@
+<template>
+    <div class="dashboard-container">
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <template for:each={stats} for:item="stat">
+                <div key={stat.id} class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">{stat.label}</span>
+                        <lightning-icon icon-name={stat.icon} size="small" class="stat-icon"></lightning-icon>
+                    </div>
+                    <div class="stat-value">{stat.value}</div>
+                    <div class="stat-footer">
+                        <span class="stat-change">{stat.change}</span>
+                        <template if:true={stat.changeLabel}>
+                            <span class="stat-change-label">{stat.changeLabel}</span>
+                        </template>
+                    </div>
+                </div>
+            </template>
+        </div>
+
+        <!-- Projects Section -->
+        <div class="projects-section">
+            <div class="section-header">
+                <div class="section-title-wrapper">
+                    <h2 class="section-title">Projects</h2>
+                    <p class="section-subtitle">Manage your data import projects</p>
+                </div>
+                <div class="section-actions">
+                    <div class="search-box">
+                        <lightning-icon icon-name="utility:search" size="x-small" class="search-icon"></lightning-icon>
+                        <input 
+                            type="text" 
+                            placeholder="Search projects..." 
+                            class="search-input"
+                            onchange={handleSearch}
+                        />
+                    </div>
+                    <button class="btn-new-project" onclick={handleNewProject}>
+                        <lightning-icon icon-name="utility:add" size="x-small"></lightning-icon>
+                        New Project
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filter Tabs -->
+            <div class="filter-tabs">
+                <template for:each={filterTabs} for:item="tab">
+                    <button 
+                        key={tab.value} 
+                        class={tab.active} 
+                        data-value={tab.value}
+                        onclick={handleFilterChange}>
+                        {tab.label}
+                    </button>
+                </template>
+            </div>
+
+            <!-- Projects Grid -->
+            <template if:true={isLoading}>
+                <div class="loading-container">
+                    <lightning-spinner alternative-text="Loading projects..." size="medium"></lightning-spinner>
+                </div>
+            </template>
+
+            <template if:true={hasProjects}>
+                <div class="projects-grid">
+                    <template for:each={projects} for:item="project">
+                        <c-project-card 
+                            key={project.Id} 
+                            project={project}
+                            onprojectselect={handleProjectSelect}
+                            onprojectedit={handleProjectEdit}
+                            onprojectdelete={handleProjectDelete}>
+                        </c-project-card>
+                    </template>
+                </div>
+            </template>
+
+            <template if:false={hasProjects}>
+                <template if:false={isLoading}>
+                    <div class="no-projects-container">
+                        <lightning-icon icon-name="custom:custom78" size="large" class="no-projects-icon"></lightning-icon>
+                        <p class="no-projects-message">{noProjectsMessage}</p>
+                        <template if:false={error}>
+                            <button class="btn-new-project" onclick={handleNewProject}>
+                                <lightning-icon icon-name="utility:add" size="x-small"></lightning-icon>
+                                Create Your First Project
+                            </button>
+                        </template>
+                    </div>
+                </template>
+            </template>
+        </div>
+    </div>
+</template>
