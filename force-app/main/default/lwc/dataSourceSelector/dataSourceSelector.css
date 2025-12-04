@@ -1,6 +1,6 @@
 .container {
-  font-family: "Salesforce Sans", Arial, sans-serif;
-  max-width: 100%; 
+  max-width: 1000px;
+  margin: 2rem auto;
   padding: 2rem;
   border-radius: 16px;
   background-color: #ffffff;

@@ -16,9 +16,9 @@ export default class DataSourceSelector extends LightningElement {
   get projectTargetObject() {
     const p = this.currentProject || {};
     return (
-      p.Target_Object__c ||
-      p.TargetObject__c ||
-      p.Target_SObject__c ||
+      p.Target_Object__c ||     
+      p.TargetObject__c ||     
+      p.Target_SObject__c ||   
       ''
     );
   }
@@ -47,76 +47,29 @@ export default class DataSourceSelector extends LightningElement {
     this.dispatchEvent(new CustomEvent('previous'));
   }
 
-  // Proxy du CSV uploader
   handleCsvLoaded(event) {
     this.dispatchEvent(
-      new CustomEvent('dataloaded', {
-        detail: event.detail,
-        bubbles: true,
-        composed: true
-      })
+      new CustomEvent('dataloaded', { detail: event.detail })
     );
   }
 
-  // Proxy du SOQL builder (si utilisé)
   handleSoqlBuilt(event) {
     this.dispatchEvent(
-      new CustomEvent('dataloaded', {
-        detail: event.detail,
-        bubbles: true,
-        composed: true
-      })
+      new CustomEvent('dataloaded', { detail: event.detail })
     );
   }
 
-  // appelé par le CSV uploader
   handleGoToMappingFromCsv(evt) {
-    this.handleGoToMapping(evt);
-  }
-
-  // appelé par le SOQL builder
-  handleStartMappingFromSoql(evt) {
-    this.handleGoToMapping(evt);
-  }
-
-  handleGoToMapping(evt) {
-    const d = evt.detail || {};
-    const columns = Array.isArray(d.columns) ? d.columns : [];
-    const rows = Array.isArray(d.rows) ? d.rows : [];
-    const fileName = (d.fileName || d.sourceLabel || '').trim();
-
-    const totalFromDetail = d.totalRowCount;
-    let totalRowCount = rows.length;
-    if (typeof totalFromDetail === 'number' && Number.isFinite(totalFromDetail)) {
-      totalRowCount = totalFromDetail;
-    }
-
-    // Persist preview dans sessionStorage pour le FieldMapper
-    try {
-      if (columns.length) {
-        window.sessionStorage.setItem(SS_COLS_KEY, columns.join(','));
-      }
-      if (rows.length) {
-        window.sessionStorage.setItem(SS_ROWS_KEY, JSON.stringify(rows));
-      }
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.debug('[DataSourceSelector] sessionStorage unavailable', e);
-    }
+    const headersCsv = Array.isArray(evt?.detail?.columns)
+      ? evt.detail.columns.join(',')
+      : '';
 
     this.dispatchEvent(
       new CustomEvent('startmapping', {
         detail: {
-          source: d.source || this.selectedSource || 'CSV',
-          headersCsv: columns.join(','),
-          rows,
-          totalRowCount,
-          targetObject:
-            this.currentProject?.TargetObject__c ||
-            this.currentProject?.Target_Object__c ||
-            '',
-          projectId: this.currentProject?.Id || d.projectId || '',
-          sourceLabel: fileName
+          source: 'CSV',
+          headersCsv,
+          projectId: this.currentProject?.Id || evt?.detail?.projectId || null
         },
         bubbles: true,
         composed: true
@@ -124,12 +77,59 @@ export default class DataSourceSelector extends LightningElement {
     );
   }
 
-  handleBackToMain() {
-    this.dispatchEvent(
-      new CustomEvent('previous', {
-        bubbles: true,
-        composed: true
-      })
-    );
+  handleStartMappingFromSoql(evt) {
+    this.handleGoToMapping(evt);
   }
+
+  
+ handleGoToMapping(evt) {
+  const d = evt.detail || {};
+  const columns = Array.isArray(d.columns) ? d.columns : [];
+  const rows = Array.isArray(d.rows) ? d.rows : [];
+  const fileName = (d.fileName || d.sourceLabel || '').trim();
+  const totalFromDetail = d.totalRowCount;
+  let totalRowCount = rows.length;
+  if (typeof totalFromDetail === 'number' && Number.isFinite(totalFromDetail)) {
+    totalRowCount = totalFromDetail;
+  }
+
+  try {
+    if (columns.length) {
+      window.sessionStorage.setItem(SS_COLS_KEY, columns.join(','));
+    }
+    if (rows.length) {
+      window.sessionStorage.setItem(SS_ROWS_KEY, JSON.stringify(rows));
+    }
+  } catch (e) {
+    console.debug('[DataSourceSelector] sessionStorage unavailable', e);
+  }
+
+  this.dispatchEvent(
+    new CustomEvent('startmapping', {
+      detail: {
+        headersCsv: columns.join(','),
+        rows,
+        totalRowCount, 
+
+        targetObject:
+          this.currentProject?.TargetObject__c ||
+          this.currentProject?.Target_Object__c ||
+          '',
+
+        projectId: this.currentProject?.Id || '',
+        sourceLabel: fileName
+      },
+      bubbles: true,
+      composed: true
+    })
+  );
+}
+ handleBackToMain() {
+  this.dispatchEvent(
+    new CustomEvent("previous", {
+      bubbles: true,
+      composed: true
+    })
+  );
+}
 }
