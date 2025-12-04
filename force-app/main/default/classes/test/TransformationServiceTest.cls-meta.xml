@@ -1,5 +1,16 @@
+ HEAD
 <?xml version="1.0" encoding="UTF-8" ?>
+=======
+<?xml version="1.0" encoding="UTF-8"?>
+ 416e5954 (Ajout des composants fieldMapping)
 <ApexClass xmlns="http://soap.sforce.com/2006/04/metadata">
     <apiVersion>62.0</apiVersion>
     <status>Active</status>
 </ApexClass>
+ HEAD
+=======
+
+
+
+
+ 416e5954 (Ajout des composants fieldMapping)

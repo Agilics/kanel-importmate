@@ -1,6 +1,11 @@
 .container {
+ HEAD
   font-family: "Salesforce Sans", Arial, sans-serif;
   max-width: 100%; 
+=======
+  max-width: 1000px;
+  margin: 2rem auto;
+ 416e5954 (Ajout des composants fieldMapping)
   padding: 2rem;
   border-radius: 16px;
   background-color: #ffffff;
@@ -31,7 +36,10 @@
   text-align: center;
   margin-bottom: 2rem;
 }
+ HEAD
 
+=======
+ 416e5954 (Ajout des composants fieldMapping)
 .subtitle {
   font-size: 1rem;
   color: #666;
@@ -53,9 +61,15 @@
   justify-content: center;
   gap: 2rem;
   flex-wrap: wrap;
+ HEAD
   margin-bottom: 2rem;
 }
 
+=======
+
+  margin-bottom: 2rem;
+}
+ 416e5954 (Ajout des composants fieldMapping)
 .card {
   background: lightgray;
   border-radius: 12px;
@@ -63,13 +77,24 @@
   width: 300px;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.08);
   cursor: pointer;
-  text-align: center;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  text-align: center;
+  -webkit-border-radius: 12px;
+  -moz-border-radius: 12px;
+  -ms-border-radius: 12px;
+  -o-border-radius: 12px;
+  -webkit-transition: ;
+  -moz-transition: ;
+  -ms-transition: ;
+  -o-transition: ;
 }
-
 .card:hover {
   transform: translateY(-5px);
   box-shadow: 0px 6px 16px rgba(0, 0, 0, 0.15);
+  -webkit-transform: translateY(-5px);
+  -moz-transform: translateY(-5px);
+  -ms-transform: translateY(-5px);
+  -o-transform: translateY(-5px);
 }
 
 .card-icon {
@@ -80,6 +105,7 @@
   background-repeat: no-repeat;
   background-position: center;
 }
+ HEAD
 
 .file-icon {
   background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="black" width="32" height="32" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>');
@@ -88,3 +114,11 @@
 .soql-icon {
   background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="black" width="32" height="32" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="2"/><rect x="4" y="11" width="16" height="2"/><rect x="4" y="17" width="16" height="2"/></svg>');
 }
+=======
+.file-icon {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="black" width="32" height="32" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>');
+}
+.soql-icon {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="black" width="32" height="32" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="2"/><rect x="4" y="11" width="16" height="2"/><rect x="4" y="17" width="16" height="2"/></svg>');
+}
+ 416e5954 (Ajout des composants fieldMapping)

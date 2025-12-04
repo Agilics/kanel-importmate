@@ -18,4 +18,8 @@ public with sharing class SecurityUtils {
     public static Boolean isQueryable(Schema.SObjectType objType) {
         return objType != null && objType.getDescribe().isQueryable();
     }
+ HEAD
 }
+=======
+}
+ 416e5954 (Ajout des composants fieldMapping)

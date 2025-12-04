@@ -1,3 +1,4 @@
+ HEAD
 /**
  * Service class for logging errors and exceptions to the ErrorLog__c object
  */
@@ -16,10 +17,19 @@ public with sharing class ErrorLogService {
             ErrorType__c = errorType,
             ErrorMessage__c = errorMessage,
             StackTrace__c = stackTrace
+=======
+public with sharing class ErrorLogService {
+    public static void logError(Integer lineNumber, String errorType, String errorMessage) {
+        ErrorLog__c error = new ErrorLog__c(
+            LineNumber__c = lineNumber,
+            ErrorType__c = errorType,
+            ErrorMessage__c = errorMessage
+ 416e5954 (Ajout des composants fieldMapping)
         );
         ErrorLogRepository.saveErrorLogs(new List<ErrorLog__c>{error});
     }
 
+ HEAD
     /**
      * Logs an error without stack trace
      * @param lineNumber The line number where the error occurred
@@ -46,4 +56,10 @@ public with sharing class ErrorLogService {
         logError(e.getLineNumber(), e.getTypeName(), e.getMessage(), e.getStackTraceString());
     }
 
+=======
+    public static void logException(Exception e) {
+        // Log the exception
+        logError(e.getLineNumber(), e.getTypeName(), e.getMessage());
+    }
+ 416e5954 (Ajout des composants fieldMapping)
 }

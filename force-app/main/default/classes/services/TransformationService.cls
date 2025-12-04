@@ -140,6 +140,7 @@ public with sharing class TransformationService {
             );
         }
     }
+ HEAD
 
     //récuperer les transformations par l'id du mapping 
     public static List<TransformationRule__c> getRulesByMappingId(String mappingId) {
@@ -158,6 +159,9 @@ public with sharing class TransformationService {
          }
     }
 
+=======
+    
+ 416e5954 (Ajout des composants fieldMapping)
     //résumé des transformations
     public static Map<String, Object> getTransformationSummary(String mappingId) {
         try {

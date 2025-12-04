@@ -1,4 +1,5 @@
 public with sharing class ErrorLogRepository {
+ HEAD
     private static Boolean isInErrorLogging = false;
     
     /**
@@ -15,6 +16,14 @@ public with sharing class ErrorLogRepository {
                 System.debug(LoggingLevel.ERROR, 'Failed to log error: ' + e.getMessage());
             } finally {
                 isInErrorLogging = false;
+=======
+    public static void saveErrorLogs(List<ErrorLog__c> errors) {
+        if (!errors.isEmpty() && SecurityUtils.isCreateable(Schema.ErrorLog__c.SObjectType)) {
+            try {
+                insert errors;
+            } catch (DmlException e) {
+                ErrorLogService.logException(e);
+ 416e5954 (Ajout des composants fieldMapping)
             }
         }
     }

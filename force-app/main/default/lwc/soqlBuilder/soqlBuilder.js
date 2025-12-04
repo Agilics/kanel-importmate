@@ -357,7 +357,7 @@ loadFieldsForObject(objectName) {
       this.showToast(
         "Attention",
         "Veuillez sélectionner au moins un champ.",
-<<<<<<< HEAD
+ HEAD
         "warning"
       );
       return;
@@ -406,7 +406,7 @@ loadFieldsForObject(objectName) {
         "Attention",
         "Veuillez sélectionner au moins un champ.",
 =======
->>>>>>> dfefefbc2af9ece4b175900751a171b4a5cbd597
+ dfefefbc2af9ece4b175900751a171b4a5cbd597
         "warning"
       );
       return;
@@ -414,7 +414,7 @@ loadFieldsForObject(objectName) {
     this.showToast("OK", "La requête semble valide.", "success");
   }
 
-<<<<<<< HEAD
+ HEAD
     const where = this.buildWhereClause();
 
     this.isLoading = true;
@@ -700,7 +700,7 @@ runQuery() {
     return parts.join("");
   }
 
->>>>>>> dfefefbc2af9ece4b175900751a171b4a5cbd597
+ dfefefbc2af9ece4b175900751a171b4a5cbd597
 
   handleBackToMain() {
   this.dispatchEvent(

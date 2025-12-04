@@ -1,3 +1,4 @@
+ HEAD
 <!--
   @description       : 
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
@@ -5,6 +6,8 @@
   @last modified on  : 10-27-2025
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
+=======
+ 416e5954 (Ajout des composants fieldMapping)
 <template>
   <nav class="stepper" aria-label="Progress">
     <template for:each={steps} for:item="step">
@@ -13,6 +16,10 @@
         class={step.cssClass}
         data-step={step.number}
         aria-current={step.ariaCurrent}
+ HEAD
+=======
+        onclick={handleStepClick}
+ 416e5954 (Ajout des composants fieldMapping)
       >
         <a class="step-circle">{step.number}</a>
         <div class="step-label">{step.label}</div>

@@ -2,7 +2,11 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
+ HEAD
  * @last modified on  : 10-14-2025
+=======
+ * @last modified on  : 10-03-2025
+ 416e5954 (Ajout des composants fieldMapping)
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 public with sharing class ScheduleRepository {
@@ -27,7 +31,11 @@ public with sharing class ScheduleRepository {
             delete [SELECT Id FROM Schedule__c WHERE Id = :scheduleId LIMIT 1];
         } catch (DmlException e) {
             ErrorLogService.logException(e);
+ HEAD
             throw new ApplicationException(e.getMessage());
+=======
+            throw e;
+ 416e5954 (Ajout des composants fieldMapping)
         }
     
     }

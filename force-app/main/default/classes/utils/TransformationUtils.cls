@@ -1,3 +1,4 @@
+ HEAD
 /**
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
@@ -5,12 +6,15 @@
  * @last modified on  : 10-24-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
+=======
+ 416e5954 (Ajout des composants fieldMapping)
 public with sharing class TransformationUtils {
 
     public static ITransformationRule getTransformer(TransformationRule__c rule) {
         if (rule.RuleType__c == 'BooleanTransformation') {
             return new BooleanTransformation();
         } else if (rule.RuleType__c == 'EmailMasking') {
+ HEAD
             return new EmailMaskTransformation();
         }else if(rule.RuleType__c == 'LowerCaseTransformation'){
             return new LowerCaseTransformation();
@@ -20,6 +24,9 @@ public with sharing class TransformationUtils {
             return new ConcatenationTransformation();
         }else if(rule.RuleType__c =='PhoneMask'){
             return new PhoneMaskTransformation();
+=======
+            //return new EmailMaskTransformation();
+ 416e5954 (Ajout des composants fieldMapping)
         }
         return null;
     }

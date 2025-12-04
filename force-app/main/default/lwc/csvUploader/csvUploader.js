@@ -201,7 +201,7 @@ parseCSV(csvText) {
     };
   }
 
-<<<<<<< HEAD
+ HEAD
 parseCSV(csvText) {
   const normalize = csvText.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
   const lines = normalize.split('\n');
@@ -337,7 +337,7 @@ parseCSV(csvText) {
 }
 
 
->>>>>>> dfefefbc2af9ece4b175900751a171b4a5cbd597
+ dfefefbc2af9ece4b175900751a171b4a5cbd597
 
   buildRow(values, columns, index) {
     return {

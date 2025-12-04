@@ -13,7 +13,11 @@ public static ImportProject__c saveProject(ImportProject__c project) {
       try {
         upsert project;
         return project;
+ HEAD
       } catch (Exception e) {
+=======
+      } catch (DmlException e) {
+ 416e5954 (Ajout des composants fieldMapping)
         throw new ApplicationException(
           'Erreur lors de la sauvegarde du projet : ' + e.getMessage()
         );
@@ -28,7 +32,11 @@ public static ImportProject__c saveProject(ImportProject__c project) {
   public static ImportProject__c getProjectById(String projectId) {
     if (SecurityUtils.isAccessible(ImportProject__c.SObjectType)) {
       return [
+ HEAD
         SELECT Id, Name, Description__c, TargetObject__c, CreatedDate
+=======
+        SELECT Id, Name, Description__c, TargetObject__c
+ 416e5954 (Ajout des composants fieldMapping)
         FROM ImportProject__c 
         WHERE Id = :projectId  
         LIMIT 1
@@ -92,6 +100,7 @@ public static ImportProject__c saveProject(ImportProject__c project) {
     }
     return new List<ImportProject__c>();
   }
+ HEAD
 
   //get prj with exec stats
   public static List<ImportProject__c> getProjectsWithStats(Integer limitor) {
@@ -146,4 +155,6 @@ public static ImportProject__c saveProject(ImportProject__c project) {
       throw new ApplicationException('Unauthorized! You do not have permission to delete this project.');
     }
   }
+=======
+ 416e5954 (Ajout des composants fieldMapping)
 }

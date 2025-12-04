@@ -85,6 +85,10 @@ public with sharing class ScheduleServiceTest {
         String excpetedFrequency = 'DAILY';
         ScheduleService.FrequencyEnum actual =  ScheduleService.FrequencyEnum.DAILY;
         Test.stopTest();
+ HEAD
+=======
+
+ 416e5954 (Ajout des composants fieldMapping)
         //Assertions
         System.assertEquals(excpetedFrequency, actual.Name());
      }

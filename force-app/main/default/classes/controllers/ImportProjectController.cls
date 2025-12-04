@@ -2,7 +2,11 @@
  * @description       :
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             :
+ HEAD
  * @last modified on  : 10-20-2025
+=======
+ * @last modified on  : 09-09-2025
+ 416e5954 (Ajout des composants fieldMapping)
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
  **/
 public class ImportProjectController {
@@ -45,10 +49,13 @@ public class ImportProjectController {
   public static Boolean doesProjectExist(String name,String targetObject){
     return ProjectService.doesProjectExist(name,targetObject);
   }
+ HEAD
 
    //récupèrer les SObjets compatibles
     @AuraEnabled(cacheable=true)
     public static List<String> getCompatibleSObjects() {
       return ObjectMetadataService.getCompatibleSObjects();
     }
+=======
+ 416e5954 (Ajout des composants fieldMapping)
 }

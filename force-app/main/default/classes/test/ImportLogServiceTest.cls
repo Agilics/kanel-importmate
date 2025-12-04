@@ -28,6 +28,7 @@ public class ImportLogServiceTest {
         }
     }
 
+ HEAD
     // test logImportLogs(List<ImportLog__c> logs)
     @isTest
     static void testLogImportLogs() {
@@ -59,6 +60,8 @@ public class ImportLogServiceTest {
     }
 
 
+=======
+ 416e5954 (Ajout des composants fieldMapping)
     @isTest
     static void testFormatLogsForUI() {
         User admin = TestDataFactory.createAdminUser();

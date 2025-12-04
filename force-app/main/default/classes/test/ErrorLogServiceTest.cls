@@ -2,7 +2,11 @@
 public class ErrorLogServiceTest {
 
     @isTest
+ HEAD
     static void testLogErrorWithoutStackTrace() {
+=======
+    static void testLogError() {
+ 416e5954 (Ajout des composants fieldMapping)
         Integer lineNumber = 10;
         String errorType = 'Custom Error';
         String errorMessage = 'Something went wrong';
@@ -11,11 +15,16 @@ public class ErrorLogServiceTest {
         ErrorLogService.logError(lineNumber, errorType, errorMessage);
         Test.stopTest();
 
+ HEAD
         List<ErrorLog__c> logs = [SELECT Id, LineNumber__c, ErrorType__c, ErrorMessage__c, StackTrace__c FROM ErrorLog__c];
+=======
+        List<ErrorLog__c> logs = [SELECT Id, LineNumber__c, ErrorType__c, ErrorMessage__c FROM ErrorLog__c];
+ 416e5954 (Ajout des composants fieldMapping)
         Assert.areEqual(1, logs.size(), 'One error log should be created');
         Assert.areEqual(lineNumber, logs[0].LineNumber__c);
         Assert.areEqual(errorType, logs[0].ErrorType__c);
         Assert.areEqual(errorMessage, logs[0].ErrorMessage__c);
+ HEAD
         Assert.areEqual(null, logs[0].StackTrace__c, 'StackTrace should be null for 3-parameter overload');
     }
 
@@ -36,6 +45,8 @@ public class ErrorLogServiceTest {
         Assert.areEqual(errorType, logs[0].ErrorType__c);
         Assert.areEqual(errorMessage, logs[0].ErrorMessage__c);
         Assert.areEqual(stackTrace, logs[0].StackTrace__c);
+=======
+ 416e5954 (Ajout des composants fieldMapping)
     }
 
     @isTest
@@ -49,11 +60,16 @@ public class ErrorLogServiceTest {
         }
         Test.stopTest();
 
+ HEAD
         List<ErrorLog__c> logs = [SELECT Id, LineNumber__c, ErrorType__c, ErrorMessage__c, StackTrace__c FROM ErrorLog__c];
+=======
+        List<ErrorLog__c> logs = [SELECT Id, LineNumber__c, ErrorType__c, ErrorMessage__c FROM ErrorLog__c];
+ 416e5954 (Ajout des composants fieldMapping)
         Assert.areEqual(1, logs.size(), 'One error log should be created from exception');
         Assert.areNotEqual(null, logs[0].LineNumber__c);
         Assert.areEqual('System.MathException', logs[0].ErrorType__c);
         Assert.areEqual('Divide by 0', logs[0].ErrorMessage__c);
+ HEAD
         Assert.areNotEqual(null, logs[0].StackTrace__c, 'StackTrace should be populated from exception');
     }
 
@@ -71,5 +87,7 @@ public class ErrorLogServiceTest {
         Assert.areEqual(1, logs.size(), 'One error log should be created from ApplicationException');
         Assert.areEqual('ApplicationException', logs[0].ErrorType__c);
         Assert.areEqual('Test error message', logs[0].ErrorMessage__c);
+=======
+ 416e5954 (Ajout des composants fieldMapping)
     }
 }

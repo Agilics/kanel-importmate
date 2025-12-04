@@ -1,4 +1,10 @@
 import { LightningElement, api, track } from "lwc";
+ HEAD
+=======
+import searchProjetById from "@salesforce/apex/ImportProjectController.searchProjetById";
+// importation du modal
+import DetailView from "c/projectDetailViewComponent";
+ 416e5954 (Ajout des composants fieldMapping)
 
 export default class ImportProjectRecentComponent extends LightningElement {
   //params
@@ -26,6 +32,25 @@ export default class ImportProjectRecentComponent extends LightningElement {
     this.dispatchEvent(new CustomEvent("show"));
   }
 
+ HEAD
+=======
+  //Affichage  détail d'un projet importé via le modal DetailViewComponent
+  async handleShowDetails(event) {
+    //recherche le project via son id
+    searchProjetById({ id: event.target.dataset.id })
+      .then((result) => {
+        return DetailView.open({
+          size: "medium",
+          description: "Détail du projet",
+          project: result
+        });
+      })
+      .catch((err) => {
+        console.error("Erreur Apex:", err);
+      });
+  }
+
+ 416e5954 (Ajout des composants fieldMapping)
   //fermeture la section projets récents et on affiche la section création de projets
   openNewProject() {
     this.showCreatorSection = true;
@@ -33,6 +58,7 @@ export default class ImportProjectRecentComponent extends LightningElement {
 
   //Dispatching vers le composant MainComponent
   // rechercher les projets importés par nom
+ HEAD
   async handleShowSelectProject(event) {
     const projectId = event.target.dataset.id; // on récupère l'id du projet sélectionné
     //bubbles: true permet à l’événement de remonter jusqu’au mainComponent même s’il est dans plusieurs couches de composants
@@ -43,5 +69,9 @@ export default class ImportProjectRecentComponent extends LightningElement {
 
   async handleFindExistingProject() {
     this.dispatchEvent(new CustomEvent("searchproject"));
+=======
+  async handleShowSelectProject() {
+    this.dispatchEvent(new CustomEvent("selectproject"));
+ 416e5954 (Ajout des composants fieldMapping)
   }
 }

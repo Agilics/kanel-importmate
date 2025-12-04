@@ -7,8 +7,17 @@
 **/
 public with sharing class ProjectService {
   // Crée un nouveau projet
+ HEAD
   public static ImportProject__c createProject(String name,String description,String targetObject) {
     /* try {  */
+=======
+  public static ImportProject__c createProject(
+    String name,
+    String description,
+    String targetObject
+  ) {
+    try { 
+ 416e5954 (Ajout des composants fieldMapping)
      ImportProject__c project = new ImportProject__c(
         Name = name,
         Description__c = description,
@@ -16,21 +25,41 @@ public with sharing class ProjectService {
       );
       
       return ProjectRepository.saveProject(project);
+ HEAD
     /* } catch (ApplicationException e) {
       ErrorLogService.logException(e);
       throw e;
     } */
+=======
+    } catch (DmlException e) {
+      ErrorLogService.logException(e);
+      throw new ApplicationException('Erreur lors de la création du projet : ' + e.getMessage());
+    }
+ 416e5954 (Ajout des composants fieldMapping)
    
   }
 
   // Met à jour un projet existant
+ HEAD
   public static void updateProject(String projectId,String name,String description,String targetObject) {
+=======
+  public static void updateProject(
+    String projectId,
+    String name,
+    String description,
+    String targetObject
+  ) {
+ 416e5954 (Ajout des composants fieldMapping)
     ImportProject__c project = projectRepository.getProjectById(projectId);
     try {
       if (project != null) {
         project.Name = name;
         project.Description__c = description;
+ HEAD
         project.TargetObject__c = targetObject; 
+=======
+        project.TargetObject__c = targetObject;
+ 416e5954 (Ajout des composants fieldMapping)
         projectRepository.saveProject(project);
       }
     } catch (DmlException e) {
@@ -57,7 +86,14 @@ public with sharing class ProjectService {
   public static List<ImportProject__c> getProjectsByName(String keyword) {
    
     try {
+ HEAD
       return ProjectRepository.getProjectsByName(keyword);
+=======
+     if (String.isBlank(keyword)) {
+        return ProjectRepository.getAllProjects();
+     }
+    return ProjectRepository.getProjectsByName(keyword);
+ 416e5954 (Ajout des composants fieldMapping)
     } catch (ApplicationException e) {
       ErrorLogService.logException(e);
       throw new ApplicationException(e.getMessage());
@@ -105,6 +141,7 @@ public with sharing class ProjectService {
   public static Boolean validateTargetObject(String targetObject) {
     return Schema.getGlobalDescribe().containsKey(targetObject);
   }
+ HEAD
 
   // Récupère les projets avec leurs statistiques d'exécution
   public static List<ImportProject__c> getProjectsWithStats(Integer limitor) {
@@ -209,3 +246,6 @@ public with sharing class ProjectService {
     }
   }
 }
+=======
+} 
+ 416e5954 (Ajout des composants fieldMapping)

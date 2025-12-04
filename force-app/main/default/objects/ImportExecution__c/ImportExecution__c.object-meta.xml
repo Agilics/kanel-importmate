@@ -1,4 +1,8 @@
+ HEAD
 <?xml version="1.0" encoding="UTF-8" ?>
+=======
+<?xml version="1.0" encoding="UTF-8"?>
+ 416e5954 (Ajout des composants fieldMapping)
 <CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
     <actionOverrides>
         <actionName>Accept</actionName>
@@ -160,7 +164,11 @@
         <type>AutoNumber</type>
     </nameField>
     <pluralLabel>Import Executions</pluralLabel>
+ HEAD
     <searchLayouts />
+=======
+    <searchLayouts></searchLayouts>
+ 416e5954 (Ajout des composants fieldMapping)
     <sharingModel>ControlledByParent</sharingModel>
     <visibility>Public</visibility>
 </CustomObject>

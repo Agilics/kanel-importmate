@@ -8,7 +8,11 @@
 @isTest
 public with sharing class ProjectServiceTest {
   @TestSetup
+ HEAD
   private static void setupData() {
+=======
+  static void setupData() {
+ 416e5954 (Ajout des composants fieldMapping)
     // Création de données de test
     List<ImportProject__c> projects = new List<ImportProject__c>();
     for (Integer i = 0; i < 5; i++) {
@@ -25,7 +29,11 @@ public with sharing class ProjectServiceTest {
 
   // Test négatif : limiter < 0 -> liste vide
   @isTest
+ HEAD
   private static void testRecentsProjectsNegativeLimitor() {
+=======
+  static void testRecentsProjectsNegativeLimitor() {
+ 416e5954 (Ajout des composants fieldMapping)
     // Performer le teste
     Test.startTest();
   
@@ -42,7 +50,11 @@ public with sharing class ProjectServiceTest {
 
   // Test positif : limiter = 3 -> 3 projets
   @isTest
+ HEAD
   private static void testRecentsProjectsWithValidLimitor() {
+=======
+  static void testRecentsProjectsWithValidLimitor() {
+ 416e5954 (Ajout des composants fieldMapping)
     // Test data setup
     // Creation projets Importés
     // Performer le teste
@@ -67,7 +79,11 @@ public with sharing class ProjectServiceTest {
 
   // Test de la méthode permettant la récupération de tous les projets
   @isTest
+ HEAD
   private static void testGetAllProjects() {
+=======
+  static void testGetAllProjects() {
+ 416e5954 (Ajout des composants fieldMapping)
   
     Integer expected = 5;
     //excecution du test
@@ -92,7 +108,11 @@ public with sharing class ProjectServiceTest {
     // insertion au niveau de la base
     ImportProject__c result = ProjectService.createProject(
       'Lead Import',
+ HEAD
       'Lead', 
+=======
+      'Lead',
+ 416e5954 (Ajout des composants fieldMapping)
       'Descr'
     );
 
@@ -102,6 +122,7 @@ public with sharing class ProjectServiceTest {
     System.assertNotEquals(null, result, 'Insérer avec success');
   }
 
+ HEAD
   @IsTest
   static void testSaveProjectFail() {
     //execution du test
@@ -118,6 +139,11 @@ public with sharing class ProjectServiceTest {
   //teste de la méthode recherche par nom de projets importés
   @IsTest
   private static void testSearchProjectName() {
+=======
+  //teste de la méthode recherche par nom de projets importés
+  @IsTest
+  static void testSearchProjectName() {
+ 416e5954 (Ajout des composants fieldMapping)
     // valeur du nom de l'objet  attendu
     String expectedTargetObject = 'Account import';
 
@@ -136,6 +162,7 @@ public with sharing class ProjectServiceTest {
     );
     Test.stopTest();
 
+ HEAD
     //Vérification des assertions 
     System.assertNotEquals(null, results, 'Resultat non null');
     System.assertEquals(expectedTargetObject, results[0].Name, 'Success');
@@ -148,12 +175,21 @@ public with sharing class ProjectServiceTest {
 
     //Vérification des assertions
     System.assertNotEquals(null, results, 'Resultat non null');
+=======
+    //Vérification des assertions
+    System.assertNotEquals(null, results, 'Resultat non null');
+    System.assertEquals(expectedTargetObject, results[0].Name, 'Success');
+ 416e5954 (Ajout des composants fieldMapping)
   }
 
 
   //Tester la Validité l'objet cible Salesforce
   @IsTest
+ HEAD
   private static void testValidateTargetObject() {
+=======
+  static void testValidateTargetObject() {
+ 416e5954 (Ajout des composants fieldMapping)
 
     // Execution du test
     Test.startTest();
@@ -167,7 +203,11 @@ public with sharing class ProjectServiceTest {
 
   //Tester la mise à jour d'un projet importé
   @isTest
+ HEAD
   private static void testForUpdateProject() {
+=======
+  static void testForUpdateProject() {
+ 416e5954 (Ajout des composants fieldMapping)
     String expectedName = 'Lead Import';
     String expectedDescription = 'Describe Lead import';
     String expectedTargetObject = 'Lead';
@@ -215,7 +255,11 @@ public with sharing class ProjectServiceTest {
 
   //Tester la récupèration des données par l'ID
   @IsTest
+ HEAD
   private static void testGetProjectById() {
+=======
+  static void testGetProjectById() {
+ 416e5954 (Ajout des composants fieldMapping)
     Test.startTest();
     String expectedName = 'Lead Import';
     String expectedTargetObject = 'Lead';
@@ -243,7 +287,11 @@ public with sharing class ProjectServiceTest {
 
 
   @IsTest
+ HEAD
   private static void testdoesProjectExist() {
+=======
+  static void testdoesProjectExist() {
+ 416e5954 (Ajout des composants fieldMapping)
     // expected values
     Boolean expectedFalse = false;
     Boolean expectedTrue = true;   
@@ -274,6 +322,7 @@ public with sharing class ProjectServiceTest {
    //  System.assertEquals(expectedFalse, isProject);
     // System.assertNotEquals(expectedFalse, actual);
   }
+ HEAD
 
   @IsTest
   private static void testdoesProjectExistFailure() {
@@ -408,4 +457,6 @@ public with sharing class ProjectServiceTest {
     }
     Test.stopTest();
   }
+=======
+ 416e5954 (Ajout des composants fieldMapping)
 }

@@ -5,8 +5,13 @@
     </template>
 
     <p class="slds-text-color_weak slds-m-bottom_small">
+ HEAD
       Project: <strong>{projectId}</strong> &nbsp;•&nbsp; Version:
       <strong>{version}</strong>
+=======
+      Project: <strong>{projectId}</strong>
+      &nbsp;•&nbsp; Version: <strong>{version}</strong>
+ 416e5954 (Ajout des composants fieldMapping)
       <template if:true={objectApiName}>
         &nbsp;•&nbsp; Object: <strong>{objectApiName}</strong>
       </template>
@@ -42,6 +47,7 @@
     </template>
 
     <template if:false={hasRows}>
+ HEAD
       <div class="slds-text-color_weak">
         No mappings found for this Project/Version.
       </div>
@@ -55,3 +61,13 @@
     </div>
   </div>
 </template>
+=======
+      <div class="slds-text-color_weak">No mappings found for this Project/Version.</div>
+    </template>
+
+    <div class="slds-m-top_medium">
+      <lightning-button label="Back to mapping" onclick={handleBack}></lightning-button>
+    </div>
+  </div>
+</template>
+ 416e5954 (Ajout des composants fieldMapping)

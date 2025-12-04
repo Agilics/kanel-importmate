@@ -1,7 +1,11 @@
 import { LightningElement, api, track } from "lwc";
 
 //import methods from Controller
+ HEAD
 import getCompatibleSObjects from "@salesforce/apex/ImportProjectController.getCompatibleSObjects";
+=======
+import getCompatibleSObjects from "@salesforce/apex/ObjectMetadataController.getCompatibleSObjects";
+ 416e5954 (Ajout des composants fieldMapping)
 
 export default class ProjectCreatorComponent extends LightningElement {
   @api projectName = "";

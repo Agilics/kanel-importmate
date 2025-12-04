@@ -6,7 +6,11 @@
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 @IsTest
+ HEAD
 private with sharing class ProjectRepositoryTest {
+=======
+private class ProjectRepositoryTest {
+ 416e5954 (Ajout des composants fieldMapping)
 
     @TestSetup
     static void setupTestData() {
@@ -114,6 +118,7 @@ private with sharing class ProjectRepositoryTest {
        
      }
 
+ HEAD
     @IsTest
     static void testGetAllProjectsForStats() {
         User admin = TestDataFactory.createAdminUser();
@@ -133,6 +138,8 @@ private with sharing class ProjectRepositoryTest {
         }
     }
 
+=======
+ 416e5954 (Ajout des composants fieldMapping)
     //Tester la récupération d'un projet par le nom
     @IsTest
     static void testGetProjectsByName() {
@@ -188,6 +195,7 @@ private with sharing class ProjectRepositoryTest {
         }
     }
 
+ HEAD
     @IsTest
     static void testGetProjectsWithStats() {
         User admin = TestDataFactory.createAdminUser();
@@ -237,3 +245,7 @@ private with sharing class ProjectRepositoryTest {
     }
 
 }
+=======
+
+}
+ 416e5954 (Ajout des composants fieldMapping)

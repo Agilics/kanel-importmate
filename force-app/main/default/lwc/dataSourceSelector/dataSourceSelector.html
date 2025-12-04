@@ -1,21 +1,7 @@
-<!--
-  @description       : 
-  @author            : khalidousowba
-  @group             : 
-  @last modified on  : 11-27-2025
-  @last modified by  : khalidousowba
--->
 <template>
   <div class="container">
-    <!-- Selected project banner -->
-    <template if:true={currentProject}>
-      <h1 class="slds-text-align_center">
-        Selected project: {projectName}
-      </h1>
-      <br />
-    </template>
+    <!-- Selection -->
 
-    <!-- Source selection -->
     <template if:true={showSelection}>
       <h2 class="section-title">Data source</h2>
       <div class="cards">
@@ -35,20 +21,25 @@
 
     <!-- CSV -->
     <template if:true={showCSV}>
+ HEAD
       <c-csv-uploader
           current-project={currentProject}
           oncsvloaded={handleCsvLoaded}
-<<<<<<< HEAD
+ HEAD
           ongotomapping={handleGoToMappingFromCsv}
 =======
           ongotomapping={handleGoToMapping}
->>>>>>> dfefefbc2af9ece4b175900751a171b4a5cbd597
+ dfefefbc2af9ece4b175900751a171b4a5cbd597
       >
       </c-csv-uploader>
+=======
+      <c-csv-uploader oncsvloaded={handleCsvLoaded}></c-csv-uploader>
+ 416e5954 (Ajout des composants fieldMapping)
     </template>
 
     <!-- SOQL -->
     <template if:true={showSOQL}>
+ HEAD
     <c-soql-builder
         project-target-object={projectTargetObject}
         onsoqlbuilt={handleSoqlBuilt}
@@ -58,4 +49,18 @@
     </template>
   </div>
    <c-backbutton onback={handleBackToMain}></c-backbutton>
+=======
+      <c-soql-builder onsoqlbuilt={handleSoqlBuilt}></c-soql-builder>
+    </template>
+
+    <!-- recent's project-->
+    <template lwc:if={recentProject}>
+      <h1>Select project ID: {recentProject.Id}</h1>
+      <br />
+    </template>
+
+    <!-- Back button -->
+    <c-backbutton onback={handleBackToSelection}> </c-backbutton>
+  </div>
+ 416e5954 (Ajout des composants fieldMapping)
 </template>

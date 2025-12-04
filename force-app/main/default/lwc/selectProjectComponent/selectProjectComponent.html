@@ -1,3 +1,4 @@
+ HEAD
 <!--
   @description       : 
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
@@ -5,6 +6,8 @@
   @last modified on  : 10-27-2025
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
+=======
+ 416e5954 (Ajout des composants fieldMapping)
 <template>
   <lightning-modal-header label={title}></lightning-modal-header>
 
@@ -32,7 +35,11 @@
             onchange={handleSearch}
           ></lightning-input>
         </div>
+ HEAD
         <!-- Card pour sélectionner les projet -->
+=======
+        <!-- Card pour les détails du projet -->
+ 416e5954 (Ajout des composants fieldMapping)
         <template if:true={projects}>
           <lightning-card>
             <table class="styled-table">
@@ -72,7 +79,11 @@
                       <lightning-button
                         onclick={handleShowDetailProject}
                         variant="brand"
+ HEAD
                         label="Select"
+=======
+                        label="Details"
+ 416e5954 (Ajout des composants fieldMapping)
                         icon-name="action:preview"
                         data-id={project.Id}
                       >

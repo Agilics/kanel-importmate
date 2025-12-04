@@ -3,8 +3,13 @@
     <fullName>TargetObject__c</fullName>
     <externalId>false</externalId>
     <label>Target Object</label>
+ HEAD
     <length>30</length>
     <required>true</required>
+=======
+    <length>255</length>
+    <required>false</required>
+ 416e5954 (Ajout des composants fieldMapping)
     <trackTrending>false</trackTrending>
     <type>Text</type>
     <unique>false</unique>

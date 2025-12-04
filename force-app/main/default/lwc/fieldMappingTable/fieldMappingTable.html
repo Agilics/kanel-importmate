@@ -1,5 +1,6 @@
 <template>
   <div class="slds-p-around_medium">
+ HEAD
     <!-- Status bar -->
     <div
       class="slds-notify slds-notify_alert slds-theme_alert-texture slds-theme_info slds-m-bottom_small"
@@ -9,6 +10,13 @@
       <span class="slds-icon_container slds-m-right_x-small" title="info"
         >ℹ️</span
       >
+=======
+
+    <!-- Status bar -->
+    <div class="slds-notify slds-notify_alert slds-theme_alert-texture slds-theme_info slds-m-bottom_small" role="status">
+      <span class="slds-assistive-text">info</span>
+      <span class="slds-icon_container slds-m-right_x-small" title="info">ℹ️</span>
+ 416e5954 (Ajout des composants fieldMapping)
       <h2>{statusText}</h2>
     </div>
 
@@ -26,8 +34,12 @@
           value={selectedObjectApiName}
           options={objectOptions}
           placeholder="Select an object"
+ HEAD
           onchange={handleObjectPick}
         >
+=======
+          onchange={handleObjectPick}>
+ 416e5954 (Ajout des composants fieldMapping)
         </lightning-combobox>
       </div>
 
@@ -38,8 +50,12 @@
           value={selectedProjectId}
           options={projectOptions}
           placeholder="Select a project"
+ HEAD
           onchange={handleProjectPick}
         >
+=======
+          onchange={handleProjectPick}>
+ 416e5954 (Ajout des composants fieldMapping)
         </lightning-combobox>
       </div>
 
@@ -48,8 +64,12 @@
           type="text"
           label="Version"
           value={selectedVersion}
+ HEAD
           onchange={handleVersionChange}
         >
+=======
+          onchange={handleVersionChange}>
+ 416e5954 (Ajout des composants fieldMapping)
         </lightning-input>
       </div>
     </div>
@@ -66,7 +86,11 @@
             <tr>
               <th scope="col">CSV Column</th>
               <th scope="col">Target Field</th>
+ HEAD
               <th scope="col" style="width: 110px">Lookup?</th>
+=======
+              <th scope="col" style="width:110px;">Lookup?</th>
+ 416e5954 (Ajout des composants fieldMapping)
               <th scope="col">Lookup Object</th>
               <th scope="col">Match Field</th>
             </tr>
@@ -82,8 +106,12 @@
                     value={r.targetField}
                     options={fieldOptions}
                     placeholder="-- none --"
+ HEAD
                     onchange={handleFieldPick}
                   >
+=======
+                    onchange={handleFieldPick}>
+ 416e5954 (Ajout des composants fieldMapping)
                   </lightning-combobox>
                 </td>
 
@@ -92,8 +120,12 @@
                     type="checkbox"
                     data-key={r.key}
                     checked={r.isLookup}
+ HEAD
                     onchange={handleLookupToggle}
                   >
+=======
+                    onchange={handleLookupToggle}>
+ 416e5954 (Ajout des composants fieldMapping)
                   </lightning-input>
                 </td>
 
@@ -104,8 +136,12 @@
                     options={objectOptions}
                     placeholder="Select object"
                     disabled={r.disabledLookup}
+ HEAD
                     onchange={handleLookupObjectPick}
                   >
+=======
+                    onchange={handleLookupObjectPick}>
+ 416e5954 (Ajout des composants fieldMapping)
                   </lightning-combobox>
                 </td>
 
@@ -116,8 +152,12 @@
                     options={r.lookupMatchFieldOptions}
                     placeholder="Field on lookup object"
                     disabled={r.disabledLookup}
+ HEAD
                     onchange={handleLookupMatchFieldPick}
                   >
+=======
+                    onchange={handleLookupMatchFieldPick}>
+ 416e5954 (Ajout des composants fieldMapping)
                   </lightning-combobox>
                 </td>
               </tr>
@@ -131,24 +171,39 @@
           variant="brand"
           label="Save mappings"
           onclick={handleSave}
+ HEAD
           disabled={isSaveDisabled}
         >
+=======
+          disabled={isSaveDisabled}>
+ 416e5954 (Ajout des composants fieldMapping)
         </lightning-button>
 
         <lightning-button
           class="slds-m-left_small"
           label="Load existing"
           onclick={handleLoadExisting}
+ HEAD
           disabled={disableLoad}
         >
+=======
+          disabled={disableLoad}>
+ 416e5954 (Ajout des composants fieldMapping)
         </lightning-button>
       </div>
     </template>
 
     <template if:false={hasColumns}>
+ HEAD
       <p class="slds-text-color_weak">
         Upload a CSV (or provide columns) to start mapping.
       </p>
     </template>
   </div>
 </template>
+=======
+      <p class="slds-text-color_weak">Upload a CSV (or provide columns) to start mapping.</p>
+    </template>
+  </div>
+</template>
+ 416e5954 (Ajout des composants fieldMapping)

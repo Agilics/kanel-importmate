@@ -1,3 +1,4 @@
+ HEAD
 /**
     Description : Service class for managing field mappings between source data and Salesforce objects.
 
@@ -13,6 +14,14 @@
 public with sharing class FieldMappingService {
 
     private static void validateRowsAgainstSchema(String targetSObjectApiName,List<FieldMappingRepository.FieldMappingDTO> mappingRowDtos) {
+=======
+public with sharing class FieldMappingService {
+
+    private static void validateRowsAgainstSchema(
+        String targetSObjectApiName,
+        List<FieldMappingRepository.FieldMappingDTO> mappingRowDtos
+    ) {
+ 416e5954 (Ajout des composants fieldMapping)
         if (String.isBlank(targetSObjectApiName)) {
             throw new ApplicationException('Target object is required.');
         }
@@ -46,7 +55,14 @@ public with sharing class FieldMappingService {
     }
 
    
+ HEAD
     public static List<FieldMapping__c> saveMappings(String targetSObjectApiName,List<FieldMappingRepository.FieldMappingDTO> inputMappingRowDtos) {
+=======
+    public static List<FieldMapping__c> saveMappings(
+        String targetSObjectApiName,
+        List<FieldMappingRepository.FieldMappingDTO> inputMappingRowDtos
+    ) {
+ 416e5954 (Ajout des composants fieldMapping)
         List<FieldMappingRepository.FieldMappingDTO> normalizedMappingRowDtos = new List<FieldMappingRepository.FieldMappingDTO>();
 
         if (inputMappingRowDtos != null) {
@@ -83,7 +99,14 @@ public with sharing class FieldMappingService {
         return FieldMappingRepository.upsertMappings(normalizedMappingRowDtos);
     }
 
+ HEAD
     public static List<FieldMappingRepository.FieldMappingDTO> getMappingsByProject(Id projectId,String version) {
+=======
+    public static List<FieldMappingRepository.FieldMappingDTO> getMappingsByProject(
+        Id projectId,
+        String version
+    ) {
+ 416e5954 (Ajout des composants fieldMapping)
         List<FieldMapping__c> mappingRecords = FieldMappingRepository.getByProject(projectId, version);
         return toDtos(mappingRecords);
     }
@@ -93,11 +116,14 @@ public with sharing class FieldMappingService {
         return toDtos(mappingRecords);
     }
 
+ HEAD
     // Overloaded method to return FieldMapping__c records directly
     public static List<FieldMapping__c> getAllMappingsByProject(String projectId) {
         return FieldMappingRepository.getAllByProject(projectId);
     }
 
+=======
+ 416e5954 (Ajout des composants fieldMapping)
     private static List<FieldMappingRepository.FieldMappingDTO> toDtos(List<FieldMapping__c> mappingRecords) {
         List<FieldMappingRepository.FieldMappingDTO> mappingRowDtos = new List<FieldMappingRepository.FieldMappingDTO>();
         if (mappingRecords == null) return mappingRowDtos;

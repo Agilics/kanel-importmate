@@ -1,3 +1,4 @@
+ HEAD
 /**
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
@@ -5,6 +6,8 @@
  * @last modified on  : 10-22-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
+=======
+ 416e5954 (Ajout des composants fieldMapping)
 @isTest
 public class TestDataFactory {
     public static User createAdminUser() {
@@ -172,6 +175,7 @@ public class TestDataFactory {
                 WHERE Id = :rule.Id];
     }
 
+ HEAD
      public static TransformationRule__c createTransformationRule(Id projectId, Id fieldMappingId, String targetType,  String targetValue,String type) {
         TransformationRule__c rule = new TransformationRule__c(
             Project__c = projectId,
@@ -188,6 +192,8 @@ public class TestDataFactory {
                 WHERE Id = :rule.Id];
     }
 
+=======
+ 416e5954 (Ajout des composants fieldMapping)
     public static TransformationRule__c createBooleanTransformationRule(Id projectId, Id fieldMappingId, List<String> trueValues, List<String> falseValues, String targetValue, String type) {
         List<Object> trueValuesObj = new List<Object>();
         List<Object> falseValuesObj = new List<Object>();
@@ -355,6 +361,7 @@ public class TestDataFactory {
         
         return rows;
     }
+ HEAD
     
     /**
      * Create test for Concatenation Transformation
@@ -374,6 +381,9 @@ public class TestDataFactory {
     
 
     }
+=======
+
+ 416e5954 (Ajout des composants fieldMapping)
     /**
      * Creates test rows with valid/invalid data
      */
@@ -469,9 +479,12 @@ public class TestDataFactory {
         return testData;
     }
 
+ HEAD
 
   
 
+=======
+ 416e5954 (Ajout des composants fieldMapping)
     /**
      * Creates transformation rules for testing
      */
@@ -524,4 +537,8 @@ public class TestDataFactory {
         return rulesMap;
     }
 
+ HEAD
 }
+=======
+}
+ 416e5954 (Ajout des composants fieldMapping)

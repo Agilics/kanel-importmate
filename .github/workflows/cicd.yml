@@ -91,8 +91,18 @@ jobs:
           npm install
           echo "✅ package-lock.json synchronisé"
       - run: npm ci
+ HEAD
       # - run: npm run lint
       # - run: npm run test:unit:coverage
+=======
+ HEAD
+      - run: npm run lint
+      #- run: npm run test:unit:coverage
+=======
+      # - run: npm run lint
+      # - run: npm run test:unit:coverage
+ 421a3793acb5db379f314594e67589ab8449c07e
+ 416e5954 (Ajout des composants fieldMapping)
       #- run: npm run prettier:verify
       - name: Install Salesforce CLI
         run: npm install -g @salesforce/cli

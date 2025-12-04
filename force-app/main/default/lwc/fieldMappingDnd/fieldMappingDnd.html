@@ -1,0 +1,120 @@
+<template>
+  <div class="slds-grid slds-wrap slds-gutters">
+    <!-- LEFT: Source columns (draggable chips) -->
+    <div class="slds-col slds-size_1-of-1 slds-large-size_4-of-12">
+      <article class="slds-card">
+        <div class="slds-card__header slds-grid">
+          <header class="slds-media slds-media_center slds-has-flexi-truncate">
+            <div class="slds-media__figure">
+              <lightning-icon icon-name="utility:drag_and_drop" size="small"></lightning-icon>
+            </div>
+            <div class="slds-media__body">
+              <h2 class="slds-card__header-title slds-truncate">Source Columns</h2>
+            </div>
+          </header>
+        </div>
+
+        <div class="slds-card__body slds-card__body_inner">
+          <div
+            class="source-list"
+            ondragover={handleSourceListDragOver}
+            ondrop={handleSourceListDrop}
+            data-dropzone="unassign"
+          >
+            <template if:true={hasAvailableSources}>
+              <template for:each={availableSources} for:item="c">
+                <span
+                  key={c.key}
+                  class="pill draggable"
+                  draggable="true"
+                  data-source-key={c.key}
+                  ondragstart={handleDragStart}
+                  onkeydown={handlePillKeydown}
+                  tabindex="0"
+                  aria-grabbed="false"
+                  title={c.label}
+                >
+                  {c.label}
+                </span>
+              </template>
+            </template>
+
+            <template if:false={hasAvailableSources}>
+              <p class="slds-text-color_weak slds-m-top_small">
+                All columns are mapped. Drag here to unassign.
+              </p>
+            </template>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <!-- RIGHT: Target fields with drop zones -->
+    <div class="slds-col slds-size_1-of-1 slds-large-size_8-of-12">
+      <article class="slds-card">
+        <div class="slds-card__header slds-grid">
+          <header class="slds-media slds-media_center slds-has-flexi-truncate">
+            <div class="slds-media__figure">
+              <lightning-icon icon-name="utility:table" size="small"></lightning-icon>
+            </div>
+            <div class="slds-media__body">
+              <h2 class="slds-card__header-title slds-truncate">Target Fields</h2>
+            </div>
+          </header>
+        </div>
+
+        <div class="slds-card__body slds-card__body_inner">
+          <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+            <thead>
+              <tr>
+                <th scope="col">Target Field</th>
+                <th scope="col" style="width:50%;">Mapped Source (drop here)</th>
+                <th scope="col" class="slds-text-align_right">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <template for:each={targetRows} for:item="row">
+                <tr key={row.apiName}>
+                  <th scope="row">
+                    <div class="slds-truncate" title={row.label}>{row.label}</div>
+                    <div class="slds-text-color_weak slds-text-body_small">{row.apiName}</div>
+                  </th>
+                  <td>
+                    <div
+                      class={row.dropClass}
+                      data-dropzone="target"
+                      data-target-api={row.apiName}
+                      ondragover={handleDropZoneDragOver}
+                      ondragleave={handleDropZoneDragLeave}
+                      ondrop={handleDropOnTarget}
+                      tabindex="0"
+                      onkeydown={handleDropZoneKeydown}
+                      aria-label={row.ariaLabel}
+                    >
+                      <template if:true={row.currentSource}>
+                        <span class="pill assigned">{row.currentSource.label}</span>
+                      </template>
+                      <template if:false={row.currentSource}>
+                        <span class="placeholder">Drop source column here</span>
+                      </template>
+                    </div>
+                  </td>
+                  <td class="slds-text-align_right">
+                    <lightning-button-icon
+                      icon-name="utility:close"
+                      alternative-text="Unassign"
+                      title="Unassign"
+                      onclick={handleUnassign}
+                      data-target-api={row.apiName}
+                      variant="border-filled"
+                    ></lightning-button-icon>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+      </article>
+    </div>
+  </div>
+</template>

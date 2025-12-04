@@ -538,3 +538,7 @@ public class TransformationServiceTest {
         Test.stopTest();
     }
 }
+ HEAD
+=======
+
+ 416e5954 (Ajout des composants fieldMapping)

@@ -7,4 +7,8 @@
          <target>lightning__RecordPage</target>
         <target>lightning__HomePage</target>
     </targets>
+ HEAD
 </LightningComponentBundle>
+=======
+</LightningComponentBundle>
+ 416e5954 (Ajout des composants fieldMapping)
