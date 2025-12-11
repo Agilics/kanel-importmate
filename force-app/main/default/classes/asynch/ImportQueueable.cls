@@ -1,3 +1,10 @@
+/**
+ * @description       : 
+ * @author            : khalidousowba
+ * @group             : 
+ * @last modified on  : 12-11-2025
+ * @last modified by  : khalidousowba
+**/
 public with sharing class ImportQueueable implements Queueable, Database.AllowsCallouts {
     private String projectId;
     private List<Map<String, String>> csvData;
@@ -69,7 +76,7 @@ public with sharing class ImportQueueable implements Queueable, Database.AllowsC
             }
             failedRecords += uniqueFailedLines.size();
 
-            List<Map<String, Object>> lookupInfoList = new List<Map<String, Object>>();
+            Map<Integer, List<Map<String, Object>>> lookupNeedsByRow = new Map<Integer, List<Map<String, Object>>>();
 
             for (Integer i = 0; i < currentBatch.size(); i++) {
                 if (errorRowIndices.contains(i)) continue;
@@ -79,20 +86,31 @@ public with sharing class ImportQueueable implements Queueable, Database.AllowsC
 
                 try {
                     SObject record = ObjectMetadataService.getGlobalDescribeMap().get(targetObject).newSObject();
-                    Map<String, Object> recordLookupInfo = new Map<String, Object>();
+
+                    // Apply all transformations for the entire row once (same as validation phase)
+                    Map<String, String> transformedRow = TransformationService.applyTransformationsForRow(row, mappings, rulesByMappingId);
+
+                    List<Map<String, Object>> lookupDetailsForRecord = new List<Map<String, Object>>();
 
                     for (FieldMapping__c mapping : mappings) {
                         String sourceValue = ImportUtils.getValueFromRow(row, mapping.SourceColumn__c);
                         String targetField = mapping.TargetField__c;
 
-                        if (mapping.IsLookup__c && String.isNotBlank(sourceValue)) {
-                            recordLookupInfo.put('targetField', targetField);
-                            recordLookupInfo.put('lookupValue', sourceValue);
-                            recordLookupInfo.put('lookupObject', mapping.LookupObject__c);
-                            recordLookupInfo.put('lookupField', mapping.LookupMatchField__c);
+                        if (mapping.IsLookup__c) {
+                            String transformedValue = getProcessedValue(transformedRow, targetField, mapping.SourceColumn__c, sourceValue);
+
+                            if (String.isNotBlank(transformedValue)) {
+                                Map<String, Object> lookupDetails = new Map<String, Object>{
+                                    'lookupObject' => mapping.LookupObject__c,
+                                    'lookupField' => mapping.LookupMatchField__c,
+                                    'lookupValue' => transformedValue,
+                                    'targetField' => targetField
+                                };
+                                lookupDetailsForRecord.add(lookupDetails);
+                            }
                         } else {
-                            Map<String, String> transformedRow = TransformationService.applyTransformations(mapping.Id, row, rulesByMappingId);
-                            String transformedValue = getTransformedValue(transformedRow, targetField, mapping.SourceColumn__c, sourceValue);
+                            // Use transformed value from the fully transformed row
+                            String transformedValue = getProcessedValue(transformedRow, targetField, mapping.SourceColumn__c, sourceValue);
 
                             if (String.isNotBlank(transformedValue)) {
                                 record.put(targetField, transformedValue);
@@ -101,7 +119,9 @@ public with sharing class ImportQueueable implements Queueable, Database.AllowsC
                     }
 
                     recordsToInsert.add(record);
-                    lookupInfoList.add(recordLookupInfo);
+                    if (!lookupDetailsForRecord.isEmpty()) {
+                        lookupNeedsByRow.put(lineNumber, lookupDetailsForRecord);
+                    }
 
                     if (Math.mod(i + 1, 50) == 0) {
                         PublisherService.publishBatchProgress(executionId, i + 1, csvData.size(), Constants.EXECUTION_STATUS_IN_PROGRESS);
@@ -171,9 +191,7 @@ public with sharing class ImportQueueable implements Queueable, Database.AllowsC
                     failedRecords++;
                 
                 } catch (Exception e) {
-                    //Exception générique
-                    //debug exception
-                    System.debug('Unexpected error processing line ' + lineNumber + ': ' + e.getMessage());
+                    // Generic exception
                     errors.add(ValidationUtils.createValidationError(
                         executionId, 
                         lineNumber, 
@@ -185,16 +203,101 @@ public with sharing class ImportQueueable implements Queueable, Database.AllowsC
                 }
             }
 
-            //Resolve lookups in bulk before inserting records
-            if (!recordsToInsert.isEmpty()) {
-                ImportUtils.resolveLookupsInBulk(recordsToInsert, lookupInfoList);
+            if (!recordsToInsert.isEmpty() && !lookupNeedsByRow.isEmpty()) {
+                Map<String, Map<String, Set<String>>> lookupGroupsByTypeAndField = new Map<String, Map<String, Set<String>>>();
+                Map<String, Map<String, Map<String, Id>>> foundIdsByTypeAndField = new Map<String, Map<String, Map<String, Id>>>();
+
+                for (List<Map<String, Object>> lookupsForRecord : lookupNeedsByRow.values()) {
+                    for (Map<String, Object> lookupInfo : lookupsForRecord) {
+                        String lookupObject = (String) lookupInfo.get('lookupObject');
+                        String lookupField = (String) lookupInfo.get('lookupField');
+                        String lookupValue = (String) lookupInfo.get('lookupValue');
+
+                        if (String.isNotBlank(lookupObject) && String.isNotBlank(lookupField) && String.isNotBlank(lookupValue)) {
+                            if (!lookupGroupsByTypeAndField.containsKey(lookupObject)) {
+                                lookupGroupsByTypeAndField.put(lookupObject, new Map<String, Set<String>>());
+                                foundIdsByTypeAndField.put(lookupObject, new Map<String, Map<String, Id>>());
+                            }
+
+                            if (!lookupGroupsByTypeAndField.get(lookupObject).containsKey(lookupField)) {
+                                lookupGroupsByTypeAndField.get(lookupObject).put(lookupField, new Set<String>());
+                            }
+
+                            lookupGroupsByTypeAndField.get(lookupObject).get(lookupField).add(lookupValue);
+                        }
+                    }
+                }
+
+                for (String lookupObject : lookupGroupsByTypeAndField.keySet()) {
+                    Map<String, Set<String>> fieldMappingsForType = lookupGroupsByTypeAndField.get(lookupObject);
+
+                    for (String lookupField : fieldMappingsForType.keySet()) {
+                        Set<String> lookupValues = fieldMappingsForType.get(lookupField);
+
+                        // Query existing records only (no creation)
+                        String soqlQuery = 'SELECT Id, ' + String.escapeSingleQuotes(lookupField) +
+                                         ' FROM ' + String.escapeSingleQuotes(lookupObject) +
+                                         ' WHERE ' + String.escapeSingleQuotes(lookupField) + ' IN :lookupValues';
+
+                        List<SObject> existingRecords = Database.query(soqlQuery);
+                        Map<String, Id> valueToIdMap = new Map<String, Id>();
+
+                        for (SObject record : existingRecords) {
+                            Object fieldValue = record.get(lookupField);
+                            if (fieldValue != null) {
+                                String stringValue = String.valueOf(fieldValue);
+                                valueToIdMap.put(stringValue, record.Id);
+                            }
+                        }
+
+                        // Check for missing values and log warnings (don't create)
+                        Set<String> foundValues = valueToIdMap.keySet();
+                        List<String> missingValues = new List<String>();
+                        for (String lookupValue : lookupValues) {
+                            if (!foundValues.contains(lookupValue)) {
+                                missingValues.add(lookupValue);
+                            }
+                        }
+
+                        if (!missingValues.isEmpty()) {
+                            // Missing values are logged but not created
+                        }
+
+                        if (!foundIdsByTypeAndField.get(lookupObject).containsKey(lookupField)) {
+                            foundIdsByTypeAndField.get(lookupObject).put(lookupField, new Map<String, Id>());
+                        }
+                        foundIdsByTypeAndField.get(lookupObject).put(lookupField, valueToIdMap);
+                    }
+                }
+
+                for (Integer i = 0; i < recordsToInsert.size(); i++) {
+                    SObject record = recordsToInsert[i];
+                    Integer recordLineNumber = startLineNumber + i;
+
+                    if (lookupNeedsByRow.containsKey(recordLineNumber)) {
+                        List<Map<String, Object>> lookupsForRecord = lookupNeedsByRow.get(recordLineNumber);
+                        for (Map<String, Object> lookupInfo : lookupsForRecord) {
+                            String lookupObject = (String) lookupInfo.get('lookupObject');
+                            String lookupField = (String) lookupInfo.get('lookupField');
+                            String lookupValue = (String) lookupInfo.get('lookupValue');
+                            String targetField = (String) lookupInfo.get('targetField');
+
+                            Map<String, Id> valueToRecordIdMap = foundIdsByTypeAndField.get(lookupObject)?.get(lookupField);
+                            if (valueToRecordIdMap != null) {
+                            Id resolvedId = valueToRecordIdMap.get(lookupValue);
+                            if (resolvedId != null) {
+                                record.put(targetField, resolvedId);
+                            }
+                            }
+                        }
+                    }
+                }
             }
 
-            //use database all or none feature to continue if error
+            // Insert records with all-or-nothing behavior
             if (!recordsToInsert.isEmpty()) {
                 try {
                     database.insert(recordsToInsert,true);
-                    System.debug('Inserted ' + recordsToInsert.size() + ' records successfully.');
                     // Count successful insertions
                     successfulRecords += recordsToInsert.size();
                 } catch (DmlException e) {
@@ -277,7 +380,7 @@ public with sharing class ImportQueueable implements Queueable, Database.AllowsC
         }
     }
 
-    private String getTransformedValue(Map<String, String> transformedRow, String targetField, String sourceColumn, String originalValue) {
+    private String getProcessedValue(Map<String, String> transformedRow, String targetField, String sourceColumn, String originalValue) {
         String transformedValue = transformedRow.get(targetField);
         if (transformedValue == null) {
             transformedValue = transformedRow.get(sourceColumn);
@@ -292,6 +395,4 @@ public with sharing class ImportQueueable implements Queueable, Database.AllowsC
         ImportQueueable queueable = new ImportQueueable(projectId, remainingData, executionId, processed, successful, failed);
         queueable.execute(null);
     }
-
-
 }
