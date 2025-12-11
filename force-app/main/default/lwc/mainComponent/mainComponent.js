@@ -1,4 +1,4 @@
-import { LightningElement, wire } from 'lwc';
+import { LightningElement, wire,track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 import doesProjectExist from '@salesforce/apex/ImportProjectController.doesProjectExist';
@@ -44,6 +44,7 @@ export default class MainComponent extends LightningElement {
   // Stepper configuration
   currentStep = STEPS.PROJECT_SETUP;
   baseSteps = STEP_CONFIG;
+    @track showProjectForm = false;
 
   // Wire config
   recentProjectsLimit = RECENT_PROJECTS_LIMIT;
@@ -434,4 +435,15 @@ export default class MainComponent extends LightningElement {
       this.showCreatorSection = false;
     }
   }
+
+ 
+
+    openProjectForm() {
+        this.showProjectForm = true;
+        console.log('Opening project form...');
+    }
+
+    closeForm() {
+        this.showProjectForm = false;
+    }
 }
