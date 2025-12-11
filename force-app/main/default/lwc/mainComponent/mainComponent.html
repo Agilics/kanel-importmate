@@ -2,8 +2,8 @@
   @description       : Main component hosting all ImportMate application components
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
   @group             : 
-  @last modified on  : 11-28-2025
-  @last modified by  : khalidousowba
+  @last modified on  : 12-03-2025
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
   <template if:true={isLoading}>
@@ -40,11 +40,15 @@
         <!-- Dashboard View -->
         <template if:true={showDashboard}>
           <div class="content-container">
+             <c-import-history onnewimportproject={openProjectForm}>
+            </c-import-history>
             <c-dashboard-cmp
               onnewproject={openNewProject}
               onprojectselect={handleProjectSelect}
               onprojectedit={handleProjectSelect}
             ></c-dashboard-cmp>
+           
+
           </div>
         </template>
 
@@ -136,4 +140,5 @@
       </div>
     </div>
   </div>
+
 </template>

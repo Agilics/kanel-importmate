@@ -1,0 +1,244 @@
+/* Base Styles */
+:host {
+  font-family: "Salesforce Sans", Arial, sans-serif;
+}
+
+/* Card Container */
+.card {
+  width: 100%;
+  max-width: 1054px;
+  border-radius: 8px;
+  padding: 1rem;
+  background: #fff;
+  box-shadow: 0px 1px 2px 0px #0000000D;
+  margin: 0 0 2rem 0;
+}
+
+/* Card Header */
+.card-header {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.title-with-icon {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header-content {
+  flex: 1;
+}
+
+.header-title {
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.regular-text {
+  font-weight: 400;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+/* Actions (Edit/Delete Buttons) */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-action-icons {
+  cursor: pointer;
+}
+
+/* Card Content */
+.card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.transformation-rules {
+  flex: 1;
+}
+
+.content-title {
+  font-weight: 500;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+.infos {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.check-list {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.dot {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 1.375rem;
+  height: 1.375rem;
+  background: #22C55E;
+  border-radius: 50%;
+}
+
+.custom-icon-check {
+  --slds-c-icon-color-foreground-default: #fff;
+}
+
+/* Email box */
+.email-card-icon-box {
+background: #dbeafe;
+border: 1px solid #e5e7eb;
+
+}
+
+/* icon default size & position */
+.icon {
+width: 16px;
+height: 16px;
+opacity: 1;
+}
+/*default box icon*/
+.box-icon {
+width: 40px;
+height: 40px; 
+border-radius: 8px;
+margin: 0 16px 0 0;
+}
+/* center text & items*/
+.is-centered{
+display: flex;
+justify-content: center;
+align-items: center;
+align-content: center;
+display: flex;
+align-items: center;
+justify-content: center;
+text-align: center;
+}
+/* Email icon */
+.custom-icon-email {
+--slds-c-icon-color-foreground-default: #1e40af;
+--slds-c-icon-color-foreground: #1e40af;
+--slds-c-icon-color-background: #dbeafe;
+}
+
+/*call box icon*/
+.phone-card-icon-box {
+background: #dcfce7;
+border: 1px solid #e5e7eb;
+opacity: 1;
+}
+
+/* call icon*/
+.custom-icon-call {
+--slds-c-icon-color-foreground-default: #16a34a;
+--slds-c-icon-color-foreground: #16a34a;
+--slds-c-icon-color-background: #dcfce7;
+}
+/*lead icon*/
+.custom-icon-product_transfer {
+--slds-c-icon-color-foreground-default: #9333ea;
+--slds-c-icon-color-foreground: #9333ea;
+--slds-c-icon-color-background: #f3e8ff;
+}
+
+/*lead box icon*/
+.lead-card-icon-box {
+background: #f3e8ff;
+border: 1px solid #e5e7eb;
+}
+/* Lead Content */
+.lead-content {
+  width: 100%;
+  padding: 0.5rem;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.25rem;
+}
+
+/* Badge Styles */
+.badge {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 9999px;
+}
+
+.badge-active {
+  background: #dcfce7;
+  border: 1px solid #e5e7eb;
+}
+
+.badge-warning {
+  background: #fef9c3;
+  color: #854D0E;
+  border: 1px solid #e5e7eb;
+}
+
+ 
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .card {
+    padding: 0.75rem;
+  }
+
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .actions {
+    margin-top: 0.5rem;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .lead-content {
+    width: 100%;
+  }
+
+  .infos {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .card {
+    padding: 0.5rem;
+  }
+
+  .header-title {
+    font-size: 0.875rem;
+  }
+
+  .regular-text-size {
+    font-size: 0.75rem;
+  }
+
+  .box-icon {
+    width: 2rem;
+    height: 2rem;
+    
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  }
+}

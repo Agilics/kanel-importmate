@@ -1,8 +1,10 @@
-import { LightningElement, wire } from "lwc";
-import { ShowToastEvent } from "lightning/platformShowToastEvent";
-import doesProjectExist from "@salesforce/apex/ImportProjectController.doesProjectExist";
-import saveProject from "@salesforce/apex/ImportProjectController.saveProject";
-import getRecentsProjects from "@salesforce/apex/ImportProjectController.getRecentsProjects";
+import { LightningElement, wire,track } from 'lwc';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+
+import doesProjectExist from '@salesforce/apex/ImportProjectController.doesProjectExist';
+import saveProject from '@salesforce/apex/ImportProjectController.saveProject';
+import getRecentsProjects from '@salesforce/apex/ImportProjectController.getRecentsProjects';
+
 import {
   STEPS,
   STEP_CONFIG,
@@ -19,56 +21,54 @@ import {
  * Handles project workflow navigation and state management
  */
 export default class MainComponent extends LightningElement {
-  //UI state
+  // UI state
   showCreatorSection = false;
   showDashboard = true;
   isLoading = false;
   activePage = PAGES.DASHBOARD;
 
-  //Mapping data
+  // Mapping data
   mappingHeadersCsv = '';
   mappingTargetObject = '';
   csvData = null;
-  
-  //Data source selection
+
+  // Data source selection
   selectedDataSource = null;
 
-  //Project data
-  projectName = "";
-  description = "";
-  targetObject = "";
+  // Project data
+  projectName = '';
+  description = '';
+  targetObject = '';
   currentProject;
 
-  //Stepper configuration
+  // Stepper configuration
   currentStep = STEPS.PROJECT_SETUP;
   baseSteps = STEP_CONFIG;
+    @track showProjectForm = false;
 
-  //Wire service configuration
+  // Wire config
   recentProjectsLimit = RECENT_PROJECTS_LIMIT;
-  @wire(getRecentsProjects, { limitor: "$recentProjectsLimit" })
+  @wire(getRecentsProjects, { limitor: '$recentProjectsLimit' })
   importProjects;
-
 
   get steps() {
     return this.baseSteps.map((step) => {
-      let cssClass = "step";
+      let cssClass = 'step';
       if (step.number < this.currentStep) {
-        cssClass = "step completed";
+        cssClass = 'step completed';
       } else if (step.number === this.currentStep) {
-        cssClass = "step active";
+        cssClass = 'step active';
       }
 
-      const ariaCurrent = step.number === this.currentStep ? "step" : "false";
+      const ariaCurrent = step.number === this.currentStep ? 'step' : 'false';
       return { ...step, cssClass, ariaCurrent };
     });
   }
 
-
   get currentStepLabel() {
-    const step = this.baseSteps.find(s => s.number === this.currentStep);
+    const step = this.baseSteps.find((s) => s.number === this.currentStep);
     return step ? step.label : '';
   }
-
 
   get projectDisplayName() {
     return this.currentProject?.Name;
@@ -76,7 +76,7 @@ export default class MainComponent extends LightningElement {
 
   navigateToSelectedDataSource(event) {
     this.currentProject = event.detail;
-    this.selectedDataSource = null; //Reset selection when navigating to data source step
+    this.selectedDataSource = null;
     this.currentStep = STEPS.DATA_SOURCE;
     this.updateUIForStep(this.currentStep);
   }
@@ -88,17 +88,20 @@ export default class MainComponent extends LightningElement {
 
     const maxStep = this.baseSteps.length;
     if (this.currentStep < maxStep && this.currentProject) {
-      this.currentStep++;
+      this.currentStep += 1;
       this.updateUIForStep(this.currentStep);
     }
   }
-
 
   async handleCreateProject() {
     this.isLoading = true;
 
     if (!this.validateProjectFields()) {
-      this.showToast(TOAST_VARIANTS.WARNING, MESSAGES.ALL_FIELDS_REQUIRED, TOAST_VARIANTS.WARNING);
+      this.showToast(
+        TOAST_VARIANTS.WARNING,
+        MESSAGES.ALL_FIELDS_REQUIRED,
+        TOAST_VARIANTS.WARNING
+      );
       this.isLoading = false;
       return;
     }
@@ -110,7 +113,11 @@ export default class MainComponent extends LightningElement {
       });
 
       if (exists) {
-        this.showToast(TOAST_VARIANTS.WARNING, MESSAGES.PROJECT_EXISTS, TOAST_VARIANTS.WARNING);
+        this.showToast(
+          TOAST_VARIANTS.WARNING,
+          MESSAGES.PROJECT_EXISTS,
+          TOAST_VARIANTS.WARNING
+        );
         this.resetProjectForm();
         this.isLoading = false;
         return;
@@ -146,59 +153,52 @@ export default class MainComponent extends LightningElement {
     return this.projectName && this.description && this.targetObject;
   }
 
-
   resetProjectForm() {
-    const createProjectComponent = this.template.querySelector("c-create-project-component");
+    const createProjectComponent = this.template.querySelector(
+      'c-create-project-component'
+    );
     if (createProjectComponent) {
       createProjectComponent.resetFields();
     }
-    this.targetObject = "";
+    this.targetObject = '';
   }
-
 
   handleDataSourceSelected(event) {
     this.selectedDataSource = event.detail?.source || null;
   }
 
-
   handleCsvLoaded(event) {
-    // Extract csvData from nested structure: event.detail.csvData or use event.detail directly
     this.csvData = event.detail?.csvData || event.detail || {};
-    console.log('csvData loaded in mainComponent:', 
-      this.csvData?.allRows ? 
-        `Object with ${this.csvData.allRows.length} rows` : 
-        JSON.stringify(this.csvData));
+    // eslint-disable-next-line no-console
+    console.log(
+      'csvData loaded in mainComponent:',
+      this.csvData?.allRows
+        ? `Object with ${this.csvData.allRows.length} rows`
+        : JSON.stringify(this.csvData)
+    );
   }
-
-
 
   handlePreviousStep() {
     if (this.currentStep > STEPS.PROJECT_SETUP) {
-      this.currentStep--;
+      this.currentStep -= 1;
       this.updateUIForStep(this.currentStep);
     }
   }
 
- 
   handleCancel() {
     this.currentStep = STEPS.PROJECT_SETUP;
     this.updateUIForStep(this.currentStep);
   }
 
-  /**
-   * Reset all project form fields
-   */
   resetProjectFormFields() {
-    this.projectName = "";
-    this.description = "";
-    this.targetObject = "";
+    this.projectName = '';
+    this.description = '';
+    this.targetObject = '';
   }
-
 
   handleProjectNameChange(event) {
     this.projectName = event.detail;
   }
-
 
   handleDescriptionChange(event) {
     this.description = event.detail;
@@ -210,20 +210,16 @@ export default class MainComponent extends LightningElement {
 
   showToast(title, message, variant) {
     const toastEvent = new ShowToastEvent({
-      title: title,
-      message: message,
-      variant: variant,
-      mode: "dismissable"
+      title,
+      message,
+      variant,
+      mode: 'dismissable'
     });
     this.dispatchEvent(toastEvent);
   }
 
-
   openNewProject() {
-    console.log('open');
-    
     this.currentStep = STEPS.PROJECT_SETUP;
-    //this.updateUIForStep(this.currentStep);
     this.showDashboard = false;
     this.showCreatorSection = true;
   }
@@ -232,63 +228,59 @@ export default class MainComponent extends LightningElement {
     this.currentStep = parseInt(event.detail, 10);
   }
 
-
   get isStart() {
     return this.currentStep === STEPS.PROJECT_SETUP;
   }
-
 
   get isSelectSource() {
     return this.currentProject && this.currentStep === STEPS.DATA_SOURCE;
   }
 
- 
   get showDataSourceSelection() {
     return this.isSelectSource && !this.selectedDataSource;
   }
 
- 
   get showCsvUploader() {
     return this.isSelectSource && this.selectedDataSource === 'CSV';
   }
-
 
   get showSoqlBuilder() {
     return this.isSelectSource && this.selectedDataSource === 'SOQL';
   }
 
-
   get isMappingAndTransformation() {
-    return this.currentProject && 
-           (this.currentStep === STEPS.FIELD_MAPPING );
+    return (
+      this.currentProject && this.currentStep === STEPS.FIELD_MAPPING
+    );
   }
 
   get isTransformations() {
     return this.currentProject && this.currentStep === STEPS.TRANSFORMATIONS;
   }
 
-
   get isDryRunExecution() {
     return this.currentProject && this.currentStep === STEPS.VALIDATION;
   }
-
 
   get isRealExecution() {
     return this.currentProject && this.currentStep === STEPS.EXECUTION;
   }
 
-
   handleStartMapping(event) {
     const headersCsv = Array.isArray(event?.detail?.columns)
-      ? event.detail.columns.join(",")
+      ? event.detail.columns.join(',')
       : event?.detail?.headersCsv || '';
-    
+
     this.mappingHeadersCsv = headersCsv;
+
     if (event?.detail?.csvData) {
       this.csvData = event.detail.csvData;
     } else if (event?.detail?.allRows && event?.detail?.columns) {
-      this.csvData = { allRows: event.detail.allRows, columns: event.detail.columns };
-    } 
+      this.csvData = {
+        allRows: event.detail.allRows,
+        columns: event.detail.columns
+      };
+    }
 
     const project = this.currentProject || {};
     this.mappingTargetObject = this.getTargetObjectFromProject(project);
@@ -305,13 +297,10 @@ export default class MainComponent extends LightningElement {
     }
   }
 
-  /**
-   * Handle back to data source selection
-   */
+  // retour de la page de choix de datasource
   handleBackToDataSourceSelection() {
     this.selectedDataSource = null;
   }
-
 
   getTargetObjectFromProject(project) {
     for (const fieldName of PROJECT_FIELD_NAMES.TARGET_OBJECT) {
@@ -322,11 +311,9 @@ export default class MainComponent extends LightningElement {
     return '';
   }
 
-
   handleBackToStep() {
     this.handlePreviousStep();
   }
-
 
   handleStartImport(event) {
     const importDetails = event.detail;
@@ -334,9 +321,12 @@ export default class MainComponent extends LightningElement {
       .replace('{0}', importDetails.executionMode)
       .replace('{1}', importDetails.batchSize);
 
-    this.showToast(TOAST_VARIANTS.SUCCESS, message, TOAST_VARIANTS.SUCCESS);
+    this.showToast(
+      TOAST_VARIANTS.SUCCESS,
+      message,
+      TOAST_VARIANTS.SUCCESS
+    );
   }
-
 
   handleNavigation(event) {
     const page = event.detail?.page || event.detail;
@@ -352,21 +342,31 @@ export default class MainComponent extends LightningElement {
         this.updateUIForStep(this.currentStep);
         break;
       case PAGES.LOGS:
-        this.showToast(TOAST_VARIANTS.INFO, MESSAGES.LOGS_COMING_SOON, TOAST_VARIANTS.INFO);
+        this.showToast(
+          TOAST_VARIANTS.INFO,
+          MESSAGES.LOGS_COMING_SOON,
+          TOAST_VARIANTS.INFO
+        );
         break;
       case PAGES.SETTINGS:
-        this.showToast(TOAST_VARIANTS.INFO, MESSAGES.SETTINGS_COMING_SOON, TOAST_VARIANTS.INFO);
+        this.showToast(
+          TOAST_VARIANTS.INFO,
+          MESSAGES.SETTINGS_COMING_SOON,
+          TOAST_VARIANTS.INFO
+        );
         break;
       default:
         break;
     }
   }
 
-
   async handleFindExistingProject() {
-    this.showToast(TOAST_VARIANTS.INFO, "Search projects feature", TOAST_VARIANTS.INFO);
+    this.showToast(
+      TOAST_VARIANTS.INFO,
+      'Search projects feature',
+      TOAST_VARIANTS.INFO
+    );
   }
-
 
   handleSidebarStepClick(event) {
     const stepNumber = parseInt(event.detail, 10);
@@ -383,14 +383,12 @@ export default class MainComponent extends LightningElement {
     }
   }
 
-
   handleProjectSelect(event) {
     const project = event.detail.project || event.detail;
     this.currentProject = project;
     this.currentStep = STEPS.DATA_SOURCE;
     this.updateUIForStep(this.currentStep);
   }
-
 
   handleQuickAction(event) {
     const actionName = event.detail;
@@ -402,10 +400,18 @@ export default class MainComponent extends LightningElement {
         this.showCreatorSection = true;
         break;
       case QUICK_ACTIONS.VIEW_LOGS:
-        this.showToast(TOAST_VARIANTS.INFO, MESSAGES.VIEW_LOGS, TOAST_VARIANTS.INFO);
+        this.showToast(
+          TOAST_VARIANTS.INFO,
+          MESSAGES.VIEW_LOGS,
+          TOAST_VARIANTS.INFO
+        );
         break;
       case QUICK_ACTIONS.EXPORT_DATA:
-        this.showToast(TOAST_VARIANTS.INFO, MESSAGES.EXPORT_COMING_SOON, TOAST_VARIANTS.INFO);
+        this.showToast(
+          TOAST_VARIANTS.INFO,
+          MESSAGES.EXPORT_COMING_SOON,
+          TOAST_VARIANTS.INFO
+        );
         break;
       default:
         break;
@@ -413,12 +419,11 @@ export default class MainComponent extends LightningElement {
   }
 
   updateUIForStep(stepNumber) {
-    //Show dashboard only for Project Setup step (step 1)
     if (stepNumber === STEPS.PROJECT_SETUP) {
       this.showDashboard = true;
       this.activePage = PAGES.DASHBOARD;
       this.showCreatorSection = false;
-      this.selectedDataSource = null; //Reset data source selection
+      this.selectedDataSource = null;
     } else if (stepNumber === STEPS.DATA_SOURCE) {
       this.selectedDataSource = null;
       this.showDashboard = false;
@@ -430,4 +435,15 @@ export default class MainComponent extends LightningElement {
       this.showCreatorSection = false;
     }
   }
+
+ 
+
+    openProjectForm() {
+        this.showProjectForm = true;
+        console.log('Opening project form...');
+    }
+
+    closeForm() {
+        this.showProjectForm = false;
+    }
 }
