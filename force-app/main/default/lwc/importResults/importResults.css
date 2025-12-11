@@ -1,0 +1,223 @@
+/* Results Section */
+.results-section {
+    background-color: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin: 1.5rem 2rem;
+    padding: 1.5rem;
+}
+
+.results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.results-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #111827;
+    margin: 0;
+}
+
+.results-badges {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.results-badge {
+    padding: 0.375rem 0.875rem;
+    border-radius: 9999px;
+    font-size: 0.813rem;
+    font-weight: 600;
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.results-content {
+    /* Container for filters, table, and pagination */
+}
+
+.error-filters {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.filter-controls {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.search-container {
+    min-width: 200px;
+}
+
+.results-summary {
+    margin-bottom: 1.5rem;
+    font-size: 0.875rem;
+    color: #374151;
+}
+
+.error-type-badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-align: center;
+    background-color: #f3f4f6;
+    color: #374151;
+}
+
+/* Styles pour différents types d'erreurs basés sur data-error-type */
+.error-type-badge[data-error-type="Invalid Format"],
+.error-type-badge[data-error-type="Validation"] {
+    background-color: #f3f4f6;
+    color: #374151;
+}
+
+.error-type-badge[data-error-type="Required Field"],
+.error-type-badge[data-error-type="Missing Required Field"] {
+    background-color: #fecaca;
+    color: #991b1b;
+}
+
+.error-type-badge[data-error-type="Duplicate Value"],
+.error-type-badge[data-error-type="Duplicate"] {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.error-type-badge[data-error-type="Invalid Lookup"],
+.error-type-badge[data-error-type="Lookup"] {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+
+.error-type-badge[data-error-type="Invalid Picklist"],
+.error-type-badge[data-error-type="Picklist"] {
+    background-color: #fce7f3;
+    color: #9f1239;
+}
+
+.pagination-container {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.pagination-info {
+    font-size: 0.875rem;
+    color: #6b7280;
+}
+
+.pagination-controls {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.page-button {
+    min-width: 2.5rem;
+}
+
+.no-results {
+    padding: 3rem;
+    text-align: center;
+    color: #6b7280;
+}
+
+.no-results p {
+    font-size: 1rem;
+    margin: 0;
+}
+
+.spinner-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+    text-align: center;
+}
+
+.spinner-text {
+    margin-top: 1rem;
+    font-size: 1rem;
+    color: #6b7280;
+}
+
+/* Table Styles - matching dryRunValidator */
+.slds-table {
+    border-collapse: separate;
+    border-spacing: 0;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.slds-table thead {
+    background-color: #f9fafb;
+}
+
+.slds-table thead th {
+    padding: 0.75rem 1rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6b7280;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.slds-table tbody td {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    color: #374151;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.slds-table tbody tr:hover {
+    background-color: #f9fafb;
+}
+
+.slds-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .results-section {
+        margin-left: 1rem;
+        margin-right: 1rem;
+    }
+
+    .error-filters {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .filter-controls {
+        width: 100%;
+        flex-direction: column;
+    }
+
+    .search-container {
+        width: 100%;
+    }
+
+    .pagination-container {
+        flex-direction: column;
+        gap: 1rem;
+    }
+}
+
