@@ -331,7 +331,7 @@ public class ImportUtilsTest {
                 testRecords.add(new Account(Name = 'Bulk Test Account ' + i, Industry = 'Technology'));
                 lookupInfoList.add(new Map<String, Object>{
                     'targetField' => 'ParentId',
-                    'lookupValue' => 'Lookup Account ' + Math.mod(i, 3)
+                    'lookupValue' => 'Lookup Account ' + Math.mod(i, 3),
                     'lookupObject' => 'Account',
                     'lookupField' => 'Name'
                 });
