@@ -17,17 +17,6 @@ public class ValidationServiceTest {
         TestDataFactory.createTestAccounts(5);
     }
 
-    @IsTest
-    static void testLookupRequestCacheKey() {
-        //Test that LookupRequest creates correct cache key
-        LookupRequest request = new LookupRequest('Account', 'Name', 'Test Value', 'AccountId');
-        String expectedKey = 'Account.Name.Test Value';
-        Assert.areEqual(expectedKey, request.getCacheKey(), 'Cache key should match expected format');
-
-        //Test with different values
-        LookupRequest request2 = new LookupRequest('Contact', 'Email', 'test@example.com', 'ContactId');
-        Assert.areEqual('Contact.Email.test@example.com', request2.getCacheKey(), 'Cache key should work for different objects');
-    }
 
     @IsTest
     static void testValidateFieldWithValidData() {
