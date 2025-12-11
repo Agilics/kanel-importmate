@@ -17,7 +17,7 @@ public with sharing class ErrorLogService {
             ErrorMessage__c = errorMessage,
             StackTrace__c = stackTrace
         );
-        ErrorLogRepository.saveErrorLogs(new List<ErrorLog__c>{error});
+        ///ErrorLogRepository.saveErrorLogs(new List<ErrorLog__c>{error});
     }
 
     /**

@@ -2,8 +2,8 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 10-03-2025
- * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @last modified on  : 11-23-2025
+ * @last modified by  : khalidousowba
 **/
 @isTest
 public with sharing class ScheduleServiceTest { 
@@ -45,7 +45,7 @@ public with sharing class ScheduleServiceTest {
         // When
         Test.startTest();
         Id scheduleId = ScheduleService.schedule(
-            String.valueOf(ScheduleService.FrequencyEnum.DAILY),
+            String.valueOf(ImportMateEnum.FrequencyEnum.DAILY),
             nextRun,
             project.Id
         );
@@ -83,7 +83,7 @@ public with sharing class ScheduleServiceTest {
         //Perform test
         Test.startTest();
         String excpetedFrequency = 'DAILY';
-        ScheduleService.FrequencyEnum actual =  ScheduleService.FrequencyEnum.DAILY;
+        ImportMateEnum.FrequencyEnum actual =  ImportMateEnum.FrequencyEnum.DAILY;
         Test.stopTest();
         //Assertions
         System.assertEquals(excpetedFrequency, actual.Name());
@@ -95,7 +95,7 @@ public with sharing class ScheduleServiceTest {
         //Perform test
         Test.startTest();
         String excpetedFrequency = 'MONTHLY';
-        ScheduleService.FrequencyEnum actual =  ScheduleService.FrequencyEnum.MONTHLY;
+        ImportMateEnum.FrequencyEnum actual =  ImportMateEnum.FrequencyEnum.MONTHLY;
         Test.stopTest();
 
         //Assertions
@@ -208,7 +208,7 @@ public with sharing class ScheduleServiceTest {
      @IsTest
      static void testGetSchedulesByFrequency() {
         //GIVEN
-       ScheduleService.FrequencyEnum exceptedFrequency =  ScheduleService.FrequencyEnum.DAILY;
+       ImportMateEnum.FrequencyEnum exceptedFrequency =  ImportMateEnum.FrequencyEnum.DAILY;
         
         //WHEN
         Test.startTest();

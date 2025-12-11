@@ -1,11 +1,4 @@
-/**
- * @description       : 
- * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
- * @group             : 
- * @last modified on  : 10-14-2025
- * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
-**/
- 
+
 public with sharing class ScheduleController {
 
     //création d'une nouvelle planification
@@ -58,7 +51,7 @@ public with sharing class ScheduleController {
 
     //récupèrer les planifications par la fréquence (DAILY  | WEEKLY | MONTHLY)
     @AuraEnabled(cacheable = true)
-    public static List<Schedule__c>  getSchedulesByFrequency(ScheduleService.FrequencyEnum  frequence){
+    public static List<Schedule__c>  getSchedulesByFrequency(ImportMateEnum.FrequencyEnum  frequence){
         return ScheduleService.getSchedulesByFrequency(frequence);
     }
 
