@@ -74,4 +74,9 @@ export default class DataSourceSelectorPage extends LightningElement {
       })
     );
   }
+
+  //retour à la section de création de projet
+  handleBackToSelection() {
+    this.dispatchEvent(new CustomEvent('previous'));
+  }
 }
