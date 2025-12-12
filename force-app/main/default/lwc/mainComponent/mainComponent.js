@@ -446,4 +446,19 @@ export default class MainComponent extends LightningElement {
     closeForm() {
         this.showProjectForm = false;
     }
+
+
+    handleContinueFromFieldMapper(event) {
+  const d = event?.detail || {};
+  if (d.projectId && (!this.currentProject || this.currentProject.Id !== d.projectId)) {
+    this.currentProject = { ...(this.currentProject || {}), Id: d.projectId };
+  }
+  if (d.targetObjectApiName) {
+    this.mappingTargetObject = d.targetObjectApiName;
+  }
+  this.currentMappings = Array.isArray(d.mappings) ? d.mappings : [];
+  this.currentStep = STEPS.TRANSFORMATIONS;
+  this.updateUIForStep(this.currentStep);
+}
+
 }
