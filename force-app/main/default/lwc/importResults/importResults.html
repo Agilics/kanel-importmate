@@ -1,0 +1,184 @@
+<template>
+    <div class="results-section">
+        <h2 class="results-title">Import Results</h2>
+
+        <div class="results-content">
+
+            <template if:true={isLoading}>
+                <div class="spinner-container">
+                    <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+                    <p class="spinner-text">Loading import results...</p>
+                </div>
+            </template>
+
+            <template if:false={isLoading}>
+                <template if:true={hasImportLogs}>
+                    <!-- Filters -->
+                    <div class="error-filters">
+                        <div></div>
+                        <div class="filter-controls">
+                            <div class="search-container">
+                                <lightning-input
+                                    type="search"
+                                    placeholder="Search errors..."
+                                    value={searchTerm}
+                                    onchange={handleSearchChange}
+                                    variant="label-hidden">
+                                </lightning-input>
+                            </div>
+                            <lightning-combobox
+                                name="errorTypeFilter"
+                                label="Filter"
+                                value={selectedErrorType}
+                                placeholder="All Error Types"
+                                options={errorTypeOptions}
+                                onchange={handleFilterChange}
+                                variant="label-hidden">
+                            </lightning-combobox>
+                        </div>
+                    </div>
+
+                    <!-- Summary -->
+                    <div class="slds-m-bottom_medium">
+                        <div class="slds-text-body_regular">
+                            <strong>Total Errors Found: {totalErrors}</strong>
+                            <span class="slds-m-left_small">Failed Lines: {failedRecords}</span>
+                            <template if:true={searchTerm}>
+                                <span class="slds-m-left_small">(Filtered: {filteredLogsCount})</span>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Table -->
+                    <div class="slds-scrollable_x">
+                            <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped">
+                                <thead>
+                                    <tr class="slds-line-height_reset">
+                                        <th class="slds-text-title_caps" scope="col">
+                                            <div class="slds-truncate" title="Select">
+                                                <lightning-input type="checkbox" onchange={handleSelectAll}></lightning-input>
+                                            </div>
+                                        </th>
+                                        <th class="slds-text-title_caps" scope="col">
+                                            <div class="slds-truncate" title="ROW">ROW</div>
+                                        </th>
+                                        <th class="slds-text-title_caps" scope="col">
+                                            <div class="slds-truncate" title="FIELD">FIELD</div>
+                                        </th>
+                                        <th class="slds-text-title_caps" scope="col">
+                                            <div class="slds-truncate" title="ERROR TYPE">ERROR TYPE</div>
+                                        </th>
+                                        <th class="slds-text-title_caps" scope="col">
+                                            <div class="slds-truncate" title="MESSAGE">MESSAGE</div>
+                                        </th>
+                                        <th class="slds-text-title_caps" scope="col">
+                                            <div class="slds-truncate" title="CURRENT VALUE">CURRENT VALUE</div>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <template if:true={hasFilteredLogs}>
+                                        <template for:each={paginatedLogs} for:item="log">
+                                            <tr key={log.id} class="slds-hint-parent">
+                                                <td data-label="Select">
+                                                    <lightning-input 
+                                                        type="checkbox" 
+                                                        data-error-id={log.id} 
+                                                        onchange={handleErrorSelect} 
+                                                        checked={log.isSelected}>
+                                                    </lightning-input>
+                                                </td>
+                                                <td data-label="ROW">
+                                                    <div class="slds-truncate" title={log.lineNumber}>
+                                                        Row {log.lineNumber}
+                                                    </div>
+                                                </td>
+                                                <td data-label="FIELD">
+                                                    <div class="slds-truncate" title={log.fieldApiName}>
+                                                        {log.fieldApiName}
+                                                    </div>
+                                                </td>
+                                                <td data-label="ERROR TYPE">
+                                                    <span class="error-type-badge" data-error-type={log.errorType}>
+                                                        {log.errorType}
+                                                    </span>
+                                                </td>
+                                                <td data-label="MESSAGE">
+                                                    <div class="slds-truncate" title={log.errorMessage}>
+                                                        {log.errorMessage}
+                                                    </div>
+                                                </td>
+                                                <td data-label="CURRENT VALUE">
+                                                    <div class="slds-truncate" title={log.currentValue}>
+                                                        {log.currentValue}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </template>
+                                    </template>
+                                    <template if:false={hasFilteredLogs}>
+                                        <tr>
+                                            <td colspan="6" class="slds-text-align_center slds-p-vertical_medium">
+                                                <div class="slds-text-body_regular">
+                                                    <template if:true={searchTerm}>
+                                                        No errors match your current filters.
+                                                    </template>
+                                                    <template if:false={searchTerm}>
+                                                        No errors found.
+                                                    </template>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </template>
+                                </tbody>
+                            </table>
+                    </div>
+
+                    <!-- Pagination -->
+                        <template if:true={hasMultiplePages}>
+                            <div class="pagination-container">
+                                <div class="pagination-info">
+                                    Showing {startRecord} to {endRecord} of {filteredLogsCount} errors
+                                </div>
+                                <div class="pagination-controls">
+                                    <lightning-button
+                                        label="Previous"
+                                        onclick={handlePreviousPage}
+                                        disabled={isFirstPage}
+                                        variant="neutral"
+                                        icon-name="utility:chevronleft"
+                                        icon-position="left">
+                                    </lightning-button>
+                                    <template for:each={pageNumbers} for:item="page">
+                                        <lightning-button
+                                            key={page.number}
+                                            label={page.number}
+                                            onclick={handlePageClick}
+                                            data-page={page.number}
+                                            variant={page.variant}
+                                            class="page-button">
+                                        </lightning-button>
+                                    </template>
+                                    <lightning-button
+                                        label="Next"
+                                        onclick={handleNextPage}
+                                        disabled={isLastPage}
+                                        variant="neutral"
+                                        icon-name="utility:chevronright"
+                                        icon-position="right">
+                                    </lightning-button>
+                                </div>
+                            </div>
+                        </template>
+                </template>
+
+                <template if:false={hasImportLogs}>
+                    <div class="no-results">
+                        <p>No errors found. Import completed successfully!</p>
+                    </div>
+                </template>
+            </template>
+        </div>
+    </div>
+</template>
+

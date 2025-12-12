@@ -1,0 +1,213 @@
+<template>
+    <div class="execution-container">
+        <!-- Page Header -->
+        <div class="page-header">
+            <div class="header-content">
+                <div class="header-left">
+                    <h1 class="header-title">Import Execution</h1>
+                    <p class="header-subtitle">Execute your import or schedule for recurring runs</p>
+                </div>
+                <div class="header-actions">
+                    <lightning-button
+                        label="Schedule Import"
+                        variant="neutral"
+                        onclick={handleScheduleImport}
+                        disabled={isScheduleImportDisabled}
+                        icon-name="utility:event"
+                        icon-position="left"
+                        class="schedule-button">
+                    </lightning-button>
+                    <lightning-button
+                        label="Start Import"
+                        variant="brand"
+                        onclick={handleStartImport}
+                        disabled={isStartImportDisabled}
+                        icon-name="utility:play"
+                        icon-position="left"
+                        class="start-button">
+                    </lightning-button>
+                </div>
+            </div>
+        </div>
+
+       
+
+        <!-- Import Progress Section -->
+        <template if:true={showImportProgress}>
+            <div class="progress-section">
+                <div class="progress-header">
+                    <div class="progress-header-left">
+                        <lightning-icon 
+                            icon-name={importStatusIconName} 
+                            size="small" 
+                            class={statusIconClass}>
+                        </lightning-icon>
+                        <h2 class="progress-title">Import Execution Status</h2>
+                    </div>
+                    <div class="progress-header-right">
+                        <span class={importStatusClass}>{formattedImportStatus}</span>
+                    </div>
+                </div>
+
+                <div class="progress-content">
+                        <!-- Progress Bar -->
+                        <template if:true={isImportInProgress}>
+                            <div class="progress-bar-container">
+                                <lightning-progress-bar 
+                                    value={importProgressPercentage} 
+                                    variant={progressBarVariant}
+                                    size="large">
+                                </lightning-progress-bar>
+                                <div class="progress-info">
+                                    <span class="progress-numbers">{importProgressPercentage}%</span>
+                                </div>
+                                <template if:true={importMessage}>
+                                    <div style="text-align: center; color: #6b7280; font-size: 0.875rem; margin-bottom: 1rem;">
+                                        {importMessage}
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+                        
+                        <!-- Completed/Failed Progress Display -->
+                        <template if:false={isImportInProgress}>
+                            <div class="progress-bar-container">
+                                <lightning-progress-bar 
+                                    value={importProgressPercentage} 
+                                    variant={progressBarVariant}
+                                    size="large">
+                                </lightning-progress-bar>
+                                <div class="progress-info">
+                                    <span class="progress-numbers">{importProgressPercentage}%</span>
+                                </div>
+                                <div style="text-align: center; color: #6b7280; font-size: 0.875rem; margin-bottom: 1rem;">
+                                    <template if:true={isImportCompleted}>Import completed</template>
+                                    <template if:true={isImportFailed}>Import failed</template>
+                                </div>
+                            </div>
+                        </template>
+
+                        <!-- Execution Details -->
+                        <template if:true={currentExecutionId}>
+                            <div class="execution-details">
+                                <div class="detail-item">
+                                    <span class="detail-label">Execution ID:</span>
+                                    <span class="detail-value">{currentExecutionId}</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">Status:</span>
+                                    <span class="detail-value">{formattedImportStatus}</span>
+                                </div>
+                                <template if:true={showImportResults}>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Total Records:</span>
+                                        <span class="detail-value">{totalRecords}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Processed:</span>
+                                        <span class="detail-value">{processedRecords}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Successful:</span>
+                                        <span class="detail-value success-value">{successfulRecords}</span>
+                                    </div>
+                                    <div class="detail-item">
+                                        <span class="detail-label">Failed:</span>
+                                        <span class="detail-value error-value">{failedRecords}</span>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
+
+                        <!-- Loading Spinner for In Progress -->
+                        <template if:true={isImportInProgress}>
+                            <div class="spinner-container">
+                                <!-- <lightning-spinner 
+                                    alternative-text="Processing..." 
+                                    size="small">
+                                </lightning-spinner> -->
+                                <p class="spinner-text">Processing your import... Please wait.</p>
+                                <template if:true={importMessage}>
+                                    <p class="spinner-text" style="font-size: 0.875rem; margin-top: 0.5rem;">{importMessage}</p>
+                                </template>
+                            </div>
+                        </template>
+
+                        <!-- Success Message - Only show if truly completed with no failures -->
+                        <template if:true={isImportCompleted}>
+                            <template if:false={isImportFailed}>
+                                <div class="success-message">
+                                    <lightning-icon 
+                                        icon-name="utility:success" 
+                                        size="small" 
+                                        variant="success">
+                                    </lightning-icon>
+                                    <div>
+                                        <p style="margin-bottom: 0.25rem;">Import completed successfully!</p>
+                                        <template if:true={showImportResults}>
+                                            <p style="font-size: 0.875rem; font-weight: 400; margin: 0;">
+                                                {successfulRecords} of {totalRecords} record(s) processed successfully.
+                                            </p>
+                                        </template>
+                                        <template if:false={showImportResults}>
+                                            <template if:true={importMessage}>
+                                                <p style="font-size: 0.875rem; font-weight: 400; margin: 0;">{importMessage}</p>
+                                            </template>
+                                        </template>
+                                    </div>
+                                </div>
+                            </template>
+                        </template>
+
+                        <!-- Error Message - Only show if failed or has failures -->
+                        <template if:true={isImportFailed}>
+                            <div class="error-message">
+                                <lightning-icon 
+                                    icon-name="utility:error" 
+                                    size="small" 
+                                    variant="error">
+                                </lightning-icon>
+                                <div>
+                                    <p style="margin-bottom: 0.25rem;">Import failed. Please check the logs for details.</p>
+                                    <template if:true={showImportResults}>
+                                        <p style="font-size: 0.875rem; font-weight: 400; margin: 0;">
+                                            Total: {totalRecords}, Successful: {successfulRecords}, Failed: {failedRecords}
+                                        </p>
+                                    </template>
+                                    <template if:false={showImportResults}>
+                                        <template if:true={importMessage}>
+                                            <p style="font-size: 0.875rem; font-weight: 400; margin: 0;">{importMessage}</p>
+                                        </template>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+            </div>
+        </template>
+
+        <!-- Import Results Component -->
+        <template if:true={showImportResults}>
+            <c-import-results
+                execution-id={currentExecutionId}
+                total-errors={totalErrors}
+                failed-records={failedRecords}>
+            </c-import-results>
+        </template>
+
+        <!-- Active Schedules Section -->
+        <!-- <c-scheduled-schedules project-id={projectId}>
+        </c-scheduled-schedules> -->
+
+        <!-- Navigation Buttons -->
+        <div class="navigation-buttons">
+            <lightning-button
+                label="Back to Validation"
+                onclick={handlePreviousStep}
+                variant="neutral"
+                icon-name="utility:left"
+                icon-position="left">
+            </lightning-button>
+        </div>
+    </div>
+</template>

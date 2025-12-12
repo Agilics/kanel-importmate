@@ -108,33 +108,32 @@
               </template>
 
               <!-- Step 4: Transformations -->
-            <template if:true={isTransformations}>
+              <template if:true={isTransformations}>
                 <c-transformation-page
                   onprevious={handleBackToStep}
                   onnext={handleNextStep}
                   project-id={currentProject.Id}
                 ></c-transformation-page>
-            </template>
-
+              </template>
 
               <!-- Step 5: Validation (Dry Run) -->
-              <!-- <template if:true={isDryRunExecution}>
+              <template if:true={isDryRunExecution}>
                 <c-dry-run-validator
                   project-id={currentProject.Id}
                   csv-data={csvData}
                   onprevious={handleBackToStep}
                   onnext={handleNextStep}
                 ></c-dry-run-validator>
-              </template> -->
+              </template>
 
               <!-- Step 6: Execution & scheduling-->
-              <!-- <template if:true={isRealExecution}>
+              <template if:true={isRealExecution}>
                 <c-execution-cmp
                   project-id={currentProject.Id}
                   csv-data={csvData}
                   onprevious={handleBackToStep}
                 ></c-execution-cmp>
-              </template> -->
+              </template>
             <!-- </div> -->
           </div>
         </template>
