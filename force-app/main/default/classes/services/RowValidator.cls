@@ -14,13 +14,13 @@ public with sharing class RowValidator {
     /**
      * Check one row of data with bulk lookup results.
      */
-    public List<ValidationException> validate(Map<String, String> row,List<FieldMapping__c> mappings,String executionId,Integer lineNumber,String objectName,Map<String, List<TransformationRule__c>> rulesByMappingId, Map<String, Map<String, Map<String, Id>>> resolvedIdsByObjectAndField) {
+    public List<ValidationException> validate(Map<String, String> row,List<FieldMapping__c> mappings,String executionId,Integer lineNumber,String objectName,Map<String, List<TransformationRule__c>> rulesByMappingId, Map<String, Map<String, Map<String, Id>>> foundIdsByTypeAndField) {
         List<ValidationException> validationErrors = new List<ValidationException>();
         Set<String> seenErrors = new Set<String>();
 
         for (FieldMapping__c mapping : mappings) {
             //try {
-                List<ValidationException> mappingErrors = validateMapping(row, mapping, executionId, lineNumber, objectName, rulesByMappingId, resolvedIdsByObjectAndField);
+                List<ValidationException> mappingErrors = validateMapping(row, mapping, executionId, lineNumber, objectName, rulesByMappingId, foundIdsByTypeAndField);
 
                 for (ValidationException ve : mappingErrors) {
                     String errorKey = createErrorDeduplicationKey(ve, lineNumber);
@@ -53,7 +53,7 @@ public with sharing class RowValidator {
     /**
      * Check one field mapping with bulk lookup results.
      */
-    private List<ValidationException> validateMapping(Map<String, String> row,FieldMapping__c mapping,String executionId,Integer lineNumber,String objectName,Map<String, List<TransformationRule__c>> rulesByMappingId, Map<String, Map<String, Map<String, Id>>> resolvedIdsByObjectAndField) {
+    private List<ValidationException> validateMapping(Map<String, String> row,FieldMapping__c mapping,String executionId,Integer lineNumber,String objectName,Map<String, List<TransformationRule__c>> rulesByMappingId, Map<String, Map<String, Map<String, Id>>> foundIdsByTypeAndField) {
         List<ValidationException> errors = new List<ValidationException>();
 
         String sourceValue = ImportUtils.getValueFromRow(row, mapping.SourceColumn__c);
@@ -71,7 +71,7 @@ public with sharing class RowValidator {
         }
 
         // Check lookup field
-        ValidationException lookupError = validateLookupField(transformedValue, mapping, executionId, lineNumber, objectName, resolvedIdsByObjectAndField);
+        ValidationException lookupError = validateLookupField(transformedValue, mapping, executionId, lineNumber, objectName, foundIdsByTypeAndField);
         if (lookupError != null) {
             errors.add(lookupError);
         }
@@ -166,30 +166,15 @@ public with sharing class RowValidator {
         String lookupField = mapping.LookupMatchField__c;
         System.debug('ROW VALIDATOR LOOKUP: ' + lookupObject + '.' + lookupField + ' = "' + value + '"');
 
-        Boolean isFound = null;
+        Boolean isFound = false;
         if (foundIdsByTypeAndField != null &&
             foundIdsByTypeAndField.containsKey(lookupObject) &&
             foundIdsByTypeAndField.get(lookupObject).containsKey(lookupField)) {
             Map<String, Id> valueToRecordIdMap = foundIdsByTypeAndField.get(lookupObject).get(lookupField);
             isFound = valueToRecordIdMap.containsKey(value);
-            System.debug('- Bulk lookup result: ' + isFound);
         }
 
-        if (isFound == null) {
-            System.debug('- Doing individual lookup');
-            // Value not found in bulk results, do individual lookup
-            ValidationUtils.ValidationResult lookupResult = ValidationUtils.validateLookup(
-                value, mapping.LookupObject__c, mapping.LookupMatchField__c, mapping.TargetField__c, objectName
-            );
-
-            if (!lookupResult.isValid && !lookupResult.isWarning) {
-                Map<String, Object> context = ValidationUtils.buildValidationContext(mapping, executionId, lineNumber, value);
-                context.put('lookupObject', mapping.LookupObject__c);
-                context.put('lookupMatchField', mapping.LookupMatchField__c);
-                context.put('isWarning', false);
-                return new ValidationException(lookupResult.errorMessage, lookupResult.errorCode, context);
-            }
-        } else if (!isFound) {
+        if (!isFound) {
             System.debug('- LOOKUP NOT FOUND: false');
             Boolean isRequired = false;
             try {
