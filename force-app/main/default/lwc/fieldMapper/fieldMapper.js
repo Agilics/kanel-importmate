@@ -28,25 +28,32 @@ function microtaskDebounce(fn) {
 
 const SS_ROWS_KEY = 'IM_csvRows';
 const SS_COLS_KEY = 'IM_sourceColumnsCsv';
+const SS_VER_PREFIX = 'IM_ver_';
 
 export default class FieldMapper extends NavigationMixin(LightningElement) {
   _csvRows = [];
   _sourceColumnsCsv = '';
 
   @api totalRowCount;
+
   @api
   get csvRows() {
     return this._csvRows;
   }
   set csvRows(v) {
     this._csvRows = Array.isArray(v) ? v : [];
-    this.initMappings();
-
     if (this._csvRows.length) {
       this.initialSourceColumns = Object.keys(this._csvRows[0] || {});
       this.availableSourceColumns = [...this.initialSourceColumns];
       this._refreshPreviewDebounced();
     }
+  }
+  get rowCountLabel() {
+    const n = this.totalRowCount;
+    if (typeof n === 'number' && Number.isFinite(n) && n >= 0) {
+      return n;
+    }
+    return Array.isArray(this._csvRows) ? this._csvRows.length : 0;
   }
 
   @api
@@ -55,8 +62,6 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
   }
   set sourceColumnsCsv(v) {
     this._sourceColumnsCsv = (v || '').trim();
-    this.initMappings();
-
     if (!this.initialSourceColumns?.length && this._sourceColumnsCsv) {
       this.initialSourceColumns = this._sourceColumnsCsv
         .split(',')
@@ -94,15 +99,6 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
     return this._preselectedTargetObject;
   }
 
-  /** ===== Derived labels ===== */
-  get rowCountLabel() {
-    const n = this.totalRowCount;
-    if (typeof n === 'number' && Number.isFinite(n) && n >= 0) {
-      return n;
-    }
-    return Array.isArray(this._csvRows) ? this._csvRows.length : 0;
-  }
-
   get sourceTitle() {
     if (this.sourceLabel) {
       return `Source Data (${this.sourceLabel})`;
@@ -119,7 +115,7 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
   }
 
   /** ===== State ===== */
-  @track versionInput = ''; 
+  @track versionInput = '';
   @track projects = [];
   @track availableObjects = [];
   @track selectedProjectId = '';
@@ -139,9 +135,39 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
   @track showSettingsModal = false;
   @track settingsPreviewRowLimit = 4;
 
+  /** Versions modal */
+  @track showVersionModal = false;
+  @track versionModalLoading = false;
+  @track versionModalError = '';
+  // array of { value: '1.0' }
+  @track versionOptions = [];
+  @track selectedPreviewVersion = '';
+  @track versionPreviewHeaders = [];
+  @track versionPreviewRows = [];
+  // not reactive: { [version]: mappedRows[] }
+  versionModalMappingsByVersion = {};
+
   _refreshPreviewDebounced = microtaskDebounce(() =>
     this.rebuildClientPreview()
   );
+
+  /** ===== Template helpers for versions ===== */
+  get hasVersionOptions() {
+    return Array.isArray(this.versionOptions) && this.versionOptions.length > 0;
+  }
+
+  // returns [{ value, cssClass }]
+  get versionOptionsWithClass() {
+    const selected = this.selectedPreviewVersion;
+    return (this.versionOptions || []).map((v) => {
+      const value = v.value || v;
+      return {
+        value,
+        cssClass:
+          value === selected ? 'ver-pill ver-pill--active' : 'ver-pill'
+      };
+    });
+  }
 
   /** ===== Options & helpers ===== */
   get projectOptions() {
@@ -217,7 +243,7 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
     return this.sourceList.length > 0;
   }
 
-  /** Summary*/
+  /** Summary (for sidebar only) */
   get summaryTotalFields() {
     return (this.targetFields || []).length;
   }
@@ -229,6 +255,7 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
   get summaryUnmappedCount() {
     return Math.max(this.summaryTotalFields - this.summaryMappedCount, 0);
   }
+  // used by notifySidebar
   get summaryWithTransformCount() {
     return (this.targetFields || []).filter((f) =>
       (f.mappedSources || []).some(
@@ -244,7 +271,7 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
     return this.summaryUnmappedCount;
   }
 
-  /**Mapping lookup field  */
+  /**Nombre de mappings lookup actuellement cochés (max 3) */
   get currentLookupCount() {
     return (this.mappings || []).filter(
       (m) => m && m.isLookup === true
@@ -350,6 +377,41 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
     };
   }
 
+  /** ===== Version helpers (per project) ===== */
+  getLastVersionForProject(projectId) {
+    if (!projectId) return null;
+    if (typeof window === 'undefined') return null;
+    try {
+      const raw = window.sessionStorage.getItem(`${SS_VER_PREFIX}${projectId}`);
+      return raw || null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  setLastVersionForProject(projectId, version) {
+    if (!projectId || !version) return;
+    if (typeof window === 'undefined') return;
+    try {
+      window.sessionStorage.setItem(`${SS_VER_PREFIX}${projectId}`, version);
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  computeNextVersionForProject(projectId) {
+    const last = this.getLastVersionForProject(projectId);
+    if (!last) {
+      return '1.0';
+    }
+    const n = parseFloat(last);
+    if (!Number.isFinite(n)) {
+      return '1.0';
+    }
+    const inc = Math.round((n + 0.1) * 10) / 10;
+    return inc.toFixed(1);
+  }
+
   /** ===== Loads ===== */
   async loadProjects() {
     try {
@@ -398,7 +460,6 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
         (p) => (p.name || '').toLowerCase() === want
       );
     }
-
     if (!project) {
       if (!this._preselectedProjectId && !this.preselectedProjectName) {
         return;
@@ -411,15 +472,17 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
       };
       this.projects = [...(this.projects || []), project];
     }
-
     this.selectedProjectId = project.id;
     this.selectedTargetObject =
       this._preselectedTargetObject || project.targetObject || '';
-
     await this.loadTargetFields();
     this.updateMappedSources();
 
-    await this.applySavedMappings({ silent: true });
+    await this.applySavedMappings({ useLatest: true, silent: true });
+    if (!this.versionInput) {
+      const last = this.getLastVersionForProject(this.selectedProjectId);
+      this.versionInput = last || '';
+    }
 
     this._appliedPreselect = true;
   }
@@ -628,6 +691,7 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
     this.dispatchEvent(new ShowToastEvent({ title, message, variant }));
   }
 
+  /** Version & project */
   handleVersionChange(e) {
     this.versionInput = e.target.value;
     (this.mappings || []).forEach((m) => {
@@ -650,8 +714,12 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
     this.ensureCsvSamplesFromSession();
     this.updateMappedSources();
 
-    // Charger mapping existant s'il y en a
-    await this.applySavedMappings({ silent: true });
+    await this.applySavedMappings({ useLatest: true, silent: true });
+
+    if (!this.versionInput) {
+      const last = this.getLastVersionForProject(this.selectedProjectId);
+      this.versionInput = last || '';
+    }
   }
 
   /** ===== Lookup controls ===== */
@@ -698,38 +766,41 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
     }
   }
 
-  handleLookupToggle(e) {
-    const sourceColumn = e.target.dataset.source;
-    const checked = e.target.checked;
+ handleLookupToggle(e) {
+  const sourceColumn = e.target.dataset.source;
+  const checked = e.target.checked;
 
-    const m = (this.mappings || []).find(
-      (x) => x.sourceColumn === sourceColumn
-    );
-    if (!m) {
+  const m = (this.mappings || []).find(
+    (x) => x.sourceColumn === sourceColumn
+  );
+  if (!m) {
+    return;
+  }
+
+  // Si on essaie d'activer un lookup en plus
+  if (checked && !m.isLookup) {
+    const current = this.currentLookupCount;
+    if (current >= 3) {
+      e.target.checked = false;
+
+      this.toast(
+        'Limit reached',
+        'You can configure at most 3 lookup fields in this mapping.',
+        'warning'
+      );
       return;
     }
-
-    if (checked && !m.isLookup) {
-      const current = this.currentLookupCount;
-      if (current >= 3) {
-        e.target.checked = false;
-
-        this.toast(
-          'Limit reached',
-          'You can configure at most 3 lookup fields in this mapping.',
-          'warning'
-        );
-        return;
-      }
-    }
-
-    m.isLookup = checked;
-    if (!checked) {
-      m.lookupObject = null;
-      m.lookupMatchField = null;
-    }
-    this.updateMappedSources();
   }
+
+  // Sinon on applique normalement
+  m.isLookup = checked;
+  if (!checked) {
+    m.lookupObject = null;
+    m.lookupMatchField = null;
+  }
+  this.updateMappedSources();
+}
+
 
   /** ===== Drag & drop ===== */
   handleDragStart(e) {
@@ -771,7 +842,7 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
         {
           id: null,
           projectId: this.selectedProjectId,
-          version: this.versionInput || '1.0',
+          version: this.versionInput || '',
           sourceColumn,
           targetField,
           isLookup: false,
@@ -845,7 +916,7 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
       newMappings.push({
         id: null,
         projectId: this.selectedProjectId,
-        version: this.versionInput || '1.0',
+        version: this.versionInput || '',
         sourceColumn: candidate,
         targetField: f.apiName,
         isLookup: false,
@@ -871,7 +942,7 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
         throw new Error('Please select a Project before saving.');
       }
 
-      // Limite 3 champs lookup max
+      /**limite 3 champs lookup max */
       const lookupCount = this.currentLookupCount;
       if (lookupCount > 3) {
         this.toast(
@@ -882,7 +953,10 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
         return;
       }
 
-      const ver = this.versionInput || '1.0';
+      const nextVersion = this.computeNextVersionForProject(
+        this.selectedProjectId
+      );
+      const ver = nextVersion;
       this.versionInput = ver;
 
       const payload = (this.mappings || [])
@@ -910,7 +984,9 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
         rowsJson: JSON.stringify(payload)
       });
 
-      this.toast('Success', 'Mappings saved.', 'success');
+      this.setLastVersionForProject(this.selectedProjectId, ver);
+
+      this.toast('Success', `Mappings saved as Version ${ver}`, 'success');
       this._refreshPreviewDebounced();
     } catch (error) {
       const msg =
@@ -926,7 +1002,7 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
   }
 
   async applySavedMappings(opts = {}) {
-    const { silent = false } = opts;
+    const { useLatest = false, silent = false } = opts;
 
     if (!this.selectedProjectId) {
       if (!silent) {
@@ -943,11 +1019,20 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
     }
 
     try {
-      const saved = await loadMappings({
-        projectId: this.selectedProjectId,
-        version: '',
-        objectApiName: this.selectedTargetObject
-      });
+      let saved;
+      if (useLatest) {
+        saved = await loadMappings({
+          projectId: this.selectedProjectId,
+          version: '',
+          objectApiName: this.selectedTargetObject
+        });
+      } else {
+        saved = await loadMappings({
+          projectId: this.selectedProjectId,
+          version: this.versionInput || '',
+          objectApiName: this.selectedTargetObject
+        });
+      }
 
       const rows = Array.isArray(saved) ? saved : [];
       if (!rows.length) {
@@ -960,20 +1045,55 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
         }
         return;
       }
+      const versionsSet = new Set();
+      rows.forEach((r) => {
+        const v = (
+          r.version ||
+          r.Version__c ||
+          r.Version ||
+          ''
+        ).toString();
+        if (v) versionsSet.add(v);
+      });
 
-      // Version fixe interne, pas d'historique
-      const effectiveVersion = this.versionInput || '1.0';
+      let effectiveVersion = this.versionInput;
+
+      if (useLatest || !effectiveVersion) {
+        const sorted = Array.from(versionsSet).sort(
+          (a, b) => parseFloat(b) - parseFloat(a)
+        );
+        effectiveVersion = sorted[0];
+      }
+
+      const filteredRows = rows.filter((r) => {
+        const v = (
+          r.version ||
+          r.Version__c ||
+          r.Version ||
+          ''
+        ).toString();
+        return v === effectiveVersion;
+      });
+
+      if (!filteredRows.length) {
+        if (!silent) {
+          this.toast('Info', 'No rows for selected version.', 'info');
+        }
+        return;
+      }
+
       this.versionInput = effectiveVersion;
+      this.setLastVersionForProject(this.selectedProjectId, effectiveVersion);
 
-      this.mappings = rows.map((r) => ({
-        id: r.id || r.Id || null,
-        projectId: r.projectId || r.Project__c || this.selectedProjectId,
+      this.mappings = filteredRows.map((r) => ({
+        id: r.id || null,
+        projectId: r.projectId || this.selectedProjectId,
         version: effectiveVersion,
-        sourceColumn: r.sourceColumn || r.SourceColumn__c,
-        targetField: r.targetField || r.TargetField__c,
-        isLookup: !!(r.isLookup ?? r.IsLookup__c),
-        lookupObject: r.lookupObject || r.LookupObject__c || null,
-        lookupMatchField: r.lookupMatchField || r.LookupMatchField__c || null
+        sourceColumn: r.sourceColumn,
+        targetField: r.targetField,
+        isLookup: !!r.isLookup,
+        lookupObject: r.lookupObject || null,
+        lookupMatchField: r.lookupMatchField || null
       }));
 
       const mapped = new Set();
@@ -988,7 +1108,11 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
       this._refreshPreviewDebounced();
 
       if (!silent) {
-        this.toast('Loaded', 'Existing mappings loaded.', 'success');
+        this.toast(
+          'Loaded',
+          `Loaded mappings for Version ${effectiveVersion}.`,
+          'success'
+        );
       }
     } catch (e) {
       if (!silent) {
@@ -1060,6 +1184,168 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
     this._refreshPreviewDebounced();
   }
 
+  /** ===== Versions Modal ===== */
+  async openVersionModal() {
+    if (!this.selectedProjectId) {
+      this.toast('Info', 'Select a project first.', 'info');
+      return;
+    }
+
+    if (!this.selectedTargetObject) {
+      this.toast(
+        'Info',
+        'Target object is missing for this project.',
+        'info'
+      );
+      return;
+    }
+
+    this.showVersionModal = true;
+    this.versionModalLoading = true;
+    this.versionModalError = '';
+    this.versionOptions = [];
+    this.versionPreviewHeaders = [];
+    this.versionPreviewRows = [];
+    this.versionModalMappingsByVersion = {};
+
+    try {
+      const saved = await loadMappings({
+        projectId: this.selectedProjectId,
+        version: '',
+        objectApiName: this.selectedTargetObject
+      });
+
+      const rows = Array.isArray(saved) ? saved : [];
+
+      if (!rows.length) {
+        this.versionModalError =
+          'No previous mappings found for this project.';
+        this.versionModalLoading = false;
+        return;
+      }
+
+      const byVersion = new Map();
+      rows.forEach((r) => {
+        const v = (
+          r.version ||
+          r.Version__c ||
+          r.Version ||
+          ''
+        ).toString() || '1.0';
+        if (!byVersion.has(v)) byVersion.set(v, []);
+        byVersion.get(v).push(r);
+      });
+
+      const versions = Array.from(byVersion.keys()).sort(
+        (a, b) => parseFloat(b) - parseFloat(a)
+      );
+
+      this.versionOptions = versions.map((v) => ({ value: v }));
+      this.versionModalMappingsByVersion = {};
+
+      versions.forEach((v) => {
+        this.versionModalMappingsByVersion[v] = (byVersion.get(v) || []).map(
+          (r) => ({
+            id: r.id || null,
+            projectId: r.projectId || this.selectedProjectId,
+            version: v,
+            sourceColumn: r.sourceColumn,
+            targetField: r.targetField,
+            isLookup: !!r.isLookup,
+            lookupObject: r.lookupObject || null,
+            lookupMatchField: r.lookupMatchField || null
+          })
+        );
+      });
+
+      this.selectedPreviewVersion = versions[0];
+      this.buildVersionPreview(this.selectedPreviewVersion);
+    } catch (e) {
+      this.versionModalError =
+        e?.body?.message || 'Failed to load mappings for this project.';
+    } finally {
+      this.versionModalLoading = false;
+    }
+  }
+
+  buildVersionPreview(version) {
+    const mappings = this.versionModalMappingsByVersion[version] || [];
+    if (!mappings.length) {
+      this.versionPreviewHeaders = [];
+      this.versionPreviewRows = [];
+      return;
+    }
+
+    const mappingByTarget = new Map();
+    mappings.forEach((m) => {
+      if (!mappingByTarget.has(m.targetField)) {
+        mappingByTarget.set(m.targetField, m);
+      }
+    });
+
+    const mappedTargets = (this.targetFields || [])
+      .filter((f) => mappingByTarget.has(f.apiName))
+      .map((f) => {
+        const m = mappingByTarget.get(f.apiName);
+        return {
+          ...f,
+          mappedSources: [
+            {
+              sourceColumn: m.sourceColumn
+            }
+          ]
+        };
+      });
+
+    this.versionPreviewHeaders = mappedTargets.map((f) => f.label);
+
+    const limit = this.previewRowLimit || 4;
+    const srcRows = Array.isArray(this._csvRows) ? this._csvRows : [];
+
+    if (!srcRows.length) {
+      const byColExamples = new Map();
+      mappedTargets.forEach((f) => {
+        const col = f.mappedSources[0]?.sourceColumn;
+        byColExamples.set(col, this._examplesForSource(col, limit));
+      });
+      const rowCount = Math.max(
+        1,
+        ...Array.from(byColExamples.values()).map((a) => a.length || 0)
+      );
+
+      this.versionPreviewRows = Array.from({ length: rowCount }).map(
+        (_, i) => {
+          const cells = mappedTargets.map((f) => {
+            const col = f.mappedSources[0]?.sourceColumn || '';
+            const ex = byColExamples.get(col) || [];
+            return ex[i] ?? '';
+          });
+          return { _key: `vrow-${version}-${i}`, cells };
+        }
+      );
+      return;
+    }
+
+    this.versionPreviewRows = srcRows.map((src, i) => {
+      const cells = mappedTargets.map((f) => {
+        const col = f.mappedSources[0]?.sourceColumn || '';
+        return col ? src?.[col] ?? '' : '';
+      });
+      return { _key: `vrow-${version}-${i}`, cells };
+    });
+  }
+
+  handleVersionSelect(e) {
+    const v = e.currentTarget?.dataset?.version;
+    if (!v) return;
+    this.selectedPreviewVersion = v;
+    this.buildVersionPreview(v);
+  }
+
+  handleVersionModalClose() {
+    this.showVersionModal = false;
+  }
+
   /** ===== Sidebar event ===== */
   notifySidebar() {
     try {
@@ -1105,8 +1391,7 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
   }
 
   connectedCallback() {
-    // On fige la version interne par défaut à 1.0 (sans historique)
-    this.versionInput = this.version || '1.0';
+    this.versionInput = this.version || '';
 
     if (
       Array.isArray(this._csvRows) &&

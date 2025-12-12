@@ -2,8 +2,8 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 11-23-2025
- * @last modified by  : khalidousowba
+ * @last modified on  : 10-14-2025
+ * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 public with sharing class ScheduleRepository {
     
@@ -14,7 +14,7 @@ public with sharing class ScheduleRepository {
                 upsert schedule;
                 return schedule;
             } catch (DmlException e) {
-                 //ErrorLogService.logException(e);
+                 ErrorLogService.logException(e);
                  throw new DmlException(e.getMessage());
             }
         }
@@ -26,7 +26,7 @@ public with sharing class ScheduleRepository {
         try {
             delete [SELECT Id FROM Schedule__c WHERE Id = :scheduleId LIMIT 1];
         } catch (DmlException e) {
-            //ErrorLogService.logException(e);
+            ErrorLogService.logException(e);
             throw new ApplicationException(e.getMessage());
         }
     
@@ -102,7 +102,7 @@ public with sharing class ScheduleRepository {
                     LIMIT 1
                 ];
             }catch(ApplicationException e){
-                   //ErrorLogService.logException(e);
+                   ErrorLogService.logException(e);
                 throw new ApplicationException(e.getMessage());
             }
           }
@@ -111,7 +111,7 @@ public with sharing class ScheduleRepository {
 
 
      // Récupérer les plannifications par la fréquence
-    public  static List<Schedule__c> getSchedulesByFrequency(ImportMateEnum.FrequencyEnum frequence) {
+    public  static List<Schedule__c> getSchedulesByFrequency(ScheduleService.FrequencyEnum frequence) {
           if(SecurityUtils.isCreateable(Schema.Schedule__c.SObjectType)){
             try {
                 String keyword = String.valueOf(frequence);

@@ -1,30 +1,24 @@
-/**
- * @description       : 
- * @author            : khalidousowba
- * @group             : 
- * @last modified on  : 12-02-2025
- * @last modified by  : khalidousowba
-**/
 @isTest
 public class ValidationUtilsTest {
 
     @testSetup
     static void setup() {
+        // Create test data if needed
         TestDataFactory.createAdminUser();
     }
 
-    //Test ValidationResult inner class
+    // Test ValidationResult inner class
     @isTest
     static void testValidationResultConstructors() {
         Test.startTest();
         
-        //Test simple constructor
+        // Test simple constructor
         ValidationUtils.ValidationResult result1 = new ValidationUtils.ValidationResult(true);
         Assert.areEqual(true, result1.isValid, 'Should be valid');
         Assert.areEqual(null, result1.errorMessage, 'Error message should be null');
         Assert.areEqual(false, result1.isWarning, 'Should not be a warning by default');
         
-        //Test full constructor without isWarning
+        // Test full constructor without isWarning
         Map<String, Object> testContext = new Map<String, Object>{'testKey' => 'testValue'};
         ValidationUtils.ValidationResult result2 = new ValidationUtils.ValidationResult(
             false, 'Test error', 'TEST_ERROR', testContext
@@ -35,7 +29,7 @@ public class ValidationUtilsTest {
         Assert.areEqual(testContext, result2.context, 'Context should match');
         Assert.areEqual(false, result2.isWarning, 'Should not be a warning by default');
         
-        //Test constructor with isWarning
+        // Test constructor with isWarning
         ValidationUtils.ValidationResult result3 = new ValidationUtils.ValidationResult(
             true, 'Test warning', 'WARNING_CODE', testContext, true
         );
@@ -46,23 +40,23 @@ public class ValidationUtilsTest {
         Test.stopTest();
     }
 
-    //Test email validation
+    // Test email validation
     @isTest
     static void testValidateEmail() {
         Test.startTest();
         
-        //Valid emails
+        // Valid emails
         ValidationUtils.ValidationResult result1 = ValidationUtils.validateEmail('test@example.com', 'Email');
         Assert.isTrue(result1.isValid, 'Valid email should pass');
         
         ValidationUtils.ValidationResult result2 = ValidationUtils.validateEmail('user.name+tag@domain.co.uk', 'Email');
         Assert.isFalse(result2.isValid, 'Complex valid email should not pass');
         
-        //Invalid emails
+        // Invalid emails
         ValidationUtils.ValidationResult result3 = ValidationUtils.validateEmail('invalid-email', 'Email');
         Assert.isFalse(result3.isValid, 'Invalid email should fail');
         Assert.areEqual(Constants.INVALID_EMAIL_FORMAT, result3.errorCode, 'Error code should match');
-        Assert.isTrue(result3.errorMessage.contains('Invalid email format'), 'Error message should be descriptive');
+        Assert.isTrue(result3.errorMessage.contains('Format email invalide'), 'Error message should be descriptive');
         
         ValidationUtils.ValidationResult result4 = ValidationUtils.validateEmail('test@', 'Email');
         Assert.isFalse(result4.isValid, 'Incomplete email should fail');
@@ -70,19 +64,19 @@ public class ValidationUtilsTest {
         Test.stopTest();
     }
     
-    //Test date validation
+    // Test date validation
     @isTest
     static void testValidateDate() {
         Test.startTest();
         
-        //Valid dates
+        // Valid dates
         ValidationUtils.ValidationResult result1 = ValidationUtils.validateDate('2023-12-25', 'DateField');
         Assert.isTrue(result1.isValid, 'Valid ISO date should pass');
         
         ValidationUtils.ValidationResult result2 = ValidationUtils.validateDate('2023-01-01', 'DateField');
         Assert.isTrue(result2.isValid, 'Valid date should pass');
         
-        //Invalid dates
+        // Invalid dates
         ValidationUtils.ValidationResult result3 = ValidationUtils.validateDate('invalid-date', 'DateField');
         Assert.isFalse(result3.isValid, 'Invalid date should fail');
         Assert.areEqual(Constants.INVALID_DATE_FORMAT, result3.errorCode, 'Error code should match');
@@ -93,19 +87,19 @@ public class ValidationUtilsTest {
         Test.stopTest();
     }
 
-    //Test datetime validation
+    // Test datetime validation
     @isTest
     static void testValidateDatetime() {
         Test.startTest();
         
-        //Valid datetimes
+        // Valid datetimes
         ValidationUtils.ValidationResult result1 = ValidationUtils.validateDatetime('2023-12-25 10:30:00', 'DateTimeField');
         Assert.isTrue(result1.isValid, 'Valid datetime should pass');
         
         ValidationUtils.ValidationResult result2 = ValidationUtils.validateDatetime('2023-01-01 00:00:00', 'DateTimeField');
         Assert.isTrue(result2.isValid, 'Valid datetime should pass');
         
-        //Invalid datetimes
+        // Invalid datetimes
         ValidationUtils.ValidationResult result3 = ValidationUtils.validateDatetime('invalid-datetime', 'DateTimeField');
         Assert.isFalse(result3.isValid, 'Invalid datetime should fail');
         Assert.areEqual(Constants.INVALID_DATETIME_FORMAT, result3.errorCode, 'Error code should match');
@@ -113,12 +107,12 @@ public class ValidationUtilsTest {
         Test.stopTest();
     }
 
-    //Test number validation
+    // Test number validation
     @isTest
     static void testValidateNumber() {
         Test.startTest();
         
-        //Valid numbers
+        // Valid numbers
         ValidationUtils.ValidationResult result1 = ValidationUtils.validateNumber('123.45', 'NumberField');
         Assert.isTrue(result1.isValid, 'Valid decimal should pass');
         
@@ -131,7 +125,7 @@ public class ValidationUtilsTest {
         ValidationUtils.ValidationResult result4 = ValidationUtils.validateNumber('0', 'NumberField');
         Assert.isTrue(result4.isValid, 'Zero should pass');
         
-        //Invalid numbers
+        // Invalid numbers
         ValidationUtils.ValidationResult result5 = ValidationUtils.validateNumber('abc', 'NumberField');
         Assert.isFalse(result5.isValid, 'Non-numeric string should fail');
         Assert.areEqual(Constants.ERROR_CODE_INVALID_NUMBER_FORMAT, result5.errorCode, 'Error code should match');
@@ -142,70 +136,70 @@ public class ValidationUtilsTest {
         Test.stopTest();
     }
 
-    //Test required field validation
+    // Test required field validation
     @isTest
     static void testValidateRequired() {
         Test.startTest();
         
-        //Valid non-empty values
+        // Valid non-empty values
         ValidationUtils.ValidationResult result1 = ValidationUtils.validateRequired('Test Value', 'Name', 'Account');
         Assert.isTrue(result1.isValid, 'Non-empty value should pass');
         
         ValidationUtils.ValidationResult result2 = ValidationUtils.validateRequired('0', 'Amount', 'Account');
         Assert.isTrue(result2.isValid, 'Zero string should pass');
         
-        //Test empty/null values - this will depend on field metadata
+        // Test empty/null values - this will depend on field metadata
         ValidationUtils.ValidationResult result3 = ValidationUtils.validateRequired('', 'TestField', 'Account');
         
         ValidationUtils.ValidationResult result4 = ValidationUtils.validateRequired(null, 'TestField', 'Account');
-        //Result depends on whether field is nullable
+        // Result depends on whether field is nullable
         
         Test.stopTest();
     }
 
-    //Test field size validation
+    // Test field size validation
     @isTest
     static void testValidateFieldSize() {
         Test.startTest();
         
-        //Test with Account.Name field (typically has a size limit)
+        // Test with Account.Name field (typically has a size limit)
         ValidationUtils.ValidationResult result1 = ValidationUtils.validateFieldSize('Test Account', 'Name', 'Account');
         Assert.isTrue(result1.isValid, 'Normal length should pass');
         
-        //Test with very long string
+        // Test with very long string
         String longString = 'A'.repeat(500);
         ValidationUtils.ValidationResult result2 = ValidationUtils.validateFieldSize(longString, 'Name', 'Account');
-        //This might fail if the field has size limits
+        // This might fail if the field has size limits
         
         Test.stopTest();
     }
 
-    //Test cache methods
+    // Test cache methods
     @isTest
     static void testCacheMethods() {
         Test.startTest();
         
-        //Test getCachedFieldNullable
+        // Test getCachedFieldNullable
         Boolean isNullable1 = ValidationUtils.getCachedFieldNullable('Account', 'Name');
-        Boolean isNullable2 = ValidationUtils.getCachedFieldNullable('Account', 'Name'); //Should use cache
+        Boolean isNullable2 = ValidationUtils.getCachedFieldNullable('Account', 'Name'); // Should use cache
         Assert.areEqual(isNullable1, isNullable2, 'Cache should return consistent results');
         
-        //Test getCachedFieldDescribe
+        // Test getCachedFieldDescribe
         Schema.DescribeFieldResult fieldDescribe1 = ValidationUtils.getCachedFieldDescribe('Account', 'Name');
         Schema.DescribeFieldResult fieldDescribe2 = ValidationUtils.getCachedFieldDescribe('Account', 'Name');
         Assert.areEqual(fieldDescribe1.getName(), fieldDescribe2.getName(), 'Field describe should be consistent');
         
-        //Test clearCache
+        // Test clearCache
         ValidationUtils.clearCache();
         
-        //Test with non-existent field
+        // Test with non-existent field
         Boolean isNullableInvalid = ValidationUtils.getCachedFieldNullable('Account', 'NonExistentField');
         Assert.isTrue(isNullableInvalid, 'Non-existent field should default to nullable');
         
         Test.stopTest();
     }
 
-    //Test error building methods
+    // Test error building methods
     @isTest
     static void testBuildValidationError() {
         Test.startTest();
@@ -226,7 +220,7 @@ public class ValidationUtilsTest {
         Test.stopTest();
     }
 
-    //Test createValidationError method
+    // Test createValidationError method
     @isTest
     static void testCreateValidationError() {
         Test.startTest();
@@ -246,14 +240,14 @@ public class ValidationUtilsTest {
         Test.stopTest();
     }
 
-    //Test ValidationException conversion
+    // Test ValidationException conversion
     @isTest
     static void testConvertValidationExceptionToImportLog() {
         Test.startTest();
         
         ImportExecution__c execution = TestDataFactory.createImportExecution();
         
-        //Create a ValidationException with context
+        // Create a ValidationException with context
         Map<String, Object> context = new Map<String, Object>{
             'sourceColumn' => 'TestSourceColumn',
             'fieldName' => 'TestFieldName'
@@ -276,7 +270,7 @@ public class ValidationUtilsTest {
     static void testValidateBoolean() {
         Test.startTest();
         
-        //Valid boolean values
+        // Valid boolean values
         ValidationUtils.ValidationResult result1 = ValidationUtils.validateBoolean('true', 'DoNotCall');
         Assert.isTrue(result1.isValid, 'String "true" should be valid');
         
@@ -299,14 +293,14 @@ public class ValidationUtilsTest {
         Test.stopTest();
     }
 
-    //Test ValidationException conversion without context
+    // Test ValidationException conversion without context
     @isTest
     static void testConvertValidationExceptionToImportLogNoContext() {
         Test.startTest();
         
         ImportExecution__c execution = TestDataFactory.createImportExecution();
         
-        //Create a ValidationException without context
+        // Create a ValidationException without context
         ValidationException ve = new ValidationException('Simple validation error', 'SIMPLE_ERROR');
         
         ImportLog__c error = ValidationUtils.convertValidationExceptionToImportLog(ve, execution.Id, 20);
@@ -320,35 +314,35 @@ public class ValidationUtilsTest {
         Test.stopTest();
     }
 
-    //Test picklist validation - this requires mocking ObjectMetadataService
+    // Test picklist validation - this requires mocking ObjectMetadataService
     @isTest
     static void testValidatePicklist() {
         Test.startTest();
         
-        //Test with a known picklist field on Account (e.g., Industry)
+        // Test with a known picklist field on Account (e.g., Industry)
         ValidationUtils.ValidationResult result1 = ValidationUtils.validatePicklist('Technology', 'Industry', 'Account');
-        //Result will depend on the actual picklist values in the org
+        // Result will depend on the actual picklist values in the org
         
-        //Test with empty value (should be valid)
+        // Test with empty value (should be valid)
         ValidationUtils.ValidationResult result2 = ValidationUtils.validatePicklist('', 'Industry', 'Account');
         Assert.isTrue(result2.isValid, 'Empty picklist value should be valid');
         
         ValidationUtils.ValidationResult result3 = ValidationUtils.validatePicklist(null, 'Industry', 'Account');
         Assert.isTrue(result3.isValid, 'Null picklist value should be valid');
         
-        //Test with non-existent object
+        // Test with non-existent object
         ValidationUtils.ValidationResult result4 = ValidationUtils.validatePicklist('TestValue', 'TestField', 'NonExistentObject');
         Assert.isFalse(result4.isValid, 'Non-existent object should fail validation');
         
         Test.stopTest();
     }
 
-    //Test validation with special characters
+    // Test validation with special characters
     @isTest
     static void testSpecialCharacters() {
         Test.startTest();
         
-        //Test email with special characters
+        // Test email with special characters
         ValidationUtils.ValidationResult result1 = ValidationUtils.validateEmail('test+tag@example.com', 'Email');
         Assert.isFalse(result1.isValid, 'Email with + should not be valid');
         
@@ -358,12 +352,12 @@ public class ValidationUtilsTest {
         Test.stopTest();
     }
 
-    //Test ValidationType enum
+    // Test ValidationType enum
     @isTest
     static void testValidationTypeEnum() {
         Test.startTest();
         
-        //Test enum values exist
+        // Test enum values exist
         ValidationUtils.ValidationType emailType = ValidationUtils.ValidationType.EMAIL;
         ValidationUtils.ValidationType dateType = ValidationUtils.ValidationType.DATE_TYPE;
         ValidationUtils.ValidationType datetimeType = ValidationUtils.ValidationType.DATETIME_TYPE;
@@ -383,47 +377,47 @@ public class ValidationUtilsTest {
         Test.stopTest();
     }
 
-    //Test getValidationTypeForField method
+    // Test getValidationTypeForField method
     @isTest
     static void testGetValidationTypeForField() {
         Test.startTest();
         
-        //Test with Account object fields
+        // Test with Account object fields
         ValidationUtils.ValidationType nameType = ValidationUtils.getValidationTypeForField('Name', 'Account');
         Assert.areEqual(ValidationUtils.ValidationType.FIELD_SIZE, nameType, 'Name field should be FIELD_SIZE type');
         
         ValidationUtils.ValidationType industryType = ValidationUtils.getValidationTypeForField('Industry', 'Account');
         Assert.areEqual(ValidationUtils.ValidationType.PICKLIST, industryType, 'Industry field should be PICKLIST type');
         
-        //Test with non-existent field
+        // Test with non-existent field
         ValidationUtils.ValidationType nonExistentType = ValidationUtils.getValidationTypeForField('NonExistentField', 'Account');
         Assert.areEqual(ValidationUtils.ValidationType.FIELD_SIZE, nonExistentType, 'Non-existent field should default to FIELD_SIZE');
         
-        //Test with non-existent object
+        // Test with non-existent object
         ValidationUtils.ValidationType nonExistentObjectType = ValidationUtils.getValidationTypeForField('Name', 'NonExistentObject');
         Assert.areEqual(ValidationUtils.ValidationType.FIELD_SIZE, nonExistentObjectType, 'Non-existent object should default to FIELD_SIZE');
         
         Test.stopTest();
     }
 
-    //Test mapSalesforceTypeToValidationType method
+    // Test mapSalesforceTypeToValidationType method
     @isTest
     static void testMapSalesforceTypeToValidationType() {
         Test.startTest();
         
-        //Test email type mapping
+        // Test email type mapping
         ValidationUtils.ValidationType emailType = ValidationUtils.mapSalesforceTypeToValidationType(Schema.DisplayType.EMAIL);
         Assert.areEqual(ValidationUtils.ValidationType.EMAIL, emailType, 'EMAIL DisplayType should map to EMAIL ValidationType');
         
-        //Test date type mapping
+        // Test date type mapping
         ValidationUtils.ValidationType dateType = ValidationUtils.mapSalesforceTypeToValidationType(Schema.DisplayType.DATE);
         Assert.areEqual(ValidationUtils.ValidationType.DATE_TYPE, dateType, 'DATE DisplayType should map to DATE_TYPE ValidationType');
         
-        //Test datetime type mapping
+        // Test datetime type mapping
         ValidationUtils.ValidationType datetimeType = ValidationUtils.mapSalesforceTypeToValidationType(Schema.DisplayType.DATETIME);
         Assert.areEqual(ValidationUtils.ValidationType.DATETIME_TYPE, datetimeType, 'DATETIME DisplayType should map to DATETIME_TYPE ValidationType');
         
-        //Test number type mappings
+        // Test number type mappings
         ValidationUtils.ValidationType doubleType = ValidationUtils.mapSalesforceTypeToValidationType(Schema.DisplayType.DOUBLE);
         Assert.areEqual(ValidationUtils.ValidationType.NUMBER_TYPE, doubleType, 'DOUBLE DisplayType should map to NUMBER_TYPE ValidationType');
         
@@ -436,26 +430,26 @@ public class ValidationUtilsTest {
         ValidationUtils.ValidationType integerType = ValidationUtils.mapSalesforceTypeToValidationType(Schema.DisplayType.INTEGER);
         Assert.areEqual(ValidationUtils.ValidationType.NUMBER_TYPE, integerType, 'INTEGER DisplayType should map to NUMBER_TYPE ValidationType');
         
-        //Test picklist type mappings
+        // Test picklist type mappings
         ValidationUtils.ValidationType picklistType = ValidationUtils.mapSalesforceTypeToValidationType(Schema.DisplayType.PICKLIST);
         Assert.areEqual(ValidationUtils.ValidationType.PICKLIST, picklistType, 'PICKLIST DisplayType should map to PICKLIST ValidationType');
         
         ValidationUtils.ValidationType textareaType = ValidationUtils.mapSalesforceTypeToValidationType(Schema.DisplayType.TEXTAREA);
         Assert.areEqual(ValidationUtils.ValidationType.FIELD_SIZE, textareaType, 'TEXTAREA DisplayType should map to FIELD_SIZE ValidationType');
         
-        //Test default case
+        // Test default case
         ValidationUtils.ValidationType defaultType = ValidationUtils.mapSalesforceTypeToValidationType(Schema.DisplayType.STRING);
         Assert.areEqual(ValidationUtils.ValidationType.FIELD_SIZE, defaultType, 'Unknown DisplayType should default to FIELD_SIZE ValidationType');
         
         Test.stopTest();
     }
 
-    //Test validateFieldFormat method
+    // Test validateFieldFormat method
     @isTest
     static void testValidateFieldFormat() {
         Test.startTest();
         
-        //Test EMAIL type
+        // Test EMAIL type
         ValidationUtils.ValidationResult emailResult = ValidationUtils.validateFieldFormat(
             'test@example.com', 
             ValidationUtils.ValidationType.EMAIL, 
@@ -472,7 +466,7 @@ public class ValidationUtilsTest {
         );
         Assert.isFalse(invalidEmailResult.isValid, 'Invalid email should fail format validation');
         
-        //Test DATE_TYPE
+        // Test DATE_TYPE
         ValidationUtils.ValidationResult dateResult = ValidationUtils.validateFieldFormat(
             '2023-12-25', 
             ValidationUtils.ValidationType.DATE_TYPE, 
@@ -481,7 +475,7 @@ public class ValidationUtilsTest {
         );
         Assert.isTrue(dateResult.isValid, 'Valid date should pass format validation');
         
-        //Test DATETIME_TYPE
+        // Test DATETIME_TYPE
         ValidationUtils.ValidationResult datetimeResult = ValidationUtils.validateFieldFormat(
             '2023-12-25 10:30:00', 
             ValidationUtils.ValidationType.DATETIME_TYPE, 
@@ -490,7 +484,7 @@ public class ValidationUtilsTest {
         );
         Assert.isTrue(datetimeResult.isValid, 'Valid datetime should pass format validation');
         
-        //Test NUMBER_TYPE
+        // Test NUMBER_TYPE
         ValidationUtils.ValidationResult numberResult = ValidationUtils.validateFieldFormat(
             '123.45', 
             ValidationUtils.ValidationType.NUMBER_TYPE, 
@@ -499,16 +493,16 @@ public class ValidationUtilsTest {
         );
         Assert.isTrue(numberResult.isValid, 'Valid number should pass format validation');
         
-        //Test PICKLIST
+        // Test PICKLIST
         ValidationUtils.ValidationResult picklistResult = ValidationUtils.validateFieldFormat(
             'Technology', 
             ValidationUtils.ValidationType.PICKLIST, 
             'Industry', 
             'Account'
         );
-        //Result depends on actual picklist values in org
+        // Result depends on actual picklist values in org
         
-        //Test FIELD_SIZE
+        // Test FIELD_SIZE
         ValidationUtils.ValidationResult fieldSizeResult = ValidationUtils.validateFieldFormat(
             'Test Value', 
             ValidationUtils.ValidationType.FIELD_SIZE, 
@@ -517,7 +511,7 @@ public class ValidationUtilsTest {
         );
         Assert.isTrue(fieldSizeResult.isValid, 'Normal field size should pass validation');
         
-        //Test empty value (should always be valid)
+        // Test empty value (should always be valid)
         ValidationUtils.ValidationResult emptyResult = ValidationUtils.validateFieldFormat(
             '', 
             ValidationUtils.ValidationType.EMAIL, 
@@ -537,16 +531,16 @@ public class ValidationUtilsTest {
         Test.stopTest();
     }
 
-    //Test validateLookup method
+    // Test validateLookup method
     @isTest
     static void testValidateLookup() {
         Test.startTest();
         
-        //Create test Account for lookup validation
+        // Create test Account for lookup validation
         Account testAccount = new Account(Name = 'Test Account for Lookup');
         insert testAccount;
         
-        //Test valid lookup
+        // Test valid lookup
         ValidationUtils.ValidationResult validLookup = ValidationUtils.validateLookup(
             'Test Account for Lookup', 
             'Account', 
@@ -555,7 +549,7 @@ public class ValidationUtilsTest {
         );
         Assert.isTrue(validLookup.isValid, 'Valid lookup should pass validation');
         
-        //Test invalid lookup (without objectName, defaults to warning)
+        // Test invalid lookup (without objectName, defaults to warning)
         ValidationUtils.ValidationResult invalidLookup = ValidationUtils.validateLookup(
             'Non-existent Account', 
             'Account', 
@@ -567,7 +561,7 @@ public class ValidationUtilsTest {
         Assert.areEqual(Constants.LOOKUP_VALUE_NOT_FOUND, invalidLookup.errorCode, 'Error code should be LOOKUP_VALUE_NOT_FOUND');
         Assert.isTrue(invalidLookup.errorMessage.contains('LOOKUP NOT FOUND'), 'Error message should indicate lookup not found');
         
-        //Test empty value (should be valid)
+        // Test empty value (should be valid)
         ValidationUtils.ValidationResult emptyLookup = ValidationUtils.validateLookup(
             '', 
             'Account', 
@@ -584,7 +578,7 @@ public class ValidationUtilsTest {
         );
         Assert.isTrue(nullLookup.isValid, 'Null lookup value should be valid');
         
-        //Test with non-existent object
+        // Test with non-existent object
         ValidationUtils.ValidationResult nonExistentObjectLookup = ValidationUtils.validateLookup(
             'Test Value', 
             'NonExistentObject', 
@@ -597,13 +591,13 @@ public class ValidationUtilsTest {
         Test.stopTest();
     }
 
-    //Test error handling in validateFieldFormat
+    // Test error handling in validateFieldFormat
     @isTest
     static void testValidateFieldFormatErrorHandling() {
         Test.startTest();
         
         try {
-            //This should throw a ValidationException due to the error handling in validateFieldFormat
+            // This should throw a ValidationException due to the error handling in validateFieldFormat
             ValidationUtils.validateFieldFormat(
                 'test@example.com', 
                 ValidationUtils.ValidationType.EMAIL, 
@@ -611,7 +605,7 @@ public class ValidationUtilsTest {
                 'ObjectNotFound'
             );
         } catch (ValidationException ve) {
-            Assert.isTrue(ve.getMessage().contains('Error during format validation'), 'Error message should be descriptive');
+            Assert.isTrue(ve.getMessage().contains('Erreur lors de la validation du format'), 'Error message should be descriptive');
             Assert.areEqual(Constants.ERROR_CODE_VALIDATION, ve.getErrorCode(), 'Error code should be VALIDATION_ERROR');
         }
         
@@ -623,7 +617,7 @@ public class ValidationUtilsTest {
     static void testComprehensiveFieldValidationWorkflow() {
         Test.startTest();
         
-        //Test the complete workflow: getValidationTypeForField -> validateFieldFormat
+        // Test the complete workflow: getValidationTypeForField -> validateFieldFormat
         ValidationUtils.ValidationType fieldType = ValidationUtils.getValidationTypeForField('Name', 'Account');
         ValidationUtils.ValidationResult result = ValidationUtils.validateFieldFormat(
             'Test Account Name', 
@@ -636,26 +630,26 @@ public class ValidationUtilsTest {
         //Test with invalid data
         ValidationUtils.ValidationType emailType = ValidationUtils.getValidationTypeForField('Name', 'Account'); 
         ValidationUtils.ValidationResult invalidResult = ValidationUtils.validateFieldFormat(
-            'A'.repeat(1000), //Very long string
+            'A'.repeat(1000), // Very long string
             emailType, 
             'Name', 
             'Account'
         );
-        //Result depends on actual field size limits
+        // Result depends on actual field size limits
         
         Test.stopTest();
     }
     
-    //Test lookup validation with objectName parameter for required field determination
+    // Test lookup validation with objectName parameter for required field determination
     @isTest
     static void testValidateLookupWithObjectName() {
         Test.startTest();
         
-        //Create test Account for lookup validation
+        // Create test Account for lookup validation
         Account testAccount = new Account(Name = 'Test Account for Lookup');
         insert testAccount;
         
-        //Test lookup with objectName parameter for optional field (ParentId is nullable in Account)
+        // Test lookup with objectName parameter for optional field (ParentId is nullable in Account)
         ValidationUtils.ValidationResult optionalLookup = ValidationUtils.validateLookup(
             'Non-existent Account', 
             'Account', 
@@ -664,12 +658,12 @@ public class ValidationUtilsTest {
             'Account'
         );
         
-        //ParentId is optional in Account (nullable), so should return warning, not error
+        // ParentId is optional in Account (nullable), so should return warning, not error
         Assert.isTrue(optionalLookup.isValid, 'Optional field lookup not found should pass (isValid = true)');
         Assert.isTrue(optionalLookup.isWarning, 'Optional field lookup not found should be a warning');
         Assert.isTrue(optionalLookup.errorMessage.contains('LOOKUP NOT FOUND'), 'Error message should indicate lookup not found');
         
-        //Test lookup for a valid value with optional field
+        // Test lookup for a valid value with optional field
         ValidationUtils.ValidationResult validOptionalLookup = ValidationUtils.validateLookup(
             'Test Account for Lookup', 
             'Account', 
@@ -680,7 +674,7 @@ public class ValidationUtilsTest {
         Assert.isTrue(validOptionalLookup.isValid, 'Valid lookup should pass validation');
         Assert.isFalse(validOptionalLookup.isWarning, 'Valid lookup should not be a warning');
         
-        //Test empty value
+        // Test empty value
         ValidationUtils.ValidationResult emptyLookup = ValidationUtils.validateLookup(
             '', 
             'Account', 
@@ -694,12 +688,12 @@ public class ValidationUtilsTest {
         Test.stopTest();
     }
     
-    //Test ValidationResult with warning flag
+    // Test ValidationResult with warning flag
     @isTest
     static void testValidationResultWithWarning() {
         Test.startTest();
         
-        //Test constructor with warning
+        // Test constructor with warning
         Map<String, Object> testContext = new Map<String, Object>{'testKey' => 'testValue'};
         ValidationUtils.ValidationResult warningResult = new ValidationUtils.ValidationResult(
             true, 'Test warning message', 'WARNING_CODE', testContext, true
@@ -709,7 +703,7 @@ public class ValidationUtilsTest {
         Assert.areEqual('Test warning message', warningResult.errorMessage, 'Warning should have error message');
         Assert.isTrue(warningResult.isWarning, 'isWarning should be true');
         
-        //Test error result (not a warning)
+        // Test error result (not a warning)
         ValidationUtils.ValidationResult errorResult = new ValidationUtils.ValidationResult(
             false, 'Test error message', 'ERROR_CODE', testContext, false
         );

@@ -2,7 +2,7 @@
    @description       : Data source selector page - shows selection cards for CSV or SOQL
    @author            : ChangeMeIn@UserSettingsUnder.SFDoc
    @group             : 
-   @last modified on  : 11-11-2025
+   @last modified on  : 12-12-2025
    @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
@@ -42,6 +42,10 @@
         </c-data-source-selector-card>
       </div>
       <!-- END CARD QUERY UPLOAD -->
+       <button type="button" class="btn btn--ghost btn--xl" onclick={handleBackToMain}>
+        <lightning-icon icon-name="utility:back" size="x-small"></lightning-icon>
+        <span >Back to Data Source</span>
+      </button> 
     </div>
   </div>
 </template>

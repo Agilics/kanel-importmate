@@ -1,22 +1,31 @@
+/**
+ * Publish import status updates via Platform Events.
+ */
 public with sharing class PublisherService {
-
+    
     public static void publishImportStatus(String executionId, String status, Decimal progress, String message) {
         try {
-            publishPlatformEvent(executionId, status, progress, message);
+            publishViaPlatformEvent(executionId, status, progress, message);
+            
         } catch (Exception e) {
             ErrorLogService.logException(e);
         }
     }
-
+    
+    /**
+     * Publishes import status updates with only required parameters
+     * @param executionId The execution ID
+     * @param status The current status
+     */
     public static void publishImportStatus(String executionId, String status) {
         publishImportStatus(executionId, status, null, null);
     }
-
+    
     public static void publishImportStatus(String executionId, String status, Decimal progress) {
         publishImportStatus(executionId, status, progress, null);
     }
 
-    private static void publishPlatformEvent(String executionId, String status, Decimal progress, String message) {
+    private static void publishViaPlatformEvent(String executionId, String status, Decimal progress, String message) {
         try {
             ImportStatusEvent__e platformEvent = new ImportStatusEvent__e(
                 ExecutionId__c = executionId,
@@ -24,27 +33,38 @@ public with sharing class PublisherService {
                 Progress__c = progress,
                 Message__c = message
             );
-
+            
+            //Publish the platform event
             Database.SaveResult result = EventBus.publish(platformEvent);
-
+            
             if (!result.isSuccess()) {
                 String errorMessage = 'Platform Event publish failed: ';
                 for (Database.Error error : result.getErrors()) {
                     errorMessage += error.getMessage() + '; ';
                 }
-                ErrorLogService.logError(-1, 'PlatformEvent_Publish_Error', errorMessage, '');
+                ErrorLogService.logError(
+                    -1,
+                    'PlatformEvent_Publish_Error',
+                    errorMessage,
+                    ''
+                );
             }
-
+            
         } catch (Exception e) {
-            ErrorLogService.logError(e.getLineNumber(), 'PlatformEvent_Publish_Error',
-                'Failed to publish Platform Event: ' + e.getMessage(), e.getStackTraceString());
+            ErrorLogService.logError(
+                e.getLineNumber(),
+                'PlatformEvent_Publish_Error',
+                'Failed to publish Platform Event: ' + e.getMessage(),
+                e.getStackTraceString()
+            );
         }
     }
     
     public static void publishBatchProgress(String executionId, Integer processedRecords, Integer totalRecords, String currentStatus) {
         Decimal progress = totalRecords > 0 ? (processedRecords * 100.0 / totalRecords).setScale(0) : 0;
-        String message = String.format('Processed {0} of {1} records ({2}%)',
+        String message = String.format('Processed {0} of {1} records ({2}%)', 
             new List<String>{String.valueOf(processedRecords), String.valueOf(totalRecords), String.valueOf(progress)});
+        
         publishImportStatus(executionId, currentStatus, progress, message);
     }
 
@@ -54,15 +74,9 @@ public with sharing class PublisherService {
 
     public static void publishExecutionCompleted(String executionId, Boolean success, Integer processedRecords, Integer failedRecords) {
         String status = success ? Constants.EXECUTION_STATUS_COMPLETED : Constants.EXECUTION_STATUS_FAILED;
-        String message = String.format('Execution completed. Processed: {0}, Failed: {1}',
+        String message = String.format('Execution completed. Processed: {0}, Failed: {1}', 
             new List<String>{String.valueOf(processedRecords), String.valueOf(failedRecords)});
-        publishImportStatus(executionId, status, 100, message);
-    }
-
-    public static void publishExecutionCompleted(String executionId, Boolean success, Integer processedRecords, Integer failedRecords, Integer totalErrors) {
-        String status = success ? Constants.EXECUTION_STATUS_COMPLETED : Constants.EXECUTION_STATUS_FAILED;
-        String message = String.format('Execution completed. Processed: {0}, Failed Lines: {1}, Total Errors: {2}',
-            new List<String>{String.valueOf(processedRecords), String.valueOf(failedRecords), String.valueOf(totalErrors)});
+        
         publishImportStatus(executionId, status, 100, message);
     }
 }

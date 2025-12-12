@@ -1,102 +1,108 @@
 /**
- * @description       : 
- * @author            : khalidousowba
- * @group             : 
- * @last modified on  : 12-02-2025
- * @last modified by  : khalidousowba
-**/
+ * @description Test class for ImportUtils
+ */
 @isTest
 public class ImportUtilsTest {
-
+    
     @TestSetup
-    static void setupTestData() {
-        TestDataFactory.createAdminUser();
+    static void testSetup() {
+        //Create test project
         ImportProject__c project = TestDataFactory.createImportProject('Account');
+        
+        //Create test execution
         ImportExecution__c execution = TestDataFactory.createImportExecution(project.Id);
+        
+        //Create test field mappings
         TestDataFactory.createFieldMapping(project.Id, 'Name', 'Name');
-
+        TestDataFactory.createFieldMapping(project.Id, 'Industry', 'Industry');
+        TestDataFactory.createFieldMapping(project.Id, 'AccountNumber', 'AccountNumber');
+        
+        //Create lookup accounts for testing
         List<Account> lookupAccounts = new List<Account>();
         for (Integer i = 0; i < 3; i++) {
             lookupAccounts.add(new Account(
                 Name = 'Lookup Account ' + i,
-                AccountNumber = 'LOOKUP-' + String.valueOf(i).leftPad(5, '0')
+                AccountNumber = 'LOOKUP-' + String.valueOf(i).leftPad(5, '0'),
+                Industry = 'Technology',
+                Type = 'Customer'
             ));
         }
         insert lookupAccounts;
     }
     
     @isTest
-    static void testGetValueFromRow() {
-        Map<String, String> row = new Map<String, String>{'Name' => 'Test Account', 'Industry' => 'Tech'};
-
-        String value1 = ImportUtils.getValueFromRow(row, 'Name');
-        Assert.areEqual('Test Account', value1, 'Should get exact match');
-
-        String value2 = ImportUtils.getValueFromRow(row, 'name');
-        Assert.areEqual('Test Account', value2, 'Should get case insensitive match');
-
-        String value3 = ImportUtils.getValueFromRow(row, 'MissingField');
-        Assert.isNull(value3, 'Should return null for missing field');
-    }
-
-    @isTest
-    static void testResolveLookupsInBulk() {
-        // Create test accounts directly
-        List<Account> lookupAccounts = new List<Account>();
-        for (Integer i = 0; i < 3; i++) {
-            lookupAccounts.add(new Account(
-                Name = 'Lookup Account ' + i,
-                AccountNumber = 'LOOKUP-' + String.valueOf(i).leftPad(5, '0')
-            ));
+    static void testResolveLookupsInBulkWithValidLookups() {
+        User adminUser = TestDataFactory.createAdminUser();
+        System.runAs(adminUser) {
+            //Get test data
+            ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
+            ImportExecution__c execution = [SELECT Id FROM ImportExecution__c LIMIT 1];
+            
+            //Create field mappings for lookups
+            FieldMapping__c parentMapping = TestDataFactory.createLookupFieldMapping(project.Id, 'ParentAccountName', 'ParentId', 'Account', 'Name');
+            
+            //Create test records
+            List<Account> testRecords = new List<Account>();
+            testRecords.add(new Account(Name = 'Test Account 1', Industry = 'Technology'));
+            testRecords.add(new Account(Name = 'Test Account 2', Industry = 'Finance'));
+            
+            //Create lookup info list
+            List<Map<String, Object>> lookupInfoList = new List<Map<String, Object>>();
+            lookupInfoList.add(new Map<String, Object>{
+                'targetField' => 'ParentId',
+                'lookupValue' => 'Lookup Account 0',
+                'lookupObject' => 'Account',
+                'lookupField' => 'Name'
+            });
+            lookupInfoList.add(new Map<String, Object>{
+                'targetField' => 'ParentId',
+                'lookupValue' => 'Lookup Account 1',
+                'lookupObject' => 'Account',
+                'lookupField' => 'Name'
+            });
+            
+            Test.startTest();
+            ImportUtils.resolveLookupsInBulk(testRecords, lookupInfoList);
+            Test.stopTest();
+            
+            //Verify lookups were resolved
+            Assert.isNotNull(testRecords[0].ParentId, 'First record should have ParentId resolved');
+            Assert.isNotNull(testRecords[1].ParentId, 'Second record should have ParentId resolved');
         }
-        insert lookupAccounts;
-
-        List<Account> testRecords = new List<Account>();
-        testRecords.add(new Account(Name = 'Test Account 1'));
-        testRecords.add(new Account(Name = 'Test Account 2'));
-
-        List<Map<String, Object>> lookupInfoList = new List<Map<String, Object>>();
-        lookupInfoList.add(new Map<String, Object>{
-            'targetField' => 'ParentId',
-            'lookupValue' => 'Lookup Account 0',
-            'lookupObject' => 'Account',
-            'lookupField' => 'Name'
-        });
-        lookupInfoList.add(new Map<String, Object>{
-            'targetField' => 'ParentId',
-            'lookupValue' => 'Lookup Account 1',
-            'lookupObject' => 'Account',
-            'lookupField' => 'Name'
-        });
-
-        System.debug('Before resolveLookupsInBulk - testRecords size: ' + testRecords.size());
-
-        // Verify accounts exist before test
-        List<Account> existingAccounts = [SELECT Id, Name FROM Account WHERE Name IN ('Lookup Account 0', 'Lookup Account 1')];
-        System.debug('Found accounts before test: ' + existingAccounts.size());
-        for (Account acc : existingAccounts) {
-            System.debug('Account: ' + acc.Name + ' - ' + acc.Id);
-        }
-
-        Test.startTest();
-        ImportUtils.resolveLookupsInBulk(testRecords, lookupInfoList);
-        Test.stopTest();
-
-        Assert.isNotNull(testRecords, 'Records should not be null');
-        Assert.areEqual(2, testRecords.size(), 'Should have 2 records');
     }
-
+    
     @isTest
-    static void testResolveLookupsInBulkWithInvalidData() {
-        List<Account> testRecords = new List<Account>();
-        List<Map<String, Object>> lookupInfoList = new List<Map<String, Object>>();
-
-        ImportUtils.resolveLookupsInBulk(null, null);
-        ImportUtils.resolveLookupsInBulk(testRecords, lookupInfoList);
-
-        Assert.isTrue(true, 'Should handle null/empty data gracefully');
+    static void testResolveLookupsInBulkWithNoMatches() {
+        User adminUser = TestDataFactory.createAdminUser();
+        System.runAs(adminUser) {
+            //Get test data
+            ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
+            ImportExecution__c execution = [SELECT Id FROM ImportExecution__c LIMIT 1];
+            
+            //Create field mappings for lookups
+            FieldMapping__c parentMapping = TestDataFactory.createLookupFieldMapping(project.Id, 'ParentAccountName', 'ParentId', 'Account', 'Name');
+            
+            //Create test records
+            List<Account> testRecords = new List<Account>();
+            testRecords.add(new Account(Name = 'Test Account 1', Industry = 'Technology'));
+            
+            //Create lookup info list with non-existent lookup values
+            List<Map<String, Object>> lookupInfoList = new List<Map<String, Object>>();
+            lookupInfoList.add(new Map<String, Object>{
+                'targetField' => 'ParentId',
+                'lookupValue' => 'Non Existent Account',
+                'lookupObject' => 'Account',
+                'lookupField' => 'Name'
+            });
+            
+            Test.startTest();
+            ImportUtils.resolveLookupsInBulk(testRecords, lookupInfoList);
+            Test.stopTest();
+            
+            //Verify lookup was not resolved (should be null)
+            Assert.isNull(testRecords[0].ParentId, 'ParentId should be null when lookup value not found');
+        }
     }
-
     
     @isTest
     static void testResolveLookupsInBulkWithEmptyInputs() {
@@ -174,9 +180,8 @@ public class ImportUtilsTest {
             System.debug('Test Records after lookup resolution: ' + testRecords);
             
             //Verify lookups were resolved
-            // Note: This test was expecting lookup resolution to work, but that functionality
-            // is now tested through integration tests in ImportQueueableTest and ValidationServiceTest
-            Assert.isNotNull(testRecords, 'Records should not be null');
+            Assert.isNotNull(testRecords[0].ParentId, 'ParentId should be resolved for Account lookup');
+            Assert.isNotNull(testRecords[1].OwnerId, 'OwnerId should be resolved for User lookup');
         }
     }
     
@@ -200,13 +205,13 @@ public class ImportUtilsTest {
             List<Map<String, Object>> lookupInfoList = new List<Map<String, Object>>();
             lookupInfoList.add(new Map<String, Object>{
                 'targetField' => 'ParentId',
-                'lookupValue' => 'Lookup Account 0',
+                'lookupValue' => 'Lookup Account 0', // This will be found
                 'lookupObject' => 'Account',
                 'lookupField' => 'Name'
             });
             lookupInfoList.add(new Map<String, Object>{
                 'targetField' => 'ParentId',
-                'lookupValue' => 'Non Existent Account',
+                'lookupValue' => 'Non Existent Account', // This will not be found
                 'lookupObject' => 'Account',
                 'lookupField' => 'Name'
             });
@@ -216,7 +221,7 @@ public class ImportUtilsTest {
             Test.stopTest();
             
             //Verify first record has lookup resolved
-            Assert.isNotNull(testRecords, 'Records should not be null');
+            Assert.isNotNull(testRecords[0].ParentId, 'First record should have ParentId resolved');
             
             //Verify second record has null ParentId (lookup not found but optional)
             Assert.isNull(testRecords[1].ParentId, 'Second record should have null ParentId when optional lookup not found');
@@ -255,7 +260,7 @@ public class ImportUtilsTest {
             ImportUtils.resolveLookupsInBulk(testRecords, lookupInfoList);
             Test.stopTest();
             
-            //Verify record still exists but ParentId is null
+            //Verify record still exists but ParentId is null (required lookup not found)
             Assert.isNull(testRecords[0].ParentId, 'ParentId should be null when required lookup not found');
             Assert.isNotNull(testRecords[0].Name, 'Record should still exist with Name field populated');
         }
@@ -273,7 +278,7 @@ public class ImportUtilsTest {
             List<Account> testRecords = new List<Account>();
             testRecords.add(new Account(Name = 'Required Field Test 1', Industry = 'Technology'));
             
-            //Create lookup info list with a required 
+            //Create lookup info list with a field that is actually required
             List<Map<String, Object>> lookupInfoList = new List<Map<String, Object>>();
             lookupInfoList.add(new Map<String, Object>{
                 'targetField' => 'ParentId',
@@ -289,6 +294,8 @@ public class ImportUtilsTest {
             //Verify record still exists but ParentId is null (required lookup not found)
             Assert.isNull(testRecords[0].ParentId, 'ParentId should be null when required lookup not found');
             Assert.isNotNull(testRecords[0].Name, 'Record should still exist with Name field populated');
+            
+            //Note: In a real scenario, the validation service would catch required field violations
         }
     }
     
@@ -296,6 +303,7 @@ public class ImportUtilsTest {
     static void testSchemaBasedFieldRequirementDetection() {
         User adminUser = TestDataFactory.createAdminUser();
         System.runAs(adminUser) {
+            //Test that ObjectMetadataService.isFieldNullable works correctly
             Test.startTest();
             
             //Test Account fields
@@ -331,7 +339,7 @@ public class ImportUtilsTest {
                 testRecords.add(new Account(Name = 'Bulk Test Account ' + i, Industry = 'Technology'));
                 lookupInfoList.add(new Map<String, Object>{
                     'targetField' => 'ParentId',
-                    'lookupValue' => 'Lookup Account ' + Math.mod(i, 3),
+                    'lookupValue' => 'Lookup Account ' + Math.mod(i, 3), // Cycle through 3 lookup accounts
                     'lookupObject' => 'Account',
                     'lookupField' => 'Name'
                 });
@@ -341,8 +349,10 @@ public class ImportUtilsTest {
             ImportUtils.resolveLookupsInBulk(testRecords, lookupInfoList);
             Test.stopTest();
             
-            Assert.isNotNull(testRecords, 'Records should not be null');
-            Assert.areEqual(10, testRecords.size(), 'Should have 10 records');
+            //Verify all lookups were resolved
+            for (Account acc : testRecords) {
+                Assert.isNotNull(acc.ParentId, 'All records should have ParentId resolved');
+            }
         }
     }
 }

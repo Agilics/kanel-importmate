@@ -2,8 +2,8 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 11-23-2025
- * @last modified by  : khalidousowba
+ * @last modified on  : 10-03-2025
+ * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 @isTest
 public with sharing class ScheduleRepositoryTest {
@@ -12,7 +12,7 @@ public with sharing class ScheduleRepositoryTest {
     static void setupTestData(){
        User admin = TestDataFactory.createAdminUser();     
            String expected ='Test';
-            String frequence =String.valueOf(ImportMateEnum.FrequencyEnum.MONTHLY);
+            String frequence =String.valueOf(ScheduleService.FrequencyEnum.MONTHLY);
             ImportProject__c project = TestDataFactory.createImportProject();
              
               Schedule__c schedule = new Schedule__c(
@@ -76,7 +76,7 @@ public with sharing class ScheduleRepositoryTest {
      static void testGetScheduleByFrequency() {
         //GIVEN
          Schedule__c savedSchedule = TestDataFactory.createSchedule();
-        ImportMateEnum.FrequencyEnum expectedFrequence = ImportMateEnum.FrequencyEnum.DAILY;
+        ScheduleService.FrequencyEnum expectedFrequence = ScheduleService.FrequencyEnum.DAILY;
 
         //When 
         Test.startTest();

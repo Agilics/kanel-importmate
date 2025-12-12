@@ -1,5 +1,4 @@
 public with sharing class ExecutionRepository {
-
     public static ImportExecution__c createImportExecution(String projectId, String status, String type) {
         ImportExecution__c execution = new ImportExecution__c(
             Project__c = projectId,
@@ -10,7 +9,6 @@ public with sharing class ExecutionRepository {
             ProcessedRecords__c = 0,
             FailedRecords__c = 0
         );
-
         if (SecurityUtils.isCreateable(ImportExecution__c.SObjectType)) {
             try {
                 insert execution;
@@ -22,6 +20,7 @@ public with sharing class ExecutionRepository {
         return execution;
     }
 
+    // Met à jour le statut d'une exécution
     public static void updateImportExecution(ImportExecution__c execution) {
         if (SecurityUtils.isUpdateable(ImportExecution__c.SObjectType)) {
             try {
@@ -33,14 +32,17 @@ public with sharing class ExecutionRepository {
         }
     }
 
+    // Récupère une exécution par ID
     public static ImportExecution__c getImportExecutionById(String executionId) {
         if (SecurityUtils.isAccessible(ImportExecution__c.SObjectType)) {
             try {
-                return [SELECT Id, Status__c, Type__c, Project__c, StartTime__c, EndTime__c, TotalRecords__c, ProcessedRecords__c, FailedRecords__c
-                        FROM ImportExecution__c
-                        WHERE Id = :executionId
+                return [SELECT Id, Status__c, Type__c,Project__c ,StartTime__c, EndTime__c, TotalRecords__c, ProcessedRecords__c, FailedRecords__c
+                        FROM ImportExecution__c 
+                        WHERE Id = :executionId 
+                        /* WITH SECURITY_ENFORCED  */
                         LIMIT 1];
             } catch (QueryException e) {
+                System.debug('QueryException: ' + e.getMessage());
                 ErrorLogService.logException(e);
                 throw new ExecutionException('Error retrieving execution: ' + e.getMessage());
             }
@@ -48,6 +50,7 @@ public with sharing class ExecutionRepository {
         return null;
     }
 
+    // Récupère l'historique des exécutions pour un projet
     public static List<ImportExecution__c> getExecutionHistory(String projectId, String dateRange, String statusFilter) {
         try {
             if (!SecurityUtils.isAccessible(ImportExecution__c.SObjectType)) {
@@ -55,14 +58,17 @@ public with sharing class ExecutionRepository {
             }
 
             String query = 'SELECT Id, Project__c, Status__c, Type__c, StartTime__c, EndTime__c, TotalRecords__c, ProcessedRecords__c, FailedRecords__c ' +
-                          'FROM ImportExecution__c WHERE Project__c = :projectId ';
+                          'FROM ImportExecution__c ' +
+                          'WHERE Project__c = :projectId ' ;
 
+            // Add date range filter
             if (dateRange != 'all' && dateRange != null) {
                 Integer days = Integer.valueOf(dateRange);
                 Datetime dateLimit = Datetime.now().addDays(-days);
                 query += 'AND StartTime__c >= :dateLimit ';
             }
 
+            // Add status filter
             if (statusFilter != 'all' && statusFilter != null && statusFilter != '') {
                 query += 'AND Status__c = :statusFilter ';
             }
@@ -77,6 +83,7 @@ public with sharing class ExecutionRepository {
         }
     }
 
+    // Récupère les statistiques d'exécution pour un projet
     public static Map<String, Object> getExecutionStats(String projectId) {
         try {
             if (!SecurityUtils.isAccessible(ImportExecution__c.SObjectType)) {
@@ -84,10 +91,15 @@ public with sharing class ExecutionRepository {
             }
 
             List<AggregateResult> results = [
-                SELECT COUNT(Id) totalExecutions, SUM(TotalRecords__c) totalRecords,
-                       SUM(ProcessedRecords__c) processedRecords, SUM(FailedRecords__c) failedRecords, Status__c status
-                FROM ImportExecution__c
-                WHERE Project__c = :projectId
+                SELECT 
+                    COUNT(Id) totalExecutions,
+                    SUM(TotalRecords__c) totalRecords,
+                    SUM(ProcessedRecords__c) processedRecords,
+                    SUM(FailedRecords__c) failedRecords,
+                    Status__c status
+                FROM ImportExecution__c 
+                WHERE Project__c = :projectId 
+                /* WITH SECURITY_ENFORCED  */
                 GROUP BY Status__c
             ];
 
@@ -96,6 +108,8 @@ public with sharing class ExecutionRepository {
             Integer totalRecords = 0;
             Integer processedRecords = 0;
             Integer failedRecords = 0;
+            //debug aggregate results
+            System.debug('Aggregate Results: ' + results);
 
             for (AggregateResult result : results) {
                 totalExecutions += Integer.valueOf(result.get('totalExecutions'));
@@ -104,11 +118,15 @@ public with sharing class ExecutionRepository {
                 failedRecords += Integer.valueOf(result.get('failedRecords'));
             }
 
+
             stats.put('totalExecutions', totalExecutions);
             stats.put('totalRecords', totalRecords);
             stats.put('processedRecords', processedRecords);
             stats.put('failedRecords', failedRecords);
             stats.put('successRate', totalRecords > 0 ? Math.round(((Decimal.valueOf(totalRecords - failedRecords) / Decimal.valueOf(totalRecords)) * 100)) : 0);
+
+            //debug stats
+            System.debug('Execution stats: ' + stats);
 
             return stats;
 

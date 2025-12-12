@@ -2,8 +2,8 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 11-23-2025
- * @last modified by  : khalidousowba
+ * @last modified on  : 10-03-2025
+ * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 public with sharing class ScheduleService{
     public enum FrequencyEnum {
@@ -103,7 +103,7 @@ public with sharing class ScheduleService{
     /**
      *Filtrer par fréquence (DAILY | WEEKLY | MONTHLY)
     */
-     public static List<Schedule__c> getSchedulesByFrequency(ImportMateEnum.FrequencyEnum frequence) {
+     public static List<Schedule__c> getSchedulesByFrequency(ScheduleService.FrequencyEnum frequence) {
        try {
             if(SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType)) {
                 return  ScheduleRepository.getSchedulesByFrequency(frequence);   
@@ -159,13 +159,13 @@ public with sharing class ScheduleService{
                 // Lancer l’import
                 
                 // Replanifier selon la fréquence
-                ImportMateEnum.FrequencyEnum  frequence = ImportMateEnum.FrequencyEnum.valueOf(sch.Frequency__c);
+                ScheduleService.FrequencyEnum  frequence = ScheduleService.FrequencyEnum.valueOf(sch.Frequency__c);
                  
-                if(ImportMateEnum.FrequencyEnum.DAILY.equals(frequence)) {
+                if(ScheduleService.FrequencyEnum.DAILY.equals(frequence)) {
                     sch.NextRun__c = sch.NextRun__c.addDays(1);
-                } else if(ImportMateEnum.FrequencyEnum.WEEKLY === frequence) {
+                } else if(ScheduleService.FrequencyEnum.WEEKLY === frequence) {
                     sch.NextRun__c = sch.NextRun__c.addDays(7);
-                } else if(ImportMateEnum.FrequencyEnum.MONTHLY === frequence) {
+                } else if(ScheduleService.FrequencyEnum.MONTHLY === frequence) {
                     sch.NextRun__c = sch.NextRun__c.addMonths(1);
                 }
             } catch (Exception e) {

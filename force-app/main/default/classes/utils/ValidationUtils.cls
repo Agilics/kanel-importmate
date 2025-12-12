@@ -35,7 +35,7 @@ public with sharing class ValidationUtils {
         }
     }
 
-    //Supported validation types
+    //Types de validation supportés
     public enum ValidationType {
         EMAIL, DATE_TYPE, DATETIME_TYPE, NUMBER_TYPE, PICKLIST, REQUIRED, FIELD_SIZE, BOOLEAN_TYPE
     }
@@ -46,61 +46,59 @@ public with sharing class ValidationUtils {
         if (Pattern.matches(emailPattern, email) || String.isBlank(email)) {
             return new ValidationResult(true);
         }
-        return new ValidationResult(false, 'Invalid email format: ' + email, Constants.INVALID_EMAIL_FORMAT,
+        return new ValidationResult(false, 'Format email invalide: ' + email, Constants.INVALID_EMAIL_FORMAT,
             new Map<String, Object>{ 'fieldName' => fieldName, 'email' => email });
     }
     
-    //Date validation
+    //Validation date
     public static ValidationResult validateDate(String dateValue, String fieldName) {
         try {
             Date.valueOf(dateValue);
             return new ValidationResult(true);
         } catch (Exception e) {
-            return new ValidationResult(false, 'Invalid date format: ' + dateValue, Constants.INVALID_DATE_FORMAT,
+            return new ValidationResult(false, 'Format date invalide: ' + dateValue, Constants.INVALID_DATE_FORMAT, 
                 new Map<String, Object>{ 'fieldName' => fieldName, 'dateValue' => dateValue });
         }
     }
     
-    //Datetime validation
+    //Validation datetime
     public static ValidationResult validateDatetime(String datetimeValue, String fieldName) {
         try {
             Datetime.valueOf(datetimeValue);
+            System.debug('Parsed datetime: ' + Datetime.valueOf(datetimeValue));
             return new ValidationResult(true);
         } catch (Exception e) {
-            return new ValidationResult(false, 'Invalid datetime format: ' + datetimeValue, Constants.INVALID_DATETIME_FORMAT,
+            return new ValidationResult(false, 'Format datetime invalide: ' + datetimeValue, Constants.INVALID_DATETIME_FORMAT,
                 new Map<String, Object>{ 'fieldName' => fieldName, 'datetimeValue' => datetimeValue });
         }
     }
     
-    //Number validation
+    //Validation nombre
     public static ValidationResult validateNumber(String numberValue, String fieldName) {
         try {
             Decimal.valueOf(numberValue);
             return new ValidationResult(true);
         } catch (Exception e) {
-            return new ValidationResult(false, 'Invalid number format: ' + numberValue, Constants.ERROR_CODE_INVALID_NUMBER_FORMAT,
+            return new ValidationResult(false, 'Format numérique invalide: ' + numberValue, Constants.ERROR_CODE_INVALID_NUMBER_FORMAT,
                 new Map<String, Object>{ 'fieldName' => fieldName, 'numberValue' => numberValue });
         }
     }
     
-    //Picklist validation
+    //Validation picklist
     public static ValidationResult validatePicklist(String value, String fieldName, String objectName) {
         try {
-            Boolean isValid = ObjectMetadataService.isValidPicklistValue(value, fieldName, objectName);
-
-            if (isValid) {
+            if (ObjectMetadataService.isValidPicklistValue(value, fieldName, objectName)) {
                 return new ValidationResult(true);
             }
-
-            return new ValidationResult(false, 'Invalid picklist value: ' + value, 'INVALID_PICKLIST_VALUE',
+            return new ValidationResult(false, 'Valeur picklist invalide: ' + value, 'INVALID_PICKLIST_VALUE',
                 new Map<String, Object>{ 'fieldName' => fieldName, 'value' => value, 'objectName' => objectName });
         } catch (Exception e) {
-            return new ValidationResult(false, 'Picklist validation error: ' + e.getMessage(), 'PICKLIST_VALIDATION_ERROR',
+            return new ValidationResult(false, 'Erreur validation picklist: ' + e.getMessage(), 'PICKLIST_VALIDATION_ERROR',
                 new Map<String, Object>{ 'fieldName' => fieldName, 'value' => value, 'objectName' => objectName });
         }
     }
 
-    //Boolean validation
+    //validate boolean
     public static ValidationResult validateBoolean(String value, String fieldName) {
         if (String.isBlank(value)) {
             return new ValidationResult(true);
@@ -109,59 +107,61 @@ public with sharing class ValidationUtils {
         if (lowerValue == 'true' || lowerValue == 'false') {
             return new ValidationResult(true);
         }
-        return new ValidationResult(false, 'Invalid boolean format: ' + value, Constants.INVALID_BOOLEAN_FORMAT,
+        return new ValidationResult(false, 'Format boolean invalide: ' + value, Constants.INVALID_BOOLEAN_FORMAT,
             new Map<String, Object>{ 'fieldName' => fieldName, 'value' => value });
     }
     
-    //Required field validation
+    //Validation champ obligatoire
     public static ValidationResult validateRequired(String value, String fieldName, String objectName) {
+        System.debug('Validating required for field: ' + objectName + '.' + fieldName + ' with value: ' + value);
         Boolean isNotNullable = getCachedFieldNullable(objectName, fieldName);
         if (!isNotNullable && String.isBlank(value)) {
-            return new ValidationResult(false, 'Required field is missing: ' + fieldName, Constants.ERROR_CODE_REQUIRED_FIELDS_MISSING,
+            return new ValidationResult(false, 'Champ obligatoire manquant: ' + fieldName, Constants.ERROR_CODE_REQUIRED_FIELDS_MISSING,
                 new Map<String, Object>{ 'fieldName' => fieldName, 'objectName' => objectName });
         }
         return new ValidationResult(true);
         
     }
     
-    //Field size validation
+    //Validation taille de champ
     public static ValidationResult validateFieldSize(String value, String fieldName, String objectName) {
         try {
             Schema.DescribeFieldResult fieldDescribe = getCachedFieldDescribe(objectName, fieldName);
             if (fieldDescribe.getType() == Schema.DisplayType.STRING) {
                 if (value?.length() > fieldDescribe?.getLength()) {
-                    return new ValidationResult(false, 'Field value too long: ' + value, Constants.ERROR_CODE_FIELD_SIZE_TOO_LARGE,
+                    return new ValidationResult(false, 'Taille de champ trop grande: ' + value, Constants.ERROR_CODE_FIELD_SIZE_TOO_LARGE,
                         new Map<String, Object>{ 'fieldName' => fieldName, 'value' => value, 'maxLength' => fieldDescribe.getLength() });
                 }
             }
             return new ValidationResult(true);
         } catch (Exception e) {
-            return new ValidationResult(false, 'Field size validation error: ' + e?.getMessage(), 'FIELD_SIZE_VALIDATION_ERROR',
+            return new ValidationResult(false, 'Erreur validation taille: ' + e?.getMessage(), 'FIELD_SIZE_VALIDATION_ERROR',
                 new Map<String, Object>{ 'fieldName' => fieldName, 'value' => value });
         }
     }
     
-    //Lookup validation with required field check
+    //Validation lookup avec vérification si le champ est obligatoire
     public static ValidationResult validateLookup(String value, String lookupObject, String lookupMatchField, String fieldName, String objectName) {
         if (String.isBlank(value)) {
             return new ValidationResult(true);
         }
-
+        
         try {
-            //Check if field is required or optional
+            //Vérifier si le champ est obligatoire ou optionnel
             Boolean isRequired = !getCachedFieldNullable(objectName, fieldName);
-
-            //Build SOQL query to check value existence
-            String soqlQuery = 'SELECT Id FROM ' + String.escapeSingleQuotes(lookupObject) +
+            
+            //Construire la requête SOQL pour vérifier l'existence de la valeur
+            String soqlQuery = 'SELECT Id FROM ' + String.escapeSingleQuotes(lookupObject) + 
                              ' WHERE ' + String.escapeSingleQuotes(lookupMatchField) + ' = :value LIMIT 1';
-
+            
             List<SObject> results = Database.query(soqlQuery);
-
+            
             if (results.isEmpty()) {
+                //Si le champ est obligatoire, retourner une erreur
                 if (isRequired) {
                     return new ValidationResult(
-                        false,
-                        'Lookup value not found (required): "' + value + '" in ' + lookupObject + '.' + lookupMatchField,
+                        false, 
+                        'Valeur de lookup introuvable (requis): "' + value + '" dans ' + lookupObject + '.' + lookupMatchField,
                         Constants.LOOKUP_VALUE_NOT_FOUND,
                         new Map<String, Object>{
                             'fieldName' => fieldName,
@@ -171,7 +171,7 @@ public with sharing class ValidationUtils {
                         }
                     );
                 } else {
-                    //If field is optional, return a warning
+                    //Si le champ est optionnel, retourner un warning 
                     return new ValidationResult(
                         true, 
                         'LOOKUP NOT FOUND: "' + value + '" FOR FIELD ' + lookupObject + '.' + lookupMatchField + '. The field will be left blank.',
@@ -205,7 +205,7 @@ public with sharing class ValidationUtils {
         } catch (Exception e) {
             return new ValidationResult(
                 false,
-                'Unexpected error during lookup validation: ' + e.getMessage(),
+                'Erreur inattendue lors de la validation du lookup: ' + e.getMessage(),
                 Constants.LOOKUP_RESOLUTION_ERROR,
                 new Map<String, Object>{
                     'fieldName' => fieldName,
@@ -218,7 +218,7 @@ public with sharing class ValidationUtils {
         }
     }
     
-    //Lookup validation without objectName - by default consider field as optional
+    //Validation lookup sans objectName- by default consider the field as optional
     public static ValidationResult validateLookup(String value, String lookupObject, String lookupMatchField, String fieldName) {
         if (String.isBlank(value)) {
             return new ValidationResult(true);
@@ -231,7 +231,7 @@ public with sharing class ValidationUtils {
             List<SObject> results = Database.query(soqlQuery);
             
             if (results.isEmpty()) {
-                //By default, return a warning (optional field)
+                //Par défaut, retourner un warning (champ optionnel)
                 return new ValidationResult(
                     true, 
                     'LOOKUP NOT FOUND: "' + value + '" FOR ' + lookupObject + '.' + lookupMatchField + '. The field will be left blank.',
@@ -251,7 +251,7 @@ public with sharing class ValidationUtils {
         } catch (Exception e) {
             return new ValidationResult(
                 false,
-                'Error during lookup validation: ' + e.getMessage(),
+                'Erreur lors de la validation du lookup: ' + e.getMessage(),
                 Constants.LOOKUP_RESOLUTION_ERROR,
                 new Map<String, Object>{
                     'fieldName' => fieldName,
@@ -279,7 +279,7 @@ public with sharing class ValidationUtils {
             Schema.DescribeFieldResult fieldDescribe = fieldsMap.get(fieldName).getDescribe();
             Schema.DisplayType fieldType = fieldDescribe.getType();
             
-            //Map Salesforce types to our validation types
+            //Mapper les types Salesforce vers nos types de validation
             return mapSalesforceTypeToValidationType(fieldType);
             
         } catch (Exception e) {
@@ -290,6 +290,8 @@ public with sharing class ValidationUtils {
     
     /**
      * Mappe un type Salesforce vers un type de validation
+     * @param fieldType Type de champ Salesforce
+     * @return Type de validation correspondant
      */
     public static ValidationType mapSalesforceTypeToValidationType(Schema.DisplayType fieldType) {
         switch on fieldType {
@@ -322,6 +324,11 @@ public with sharing class ValidationUtils {
     
     /**
      * Valide le format d'un champ selon son type
+     * @param value Valeur à valider
+     * @param type Type de validation
+     * @param fieldName Nom du champ
+     * @param objectName Nom de l'objet
+     * @return Résultat de validation
      */
     public static ValidationResult validateFieldFormat(String value, ValidationType type, String fieldName, String objectName) {
         if (String.isBlank(value)) {
@@ -363,8 +370,8 @@ public with sharing class ValidationUtils {
                 'validationType' => type.name()
             };
             throw new ValidationException(
-                'Error during format validation: ' + e.getMessage(),
-                Constants.ERROR_CODE_VALIDATION,
+                'Erreur lors de la validation du format: ' + e.getMessage(), 
+                Constants.ERROR_CODE_VALIDATION, 
                 context
             );
         }
@@ -393,7 +400,7 @@ public with sharing class ValidationUtils {
         return ObjectMetadataService.getFieldDescribe(objectName, fieldName);
     }
     
-    //Clear cache
+    //free cache
     public static void clearCache() {
         fieldTypeCache.clear();
         fieldNullableCache.clear();
@@ -407,8 +414,7 @@ public with sharing class ValidationUtils {
             ErrorType__c = Constants.ERROR_TYPE_VALIDATION,
             ErrorMessage__c = errorMessage,
             ColumnName__c = columnName,
-            FieldApiName__c = fieldApiName,
-            Severity__c = 'ERROR'
+            FieldApiName__c = fieldApiName
         );
         return error;
     }
@@ -419,7 +425,7 @@ public with sharing class ValidationUtils {
 
     public static ImportLog__c convertValidationExceptionToImportLog(ValidationException ve, String executionId, Integer lineNumber) {
         ImportLog__c error = buildValidationError(executionId, lineNumber, ve.getMessage(), null, null);
-
+       
         Map<String, Object> context = ve.getContext();
         if (context != null) {
             if (context.containsKey('sourceColumn')) {
@@ -428,43 +434,11 @@ public with sharing class ValidationUtils {
             if (context.containsKey('fieldName')) {
                 error.FieldApiName__c = (String) context.get('fieldName');
             }
-            if (context.containsKey('isWarning') && (Boolean) context.get('isWarning')) {
-                error.Severity__c = 'WARNING';
-            } else {
-                error.Severity__c = 'ERROR';
-            }
-        } else {
-            error.Severity__c = 'ERROR';
         }
-
+        
         return error;
     }
 
-    /**
-     * Make a basic validation context.
-     */
-    public static Map<String, Object> buildValidationContext(FieldMapping__c mapping, String executionId, Integer lineNumber, String value) {
-        return new Map<String, Object>{
-            'mappingId' => mapping.Id,
-            'sourceColumn' => mapping.SourceColumn__c,
-            'executionId' => executionId,
-            'lineNumber' => lineNumber,
-            'fieldName' => mapping.TargetField__c,
-            'value' => value
-        };
-    }
-
-    /**
-     * Make context with extra custom fields.
-     */
-    public static Map<String, Object> buildValidationContextWithAdditionalContext(FieldMapping__c mapping, String executionId, Integer lineNumber, String value, Map<String, Object> additionalContext) {
-        Map<String, Object> context = buildValidationContext(mapping, executionId, lineNumber, value);
-
-        if (additionalContext != null) {
-            context.putAll(additionalContext);
-        }
-
-        return context;
-    }
+    
 
 }

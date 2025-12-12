@@ -102,3 +102,9 @@ body {
   --slds-c-icon-color-foreground-default: #dbeafe;
   --slds-c-icon-color-background: #1e40af;
 }
+
+/* back button*/
+.btn--ghost { background: transparent; color:#1E40AF; border: 1px solid #0176d3; }
+.btn--ghost:hover { background: #e5f2ff; }
+.btn--outline { background: transparent; border: 1px solid #ddd; }
+.btn--xl { padding: 0.7rem 1.4rem; font-size: 1rem; }

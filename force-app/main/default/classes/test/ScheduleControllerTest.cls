@@ -2,8 +2,8 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 11-23-2025
- * @last modified by  : khalidousowba
+ * @last modified on  : 10-07-2025
+ * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 @IsTest
 public class ScheduleControllerTest {
@@ -29,7 +29,7 @@ public class ScheduleControllerTest {
         // When
         Test.startTest();
         Id scheduleId = ScheduleController.addSchedule(
-            String.valueOf(ImportMateEnum.FrequencyEnum.DAILY),
+            String.valueOf(ScheduleService.FrequencyEnum.DAILY),
             nextRun,
             project.Id
         );
@@ -49,7 +49,7 @@ public class ScheduleControllerTest {
         ];
 
         System.assertEquals(
-            String.valueOf(ImportMateEnum.FrequencyEnum.DAILY),
+            String.valueOf(ScheduleService.FrequencyEnum.DAILY),
             insertedSchedule.Frequency__c.toUpperCase(),
             'La fréquence doit être DAILY'
         );
@@ -81,7 +81,7 @@ public class ScheduleControllerTest {
             WHERE Id = :scheduleId
             LIMIT 1
         ];
-        insertedSchedule.Frequency__c = String.valueOf(ImportMateEnum.FrequencyEnum.MONTHLY);
+        insertedSchedule.Frequency__c = String.valueOf(ScheduleService.FrequencyEnum.MONTHLY);
 
        Id resultId = ScheduleController.addSchedule(
             insertedSchedule.Frequency__c,
@@ -103,7 +103,7 @@ public class ScheduleControllerTest {
 
 
         System.assertEquals(
-            String.valueOf(ImportMateEnum.FrequencyEnum.MONTHLY),
+            String.valueOf(ScheduleService.FrequencyEnum.MONTHLY),
              updateSchedule.Frequency__c.toUpperCase(),
             'La fréquence doit être MONTHLY'
         );
@@ -141,7 +141,7 @@ public class ScheduleControllerTest {
     static void testGetSchedulesByFrequency() {
         //given
         Test.startTest();
-        List<Schedule__c> schedules = ScheduleController.getSchedulesByFrequency(ImportMateEnum.FrequencyEnum.DAILY);
+        List<Schedule__c> schedules = ScheduleController.getSchedulesByFrequency(ScheduleService.FrequencyEnum.DAILY);
         Test.stopTest();
 
         System.assertNotEquals(0, schedules.size(), 'Should return schedules with DAILY frequency');

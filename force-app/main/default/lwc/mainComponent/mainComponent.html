@@ -2,7 +2,7 @@
   @description       : Main component hosting all ImportMate application components
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
   @group             : 
-  @last modified on  : 12-03-2025
+  @last modified on  : 12-12-2025
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
@@ -40,15 +40,11 @@
         <!-- Dashboard View -->
         <template if:true={showDashboard}>
           <div class="content-container">
-             <c-import-history onnewimportproject={openProjectForm}>
-            </c-import-history>
             <c-dashboard-cmp
               onnewproject={openNewProject}
               onprojectselect={handleProjectSelect}
               onprojectedit={handleProjectSelect}
             ></c-dashboard-cmp>
-           
-
           </div>
         </template>
 
@@ -59,14 +55,14 @@
               <!-- Step 1: Project Setup -->
 
                 <template if:true={showCreatorSection}>
-                  <c-project-form-card-component
+                  <c-project-form-component
                     recent-projet={currentProject}
                     onsaveproject={handleCreateProject}
                     oncancel={handleCancel}
                     onprojectnamechange={handleProjectNameChange}
                     ondescriptionchange={handleDescriptionChange}
                     ontargetobjectchange={handleTargetObjectChange}
-                  ></c-project-form-card-component>
+                  ></c-project-form-component>
                 </template>
 
               <!-- Step 2: Data Source Selection -->
@@ -74,6 +70,7 @@
                 <c-data-source-selector-page
                   current-project={currentProject}
                   onsourceselected={handleDataSourceSelected}
+                  onprevious={handleBackToDataSourceSelection}
                 ></c-data-source-selector-page>
               </template>
 
@@ -108,37 +105,37 @@
               </template>
 
               <!-- Step 4: Transformations -->
-              <template if:true={isTransformations}>
+            <template if:true={isTransformations}>
                 <c-transformation-page
                   onprevious={handleBackToStep}
                   onnext={handleNextStep}
                   project-id={currentProject.Id}
                 ></c-transformation-page>
-              </template>
+            </template>
+
 
               <!-- Step 5: Validation (Dry Run) -->
-              <template if:true={isDryRunExecution}>
+              <!-- <template if:true={isDryRunExecution}>
                 <c-dry-run-validator
                   project-id={currentProject.Id}
                   csv-data={csvData}
                   onprevious={handleBackToStep}
                   onnext={handleNextStep}
                 ></c-dry-run-validator>
-              </template>
+              </template> -->
 
               <!-- Step 6: Execution & scheduling-->
-              <template if:true={isRealExecution}>
+              <!-- <template if:true={isRealExecution}>
                 <c-execution-cmp
                   project-id={currentProject.Id}
                   csv-data={csvData}
                   onprevious={handleBackToStep}
                 ></c-execution-cmp>
-              </template>
+              </template> -->
             <!-- </div> -->
           </div>
         </template>
       </div>
     </div>
   </div>
-
 </template>

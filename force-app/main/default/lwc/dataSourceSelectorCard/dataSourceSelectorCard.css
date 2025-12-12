@@ -1,151 +1,259 @@
 body {
-  font-family: Inter;
+  font-family: Inter, sans-serif;
 }
+
 .card {
   box-sizing: border-box;
-  position: absolute;
-  width: 512px;
-  height: 330px;
+  width: 100%;
+  max-width: 512px;
+  min-height: 330px;
   background: #ffffff;
   border: 1px solid #e2e8f0;
   padding: 24px;
-  margin: 24px;
   box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.05);
   border-radius: 12px;
-  padding: 24px;
+  display: flex;
+  flex-direction: column;
 }
 
 .header {
   display: flex;
   align-items: center;
-  justify-content: start;
-  width: 446px;
-  height: 64px;
-  opacity: 1;
-  padding: 18px 0 10px 0;
-  margin-left: -9px;
-  top: 33px;
-  left: 23px;
+  width: 100%;
+  margin-bottom: 16px;
+  gap: 16px;
 }
+
 .content {
   list-style: none;
   padding: 0;
-  margin: 12px 0 24px;
+  margin: 12px 0 0;
   color: #374151;
   font-size: 14px;
   line-height: 1.6;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .box-icon {
   width: 64px;
   height: 64px;
-  margin: 0 25px 0 20px;
+  min-width: 64px;
   border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 1;
+  flex-shrink: 0;
 }
+
 .box-icon-upload {
   background: #dbeafe;
 }
+
 .box-icon-query {
   background: #ffedd5;
 }
 
-/* */
 .custom-icon-upload {
   --slds-c-icon-color-foreground-default: #1e40af;
   --slds-c-icon-color-background: #dbeafe;
 }
 
-.icon-size {
-  top: 16px;
-  left: 23px;
-  opacity: 1;
-}
-
-/*Add the class name below to the lightning-icon element.*/
 .custom-icon-database {
   --slds-c-icon-color-foreground-default: #ea580c;
   --slds-c-icon-color-background: #ffedd5;
 }
 
+.text-content {
+  flex: 1;
+  min-width: 0;
+}
+
 .title {
   font-weight: 700;
-  font-style: Bold;
   font-size: 20px;
   line-height: 28px;
   letter-spacing: 0%;
   color: #111827;
+  margin-bottom: 4px;
+  word-wrap: break-word;
 }
+
 .subtitle {
-  font-family: Inter;
   font-weight: 400;
-  font-style: Regular;
   font-size: 16px;
   line-height: 24px;
   letter-spacing: 0%;
   color: #4b5563;
+  word-wrap: break-word;
 }
 
 .support {
-  margin: 26px 0 1.3rem 12px;
-  width: 446px;
-  height: 24px;
-  opacity: 1;
-  border: none;
   display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+  width: 100%;
 }
 
-/*Add the class name below to the lightning-icon element.*/
 .custom-icon-check {
   --slds-c-icon-color-foreground-default: #16a34a;
   --slds-c-icon-color-background: #ffffff;
-  width: 14px;
-  height: 24px;
-  opacity: 1;
-  margin: 0 1.1rem 0 0;
+  width: 20px;
+  min-width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  margin-top: 2px;
 }
 
-/* card's text item  */
 .item {
-  font-family: Inter;
   font-weight: 400;
-  font-style: Regular;
   font-size: 16px;
   line-height: 24px;
   letter-spacing: 0%;
   color: #374151;
+  flex: 1;
+  word-wrap: break-word;
 }
 
-/* button choose file upload*/
 .btn {
-  width: 446px;
+  width: 100%;
   height: 48px;
   border-radius: 8px;
-  opacity: 1;
-  font-family: Inter;
+  font-family: Inter, sans-serif;
   font-weight: 500;
-  font-style: Medium;
-  margin-left: 7.8px;
   font-size: 16px;
   color: #ffffff;
-  line-height: 100%;
-  letter-spacing: 0%;
   text-align: center;
-  top: 249px;
-  left: 33px;
+  cursor: pointer;
+  transition: opacity 0.2s ease, transform 0.1s ease;
+  border: none;
+  margin-top: auto;
 }
 
-/* bouton upload de fichier*/
+.btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  opacity: 0.8;
+  transform: translateY(0);
+}
+
 .btn-upload {
   background: #1e40af;
   border: 1px solid #1e40af;
 }
 
-/* bouton contructeur de requête*/
 .btn-query {
   background-color: #ea580c;
   border: 1px solid #ea580c;
+}
+
+/* Tablettes et plus petits écrans */
+@media (max-width: 768px) {
+  .card {
+    max-width: 100%;
+    padding: 20px;
+  }
+  
+  .header {
+    gap: 12px;
+  }
+  
+  .box-icon {
+    width: 56px;
+    height: 56px;
+    min-width: 56px;
+  }
+  
+  .title {
+    font-size: 18px;
+    line-height: 26px;
+  }
+  
+  .subtitle {
+    font-size: 15px;
+    line-height: 22px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .card {
+    padding: 16px;
+    min-height: auto;
+  }
+  
+  .header {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .box-icon {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+  }
+  
+  .title {
+    font-size: 18px;
+    line-height: 24px;
+  }
+  
+  .subtitle {
+    font-size: 14px;
+    line-height: 20px;
+  }
+  
+  .support {
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  
+  .item {
+    font-size: 14px;
+    line-height: 20px;
+  }
+  
+  .btn {
+    height: 44px;
+    font-size: 15px;
+  }
+}
+
+/* Très petits mobiles */
+@media (max-width: 360px) {
+  .card {
+    padding: 12px;
+  }
+  
+  .box-icon {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+  }
+  
+  .title {
+    font-size: 16px;
+    line-height: 22px;
+  }
+  
+  .subtitle {
+    font-size: 13px;
+    line-height: 18px;
+  }
+  
+  .item {
+    font-size: 13px;
+    line-height: 18px;
+  }
+  
+  .btn {
+    height: 42px;
+    font-size: 14px;
+  }
 }

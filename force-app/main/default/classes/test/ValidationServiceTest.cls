@@ -1,219 +1,96 @@
-/**
- * @description       : 
- * @author            : khalidousowba
- * @group             : 
- * @last modified on  : 12-11-2025
- * @last modified by  : khalidousowba
-**/
 @isTest
 public class ValidationServiceTest {
 
-    @TestSetup
-    static void setupTestData() {
+    @testSetup
+    static void setup() {
+        //Create comprehensive test data using TestDataFactory
         TestDataFactory.createAdminUser();
-        ImportProject__c project = TestDataFactory.createImportProject('Account');
+        
+        //Create test project and execution
+        ImportProject__c project = TestDataFactory.createImportProject();
         ImportExecution__c execution = TestDataFactory.createImportExecution(project.Id);
-        TestDataFactory.createFieldMappingsForValidation(project.Id);
+        
+        //Create field mappings for validation testing
+        List<FieldMapping__c> mappings = TestDataFactory.createFieldMappingsForValidation(project.Id);
+        
+        //Create test accounts for lookup validation
         TestDataFactory.createTestAccounts(5);
+        
+        //Create test account with specific name for lookup testing
+        TestDataFactory.createTestAccount('Existing Account');
+        TestDataFactory.createTestAccount('Existing Account 0');
+        TestDataFactory.createTestAccount('Existing Account 1');
+        TestDataFactory.createTestAccount('Existing Account 2');
     }
 
-
-    @IsTest
-    static void testValidateFieldWithValidData() {
-        //Test validating a valid account name
-        ValidationUtils.ValidationResult result = ValidationService.validateField('Test Account Name', 'Name', 'Account');
-        Assert.isTrue(result.isValid, 'Valid account name should pass validation');
-        Assert.isNull(result.errorMessage, 'No error message for valid field');
+    //Test LookupRequest inner class
+    @isTest
+    static void testLookupRequestClass() {
+        Test.startTest();
+        
+        ValidationService.LookupRequest request = new ValidationService.LookupRequest(
+            'Account', 'Name', 'Test Account', 'AccountId'
+        );
+        
+        Assert.areEqual('Account', request.lookupObject, 'Lookup object should match');
+        Assert.areEqual('Name', request.lookupMatchField, 'Lookup match field should match');
+        Assert.areEqual('Test Account', request.value, 'Value should match');
+        Assert.areEqual('AccountId', request.fieldName, 'Field name should match');
+        
+        String cacheKey = request.getCacheKey();
+        Assert.areEqual('Account.Name.Test Account', cacheKey, 'Cache key should be properly formatted');
+        
+        Test.stopTest();
     }
 
-    @IsTest
-    static void testValidateFieldWithInvalidEmail() {
-        //Test validating an invalid email address
-        ValidationUtils.ValidationResult result = ValidationService.validateField('invalid-email-format', 'Email', 'Contact');
-        Assert.isFalse(result.isValid, 'Invalid email should fail validation');
-        Assert.isNotNull(result.errorMessage, 'Should have error message for invalid email');
-        Assert.areEqual(Constants.INVALID_EMAIL_FORMAT, result.errorCode, 'Should have correct error code');
-    }
-
-    @IsTest
-    static void testValidateFieldWithInvalidNumber() {
-        //Test validating an invalid number field
-        ValidationUtils.ValidationResult result = ValidationService.validateField('not-a-number', 'AnnualRevenue', 'Account');
-        Assert.isFalse(result.isValid, 'Invalid number should fail validation');
-        Assert.isNotNull(result.errorMessage, 'Should have error message for invalid number');
-    }
-
-    @IsTest
-    static void testValidateLookupWithExistingValue() {
-        //Create test account for lookup
-        Account testAccount = new Account(Name = 'Existing Account for Lookup');
+    //Test validateRow method
+    @isTest
+    static void testValidateRow() {
+        Test.startTest();
+        
+        ImportExecution__c execution = [SELECT Id FROM ImportExecution__c LIMIT 1];
+        List<FieldMapping__c> mappings = new List<FieldMapping__c>();
+        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
+        mappings.add(new FieldMapping__c(
+            Project__c = project.Id,
+            SourceColumn__c = 'AccountNumber',
+            TargetField__c = 'AccountId',
+            IsLookup__c = true,
+            LookupObject__c = 'Account',
+            LookupMatchField__c = 'AccountNumber'
+        ));
+        insert mappings;
+        
+        //Create test data row
+        Map<String, String> row = new Map<String, String>{
+            'Name' => 'Test Account 2',
+            'AccountNumber' => '123456',
+            'Email' => 'test@example.com'
+        };
+        
+        //Create test Account for lookup validation
+        Account testAccount = new Account(Name = 'test 123456',AccountNumber='123456');
         insert testAccount;
-
-        //Test lookup validation with existing value
-        ValidationUtils.ValidationResult result = ValidationService.validateLookup('Existing Account for Lookup', 'Account', 'Name', 'ParentId');
-        Assert.isTrue(result.isValid, 'Existing lookup value should pass');
-    }
-
-    @IsTest
-    static void testValidateLookupWithNonExistingValue() {
-        //Test lookup validation with non-existing value (should be warning, not error)
-        ValidationUtils.ValidationResult result = ValidationService.validateLookup('Non Existing Account Name', 'Account', 'Name', 'ParentId');
-        Assert.isTrue(result.isWarning, 'Non-existing lookup value should be warning');
-    }
-
-    @IsTest
-    static void testValidateRowWithValidData() {
-        //Setup test data
-        ImportExecution__c execution = [SELECT Id FROM ImportExecution__c LIMIT 1];
-        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
-
-        FieldMapping__c mapping = new FieldMapping__c(
-            Project__c = project.Id,
-            SourceColumn__c = 'AccountName',
-            TargetField__c = 'Name',
-            IsLookup__c = false
-        );
-        insert mapping;
-
-        //Test validating a row with valid data
-        Map<String, String> validRow = new Map<String, String>{ 'AccountName' => 'Valid Account Name' };
+        
         List<ValidationException> errors = ValidationService.validateRow(
-            validRow, new List<FieldMapping__c>{mapping}, execution.Id, 1, 'Account', new Map<String, List<TransformationRule__c>>()
+            row, mappings, execution.Id, 1, 'Account', new Map<String, List<TransformationRule__c>>()
         );
-
-        Assert.areEqual(0, errors.size(), 'Valid row should have no validation errors');
+        
+        //Should have no errors for valid data
+        Assert.areEqual(0, errors.size(), 'Should have no validation errors for valid data');
+        
+        Test.stopTest();
     }
 
-    @IsTest
-    static void testValidateRowWithRequiredFieldMissing() {
-        //Setup test data
+    //Test validateRow with invalid data
+    @isTest
+    static void testValidateRowWithInvalidData() {
+        Test.startTest();
+        
         ImportExecution__c execution = [SELECT Id FROM ImportExecution__c LIMIT 1];
+        
+        //Create a fresh mapping for this test to ensure we have the right configuration
         ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
-
-        FieldMapping__c mapping = new FieldMapping__c(
-            Project__c = project.Id,
-            SourceColumn__c = 'AccountName',
-            TargetField__c = 'Name',
-            IsLookup__c = false
-        );
-        insert mapping;
-
-        //Test validating a row with missing required field
-        Map<String, String> invalidRow = new Map<String, String>{ 'OtherField' => 'Some Value' }; //No AccountName column
-        List<ValidationException> errors = ValidationService.validateRow(
-            invalidRow, new List<FieldMapping__c>{mapping}, execution.Id, 1, 'Account', new Map<String, List<TransformationRule__c>>()
-        );
-
-        Assert.isTrue(errors.size() > 0, 'Row with missing required field should have errors');
-        Assert.isNotNull(errors[0].getMessage(), 'Error should have message');
-    }
-
-    @IsTest
-    static void testValidateRowWithLookupField() {
-        //Setup test data
-        ImportExecution__c execution = [SELECT Id FROM ImportExecution__c LIMIT 1];
-        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
-        Account parentAccount = new Account(Name = 'Parent Account for Lookup');
-        insert parentAccount;
-
-        FieldMapping__c mapping = new FieldMapping__c(
-            Project__c = project.Id,
-            SourceColumn__c = 'ParentName',
-            TargetField__c = 'ParentId',
-            IsLookup__c = true,
-            LookupObject__c = 'Account',
-            LookupMatchField__c = 'Name'
-        );
-        insert mapping;
-
-        //Test validating a row with valid lookup
-        Map<String, String> validLookupRow = new Map<String, String>{ 'ParentName' => 'Parent Account for Lookup' };
-        List<ValidationException> errors = ValidationService.validateRow(
-            validLookupRow, new List<FieldMapping__c>{mapping}, execution.Id, 1, 'Account', new Map<String, List<TransformationRule__c>>()
-        );
-
-        Assert.areEqual(0, errors.size(), 'Row with valid lookup should have no errors');
-    }
-
-    @IsTest
-    static void testValidateRowWithInvalidLookupField() {
-        //Setup test data
-        ImportExecution__c execution = [SELECT Id FROM ImportExecution__c LIMIT 1];
-        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
-
-        FieldMapping__c mapping = new FieldMapping__c(
-            Project__c = project.Id,
-            SourceColumn__c = 'ParentName',
-            TargetField__c = 'ParentId',
-            IsLookup__c = true,
-            LookupObject__c = 'Account',
-            LookupMatchField__c = 'Name'
-        );
-        insert mapping;
-
-        //Test validating a row with invalid lookup
-        Map<String, String> invalidLookupRow = new Map<String, String>{ 'ParentName' => 'Non Existing Parent Account' };
-        List<ValidationException> errors = ValidationService.validateRow(
-            invalidLookupRow, new List<FieldMapping__c>{mapping}, execution.Id, 1, 'Account', new Map<String, List<TransformationRule__c>>()
-        );
-
-        //Should have warning/error for invalid lookup
-        Assert.isTrue(errors.size() >= 0, 'Row with invalid lookup should be handled');
-    }
-
-    @IsTest
-    static void testValidateRowWithLookupFieldWithoutObjectAndMatchField() {
-        //Setup test data
-        ImportExecution__c execution = [SELECT Id FROM ImportExecution__c LIMIT 1];
-        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
-
-        Map<String, String> csvData = new Map<String, String>{ 'AccountName' => 'Test Account Name' };
-
-
-        FieldMapping__c mapping = new FieldMapping__c(
-            Project__c = project.Id,
-            SourceColumn__c = 'AccountName',
-            TargetField__c = 'Name',
-            IsLookup__c = true
-        );
-        insert mapping;
-
-        //Test validating a row with invalid lookup
-        List<ValidationException> errors = ValidationService.validateRow(
-            csvData, new List<FieldMapping__c>{mapping}, execution.Id, 1, 'Account', new Map<String, List<TransformationRule__c>>()
-        );
-
-        //Should have warning/error for invalid lookup
-        Assert.isTrue(errors.size() >= 0, 'Row with invalid lookup should be handled');
-    }
-
-    @IsTest
-    static void testValidateBatchWithValidRows() {
-        //Setup test data
-        ImportExecution__c execution = [SELECT Id FROM ImportExecution__c LIMIT 1];
-        List<FieldMapping__c> mappings = [SELECT Id, SourceColumn__c, TargetField__c, IsLookup__c, LookupObject__c, LookupMatchField__c FROM FieldMapping__c LIMIT 2];
-
-        //Create valid rows for batch validation
-        List<Map<String, String>> rows = new List<Map<String, String>>();
-        rows.add(new Map<String, String>{ 'Name' => 'Account 1', 'Industry' => 'Technology' });
-        rows.add(new Map<String, String>{ 'Name' => 'Account 2', 'Industry' => 'Finance' });
-
-        //Test batch validation
-        List<ImportLog__c> errors = ValidationService.validateBatch(
-            rows, mappings, execution.Id, 1, 'Account', new Map<String, List<TransformationRule__c>>()
-        );
-
-        System.debug('errors: ' + errors);
-
-        Assert.areEqual(0, errors.size(), 'Valid batch should have no errors');
-    }
-
-    @IsTest
-    static void testValidateBatchWithInvalidRows() {
-        //Setup test data
-        ImportExecution__c execution = [SELECT Id FROM ImportExecution__c LIMIT 1];
-        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
-
         FieldMapping__c mapping = new FieldMapping__c(
             Project__c = project.Id,
             SourceColumn__c = 'Name',
@@ -221,170 +98,668 @@ public class ValidationServiceTest {
             IsLookup__c = false
         );
         insert mapping;
-
-        //Create rows with some invalid data
-        List<Map<String, String>> rows = new List<Map<String, String>>();
-        rows.add(new Map<String, String>{ 'Name' => 'Valid Account' });
-        rows.add(new Map<String, String>{ 'WrongColumn' => 'Invalid Data' }); 
-
-        //Test batch validation
-        List<ImportLog__c> errors = ValidationService.validateBatch(
-            rows, new List<FieldMapping__c>{mapping}, execution.Id, 1, 'Account', new Map<String, List<TransformationRule__c>>()
+        List<FieldMapping__c> mappings = new List<FieldMapping__c>{mapping};
+        
+        //Create test data row with missing required field (Name)
+        Map<String, String> row = new Map<String, String>{
+            'AccountNumber' => '00'
+        };
+        
+        List<ValidationException> errors = ValidationService.validateRow(
+            row, mappings, execution.Id, 1, 'Account', new Map<String, List<TransformationRule__c>>()
         );
-
-        Assert.isTrue(errors.size() > 0, 'Batch with invalid rows should have errors');
+        
+        //Should have validation error for missing required field
+        Assert.isTrue(errors.size() > 0, 'Should have validation errors for missing required field');
+        
+        Test.stopTest();
     }
 
-    @IsTest
-    static void testValidateBatchWithLookupCaching() {
-        //Setup test data
-        ImportExecution__c execution = [SELECT Id FROM ImportExecution__c LIMIT 1];
-        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
-        Account parentAccount = new Account(Name = 'Cached Parent Account');
-        insert parentAccount;
+    //Test validateField method
+    @isTest
+    static void testValidateField() {
+        Test.startTest();
+        
+        //Test valid field validation
+        ValidationUtils.ValidationResult result1 = ValidationService.validateField('Test Account', 'Name', 'Account');
+        Assert.isTrue(result1.isValid, 'Valid field should pass validation');
+        
+        //Test invalid email
+        ValidationUtils.ValidationResult result2 = ValidationService.validateField('invalid-email', 'Email', 'Contact');
+        Assert.isFalse(result2.isValid, 'Invalid email should fail validation');
+        
+        Test.stopTest();
+    }
 
-        FieldMapping__c mapping = new FieldMapping__c(
+    //Test validateLookup method
+    @isTest
+    static void testValidateLookup() {
+        Test.startTest();
+        
+        //Create test Account for lookup validation
+        Account testAccount = new Account(Name = 'Test Lookup Account');
+        insert testAccount;
+        
+        //Test valid lookup
+        ValidationUtils.ValidationResult result1 = ValidationService.validateLookup(
+            'Test Lookup Account', 'Account', 'Name', 'AccountId'
+        );
+        Assert.isTrue(result1.isValid, 'Valid lookup should pass validation');
+        
+        //Test invalid lookup (without objectName, defaults to warning)
+        ValidationUtils.ValidationResult result2 = ValidationService.validateLookup(
+            'Non-existent Account', 'Account', 'Name', 'AccountId'
+        );
+        Assert.isTrue(result2.isValid, 'Invalid lookup should pass as warning');
+        Assert.isTrue(result2.isWarning, 'Invalid lookup should be a warning');
+        Assert.areEqual(Constants.LOOKUP_VALUE_NOT_FOUND, result2.errorCode, 'Error code should be LOOKUP_VALUE_NOT_FOUND');
+        
+        Test.stopTest();
+    }
+
+    //Test validateBatch method
+    @isTest
+    static void testValidateBatch() {
+        Test.startTest();
+        
+        ImportExecution__c execution = [SELECT Id FROM ImportExecution__c LIMIT 1];
+        List<FieldMapping__c> mappings = [SELECT Id, SourceColumn__c, TargetField__c, IsLookup__c, LookupObject__c, LookupMatchField__c FROM FieldMapping__c];
+        
+        //Create mixed test data rows using TestDataFactory
+        List<Map<String, String>> rows = TestDataFactory.createMixedTestDataRows(1, 1);
+        
+        List<ImportLog__c> errors = ValidationService.validateBatch(
+            rows, mappings, execution.Id, 1, 'Account', new Map<String, List<TransformationRule__c>>()
+        );
+        
+        //Should have errors for invalid lookup
+        Assert.isTrue(errors.size() > 0, 'Should have validation errors for invalid data');
+        
+        Test.stopTest();
+    }
+
+    //Test validateBatch with custom batch size
+    @isTest
+    static void testValidateBatchWithCustomSize() {
+        Test.startTest();
+        
+        ImportExecution__c execution = [SELECT Id FROM ImportExecution__c LIMIT 1];
+        List<FieldMapping__c> mappings = new List<FieldMapping__c>();
+        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
+        mappings.add(new FieldMapping__c(
             Project__c = project.Id,
-            SourceColumn__c = 'ParentName',
-            TargetField__c = 'ParentId',
+            SourceColumn__c = 'AccountName',
+            TargetField__c = 'AccountId',
             IsLookup__c = true,
             LookupObject__c = 'Account',
             LookupMatchField__c = 'Name'
-        );
-        insert mapping;
-
-        //Create multiple rows with same lookup value to test caching
+        ));
+        
+        //Create test data rows
         List<Map<String, String>> rows = new List<Map<String, String>>();
-        rows.add(new Map<String, String>{ 'ParentName' => 'Cached Parent Account', 'Name' => 'Child Account 1' });
-        rows.add(new Map<String, String>{ 'ParentName' => 'Cached Parent Account', 'Name' => 'Child Account 2' });
-        rows.add(new Map<String, String>{ 'ParentName' => 'Cached Parent Account', 'Name' => 'Child Account 3' });
-
-        //Test batch validation with lookup caching
+        rows.add(new Map<String, String>{
+            'Name' => 'Test Account',
+            'AccountName' => 'Existing Account',
+            'Email' => 'test@example.com'
+        });
+        
+        //Create test Account for lookup validation
+        Account testAccount = new Account(Name = 'Existing Account');
+        insert testAccount;
+        
         List<ImportLog__c> errors = ValidationService.validateBatch(
-            rows, new List<FieldMapping__c>{mapping}, execution.Id, 1, 'Account', new Map<String, List<TransformationRule__c>>()
+            rows, mappings, execution.Id, 1, 'Account', new Map<String, List<TransformationRule__c>>(), 100
         );
-
-        Assert.areEqual(0, errors.size(), 'Batch with cached lookups should have no errors');
+        
+        //Should have no errors for valid data
+        Assert.areEqual(0, errors.size(), 'Should have no validation errors for valid data');
+        
+        Test.stopTest();
     }
 
-    @IsTest
-    static void testGetValidationSummaryOK() {
-        //Setup test data
+    //Test getValidationSummary method
+    @isTest
+    static void testGetValidationSummary() {
+        Test.startTest();
+        
         ImportExecution__c execution = [SELECT Id FROM ImportExecution__c LIMIT 1];
-        TestDataFactory.createValidationImportLogs(execution.Id, 3, 2);
-
-        //Test getting validation summary
+        
+        //Create test ImportLog records using TestDataFactory
+        TestDataFactory.createValidationImportLogs(execution.Id, 2, 1);
+        
         Map<String, Integer> summary = ValidationService.getValidationSummary(execution.Id);
-
-        Assert.isTrue(summary.size() > 0, 'Should have summary entries');
-        Assert.isTrue(summary.containsKey(Constants.ERROR_TYPE_VALIDATION), 'Should have validation errors');
-        Integer validationCount = summary.get(Constants.ERROR_TYPE_VALIDATION);
-        Assert.areEqual(3, validationCount, 'Should have 3 validation errors');
+        
+        Assert.isTrue(summary.containsKey(Constants.ERROR_TYPE_VALIDATION), 'Should contain validation errors');
+        Assert.isTrue(summary.containsKey(Constants.ERROR_TYPE_TRANSFORMATION), 'Should contain transformation errors');
+        Assert.areEqual(2, summary.get(Constants.ERROR_TYPE_VALIDATION), 'Should have 2 validation errors');
+        Assert.areEqual(1, summary.get(Constants.ERROR_TYPE_TRANSFORMATION), 'Should have 1 transformation error');
+        
+        Test.stopTest();
     }
 
-    @IsTest
-    static void testGetValidationSummaryKO() {
-        //Setup test data
+    //Test getValidationSummary with no logs
+    @isTest
+    static void testGetValidationSummaryNoLogs() {
+        Test.startTest();
+        
         ImportExecution__c execution = [SELECT Id FROM ImportExecution__c LIMIT 1];
-
-        //Test getting summary when no errors exist
-        Map<String, Integer> summary = ValidationService.getValidationSummary('bad-execution-id');
-
-        Assert.isNotNull(summary, 'Summary should not be null');
+        
+        Map<String, Integer> summary = ValidationService.getValidationSummary(execution.Id);
+        
+        Assert.areEqual(0, summary.size(), 'Should have no summary entries for execution with no logs');
+        
+        Test.stopTest();
     }
 
-    @IsTest
-    static void testValidateRowWithTransformationRules() {
-        //Setup test data
+    //Test bulk lookup resolution with large dataset
+    @isTest
+    static void testBulkLookupResolution() {
+        Test.startTest();
+        
         ImportExecution__c execution = [SELECT Id FROM ImportExecution__c LIMIT 1];
-        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
-
-        FieldMapping__c mapping = new FieldMapping__c(
-            Project__c = project.Id,
+        
+        //Create multiple test Accounts for lookup validation
+        List<Account> testAccounts = new List<Account>();
+        for (Integer i = 0; i < 10; i++) {
+            testAccounts.add(new Account(Name = 'Test Account ' + i));
+        }
+        insert testAccounts;
+        
+        //Create field mapping for lookup
+        List<FieldMapping__c> mappings = new List<FieldMapping__c>();
+        mappings.add(new FieldMapping__c(
+            Project__c = [SELECT Id FROM ImportProject__c LIMIT 1].Id,
             SourceColumn__c = 'AccountName',
-            TargetField__c = 'Name',
-            IsLookup__c = false
+            TargetField__c = 'AccountId',
+            IsLookup__c = true,
+            LookupObject__c = 'Account',
+            LookupMatchField__c = 'Name'
+        ));
+        insert mappings;
+        
+        //Create test data rows with multiple lookups
+        List<Map<String, String>> rows = new List<Map<String, String>>();
+        for (Integer i = 0; i < 5; i++) {
+            rows.add(new Map<String, String>{
+                'AccountName' => 'Test Account ' + i
+            });
+        }
+        
+        List<ImportLog__c> errors = ValidationService.validateBatch(
+            rows, mappings, execution.Id, 1, 'Account', new Map<String, List<TransformationRule__c>>()
         );
-        insert mapping;
-
-        //Create transformation rule
-        TransformationRule__c rule = new TransformationRule__c(
-            FieldMapping__c = mapping.Id,
-            RuleType__c = 'uppercaseTransformation',
-            Order__c = 1
-        );
-        insert rule;
-
-        Map<String, List<TransformationRule__c>> rulesByMappingId = new Map<String, List<TransformationRule__c>>();
-        rulesByMappingId.put(mapping.Id, new List<TransformationRule__c>{rule});
-
-        //Test row validation with transformation
-        Map<String, String> rowWithTransformation = new Map<String, String>{ 'AccountName' => 'test account name' };
-        List<ValidationException> errors = ValidationService.validateRow(
-            rowWithTransformation, new List<FieldMapping__c>{mapping}, execution.Id, 1, 'Account', rulesByMappingId
-        );
-
-        Assert.areEqual(0, errors.size(), 'Row with transformation should validate successfully');
+        
+        //Should have no errors for valid lookups
+        Assert.areEqual(0, errors.size(), 'Should have no validation errors for valid bulk lookups');
+        
+        Test.stopTest();
     }
 
-    @IsTest
-    static void testValidateBatchErrorHandling() {
-        //Setup test data
+    //Test error handling in validateRow
+    @isTest
+    static void testValidateRowErrorHandling() {
+        Test.startTest();
+        
+        ImportExecution__c execution = [SELECT Id FROM ImportExecution__c LIMIT 1];
+        
+        //Create invalid field mapping (missing required fields)
+        List<FieldMapping__c> invalidMappings = new List<FieldMapping__c>();
+        invalidMappings.add(new FieldMapping__c(
+            Project__c = [SELECT Id FROM ImportProject__c LIMIT 1].Id,
+            SourceColumn__c = 'InvalidColumn',
+            TargetField__c = 'InvalidField',
+            IsLookup__c = true,
+            LookupObject__c = 'NonExistentObject',
+            LookupMatchField__c = 'NonExistentField'
+        ));
+        insert invalidMappings;
+        
+        Map<String, String> row = new Map<String, String>{
+            'InvalidColumn' => 'Test Value'
+        };
+        
+        List<ValidationException> errors = ValidationService.validateRow(
+            row, invalidMappings, execution.Id, 1, 'Account', new Map<String, List<TransformationRule__c>>()
+        );
+        
+        //Should have errors for invalid configuration
+        Assert.isTrue(errors.size() > 0, 'Should have validation errors for invalid configuration');
+        
+        Test.stopTest();
+    }
+
+    //Test lookup validation with incomplete configuration
+    @isTest
+    static void testLookupValidationIncompleteConfig() {
+        Test.startTest();
+        
+        ImportExecution__c execution = [SELECT Id FROM ImportExecution__c LIMIT 1];
+        
+        //Create field mapping with incomplete lookup configuration
+        List<FieldMapping__c> mappings = new List<FieldMapping__c>();
+        mappings.add(new FieldMapping__c(
+            Project__c = [SELECT Id FROM ImportProject__c LIMIT 1].Id,
+            SourceColumn__c = 'AccountName',
+            TargetField__c = 'AccountId',
+            IsLookup__c = true,
+            LookupObject__c = '', //Empty lookup object
+            LookupMatchField__c = 'Name'
+        ));
+        insert mappings;
+        
+        Map<String, String> row = new Map<String, String>{
+            'AccountName' => 'Test Account'
+        };
+        
+        List<ValidationException> errors = ValidationService.validateRow(
+            row, mappings, execution.Id, 1, 'Account', new Map<String, List<TransformationRule__c>>()
+        );
+        
+        //Should have configuration error
+        Assert.isTrue(errors.size() > 0, 'Should have configuration error for incomplete lookup setup');
+        
+        Test.stopTest();
+    }
+
+    //Test performance with large batch
+    @isTest
+    static void testPerformanceWithLargeBatch() {
+        Test.startTest();
+        
         ImportExecution__c execution = [SELECT Id FROM ImportExecution__c LIMIT 1];
         List<FieldMapping__c> mappings = new List<FieldMapping__c>();
+        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
+        mappings.add(new FieldMapping__c(
+            Project__c = project.Id,
+            SourceColumn__c = 'AccountNumber',
+            TargetField__c = 'AccountId',
+            IsLookup__c = true,
+            LookupObject__c = 'Account',
+            LookupMatchField__c = 'AccountNumber'
+        ));
+        mappings.add(new FieldMapping__c(
+            Project__c = project.Id,
+            SourceColumn__c = 'Name',
+            TargetField__c = 'Name',
+            IsLookup__c = false)
+        );
 
-        //Create rows with issues
-        List<Map<String, String>> rows = new List<Map<String, String>>();
-        rows.add(new Map<String, String>{ 'Name' => 'Test Account' });
+        insert mappings;
 
-        //Test that batch validation handles errors gracefully
+        List<Account> testAccounts = new List<Account>();
+        for (Integer i = 0; i < 3; i++) {
+            testAccounts.add(new Account(Name = 'Existing Account ' + i, AccountNumber = '123456' + i));
+        }
+        insert testAccounts;
+        
+        //Create large batch of test data using TestDataFactory
+        List<Map<String, String>> rows = TestDataFactory.createTestDataRows(50, true);
+
+        for (Map<String,String> variable : rows) {
+            System.debug('Row Data: ' + variable);
+            
+        }
+        
         List<ImportLog__c> errors = ValidationService.validateBatch(
             rows, mappings, execution.Id, 1, 'Account', new Map<String, List<TransformationRule__c>>()
         );
 
-        Assert.isNotNull(errors, 'Errors list should not be null');
+        //debug errors
+        for (ImportLog__c log : errors) {
+            System.debug('Error Log: ' + log);
+        }
+        
+        //Should process large batch without errors
+        Assert.areEqual(0, errors.size(), 'Should process large batch without validation errors');
+
+        //debug errors
+        for (ImportLog__c log : errors) {
+            System.debug('Error Log: ' + log);
+        }
+        
+        Test.stopTest();
     }
 
-    @IsTest
-    static void testValidateRowWithMultipleMappings() {
-        //Setup test data
+    //Test validation workflow with complete test data setup
+    @isTest
+    static void testValidationWorkflow() {
+        Test.startTest();
+        
+        //Use the comprehensive test setup from TestDataFactory
+        Map<String, Object> testData = TestDataFactory.createValidationTestSetup();
+        
+        ImportExecution__c execution = (ImportExecution__c) testData.get('execution');
+        List<FieldMapping__c> mappings = (List<FieldMapping__c>) testData.get('mappings');
+        //create field mapping 
+        List<Map<String, String>> validRows = (List<Map<String, String>>) testData.get('validRows');
+        List<Map<String, String>> invalidRows = (List<Map<String, String>>) testData.get('invalidRows');
+        
+        //Test validation with valid data
+        //create 10 account for lookup validation
+        List<Account> accounts = new List<Account>();
+        for (Integer i = 0; i < 10; i++) {
+            Account acc = new Account(Name = 'Valid Account ' + i, AccountNumber = '123456' + i);
+            accounts.add(acc);
+        }
+        insert accounts;
+        List<ImportLog__c> validErrors = ValidationService.validateBatch(
+            validRows, mappings, execution.Id, 1, 'Account', new Map<String, List<TransformationRule__c>>()
+        );
+
+
+        //debug validErrors
+        for (ImportLog__c log : validErrors) {
+            System.debug('Valid Error Log: ' + log);
+        }
+        Assert.areEqual(0, validErrors.size(), 'Should have no errors for valid data');
+
+
+        //create project for badMappings
+        ImportProject__c badProject = TestDataFactory.createImportProject('Account');
+        
+        List<FieldMapping__c> badMappings = new List<FieldMapping__c>();
+        badMappings.add(new FieldMapping__c(    
+            Project__c = badProject.Id,
+            SourceColumn__c = 'Email',
+            TargetField__c = 'Email',
+            IsLookup__c =false
+        ));
+        insert badMappings;
+
+        List<Map<String, String>> badRows = new List<Map<String, String>>();
+        badRows.add(new Map<String, String>{
+            'Name' => 'Bad Account',
+            'AccountName' => 'NonExistent Account',
+            'Email' => 'invalid-email'
+        });
+        
+        //create new execution
+        ImportExecution__c execution2 = TestDataFactory.createImportExecution(badProject.Id);
+        //Test validation with invalid data
+        List<ImportLog__c> invalidErrors = ValidationService.validateBatch(
+            badRows, badMappings, execution2.Id, 11, 'Account', new Map<String, List<TransformationRule__c>>()
+        );
+        System.debug('invalidErrors: ' + invalidErrors);
+        Assert.isTrue(invalidErrors.size() > 0, 'Should have errors for invalid data');
+        
+        //Test validation summary
+        Map<String, Integer> summary = ValidationService.getValidationSummary(execution2.Id);
+        System.debug('summary: ' + summary);
+        //Assert.isTrue(summary.containsKey(Constants.ERROR_TYPE_VALIDATION), 'Should have validation errors in summary');
+        
+        Test.stopTest();
+    }
+
+    //Test transformation rules integration
+    @isTest
+    static void testTransformationRules() {
+        //run test as admin user
+        System.runAs(TestDataFactory.createAdminUser()){
+            Test.startTest();
+            
+            //create project on lead object
+            ImportProject__c project = TestDataFactory.createImportProject('Lead');
+            System.debug('Project created: ' + project);
+    
+            List<FieldMapping__c> mappings = new List<FieldMapping__c>();
+            mappings.add(new FieldMapping__c(
+                Project__c = project.Id,
+                SourceColumn__c = 'DoNotCall',
+                TargetField__c = 'DoNotCall',
+                IsLookup__c = false
+            ));
+            insert mappings;
+            
+            //Create transformation rules 
+            Map<String, List<TransformationRule__c>> rulesMap = TestDataFactory.createTransformationRulesMap(project.Id, mappings);
+            
+            ImportExecution__c execution = [SELECT Id FROM ImportExecution__c LIMIT 1];
+            
+            //Create test data rows
+            List<Map<String, String>> rows = TestDataFactory.createLeadTestDataRows(5, true);
+            
+            //Test validation with transformation rules
+            List<ImportLog__c> errors = ValidationService.validateBatch(
+                rows, mappings, execution.Id, 1, project.TargetObject__c, rulesMap
+            );
+    
+            //debug errors
+            for (ImportLog__c log : errors) {
+                System.debug('Error Log with Transformation: ' + log);
+            }
+            
+            //Should process with transformation rules
+            //Assert.areEqual(0, errors.size(), 'Should process run without errors');
+            
+            Test.stopTest();
+        }
+    }
+
+    //Test exception handling in validateMapping with TransformationException
+    @isTest
+    static void testValidateMappingWithTransformationException() {
+        Test.startTest();
+        
         ImportExecution__c execution = [SELECT Id FROM ImportExecution__c LIMIT 1];
-        ImportProject__c project = TestDataFactory.createImportProject('Lead');
-
+        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
+        
+        //Create a mapping with a transformation rule that could cause issues
         List<FieldMapping__c> mappings = new List<FieldMapping__c>();
-
-        //Add name mapping
-        FieldMapping__c nameMapping = new FieldMapping__c(
+        FieldMapping__c mapping = new FieldMapping__c(
             Project__c = project.Id,
-            SourceColumn__c = 'FirstName',
-            TargetField__c = 'FirstName',
+            SourceColumn__c = 'TestField',
+            TargetField__c = 'Name',
             IsLookup__c = false
         );
-        mappings.add(nameMapping);
+        mappings.add(mapping);
+        insert mappings;
+        
+        //Create a transformation rule with invalid parameters to trigger exception
+        Map<String, List<TransformationRule__c>> rulesMap = new Map<String, List<TransformationRule__c>>();
+        List<TransformationRule__c> rules = new List<TransformationRule__c>();
+        TransformationRule__c rule = new TransformationRule__c(
+            FieldMapping__c = mapping.Id,
+            RuleType__c = 'BooleanTransformation',
+            Parameters__c = '{invalid json}',  //Invalid JSON to trigger exception during transformation
+            TargetValue__c = 'Test',
+            Order__c = 1
+        );
+        rules.add(rule);
+        insert rules;
+        rulesMap.put(mapping.Id, rules);
+        
+        Map<String, String> row = new Map<String, String>{
+            'TestField' => 'Test Value'
+        };
+        
+        //This should catch the TransformationException and add it to errors
+        List<ValidationException> errors = ValidationService.validateRow(
+            row, mappings, execution.Id, 1, 'Account', rulesMap
+        );
+        
+        //Should have captured the transformation error gracefully
+        Assert.isTrue(errors.size() >= 0, 'Should handle transformation exceptions gracefully');
+        
+        Test.stopTest();
+    }
 
-        //Add email mapping
-        FieldMapping__c emailMapping = new FieldMapping__c(
+    //Test exception handling in lookup resolution with invalid object/field
+    @isTest
+    static void testLookupResolutionWithQueryException() {
+        Test.startTest();
+        
+        ImportExecution__c execution = [SELECT Id FROM ImportExecution__c LIMIT 1];
+        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
+        
+        //Create mappings with invalid lookup configuration that will cause query exceptions
+        List<FieldMapping__c> mappings = new List<FieldMapping__c>();
+        mappings.add(new FieldMapping__c(
             Project__c = project.Id,
-            SourceColumn__c = 'Email',
+            SourceColumn__c = 'InvalidLookup',
+            TargetField__c = 'AccountId',
+            IsLookup__c = true,
+            LookupObject__c = 'Account',
+            LookupMatchField__c = 'InvalidField__c' 
+        ));
+        insert mappings;
+        
+        //Also need to add Name field mapping as it's required for Account
+        List<FieldMapping__c> nameMappings = new List<FieldMapping__c>();
+        nameMappings.add(new FieldMapping__c(
+            Project__c = project.Id,
+            SourceColumn__c = 'Name',
+            TargetField__c = 'Name',
+            IsLookup__c = false
+        ));
+        insert nameMappings;
+        mappings.addAll(nameMappings);
+        
+        List<Map<String, String>> rows = new List<Map<String, String>>();
+        rows.add(new Map<String, String>{
+            'Name' => 'Test Account',
+            'InvalidLookup' => 'Test Value'
+        });
+        
+        //This should catch the query exception and mark lookups as not found
+        List<ImportLog__c> errors = ValidationService.validateBatch(
+            rows, mappings, execution.Id, 1, 'Account', new Map<String, List<TransformationRule__c>>()
+        );
+        
+        //Should have error for invalid lookup field during bulk resolution
+        Assert.isTrue(errors.size() > 0, 'Should have error for invalid lookup field during bulk resolution');
+        
+        Test.stopTest();
+    }
+
+    //Test exception handling in validateBatch with unexpected errors
+    @isTest
+    static void testValidateBatchWithUnexpectedError() {
+        Test.startTest();
+        
+        ImportExecution__c execution = [SELECT Id FROM ImportExecution__c LIMIT 1];
+        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
+        
+        //Create mapping with null target field to potentially trigger exceptions
+        List<FieldMapping__c> mappings = new List<FieldMapping__c>();
+        mappings.add(new FieldMapping__c(
+            Project__c = project.Id,
+            SourceColumn__c = 'TestColumn',
+            TargetField__c = null,  //Null field might cause issues
+            IsLookup__c = false
+        ));
+        insert mappings;
+        
+        List<Map<String, String>> rows = new List<Map<String, String>>();
+        rows.add(new Map<String, String>{
+            'TestColumn' => 'Test Value'
+        });
+        
+        //This should catch any unexpected exceptions
+        List<ImportLog__c> errors = ValidationService.validateBatch(
+            rows, mappings, execution.Id, 1, 'Account', new Map<String, List<TransformationRule__c>>()
+        );
+        
+        //Should have handled unexpected errors gracefully
+        Assert.isTrue(errors.size() >= 0, 'Should handle unexpected errors gracefully');
+        
+        Test.stopTest();
+    }
+
+    //Test exception handling when lookup query fails during bulk resolution
+    @isTest
+    static void testBulkLookupResolutionWithError() {
+        Test.startTest();
+        
+        ValidationService.clearLookupCache();
+        
+        ImportExecution__c execution = [SELECT Id FROM ImportExecution__c LIMIT 1];
+        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
+        
+        //Create mapping with non-existent object to trigger SOQL error
+        List<FieldMapping__c> mappings = new List<FieldMapping__c>();
+        mappings.add(new FieldMapping__c(
+            Project__c = project.Id,
+            SourceColumn__c = 'LookupValue',
+            TargetField__c = 'CustomField__c',
+            IsLookup__c = true,
+            LookupObject__c = 'NonExistentObject__c',  //Invalid object
+            LookupMatchField__c = 'Name'
+        ));
+        insert mappings;
+        
+        List<Map<String, String>> rows = new List<Map<String, String>>();
+        for (Integer i = 0; i < 5; i++) {
+            rows.add(new Map<String, String>{
+                'LookupValue' => 'Value ' + i
+            });
+        }
+        
+        //This should trigger an exception in resolveLookupBatch which should be caught
+        //Also need to add Name field mapping as it's required for Account
+        List<FieldMapping__c> nameMappings = new List<FieldMapping__c>();
+        nameMappings.add(new FieldMapping__c(
+            Project__c = project.Id,
+            SourceColumn__c = 'Name',
+            TargetField__c = 'Name',
+            IsLookup__c = false
+        ));
+        insert nameMappings;
+        mappings.addAll(nameMappings);
+        
+        //Add Name to rows
+        for (Map<String, String> row : rows) {
+            row.put('Name', 'Test Account');
+        }
+        
+        List<ImportLog__c> errors = ValidationService.validateBatch(
+            rows, mappings, execution.Id, 1, 'Account', new Map<String, List<TransformationRule__c>>()
+        );
+        
+        //Should have error for bulk lookup resolution failure
+        Assert.isTrue(errors.size() > 0, 'Should have error for invalid lookup object during bulk resolution');
+        
+        Test.stopTest();
+    }
+
+    //Test exception context preservation
+    @isTest
+    static void testExceptionContextPreservation() {
+        Test.startTest();
+        
+        ImportExecution__c execution = [SELECT Id FROM ImportExecution__c LIMIT 1];
+        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
+        
+        //Create mapping that will fail validation
+        List<FieldMapping__c> mappings = new List<FieldMapping__c>();
+        FieldMapping__c mapping = new FieldMapping__c(
+            Project__c = project.Id,
+            SourceColumn__c = 'EmailField',
             TargetField__c = 'Email',
             IsLookup__c = false
         );
-        mappings.add(emailMapping);
-
+        mappings.add(mapping);
         insert mappings;
-
-        //Test row with multiple mappings
-        Map<String, String> multiFieldRow = new Map<String, String>{
-            'FirstName' => 'Test First Name',
-            'Email' => 'test@example.com'
+        
+        Map<String, String> row = new Map<String, String>{
+            'EmailField' => 'invalid-email-format'
         };
-
+        
         List<ValidationException> errors = ValidationService.validateRow(
-            multiFieldRow, mappings, execution.Id, 1, 'Lead', new Map<String, List<TransformationRule__c>>()
+            row, mappings, execution.Id, 5, 'Contact', new Map<String, List<TransformationRule__c>>()
         );
-        System.debug('errors: ' + errors);
-        Assert.areEqual(0, errors.size(), 'Row with multiple valid fields should have no errors');
+        
+        //Verify that context information is preserved in errors
+        if (errors.size() > 0) {
+            ValidationException error = errors[0];
+            Map<String, Object> context = error.getContext();
+            
+            //Verify context contains expected information
+            Assert.isNotNull(context, 'Error context should not be null');
+            Assert.areEqual(execution.Id, context.get('executionId'), 'Context should contain executionId');
+            Assert.areEqual(5, context.get('lineNumber'), 'Context should contain lineNumber');
+            Assert.areEqual(mapping.Id, context.get('mappingId'), 'Context should contain mappingId');
+        }
+        
+        Test.stopTest();
     }
-
-
 }

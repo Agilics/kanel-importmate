@@ -2,8 +2,8 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 11-23-2025
- * @last modified by  : khalidousowba
+ * @last modified on  : 10-24-2025
+ * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 public with sharing class Constants {
     public static final String BOOLEAN_TYPE = 'Boolean';
@@ -42,7 +42,7 @@ public with sharing class Constants {
 
     public static final String EXECUTION_STATUS_COMPLETED = 'Completed';
     public static final String EXECUTION_STATUS_FAILED = 'Failed';
-    public static final String EXECUTION_STATUS_IN_PROGRESS = 'InProgress';
+    public static final String EXECUTION_STATUS_IN_PROGRESS = 'In Progress';
     public static final String EXECUTION_STATUS_SUSPENDED = 'Suspended';
     public static final String EXECUTION_STATUS_PENDING = 'Pending';
 

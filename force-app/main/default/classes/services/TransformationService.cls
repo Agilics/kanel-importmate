@@ -30,9 +30,9 @@ public with sharing class TransformationService {
             if (rules == null) {
                 rules = new List<TransformationRule__c>();
             }
-
+            
             Map<String, String> transformedRow = row.clone();
-
+            
             for (TransformationRule__c rule : rules) {
                 ITransformationRule transformer = TransformationUtils.getTransformer(rule);
                 if (transformer.validate(transformedRow, rule)) {
@@ -49,39 +49,6 @@ public with sharing class TransformationService {
             };
             throw new TransformationException(
                 'Erreur inattendue lors de l\'application: ' + e.getMessage(),
-                Constants.ERROR_CODE_TRANSFORMATION,
-                context
-            );
-        }
-    }
-
-    //Apply transformations for an entire row across all mappings
-    public static Map<String, String> applyTransformationsForRow(Map<String, String> row, List<FieldMapping__c> mappings, Map<String, List<TransformationRule__c>> rulesByMappingId) {
-        try {
-            Map<String, String> transformedRow = row.clone();
-
-            // Apply transformations for each mapping that has rules
-            for (FieldMapping__c mapping : mappings) {
-                List<TransformationRule__c> rules = rulesByMappingId.get(mapping.Id);
-                if (rules != null && !rules.isEmpty()) {
-                    for (TransformationRule__c rule : rules) {
-                        ITransformationRule transformer = TransformationUtils.getTransformer(rule);
-                        if (transformer.validate(transformedRow, rule)) {
-                            transformedRow.put(rule.FieldMapping__r.TargetField__c, transformer.apply(transformedRow, rule));
-                        }
-                    }
-                }
-            }
-
-            return transformedRow;
-        } catch (Exception e) {
-            Map<String, Object> context = new Map<String, Object>{
-                'rowData' => row,
-                'mappingsCount' => mappings?.size(),
-                'originalError' => e.getMessage()
-            };
-            throw new TransformationException(
-                'Error applying transformations for row: ' + e.getMessage(),
                 Constants.ERROR_CODE_TRANSFORMATION,
                 context
             );
