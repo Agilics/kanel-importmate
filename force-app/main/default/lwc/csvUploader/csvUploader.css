@@ -15,17 +15,44 @@
 .btn--xl { padding: 0.7rem 1.4rem; font-size: 1rem; }
 
 /* ====== Cards ====== */
-.card { background: white; border-radius: 0.6rem; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05); padding: 1.2rem 1.5rem; }
+.card {
+  background: white;
+  border-radius: 0.6rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+  padding: 0.9rem 1.2rem; 
+}
+
 .card__title { font-weight: 600; color: #222; }
-.card__subtitle { color: #666; font-size: 0.85rem; margin-bottom: 1rem; }
+.card__subtitle {
+  margin-bottom: 0.5rem;
+}
 
 /* ====== Dropzone ====== */
-.dropzone { border: 2px dashed #c7c7c7; border-radius: 0.6rem; padding: 2rem 1rem; text-align: center; background: #fafafa; cursor: pointer; transition: border-color 0.2s, background 0.2s; }
+.dropzone {
+  border: 2px dashed #c7c7c7;
+  border-radius: 0.6rem;
+  padding: 1.1rem 1rem;   
+  text-align: center;
+  background: #fafafa;
+  cursor: pointer;
+  height: 110px;
+}
 .dropzone--hover { border-color: #1E40AF; background: #eef6ff; }
-.dropzone__icon { margin-bottom: 0.5rem; }
-.dropzone__text { font-size: 1rem; color: #333; }
 .dropzone__text .browse { color: #1E40AF; cursor: pointer; font-weight: 600; }
-.dropzone__hint { color: #888; font-size: 0.8rem; margin-top: 0.3rem; }
+.dropzone__icon {
+  margin-bottom: 0.3rem; 
+ 
+}
+
+.dropzone__text {
+  font-size: 0.9rem;     
+  line-height: 1.2;
+}
+
+.dropzone__hint {
+  font-size: 0.75rem;    
+  margin-top: 0.2rem;
+}
 .hidden-input { display: none; }
 
 /* ====== Toolbar ====== */
