@@ -1,6 +1,5 @@
 body {
-  /*div*/
-  position: absolute;
+  /*div*/ 
   width: 1120px;
   height: 1517px;
   background-color: #e5e7eb;
@@ -89,6 +88,25 @@ body {
   opacity: 1;
   top: 40px;
 }
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 44px; 
+}
+
+.btn-secondary:hover {
+  background-color: #f9fafb;
+  border-color: #cbd5e0;
+}
+
 
 /*database icon*/
 .db-icon {

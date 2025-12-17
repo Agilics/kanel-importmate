@@ -59,14 +59,15 @@
               <!-- Step 1: Project Setup -->
 
                 <template if:true={showCreatorSection}>
-                  <c-project-form-card-component
+                  <c-project-form-component
                     recent-projet={currentProject}
                     onsaveproject={handleCreateProject}
                     oncancel={handleCancel}
                     onprojectnamechange={handleProjectNameChange}
                     ondescriptionchange={handleDescriptionChange}
                     ontargetobjectchange={handleTargetObjectChange}
-                  ></c-project-form-card-component>
+                    onprevious={handleBackToStep}
+                  ></c-project-form-component>
                 </template>
 
               <!-- Step 2: Data Source Selection -->
