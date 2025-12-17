@@ -150,7 +150,7 @@ export default class MainComponent extends LightningElement {
   }
 
   validateProjectFields() {
-    return this.projectName && this.description && this.targetObject;
+    return this.projectName  && this.targetObject;
   }
 
   resetProjectForm() {
