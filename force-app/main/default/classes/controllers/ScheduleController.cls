@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 /**
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
@@ -6,10 +5,7 @@
  * @last modified on  : 11-07-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
- 
-=======
-
->>>>>>> dba0851ef05faec95cd7d790162bb7c5c5d485dc
+  
 public with sharing class ScheduleController {
 
     //création d'une nouvelle planification

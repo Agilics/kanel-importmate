@@ -74,10 +74,7 @@ wireAllSchedulesByProjectName({ error, data }) {
         // Dernière exécution
         lastExecute: this.getLastExecution(exec.EndTime),
         // Classe CSS du badge selon le statut
-        badgeStatusClass:
-          status === "Active"
-            ? "status-badge active-status"
-            : "status-badge paused-status",
+        badgeStatusClass: this.getBadgeStatusClass(status),
         // Indicateur d'échec d'import
         hasFailRecord: failRecord > 0
       };
@@ -88,6 +85,10 @@ wireAllSchedulesByProjectName({ error, data }) {
   }
 }
 
+//récupérer la classe du statut badge css à afficher Activé | Pause
+getBadgeStatusClass(statusClass){
+  return statusClass === "Active"? "status-badge active-status": "status-badge paused-status";
+}
 
   //Récupération des valeurs de la liste de sélection de Status d'éxécution
   @wire(getPickListValues, {
