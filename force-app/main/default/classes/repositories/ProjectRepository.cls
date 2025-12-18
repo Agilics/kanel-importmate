@@ -13,7 +13,7 @@ public static ImportProject__c saveProject(ImportProject__c project) {
       try {
         upsert project;
         return project;
-      } catch (DmlException e) {
+      } catch (Exception e) {
         throw new ApplicationException(
           'Erreur lors de la sauvegarde du projet : ' + e.getMessage()
         );
@@ -28,7 +28,7 @@ public static ImportProject__c saveProject(ImportProject__c project) {
   public static ImportProject__c getProjectById(String projectId) {
     if (SecurityUtils.isAccessible(ImportProject__c.SObjectType)) {
       return [
-        SELECT Id, Name, Description__c, TargetObject__c
+        SELECT Id, Name, Description__c, TargetObject__c, CreatedDate
         FROM ImportProject__c 
         WHERE Id = :projectId  
         LIMIT 1
@@ -91,5 +91,59 @@ public static ImportProject__c saveProject(ImportProject__c project) {
       ];
     }
     return new List<ImportProject__c>();
+  }
+
+  //get prj with exec stats
+  public static List<ImportProject__c> getProjectsWithStats(Integer limitor) {
+    if (SecurityUtils.isAccessible(ImportProject__c.SObjectType)) {
+      return [
+        SELECT Id, Name, Description__c, TargetObject__c, IsActive__c,
+               CreatedDate, LastModifiedDate,
+               (SELECT Id, Status__c, TotalRecords__c, ProcessedRecords__c, 
+                       FailedRecords__c, StartTime__c, EndTime__c, Type__c,
+                       CreatedDate, LastModifiedDate
+                FROM ImportExecutions__r WHERE Type__c = 'Import'
+                ORDER BY CreatedDate DESC
+                LIMIT 1)
+        FROM ImportProject__c
+        ORDER BY LastModifiedDate DESC
+        LIMIT :limitor
+      ];
+    } 
+    return new List<ImportProject__c>();
+  }
+
+  //Récupère tous les projets pour les statistiques
+  public static List<ImportProject__c> getAllProjectsForStats() {
+    if (SecurityUtils.isAccessible(ImportProject__c.SObjectType)) {
+      return [
+        SELECT Id, IsActive__c,
+               (SELECT Id, Status__c, TotalRecords__c, ProcessedRecords__c, 
+                       FailedRecords__c
+                FROM ImportExecutions__r WHERE Type__c = 'Import')
+        FROM ImportProject__c
+      ];
+    }
+    return new List<ImportProject__c>();
+  }
+
+  public static void deleteProject(String projectId) {
+    if (SecurityUtils.isDeletable(ImportProject__c.SObjectType)) {
+      try {
+        ImportProject__c project = [
+          SELECT Id 
+          FROM ImportProject__c 
+          WHERE Id = :projectId 
+          LIMIT 1
+        ];
+        delete project;
+      } catch (Exception e) {
+        throw new ApplicationException(
+          'Erreur lors de la suppression du projet : ' + e.getMessage()
+        );
+      }
+    } else {
+      throw new ApplicationException('Unauthorized! You do not have permission to delete this project.');
+    }
   }
 }

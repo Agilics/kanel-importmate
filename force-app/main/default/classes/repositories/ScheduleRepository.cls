@@ -1,10 +1,9 @@
 /**
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
- * @group             : 
- * @last modified on  : 11-07-2025
- * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
- * I'm > Than I was
+ * @group             :  
+ * @last modified on  : 11-23-2025
+ * @last modified by  : khalidousowba 
 **/
 public with sharing class ScheduleRepository {
     
@@ -15,7 +14,7 @@ public with sharing class ScheduleRepository {
                 upsert schedule;
                 return schedule;
             } catch (DmlException e) {
-                 ErrorLogService.logException(e);
+                 //ErrorLogService.logException(e);
                  throw new DmlException(e.getMessage());
             }
         }
@@ -27,7 +26,7 @@ public with sharing class ScheduleRepository {
         try {
             delete [SELECT Id FROM Schedule__c WHERE Id = :scheduleId LIMIT 1];
         } catch (DmlException e) {
-            ErrorLogService.logException(e);
+            //ErrorLogService.logException(e);
             throw new ApplicationException(e.getMessage());
         }
     }
@@ -157,8 +156,26 @@ public with sharing class ScheduleRepository {
                 ErrorLogService.logException(e);
                 throw new ApplicationException(e.getMessage());
             }
-        }
-        return results;
+        } 
+        return results; 
+    }
+
+    // Récupérer la plannification par l'id
+    public  static Schedule__c getScheduleById(String scheduleId) {
+          if(SecurityUtils.isCreateable(Schema.Schedule__c.SObjectType)){
+            try {
+                return [
+                    SELECT NextRun__c, Name, Id,Frequency__c 
+                    FROM Schedule__c
+                    WHERE Id =: scheduleId
+                    LIMIT 1
+                ];
+            }catch(ApplicationException e){
+                   //ErrorLogService.logException(e);
+                throw new ApplicationException(e.getMessage());
+            }
+          }
+          return null; 
     }
 
     // Récupérer la planification par l'id
@@ -178,10 +195,10 @@ public with sharing class ScheduleRepository {
         }
         return null;
     }
-
+ 
     // Récupérer les planifications par la fréquence
     public static List<Schedule__c> getSchedulesByFrequency(ScheduleService.FrequencyEnum frequence) {
-        if(SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType)){
+        if(SecurityUtils.isCreateable(Schema.Schedule__c.SObjectType)){ 
             try {
                 String keyword = String.valueOf(frequence);
                 return [
@@ -262,7 +279,5 @@ public with sharing class ScheduleRepository {
             }
        }
        return executionsByProject;
-    }
-
-        
+    }       
 }

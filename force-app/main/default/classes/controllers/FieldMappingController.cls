@@ -40,6 +40,11 @@ public with sharing class FieldMappingController {
         }
     }
 
+     @AuraEnabled(cacheable= true)
+    public static  List<FieldMappingRepository.FieldMappingDTO> getAllMappingsByProjectId(Id projectId){
+        return FieldMappingService.getAllMappingsByProject(projectId);
+    }
+    
 
     @AuraEnabled
     public static List<FieldMapping__c> saveMappings(

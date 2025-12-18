@@ -2,11 +2,13 @@
   <div class="container">
     <!-- Selected project banner -->
     <template if:true={currentProject}>
-      <h1 class="slds-text-align_center">Selected project: {projectName}</h1>
+      <h1 class="slds-text-align_center">
+        Selected project: {projectName}
+      </h1>
       <br />
     </template>
 
-    <!-- Selection -->
+    <!-- Source selection -->
     <template if:true={showSelection}>
       <h2 class="section-title">Data source</h2>
       <div class="cards">
@@ -15,6 +17,7 @@
           <h3>Import CSV</h3>
           <p>Import a CSV file from your local machine.</p>
         </div>
+
         <div class="card" onclick={handleSOQL}>
           <div class="card-icon soql-icon"></div>
           <h3>SOQL Builder</h3>
@@ -26,20 +29,37 @@
     <!-- CSV -->
     <template if:true={showCSV}>
       <c-csv-uploader
+<<<<<<< HEAD
         current-project={currentProject}
         oncsvloaded={handleCsvLoaded}
         ongotomapping={handleGoToMappingFromCsv}>
+=======
+          current-project={currentProject}
+          oncsvloaded={handleCsvLoaded}
+          ongotomapping={handleGoToMapping}
+      >
+>>>>>>> dba0851ef05faec95cd7d790162bb7c5c5d485dc
       </c-csv-uploader>
     </template>
 
     <!-- SOQL -->
     <template if:true={showSOQL}>
+<<<<<<< HEAD
       <c-soql-builder
         onsoqlbuilt={handleSoqlBuilt}
         selected-project-id={currentProject.Id}
         selected-project-name={currentProject.Name}
         onstartmapping={handleStartMapping}>
       </c-soql-builder>
+=======
+    <c-soql-builder
+        project-target-object={projectTargetObject}
+        onsoqlbuilt={handleSoqlBuilt}
+        onstartmapping={handleStartMappingFromSoql}
+    ></c-soql-builder>
+
+>>>>>>> dba0851ef05faec95cd7d790162bb7c5c5d485dc
     </template>
   </div>
+   <c-backbutton onback={handleBackToMain}></c-backbutton>
 </template>

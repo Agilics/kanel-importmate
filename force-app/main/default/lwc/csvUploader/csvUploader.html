@@ -19,8 +19,8 @@
     </div>
 
     <!-- File Upload Card -->
-    <div class="card">
-      <div class="card__title">File Upload</div>
+    <div onclick={handleBrowseClick} class="card">
+      <div class="card__title">File Upload </div>
       <div class="card__subtitle">Upload your CSV file to import data</div>
 
       <div class="dropzone" ondragover={handleDragOver} ondragleave={handleDragLeave} ondrop={handleDrop}>
@@ -29,7 +29,7 @@
         </div>
         <div class="dropzone__text">
           Drop your CSV file here
-          <span class="browse" onclick={handleBrowseClick}>or browse files</span>
+          <span class="browse" onclick={handleBrowseClick}> or browse files</span>
         </div>
         <div class="dropzone__hint">Supports CSV files up to 50MB</div>
 
@@ -169,7 +169,7 @@
 
     <!-- Footer actions -->
     <div class="footer-actions">
-      <button type="button" class="btn btn--ghost btn--xl" onclick={fireBack}>
+      <button type="button" class="btn btn--ghost btn--xl" onclick={handleBackClick}>
         <lightning-icon icon-name="utility:back" size="x-small"></lightning-icon>
         <span >Back to Data Source</span>
       </button>
@@ -178,10 +178,14 @@
           <lightning-icon icon-name="utility:save" size="x-small"></lightning-icon>
           <span>Save Data Preview</span>
         </button>-->
-        <button type="button" class="btn btn--primary" onclick={handleGoForMapping} disabled={disableGoForMapping}>
+            <button type="button"
+            class="btn btn--primary"
+            onclick={handleGoForMapping}
+            disabled={disableGoForMapping}>
           <span>Continue to Mapping</span>
           <lightning-icon icon-name="utility:chevronright" size="x-small"></lightning-icon>
-        </button>
+            </button>
+
       </div>
     </div>
 

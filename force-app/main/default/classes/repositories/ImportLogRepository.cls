@@ -1,3 +1,10 @@
+/**
+ * @description       : 
+ * @author            : khalidousowba
+ * @group             : 
+ * @last modified on  : 11-23-2025
+ * @last modified by  : khalidousowba
+**/
 public with sharing class ImportLogRepository {
 
     public static List<ImportLog__c> getLogsByExecutionId(String executionId) {
@@ -23,7 +30,8 @@ public with sharing class ImportLogRepository {
             try {
                 insert logs;
             } catch (Exception e) {
-                ErrorLogService.logException(e);
+                //ErrorLogService.logException(e);
+                throw new ImportException('Error saving import logs: ' + e.getMessage());
             }
         }
     }

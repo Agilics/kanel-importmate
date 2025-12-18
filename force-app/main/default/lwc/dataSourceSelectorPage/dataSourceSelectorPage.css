@@ -1,0 +1,122 @@
+body {
+  /*div*/ 
+  width: 1120px;
+  height: 1517px;
+  background-color: #e5e7eb;
+}
+.container {
+  padding: 24px;
+  height: 900px;
+  max-height: 1517px;
+  opacity: 1;
+  flex-wrap: wrap;
+}
+.header {
+  width: 1056px;
+  height: 68px;
+  opacity: 1;
+  top: 32px;
+  align-items: start;
+  left: 32px;
+  margin: 0 0 0 24px;
+  font-family: "Inter";
+}
+.header-title {
+  width: 1056px;
+  text-align: left;
+  height: 36px;
+  opacity: 1;
+  font-weight: 700;
+  font-style: Bold;
+  font-size: 30px;
+  line-height: 36px;
+  letter-spacing: 0%;
+}
+
+.cards {
+  padding: 10px;
+  display: flex;
+  width: 1056px;
+  height: 330px;
+  opacity: 1;
+  margin: 0 0 0 24px;
+  top: 132px;
+  left: 32px;
+}
+.query {
+  margin-left: 32.6rem;
+}
+.header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.header {
+  width: 1056px;
+  height: 68px;
+  text-align: left;
+  opacity: 1;
+  top: 32px;
+  left: 32px;
+  margin: 0 0 0 58px;
+  font-family: "Inter";
+}
+.header-title {
+  width: 1056px;
+  height: 36px;
+  opacity: 1;
+  font-weight: 700;
+  font-style: Bold;
+  font-size: 30px;
+  line-height: 36px;
+  letter-spacing: 0%;
+  color: #111827;
+}
+
+.header-subtitle {
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 16px;
+  line-height: 24px;
+  color: #4b5563;
+  letter-spacing: 0%;
+}
+
+.automatic {
+  width: 446px;
+  height: 24px;
+  opacity: 1;
+  top: 40px;
+}
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 44px; 
+}
+
+.btn-secondary:hover {
+  background-color: #f9fafb;
+  border-color: #cbd5e0;
+}
+
+
+/*database icon*/
+.db-icon {
+  /*Add the class name below to the lightning-icon element.*/
+  --slds-c-icon-color-foreground-default: #ea580c;
+  --slds-c-icon-color-background: #ffedd5;
+}
+
+/*file upload icon*/
+.file-upload-icon {
+  --slds-c-icon-color-foreground-default: #dbeafe;
+  --slds-c-icon-color-background: #1e40af;
+}

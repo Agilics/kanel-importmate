@@ -1,0 +1,58 @@
+<!--
+   @description       : Data source selector page - shows selection cards for CSV or SOQL
+   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+   @group             : 
+   @last modified on  : 11-11-2025
+   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<template>
+  <div class="container">
+    <!-- header title -->
+    <div class="header">
+      <h1 class="header-title">Choose Data Source</h1>
+      <p class="header-subtitle">
+        Select how you want to import your data into Salesforce
+      </p>
+    </div>
+    <div class="cards">
+      <!-- CARD FILE UPLOAD -->
+      <div class="upload">
+        <c-data-source-selector-card
+          contents={uploadContents}
+          title={uploadTitle}
+          subtitle={uploadSubtitle}
+          is-upload={isUpload}
+          current-project={currentProject}
+          oncardaction={handleCSV}
+        >
+        </c-data-source-selector-card>
+      </div>
+      <!-- END CARD FILE UPLOAD -->
+
+      <!-- CARD QUERY BUILDER -->
+      <div class="query">
+        <c-data-source-selector-card
+          contents={queryContents}
+          title={queryTitle}
+          subtitle={querySubTitle}
+          is-upload={isNotUpload}
+          current-project={currentProject}
+          oncardaction={handleSOQL}
+        >
+        </c-data-source-selector-card>
+      </div>
+      <!-- END CARD QUERY UPLOAD -->
+    </div>
+
+      <!-- Cancel Button -->
+    <button type="button" class="btn btn-secondary" onclick={handleBackToProjectSetup}>
+        <lightning-icon
+          icon-name="utility:back"
+          alternative-text="Cancel"
+          size="x-small"
+          title="Cancel"
+        ></lightning-icon>
+        <span>Back</span>
+    </button>
+  </div>
+</template>

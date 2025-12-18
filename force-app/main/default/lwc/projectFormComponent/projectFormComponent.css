@@ -1,0 +1,316 @@
+/* ========================================
+   MAIN FORM RESPONSIVE STYLES - FIGMA DESIGN
+   ======================================== */
+
+.main-content {
+  background-color: #ffffff;
+  padding: 2rem 3rem;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  min-height: 100vh;
+}
+
+/* BREADCRUMB */
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 14px;
+  color: #6b7280;
+  margin-bottom: 1.5rem;
+}
+
+.breadcrumb a {
+  color: #6b7280;
+  text-decoration: none;
+}
+
+.breadcrumb a:hover {
+  color: #1f2937;
+}
+
+.breadcrumb-separator {
+  color: #9ca3af;
+}
+
+/* HEADER */
+.header {
+  display: flex;
+  justify-content: start;
+  align-items: start;
+  gap: 1.25rem;
+  margin-bottom: 2.5rem;
+  width: 100%;
+}
+
+.plus-icon,
+.plus-icons {
+  width: 56px;
+  height: 56px;
+  min-width: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  background: #2563eb;
+  flex-shrink: 0;
+}
+
+.plus-icons {
+  --slds-c-icon-color-foreground-default: #e5e7eb;
+  --slds-c-icon-color-foreground: #e5e7eb;
+  --slds-c-icon-color-background: #1e40af;
+}
+
+.margin-icon {
+  margin: 10px 0 0 0;
+}
+
+.icon-size {
+  width: 20px;
+  height: 20px;
+}
+
+.icon,
+.icon-colors {
+  --slds-c-icon-color-foreground-default: #1e40af;
+  --slds-c-icon-color-foreground: #1e40af;
+  --slds-c-icon-color-background: #e5e7eb;
+}
+
+.text-header h1 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem 0;
+  line-height: 1.2;
+  color: #111827;
+}
+
+.subtitle {
+  font-family: Inter, sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 24px;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* CARD */
+.card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  max-width: 100%;
+  width: 100%;
+  padding: 2.5rem;
+  border: 1px solid #e5e7eb;
+  margin-bottom: 2rem;
+}
+
+/* SECTION HEADERS */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.75rem;
+}
+
+.section-header h2 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
+  font-family: Inter, sans-serif;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.section-header .plus-icons {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  border-radius: 6px;
+  background: #2563eb;
+}
+
+/* INPUTS */
+.input-field,
+lightning-input,
+lightning-textarea,
+lightning-combobox {
+  width: 100%;
+}
+
+lightning-input,
+lightning-combobox {
+  --slds-c-input-sizing-border: 1px solid #d1d5db;
+  --slds-c-input-radius-border: 8px;
+}
+
+lightning-input input,
+lightning-combobox select {
+  height: 44px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  padding: 0 1rem;
+  font-size: 15px;
+}
+
+lightning-input input:focus,
+lightning-combobox select:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+lightning-textarea textarea {
+  min-height: 100px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  padding: 0.75rem 1rem;
+  font-size: 15px;
+  resize: vertical;
+}
+
+.rounded-input {
+  border-radius: 8px;
+}
+
+.help-text {
+  font-size: 13px;
+  color: #6b7280;
+  margin-top: 0.5rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.4;
+}
+
+/* FORM GRID */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.form-item {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* DIVIDER */
+.divider {
+  border: none;
+  border-top: 1px solid #e5e7eb;
+  margin: 1.5rem 0;
+}
+
+/* LABELS */
+.custom-label {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-family: Inter, sans-serif;
+  font-weight: 500;
+  font-size: 14px;
+  color: #111827;
+  margin-bottom: 0.5rem;
+}
+
+.required {
+  color: #ef4444 !important;
+  font-weight: 600;
+}
+
+.footer {
+  width: 100%;
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+
+/* ========================================
+   RESPONSIVE BREAKPOINTS
+   ======================================== */
+
+/* Desktop Large (> 1200px) */
+@media screen and (min-width: 1201px) {
+  .main-content {
+    padding: 2rem 3rem;
+  }
+}
+
+/* Laptop & Desktop Standard (769px - 1200px) */
+@media screen and (max-width: 1200px) and (min-width: 769px) {
+  .main-content {
+    padding: 2rem;
+    max-width: 100%;
+  }
+  
+  .card {
+    padding: 2rem;
+  }
+  
+  .text-header h1 {
+    font-size: 1.75rem;
+  }
+  
+  .subtitle {
+    font-size: 15px;
+  }
+  
+  .form-grid {
+    gap: 1.25rem;
+  }
+}
+
+/* Tablet (481px - 768px) */
+@media screen and (max-width: 768px) and (min-width: 481px) {
+  .main-content {
+    padding: 1.5rem;
+  }
+  
+  .header {
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  
+  .plus-icons {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    border-radius: 12px;
+  }
+  
+  .text-header h1 {
+    font-size: 1.5rem;
+  }
+  
+  .subtitle {
+    font-size: 14px;
+    line-height: 20px;
+  }
+  
+  .card {
+    padding: 1.75rem;
+  }
+  
+  .section-header {
+    margin-bottom: 1.25rem;
+  }
+  
+  .section-header h2 {
+    font-size: 1rem;
+  }
+  
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+  
+  .divider {
+    margin: 1.5rem 0;
+  }
+}
+ 

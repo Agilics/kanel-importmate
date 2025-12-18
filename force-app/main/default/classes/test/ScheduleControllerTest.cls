@@ -2,8 +2,13 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
+<<<<<<< HEAD
  * @last modified on  : 10-03-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+=======
+ * @last modified on  : 11-23-2025
+ * @last modified by  : khalidousowba
+>>>>>>> dba0851ef05faec95cd7d790162bb7c5c5d485dc
 **/
 @isTest
 public with sharing class ScheduleControllerTest { 
@@ -35,8 +40,13 @@ public with sharing class ScheduleControllerTest {
         
         // When
         Test.startTest();
+<<<<<<< HEAD
         Id scheduleId = ScheduleService.schedule(
             String.valueOf(ScheduleService.FrequencyEnum.DAILY),
+=======
+        Id scheduleId = ScheduleController.addSchedule(
+            String.valueOf(ImportMateEnum.FrequencyEnum.DAILY),
+>>>>>>> dba0851ef05faec95cd7d790162bb7c5c5d485dc
             nextRun,
             project.Id
         );
@@ -56,7 +66,7 @@ public with sharing class ScheduleControllerTest {
         ];
 
         System.assertEquals(
-            String.valueOf(ScheduleService.FrequencyEnum.DAILY),
+            String.valueOf(ImportMateEnum.FrequencyEnum.DAILY),
             insertedSchedule.Frequency__c.toUpperCase(),
             'La fréquence doit être DAILY'
         );
@@ -73,15 +83,48 @@ public with sharing class ScheduleControllerTest {
         
         //Perform test
         Test.startTest();
+<<<<<<< HEAD
         String excpetedFrequency = 'DAILY';
         ScheduleService.FrequencyEnum actual =  ScheduleService.FrequencyEnum.DAILY;
+=======
+        Id scheduleId =ScheduleController.addSchedule(
+            String.valueOf(ScheduleService.FrequencyEnum.DAILY),
+            nextRun,
+            project.Id
+        );
+        // Vérification en base
+        Schedule__c insertedSchedule = [
+            SELECT Id, Frequency__c, Project__c, NextRun__c
+            FROM Schedule__c
+            WHERE Id = :scheduleId
+            LIMIT 1
+        ];
+        insertedSchedule.Frequency__c = String.valueOf(ImportMateEnum.FrequencyEnum.MONTHLY);
+
+       Id resultId = ScheduleController.addSchedule(
+            insertedSchedule.Frequency__c,
+            insertedSchedule.NextRun__c,
+            insertedSchedule.Project__c
+        );
+
+
+>>>>>>> dba0851ef05faec95cd7d790162bb7c5c5d485dc
         Test.stopTest();
         //Assertions
         System.assertEquals(excpetedFrequency, actual.Name());
      }
 
+<<<<<<< HEAD
        @IsTest
     public  static  void callTestDataFrequencyMonthly() {
+=======
+
+        System.assertEquals(
+            String.valueOf(ImportMateEnum.FrequencyEnum.MONTHLY),
+             updateSchedule.Frequency__c.toUpperCase(),
+            'La fréquence doit être MONTHLY'
+        );
+>>>>>>> dba0851ef05faec95cd7d790162bb7c5c5d485dc
         
         //Perform test
         Test.startTest();
@@ -111,7 +154,13 @@ public with sharing class ScheduleControllerTest {
         @IsTest
     static void testGetPastSchedules() {
         //given
+<<<<<<< HEAD
          Schedule__c savedSchedule = TestDataFactory.createSchedule();
+=======
+        Test.startTest();
+        List<Schedule__c> schedules = ScheduleController.getSchedulesByFrequency(ImportMateEnum.FrequencyEnum.DAILY);
+        Test.stopTest();
+>>>>>>> dba0851ef05faec95cd7d790162bb7c5c5d485dc
 
         //when
         Test.startTest();
