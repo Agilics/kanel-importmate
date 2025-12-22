@@ -1,7 +1,36 @@
-/* Container with rounded corners & background */
-.container {
+/* App Wrapper */
+.app-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background-color: #f3f3f3;
+}
+
+/* App Layout with Sidebar */
+.app-layout {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow-y: auto;
+}
+
+.content-container {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+/* Container with rounded corners & background for Projects workflow */
+.content-container .container {
   max-width: 1200px;
-  margin: 2rem auto;
+  margin: 0 auto;
   background-color: #f9eeef;
   border-radius: 20px;
   padding: 2.5rem 3rem 3rem 3rem;
@@ -11,49 +40,6 @@
   -ms-border-radius: 20px;
   -o-border-radius: 20px;
 }
-/* Header - Logo and Steps */
-header {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-}
-/* Sub container */
-.sub-container {
-  display: flex;
-  flex-wrap: wrap;
-  row-gap: 5em;
-}
-.stepper {
-  display: flex;
-  flex-wrap: wrap;
-}
-/* Logo */
-.logo {
-  display: flex;
-  align-items: center;
-  font-weight: 700;
-  font-size: 32px;
-  row-gap: 20px;
-  margin: 0 8px 3rem 0;
-  font-family: "Arial Black", Gadget, sans-serif;
-  cursor: default;
-}
-.logo {
-  width: 30px;
-  height: 30px;
-  stroke: #111;
-  stroke-width: 2;
-  stroke-linejoin: round;
-  stroke-linecap: round;
-  fill: none;
-}
-
-.stepper {
-  float: right;
-  margin: 2em 0 0 15rem;
-}
 
 /* Description text under header */
 .intro-text {
@@ -62,22 +48,18 @@ header {
   margin: 0.5rem 0 0.2rem 0;
   line-height: 1.3;
 }
+
 /* Responsive */
 @media (max-width: 900px) {
-  .cards {
+  .app-layout {
     flex-direction: column;
-  }
-  .card {
-    flex: 1 1 100%;
-  }
-  header {
-    flex-direction: column;
-    gap: 1.5rem;
-    align-items: flex-start;
-    flex-wrap: wrap;
   }
 
-  .stepper {
-    display: grid;
+  .content-container {
+    padding: 1rem;
+  }
+
+  .content-container .container {
+    padding: 1.5rem;
   }
 }

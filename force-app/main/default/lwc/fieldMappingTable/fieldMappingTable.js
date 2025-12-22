@@ -1,4 +1,4 @@
-import { LightningElement, api, track } from "lwc";
+import { LightningElement, track, api } from "lwc";
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 
 import fetchObjects from "@salesforce/apex/FieldMappingController.fetchObjects";
@@ -8,7 +8,9 @@ import loadMappings from "@salesforce/apex/FieldMappingController.loadMappings";
 import saveMappingsJson from "@salesforce/apex/FieldMappingController.saveMappingsJson";
 
 export default class FieldMappingTable extends LightningElement {
-  @api set csvData(v) {
+  // ===== API props =====
+  @api
+  set csvData(v) {
     this.csvColumns = Array.isArray(v?.columns) ? v.columns : [];
     this.csvAllRows = Array.isArray(v?.rows) ? v.rows : [];
     this.buildRowsFromColumns();
@@ -18,15 +20,19 @@ export default class FieldMappingTable extends LightningElement {
     return { columns: this.csvColumns, rows: this.csvAllRows };
   }
 
-  @api set objectApiName(v) {
+  @api
+  set objectApiName(v) {
     this.selectedObjectApiName = v || "";
-    if (this.selectedObjectApiName) this.loadFields(this.selectedObjectApiName);
+    if (this.selectedObjectApiName) {
+      this.loadFields(this.selectedObjectApiName);
+    }
   }
   get objectApiName() {
     return this.selectedObjectApiName;
   }
 
-  @api set projectId(v) {
+  @api
+  set projectId(v) {
     this.selectedProjectId = v || "";
     // If projects already loaded, apply selection to also set target object
     if (this.selectedProjectId && Object.keys(this.projectsById).length) {
@@ -37,7 +43,8 @@ export default class FieldMappingTable extends LightningElement {
     return this.selectedProjectId;
   }
 
-  @api set version(v) {
+  @api
+  set version(v) {
     this.selectedVersion = v || "";
   }
   get version() {
@@ -52,6 +59,7 @@ export default class FieldMappingTable extends LightningElement {
   // Project dropdown
   @track projectOptions = [];
   projectsById = {};
+
   @track selectedProjectId = "";
   @track selectedTargetObject = "";
 
@@ -72,24 +80,31 @@ export default class FieldMappingTable extends LightningElement {
   connectedCallback() {
     Promise.all([this.loadProjects(), this.loadObjects()])
       .then(() => {
-        if (this.selectedProjectId)
+        if (this.selectedProjectId) {
           this.applyProjectSelection(this.selectedProjectId);
-        if (this.selectedObjectApiName)
+        }
+        if (this.selectedObjectApiName) {
           this.loadFields(this.selectedObjectApiName);
+        }
       })
-      .catch(() => {});
+      .catch(() => {
+        // ignore
+      });
   }
 
   // ------- Computed -------
   get hasColumns() {
     return (this.csvColumns?.length || 0) > 0;
   }
+
   get disableLoad() {
     return !this.hasColumns || !this.selectedProjectId || !this.selectedVersion;
   }
+
   get validRowCount() {
     return this.validRows.length;
   }
+
   get isSaveDisabled() {
     return (
       !this.selectedObjectApiName ||
@@ -99,6 +114,7 @@ export default class FieldMappingTable extends LightningElement {
       this.saveLocked
     );
   }
+
   get statusText() {
     const obj = this.selectedObjectApiName || "(none)";
     const headers = this.csvColumns.length || 0;
@@ -187,11 +203,13 @@ export default class FieldMappingTable extends LightningElement {
     if (!objectApiName) return [];
     const cached = this.lookupMatchFieldOptionsByObject[objectApiName];
     if (cached) return cached;
+
     try {
       const fields = await fetchFields({ objectApiName });
       const opts = (fields || [])
         .map((f) => ({ label: `${f.label} (${f.apiName})`, value: f.apiName }))
         .sort((a, b) => a.label.localeCompare(b.label));
+
       this.lookupMatchFieldOptionsByObject[objectApiName] = opts;
       return opts;
     } catch (e) {
@@ -204,7 +222,10 @@ export default class FieldMappingTable extends LightningElement {
   // ------- Rows -------
   buildRowsFromColumns() {
     const prevByCol = new Map(
-      this.rows.map((r) => [String(r.sourceColumn || "").toLowerCase(), r])
+      this.rows.map((r) => [
+        String(r.sourceColumn || "").toLowerCase(),
+        r
+      ])
     );
     const next = [];
     const cols = this.csvColumns || [];
@@ -233,7 +254,9 @@ export default class FieldMappingTable extends LightningElement {
   // ------- Handlers -------
   handleObjectPick(e) {
     this.selectedObjectApiName = e.detail.value || "";
-    if (this.selectedObjectApiName) this.loadFields(this.selectedObjectApiName);
+    if (this.selectedObjectApiName) {
+      this.loadFields(this.selectedObjectApiName);
+    }
     this.markDirty();
   }
 
@@ -258,14 +281,16 @@ export default class FieldMappingTable extends LightningElement {
 
   handleVersionChange(e) {
     this.selectedVersion = e.detail.value || "";
+    this.markDirty();
   }
 
   handleFieldPick(e) {
     const key = e.target.dataset.key;
     const val = e.detail.value || "";
     const next = [];
-    for (const r of this.rows)
+    for (const r of this.rows) {
       next.push(r.key === key ? { ...r, targetField: val } : r);
+    }
     this.rows = next;
     this.markDirty();
   }
@@ -284,7 +309,9 @@ export default class FieldMappingTable extends LightningElement {
           lookupMatchField: checked ? r.lookupMatchField : "",
           lookupMatchFieldOptions: checked ? r.lookupMatchFieldOptions : []
         });
-      } else next.push(r);
+      } else {
+        next.push(r);
+      }
     }
     this.rows = next;
     this.markDirty();
@@ -315,8 +342,11 @@ export default class FieldMappingTable extends LightningElement {
     const key = e.target.dataset.key;
     const val = e.detail.value || "";
     const next = [];
-    for (const r of this.rows)
-      next.push(r.key === key ? { ...r, lookupMatchField: val } : r);
+    for (const r of this.rows) {
+      next.push(
+        r.key === key ? { ...r, lookupMatchField: val } : r
+      );
+    }
     this.rows = next;
     this.markDirty();
   }
@@ -338,11 +368,16 @@ export default class FieldMappingTable extends LightningElement {
       });
 
       const bySource = new Map(
-        (list || []).map((x) => [String(x.sourceColumn || "").toLowerCase(), x])
+        (list || []).map((x) => [
+          String(x.sourceColumn || "").toLowerCase(),
+          x
+        ])
       );
       const merged = [];
       for (const r of this.rows) {
-        const m = bySource.get(String(r.sourceColumn || "").toLowerCase());
+        const m = bySource.get(
+          String(r.sourceColumn || "").toLowerCase()
+        );
         if (m) {
           merged.push({
             ...r,
@@ -365,7 +400,7 @@ export default class FieldMappingTable extends LightningElement {
         "success"
       );
 
-      // ⬅️ Tell parent to show the Preview step
+      // Tell parent to show the Preview step
       this.dispatchEvent(
         new CustomEvent("previewrequest", {
           detail: {
@@ -441,6 +476,7 @@ export default class FieldMappingTable extends LightningElement {
   toast(title, message, variant) {
     this.dispatchEvent(new ShowToastEvent({ title, message, variant }));
   }
+
   message(e) {
     return e?.body?.message || e?.message || "Unexpected error";
   }

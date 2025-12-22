@@ -1,4 +1,9 @@
 /**
+ * @description       : 
+ * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @group             : 
+ * @last modified on  : 12-18-2025
+ * @last modified by  : Mouhamed Niang
  * @description Génère un numéro de téléphone factice tout en conservant l'indicatif pays.
  * Implémente l'interface ITransformationRule utilisée dans le moteur de transformation.
  */

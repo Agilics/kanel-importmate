@@ -1,3 +1,8 @@
+/**
+ * @Last Modified Date : 12-19-2025
+ * Ajout de la méthode  getRulesByProjectId
+ * AJOUT Méthode deleteRuleById
+ */
 public with sharing class TransformationService {
 
     //Créer une règle de transformation
@@ -30,9 +35,9 @@ public with sharing class TransformationService {
             if (rules == null) {
                 rules = new List<TransformationRule__c>();
             }
-            
+
             Map<String, String> transformedRow = row.clone();
-            
+
             for (TransformationRule__c rule : rules) {
                 ITransformationRule transformer = TransformationUtils.getTransformer(rule);
                 if (transformer.validate(transformedRow, rule)) {
@@ -49,6 +54,39 @@ public with sharing class TransformationService {
             };
             throw new TransformationException(
                 'Erreur inattendue lors de l\'application: ' + e.getMessage(),
+                Constants.ERROR_CODE_TRANSFORMATION,
+                context
+            );
+        }
+    }
+
+    //Apply transformations for an entire row across all mappings
+    public static Map<String, String> applyTransformationsForRow(Map<String, String> row, List<FieldMapping__c> mappings, Map<String, List<TransformationRule__c>> rulesByMappingId) {
+        try {
+            Map<String, String> transformedRow = row.clone();
+
+            // Apply transformations for each mapping that has rules
+            for (FieldMapping__c mapping : mappings) {
+                List<TransformationRule__c> rules = rulesByMappingId.get(mapping.Id);
+                if (rules != null && !rules.isEmpty()) {
+                    for (TransformationRule__c rule : rules) {
+                        ITransformationRule transformer = TransformationUtils.getTransformer(rule);
+                        if (transformer.validate(transformedRow, rule)) {
+                            transformedRow.put(rule.FieldMapping__r.TargetField__c, transformer.apply(transformedRow, rule));
+                        }
+                    }
+                }
+            }
+
+            return transformedRow;
+        } catch (Exception e) {
+            Map<String, Object> context = new Map<String, Object>{
+                'rowData' => row,
+                'mappingsCount' => mappings?.size(),
+                'originalError' => e.getMessage()
+            };
+            throw new TransformationException(
+                'Error applying transformations for row: ' + e.getMessage(),
                 Constants.ERROR_CODE_TRANSFORMATION,
                 context
             );
@@ -140,7 +178,41 @@ public with sharing class TransformationService {
             );
         }
     }
-    
+
+    //récuperer les transformations par l'id du mapping 
+    public static List<TransformationRule__c> getRulesByMappingId(String mappingId) {
+         try {
+           return  TransformationRepository.getRulesByMappingId(mappingId);
+         }catch(Exception e){
+             Map<String, Object> context = new Map<String, Object>{
+                'mappingId' => mappingId, 
+                'originalError' => e.getMessage()
+            };
+            throw new TransformationException(
+                'Erreur lors de la génération du résumé des transformations: ' + e.getMessage(),
+                Constants.ERROR_CODE_TRANSFORMATION,
+                context
+            );
+         }
+    }
+
+      //récuperer toutes les transformations par l'id du project 
+      public static List<TransformationRule__c>  getRulesByProjectId(String projectId) {
+        try {
+          return  TransformationRepository.getRulesByProjectId(projectId);
+        }catch(Exception e){
+            Map<String, Object> context = new Map<String, Object>{
+                'projectId' => projectId, 
+                'originalError' => e.getMessage()
+            };
+           throw new TransformationException(
+               'Erreur lors de la génération du résumé des transformations: ' + e.getMessage(),
+               Constants.ERROR_CODE_TRANSFORMATION,
+               context
+           );
+        }
+   }
+
     //résumé des transformations
     public static Map<String, Object> getTransformationSummary(String mappingId) {
         try {
@@ -173,4 +245,13 @@ public with sharing class TransformationService {
         }
     }
 
+    //suppression d'une transformation par l'id
+    public static void  deleteRuleById (String ruleId){
+        try {
+            TransformationRepository.deleteRule(ruleId);
+        } catch (Exception e) {
+            ErrorLogService.logException(e);
+            throw new TransformationException('Erreur lors de la suppression de la règle : ' + e.getMessage());
+        }
+    }
 }

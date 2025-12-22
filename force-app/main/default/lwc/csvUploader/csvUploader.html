@@ -1,119 +1,288 @@
 <template>
-  <!-- Zone de sélection de fichier -->
   <div class="page">
-    <div class="section">
-      <div class="upload-card">
-        <div class="upload-pill">
-          <div class="upload-head">Import CSV</div>
-          <div class="upload-sub">Click or Drop CSV file here</div>
-
-          <!-- garde l’input pour les tests -->
-          <input
-            data-id="file"
-            class="upload-input"
-            type="file"
-            accept=".csv,text/csv"
-            onchange={handleFileUpload}
-          />
-        </div>
+    <!-- Header -->
+    <div class="page-header">
+      <div class="page-header__left">
+        <div class="page-title">{title}</div>
+        <div class="page-subtitle">Upload your CSV file and preview the data</div>
       </div>
-
-      <!-- Indicateurs d'état / messages -->
-      <template if:true={isLoading}>
-        <p data-id="loading" class="info info--ok">Chargement en cours…</p>
-      </template>
-
-      <template if:true={parseError}>
-        <p data-id="error" class="info info--error">{parseError}</p>
-      </template>
-
-      <template if:true={fileName}>
-        <p data-id="meta" class="meta">
-          <strong>{fileName}</strong> — {fileSize} bytes —
-          {showingCount}/{totalRows} lignes affichées
-        </p>
-      </template>
-
-      <!-- Boutons d’action -->
-      <div class="actions">
-        <template if:true={showActions}>
-          <button
-            data-id="load-next"
-            class="btn btn--ghost"
-            onclick={handleLoadNext}
-          >
-            Load next
-          </button>
-          <button
-            data-id="load-all"
-            class="btn btn--primary"
-            onclick={handleLoadAll}
-          >
-            Load all
-          </button>
-        </template>
-        <button
-          data-id="reset-view"
-          class="btn btn--outline"
-          onclick={handleResetView}
-        >
-          Reset view
+      <div class="page-header__right">
+      <!--  <button type="button" class="btn btn--ghost" onclick={handleDownloadTemplate}>
+          <lightning-icon icon-name="utility:download" size="x-small"></lightning-icon>
+          <span>Download Template</span>
+        </button>-->
+        <button type="button" class="btn btn--primary" onclick={openSettings}>
+          <lightning-icon icon-name="utility:setup_assistant_guide" size="x-small"></lightning-icon>
+          <span style="font-size: 18px;">Import Settings</span>
         </button>
       </div>
+    </div>
 
-      <!-- Aperçu des données -->
-      <template if:true={hasData}>
-        <div data-id="preview" class="table-card">
+    <!-- File Upload Card -->
+    <div onclick={handleBrowseClick} class="card">
+      <div class="card__title">File Upload </div>
+      <div class="card__subtitle">Upload your CSV file to import data</div>
+
+      <div class="dropzone" ondragover={handleDragOver} ondragleave={handleDragLeave} ondrop={handleDrop}>
+        <div class="dropzone__icon">
+          <lightning-icon icon-name="utility:upload" size="large" variant="base"></lightning-icon>
+        </div>
+        <div class="dropzone__text">
+          Drop your CSV file here
+          <span class="browse" onclick={handleBrowseClick}> or browse files</span>
+        </div>
+        <div class="dropzone__hint">Supports CSV files up to 50MB</div>
+
+        <input data-id="file" type="file" accept=".csv,text/csv" class="hidden-input" onchange={handleFileUpload}/>
+      </div>
+
+      <template if:true={isLoading}>
+        <p class="info info--ok slds-m-top_small">Loading…</p>
+      </template>
+      <template if:true={parseError}>
+        <p class="info info--error slds-m-top_small">{parseError}</p>
+      </template>
+      <template if:true={fileName}>
+        <div class="file-meta slds-m-top_small">
+          <span class="file-meta__name">{fileName}</span>
+          <span class="file-meta__sep">•</span>
+          <span>{fileSize} bytes</span>
+        </div>
+      </template>
+    </div>
+
+    <!-- Data Table -->
+    <template if:true={hasHeaders}>
+      <div class="card slds-m-top_medium">
+        <div class="toolbar">
+          <div class="toolbar__left">
+            <div class="title">Imported Data</div>
+            <span class="badge badge--green">{badgeText}</span>
+          </div>
+          <div class="toolbar__right">
+            <div class="search">
+              <lightning-icon icon-name="utility:search" size="x-small" class="search__icon"></lightning-icon>
+              <input class="search__input" type="search" placeholder="Search data..." oninput={handleSearchChange}/>
+            </div>
+            <button type="button" class="btn btn--ghost" onclick={openFilters}>
+              <lightning-icon icon-name="utility:filterList" size="x-small"></lightning-icon>
+              <span>Filters</span>
+            </button>
+            <!--<button type="button" class="btn btn--primary" onclick={handleExport}>
+              <lightning-icon icon-name="utility:download" size="x-small"></lightning-icon>
+              <span>Export</span>
+            </button>-->
+          </div>
+        </div>
+
+        <div class="table-card">
           <div class="table-scroll">
             <table class="table">
               <thead>
                 <tr>
-                  <template for:each={columns} for:item="col">
-                    <th key={col}>{col}</th>
+                  <template for:each={displayColumns} for:item="col">
+                    <th key={col.name}>
+                      <button class="th-btn" data-field={col.name} onclick={handleHeaderClick}>
+                        <span>{col.name}</span>
+                        <template if:true={col.isSorted}>
+                          <span class="sort-caret" title="Sorted">
+                            <template if:true={col.sortAsc}>▲</template>
+                            <template if:false={col.sortAsc}>▼</template>
+                          </span>
+                        </template>
+                      </button>
+                    </th>
                   </template>
+                  <th class="col-actions">Actions</th>
                 </tr>
               </thead>
+
               <tbody>
-                <template for:each={data} for:item="row">
+                <template for:each={pagedRows} for:item="row">
                   <tr key={row.id}>
                     <template for:each={row.values} for:item="cell">
-                      <td key={cell.key}>{cell.value}</td>
+                      <td key={cell.key}>
+                        <template if:true={cell.isIndustry}>
+                          <span class="tag">{cell.value}</span>
+                        </template>
+                        <template if:true={cell.isStatus}>
+                          <span class={cell.statusClass}>{cell.value}</span>
+                        </template>
+                        <template if:false={cell.isIndustry}>
+                          <template if:false={cell.isStatus}>
+                            {cell.value}
+                          </template>
+                        </template>
+                      </td>
                     </template>
+
+                    <td class="actions-cell">
+                      <button type="button" class="icon-btn" title="Edit" data-rowid={row.id} onclick={handleRowEdit}>
+                        <lightning-icon icon-name="utility:edit" size="x-small"></lightning-icon>
+                      </button>
+                      <button type="button" class="icon-btn" title="Preview" data-rowid={row.id} onclick={handleRowView}>
+                        <lightning-icon icon-name="utility:preview" size="x-small"></lightning-icon>
+                      </button>
+                    </td>
                   </tr>
                 </template>
               </tbody>
             </table>
           </div>
-          <div class="table-footer"></div>
-        </div>
-      </template>
 
-      <!-- Open Field Mapper (unchanged) -->
-      <template if:true={canShowGo}>
-        <div class="slds-m-top_large">
-          <button
+          <!-- Pagination -->
+          <div class="table-footer">
+            <div class="table-footer__left">
+              Showing {showingFrom} to {showingTo} of {totalEntries} entries
+            </div>
+            <div class="table-footer__right pager">
+              <button type="button" class="pager__btn" onclick={gotoPrev} disabled={isFirstPage}>
+                <lightning-icon icon-name="utility:chevronleft" size="xx-small"></lightning-icon>
+                <span class="slds-m-left_xx-small">Previous</span>
+              </button>
+
+              <template for:each={pageNumbers} for:item="p">
+                <span key={p.key}>
+                  <template if:true={p.isEllipsis}>
+                    <span class="pager__ellipsis">{p.label}</span>
+                  </template>
+                  <template if:false={p.isEllipsis}>
+                    <template if:true={p.isActive}>
+                      <button type="button" class="pager__page pager__page--active">{p.label}</button>
+                    </template>
+                    <template if:false={p.isActive}>
+                      <button type="button" class="pager__page" data-page={p.page} onclick={gotoPage}>{p.label}</button>
+                    </template>
+                  </template>
+                </span>
+              </template>
+
+              <button type="button" class="pager__btn" onclick={gotoNext} disabled={isLastPage}>
+                <span class="slds-m-right_xx-small">Next</span>
+                <lightning-icon icon-name="utility:chevronright" size="xx-small"></lightning-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <!-- Footer actions -->
+    <div class="footer-actions">
+      <button type="button" class="btn btn--ghost btn--xl" onclick={handleBackClick}>
+        <lightning-icon icon-name="utility:back" size="x-small"></lightning-icon>
+        <span >Back to Data Source</span>
+      </button>
+      <div class="footer-actions__right">
+       <!-- <button type="button" class="btn btn--ghost" onclick={fireSavePreview}>
+          <lightning-icon icon-name="utility:save" size="x-small"></lightning-icon>
+          <span>Save Data Preview</span>
+        </button>-->
+            <button type="button"
             class="btn btn--primary"
-            onclick={handleShowFieldMapper}
-            disabled={disableGoForMapping}
-          >
-            Open Field Mapper
-          </button>
-        </div>
-      </template>
-      <template if:true={showFieldMapper}>
-        <!-- 👇 forward the selected project to prefill the combobox -->
-        <c-field-mapper
-          source-columns-csv={headersCsv}
-          preselected-project-id={currentProject.Id}
-          preselected-target-object={currentProject.TargetObject__c}
-        ></c-field-mapper>
-      </template>
-      <!-- Mapping table appears only after clicking "Go for mapping" -->
-      <template if:true={showFieldMappingTable}>
-        <div class="slds-m-top_xx-large">
-          <c-field-mapping-table csv-data={csvPayload}></c-field-mapping-table>
-        </div>
-      </template>
+            onclick={handleGoForMapping}
+            disabled={disableGoForMapping}>
+          <span>Continue to Mapping</span>
+          <lightning-icon icon-name="utility:chevronright" size="x-small"></lightning-icon>
+            </button>
+
+      </div>
     </div>
+
+    <!-- Hidden anchor (Locker-safe downloads) -->
+    <a data-id="download-anchor" class="visually-hidden" tabindex="-1" aria-hidden="true"></a>
+
+    <!-- Filters Modal -->
+    <template if:true={showFilters}>
+      <section class="modal-backdrop">
+        <div class="modal">
+          <div class="modal__header">Filters</div>
+          <div class="modal__body">
+            <label class="lbl">Column</label>
+            <select class="inp" data-id="filter-col">
+              <option value="">-- choose --</option>
+              <template for:each={columns} for:item="c">
+                <option key={c} value={c}>{c}</option>
+              </template>
+            </select>
+
+            <label class="lbl slds-m-top_small">Operator</label>
+            <select class="inp" data-id="filter-op">
+              <option value="contains">contains</option>
+              <option value="equals">equals</option>
+              <option value="starts">starts with</option>
+            </select>
+
+            <label class="lbl slds-m-top_small">Value</label>
+            <input class="inp" type="text" data-id="filter-val" />
+          </div>
+          <div class="modal__footer">
+            <button type="button" class="btn btn--ghost" onclick={clearFilters}>Clear</button>
+            <div class="modal__spacer"></div>
+            <button type="button" class="btn btn--ghost" onclick={closeFilters}>Cancel</button>
+            <button type="button" class="btn btn--primary" onclick={applyFilters}>Apply</button>
+          </div>
+        </div>
+      </section>
+    </template>
+
+    <!-- Settings Modal -->
+    <template if:true={showSettings}>
+      <section class="modal-backdrop">
+        <div class="modal">
+          <div class="modal__header">Import Settings</div>
+          <div class="modal__body">
+            <label class="lbl">Rows per page</label>
+            <input class="inp" type="number" min="1" step="1" value={pageSize} data-id="page-size" />
+            <label class="lbl slds-m-top_small">Preview limit (large files)</label>
+            <input class="inp" type="number" min="1" step="1" value={previewLimit} data-id="preview-limit" />
+          </div>
+          <div class="modal__footer">
+            <button type="button" class="btn btn--ghost" onclick={closeSettings}>Cancel</button>
+            <button type="button" class="btn btn--primary" onclick={applySettings}>Apply</button>
+          </div>
+        </div>
+      </section>
+    </template>
+
+    <!-- Preview Modal -->
+    <template if:true={showPreview}>
+      <section class="modal-backdrop">
+        <div class="modal">
+          <div class="modal__header">Row Preview</div>
+          <div class="modal__body">
+            <template for:each={previewCells} for:item="c">
+              <div key={c.label} class="slds-m-bottom_x-small">
+                <strong>{c.label}:</strong> <span>{c.value}</span>
+              </div>
+            </template>
+          </div>
+          <div class="modal__footer">
+            <button type="button" class="btn btn--primary" onclick={closePreview}>Close</button>
+          </div>
+        </div>
+      </section>
+    </template>
+
+    <!-- Edit Modal -->
+    <template if:true={showEditor}>
+      <section class="modal-backdrop">
+        <div class="modal">
+          <div class="modal__header">Edit Row</div>
+          <div class="modal__body">
+            <template for:each={editBuffer} for:item="c" for:index="index">
+              <div key={c.label} class="slds-m-bottom_small">
+                <label class="lbl">{c.label}</label>
+                <input class="inp" type="text" value={c.value} data-pos={index} oninput={editInputChanged}/>
+              </div>
+            </template>
+          </div>
+          <div class="modal__footer">
+            <button type="button" class="btn btn--ghost" onclick={cancelEdit}>Cancel</button>
+            <button type="button" class="btn btn--primary" onclick={saveEdit}>Save</button>
+          </div>
+        </div>
+      </section>
+    </template>
   </div>
 </template>

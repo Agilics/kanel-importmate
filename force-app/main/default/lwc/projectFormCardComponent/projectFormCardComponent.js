@@ -1,7 +1,6 @@
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 import { LightningElement, track, api } from "lwc";
 
-import searchProjetById from "@salesforce/apex/ImportProjectController.searchProjetById";
 import doesProjectExist from "@salesforce/apex/ImportProjectController.doesProjectExist";
 //importation méthodes depuis le Contrôleur
 import saveProject from "@salesforce/apex/ImportProjectController.saveProject";
@@ -17,7 +16,7 @@ export default class ProjectFormCardComponent extends LightningElement {
 
   //naviger vers la section data source
   handleGoToDataSource() {
-    //TODO
+    this.dispatchEvent = new CustomEvent("gotodatsource");
   }
 
   // Permet au parent de définir des valeurs initiales dans le champs  target Salesforce object au lancement de la page
@@ -103,8 +102,6 @@ export default class ProjectFormCardComponent extends LightningElement {
           detail: result
         })
       );
-
-      //TODO Navigation vers le Data Source Selection
     } catch (err) {
       //Affichage d'un toast de message d'erreur
       this.showToast(
@@ -128,6 +125,11 @@ export default class ProjectFormCardComponent extends LightningElement {
   //Mise à jour de la variable target Object via le champs de selection
   handleTargetObjectChange(event) {
     this.targetObject = event.target.value;
+  }
+
+  //Masquer la section de création de projets
+  handleCancel() {
+    this.dispatchEvent(new CustomEvent("cancel"));
   }
 
   //affiche un flash message qui contient le titre, le contenu du message et la variant via un toast

@@ -1,4 +1,4 @@
-import { LightningElement, track, wire, api } from "lwc";
+import { LightningElement, track,api, wire } from "lwc";
 import SCHEDULE_OBJECT from "@salesforce/schema/Schedule__c";
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 import FREQUENCY_FIELD from "@salesforce/schema/Schedule__c.Frequency__c";
@@ -6,18 +6,11 @@ import getPickListValues from "@salesforce/apex/ScheduleController.getPickListVa
 export default class ScheduleCreatorComponent extends LightningElement {
   @track executionDate;
   @api projectId;
-  @api nextRun;
-  @track picklistValues = [];
-  @api selectedFrequency;
-  @api showSchedule;
-  @track schedules = [];
-
-  columns = [
-    { label: "Schedule Name", fieldName: "name" },
-    { label: "Project Name", fieldName: "project" },
-    { label: "Next Run", fieldName: "nextRun", type: "date" },
-    { label: "Frequency", fieldName: "frequency" }
-  ];
+  nextExecution;
+  @track nextRun;
+  @track picklistValues = []; // list of frequency  DAILY | WEEKLY | MONTHLY
+  @track selectedFrequency = "Daily";
+  @track showSchedule;
 
   //Récupération des valeurs de la liste de sélection de Frequency__c(Daily | Weekly | Monthly)
   @wire(getPickListValues, {
@@ -30,6 +23,7 @@ export default class ScheduleCreatorComponent extends LightningElement {
         label,
         value
       }));
+      console.log(data);
     } else if (error) {
       console.error(
         "Erreur lors de la récupération des valeurs de picklist : ",
@@ -46,24 +40,58 @@ export default class ScheduleCreatorComponent extends LightningElement {
 
   //Mise à jour de la valeur de selectedFrequency
   handleFrequencyChange(event) {
-    this.dispatchEvent(
-      new CustomEvent("select", { detail: { frequency: event.detail.value } })
-    );
+    this.selectedFrequency = event.target.value;
   }
 
-  //Mise à jour de la valeur de next run
+  //Mise à jour du champs de la date d'éxécution
   handleNextRunChange(event) {
-    this.dispatchEvent(
-      new CustomEvent("nextrunchange", {
-        detail: { nextRun: event.detail.value }
-      })
-    );
+    this.nextRun = event.target.value;
   }
 
-  //add a new schedule
-  handleAddSchedule() {
-    const show = true; // show datatable list
-    this.dispatchEvent(new CustomEvent("add", { detail: { show } }));
+  //Enregistrement  d'une nouvelle planification
+  async handleAddSchedule(event) {
+    //Récupération de l'id du projet sélectionné
+
+    try {
+      if(!this.projectId){
+         this.showToast("Error", "Project no were found .Please select one!", "error");
+        return;
+      }
+      if (!this.selectedFrequency || !this.nextRun) {
+        this.showToast("Warning", "All fields are required.", "warning");
+        return;
+      }
+      /**
+       * Création d'une planification via la fréquence , l'id du project
+       * et la date d'éxécution NextRun
+       *  Création d'une tâche Apex
+       */
+
+      const result = await addSchedule({
+        frequency: this.selectedFrequency,
+        nextRun: this.nextRun,
+        projectId: id
+      }).then((data) => {
+        //Affichage du message toast de succès
+        this.showToast(
+          "Success",
+          `Schedule  with ID:\t${data}  created  successfully !`,
+          "success"
+        );
+
+        this.resetFields(); // Réintialisation de tous les champs de texte | combo box
+        //TODO envoyer un boolean pour refresh la liste
+        //   this.showSchedule = event.detail;
+        // return refreshApex(this.wiredSchedulesResult); //  refresh datatable
+      });
+    } catch (err) {
+      //Affichage d'un toast de message d'erreur
+      this.showToast(
+        "Error",
+        err?.body?.message || "An Error were occured while adding a schedule! ",
+        "error"
+      );
+    }
   }
 
   //cancel all actions
@@ -72,7 +100,6 @@ export default class ScheduleCreatorComponent extends LightningElement {
   }
 
   // réintialisation des valeurs de tous les champs  de textes | combo box
-  @api
   resetFields() {
     // reset valeurs UI
     this.template.querySelectorAll(".rounded-input").forEach((input) => {

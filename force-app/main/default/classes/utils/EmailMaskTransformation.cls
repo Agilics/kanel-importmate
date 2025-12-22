@@ -2,8 +2,8 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 10-20-2025
- * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @last modified on  : 12-18-2025
+ * @last modified by  : Mouhamed Niang
 **/
 public with sharing class EmailMaskTransformation implements ITransformationRule{
     public String apply(Map<String, String> row, TransformationRule__c configRule) {
@@ -25,7 +25,7 @@ public with sharing class EmailMaskTransformation implements ITransformationRule
 
         // Si aucun domaine n’est fourni, on met une valeur par défaut
         if(String.isBlank(domain) || String.isEmpty(domain)) {
-            domain =  'sandbox.com';
+            domain =  'sandbox';
         }
 
         String maskedEmail = 'user'+ randomNumber + '@'+ domain ;

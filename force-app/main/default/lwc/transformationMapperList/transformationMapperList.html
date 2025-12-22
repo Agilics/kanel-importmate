@@ -1,0 +1,235 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 11-27-2025
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<template>
+  <div style="margin-bottom: 3.5rem:">
+    <!-- Loading State -->
+    <template if:true={isLoading}>
+      <div class="card">
+        <div class="slds-align_absolute-center" style="padding: 2rem;">
+          <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
+        </div>
+        <p class="slds-align_absolute-center slds-m-top_small" style="color: #666;">Loading mappings...</p>
+      </div>
+    </template>
+
+    <!-- Error State -->
+    <template if:true={error}>
+      <div class="card">
+        <div class="slds-box slds-theme_error slds-m-bottom_small">
+          <strong>Error:</strong>
+          <span class="slds-m-left_x-small">{error}</span>
+        </div>
+      </div>
+    </template>
+
+    <!-- Mappings Table -->
+    <template if:true={hasMappings}>
+      <div class="card slds-m-top_medium">
+        <div class="toolbar">
+          <div class="toolbar__left">
+            <div class="card__title">Available Mappings</div>
+            <span class="badge badge--green">{badgeText}</span>
+          </div>
+          <div class="toolbar__right">
+            <div class="search">
+              <lightning-icon
+                icon-name="utility:search"
+                size="x-small"
+                class="search__icon"
+              ></lightning-icon>
+              <input
+                class="search__input"
+                type="search"
+                placeholder="Search mappings..."
+                value={searchTerm}
+                oninput={handleSearchChange}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="table-card">
+          <div class="table-scroll">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>
+                    <button
+                      class="th-btn"
+                      data-field="sourceColumn"
+                      onclick={handleHeaderClick}
+                    >
+                      <span>Source Column</span>
+                      <template if:true={sortFields.sourceColumn.isSorted}>
+                        <span class="sort-caret">
+                          <template if:true={sortFields.sourceColumn.sortAsc}>▲</template>
+                          <template if:false={sortFields.sourceColumn.sortAsc}>▼</template>
+                        </span>
+                      </template>
+                    </button>
+                  </th>
+                  <th>
+                    <button
+                      class="th-btn"
+                      data-field="targetField"
+                      onclick={handleHeaderClick}
+                    >
+                      <span>Target Field</span>
+                      <template if:true={sortFields.targetField.isSorted}>
+                        <span class="sort-caret">
+                          <template if:true={sortFields.targetField.sortAsc}>▲</template>
+                          <template if:false={sortFields.targetField.sortAsc}>▼</template>
+                        </span>
+                      </template>
+                    </button>
+                  </th>
+                  <th>Version</th>
+                  <th>Type</th>
+                  <th>Lookup Details</th>
+                  <th class="col-actions">Actions</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                <template for:each={pagedMappings} for:item="mapping">
+                  <tr key={mapping.id}>
+                    <td>
+                      <strong>{mapping.sourceColumn}</strong>
+                    </td>
+                    <td>
+                      <span class="tag">{mapping.targetField}</span>
+                    </td>
+                    <td>{mapping.version}</td>
+                    <td>
+                      <template if:true={mapping.isLookup}>
+                        <span class="pill pill--yellow">Lookup</span>
+                      </template>
+                      <template if:false={mapping.isLookup}>
+                        <span class="pill pill--green">Direct</span>
+                      </template>
+                    </td>
+                    <td>
+                      <template if:true={mapping.isLookup}>
+                        <div class="slds-text-body_small slds-text-color_weak">
+                          <div><strong>Object:</strong> {mapping.lookupObject}</div>
+                          <div><strong>Match:</strong> {mapping.lookupMatchField}</div>
+                        </div>
+                      </template>
+                      <template if:false={mapping.isLookup}>
+                        <span class="slds-text-color_weak ">—</span>
+                      </template>
+                    </td>
+                    <td class="actions-cell">
+                      <button
+                        type="button"
+                        class="btn btn--primary"
+                        data-mapping-id={mapping.id}
+                        onclick={handleTransformation}
+                      >
+                        <lightning-icon
+                          icon-name="utility:add"
+                          class="custom-icon-output"
+                          size="x-small"
+                        ></lightning-icon>
+                        <span>Transformation</span>
+                      </button>
+                    </td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination -->
+          <div class="table-footer">
+            <div class="table-footer__left">
+              Showing {showingFrom} to {showingTo} of {totalEntries} entries
+            </div>
+            <div class="table-footer__right pager">
+              <button
+                type="button"
+                class="pager__btn"
+                onclick={gotoPrev}
+                disabled={isFirstPage}
+              >
+                <lightning-icon
+                  icon-name="utility:chevronleft"
+                  size="xx-small"
+                ></lightning-icon>
+                <span class="slds-m-left_xx-small">Previous</span>
+              </button>
+
+              <template for:each={pageNumbers} for:item="p">
+                <span key={p.key}>
+                  <template if:true={p.isEllipsis}>
+                    <span class="pager__ellipsis">{p.label}</span>
+                  </template>
+                  <template if:false={p.isEllipsis}>
+                    <template if:true={p.isActive}>
+                      <button
+                        type="button"
+                        class="pager__page pager__page--active"
+                      >
+                        {p.label}
+                      </button>
+                    </template>
+                    <template if:false={p.isActive}>
+                      <button
+                        type="button"
+                        class="pager__page"
+                        data-page={p.page}
+                        onclick={gotoPage}
+                      >
+                        {p.label}
+                      </button>
+                    </template>
+                  </template>
+                </span>
+              </template>
+
+              <button
+                type="button"
+                class="pager__btn"
+                onclick={gotoNext}
+                disabled={isLastPage}
+              >
+                <span class="slds-m-right_xx-small">Next</span>
+                <lightning-icon
+                  icon-name="utility:chevronright"
+                  size="xx-small"
+                ></lightning-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <!-- Empty State -->
+    <template if:true={isEmpty}>
+      <div class="card">
+        <div class="slds-align_absolute-center" style="padding: 3rem 1rem;">
+          <lightning-icon
+            icon-name="utility:table"
+            size="large"
+            variant="base"
+          ></lightning-icon>
+          <div style="diplay:flex;padding: 0 1rem;">
+              <h3 class="slds-text-heading_medium slds-m-top_medium">
+                No Mappings Found
+              </h3>
+              <p class="slds-text-color_weak slds-m-top_x-small">
+                Create field mappings to configure transformations
+              </p>
+          </div>
+       
+        </div>
+      </div>
+    </template>
+  </div>
+</template>
