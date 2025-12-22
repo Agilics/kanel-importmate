@@ -2,8 +2,11 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 10-07-2025
- * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @last modified on  : 12-18-2025
+ * @last modified by  : mouhamed niang
+ * suppression de la méthode getAllSchedules()
+ * édit de la méthode getSchedulesByProjectName() 
+ *remplace de  List<Schedule__c> => List<ScheduleService.ScheduleWrapper> ligne 167
 **/
 @IsTest
 public class ScheduleControllerTest {
@@ -29,7 +32,7 @@ public class ScheduleControllerTest {
         // When
         Test.startTest();
         Id scheduleId = ScheduleController.addSchedule(
-            String.valueOf(ScheduleService.FrequencyEnum.DAILY),
+            String.valueOf(ImportMateEnum.FrequencyEnum.DAILY),
             nextRun,
             project.Id
         );
@@ -49,7 +52,7 @@ public class ScheduleControllerTest {
         ];
 
         System.assertEquals(
-            String.valueOf(ScheduleService.FrequencyEnum.DAILY),
+            String.valueOf(ImportMateEnum.FrequencyEnum.DAILY),
             insertedSchedule.Frequency__c.toUpperCase(),
             'La fréquence doit être DAILY'
         );
@@ -70,7 +73,7 @@ public class ScheduleControllerTest {
         // When
         Test.startTest();
         Id scheduleId =ScheduleController.addSchedule(
-            String.valueOf(ScheduleService.FrequencyEnum.DAILY),
+            String.valueOf(ImportMateEnum.FrequencyEnum.DAILY),
             nextRun,
             project.Id
         );
@@ -81,7 +84,7 @@ public class ScheduleControllerTest {
             WHERE Id = :scheduleId
             LIMIT 1
         ];
-        insertedSchedule.Frequency__c = String.valueOf(ScheduleService.FrequencyEnum.MONTHLY);
+        insertedSchedule.Frequency__c = String.valueOf(ImportMateEnum.FrequencyEnum.MONTHLY);
 
        Id resultId = ScheduleController.addSchedule(
             insertedSchedule.Frequency__c,
@@ -103,7 +106,7 @@ public class ScheduleControllerTest {
 
 
         System.assertEquals(
-            String.valueOf(ScheduleService.FrequencyEnum.MONTHLY),
+            String.valueOf(ImportMateEnum.FrequencyEnum.MONTHLY),
              updateSchedule.Frequency__c.toUpperCase(),
             'La fréquence doit être MONTHLY'
         );
@@ -116,15 +119,7 @@ public class ScheduleControllerTest {
     
     }
 
-    @IsTest
-    static void testGetAllSchedules() {
-        Test.startTest();
-        List<Schedule__c> schedules = ScheduleController.getAllSchedules();
-        Test.stopTest();
-
-        System.assertNotEquals(0, schedules.size(), 'Should return at least one schedule');
-    }
-
+  
 
     @IsTest
     static void testGetScheduleById() {
@@ -141,13 +136,13 @@ public class ScheduleControllerTest {
     static void testGetSchedulesByFrequency() {
         //given
         Test.startTest();
-        List<Schedule__c> schedules = ScheduleController.getSchedulesByFrequency(ScheduleService.FrequencyEnum.DAILY);
+        List<Schedule__c> schedules = ScheduleController.getSchedulesByFrequency(ImportMateEnum.FrequencyEnum.DAILY);
         Test.stopTest();
 
         System.assertNotEquals(0, schedules.size(), 'Should return schedules with DAILY frequency');
         for (Schedule__c s : schedules) {
             String actual = (s.Frequency__c).toUpperCase();
-            System.assertEquals(String.valueOf(ScheduleService.FrequencyEnum.DAILY), actual, 'Frequency should be DAILY');
+            System.assertEquals(String.valueOf(ImportMateEnum.FrequencyEnum.DAILY), actual, 'Frequency should be DAILY');
         }
     }
 
@@ -171,15 +166,14 @@ public class ScheduleControllerTest {
         Schedule__c schedule = TestDataFactory.createSchedule();
 
         Test.startTest();
-        List<Schedule__c> schedules = ScheduleController.getSchedulesByProjectName(project.Name);
+        List<ScheduleService.ScheduleWrapper> schedules = ScheduleController.getSchedulesByProjectName(project.Name);
         Test.stopTest();
 
         System.assertNotEquals(0, schedules.size(), 'Should return schedules for the given project');
-        System.assertEquals(project.Name, schedules[0].Project__r.Name, 'Project name should match');
     }
 
      
-     @isTest
+    @isTest
   static void testGetCompatibleSObjects() {
     //when
     Test.startTest();

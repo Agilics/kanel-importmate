@@ -2,8 +2,8 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 10-03-2025
- * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @last modified on  : 11-23-2025
+ * @last modified by  : khalidousowba
 **/
 @isTest
 public with sharing class ScheduleRepositoryTest {
@@ -12,7 +12,7 @@ public with sharing class ScheduleRepositoryTest {
     static void setupTestData(){
        User admin = TestDataFactory.createAdminUser();     
            String expected ='Test';
-            String frequence =String.valueOf(ScheduleService.FrequencyEnum.MONTHLY);
+            String frequence =String.valueOf(ImportMateEnum.FrequencyEnum.MONTHLY);
             ImportProject__c project = TestDataFactory.createImportProject();
              
               Schedule__c schedule = new Schedule__c(
@@ -76,7 +76,7 @@ public with sharing class ScheduleRepositoryTest {
      static void testGetScheduleByFrequency() {
         //GIVEN
          Schedule__c savedSchedule = TestDataFactory.createSchedule();
-        ScheduleService.FrequencyEnum expectedFrequence = ScheduleService.FrequencyEnum.DAILY;
+        ImportMateEnum.FrequencyEnum expectedFrequence = ImportMateEnum.FrequencyEnum.DAILY;
 
         //When 
         Test.startTest();
@@ -99,12 +99,11 @@ public with sharing class ScheduleRepositoryTest {
 
         //When 
         Test.startTest();
-         List<Schedule__c> result =  ScheduleRepository.getSchedulesByProjectName(expected);        
+         List<ScheduleService.ScheduleWrapper> result =  ScheduleRepository.getSchedulesByProjectName(expected);        
         Test.stopTest();
 
         //Then - Assertions
-        Assert.isNotNull(result, 'find a schedule success');    
-        Assert.areEqual(expected, result[0].Project__r.Name,'Values matched');
+        Assert.isNotNull(result, 'find a schedule success');     
      }
 
         //Tester l'enregistrement d'une nouvelle plabification 
@@ -113,7 +112,7 @@ public with sharing class ScheduleRepositoryTest {
               //Given  
 
             String expected ='Test Project';
-            String frequence =String.valueOf(ScheduleService.FrequencyEnum.MONTHLY);
+            String frequence =String.valueOf(ImportMateEnum.FrequencyEnum.MONTHLY);
             ImportProject__c project = TestDataFactory.createImportProject();
 
               Schedule__c schedule = new Schedule__c(

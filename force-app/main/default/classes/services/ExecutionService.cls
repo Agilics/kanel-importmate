@@ -1,73 +1,76 @@
-public with sharing class ExecutionService {      
-    //Lance une validation dry-run
-    public static String dryRunValidation(String projectId, List<Map<String, String>> csvData) {
+public with sharing class ExecutionService {
+
+    public static Map<String, Object> dryRunValidation(String projectId, List<Map<String, String>> csvData) {
+        Map<String, Object> result = new Map<String, Object>();
+
         try {
             ImportExecution__c execution = ExecutionRepository.createImportExecution(projectId, 'InProgress', 'Validation');
-            String executionId = execution.Id;
 
-            //get project record to check status
+
             ImportProject__c project = ProjectService.getProjectById(projectId);
+            if (project == null) {
+                throw new ExecutionException('Project not found');
+            }
 
-            //gros volume >200 lignes - utiliser ValidationBatch existante
             if (csvData.size() > 200) {
                 if (!Test.isRunningTest()) {
-                    String jobId = Database.executeBatch(new ValidationBatch(projectId, csvData, executionId), 200);
-                    return jobId;
+                    String jobId = System.enqueueJob(new ValidationQueueable(projectId, csvData, execution.Id));
+                    result.put('jobId', jobId);
+                    result.put('executionId', execution.Id);
+                    return result;
                 } else {
-                    //test class
-                    return validateSynchronously(projectId, csvData, executionId);
+                    String executionId = validateSynchronously(projectId, csvData, execution.Id);
+                    result.put('executionId', executionId);
+                    return result;
                 }
             }
 
-            //pour petits volumes
-            List<ImportLog__c> errors = new List<ImportLog__c>();
+            // Synchronous validation for smaller datasets
             List<FieldMapping__c> mappings = FieldMappingService.getAllMappingsByProject(projectId);
-            Map<String, FieldMapping__c> targetFieldToMapping = new Map<String, FieldMapping__c>();
-            for (FieldMapping__c mapping : mappings) {
-                targetFieldToMapping.put(mapping.TargetField__c, mapping);
-            }
-
-            //load transformation rules
             Map<String, List<TransformationRule__c>> rulesByMappingId = TransformationRepository.getRulesByProjectIdGroupedByMapping(projectId);
 
-            //use ValidationService pour une validation plus robuste avec optimisation de performance
-            //Integer recommendedBatchSize = (Integer) ValidationService.getLookupCacheStats().get('recommendedBatchSize');
-            errors = ValidationService.validateBatch(csvData, mappings, executionId, 1, project.TargetObject__c, rulesByMappingId, 200);
-
-            System.debug('Validation errors: ' + errors);
+            List<ImportLog__c> errors = ValidationService.validateBatch(csvData, mappings, execution.Id, 1, project.TargetObject__c, rulesByMappingId, 200);
 
             if (!errors.isEmpty()) {
                 ImportLogService.logImportLogs(errors);
             }
 
+            Set<Integer> uniqueFailedLines = new Set<Integer>();
+            for (ImportLog__c error : errors) {
+                if (error.LineNumber__c != null) {
+                    uniqueFailedLines.add(Integer.valueOf(error.LineNumber__c));
+                }
+            }
+
             execution.TotalRecords__c = csvData.size();
-            execution.FailedRecords__c = errors.size();
+            execution.FailedRecords__c = uniqueFailedLines.size();
             execution.Status__c = errors.isEmpty() ? 'Completed' : 'Failed';
             execution.EndTime__c = Datetime.now();
+            result.put('executionId', execution.Id);
             ExecutionRepository.updateImportExecution(execution);
 
-            System.debug('Validation dry-run completed with ' + errors.size() + ' errors.');
-            //debug execution
-            System.debug('Execution Record: ' + execution);
-
-            return executionId;
+            return result;
         } catch (Exception e) {
             ErrorLogService.logException(e);
             throw new ExecutionException(e.getMessage(), Constants.ERROR_CODE_EXECUTION);
         }
     }
 
-    public static String startImport(String projectId, List<Map<String, String>> csvData) {
+    public static Map<String, String> startImport(String projectId, List<Map<String, String>> csvData) {
         try {
             ImportExecution__c execution = ExecutionRepository.createImportExecution(projectId, 'InProgress', 'Import');
-            if (csvData.size() > 0 ) {        
+            String executionId = execution.Id;
+
+            if (csvData.size() > 0) {
                 String jobId = System.enqueueJob(new ImportQueueable(projectId, csvData, execution.Id));
-                return jobId;
+                return new Map<String, String>{'jobId' => jobId, 'executionId' => executionId};
             }
+
             execution.Status__c = 'Completed';
             execution.EndTime__c = Datetime.now();
             ExecutionRepository.updateImportExecution(execution);
-            return null;
+            return new Map<String, String>{'jobId' => null, 'executionId' => executionId};
+
         } catch (Exception e) {
             ErrorLogService.logException(e);
             throw new ExecutionException();
@@ -75,25 +78,30 @@ public with sharing class ExecutionService {
     }
 
 
-    //validate synchronously during tests
     private static String validateSynchronously(String projectId, List<Map<String, String>> csvData, String executionId) {
         ImportProject__c project = ProjectService.getProjectById(projectId);
-        List<ImportLog__c> errors = new List<ImportLog__c>();
+        if (project == null) {
+            throw new ExecutionException('Project not found');
+        }
         List<FieldMapping__c> mappings = FieldMappingService.getAllMappingsByProject(projectId);
-        
         Map<String, List<TransformationRule__c>> rulesByMappingId = TransformationRepository.getRulesByProjectIdGroupedByMapping(projectId);
-        
-        //Utiliser ValidationService pour une validation plus robuste avec optimisation de performance
-        //Integer recommendedBatchSize = (Integer) ValidationService.getLookupCacheStats().get('recommendedBatchSize');
-        errors = ValidationService.validateBatch(csvData, mappings, executionId, 1, project.TargetObject__c, rulesByMappingId, 200);
+
+        List<ImportLog__c> errors = ValidationService.validateBatch(csvData, mappings, executionId, 1, project.TargetObject__c, rulesByMappingId, 200);
 
         if (!errors.isEmpty()) {
             ImportLogService.logImportLogs(errors);
         }
 
+        Set<Integer> uniqueFailedLines = new Set<Integer>();
+        for (ImportLog__c error : errors) {
+            if (error.LineNumber__c != null) {
+                uniqueFailedLines.add(Integer.valueOf(error.LineNumber__c));
+            }
+        }
+
         ImportExecution__c execution = ExecutionRepository.getImportExecutionById(executionId);
         execution.TotalRecords__c = csvData.size();
-        execution.FailedRecords__c = errors.size();
+        execution.FailedRecords__c = uniqueFailedLines.size();
         execution.Status__c = errors.isEmpty() ? 'Completed' : 'Failed';
         execution.EndTime__c = Datetime.now();
         ExecutionRepository.updateImportExecution(execution);
@@ -109,6 +117,8 @@ public with sharing class ExecutionService {
             return new Map<String, Integer>();
         }
     }
+
+    
     
  
 }
