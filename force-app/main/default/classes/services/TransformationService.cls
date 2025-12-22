@@ -1,3 +1,8 @@
+/**
+ * @Last Modified Date : 12-19-2025
+ * Ajout de la méthode  getRulesByProjectId
+ * AJOUT Méthode deleteRuleById
+ */
 public with sharing class TransformationService {
 
     //Créer une règle de transformation
@@ -191,6 +196,23 @@ public with sharing class TransformationService {
          }
     }
 
+      //récuperer toutes les transformations par l'id du project 
+      public static List<TransformationRule__c>  getRulesByProjectId(String projectId) {
+        try {
+          return  TransformationRepository.getRulesByProjectId(projectId);
+        }catch(Exception e){
+            Map<String, Object> context = new Map<String, Object>{
+                'projectId' => projectId, 
+                'originalError' => e.getMessage()
+            };
+           throw new TransformationException(
+               'Erreur lors de la génération du résumé des transformations: ' + e.getMessage(),
+               Constants.ERROR_CODE_TRANSFORMATION,
+               context
+           );
+        }
+   }
+
     //résumé des transformations
     public static Map<String, Object> getTransformationSummary(String mappingId) {
         try {
@@ -223,4 +245,13 @@ public with sharing class TransformationService {
         }
     }
 
+    //suppression d'une transformation par l'id
+    public static void  deleteRuleById (String ruleId){
+        try {
+            TransformationRepository.deleteRule(ruleId);
+        } catch (Exception e) {
+            ErrorLogService.logException(e);
+            throw new TransformationException('Erreur lors de la suppression de la règle : ' + e.getMessage());
+        }
+    }
 }

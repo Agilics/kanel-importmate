@@ -2,8 +2,11 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 11-24-2025
- * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @last modified on  : 12-19-2025
+ * @last modified by  : Mouhamed NIANG
+ * add method  deleteTransformationById 
+ * add method   getRulesByProjectId
+ * 
 **/
 public with sharing class TransformationController {
 
@@ -45,13 +48,27 @@ public with sharing class TransformationController {
      public static Map<String, Object> getTransformationSummary(String mappingId) {
         return TransformationService.getTransformationSummary(mappingId);
     }
-
-      
+    //supprimer transformation par ID
+    @AuraEnabled
+    public static void  deleteTransformationById (String transformationId){
+      try {
+        TransformationService.deleteRuleById(transformationId);
+      } catch (ApplicationException e) {
+        ErrorLogService.logException(e);
+        throw new TransformationException('Transformation rule not found : ' + e.getMessage());
+      }
+    }
 
     //récuperer les transformations par l'id du mapping 
       @AuraEnabled(cacheable = true)
     public static List<TransformationRule__c> getRulesByMappingId(String mappingId) {
         return TransformationService.getRulesByMappingId(mappingId);
+    }
+    
+    //récuperer toutes les transformations par l'id du projet 
+    @AuraEnabled(cacheable = true)
+    public static List<TransformationRule__c>  getRulesByProjectId(String projectId) {
+       return TransformationService.getRulesByProjectId(projectId);
     }
 
 

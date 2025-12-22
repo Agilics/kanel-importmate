@@ -1,12 +1,15 @@
+/**
+ * @Last Modified Date : 12-22-2025
+ * @Modified By: Mouhamed Niang
+ * Ajout event save permettant de rafraîchir la page après sauvegarde
+ * Modification de la méthode validateForm
+ */
 import { wire, api, track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import { log } from 'lightning/logger';
-import TRANSFORMATION_OBJECT from '@salesforce/schema/TransformationRule__c'; 
+import TRANSFORMATION_OBJECT from '@salesforce/schema/TransformationRule__c';
 import LightningModal from 'lightning/modal';
 import RULE_TYPE_FIELD from '@salesforce/schema/TransformationRule__c.RuleType__c';
-
 import createRule from '@salesforce/apex/TransformationController.createRule';
-import applyTransformations from '@salesforce/apex/TransformationController.applyTransformations';
 import getPickListValues from '@salesforce/apex/TransformationController.getPickListValues';
 import getAllMappingsByProjectId from '@salesforce/apex/FieldMappingController.getAllMappingsByProjectId';
 
@@ -14,6 +17,7 @@ export default class TransformationSaveModal extends LightningModal {
     @api projectId;
     @api label;
     @api mappingId;  
+    @api version;
     @api mapping;
 
     //target value for boolean 
@@ -26,10 +30,12 @@ export default class TransformationSaveModal extends LightningModal {
     fields = []; // Noms de champs finaux ['firstname', 'lastname']
     targetField = '';
     @track targetValue;
+    
     parameters = '{}';
     @track isBooleanTransformation = false;
     @track phone; 
     mappingIdToFieldMap = new Map();
+    selectedMappingId;
     ruleTypeOptions = [];
     fieldMappingOptions = [];
     targetFieldOptions = [];
@@ -46,7 +52,7 @@ export default class TransformationSaveModal extends LightningModal {
     // Handlers UI
     // ------------------------
     get mappingInfo(){
-        return `${this.mapping.version} -> ${this.mapping.sourceColumn} `
+        return ` ${this.mapping.sourceColumn} ->  ${this.mapping.targetField} `;
     }
 
 
@@ -107,12 +113,13 @@ export default class TransformationSaveModal extends LightningModal {
 
     validateForm() {
         console.log('=== VALIDATION ===');
-        console.log('mappingId:', this.mappingId);
+        const effectiveMappingId = this.selectedMappingId || this.mappingId;
+        console.log('mappingId:', effectiveMappingId);
         console.log('ruleType:', this.ruleType);
         console.log('fields:', this.fields);
         console.log('separator:', this.separator);
 
-        if (!this.mappingId) {
+        if (!effectiveMappingId) {
             return this.toastErr('Veuillez sélectionner un mapping de champ');
         }
 
@@ -142,7 +149,9 @@ export default class TransformationSaveModal extends LightningModal {
                     return this.toastErr('Veuillez sélectionner un champ email');
                 }
                 break;
-    
+            default:
+                return this.toastErr('Veuillez sélectionner une transformation');
+
         }
 
         return true;
@@ -161,9 +170,10 @@ export default class TransformationSaveModal extends LightningModal {
             }
         
             this.parameters = this.prepareParameters(this.fields, this.separator,this.booleanValue);
+            const effectiveMappingId = this.selectedMappingId || this.mappingId;
             const payload = {
                 projectId: this.projectId,
-                mappingId: this.mappingId,
+                mappingId: effectiveMappingId,
                 ruleType: this.ruleType.replaceAll(' ',''),
                 parameters: this.parameters,
                 Field: this.fields.join(this.separator.toString()), //source fields here
@@ -176,6 +186,7 @@ export default class TransformationSaveModal extends LightningModal {
             const rule = await createRule(payload);
             const ruleId = rule.Id; 
             
+            this.dispatchEvent(new CustomEvent('save')); //refresh transformation list
             this.close(ruleId);
             
            this.showToast('Success', 'Rule added successfully with record ID:\t'+ ruleId , 'success');

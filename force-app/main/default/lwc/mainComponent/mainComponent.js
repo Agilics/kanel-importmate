@@ -149,7 +149,7 @@ export default class MainComponent extends LightningElement {
     }
   }
 
-  validateProjectFields() {
+  validateProjectFields() { 
     return this.projectName  && this.targetObject;
   }
 

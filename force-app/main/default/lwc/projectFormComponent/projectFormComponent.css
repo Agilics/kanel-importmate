@@ -2,23 +2,13 @@
    MAIN FORM RESPONSIVE STYLES - FIGMA DESIGN
    ======================================== */
 
-.main-content {
-  background-color: #ffffff;
-  padding: 2rem 3rem;
-  max-width: 1200px;
-  width: 100%;
-  margin: 0 auto;
-  min-height: 100vh;
-}
-
 /* BREADCRUMB */
 .breadcrumb {
   display: flex;
   align-items: center;
   gap: 0.5rem;
   font-size: 14px;
-  color: #6b7280;
-  margin-bottom: 1.5rem;
+  color: #6b7280; 
 }
 
 .breadcrumb a {
@@ -40,7 +30,7 @@
   justify-content: start;
   align-items: start;
   gap: 1.25rem;
-  margin-bottom: 2.5rem;
+  margin-bottom: 0.5rem;
   width: 100%;
 }
 
@@ -53,7 +43,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 16px;
-  background: #2563eb;
+  background: #1e40af;
   flex-shrink: 0;
 }
 
@@ -82,7 +72,7 @@
 .text-header h1 {
   font-size: 1.875rem;
   font-weight: 700;
-  margin: 0 0 0.25rem 0;
+  margin: 5px 0 0.25rem 0;
   line-height: 1.2;
   color: #111827;
 }
@@ -113,8 +103,8 @@
   display: flex;
   align-items: center;
   gap: 0.625rem;
-  margin-bottom: 1.5rem;
-  padding-bottom: 0.75rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.75px;
 }
 
 .section-header h2 {
@@ -131,7 +121,7 @@
   height: 24px;
   min-width: 24px;
   border-radius: 6px;
-  background: #2563eb;
+  background: #1e40af;
 }
 
 /* INPUTS */
@@ -159,7 +149,7 @@ lightning-combobox select {
 
 lightning-input input:focus,
 lightning-combobox select:focus {
-  border-color: #2563eb;
+  border-color: #1e40af;
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
@@ -179,8 +169,7 @@ lightning-textarea textarea {
 .help-text {
   font-size: 13px;
   color: #6b7280;
-  margin-top: 0.5rem;
-  margin-bottom: 1.5rem;
+  margin: 12px  0 0.75rem 0;
   line-height: 1.4;
 }
 
@@ -188,8 +177,7 @@ lightning-textarea textarea {
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1.5rem;
-  margin-top: 1rem;
+  gap: 1.5rem; 
 }
 
 .form-item {
@@ -202,7 +190,7 @@ lightning-textarea textarea {
 .divider {
   border: none;
   border-top: 1px solid #e5e7eb;
-  margin: 1.5rem 0;
+  margin: 0.75rem 0;
 }
 
 /* LABELS */
@@ -214,7 +202,7 @@ lightning-textarea textarea {
   font-weight: 500;
   font-size: 14px;
   color: #111827;
-  margin-bottom: 0.5rem;
+  margin-bottom: 5px;
 }
 
 .required {
@@ -235,7 +223,7 @@ lightning-textarea textarea {
    ======================================== */
 
 /* Desktop Large (> 1200px) */
-@media screen and (min-width: 1201px) {
+@media (min-width: 1201px) {
   .main-content {
     padding: 2rem 3rem;
   }
@@ -244,7 +232,7 @@ lightning-textarea textarea {
 /* Laptop & Desktop Standard (769px - 1200px) */
 @media screen and (max-width: 1200px) and (min-width: 769px) {
   .main-content {
-    padding: 2rem;
+    padding:12px 2rem;
     max-width: 100%;
   }
   
@@ -268,7 +256,7 @@ lightning-textarea textarea {
 /* Tablet (481px - 768px) */
 @media screen and (max-width: 768px) and (min-width: 481px) {
   .main-content {
-    padding: 1.5rem;
+    padding:0.5 1.5rem;
   }
   
   .header {
@@ -297,7 +285,7 @@ lightning-textarea textarea {
   }
   
   .section-header {
-    margin-bottom: 1.25rem;
+    margin-bottom: 12px;
   }
   
   .section-header h2 {

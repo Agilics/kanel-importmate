@@ -5,7 +5,7 @@ import getCompatibleSObjects from "@salesforce/apex/ImportProjectController.getC
 
 
 export default class ProjectFormComponent extends LightningElement {
-     @api projectName = "";
+  @api projectName = "";
   @api description = "";
   @api targetObject = "";
   @track options = [];
@@ -41,7 +41,7 @@ export default class ProjectFormComponent extends LightningElement {
   //Evénement portant sur la mise à jour du nom du projet
   handleProjectNameChange(event) {
     this.dispatchEvent(
-      new CustomEvent("namechange", { detail: event.target.value })
+      new CustomEvent("projectnamechange", { detail: event.target.value })
     );
   }
 
@@ -57,7 +57,7 @@ export default class ProjectFormComponent extends LightningElement {
   //  de l'événement portant sur la mise à jour de l'attribut target object
   handleTargetObjectChange(event) {
     this.dispatchEvent(
-      new CustomEvent("targetchange", { detail: event.target.value })
+      new CustomEvent("targetobjectchange", { detail: event.target.value })
     );
   }
 
