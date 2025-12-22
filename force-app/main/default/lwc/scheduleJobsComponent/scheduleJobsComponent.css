@@ -1,0 +1,290 @@
+body {
+  font-family: Inter;
+}
+.card {
+  width: 1056px;
+  height: 428px;
+  border-radius: 12px;
+  border-width: 1px;
+  opacity: 1;
+  top: 780px;
+  left: 32px;
+  border-width: 1px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+}
+
+/* Schedule Config Card */
+.card {
+  width: 1056px;
+  height: 616px;
+  opacity: 1;
+  border-radius: 12px;
+  border-width: 1px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+}
+/* header of card */
+.head {
+  display: flex;
+  justify-content: space-between;
+}
+/* header of card */
+.card-header {
+  display: flex;
+  gap: 2rem;
+  opacity: 1;
+  border-bottom-width: 1px;
+  margin: 0 0 2px 0;
+}
+
+/* card title */
+.card-title {
+  font-weight: 600;
+  font-style: Semi Bold;
+  font-size: 20px;
+  line-height: 28px;
+  letter-spacing: 0%;
+}
+
+/*card content*/
+.card-content {
+  opacity: 1;
+  display: flex;
+  gap: 3rem;
+}
+
+.icon-piclist_size {
+  width: 20px;
+  height: 20px;
+  opacity: 1;
+  top: 10.5px;
+}
+/*Add the class name below to the lightning-icon element.*/
+.custom-icon-groups {
+  --slds-c-icon-color-foreground-default: #1e40af;
+  --slds-c-icon-color-background: #ffffff;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+thead tr {
+  border-bottom: 1px solid #e2e8f0;
+  background: #f9fafb;
+  padding: 0 0 0 6rem;
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 14px;
+  line-height: 100%;
+  letter-spacing: 0%;
+  margin: 0 0 0 5rem;
+}
+thead th {
+  font-weight: 600;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  color: #8795b1;
+}
+tbody tr {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+tbody td {
+  padding: 0.75rem 1rem;
+  vertical-align: middle;
+}
+.project-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  white-space: nowrap;
+  max-width: 270px;
+}
+.project-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+/* Background colors for different projects */
+.icon-contact-import {
+  background: #607d8b; /* bleu gris */
+  color: white;
+}
+.icon-opportunity-sync {
+  background: #ffb74d; /* orange clair */
+  color: white;
+}
+.icon-account-migration {
+  background: #9575cd; /* violet */
+  color: white;
+}
+.project-info {
+  display: flex;
+  flex-direction: column;
+}
+.project-name {
+  font-weight: 500;
+  color: #111827;
+  font-size: 16px;
+  cursor: default;
+}
+.project-sub {
+  font-size: 0.8rem;
+  color: #6b7280;
+  white-space: normal;
+  font-weight: 400;
+  font-size: 14px;
+}
+.frequency,
+.next-run {
+  white-space: nowrap;
+  font-weight: 400;
+  font-size: 14px;
+}
+.last-execution {
+  white-space: nowrap;
+}
+/* Success and failed text style */
+.success-text {
+  color: #16a34a; /* vert vif */
+  font-weight: 400;
+  font-size: 14px;
+}
+.failed-text {
+  color: #dc2626; /* rouge vif */
+  font-weight: 400;
+  font-size: 14px;
+}
+.pending-text {
+  color: #854d0e;
+  font-weight: 500;
+  font-size: 12px;
+}
+/* Status badges */
+.status-badge {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0 0.75rem;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  width: 52.171875px;
+  height: 23px;
+  opacity: 1;
+  top: 30.5px;
+  left: 24px;
+}
+.btn-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem; /* espace horizontal entre les éléments */
+  flex-wrap: wrap; /* permet de passer sur deux lignes si l’écran est petit */
+}
+.active-status {
+  background: #dcfce7;
+  color: #166534;
+}
+.paused-status {
+  background-color: #fef9c3;
+  color: #854d0e;
+}
+.filters{
+  gap: 0 5px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: flex-start;
+  align-content: flex-start;
+}
+/* search field */
+.search-field {
+  display: flex;
+  align-items: center;
+  gap: 0 0.75rem;
+}
+.search-field lightning-input,
+lightning-combobox .status-combobox lightning-combobox {
+  width: 250px; /* tu peux ajuster la largeur ici */
+  margin: 0;
+  --sds-c-input-radius-border: 8px;
+}
+/* status */
+ 
+.slds-button {
+  border-radius: 6px;
+  font-weight: 600;
+}
+/* Action icons (edit, pause/play, delete) */
+.actions {
+  display: flex;
+  gap: 1rem 1.4rem;
+  font-size: 1.2rem;
+  margin: 20px 0 0 0;
+}
+.actions button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  /*Add the class name below to the lightning-icon element.*/
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Smaller icon size for actions */
+.slds-icon_action {
+  width: 14px;
+  height: 16px;
+  angle: 0 deg;
+  opacity: 1;
+
+  border: none;
+
+  /*Add the class name below to the lightning-icon element.*/
+
+  --slds-c-icon-color-foreground-default: #9ca3af;
+  --slds-c-icon-color-background: #ffffff;
+}
+
+/*padding*/
+
+.px-2 {
+  padding: 6rem 6rem 0 6rem;
+}
+.p-3 {
+  padding: 6rem 6rem 2.3rem 6rem;
+}
+.p-2 {
+  padding: 3rem 0 7px 2rem;
+}
+.px-3 {
+  padding: 0.8rem 6rem 6rem;
+}
+.px-1 {
+  padding: 0 0 2px 2.7rem;
+}
+.p-1 {
+  padding: 3rem 0 7px 2rem;
+}
+.pt-1 {
+  padding: 20px 0 7px 2rem;
+}
+.pr-1{
+   padding: 0 0 2rem 0;
+   margin:-17px 3rem 0 0;
+}
+.plr-1 {
+  padding: 0 3rem 0 3rem;
+}

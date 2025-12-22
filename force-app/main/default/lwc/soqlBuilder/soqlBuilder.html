@@ -1,98 +1,261 @@
 <template>
-  <div class="controls">
-    <!-- Combobox[0]: Object -->
-    <lightning-combobox
-      name="object"
-      label="Object"
-      value={selectedObject}
-      placeholder="Select an object"
-      options={objectOptions}
-      onchange={handleObjectChange}
-    >
-    </lightning-combobox>
+  <div class="page">
+    <!-- LEFT COLUMN -->
+    <aside class="left">
+      <h2 class="panel-title">SOQL Query Builder</h2>
 
-    <!-- Fields (dual list) -->
-    <lightning-dual-listbox
-      name="fields"
-      label="Fields"
-      source-label="Available"
-      selected-label="Selected"
-      options={fieldOptions}
-      value={selectedFields}
-      onchange={handleFieldsChange}
-    >
-    </lightning-dual-listbox>
+      <!-- Selected Object (read-only, from projectTargetObject) -->
+      <div class="card">
+        <div class="section-title">Selected Object</div>
+        <lightning-input
+          type="text"
+          value={selectedObject}
+          disabled
+          class="selected-object-input"
+        ></lightning-input>
+      </div>
 
-    <!-- Input[0]: WHERE -->
-    <lightning-input
-      type="text"
-      label="WHERE"
-      value={whereCondition}
-      onchange={handleWhereChange}
-    >
-    </lightning-input>
+      <!-- Select Fields -->
+      <div class="card">
+        <div class="section-title row">
+          <span>Select Fields</span>
+          <span class="muted actions-inline">
+            <a onclick={selectAll}>Select all</a>
+            <span class="sep">|</span>
+            <a onclick={clearAll}>Clear</a>
+          </span>
+        </div>
+        <div class="fields-list">
+          <template for:each={fieldsMeta} for:item="f">
+            <label class="field-item" key={f.apiName}>
+              <lightning-input
+                type="checkbox"
+                checked={f.checked}
+                data-api={f.apiName}
+                onchange={toggleField}
+              ></lightning-input>
+              <span class="fname">{f.label}</span>
+              <span class="ftype">{f.type}</span>
+            </label>
+          </template>
+        </div>
+      </div>
 
-    <!-- Combobox[1]: ORDER BY -->
-    <lightning-combobox
-      name="orderBy"
-      label="Order By"
-      value={orderByField}
-      placeholder="None"
-      options={orderByFieldOptions}
-      onchange={handleOrderByChange}
-    >
-    </lightning-combobox>
+      <!-- Query Settings -->
+      <div class="card">
+        <div class="section-title">Query Settings</div>
 
-    <!-- Combobox[2]: Direction -->
-    <lightning-combobox
-      name="direction"
-      label="Direction"
-      value={orderDirection}
-      options={directionOptions}
-      onchange={handleDirectionChange}
-    >
-    </lightning-combobox>
+        <lightning-input
+          type="number"
+          label="Record Limit"
+          value={limitRows}
+          onchange={handleLimitChange}
+        ></lightning-input>
 
-    <!-- Combobox[3]: NULLS -->
-    <lightning-combobox
-      name="nulls"
-      label="NULLS"
-      value={nullsBehavior}
-      options={nullsOptions}
-      onchange={handleNullsChange}
-    >
-    </lightning-combobox>
+        <lightning-combobox
+          label="Order By"
+          value={orderByField}
+          options={orderByFieldOptions}
+          onchange={handleOrderByChange}
+        ></lightning-combobox>
 
-    <!-- Input[1]: LIMIT -->
-    <lightning-input
-      type="number"
-      label="LIMIT"
-      value={limitRows}
-      onchange={handleLimitChange}
-    >
-    </lightning-input>
+        <lightning-combobox
+          label="Direction"
+          value={orderDirection}
+          options={directionOptions}
+          onchange={handleDirectionChange}
+        ></lightning-combobox>
 
-    <!-- Input[2]: OFFSET -->
-    <lightning-input
-      type="number"
-      label="OFFSET"
-      value={offsetRows}
-      onchange={handleOffsetChange}
-    >
-    </lightning-input>
+        <div class="btns-vertical">
+          <button
+            class="btn-validate"
+            onclick={handleValidate}
+            disabled={isLoading}
+          >
+            <lightning-icon
+              icon-name="utility:check"
+              size="x-small"
+              class="btn-icon"
+            ></lightning-icon>
+            Validate Query
+          </button>
+          <button
+            class="btn-preview"
+            onclick={handlePreview}
+            disabled={isLoading}
+          >
+            <lightning-icon
+              icon-name="utility:preview"
+              size="x-small"
+              class="btn-icon"
+            ></lightning-icon>
+            Preview Results
+          </button>
+        </div>
+      </div>
 
-    <!-- Run -->
-    <lightning-button
-      variant="brand"
-      label="Run"
-      onclick={handleRunClick}
-      disabled={isLoading}
-    >
-    </lightning-button>
+     
+    </aside>
+
+    <!-- CENTER COLUMN -->
+    <main class="center">
+      <!-- Condition Builder -->
+      <div class="card card-fixed">
+        <div class="title-row">
+          <h3 class="section-title big">Condition Builder</h3>
+          <button class="btn-add-condition" onclick={addCondition}>
+            <lightning-icon
+              icon-name="utility:add"
+              size="x-small"
+              class="btn-icon-right"
+            ></lightning-icon>
+            Add Condition
+          </button>
+        </div>
+
+        <div class="h-scroll">
+          <div class="h-row">
+            <template for:each={conditions} for:item="c" for:index="i">
+              <div key={c.id} class="cond-row">
+                <lightning-combobox
+                  class="cond-field"
+                  data-idx={i}
+                  value={c.field}
+                  placeholder="Field"
+                  options={fieldOptions}
+                  onchange={updateCondField}
+                ></lightning-combobox>
+
+                <lightning-combobox
+                  class="cond-op"
+                  data-idx={i}
+                  value={c.operator}
+                  options={operatorOptions}
+                  onchange={updateCondOp}
+                ></lightning-combobox>
+
+                <lightning-input
+                  class="cond-val"
+                  data-idx={i}
+                  type="text"
+                  value={c.value}
+                  placeholder="Enter value…"
+                  onchange={updateCondVal}
+                ></lightning-input>
+
+                <lightning-combobox
+                  class="cond-joiner"
+                  data-idx={i}
+                  value={c.joiner}
+                  options={joinerOptions}
+                  onchange={updateCondJoiner}
+                ></lightning-combobox>
+
+                <lightning-button-icon
+                  class="cond-trash"
+                  icon-name="utility:delete"
+                  alternative-text="Remove"
+                  data-idx={i}
+                  onclick={removeCondition}
+                ></lightning-button-icon>
+              </div>
+            </template>
+          </div>
+        </div>
+      </div>
+
+      <!-- Generated SOQL Query -->
+      <div class="card card-fixed">
+        <div class="title-row">
+          <h3 class="section-title big">Generated SOQL Query</h3>
+          <div class="title-actions">
+            <lightning-button-icon
+              icon-name="utility:copy"
+              alternative-text="Copy Query"
+              class="copy-icon"
+              onclick={copySoql}
+            ></lightning-button-icon>
+          </div>
+        </div>
+
+        <div class="soql-block">
+          <pre class="soql-code">
+            <template for:each={soqlTokens} for:item="t">
+              <span key={t.key} class={t.cls}>{t.text}</span>
+            </template>
+          </pre>
+        </div>
+      </div>
+
+      <!-- Query Results Preview -->
+      <div class="card card-fixed">
+        <div class="title-row">
+          <h3 class="section-title big">Query Results Preview</h3>
+          <div class="meta">
+            <template if:true={hasRows}>
+              <span class="found">
+                found <strong>{foundCountText}</strong> records
+              </span>
+              <a class="export" onclick={exportCsv}>Export</a>
+            </template>
+          </div>
+        </div>
+
+        <div class="h-scroll">
+          <table class="preview-table">
+            <thead>
+              <tr>
+                <template for:each={columns} for:item="c">
+                  <th key={c.key}>{c.label}</th>
+                </template>
+              </tr>
+            </thead>
+            <tbody>
+              <template for:each={displayRows} for:item="r">
+                <tr key={r.id}>
+                  <template for:each={r.cells} for:item="cell">
+                    <td key={cell.key}>
+                      <template if:true={cell.isBadge}>
+                        <span class="pill pill-default">{cell.value}</span>
+                      </template>
+                      <template if:false={cell.isBadge}>
+                        {cell.value}
+                      </template>
+                    </td>
+                  </template>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="results-footer">
+          <div class="results-count">
+            <span class="muted">{foundCountText}</span>
+          </div>
+
+          <button
+            class="btn-continue"
+            onclick={handleContinue}
+            disabled={isContinueDisabled}
+          >
+            <lightning-icon
+              icon-name="utility:forward"
+              size="x-small"
+              class="btn-icon"
+            ></lightning-icon>
+            Continue to Field Mapping
+          </button>
+        </div>
+      </div>
+    </main>
   </div>
 
-  <template if:true={columns}>
-    <lightning-datatable key-field="Id" data={queryResults} columns={columns}>
-    </lightning-datatable>
+  <template if:true={isLoading}>
+    <div class="spinner-overlay">
+      <lightning-spinner alternative-text="Loading"></lightning-spinner>
+    </div>
   </template>
+
+  <c-backbutton onback={handleBackToMain}></c-backbutton>
 </template>

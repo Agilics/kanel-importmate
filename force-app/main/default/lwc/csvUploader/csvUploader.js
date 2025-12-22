@@ -1,284 +1,454 @@
-import { LightningElement, track, api } from "lwc";
+import { LightningElement, track, api } from 'lwc';
+
+const SS_ROWS_KEY = 'IM_csvRows';
+const SS_COLS_KEY = 'IM_sourceColumnsCsv';
 
 const DEFAULT_PREVIEW_LIMIT = 100;
-const INCREMENT_LOAD_COUNT = 500;
+const DEFAULT_PAGE_SIZE = 5;
 
 export default class CsvUploader extends LightningElement {
-  @track data = [];
-  @track columns = [];
+  @api title = 'CSV Data Import & Display';
 
-  // File metadata
-  fileName = "";
+  // ===== File / Data =====
+  fileName = '';
   fileSize = 0;
 
-  allRows = [];
+  @track columns = [];
+  @track _displayColumns = [];
+  @track allRows = [];
   totalRows = 0;
 
-  // Preview / loading state
-  previewLimit = DEFAULT_PREVIEW_LIMIT;
-  isPreview = false;
+  // ===== UI State =====
   isLoading = false;
-  parseError = "";
+  parseError = '';
+  isPreview = false;
 
-  // UI visibility
-  @track showFieldMapper = false;
-  @track showFieldMappingTable = false;
-  @api currentProject;
-  /* ===================== Derived ===================== */
-  get hasHeaders() {
-    return Array.isArray(this.columns) && this.columns.length > 0;
-  }
-  get canShowGo() {
-    return this.hasHeaders;
-  }
-  get disableGoForMapping() {
-    return !this.hasHeaders;
-  }
-  get hasData() {
-    return this.data && this.data.length > 0;
-  }
-  get showingCount() {
-    return this.data.length;
-  }
-  get remainingCount() {
-    return Math.max(this.totalRows - this.data.length, 0);
-  }
-  get showActions() {
-    return (
-      this.totalRows > 0 &&
-      (this.isPreview || this.data.length < this.totalRows)
-    );
-  }
+  @track searchTerm = '';
+  @track showFilters = false;
+  @track filter = { column: '', operator: 'contains', value: '' };
+  @track showSettings = false;
+  @track pageSize = DEFAULT_PAGE_SIZE;
+  @track previewLimit = DEFAULT_PREVIEW_LIMIT;
 
-  // Pass parsed CSV to FieldMappingTable
-  get csvPayload() {
-    return { columns: this.columns, rows: this.allRows };
-  }
+  sortBy = '';
+  sortAsc = true;
+  pageIndex = 1;
 
-  /* ===================== Actions ===================== */
-  handleGoForMapping() {
-    if (this.disableGoForMapping) return;
+  @track showPreview = false;
+  @track showEditor = false;
+  currentRowIndex = -1;
+  @track previewCells = [];
+  @track editBuffer = [];
 
-    // keep your event (if a parent listens to it)
-    this.dispatchEvent(
-      new CustomEvent("gotomapping", {
-        detail: {
-          columns: this.columns,
-          fileName: this.fileName,
-          fileSize: this.fileSize
-        },
-        bubbles: true,
-        composed: true
-      })
-    );
+  _lastObjectUrl;
 
-    // also reveal the FieldMappingTable here
-    this.showFieldMappingTable = true;
-  }
+  // ===== Derived =====
+  get hasHeaders() { return Array.isArray(this.columns) && this.columns.length > 0; }
+  get disableGoForMapping() { return !this.hasHeaders; }
+  get displayColumns() { return this._displayColumns; }
+  get recordWord() { return this.totalEntries === 1 ? 'record' : 'records'; }
+  get badgeText() { return `${this.totalEntries} ${this.recordWord}`; }
 
-  // ONLY update this handler
-  handleShowFieldMapper() {
-    if (!this.hasHeaders) return;
+  // ===== Filtered Rows =====
+  get filteredRows() {
+    let rows = this.allRows;
 
-    this.showFieldMapper = true;
-    this.dispatchEvent(
-      new CustomEvent("gotomapping", {
-        detail: {
-          columns: this.columns,
-          fileName: this.fileName,
-          fileSize: this.fileSize,
-          projectId: this.currentProject?.Id || null
-        },
-        bubbles: true,
-        composed: true
-      })
-    );
+    const q = (this.searchTerm || '').toLowerCase();
+    if (q) {
+      rows = rows.filter((r) =>
+        r.values.some((c) => (c.value || '').toString().toLowerCase().includes(q))
+      );
+    }
+
+    const { column, operator, value } = this.filter;
+    if (column && value !== '') {
+      const colIdx = this.columns.indexOf(column);
+      const needle = value.toString().toLowerCase();
+      rows = rows.filter((r) => {
+        const v = (r.values[colIdx]?.value ?? '').toString().toLowerCase();
+        if (operator === 'equals') return v === needle;
+        if (operator === 'starts') return v.startsWith(needle);
+        return v.includes(needle);
+      });
+    }
+
+    if (this.sortBy) {
+      const i = this.columns.indexOf(this.sortBy);
+      const asc = this.sortAsc;
+      rows = [...rows].sort((a, b) => {
+        const av = (a.values[i]?.value ?? '').toString().toLowerCase();
+        const bv = (b.values[i]?.value ?? '').toString().toLowerCase();
+        if (av === bv) return 0;
+        return asc ? (av > bv ? 1 : -1) : (av < bv ? 1 : -1);
+      });
+    }
+
+    return rows;
   }
 
-  get headersCsv() {
-    return this.columns.join(",");
+  // ===== Pagination =====
+  get totalPages() { return Math.max(1, Math.ceil(this.filteredRows.length / this.pageSize)); }
+  get isFirstPage() { return this.pageIndex === 1; }
+  get isLastPage() { return this.pageIndex >= this.totalPages; }
+  get pagedRows() {
+    const start = (this.pageIndex - 1) * this.pageSize;
+    return this.filteredRows.slice(start, start + this.pageSize);
+  }
+  get showingFrom() { return this.filteredRows.length ? (this.pageIndex - 1) * this.pageSize + 1 : 0; }
+  get showingTo() { return Math.min(this.pageIndex * this.pageSize, this.filteredRows.length); }
+  get totalEntries() { return this.filteredRows.length; }
+
+  get pageNumbers() {
+    const total = this.totalPages;
+    const current = this.pageIndex;
+    const out = [];
+    const pushPage = (n) =>
+      out.push({ key: `p-${n}`, label: String(n), page: n, isActive: n === current, isEllipsis: false });
+    const pushEllipsis = (pos) => out.push({ key: `e-${pos}-${out.length}`, label: '…', isEllipsis: true });
+
+    if (total <= 7) { for (let i = 1; i <= total; i++) pushPage(i); return out; }
+    pushPage(1);
+    if (current > 3) pushPage(2);
+    const start = Math.max(3, current - 1);
+    const end = Math.min(total - 2, current + 1);
+    if (start > 3) pushEllipsis('left');
+    for (let i = start; i <= end; i++) pushPage(i);
+    if (end < total - 2) pushEllipsis('right');
+    if (current < total - 2) pushPage(total - 1);
+    pushPage(total);
+    return out;
   }
 
-  handleFileUpload(event) {
-    const file = event.target.files && event.target.files[0];
-    if (!file) return;
+  // ===== Dropzone & File read =====
+  handleBrowseClick() { this.template.querySelector('input[data-id="file"]')?.click(); }
+  handleDragOver(ev) { ev.preventDefault(); this.template.querySelector('.dropzone')?.classList.add('dropzone--hover'); }
+  handleDragLeave() { this.template.querySelector('.dropzone')?.classList.remove('dropzone--hover'); }
+  handleDrop(ev) { ev.preventDefault(); this.template.querySelector('.dropzone')?.classList.remove('dropzone--hover'); const f = ev.dataTransfer?.files?.[0]; if (f) this.readFile(f); }
+  handleFileUpload(e) { const f = e.target.files?.[0]; if (f) this.readFile(f); }
 
-    // Reset view for a new file
-    this.resetState();
-    this.showFieldMapper = false; // close old mapper if it was open
-    this.showFieldMappingTable = false; // hide mapping table until user clicks again
+  readFile(file) {
+  this.resetState();
+  this.fileName = file.name;
+  this.fileSize = file.size;
 
-    this.fileName = file.name;
-    this.fileSize = file.size;
+  this.isLoading = true;
+  const reader = new FileReader();
 
-    const reader = new FileReader();
-    this.isLoading = true;
-    reader.onload = () => {
-      const text = reader.result || "";
-      try {
-        const { columns, rows } = this.parseCSV(text);
-        this.columns = columns;
-        this.allRows = rows;
-        this.totalRows = rows.length;
+  reader.onload = () => {
+    const text = reader.result || '';
+    try {
+      const parsed = this.parseCSV(text);
+      const columns = parsed.columns || [];
+      const allRows = Array.isArray(parsed.allRows) ? parsed.allRows : [];
+      const previewRows = Array.isArray(parsed.rows) ? parsed.rows : allRows;
+      const totalRowCount =
+        typeof parsed.totalRowCount === 'number'
+          ? parsed.totalRowCount
+          : allRows.length;
 
-        // notify parent(s)
-        this.dispatchEvent(
-          new CustomEvent("csvloaded", {
-            detail: {
-              columns: this.columns,
-              rows: this.allRows,
-              fileName: this.fileName,
-              fileSize: this.fileSize
-            }
-          })
-        );
-        this.dispatchEvent(
-          new CustomEvent("headersready", { detail: { columns: this.columns } })
-        );
+      // Keep the FULL dataset here
+      this.columns = columns;
+      this.allRows = allRows;
+      this.totalRows = totalRowCount;
+      this.pageIndex = 1;
+      this.isPreview = totalRowCount > this.previewLimit;
+      this.dispatchEvent(
+        new CustomEvent('csvloaded', {
+          detail: {
+            columns,
+            rows: this.toObjectRows(
+              previewRows,
+              columns,
+              this.previewLimit
+            ),
+            totalRowCount,
+            fileName: this.fileName,
+            fileSize: this.fileSize
+          },
+          bubbles: true,
+          composed: true
+        })
+      );
 
-        // preview
-        if (this.totalRows > this.previewLimit) {
-          this.isPreview = true;
-          this.data = rows.slice(0, this.previewLimit);
-        } else {
-          this.isPreview = false;
-          this.data = rows;
-        }
-      } catch (e) {
-        this.parseError = e?.message || "Failed to parse CSV.";
-        this.columns = [];
-        this.data = [];
-        this.allRows = [];
-        this.totalRows = 0;
-      } finally {
-        this.isLoading = false;
-      }
+      this.rebuildDisplayColumns();
+    } catch (e) {
+      this.parseError =
+        (e && e.message) || 'Failed to parse CSV.';
+      this.columns = [];
+      this.allRows = [];
+      this.totalRows = 0;
+    } finally {
+      this.isLoading = false;
+    }
+  };
+
+  reader.readAsText(file);
+}
+
+
+parseCSV(csvText) {
+  const normalize = (csvText || '')
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n');
+  const lines = normalize.split('\n');
+
+  if (!lines.length || (lines.length === 1 && lines[0].trim() === '')) {
+    return {
+      columns: [],
+      rows: [],
+      allRows: [],
+      totalRowCount: 0
     };
-    reader.readAsText(file);
   }
 
-  handleLoadNext() {
-    const nextCount = Math.min(
-      this.data.length + INCREMENT_LOAD_COUNT,
-      this.totalRows
-    );
-    this.data = this.allRows.slice(0, nextCount);
-    this.isPreview = nextCount < this.totalRows;
+  const headerLine = lines[0] || '';
+
+  // ===== Detect delimiter =====
+  let delimiter = ',';
+  const commaCount = (headerLine.match(/,/g) || []).length;
+  const semiCount = (headerLine.match(/;/g) || []).length;
+  if (semiCount > commaCount) {
+    delimiter = ';';
   }
 
-  handleLoadAll() {
-    this.data = this.allRows;
-    this.isPreview = false;
-  }
+  const parseLine = (line) => {
+    const out = [];
+    let cur = '';
+    let inQuotes = false;
 
-  handleResetView() {
-    const limit = Math.min(this.previewLimit, this.totalRows);
-    this.data = this.allRows.slice(0, limit);
-    this.isPreview = limit < this.totalRows;
-  }
+    for (let i = 0; i < line.length; i += 1) {
+      const ch = line[i];
 
-  resetState() {
-    this.data = [];
-    this.columns = [];
-    this.allRows = [];
-    this.totalRows = 0;
-    this.isPreview = false;
-    this.isLoading = false;
-    this.parseError = "";
-    this.previewLimit = DEFAULT_PREVIEW_LIMIT;
-  }
-
-  /* ===================== CSV parsing ===================== */
-  parseCSV(csvText) {
-    const lines = csvText
-      .replace(/\r\n/g, "\n")
-      .replace(/\r/g, "\n")
-      .split("\n");
-    if (!lines.length || (lines.length === 1 && lines[0].trim() === ""))
-      return { columns: [], rows: [] };
-
-    const parseLine = (line) => {
-      const out = [];
-      let cur = "";
-      let inQuotes = false;
-      for (let i = 0; i < line.length; i++) {
-        const ch = line[i];
-        if (ch === '"') {
-          if (inQuotes && i + 1 < line.length && line[i + 1] === '"') {
-            cur += '"';
-            i++;
-          } else {
-            inQuotes = !inQuotes;
-          }
-        } else if (ch === "," && !inQuotes) {
-          out.push(cur);
-          cur = "";
+      if (ch === '"') {
+        if (inQuotes && i + 1 < line.length && line[i + 1] === '"') {
+          cur += '"';
+          i += 1;
         } else {
-          cur += ch;
+          inQuotes = !inQuotes;
         }
-      }
-      out.push(cur);
-      return out;
-    };
-
-    // header (supports multi-line quoted header)
-    let header = null;
-    let headerIdx = 0;
-    for (; headerIdx < lines.length; headerIdx++) {
-      const attempt = (header ? header + "\n" : "") + lines[headerIdx];
-      const quoteCount = (attempt.match(/"/g) || []).length;
-      if (quoteCount % 2 === 0) {
-        header = attempt;
-        headerIdx++;
-        break;
+      } else if (ch === delimiter && !inQuotes) {
+        out.push(cur);
+        cur = '';
       } else {
-        header = attempt;
+        cur += ch;
       }
     }
-    if (header === null) {
-      header = lines[0] || "";
-      headerIdx = 1;
-    }
 
-    const columns = parseLine(header).map((c) => (c || "").trim());
-    const seen = new Map();
-    for (let i = 0; i < columns.length; i++) {
-      let name = columns[i] || `Column_${i + 1}`;
-      const base = name;
-      let k = 1;
-      while (seen.has(name)) {
-        name = `${base}_${++k}`;
-      }
-      seen.set(name, true);
-      columns[i] = name;
-    }
+    out.push(cur);
+    return out;
+  };
 
-    const rows = [];
-    let buffer = "";
-    for (let i = headerIdx; i < lines.length; i++) {
-      const candidate = buffer ? buffer + "\n" + lines[i] : lines[i];
-      const quoteCount = (candidate.match(/"/g) || []).length;
-      if (quoteCount % 2 === 0) {
-        const values = parseLine(candidate);
-        rows.push(this.buildRow(values, columns, rows.length));
-        buffer = "";
-      } else buffer = candidate;
+  // ===== Build columns =====
+  const rawHeader = parseLine(headerLine);
+  const columns = rawHeader.map((c, index) => {
+    const trimmed = (c || '').trim();
+    if (trimmed) {
+      return trimmed;
     }
-    if (buffer) {
-      const values = parseLine(buffer);
-      rows.push(this.buildRow(values, columns, rows.length));
-    }
+    return `Column_${index + 1}`;
+  });
 
-    return { columns, rows };
-  }
+  // ===== Build ALL rows =====
+  const allRows = lines
+    .slice(1)
+    .filter((line) => line !== '')
+    .map((line, rowIdx) => {
+      const parsed = parseLine(line);
+      return this.buildRow(parsed, columns, rowIdx);
+    });
+
+  const totalRowCount = allRows.length;
+  const limit =
+    this.previewLimit || DEFAULT_PREVIEW_LIMIT;
+  const previewRows = allRows.slice(0, limit);
+
+  return {
+    columns,
+    rows: previewRows, 
+    allRows,               
+    totalRowCount
+  };
+}
+
+
 
   buildRow(values, columns, index) {
     return {
       id: index,
-      values: columns.map((col, i) => ({
-        key: `${col}_${index}`,
-        value: (values[i] ?? "").trim()
-      }))
+      values: columns.map((col, i) => {
+        const val = (values[i] ?? '').trim();
+        const colLower = (col || '').toLowerCase();
+        const isIndustry = colLower === 'industry';
+        const isStatus = colLower === 'status';
+        return {
+          key: `${col}_${index}`,
+          value: val,
+          isIndustry,
+          isStatus,
+          statusClass: isStatus ? this.computeStatusClass(val) : ''
+        };
+      })
     };
   }
+  computeStatusClass(v) {
+    const s = (v || '').toLowerCase();
+    if (s === 'active') return 'pill pill--green';
+    if (s === 'pending') return 'pill pill--yellow';
+    return 'pill pill--red';
+  }
+
+  // ===== Helpers to build plain object rows =====
+  toObjectRows(rows, columns, limit) {
+    const max = Math.max(0, Number(limit) || rows.length);
+    const out = [];
+    const len = Math.min(rows.length, max);
+    for (let i = 0; i < len; i += 1) {
+      const r = rows[i];
+      const obj = {};
+      for (let c = 0; c < columns.length; c += 1) {
+        obj[columns[c]] = (r.values[c]?.value ?? '').toString();
+      }
+      out.push(obj);
+    }
+    return out;
+  }
+
+  // ===== Mapping  =====
+handleGoForMapping() {
+  if (!Array.isArray(this.columns) || !this.columns.length) {
+    return;
+  }
+
+  const totalRowCount = Array.isArray(this.allRows)
+    ? this.allRows.length
+    : 0;
+
+  const plainRows = this.toObjectRows(
+    this.allRows,
+    this.columns,
+    totalRowCount || this.previewLimit
+  );
+
+  try {
+    window.sessionStorage.setItem(SS_COLS_KEY, this.columns.join(','));
+    window.sessionStorage.setItem(SS_ROWS_KEY, JSON.stringify(plainRows));
+  } catch (e) {
+    console.debug('[CsvUploader] sessionStorage unavailable', e);
+  }
+  this.dispatchEvent(
+    new CustomEvent('gotomapping', {
+      detail: {
+        columns: this.columns,
+        rows: plainRows,
+        totalRowCount,      
+        fileName: this.fileName,
+        fileSize: this.fileSize
+      },
+      bubbles: true,
+      composed: true
+    })
+  );
+}
+
+
+
+  // ===== Sorting & UI bits =====
+  rebuildDisplayColumns() {
+    this._displayColumns = this.columns.map((name) => ({
+      name,
+      isSorted: name === this.sortBy,
+      sortAsc: this.sortBy === name ? this.sortAsc : true
+    }));
+  }
+  handleHeaderClick(e) {
+    const col = e.currentTarget?.dataset?.field;
+    if (!col) return;
+    if (this.sortBy === col) this.sortAsc = !this.sortAsc;
+    else { this.sortBy = col; this.sortAsc = true; }
+    this.rebuildDisplayColumns();
+    this.pageIndex = 1;
+  }
+
+  // search / filters
+  handleSearchChange(e) { this.searchTerm = e.target.value || ''; this.pageIndex = 1; }
+  openSettings() { this.showSettings = true; }
+  closeSettings() { this.showSettings = false; }
+  applySettings() {
+    const pageSizeEl = this.template.querySelector('[data-id="page-size"]');
+    const previewEl = this.template.querySelector('[data-id="preview-limit"]');
+    if (pageSizeEl) { const v = Number(pageSizeEl.value); if (!Number.isNaN(v) && v > 0) this.pageSize = v; }
+    if (previewEl) { const v = Number(previewEl.value); if (!Number.isNaN(v) && v > 0) this.previewLimit = v; }
+    this.pageIndex = 1; this.showSettings = false;
+  }
+  openFilters() { this.showFilters = true; }
+  closeFilters() { this.showFilters = false; }
+  applyFilters() {
+    const colEl = this.template.querySelector('[data-id="filter-col"]');
+    const opEl  = this.template.querySelector('[data-id="filter-op"]');
+    const valEl = this.template.querySelector('[data-id="filter-val"]');
+    this.filter = { column: colEl?.value || '', operator: opEl?.value || 'contains', value: valEl?.value || '' };
+    this.pageIndex = 1; this.showFilters = false;
+  }
+  clearFilters() { this.filter = { column: '', operator: 'contains', value: '' }; this.pageIndex = 1; this.showFilters = false; }
+
+  gotoPrev() { if (!this.isFirstPage) this.pageIndex -= 1; }
+  gotoNext() { if (!this.isLastPage) this.pageIndex += 1; }
+  gotoPage(e) {
+    const n = e.currentTarget?.dataset?.page;
+    if (!n) return;
+    const num = Number(n);
+    if (!Number.isNaN(num)) this.pageIndex = Math.min(Math.max(num, 1), this.totalPages);
+  }
+
+  // preview / edit
+  handleRowView(e) {
+    const rowId = Number(e.currentTarget?.dataset?.rowid);
+    const idx = this.allRows.findIndex((r) => r.id === rowId);
+    if (idx < 0) return;
+    this.currentRowIndex = idx;
+    this.previewCells = this.columns.map((label, i) => ({ label, value: this.allRows[idx].values[i]?.value || '' }));
+    this.showPreview = true;
+  }
+  closePreview() { this.showPreview = false; }
+  handleRowEdit(e) {
+    const rowId = Number(e.currentTarget?.dataset?.rowid);
+    const idx = this.allRows.findIndex((r) => r.id === rowId);
+    if (idx < 0) return;
+    this.currentRowIndex = idx;
+    this.editBuffer = this.columns.map((label, i) => ({ label, value: this.allRows[idx].values[i]?.value || '', idx: i }));
+    this.showEditor = true;
+  }
+  editInputChanged(e) {
+    const pos = Number(e.currentTarget?.dataset?.pos);
+    if (Number.isNaN(pos)) return;
+    const newValue = e.target.value;
+    this.editBuffer = this.editBuffer.map((c, i) => (i === pos ? { ...c, value: newValue } : c));
+  }
+  saveEdit() {
+    if (this.currentRowIndex < 0) return;
+    const row = this.allRows[this.currentRowIndex];
+    const updatedValues = row.values.map((c, i) => ({ ...c, value: this.editBuffer[i]?.value ?? c.value }));
+    this.allRows = [...this.allRows.slice(0, this.currentRowIndex), { ...row, values: updatedValues }, ...this.allRows.slice(this.currentRowIndex + 1)];
+    this.showEditor = false;
+  }
+  cancelEdit() { this.showEditor = false; }
+
+  // cleanup
+  disconnectedCallback() {
+    if (this._lastObjectUrl) { URL.revokeObjectURL(this._lastObjectUrl); this._lastObjectUrl = null; }
+  }
+  resetState() {
+    this.columns = []; this._displayColumns = []; this.allRows = []; this.totalRows = 0;
+    this.isPreview = false; this.isLoading = false; this.parseError = '';
+    this.searchTerm = ''; this.filter = { column: '', operator: 'contains', value: '' };
+    this.pageSize = DEFAULT_PAGE_SIZE; this.pageIndex = 1; this.sortBy = ''; this.sortAsc = true;
+    this.showPreview = false; this.showEditor = false; this.currentRowIndex = -1; this.previewCells = []; this.editBuffer = [];
+  }
+ handleBackClick() {
+    this.dispatchEvent(
+      new CustomEvent('previous', { bubbles: true, composed: true })
+    );
+  }
+
+  
 }

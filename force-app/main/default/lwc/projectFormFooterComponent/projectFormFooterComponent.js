@@ -1,4 +1,4 @@
-import { LightningElement, api } from "lwc";
+import { LightningElement } from "lwc";
 
 export default class ProjectFormFooterComponent extends LightningElement {
   //sauvegarde d'un nouveau projet

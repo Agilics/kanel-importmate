@@ -1,3 +1,10 @@
+/**
+ * @description       : 
+ * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @group             : 
+ * @last modified on  : 11-28-2025
+ * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+**/
 public with sharing class TransformationRepository {
 
     //save rules
@@ -39,7 +46,7 @@ public with sharing class TransformationRepository {
         if (SecurityUtils.isAccessible(Schema.TransformationRule__c.SObjectType)) {
             try {
                 return [SELECT Id, RuleType__c, Parameters__c, FieldMapping__r.TargetField__c,
-                        SourceFields__c, TargetValue__c, Order__c
+                        SourceFields__c, TargetValue__c, Order__c, FieldMapping__r.SourceColumn__c
                         FROM TransformationRule__c 
                         WHERE FieldMapping__c = :mappingId 
                         /* WITH SECURITY_ENFORCED  */
@@ -53,6 +60,7 @@ public with sharing class TransformationRepository {
         return new List<TransformationRule__c>();
     }
 
+ 
     //récupère rules by project id grouped by mapping id
     public static Map<String, List<TransformationRule__c>> getRulesByProjectIdGroupedByMapping(String projectId) {
         Map<String, List<TransformationRule__c>> rulesByMappingId = new Map<String, List<TransformationRule__c>>();
@@ -60,7 +68,7 @@ public with sharing class TransformationRepository {
         if (SecurityUtils.isAccessible(Schema.TransformationRule__c.SObjectType)) {
             try {
                 List<TransformationRule__c> rules = [SELECT Id, RuleType__c, Parameters__c,
-                FieldMapping__c, FieldMapping__r.TargetField__c, 
+                FieldMapping__c, FieldMapping__r.TargetField__c, FieldMapping__r.SourceColumn__c,
                 SourceFields__c, TargetValue__c, Order__c
                         FROM TransformationRule__c 
                         WHERE Project__c = :projectId 
@@ -83,6 +91,27 @@ public with sharing class TransformationRepository {
         return rulesByMappingId;
     }
 
+    //get rule by id with relationships
+    public static TransformationRule__c getRuleById(String ruleId) {
+        if (SecurityUtils.isAccessible(Schema.TransformationRule__c.SObjectType)) {
+            try {
+                List<TransformationRule__c> rules = [
+                    SELECT Id, RuleType__c, Parameters__c, FieldMapping__c,
+                           FieldMapping__r.TargetField__c, FieldMapping__r.SourceColumn__c,
+                           SourceFields__c, TargetValue__c, Order__c
+                    FROM TransformationRule__c 
+                    WHERE Id = :ruleId 
+                    LIMIT 1
+                ];
+                return rules.isEmpty() ? null : rules[0];
+            } catch (QueryException e) {
+                ErrorLogService.logException(e);
+                throw new TransformationException('Erreur lors de la récupération de la règle : ' + e.getMessage());
+            }
+        }
+        return null;
+    }
+
     //delete rule
     public static void deleteRule(String ruleId) {
         if (SecurityUtils.isDeletable(Schema.TransformationRule__c.SObjectType)) {
@@ -95,4 +124,5 @@ public with sharing class TransformationRepository {
         }
     }
 
+    
 }

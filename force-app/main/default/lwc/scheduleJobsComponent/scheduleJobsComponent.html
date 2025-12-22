@@ -1,0 +1,152 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 11-07-2025
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<template>
+  <div class="main px-2">
+    <div class="card">
+      <div class="head p-1">
+        <div class="card-header  ">
+          <!-- date icon -->
+          <lightning-icon
+            icon-name="utility:picklist_type"
+            alternative-text="picklist_type"
+            class="custom-icon-groups icon-piclist_size"
+            title="date_input"
+          ></lightning-icon>
+          <!-- date icon -->
+          <h2 class="card-title">Schedule Jobs</h2>
+         </div>
+          <div class="btn-header pr-1" >
+          <!-- search field -->
+            <div class="search-field">
+               <lightning-input
+                type="search"
+                placeholder="Search schedules..."
+                onchange={handleSearch}
+              ></lightning-input>
+            </div>
+          <!-- search field -->
+
+          <!-- status filter -->
+            <!-- ComboBox for Select Status -->
+            <lightning-combobox
+              class="status-combobox rounded-input"
+              name="status" 
+              id="status"
+              value={selectedStatus}
+              options={picklistStatus}
+              placeholder="All Status"
+              onchange={handleStatusChange}
+            ></lightning-combobox>
+          <!-- status filter -->
+        </div>
+      </div>
+      <div class="card-content">
+        <table role="grid" aria-label="Schedule Project Table">
+          <thead>
+            <tr>
+              <template for:each={columns} for:item="item">
+                <th scope="col" key={item.label}>{item.label}</th>
+              </template>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- schedules list-->
+            <tr>
+              <template for:each={schedules} for:item="schedule">
+                <td key={schedule.Id}>
+                  <div class="project-cell">
+                    <div
+                      class="project-icon icon-contact-import"
+                      aria-hidden="true"
+                      title="Contact Import"
+                    >
+                      <!-- People Icon -->
+                    </div>
+                    <div class="project-info">
+                      <div class="project-name">{schedule.projectName}</div>
+                      <div class="project-sub" aria-label="target object">
+                        Target: {schedule.target}
+                      </div>
+                    </div>
+                  </div>
+                </td>
+                <td class="frequency" key={schedule.Id}>
+                  {schedule.frequency}
+                </td>
+                <td class="next-run" key={schedule.Id}>{schedule.nextRun}</td>
+                <td class="last-execution" key={schedule.Id}>
+                  <span>{schedule.lastExecution}</span><br />
+                  <!-- total records on success -->
+                  <template if:false={hasFailRecord}>
+                    <span class="success-text">
+                      Success &bull; {schedule.totalRecord} records
+                    </span>
+                  </template>
+                  <!-- total records on success end -->
+
+                  <!-- failed records -->
+                  <template if:true={schedule.hasFailRecord}>
+                    <span class="failed-text">
+                      Failed &bull; {schedule.failRecord} errors
+                    </span>
+                  </template>
+                  <!-- failed records end -->
+                </td>
+                <td key={schedule.Id}>
+                  <!-- job status badge -->
+                  <span
+                    class={schedule.badgeStatusClass}
+                    aria-label="Schedule status"
+                    >Active</span
+                  >
+                  <!-- job status badge end -->
+                </td>
+                <td
+                  key={schedule.Id}
+                  class="actions"
+                  role="gridcell"
+                  aria-label="Actions for Contact Import"
+                >
+                  <!-- Edit Icon -->
+                  <button aria-label="Edit Contact Import">
+                    <lightning-icon
+                      icon-name="utility:edit"
+                      alternative-text="edit"
+                      class="slds-icon_action"
+                      title="edit"
+                    ></lightning-icon>
+                  </button>
+                  <!-- Pause / Play Icon -->
+                  <button title="Pause" aria-label="Pause Contact Import">
+                    <lightning-icon
+                      icon-name={schedule.iconAction}
+                      alternative-text="play | pause"
+                      class="slds-icon_action"
+                    ></lightning-icon>
+                  </button>
+                  <!-- Pause / Play Icon end -->
+
+                  <!-- Delete Icon -->
+                  <button title="Delete" aria-label="Delete Contact Import">
+                    <lightning-icon
+                      icon-name="utility:delete"
+                      alternative-text="delete"
+                      class="slds-icon_action"
+                      title="edit"
+                    ></lightning-icon>
+                  </button>
+                  <!-- Delete Icon end -->
+                </td>
+              </template>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</template>

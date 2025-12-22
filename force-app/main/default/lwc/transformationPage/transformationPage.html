@@ -1,0 +1,70 @@
+<!--
+   @description       : 
+   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+   @group             : 
+   @last modified on  : 11-27-2025
+   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+   -->
+<template>
+   <div class="main">
+      <div class="header">
+         <div class="text-header">
+            <h1 class="header-title">Data Transformations</h1>
+            <p class="subtitle">Set up your data import project</p>
+         </div>
+         <!-- Button  -->
+      </div>
+      <!-- Mapper List  for selected project--> 
+      <c-transformation-mapper-list 
+            project-id={projectId}
+            onaddtransformation={handleAddTransformation}>
+      </c-transformation-mapper-list>
+
+      <template if:true={isTransformation}>
+         <!-- Tabs transformation select -->
+         <div style="margin-top:4rem;">
+            <c-transformation-field-tabs
+               active-tab={activeTransformationTab}
+               onmovetransformation={handleTransformationChange}
+               >
+            </c-transformation-field-tabs>
+         </div>
+         <!-- End tabs transformation select -->
+         <!-- Liste des transformations -->  
+         <template for:each={filteredTransformations} for:item="t">
+            <c-transformation-card-component
+               key={t.id}
+               rule-id={t.id}
+               card-head-title={t.displayTitle}
+               card-head-subtitle={t.displaySubtitle}
+               icon-name={t.iconName} 
+               icon-box-class={t.iconBoxClass}
+               head-icon-class={t.headIconClass}
+               onruledelete = {handleTransformationDelete}
+               >
+            </c-transformation-card-component>
+         </template>
+      </template>
+      <template if:false={isTransformation} style="margin:1.33rem; ">
+         No transformation added yet.
+      </template>
+      <footer class="footer-container">
+         <div class="footer-separator"></div>
+         <div class="footer-actions">
+            <button class="btn btn-secondary" onclick={handleBackToMapping}>
+               <lightning-icon icon-name="utility:back" size="x-small"></lightning-icon>
+               <span>Back to Mapping</span>
+            </button>
+            <div class="btns">
+               <button class="btn btn-secondary" onclick={handleBackToMapping}>
+               Save as Template
+               </button>
+               <button class="btn-continue btn-primary"  >
+                  Continue to Validation
+                  <lightning-icon class="icon-inline custom-icon-output" icon-name="standard:output" size="small"></lightning-icon>
+               </button>
+            </div>
+         </div>
+      </footer>
+   </div>
+</template>
