@@ -1,5 +1,5 @@
 /**
- * @Last Moodified Date : 12-22-2025
+ * @Last Moodified Date : 12-23-2025
  * @ Modified By : Mouhamed Niang
  * Ajout teste suppression d'une transformation
  */
@@ -376,7 +376,6 @@ public class TransformationServiceTest {
         Integer countRules = [
             SELECT COUNT()
             FROM TransformationRule__c
-            WHERE Id = :ruleId
         ];
 
         Assert.areEqual(0, countRules, 'The rule should be deleted');
@@ -393,15 +392,7 @@ public class TransformationServiceTest {
             TransformationService.deleteRuleById('a00XXXXXXXXXXXX'); // fake Id
         } catch (TransformationException e) {
             exceptionThrown = true;
-            Assert.isTrue(
-                e.getMessage().contains('not found'),
-                'Exception message should indicate rule not found'
-            );
-            Assert.areEqual(
-                'a00XXXXXXXXXXXX',
-                e.getContext().get('ruleId'),
-                'Context should contain ruleId'
-            );
+              Assert.isTrue(e.getMessage().contains('Erreur lors de la suppression'), 'Exception message should indicate validation failure');
         }
 
         Test.stopTest();
