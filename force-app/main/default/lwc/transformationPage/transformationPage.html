@@ -2,7 +2,7 @@
    @description       : 
    @author            : ChangeMeIn@UserSettingsUnder.SFDoc
    @group             : 
-   @last modified on  : 11-27-2025
+   @last modified on  : 12-23-2025
    @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
    -->
 <template>
@@ -34,11 +34,13 @@
          <template for:each={filteredTransformations} for:item="t">
             <c-transformation-card-component
                key={t.id}
+               rule-id={t.id}
                card-head-title={t.displayTitle}
                card-head-subtitle={t.displaySubtitle}
-               icon-name={t.iconName}
+               icon-name={t.iconName} 
                icon-box-class={t.iconBoxClass}
                head-icon-class={t.headIconClass}
+               onruledelete = {handleTransformationDelete}
                >
             </c-transformation-card-component>
          </template>

@@ -12,6 +12,8 @@ export default class TransformationCardComponent extends LightningElement {
   @api cardHeadSubtitle;
   @api mappings ;//propriété de mappings dispatcher vers le parent
   @api isWarningBadge = false; 
+  @api ruleId;
+
 
   //Getter style du badge 
   get badgeClass(){
@@ -26,13 +28,21 @@ export default class TransformationCardComponent extends LightningElement {
 
  
   // modification d'une transformation  dispatcher vers Transformation Page
-  handleEditTransformation() {
+  handleEditTransformation(event) {
+    event.stopPropagation(); // Prevent card click
    this.dispatchEvent(new CustomEvent("edittransformation"));
   }
 
-  // suppression d'une transformation  dispatcher vers Transformation Page
-  handleDeleteTransformation() {
-   this.dispatchEvent(new CustomEvent("removetransformation"));
+ // Suppression d'une transformation - dispatcher vers Transformation Page
+  async handleDeleteTransformation(event) {  
+    event.stopPropagation(); // Prevent card click  
+    
+    const deleteEvent = new CustomEvent("ruledelete", {
+      detail: this.ruleId,
+      bubbles: true,
+      composed: true
+    });
+    this.dispatchEvent(deleteEvent);
   }
 
     //Getter pour la classe conditionnelle de la carte

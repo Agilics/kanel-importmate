@@ -1,0 +1,294 @@
+body {
+  font-family: "Inter", sans-serif;
+}
+
+.card {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 512px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  padding: 1.5rem;
+  margin: 1.5rem auto;
+  box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.05);
+  border-radius: 12px;
+  position: relative;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  margin-bottom: 1rem;
+  gap: 1rem;
+}
+
+.box-icon {
+  width: 64px;
+  height: 64px;
+  min-width: 64px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.box-icon-upload {
+  background: #dbeafe;
+}
+
+.box-icon-query {
+  background: #ffedd5;
+}
+
+.custom-icon-upload {
+  --slds-c-icon-color-foreground-default: #1e40af;
+  --slds-c-icon-color-background: #dbeafe;
+}
+
+.custom-icon-database {
+  --slds-c-icon-color-foreground-default: #ea580c;
+  --slds-c-icon-color-background: #ffedd5;
+}
+
+.text-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.title {
+  font-weight: 700;
+  font-size: clamp(18px, 4vw, 20px);
+  line-height: 1.4;
+  color: #111827;
+  margin: 0 0 0.25rem 0;
+  word-wrap: break-word;
+}
+
+.subtitle {
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: clamp(14px, 3vw, 16px);
+  line-height: 1.5;
+  color: #4b5563;
+  margin: 0;
+  word-wrap: break-word;
+}
+
+.content {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 1.5rem;
+  color: #374151;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.support {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+  width: 100%;
+}
+
+.custom-icon-check {
+  --slds-c-icon-color-foreground-default: #16a34a;
+  --slds-c-icon-color-background: #ffffff;
+  flex-shrink: 0;
+  margin-right: 0.75rem;
+  margin-top: 0.125rem;
+}
+
+.item {
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-size: clamp(14px, 3vw, 16px);
+  line-height: 1.5;
+  color: #374151;
+  margin: 0;
+  flex: 1;
+  word-wrap: break-word;
+}
+
+.btn {
+  width: 100%;
+  height: 48px;
+  border-radius: 8px;
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  color: #ffffff;
+  line-height: 100%;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 1rem;
+  border: none;
+}
+
+.btn-upload {
+  background: #1e40af;
+  border: 1px solid #1e40af;
+}
+
+.btn-upload:hover {
+  background: #1e3a8a;
+  border-color: #1e3a8a;
+}
+
+.btn-query {
+  background-color: #ea580c;
+  border: 1px solid #ea580c;
+}
+
+.btn-query:hover {
+  background-color: #c2410c;
+  border-color: #c2410c;
+}
+
+/* Responsive breakpoints */
+
+/* Tablettes et petits écrans (≤ 768px) */
+@media screen and (max-width: 768px) {
+  .card {
+    max-width: 100%;
+    padding: 1.25rem;
+    margin: 1rem auto;
+  }
+
+  .header {
+    gap: 0.75rem;
+  }
+
+  .box-icon {
+    width: 56px;
+    height: 56px;
+    min-width: 56px;
+  }
+
+  .title {
+    font-size: 18px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+  }
+
+  .item {
+    font-size: 14px;
+  }
+
+  .btn {
+    font-size: 15px;
+    height: 44px;
+  }
+}
+
+/* Mobiles (≤ 480px) */
+@media screen and (max-width: 480px) {
+  .card {
+    padding: 1rem;
+    margin: 0.75rem auto;
+    border-radius: 8px;
+  }
+
+  .header {
+    gap: 0.625rem;
+    flex-wrap: nowrap;
+  }
+
+  .box-icon {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    border-radius: 8px;
+  }
+
+  .title {
+    font-size: 16px;
+    line-height: 1.3;
+  }
+
+  .subtitle {
+    font-size: 13px;
+  }
+
+  .support {
+    margin-bottom: 0.625rem;
+  }
+
+  .custom-icon-check {
+    margin-right: 0.5rem;
+  }
+
+  .item {
+    font-size: 13px;
+  }
+
+  .btn {
+    font-size: 14px;
+    height: 42px;
+  }
+}
+
+/* Petits mobiles (≤ 375px) */
+@media screen and (max-width: 375px) {
+  .card {
+    padding: 0.875rem;
+  }
+
+  .box-icon {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+  }
+
+  .title {
+    font-size: 15px;
+  }
+
+  .subtitle {
+    font-size: 12px;
+  }
+
+  .item {
+    font-size: 12px;
+  }
+
+  .btn {
+    font-size: 13px;
+    height: 40px;
+  }
+}
+
+/* Très petits mobiles (≤ 320px) */
+@media screen and (max-width: 320px) {
+  .card {
+    padding: 0.75rem;
+  }
+
+  .box-icon {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+  }
+
+  .title {
+    font-size: 14px;
+  }
+
+  .subtitle {
+    font-size: 11px;
+  }
+
+  .item {
+    font-size: 11px;
+  }
+
+  .btn {
+    font-size: 12px;
+    height: 38px;
+  }
+}

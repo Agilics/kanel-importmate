@@ -2,7 +2,7 @@
   @description       : 
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
   @group             : 
-  @last modified on  : 11-11-2025
+  @last modified on  : 12-23-2025
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
@@ -21,74 +21,79 @@
 
     <!-- Card container -->
     <section class="card" >
-      <!-- Project Information -->
+      <div class="project-info">
+          <!-- Project Information -->
       <div class="section-header">
         <lightning-icon icon-name="utility:info" alternative-text="Info"
-          class="icon-colors plus-icons"></lightning-icon>
+          class="icon-colors"></lightning-icon>
         <h2>Project Information</h2>
       </div>
-      <label class="custom-label name-label" for="project-name">
-        Project Name <span class="required">*</span>
-      </label>
-      <lightning-input id="project-name" class="rounded-input" style="width: 100%" type="text"
-        placeholder="Enter a descriptive project name (e.g., Q4 Contact Import)"
-        onchange={handleProjectNameChange}></lightning-input>
+      <div class="form-group">
+        <label class="custom-label name-label" for="project-name">
+          Project Name <span class="required">*</span>
+        </label>
+        <lightning-input id="project-name" class="rounded-input" style="width: 100%" type="text"
+          placeholder="Enter a descriptive project name (e.g., Q4 Contact Import)"
+          onchange={handleProjectNameChange}></lightning-input>
+      </div>
       <p class="help-text">
         Choose a clear, descriptive name for easy identification
       </p>
 
       <!--Description textarea -->
-      <label class="custom-label description-label" name="description">
+      <label class="custom-label mb-1 description-label" name="description">
         Description
       </label>
       <lightning-textarea class="input-field rounded-input" name="description" style="margin-top: -1.6rem; "
         placeholder="Describe the purpose and scope of this import project..."
         onchange={handleDescriptionChange}></lightning-textarea>
-      <p class="help-text" style="margin: 6em 0 0.75rem 0">
+      <p class="help-text">
         Provide details about data source, business purpose, and expected
         outcomes
       </p>
-
+    
+      </div>
+    
       <hr class="divider" />
 
       <!-- Target Object Configuration -->
-      <div class="section-header" style="margin-top: 1.5rem">
-        <lightning-icon icon-name="utility:campaign" alternative-text="Campaign"
-          class="icon-colors plus-icons"></lightning-icon>
-        <h2>Target Object Configuration</h2>
-      </div>
-
-      <div class="form-grid">
-        <div class="form-item">
-          <label class="custom-label target-label" for="project-name">
-            Target Salesforce Object <span class="required">*</span>
-          </label>
-          <lightning-combobox value={targetObject} options={options} class="rounded-input"
-            onchange={handleTargetObjectChange}></lightning-combobox>
-          <p class="help-text">
-            Select the Salesforce object where data will be imported
-          </p>
+       <div class="target-object-config">
+        <div class="section-header">
+          <lightning-icon icon-name="utility:campaign" alternative-text="Campaign"
+            class="icon-colors "></lightning-icon>
+          <h2>Target Object Configuration</h2>
         </div>
-        <!--Import Operation-->
-        <div class="form-item">
-          <!--
-          <lightning-combobox
-            label="Import Operation"
-            value={importOperation}
-            options={importOptions}
-            required
-            onchange={handleImportOperationChange}
-          ></lightning-combobox>
-          <p class="help-text">Choose how the data should be processed</p>
-        -->
+  
+        <div class="form-grid">
+          <div class="form-item">
+            <label class="custom-label target-label" for="project-name">
+              Target Salesforce Object <span class="required">*</span>
+            </label>
+            <lightning-combobox value={targetObject} options={options} class="rounded-input"
+              onchange={handleTargetObjectChange}></lightning-combobox>
+            <p class="help-text">
+              Select the Salesforce object where data will be imported
+            </p>
+          </div>
+          <!--Import Operation-->
+          <div class="form-item">
+            <!--
+            <lightning-combobox
+              label="Import Operation"
+              value={importOperation}
+              options={importOptions}
+              required
+              onchange={handleImportOperationChange}
+            ></lightning-combobox>
+            <p class="help-text">Choose how the data should be processed</p>
+          -->
+          </div>
         </div>
-      </div>
-
+       </div>
+        
       <!-- Footer -->
-      <div class="footer">
         <c-project-form-footer-component onsave={handleCreateProject}
           oncancel={handleCancel}></c-project-form-footer-component>
-      </div>
     </section>
   </div>
 </template>
