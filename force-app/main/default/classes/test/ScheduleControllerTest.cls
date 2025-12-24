@@ -131,22 +131,48 @@ public with sharing class ScheduleControllerTest {
 
 
     //tester la récupération de planification passée
-        @IsTest
+    @IsTest
     static void testGetPastSchedules() {
-        //given 
-         Schedule__c savedSchedule = TestDataFactory.createSchedule();
- 
-        Test.startTest();
-        List<Schedule__c> schedules = ScheduleController.getSchedulesByFrequency(ImportMateEnum.FrequencyEnum.DAILY);
-        Test.stopTest();
+        // GIVEN : données de test
+        ImportProject__c project = new ImportProject__c(
+            Name = 'Project new ',
+            TargetObject__c = 'Contact',
+            Description__c = 'Test past schedules'
+        );
+        insert project;
 
-        //when
+        // Planification passée
+        Schedule__c pastSchedule = new Schedule__c(
+            Project__c = project.Id,
+            Frequency__c = String.valueOf(ImportMateEnum.FrequencyEnum.DAILY),
+            NextRun__c = System.now().addDays(-2)
+        );
+        insert pastSchedule;
+    
+        // WHEN : appel métier 
         Test.startTest();
-           List<Schedule__c> pastSchedules = ScheduleService.getPastSchedules();
+            List<Schedule__c> pastSchedules = ScheduleService.getPastSchedules();
         Test.stopTest();
-        //then 
-        System.assertNotEquals(null, pastSchedules); 
+ 
+        // THEN : assertions 
+        System.assertNotEquals(
+            null,
+            pastSchedules,
+            'La liste des planifications passées ne doit pas être null'
+        );
+
+        System.assert(
+            pastSchedules.size() > 0,
+            'Au moins une planification passée est attendue'
+        );
+
+        System.assertEquals(
+            project.Id,
+            pastSchedules[0].Project__c,
+            'La planification retournée doit correspondre au projet créé'
+        );
     }
+
 
     //tester la récupération de planification par le nom du projet
     @IsTest
