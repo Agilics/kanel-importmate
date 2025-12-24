@@ -69,39 +69,38 @@ public with sharing class ScheduleControllerTest {
 
     //tester l'énumération de la fréquence
     @IsTest
-    public  static  void callTestDataFrequencyDaily() {
-        Datetime nextRun =  Datetime.now();
-        //Perform test
-        Test.startTest();
-        String excpetedFrequency = 'DAILY';
-        ImportMateEnum.FrequencyEnum actual =  ImportMateEnum.FrequencyEnum.DAILY;
-        ImportProject__c project = [SELECT Id FROM ImportProject__c];
-
-        Id scheduleId =ScheduleController.addSchedule(
-            String.valueOf(ImportMateEnum.FrequencyEnum.DAILY),
-            nextRun,
-            project.Id
+    static void testAddScheduleDaily() {
+        // GIVEN
+        ImportProject__c project = new ImportProject__c(
+            Name = 'Project Daily',
+            TargetObject__c = 'Account',
+            Description__c = 'Test add daily schedule'
         );
-        // Vérification en base
-        Schedule__c insertedSchedule = [
-            SELECT Id, Frequency__c, Project__c, NextRun__c
+        insert project;
+
+        Datetime nextRun = System.now().addDays(1); // FUTUR OBLIGATOIRE
+
+        // WHEN
+        Test.startTest();
+            Id scheduleId = ScheduleController.addSchedule(
+                String.valueOf(ImportMateEnum.FrequencyEnum.DAILY),
+                nextRun,
+                project.Id
+            );
+        Test.stopTest();
+
+        // THEN
+        System.assertNotEquals(null, scheduleId);
+
+        Schedule__c sched = [
+            SELECT Frequency__c, NextRun__c
             FROM Schedule__c
             WHERE Id = :scheduleId
-            LIMIT 1
         ];
-        insertedSchedule.Frequency__c = String.valueOf(ImportMateEnum.FrequencyEnum.MONTHLY);
 
-       Id resultId = ScheduleController.addSchedule(
-            insertedSchedule.Frequency__c,
-            insertedSchedule.NextRun__c,
-            insertedSchedule.Project__c
-        );
+        System.assertEquals('DAILY', sched.Frequency__c.toUpperCase());
+    }
 
- 
-        Test.stopTest();
-        //Assertions
-        System.assertEquals(excpetedFrequency, actual.Name());
-     }
 
 
        @IsTest
