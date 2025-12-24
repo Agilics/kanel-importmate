@@ -3,16 +3,10 @@
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
  
- * @last modified on  : 11-23-2025
- * @last modified by  : khalidousowba 
+ * @last modified on  : 12-24-2025
+ * @last modified by  mouhamed niang
 **/
 public with sharing class ScheduleService{
-    public enum FrequencyEnum {
-        DAILY ,
-        WEEKLY ,
-        MONTHLY
-    } 
-
     // Classe wrapper pour contenir le schedule et ses importations d'executions
     public class ScheduleWrapper {
         @AuraEnabled

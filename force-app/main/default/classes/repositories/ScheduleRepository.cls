@@ -178,24 +178,7 @@ public with sharing class ScheduleRepository {
           return null; 
     }
 
-    // Récupérer la planification par l'id
-    public static Schedule__c getScheduleById(String scheduleId) {
-        if(SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType)){
-            try {
-                return [
-                    SELECT NextRun__c, Name, Id, Frequency__c 
-                    FROM Schedule__c
-                    WHERE Id = :scheduleId
-                    LIMIT 1
-                ];
-            } catch(ApplicationException e){
-                ErrorLogService.logException(e);
-                throw new ApplicationException(e.getMessage());
-            }
-        }
-        return null;
-    }
- 
+
     // Récupérer les planifications par la fréquence
     public static List<Schedule__c> getSchedulesByFrequency(ImportMateEnum.FrequencyEnum frequence) {
         if(SecurityUtils.isCreateable(Schema.Schedule__c.SObjectType)){ 

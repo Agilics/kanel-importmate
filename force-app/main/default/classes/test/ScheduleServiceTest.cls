@@ -17,7 +17,7 @@ public with sharing class ScheduleServiceTest {
         insert project;
 
         Schedule__c sched = new Schedule__c(
-            Frequency__c = String.valueOf(ScheduleService.FrequencyEnum.DAILY),
+            Frequency__c = String.valueOf(ImportMateEnum.FrequencyEnum.DAILY),
             Project__c = project.Id
         );
         insert sched;
@@ -53,7 +53,7 @@ public with sharing class ScheduleServiceTest {
         ];
 
         System.assertEquals(
-            String.valueOf(ScheduleService.FrequencyEnum.DAILY),
+            String.valueOf(ImportMateEnum.FrequencyEnum.DAILY),
             insertedSchedule.Frequency__c.toUpperCase(),
             'La fréquence doit être DAILY'
         );
@@ -96,7 +96,7 @@ public with sharing class ScheduleServiceTest {
         //Perform test
         Test.startTest();
         String excpetedFrequency = 'WEEKLY';
-        ScheduleService.FrequencyEnum actual =  ScheduleService.FrequencyEnum.WEEKLY;
+        ImportMateEnum.FrequencyEnum actual =  ImportMateEnum.FrequencyEnum.WEEKLY;
         Test.stopTest();
 
         //Assertions
@@ -163,7 +163,7 @@ public with sharing class ScheduleServiceTest {
         List<Schedule__c> schedules = new List<Schedule__c>();
         
         Schedule__c schedule = new Schedule__c();
-        schedule.Frequency__c = String.valueOf(ScheduleService.FrequencyEnum.DAILY); 
+        schedule.Frequency__c = String.valueOf(ImportMateEnum.FrequencyEnum.DAILY); 
         schedule.Project__c = savedProject[0].Id;
         schedules.add(schedule);
         
@@ -216,7 +216,7 @@ public with sharing class ScheduleServiceTest {
      static void testGetScheduleById() {
         //GIVEN 
         Schedule__c result = TestDataFactory.createSchedule();
-        String expected = String.valueOf(ScheduleService.FrequencyEnum.DAILY);
+        String expected = String.valueOf(ImportMateEnum.FrequencyEnum.DAILY);
 
         //WHEN
         Test.startTest();
