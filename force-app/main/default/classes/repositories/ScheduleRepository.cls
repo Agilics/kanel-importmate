@@ -2,8 +2,8 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             :  
- * @last modified on  : 11-23-2025
- * @last modified by  : khalidousowba 
+ * @last modified on  : 12-24-2025
+ * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 public with sharing class ScheduleRepository {
     
@@ -197,7 +197,7 @@ public with sharing class ScheduleRepository {
     }
  
     // Récupérer les planifications par la fréquence
-    public static List<Schedule__c> getSchedulesByFrequency(ScheduleService.FrequencyEnum frequence) {
+    public static List<Schedule__c> getSchedulesByFrequency(ImportMateEnum.FrequencyEnum frequence) {
         if(SecurityUtils.isCreateable(Schema.Schedule__c.SObjectType)){ 
             try {
                 String keyword = String.valueOf(frequence);
