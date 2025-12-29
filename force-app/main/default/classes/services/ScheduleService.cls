@@ -92,11 +92,11 @@ public with sharing class ScheduleService{
     /**
     *Récupérer toutes les planifications avec les éxécutions importés
     */
-    public static List<ScheduleService.ScheduleWrapper>  getSchedulesWithExecutions() {
+    public static List<ScheduleService.ScheduleWrapper>  getSchedulesWithExecutionsByIdProject(Id idProject) {
        
         try {  
             if(SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType)) {
-                return   ScheduleRepository.getAllSchedulesWithExecutions();    
+                return   ScheduleRepository.getSchedulesWithExecutionsByIdProject(idProject);    
             }
             return new List<ScheduleService.ScheduleWrapper>();
         } catch (ApplicationException e) {
@@ -105,12 +105,12 @@ public with sharing class ScheduleService{
             }
     }
     /**
-     * Filter planifications par le statut d'éxécution d'importé
+     * Filter planifications par le statut d'éxécution d'importé et par l'id du projet
      */
-      public static List<ScheduleService.ScheduleWrapper>  getSchedulesWithExecutionsByStatus(String status) {
+      public static List<ScheduleService.ScheduleWrapper> getSchedulesByExecutionStatusAndIdProject(String status,String idProject) {
         try {  
             if(SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType)) {
-                return   ScheduleRepository.getSchedulesByExecutionStatus(status);    
+                return   ScheduleRepository.getSchedulesByExecutionStatusAndIdProject(status,idProject);    
             }
             return new List<ScheduleService.ScheduleWrapper>();
         } catch (ApplicationException e) {
@@ -122,10 +122,10 @@ public with sharing class ScheduleService{
     /**
      *Filtrer par fréquence (DAILY | WEEKLY | MONTHLY)
     */
-     public static List<Schedule__c> getSchedulesByFrequency(ImportMateEnum.FrequencyEnum frequence) {
+     public static List<Schedule__c> getSchedulesByFrequencyAndProjectId(ImportMateEnum.FrequencyEnum frequence,String idProject) {
        try {
             if(SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType)) {
-                return  ScheduleRepository.getSchedulesByFrequency(frequence);   
+                return  ScheduleRepository.getSchedulesByFrequencyAndProjectId(frequence,idProject);   
             }
             return new List<Schedule__c>();
         } catch (ApplicationException e) {
@@ -159,7 +159,7 @@ public with sharing class ScheduleService{
                 if(String.isNotBlank(name)) {
                     return  ScheduleRepository.getSchedulesByProjectName(name);     
                 } else {
-                    return ScheduleRepository.getAllSchedulesWithExecutions();
+                    return new List<ScheduleWrapper>();
                 }
             }
             return new List<ScheduleWrapper>();
@@ -169,20 +169,7 @@ public with sharing class ScheduleService{
         }  
     } 
 
-    /**
-     * Recherche les planifications par le statut d'éxécution
-     */
-    public static List<ScheduleWrapper> getSchedulesByExecutionStatus(String status){
-         try {
-            if(SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType)) {
-             return ScheduleRepository.getSchedulesByExecutionStatus(status);
-            }
-            return new List<ScheduleWrapper>();
-        }catch(ApplicationException e){
-            ErrorLogService.logException(e);
-            throw new ApplicationException(e.getMessage());
-        }
-    }
+   
     
     //Execution automatique
  public static void runDueSchedules() {

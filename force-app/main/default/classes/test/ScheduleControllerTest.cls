@@ -26,6 +26,7 @@ public with sharing class ScheduleControllerTest {
  
 
     //Tester l'ajout de planification
+    @IsTest
     static void testAddSchedule() {
         // Given
         String cron = '0 0 * * * ?'; // chaque heure pile → toujours valide
@@ -246,17 +247,17 @@ public with sharing class ScheduleControllerTest {
 
 
     /**
-     *Tester le filtre par fréquence (DAILY | WEEKLY | MONTHLY)
+     *Tester le filtre par fréquence (DAILY | WEEKLY | MONTHLY) et par l'id du projet
      */
      @IsTest
      static void testGetSchedulesByFrequency() {
         //GIVEN
        ImportMateEnum.FrequencyEnum exceptedFrequency =  ImportMateEnum.FrequencyEnum.DAILY;
-        
+        ImportProject__c project = [SELECT Id FROM ImportProject__c];
         //WHEN
         Test.startTest();
         List<Schedule__c> schedules = 
-            ScheduleService.getSchedulesByFrequency(exceptedFrequency);
+            ScheduleService.getSchedulesByFrequencyAndProjectId(exceptedFrequency,project.Id);
         Test.stopTest();
 
         //then - Assertions
@@ -283,4 +284,44 @@ public with sharing class ScheduleControllerTest {
         System.assertNotEquals(null, schedule);
         System.assertEquals(expected,actual.toUpperCase());
     }    
+
+@IsTest
+static void testGetSchedulesWithExecution(){ 
+    // GIVEN : projet et planification
+    ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
+    Schedule__c schedule = TestDataFactory.createSchedule();
+    ImportExecution__c execution =  TestDataFactory.createImportExecution(project.Id);
+
+
+    // WHEN : récupération des wrappers
+    Test.startTest();
+    List<ScheduleService.ScheduleWrapper> results = ScheduleController.getSchedulesWithExecutionsByIdProject(project.Id);
+    Test.stopTest();
+
+    // THEN : assertions
+    System.assertNotEquals(0, results.size(), 'La liste des wrappers ne doit pas être vide');
+    System.assert(results[0].importExecutions.size() > 0, 'Chaque wrapper doit contenir au moins une exécution');     
+}
+
+@IsTest
+static void testGetSchedulesWithExecutionStatus(){ 
+    // GIVEN : projet, planification et exécution avec statut
+    ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
+    Schedule__c schedule = TestDataFactory.createSchedule();
+    String status = 'Pending';
+    ImportExecution__c execution =  TestDataFactory.createImportExecution(project.Id);
+
+
+    // WHEN : récupération par statut
+    Test.startTest();
+    List<ScheduleService.ScheduleWrapper> results = ScheduleController.getSchedulesByExecutionStatusAndIdProject(status, project.Id);
+    Test.stopTest();
+
+    // THEN : assertions
+    System.assertNotEquals(0, results.size(), 'La liste filtrée par statut ne doit pas être vide');
+    System.assertEquals(status, results[0].importExecutions[0].Status__c, 'Le statut doit correspondre');
+}
+
+    
+
 }

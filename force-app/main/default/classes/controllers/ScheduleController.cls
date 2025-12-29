@@ -53,8 +53,8 @@ public with sharing class ScheduleController {
 
     //récupèrer les planifications par la fréquence (DAILY  | WEEKLY | MONTHLY)
     @AuraEnabled(cacheable = true)
-    public static List<Schedule__c>  getSchedulesByFrequency(ImportMateEnum.FrequencyEnum  frequence){
-        return ScheduleService.getSchedulesByFrequency(frequence);
+    public static List<Schedule__c> getSchedulesByFrequencyAndProjectId(ImportMateEnum.FrequencyEnum  frequence,String idProject){
+        return ScheduleService.getSchedulesByFrequencyAndProjectId(frequence,idProject);
     }
 
     // récupérer la planification par le nom du projet
@@ -67,16 +67,16 @@ public with sharing class ScheduleController {
      * Récuperer les planification par l'éxécution d'importation
      */
     @AuraEnabled(cacheable = true)
-    public static List<ScheduleService.ScheduleWrapper> getSchedulesWithExecutions(){
-       return   ScheduleService.getSchedulesWithExecutions();
+    public static List<ScheduleService.ScheduleWrapper> getSchedulesWithExecutionsByIdProject(Id idProject){
+       return   ScheduleService.getSchedulesWithExecutionsByIdProject(idProject);
     }
     
     /**
      * Recherche les planifications par le statut d'éxécution
     */
     @AuraEnabled(cacheable=true)
-    public static List<ScheduleService.ScheduleWrapper> getSchedulesByExecutionStatus(String status){
-      return ScheduleService.getSchedulesWithExecutionsByStatus(status);
+    public static List<ScheduleService.ScheduleWrapper> getSchedulesByExecutionStatusAndIdProject(String status,String idProject){
+      return ScheduleService.getSchedulesByExecutionStatusAndIdProject(status,idProject);
     }
 
     //supprimer planification par l'id

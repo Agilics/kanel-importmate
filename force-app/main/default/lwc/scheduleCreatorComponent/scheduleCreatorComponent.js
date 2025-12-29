@@ -1,9 +1,12 @@
-import { LightningElement, track,api, wire } from "lwc";
+import { track,api, wire } from "lwc";
+import LightningModal from 'lightning/modal';
 import SCHEDULE_OBJECT from "@salesforce/schema/Schedule__c";
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 import FREQUENCY_FIELD from "@salesforce/schema/Schedule__c.Frequency__c";
 import getPickListValues from "@salesforce/apex/ScheduleController.getPickListValues";
-export default class ScheduleCreatorComponent extends LightningElement {
+import addSchedule from "@salesforce/apex/ScheduleController.addSchedule";
+
+export default class ScheduleCreatorComponent extends LightningModal  {
   @track executionDate;
   @api projectId;
   nextExecution;
@@ -49,7 +52,7 @@ export default class ScheduleCreatorComponent extends LightningElement {
   }
 
   //Enregistrement  d'une nouvelle planification
-  async handleAddSchedule(event) {
+  async handleAddSchedule() {
     //Récupération de l'id du projet sélectionné
 
     try {
@@ -70,7 +73,7 @@ export default class ScheduleCreatorComponent extends LightningElement {
       const result = await addSchedule({
         frequency: this.selectedFrequency,
         nextRun: this.nextRun,
-        projectId: id
+        projectId: this.projectId
       }).then((data) => {
         //Affichage du message toast de succès
         this.showToast(
@@ -80,6 +83,7 @@ export default class ScheduleCreatorComponent extends LightningElement {
         );
 
         this.resetFields(); // Réintialisation de tous les champs de texte | combo box
+        this.close(result);
         //TODO envoyer un boolean pour refresh la liste
         //   this.showSchedule = event.detail;
         // return refreshApex(this.wiredSchedulesResult); //  refresh datatable

@@ -1,12 +1,13 @@
-import { LightningElement, track, wire } from "lwc";
+import { LightningElement, track,api, wire } from "lwc";
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 import getSchedulesByProjectName from "@salesforce/apex/ScheduleController.getSchedulesByProjectName";
-import getSchedulesByExecutionStatus from "@salesforce/apex/ScheduleController.getSchedulesByExecutionStatus";
+import getSchedulesByExecutionStatusAndIdProject from "@salesforce/apex/ScheduleController.getSchedulesByExecutionStatusAndIdProject";
 import getPickListValues from "@salesforce/apex/ScheduleController.getPickListValues";
 import STATUS_FIELD from "@salesforce/schema/ImportExecution__c.Status__c";
 import IMPORTEXECUTION_OBJECT from "@salesforce/schema/ImportExecution__c";
 
 export default class ScheduleJobsComponent extends LightningElement {
+  @api idProject;
   //schedule jobs list table name
   columns = [
     { label: "Project", fieldName: "project" },
@@ -21,7 +22,7 @@ export default class ScheduleJobsComponent extends LightningElement {
   @track selectedStatus = ""; // Status par défaut
   @track picklistStatus =[]; //liste de statut
   //filtrer les planifications associées aux éxécution importé par le statut
-  @wire(getSchedulesByExecutionStatus, { executionStatus: "$selectedStatus" })
+  @wire(getSchedulesByExecutionStatusAndIdProject, { executionStatus: "$selectedStatus" ,idProject : "$idProject"})
   wiredSchedulesByStatus({ error, data }) {
     if (data) {
       this.schedules = data.map((sch) => {

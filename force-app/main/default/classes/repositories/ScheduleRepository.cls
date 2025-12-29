@@ -1,9 +1,9 @@
 /**
- * @description       : 
- * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @description       :  all operations available on Schedule__c Object
+ * @author            : mouhamed niang
  * @group             :  
- * @last modified on  : 12-24-2025
- * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @last modified on  : 12-29-2025
+ * @last modified by  : mouhamed niang
 **/
 public with sharing class ScheduleRepository {
     
@@ -31,36 +31,34 @@ public with sharing class ScheduleRepository {
         }
     }
 
-    // Récupérer toutes les planifications
-    public static List<Schedule__c> getAllSchedules(){
+    // Récupérer toutes les planifications par l'identifiant du projet
+    public static List<Schedule__c> getSchedulesByIdProject(String idProject){
         return  [
                 SELECT Id, Name, Frequency__c, NextRun__c, 
                        Project__r.Name, Project__r.TargetObject__c, 
                        Project__r.Description__c, Project__c
                 FROM Schedule__c
+                WHERE Project__c =:idProject
                 ORDER BY CreatedDate DESC
             ];
     }
 
     // Récupérer toutes les planifications avec les données d'exécution via une jointure séparée
-    public static List<ScheduleService.ScheduleWrapper> getAllSchedulesWithExecutions() {
+    public static List<ScheduleService.ScheduleWrapper> getSchedulesWithExecutionsByIdProject(Id idProject) {
         List<ScheduleService.ScheduleWrapper> results = new List<ScheduleService.ScheduleWrapper>();
         
         if (SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType) && SecurityUtils.isAccessible(Schema.ImportExecution__c.SObjectType)) {
             try {
                 // Récupérer tous les schedules
-                List<Schedule__c> schedules = getAllSchedules();
+                List<Schedule__c> schedules = getSchedulesByIdProject(idProject);
                 
                 // Récupérer tous les ImportExecution liés aux projets de ces schedules
-                Set<Id> projectIds = new Set<Id>();
-                for (Schedule__c schedule : schedules) {
-                    if (schedule.Project__c != null) {
-                        projectIds.add(schedule.Project__c);
-                    }
-                }
+                Set<Id> projectIds = new Set<Id>(); 
+                projectIds.add(idProject);
+                    
 
                 // Map des exécutions par projet
-                Map<Id, List<ImportExecution__c>> executionsByProject =getExecutionsByProject(projectIds);                
+                Map<Id, List<ImportExecution__c>> executionsByProject = getExecutionsByProject(projectIds);                
                 
                 // Créer les wrappers (Schedule & ImportExecution)
                 results = buildScheduleWrapper(schedules, executionsByProject);
@@ -75,25 +73,22 @@ public with sharing class ScheduleRepository {
     }
 
     // Filtrer planifications par le statut d'exécution d'importation
-    public static List<ScheduleService.ScheduleWrapper> getSchedulesByExecutionStatus(String executionStatus) {
+    public static List<ScheduleService.ScheduleWrapper> getSchedulesByExecutionStatusAndIdProject(String executionStatus , String idProject) {
         List<ScheduleService.ScheduleWrapper> results = new List<ScheduleService.ScheduleWrapper>();
         if (!SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType)) {
            return results;
         }
         try {
             // Récupérer tous les schedules
-            List<Schedule__c> schedules = getAllSchedules();
+            List<Schedule__c> schedules = getSchedulesByIdProject(idProject);
             
             // Récupérer tous les ImportExecution liés aux projets de ces schedules
             Set<Id> projectIds = new Set<Id>();
-            for (Schedule__c schedule : schedules) {
-                if (schedule.Project__c != null) {
-                    projectIds.add(schedule.Project__c);
-                }
-            }
+            projectIds.add(idProject);
+               
 
             // Map des exécutions par projet et statut d'exécution
-            Map<Id, List<ImportExecution__c>> executionsByProject =getExecutionsByProjectAndStatus(projectIds, executionStatus);                
+            Map<Id, List<ImportExecution__c>> executionsByProject = getExecutionsByProjectAndStatus(projectIds, executionStatus);                
             
             // Créer les wrappers (Schedule & ImportExecution)
             results = buildScheduleWrapper(schedules, executionsByProject);
@@ -179,15 +174,16 @@ public with sharing class ScheduleRepository {
     }
 
 
-    // Récupérer les planifications par la fréquence
-    public static List<Schedule__c> getSchedulesByFrequency(ImportMateEnum.FrequencyEnum frequence) {
+    // Récupérer les planifications par la fréquence et l'id du projet
+    public static List<Schedule__c> getSchedulesByFrequencyAndProjectId(ImportMateEnum.FrequencyEnum frequence, String idProject) {
         if(SecurityUtils.isCreateable(Schema.Schedule__c.SObjectType)){ 
             try {
                 String keyword = String.valueOf(frequence);
                 return [
                     SELECT NextRun__c, Name, Id, Frequency__c 
                     FROM Schedule__c
-                    WHERE Frequency__c = :keyword
+                    WHERE Frequency__c = :keyword 
+                    AND Project__c = : idProject
                 ];
             } catch(ApplicationException e){
                 ErrorLogService.logException(e);
