@@ -377,26 +377,69 @@ export default class ExecutionCmp extends LightningElement {
         }
     }
 
-    /**
-     * transform CSV dta to List<Map<String, String>> format
-     */
-    transformCsvData(csvData) {
-        if (!csvData) {
-            return [];
-        }
 
-        if (typeof csvData === 'object' && csvData.columns && csvData.allRows) {
-            return this.transformFromObjectFormat(csvData);
-        }
+  transformCsvData(csvData) {
+  if (!csvData) return [];
 
-        //If csvData is a string, parse it using utility
-        if (typeof csvData === 'string') {
-            return parseCsvData(csvData);
-        }
+  if (Array.isArray(csvData)) {
+    return csvData.map((r) => (r && typeof r === 'object' ? r : {}));
+  }
 
-        return [];
+
+  if (typeof csvData === 'string') {
+    return parseCsvData(csvData);
+  }
+
+  if (typeof csvData === 'object') {
+    if (Array.isArray(csvData.columns) && Array.isArray(csvData.allRows)) {
+      const rows = this.transformFromValuesFormat(csvData.allRows, csvData.columns);
+      if (rows.length) return rows;
     }
 
+    if (Array.isArray(csvData.columns) && Array.isArray(csvData.rows)) {
+      return this.transformFromPlainObjects(csvData.rows, csvData.columns);
+    }
+    if (Array.isArray(csvData.rows)) {
+      return this.transformFromPlainObjects(csvData.rows);
+    }
+
+    const keys = Object.keys(csvData || {});
+    if (keys.length && typeof csvData[keys[0]] !== 'object') {
+      return [csvData];
+    }
+  }
+
+  return [];
+}
+transformFromValuesFormat(allRows, columns) {
+  if (!Array.isArray(allRows) || !Array.isArray(columns) || !columns.length) return [];
+
+  return allRows.map((row) => {
+    const out = {};
+    columns.forEach((col, i) => {
+      const v = row?.values?.[i]?.value ?? '';
+      out[col] = String(v ?? '');
+    });
+    return out;
+  });
+}
+transformFromPlainObjects(rows, columns) {
+  if (!Array.isArray(rows) || !rows.length) return [];
+
+  if (Array.isArray(columns) && columns.length) {
+    return rows.map((r) => {
+      const out = {};
+      columns.forEach((c) => (out[c] = String(r?.[c] ?? '')));
+      return out;
+    });
+  }
+
+  return rows.map((r) => {
+    const out = {};
+    Object.keys(r || {}).forEach((k) => (out[k] = String(r?.[k] ?? '')));
+    return out;
+  });
+}
     /**
      * transform CSV data from object format (columns + allRows) to List<Map<String, String>>
      */

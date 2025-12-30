@@ -266,36 +266,41 @@ export default class MainComponent extends LightningElement {
     return this.currentProject && this.currentStep === STEPS.EXECUTION;
   }
 
-  handleStartMapping(event) {
-    const headersCsv = Array.isArray(event?.detail?.columns)
-      ? event.detail.columns.join(',')
-      : event?.detail?.headersCsv || '';
+ handleStartMapping(event) {
+  const d = event?.detail || {};
 
-    this.mappingHeadersCsv = headersCsv;
+  const headersCsv = Array.isArray(d.columns)
+    ? d.columns.join(',')
+    : d.headersCsv || '';
 
-    if (event?.detail?.csvData) {
-      this.csvData = event.detail.csvData;
-    } else if (event?.detail?.allRows && event?.detail?.columns) {
-      this.csvData = {
-        allRows: event.detail.allRows,
-        columns: event.detail.columns
-      };
-    }
+  this.mappingHeadersCsv = headersCsv;
 
-    const project = this.currentProject || {};
-    this.mappingTargetObject = this.getTargetObjectFromProject(project);
-
-    if (this.currentProject) {
-      this.currentStep = STEPS.FIELD_MAPPING;
-      this.updateUIForStep(this.currentStep);
-    } else {
-      this.showToast(
-        TOAST_VARIANTS.WARNING,
-        MESSAGES.SELECT_PROJECT_FIRST,
-        TOAST_VARIANTS.WARNING
-      );
-    }
+  // ✅ IMPORTANT : persister csvData pour le DryRun
+  if (d.csvData) {
+    this.csvData = d.csvData;
+  } else if (Array.isArray(d.rows) && Array.isArray(d.columns)) {
+    this.csvData = {
+      columns: d.columns,
+      rows: d.rows,
+      totalRowCount: d.totalRowCount || d.rows.length,
+      fileName: d.fileName,
+      fileSize: d.fileSize
+    };
+  } else if (Array.isArray(d.allRows) && Array.isArray(d.columns)) {
+    this.csvData = { allRows: d.allRows, columns: d.columns };
   }
+
+  const project = this.currentProject || {};
+  this.mappingTargetObject = this.getTargetObjectFromProject(project);
+
+  if (this.currentProject) {
+    this.currentStep = STEPS.FIELD_MAPPING;
+    this.updateUIForStep(this.currentStep);
+  } else {
+    this.showToast(TOAST_VARIANTS.WARNING, MESSAGES.SELECT_PROJECT_FIRST, TOAST_VARIANTS.WARNING);
+  }
+}
+
 
   // retour de la page de choix de datasource
   handleBackToDataSourceSelection() {

@@ -272,22 +272,25 @@ export default class DryRunValidator extends LightningElement {
     }
 
     get hasCsvData() {
-        if (!this.csvData) return false;
+  const d = this.csvData;
+  if (!d) return false;
 
-        if (typeof this.csvData === 'object' && this.csvData !== null) {
-            if (this.csvData.allRows && Array.isArray(this.csvData.allRows)) {
-                return this.csvData.allRows.length > 0;
-            }
-            if (Array.isArray(this.csvData)) return this.csvData.length > 0;
-            if (Object.keys(this.csvData).length === 0) return false;
-        }
+  // Array direct
+  if (Array.isArray(d)) return d.length > 0;
 
-        if (typeof this.csvData === 'string') {
-            return this.csvData.trim().length > 0;
-        }
+  // String CSV
+  if (typeof d === 'string') return d.trim().length > 0;
 
-        return false;
-    }
+  // Object formats
+  if (typeof d === 'object') {
+    if (Array.isArray(d.allRows)) return d.allRows.length > 0; // format values
+    if (Array.isArray(d.rows)) return d.rows.length > 0;       // ✅ ton format le plus courant
+    return Object.keys(d).length > 0;
+  }
+
+  return false;
+}
+
 
     get isLoadDetailsDisabled() {
         return this.isLoading || !this.projectId;
@@ -612,21 +615,49 @@ export default class DryRunValidator extends LightningElement {
         }
     }
 
-    transformCsvData(csvData) {
-        if (!csvData) return [];
+   transformCsvData(csvData) {
+  if (!csvData) return [];
 
-        // Handle object format from csvUploader
-        if (typeof csvData === 'object' && csvData.columns && csvData.allRows) {
-            return this.transformFromObjectFormat(csvData);
-        }
+  // 1) Si on reçoit déjà un tableau d'objets [{col:value}, ...]
+  if (Array.isArray(csvData)) {
+    return csvData.map((r) => (r && typeof r === 'object' ? r : {}));
+  }
 
-        // Handle string format
-        if (typeof csvData === 'string') {
-            return parseCsvData(csvData);
-        }
+  // 2) Si on reçoit une string CSV
+  if (typeof csvData === 'string') {
+    return parseCsvData(csvData);
+  }
 
-        return [];
+  // 3) Si on reçoit un objet (le plus courant dans ton app)
+  if (typeof csvData === 'object') {
+    // 3.a) Format CsvUploader (row.values[])
+    if (Array.isArray(csvData.columns) && Array.isArray(csvData.allRows)) {
+      const rows = this.transformFromValuesFormat(csvData.allRows, csvData.columns);
+      if (rows.length) return rows;
     }
+
+    // 3.b) Format "preview rows" plain objects + columns
+    // ex: { columns: ['Name','Email'], rows: [{Name:'A', Email:'x'}, ...] }
+    if (Array.isArray(csvData.columns) && Array.isArray(csvData.rows)) {
+      return this.transformFromPlainObjects(csvData.rows, csvData.columns);
+    }
+
+    // 3.c) Format csvloaded event (si tu passes direct event.detail)
+    // ex: { columns, rows, totalRowCount, fileName... }
+    if (Array.isArray(csvData.columns) && Array.isArray(csvData.rows)) {
+      return this.transformFromPlainObjects(csvData.rows, csvData.columns);
+    }
+
+    // 3.d) Fallback: objet simple {col:value}
+    const keys = Object.keys(csvData || {});
+    if (keys.length && typeof csvData[keys[0]] !== 'object') {
+      return [csvData];
+    }
+  }
+
+  return [];
+}
+
 
     transformFromObjectFormat(csvData) {
         const { columns, allRows } = csvData;
@@ -676,4 +707,34 @@ export default class DryRunValidator extends LightningElement {
     renderedCallback() {
         
     }
+
+    transformFromValuesFormat(allRows, columns) {
+  if (!Array.isArray(allRows) || !Array.isArray(columns) || !columns.length) return [];
+
+  return allRows.map((row) => {
+    const out = {};
+    columns.forEach((col, i) => {
+      const v = row?.values?.[i]?.value ?? '';
+      out[col] = String(v ?? '');
+    });
+    return out;
+  });
+}
+transformFromPlainObjects(rows, columns) {
+  if (!Array.isArray(rows) || !rows.length) return [];
+  // columns optionnel : si fourni, on garde l’ordre/les clés
+  if (Array.isArray(columns) && columns.length) {
+    return rows.map((r) => {
+      const out = {};
+      columns.forEach((c) => (out[c] = String(r?.[c] ?? '')));
+      return out;
+    });
+  }
+  return rows.map((r) => {
+    const out = {};
+    Object.keys(r || {}).forEach((k) => (out[k] = String(r?.[k] ?? '')));
+    return out;
+  });
+}
+
 }
