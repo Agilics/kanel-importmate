@@ -46,7 +46,7 @@ export default class TransformationSaveModal extends LightningModal {
     // Handlers UI
     // ------------------------
     get mappingInfo(){
-        return `${this.mapping.sourceColumn} -> ${this.mapping.targetField}`
+        return `${this.mapping.version} -> ${this.mapping.sourceColumn} `
     }
 
 
@@ -354,21 +354,22 @@ export default class TransformationSaveModal extends LightningModal {
     }
 
     // ------------------------
-    // Gestion centralisée des erreurs
-    // ------------------------
-    handleError(error) {
-        let errorMessage = 'Erreur inconnue';
-        if (error.body) {
-            if (error.body.message) {
-                errorMessage = error.body.message;
-            } else if (error.body.pageErrors && error.body.pageErrors.length > 0) {
-                errorMessage = error.body.pageErrors[0].message;
-            } else if (error.body.fieldErrors) {
-                errorMessage = JSON.stringify(error.body.fieldErrors);
-            }
-            } else if (error.message) {
-                errorMessage = error.message;
-            }
-            this.showToast('Erreur', errorMessage, 'error');
+// Gestion centralisée des erreurs
+// ------------------------
+handleError(error) {
+    let errorMessage = 'Erreur inconnue';
+    
+    if (error.body) {
+        if (error.body.message) {
+            errorMessage = error.body.message;
+        } else if (error.body.pageErrors && error.body.pageErrors.length > 0) {
+            errorMessage = error.body.pageErrors[0].message;
+        } else if (error.body.fieldErrors) {
+            errorMessage = JSON.stringify(error.body.fieldErrors);
         }
+        } else if (error.message) {
+            errorMessage = error.message;
+        }
+        this.showToast('Erreur', errorMessage, 'error');
+    }
 }
