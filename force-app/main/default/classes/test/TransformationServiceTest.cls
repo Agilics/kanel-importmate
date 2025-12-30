@@ -1,3 +1,11 @@
+/**
+ * @description       : 
+ * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @group             : 
+ * @last modified on  : 12-23-2025
+ * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+**/
+
 @isTest
 public class TransformationServiceTest {
 
@@ -537,4 +545,97 @@ public class TransformationServiceTest {
         
         Test.stopTest();
     }
+
+    @isTest
+    static void testGetRulesByProjectId_Success() {
+        User admin = TestDataFactory.createAdminUser();
+        System.runAs(admin) {
+            ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
+            List<FieldMapping__c> mappings = [SELECT Id FROM FieldMapping__c LIMIT 1];
+            
+            // Create test rules
+            List<TransformationRule__c> rules = new List<TransformationRule__c>();
+            for (Integer i = 0; i < 3; i++) {
+                rules.add(new TransformationRule__c(
+                    Project__c = project.Id,
+                    FieldMapping__c = mappings[0].Id,
+                    RuleType__c = 'BooleanTransformation',
+                    Parameters__c = '{}',
+                    Order__c = i + 1
+                ));
+            }
+            insert rules;
+
+            //debug the inserted rules
+            System.debug('Inserted Rules: ' + rules);
+            
+            Test.startTest();
+            List<TransformationRule__c> result = TransformationService.getRulesByProjectId(project.Id);
+            Test.stopTest();
+            
+            Assert.areEqual(3, result.size(), 'Should return 3 rules');
+            Assert.areEqual(1, result[0].Order__c, 'Rules should be ordered by Order__c');
+            Assert.areEqual(2, result[1].Order__c, 'Rules should be ordered by Order__c');
+            Assert.areEqual(3, result[2].Order__c, 'Rules should be ordered by Order__c');
+        }
+    }
+
+      //tester la suppression d'une transformation
+    @isTest
+    static void testDeleteTransformationSuccess() {
+        // GIVEN
+        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
+        FieldMapping__c mapping = [SELECT Id FROM FieldMapping__c LIMIT 1];
+                
+        Map<String, Object> parameters = new Map<String, Object>{
+                'targetType' => 'boolean',
+                'trueValues' => new List<String>{'yes'},
+                'falseValues' => new List<String>{'no'}
+            };
+
+
+        TransformationRule__c rule =
+            TestDataFactory.createTransformationRule(
+                project.Id,
+                mapping.Id,
+                'boolean',
+                'false',
+                'BooleanTransformation'
+            );
+
+        Id ruleId = rule.Id;
+        
+        //when
+        Test.startTest();
+            TransformationService.deleteRuleById(ruleId);
+        Test.stopTest();
+
+        // THEN
+        Integer countRules = [
+            SELECT COUNT()
+            FROM TransformationRule__c
+        ];
+
+        Assert.areEqual(0, countRules, 'The rule should be deleted');
+    }
+
+    //tetster suppression fake id
+    @isTest
+    static void testDeleteTransformationFailure_ruleNotFound() {
+        Test.startTest();
+
+        Boolean exceptionThrown = false;
+
+        try {
+            TransformationService.deleteRuleById('a00XXXXXXXXXXXX'); // fake Id
+        } catch (TransformationException e) {
+            exceptionThrown = true;
+              Assert.isTrue(e.getMessage().contains('Erreur lors de la suppression'), 'Exception message should indicate validation failure');
+        }
+
+        Test.stopTest();
+
+        Assert.isTrue(exceptionThrown, 'Exception must be thrown');
+    }
+
 }

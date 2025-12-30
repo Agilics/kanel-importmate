@@ -1,12 +1,10 @@
 import { wire, api, track } from 'lwc';
-import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import { log } from 'lightning/logger';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent'; 
 import TRANSFORMATION_OBJECT from '@salesforce/schema/TransformationRule__c'; 
 import LightningModal from 'lightning/modal';
 import RULE_TYPE_FIELD from '@salesforce/schema/TransformationRule__c.RuleType__c';
 
-import createRule from '@salesforce/apex/TransformationController.createRule';
-import applyTransformations from '@salesforce/apex/TransformationController.applyTransformations';
+import createRule from '@salesforce/apex/TransformationController.createRule'; 
 import getPickListValues from '@salesforce/apex/TransformationController.getPickListValues';
 import getAllMappingsByProjectId from '@salesforce/apex/FieldMappingController.getAllMappingsByProjectId';
 
@@ -141,8 +139,9 @@ export default class TransformationSaveModal extends LightningModal {
                 if (this.fields.length === 0) {
                     return this.toastErr('Veuillez sélectionner un champ email');
                 }
-                break;
-    
+                break; 
+            default:
+                break
         }
 
         return true;
