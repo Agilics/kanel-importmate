@@ -1,60 +1,63 @@
 import { LightningElement, api, wire, track } from "lwc";
 import TransformationModal from 'c/transformationSaveModal';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import searchProjetById from '@salesforce/apex/ImportProjectController.searchProjetById';
-import getRulesByMappingId from '@salesforce/apex/TransformationController.getRulesByMappingId';
+import searchProjetById from '@salesforce/apex/ImportProjectController.searchProjetById'; 
+import getRulesByProjectId from "@salesforce/apex/TransformationController.getRulesByProjectId";
+import deleteTransformationById from "@salesforce/apex/TransformationController.deleteTransformationById";
+
+import { refreshApex } from '@salesforce/apex';
 
 export default class TransformationPage extends LightningElement {
   isWarningBadge = true;
   @api projectId; 
   @wire(searchProjetById, { projectId: "$projectId" }) selectedProject; 
   @track transformationsByMappingId = [];
+  wiredTransformationResults; // données affichées
+  _wiredResult; //  résultat du @wire (OBLIGATOIRE pour refreshApex)
   @track mappingId;
-  @track showMappings = false; 
-  @track transformationId;
+  @track showMappings = false;  
   
   // Paramètre du filtre de transformations
   activeTransformationTab = "all";
-   
-  // Récupérer les transformations par l'id du mapping 
-  loadTransformations(mappingId) {
-    console.log('Loading transformations for mappingId:', mappingId);
-    
-    if (!mappingId) {
-        console.error(' mappingId est undefined, impossible de charger les transformations');
-        this.transformationsByMappingId = [];
-        return;
-    }
+  
+  //récupèrer toutes les transformations liés à un projet
+  @wire(getRulesByProjectId, { projectId: '$projectId' })
+  wiredTransformations(result) {
+    this._wiredResult = result;
 
-    getRulesByMappingId({ mappingId: mappingId })
-        .then(data => {
-            console.log(' Transformations reçues :', JSON.stringify(data));
+    const { error, data } = result;
 
-            this.transformationsByMappingId = data.map(rule => {
-                const iconConfig = this.getIconConfig(rule.RuleType__c);
-                const category = this.getCategory(rule.RuleType__c);
-                console.log(`Source column : ${rule.FieldMapping__r?.SourceColumn__c}`);
-                
-                return {
-                    id: rule.Id,
-                    rule: rule?.RuleType__c,
-                    category,       
-                    displayTitle: iconConfig.title ?? rule.RuleType__c,
-                    displaySubtitle: `Source : ${rule.FieldMapping__r?.SourceColumn__c ?? 'Unknown Field'} → ${rule.FieldMapping__r?.TargetField__c ?? 'Unknown Field'}`,
-                    iconName: iconConfig.icon,
-                    iconBoxClass: iconConfig.boxClass,
-                    headIconClass: iconConfig.iconClass,
-                    formattedRules: this.formatRuleContent(rule)
-                };
-            });
-            
-            console.log(' Transformations formatées:', this.transformationsByMappingId.length);
-        })
-        .catch(error => {
-            console.error('Erreur chargement transformations:', error);
-            this.transformationsByMappingId = [];
-            this.showToast('Erreur', error?.body?.message || 'Erreur inconnue', 'error');
+    if (data) {
+        console.log('Transformations reçues :', JSON.stringify(data));
+
+        this.wiredTransformationResults = data.map(rule => {
+            const iconConfig = this.getIconConfig(rule.RuleType__c);
+            const category = this.getCategory(rule.RuleType__c);
+
+            return {
+                id: rule.Id,
+                rule: rule.RuleType__c,
+                category,
+                displayTitle: iconConfig.title ?? rule.RuleType__c,
+                displaySubtitle: `Source : ${rule.FieldMapping__r?.SourceColumn__c ?? 'Unknown Field'} → ${rule.FieldMapping__r?.TargetField__c ?? 'Unknown Field'}`,
+                iconName: iconConfig.icon,
+                iconBoxClass: iconConfig.boxClass,
+                headIconClass: iconConfig.iconClass,
+                formattedRules: this.formatRuleContent(rule)
+            };
         });
+
+        console.log('Transformations formatées :', this.wiredTransformationResults.length);
+    }
+    else if (error) {
+        console.error('Erreur chargement transformations:', error);
+        this.wiredTransformationResults = [];
+        this.showToast(
+            'Erreur',
+            error?.body?.message || 'Erreur inconnue',
+            'error'
+        );
+    }
   }
 
   // Catégoriser les transformations
@@ -70,16 +73,13 @@ export default class TransformationPage extends LightningElement {
   // Filtrer les transformations selon l'onglet actif
   get filteredTransformations() {
     if (this.activeTransformationTab === 'all') {
-      return this.transformationsByMappingId;
+      return this.wiredTransformationResults;
     }
-    return this.transformationsByMappingId.filter(t => t.category === this.activeTransformationTab);
+    return this.wiredTransformationResults.filter(t => t.category === this.activeTransformationTab);
   }
 
   // Ouverture du modal pour ajouter une nouvelle transformation
-  async handleAddTransformation(event) { 
-    this.mappingId = event.detail.mappingId;
-    console.log('Opening modal for mappingId:', this.mappingId);
-    
+  async handleAddTransformation(event) {  
     try {
       const result = await TransformationModal.open({ 
         size: 'large',
@@ -88,14 +88,12 @@ export default class TransformationPage extends LightningElement {
         targetObject: this.selectedProject?.data?.TargetObject__c,
         label: 'Add New rule',
         mappingId: event.detail.mappingId,
-        mapping: event.detail.mapping
+        mapping: event.detail.mapping,
+        onrefresh: () => this.refreshTransformations() // refresh list rule
       });
-      
+
       this.transformationId = result;
       console.log(' Transformation créée avec ID:', this.transformationId);
-      
-      // Recharger les transformations après création
-      this.loadTransformations(this.mappingId);
       
     } catch (error) {
       console.error('Erreur lors de la création:', error);
@@ -103,8 +101,14 @@ export default class TransformationPage extends LightningElement {
     }
   }
 
+  async refreshTransformations() {
+      if (this._wiredResult) {
+          await refreshApex(this._wiredResult);
+      }
+  }
+
   // Navigation vers l'étape 5: Validation (Dry Run)
-  handleNextStep(event) {
+  handleNextStep() {
     this.dispatchEvent(
       new CustomEvent('next', {
         detail: { transformationId: this.transformationId }
@@ -119,8 +123,7 @@ export default class TransformationPage extends LightningElement {
 
   // Gestion du changement d'onglets de transformation
   handleTransformationChange(event) {
-    this.activeTransformationTab = event.detail.activetab;
-    console.log("📑 Onglet actif:", this.activeTransformationTab);
+    this.activeTransformationTab = event.detail.activetab; 
   }
 
   // Configuration des icônes
@@ -133,7 +136,6 @@ export default class TransformationPage extends LightningElement {
           boxClass: 'box-icon is-centered email-card-icon-box',
           iconClass: 'icon is-centered custom-icon-email'
         };
-
       case 'PhoneMask':
         return {
           title: 'Phone Number Formatting',
@@ -141,7 +143,6 @@ export default class TransformationPage extends LightningElement {
           boxClass: 'box-icon is-centered phone-card-icon-box',
           iconClass: 'icon is-centered custom-icon-phone'
         };
-
       case 'Concatenation':
         return {
           title: 'Field Concatenation',
@@ -149,7 +150,6 @@ export default class TransformationPage extends LightningElement {
           boxClass: 'box-icon is-centered lead-card-icon-box',
           iconClass: 'icon is-centered custom-icon-product_transfer'
         };
-
       case 'LowercaseTransformation':
         return {
           title: 'Lowercase Conversion',
@@ -157,7 +157,6 @@ export default class TransformationPage extends LightningElement {
           boxClass: 'box-icon is-centered lead-card-icon-box',
           iconClass: 'icon is-centered custom-icon-product_transfer'
         };
-
       case 'UppercaseTransformation':
         return {
           title: 'Uppercase Conversion',
@@ -165,7 +164,6 @@ export default class TransformationPage extends LightningElement {
           boxClass: 'box-icon is-centered lead-card-icon-box',
           iconClass: 'icon is-centered custom-icon-product_transfer'
         };
-
       default:
         return {
           title: 'Boolean Transformation',
@@ -205,9 +203,38 @@ export default class TransformationPage extends LightningElement {
     this.dispatchEvent(new CustomEvent("previous"));
   }
 
+  async handleTransformationDelete(event) {
+    try { 
+      const ruleId = event.detail; 
+      /*eslint no-alert: "error"*/
+      const isConfirm = confirm('Are you sure you want to delete this transformation? This action cannot be undone.');
+      // Confirm deletion
+      if (!isConfirm) {
+          return;
+      } 
+      await deleteTransformationById({ transformationId: ruleId });
+      await refreshApex(this._wiredResult); // ✅ correction
+
+      // Show success toast
+      this.dispatchEvent(new ShowToastEvent({
+        title: 'Success',
+        message: 'Transformation deleted successfully',
+        variant: 'success'
+      }));
+      
+    } catch (error) { 
+        console.error('Error deleting transformation rule:', error);
+        this.dispatchEvent(new ShowToastEvent({
+            title: 'Error',
+            message: error.body?.message || 'Error deleting rule',
+            variant: 'error'
+        }));
+    }
+  }
+
   // Vérifier s'il y a des transformations
-  get isTransformation() {
-    return this.transformationsByMappingId && this.transformationsByMappingId.length > 0;
+  get isTransformation() { 
+    return this.wiredTransformationResults;
   }
 
   // Afficher un toast
