@@ -1,3 +1,9 @@
+/**
+ * 
+ * @Last Modification Date: 30-12-2025
+ * @Modification: changement composant c-project-form-component du méthode projectnamechange -> namechange
+ * Changement composant c-project-form du méthode targetobjectchange -> targetchange
+ */
 import { LightningElement, api, track } from "lwc";
 
 //import methods from Controller
@@ -41,7 +47,7 @@ export default class ProjectFormComponent extends LightningElement {
   //Evénement portant sur la mise à jour du nom du projet
   handleProjectNameChange(event) {
     this.dispatchEvent(
-      new CustomEvent("namechange", { detail: event.target.value })
+      new CustomEvent("projectnamechange", { detail: event.target.value })
     );
   }
 
@@ -57,7 +63,7 @@ export default class ProjectFormComponent extends LightningElement {
   //  de l'événement portant sur la mise à jour de l'attribut target object
   handleTargetObjectChange(event) {
     this.dispatchEvent(
-      new CustomEvent("targetchange", { detail: event.target.value })
+      new CustomEvent("targetobjectchange", { detail: event.target.value })
     );
   }
 

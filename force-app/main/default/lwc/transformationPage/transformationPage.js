@@ -32,14 +32,13 @@ export default class TransformationPage extends LightningElement {
 
         this.wiredTransformationResults = data.map(rule => {
             const iconConfig = this.getIconConfig(rule.RuleType__c);
-            const category = this.getCategory(rule.RuleType__c);
-
+            const category = this.getCategory(rule.RuleType__c); 
             return {
                 id: rule.Id,
                 rule: rule.RuleType__c,
                 category,
                 displayTitle: iconConfig.title ?? rule.RuleType__c,
-                displaySubtitle: `Source : ${rule.FieldMapping__r?.SourceColumn__c ?? 'Unknown Field'} → ${rule.FieldMapping__r?.TargetField__c ?? 'Unknown Field'}`,
+                displaySubtitle: `Source : ${rule.FieldMapping__r.SourceColumn__c ?? 'Unknown Field'} → ${rule.FieldMapping__r?.TargetField__c ?? 'Unknown Field'}`,
                 iconName: iconConfig.icon,
                 iconBoxClass: iconConfig.boxClass,
                 headIconClass: iconConfig.iconClass,
@@ -89,7 +88,7 @@ export default class TransformationPage extends LightningElement {
         label: 'Add New rule',
         mappingId: event.detail.mappingId,
         mapping: event.detail.mapping,
-        onrefresh: () => this.refreshTransformations() // refresh list rule
+        onrefresh: async() => await refreshApex(this._wiredResult) // refresh list rule
       });
 
       this.transformationId = result;

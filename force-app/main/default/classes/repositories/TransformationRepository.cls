@@ -2,8 +2,9 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 11-28-2025
- * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @last modified on  : 12-30-2025
+ * @last modified by  : Mouhamed NIANG
+ * Modification: ajout  du champs FieldMapping__r.SourceColumn__c à la méthode  getRulesByProjectId
 **/
 public with sharing class TransformationRepository {
 
@@ -24,7 +25,7 @@ public with sharing class TransformationRepository {
         if (SecurityUtils.isAccessible(Schema.TransformationRule__c.SObjectType)) {
             try {
                 return [SELECT Id, RuleType__c, Parameters__c, FieldMapping__c, 
-                        FieldMapping__r.TargetField__c, SourceFields__c, TargetValue__c, Order__c
+                        FieldMapping__r.TargetField__c, SourceFields__c, TargetValue__c, Order__c,FieldMapping__r.SourceColumn__c
                         FROM TransformationRule__c 
                         WHERE Project__c = :projectId 
                         /* WITH SECURITY_ENFORCED  */
