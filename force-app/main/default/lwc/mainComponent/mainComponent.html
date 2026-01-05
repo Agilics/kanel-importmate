@@ -2,8 +2,9 @@
   @description       : Main component hosting all ImportMate application components
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
   @group             : 
-  @last modified on  : 12-03-2025
-  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+  @last modified on  : 12-23-2025
+  @last modified by  mouhamed niang
+  remplacement de dataSourcePage par dataSource
 -->
 <template>
   <template if:true={isLoading}>
@@ -61,7 +62,7 @@
                 <template if:true={showCreatorSection}>
                   <c-project-form-component
                     recent-projet={currentProject}
-                    onsaveproject={handleCreateProject}
+                    onsave={handleCreateProject}
                     oncancel={handleCancel}
                     onprojectnamechange={handleProjectNameChange}
                     ondescriptionchange={handleDescriptionChange}
@@ -72,10 +73,11 @@
 
               <!-- Step 2: Data Source Selection -->
               <template if:true={showDataSourceSelection}>
-                <c-data-source-selector-page
+                <c-data-source
                   current-project={currentProject}
                   onsourceselected={handleDataSourceSelected}
-                ></c-data-source-selector-page>
+                  onprevious={handleBackToStep}
+                ></c-data-source>
               </template>
 
               <!-- Step 2: CSV Uploader -->

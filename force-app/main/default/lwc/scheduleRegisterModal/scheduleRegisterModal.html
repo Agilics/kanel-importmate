@@ -1,0 +1,54 @@
+<!--Add Schedule modal -->
+<template>
+   <section class="modal__header" role="presentation">
+        <div
+          class=""
+          role="dialog"
+          aria-modal="true"
+          aria-label="Preview settings"
+        >
+          <header class="fm-modal__header">
+            <h2>Preview settings</h2>
+          </header>
+          <div class="modal__body">
+               <div class="form-group">
+                  <!-- ComboBox for Select Frequency DAILY | WEEKLY | MONTHLY -->
+                  <label for="frequency" class="form-label ">Frequency</label>
+                  <lightning-combobox
+                  class="frequency-combobox rounded-input"
+                  name="frequency"
+                  label="Frequency"
+                  id="frequency"
+                  value={selectedFrequency}
+                  options={picklistValues}
+                  onchange={handleFrequencyChange}
+                  ></lightning-combobox>
+               </div>
+               <div class="form-group">
+                  <!-- Next Run date time picker  on local area -->
+                  <label for="time" class="form-label ">Time</label>
+                  <lightning-input
+                    class="time-input rounded-input"
+                    type="datetime"
+                    label="Time"
+                    id="time"
+                    value={nextRun}
+                    onchange={handleNextRunChange}
+                  >
+                  </lightning-input>
+               </div>
+          </div>
+          <footer class="modal__footer">
+            <button
+              class="btn btn-secondary"
+              onclick={handleCancel}
+            ></button>
+            <button
+              class="btn btn-primary"
+              label="Add Schedule"
+              onclick={handleAddSchedule}
+            ></button>
+          </footer>
+        </div>
+      </section>
+    </template>

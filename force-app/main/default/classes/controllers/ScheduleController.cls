@@ -1,4 +1,11 @@
-
+/**
+ * @description       : 
+ * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @group             : 
+ * @last modified on  : 11-07-2025
+ * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+**/
+  
 public with sharing class ScheduleController {
 
     //création d'une nouvelle planification
@@ -36,11 +43,6 @@ public with sharing class ScheduleController {
       }
     }
 
-    //récupérer les planifications schedules
-    @AuraEnabled(cacheable = true)
-    public static List<Schedule__c> getAllSchedules(){
-       return ScheduleService.getAllSchedules();
-    }
 
 
    // récupérer la planification par l'id
@@ -51,20 +53,37 @@ public with sharing class ScheduleController {
 
     //récupèrer les planifications par la fréquence (DAILY  | WEEKLY | MONTHLY)
     @AuraEnabled(cacheable = true)
-    public static List<Schedule__c>  getSchedulesByFrequency(ImportMateEnum.FrequencyEnum  frequence){
-        return ScheduleService.getSchedulesByFrequency(frequence);
+    public static List<Schedule__c> getSchedulesByFrequencyAndProjectId(ImportMateEnum.FrequencyEnum  frequence,String idProject){
+        return ScheduleService.getSchedulesByFrequencyAndProjectId(frequence,idProject);
     }
 
     // récupérer la planification par le nom du projet
     @AuraEnabled(cacheable = true)
-    public static List<Schedule__c> getSchedulesByProjectName(String name){
+    public static List<ScheduleService.ScheduleWrapper> getSchedulesByProjectName(String name){
         return ScheduleService.getSchedulesByProjectName(name);
     }
- 
+    
+    /**
+     * Récuperer les planification par l'éxécution d'importation
+     */
+    @AuraEnabled(cacheable = true)
+    public static List<ScheduleService.ScheduleWrapper> getSchedulesWithExecutionsByIdProject(Id idProject){
+       return   ScheduleService.getSchedulesWithExecutionsByIdProject(idProject);
+    }
+    
+    /**
+     * Recherche les planifications par le statut d'éxécution
+    */
+    @AuraEnabled(cacheable=true)
+    public static List<ScheduleService.ScheduleWrapper> getSchedulesByExecutionStatusAndIdProject(String status,String idProject){
+      return ScheduleService.getSchedulesByExecutionStatusAndIdProject(status,idProject);
+    }
+
     //supprimer planification par l'id
     @AuraEnabled
     public static void deleteSchedule(Id scheduleId) {
         ScheduleService.deleteScheduleById(scheduleId);
     }
+
 
 }

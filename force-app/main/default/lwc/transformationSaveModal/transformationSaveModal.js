@@ -1,12 +1,15 @@
+/**
+ * @Last Modification: 30-12-2025
+ * @Last Modification By : Mouhamed NIANG
+ * ReadOnly Field Mapping SourceField -> TargetField
+ */
 import { wire, api, track } from 'lwc';
-import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import { log } from 'lightning/logger';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent'; 
 import TRANSFORMATION_OBJECT from '@salesforce/schema/TransformationRule__c'; 
 import LightningModal from 'lightning/modal';
 import RULE_TYPE_FIELD from '@salesforce/schema/TransformationRule__c.RuleType__c';
 
-import createRule from '@salesforce/apex/TransformationController.createRule';
-import applyTransformations from '@salesforce/apex/TransformationController.applyTransformations';
+import createRule from '@salesforce/apex/TransformationController.createRule'; 
 import getPickListValues from '@salesforce/apex/TransformationController.getPickListValues';
 import getAllMappingsByProjectId from '@salesforce/apex/FieldMappingController.getAllMappingsByProjectId';
 
@@ -46,7 +49,7 @@ export default class TransformationSaveModal extends LightningModal {
     // Handlers UI
     // ------------------------
     get mappingInfo(){
-        return `${this.mapping.sourceColumn} -> ${this.mapping.targetField}`
+        return ` ${this.mapping.sourceColumn} -> ${this.mapping.targetField} `
     }
 
 
@@ -141,8 +144,9 @@ export default class TransformationSaveModal extends LightningModal {
                 if (this.fields.length === 0) {
                     return this.toastErr('Veuillez sélectionner un champ email');
                 }
-                break;
-    
+                break; 
+            default:
+                break
         }
 
         return true;
@@ -175,6 +179,7 @@ export default class TransformationSaveModal extends LightningModal {
            
             const rule = await createRule(payload);
             const ruleId = rule.Id; 
+            this.dispatchEvent(new CustomEvent('refresh')); //refresh the rules list
             
             this.close(ruleId);
             
@@ -300,7 +305,7 @@ export default class TransformationSaveModal extends LightningModal {
             
             // Options pour le combobox "Mapping Field"
             this.fieldMappingOptions = data.map(m => ({
-                label: `${m.targetField} → ${m.sourceField || m.version}`,
+                label: `${m.targetField} → ${m.sourceField || m.targetField }`,
                 value: m.id
             }));
             
@@ -354,21 +359,22 @@ export default class TransformationSaveModal extends LightningModal {
     }
 
     // ------------------------
-    // Gestion centralisée des erreurs
-    // ------------------------
-    handleError(error) {
-        let errorMessage = 'Erreur inconnue';
-        if (error.body) {
-            if (error.body.message) {
-                errorMessage = error.body.message;
-            } else if (error.body.pageErrors && error.body.pageErrors.length > 0) {
-                errorMessage = error.body.pageErrors[0].message;
-            } else if (error.body.fieldErrors) {
-                errorMessage = JSON.stringify(error.body.fieldErrors);
-            }
-            } else if (error.message) {
-                errorMessage = error.message;
-            }
-            this.showToast('Erreur', errorMessage, 'error');
+// Gestion centralisée des erreurs
+// ------------------------
+handleError(error) {
+    let errorMessage = 'Erreur inconnue';
+    
+    if (error.body) {
+        if (error.body.message) {
+            errorMessage = error.body.message;
+        } else if (error.body.pageErrors && error.body.pageErrors.length > 0) {
+            errorMessage = error.body.pageErrors[0].message;
+        } else if (error.body.fieldErrors) {
+            errorMessage = JSON.stringify(error.body.fieldErrors);
         }
+        } else if (error.message) {
+            errorMessage = error.message;
+        }
+        this.showToast('Erreur', errorMessage, 'error');
+    }
 }

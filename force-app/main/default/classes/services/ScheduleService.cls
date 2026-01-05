@@ -2,19 +2,24 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 11-23-2025
- * @last modified by  : khalidousowba
+ 
+ * @last modified on  : 12-24-2025
+ * @last modified by  mouhamed niang
 **/
 public with sharing class ScheduleService{
-    public enum FrequencyEnum {
-        DAILY ,
-        WEEKLY ,
-        MONTHLY
+    // Classe wrapper pour contenir le schedule et ses importations d'executions
+    public class ScheduleWrapper {
+        @AuraEnabled
+        public Schedule__c schedule { get; set; } //attribut avec getters & setters
+        @AuraEnabled
+        public List<ImportExecution__c> importExecutions { get; set; }
+        
+        //constructeur par défaut
+        public ScheduleWrapper(){
+
+        }
     }
 
-    
-
-    
      /**
      * Mettre à jour et enregistrement  d'une planification  Schedule__c
      */
@@ -85,28 +90,42 @@ public with sharing class ScheduleService{
         }
 
     /**
-    *Récupérer toutes les planifications
+    *Récupérer toutes les planifications avec les éxécutions importés
     */
-    public static List<Schedule__c> getAllSchedules() {
+    public static List<ScheduleService.ScheduleWrapper>  getSchedulesWithExecutionsByIdProject(Id idProject) {
        
         try {  
             if(SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType)) {
-                return   ScheduleRepository.getAllSchedules();    
+                return   ScheduleRepository.getSchedulesWithExecutionsByIdProject(idProject);    
             }
-            return new List<Schedule__c>();
+            return new List<ScheduleService.ScheduleWrapper>();
         } catch (ApplicationException e) {
                 ErrorLogService.logException(e);
                 throw new ApplicationException(e.getMessage());
             }
-        }
+    }
+    /**
+     * Filter planifications par le statut d'éxécution d'importé et par l'id du projet
+     */
+      public static List<ScheduleService.ScheduleWrapper> getSchedulesByExecutionStatusAndIdProject(String status,String idProject) {
+        try {  
+            if(SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType)) {
+                return   ScheduleRepository.getSchedulesByExecutionStatusAndIdProject(status,idProject);    
+            }
+            return new List<ScheduleService.ScheduleWrapper>();
+        } catch (ApplicationException e) {
+                ErrorLogService.logException(e);
+                throw new ApplicationException(e.getMessage());
+            }
+    }
 
     /**
      *Filtrer par fréquence (DAILY | WEEKLY | MONTHLY)
     */
-     public static List<Schedule__c> getSchedulesByFrequency(ImportMateEnum.FrequencyEnum frequence) {
+     public static List<Schedule__c> getSchedulesByFrequencyAndProjectId(ImportMateEnum.FrequencyEnum frequence,String idProject) {
        try {
             if(SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType)) {
-                return  ScheduleRepository.getSchedulesByFrequency(frequence);   
+                return  ScheduleRepository.getSchedulesByFrequencyAndProjectId(frequence,idProject);   
             }
             return new List<Schedule__c>();
         } catch (ApplicationException e) {
@@ -131,24 +150,26 @@ public with sharing class ScheduleService{
     }
 
 
-     /**
+    /**
      * Recherche les planifications par le nom du projet
     */
-     public static List<Schedule__c> getSchedulesByProjectName(String name) {
+     public static List<ScheduleWrapper> getSchedulesByProjectName(String name) {
        try {
             if(SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType)) {
-                return  ScheduleRepository.getSchedulesByProjectName(name);   
+                if(String.isNotBlank(name)) {
+                    return  ScheduleRepository.getSchedulesByProjectName(name);     
+                } else {
+                    return new List<ScheduleWrapper>();
+                }
             }
-            return new List<Schedule__c>();
+            return new List<ScheduleWrapper>();
         } catch (ApplicationException e) {
             ErrorLogService.logException(e);
             throw new ApplicationException(e.getMessage());
         }  
     } 
 
-     
-
-
+   
     
     //Execution automatique
  public static void runDueSchedules() {

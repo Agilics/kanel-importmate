@@ -124,6 +124,65 @@ export default class DataSourceSelector extends LightningElement {
     })
   );
 }
+ 
+
+handleStartMapping(evt) {
+  const detail = (evt && evt.detail) || {};
+
+  try {
+    // 1) Headers from SOQL / CSV
+    this.mappingHeadersCsv = (detail.headersCsv || '').trim();
+
+    // 2) Target object: from event, else from project
+    const rp = this.recentProject || {};
+    const fromProject =
+      rp.TargetObject__c ??
+      rp.Target_Object__c ??
+      rp.Target__c ??
+      rp.targetObject ??
+      '';
+    this.mappingTargetObject =
+      (detail.targetObject || '').trim() || fromProject || '';
+
+    // 3) Determine effective project id
+    const effectiveProjectId = rp.Id || detail.projectId || '';
+
+    // if we only had id in the event, make sure recentProject at least has Id
+    if (!rp.Id && detail.projectId) {
+      this.recentProject = { ...(this.recentProject || {}), Id: detail.projectId };
+    }
+
+    // 4) Move to step 3
+    this.currentStep = 3;
+
+    // 5) Optional nice scroll
+    if (typeof window !== 'undefined' && typeof window.scrollTo === 'function') {
+      try {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } catch (e) {
+        // ignore scroll issues in Locker
+      }
+    }
+    console.log('[Main] handleStartMapping OK', {
+      headersCsv: this.mappingHeadersCsv,
+      mappingTargetObject: this.mappingTargetObject,
+      projectId: effectiveProjectId
+    });
+  } catch (err) {
+    this.dispatchEvent(
+      new ShowToastEvent({
+        title: 'Open mapper failed',
+        message:
+          (err && err.message) ||
+          'Could not open the Field Mapping step.',
+        variant: 'error'
+      })
+    );
+    console.error('[Main] handleStartMapping CATCH', err, detail);
+  }
+}
+
+ 
  handleBackToMain() {
   this.dispatchEvent(
     new CustomEvent("previous", {
@@ -131,5 +190,5 @@ export default class DataSourceSelector extends LightningElement {
       composed: true
     })
   );
-}
+} 
 }
