@@ -40,5 +40,5 @@ export default class DataSourceSelectorCard extends LightningElement {
   handleNagivation() {
     console.log("Button clicked!");
     this.dispatchEvent(new CustomEvent("cardaction"));
-  }
+  } 
 }

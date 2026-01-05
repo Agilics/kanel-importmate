@@ -28,22 +28,21 @@
 
     <!-- CSV -->
     <template if:true={showCSV}>
-      <c-csv-uploader
+      <c-csv-uploader 
           current-project={currentProject}
           oncsvloaded={handleCsvLoaded}
           ongotomapping={handleGoToMapping}
-      >
+      > 
       </c-csv-uploader>
     </template>
 
     <!-- SOQL -->
-    <template if:true={showSOQL}>
+    <template if:true={showSOQL}> 
     <c-soql-builder
         project-target-object={projectTargetObject}
         onsoqlbuilt={handleSoqlBuilt}
         onstartmapping={handleStartMappingFromSoql}
     ></c-soql-builder>
-
     </template>
   </div>
    <c-backbutton onback={handleBackToMain}></c-backbutton>

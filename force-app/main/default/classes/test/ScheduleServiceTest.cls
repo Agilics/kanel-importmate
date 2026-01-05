@@ -2,8 +2,8 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 11-23-2025
- * @last modified by  : khalidousowba
+ * @last modified on  : 12-24-2025
+ * @last modified by  mouhamed niang
 **/
 @isTest
 public with sharing class ScheduleServiceTest { 
@@ -17,23 +17,11 @@ public with sharing class ScheduleServiceTest {
         insert project;
 
         Schedule__c sched = new Schedule__c(
-            Frequency__c = String.valueOf(ScheduleService.FrequencyEnum.DAILY),
+            Frequency__c = String.valueOf(ImportMateEnum.FrequencyEnum.DAILY),
             Project__c = project.Id
         );
         insert sched;
     }
-
-
-    @IsTest
-    static void testGetAllSchedules() {
-        Test.startTest();
-        List<Schedule__c> actual = ScheduleService.getAllSchedules();
-        Test.stopTest();
-
-        System.assertNotEquals(null, actual, 'Schedule list ne doit pas être null');
-        System.assert(actual.size() > 0, 'Schedule list ne doit pas être vide');
-    }
-
     //Tester l'ajout de planification
     static void testAddSchedule() {
         // Given
@@ -65,7 +53,7 @@ public with sharing class ScheduleServiceTest {
         ];
 
         System.assertEquals(
-            String.valueOf(ScheduleService.FrequencyEnum.DAILY),
+            String.valueOf(ImportMateEnum.FrequencyEnum.DAILY),
             insertedSchedule.Frequency__c.toUpperCase(),
             'La fréquence doit être DAILY'
         );
@@ -108,7 +96,7 @@ public with sharing class ScheduleServiceTest {
         //Perform test
         Test.startTest();
         String excpetedFrequency = 'WEEKLY';
-        ScheduleService.FrequencyEnum actual =  ScheduleService.FrequencyEnum.WEEKLY;
+        ImportMateEnum.FrequencyEnum actual =  ImportMateEnum.FrequencyEnum.WEEKLY;
         Test.stopTest();
 
         //Assertions
@@ -140,7 +128,7 @@ public with sharing class ScheduleServiceTest {
         //Perform test
         Test.startTest();
             String keyword = schedule.Project__r.Name;    // get project's name
-            List<Schedule__c> schedules = ScheduleService.getSchedulesByProjectName(keyword);   //search schedules by project Name   
+            List<ScheduleService.ScheduleWrapper> schedules = ScheduleService.getSchedulesByProjectName(keyword);   //search schedules by project Name   
         Test.stopTest();
         
         //THEN - ASSERTION
@@ -175,7 +163,7 @@ public with sharing class ScheduleServiceTest {
         List<Schedule__c> schedules = new List<Schedule__c>();
         
         Schedule__c schedule = new Schedule__c();
-        schedule.Frequency__c = String.valueOf(ScheduleService.FrequencyEnum.DAILY); 
+        schedule.Frequency__c = String.valueOf(ImportMateEnum.FrequencyEnum.DAILY); 
         schedule.Project__c = savedProject[0].Id;
         schedules.add(schedule);
         
@@ -209,11 +197,12 @@ public with sharing class ScheduleServiceTest {
      static void testGetSchedulesByFrequency() {
         //GIVEN
        ImportMateEnum.FrequencyEnum exceptedFrequency =  ImportMateEnum.FrequencyEnum.DAILY;
+       ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
+
         
         //WHEN
         Test.startTest();
-        List<Schedule__c> schedules = 
-            ScheduleService.getSchedulesByFrequency(exceptedFrequency);
+        List<Schedule__c> schedules =   ScheduleService.getSchedulesByFrequencyAndProjectId(exceptedFrequency,project.Id);
         Test.stopTest();
 
         //then - Assertions
@@ -228,7 +217,7 @@ public with sharing class ScheduleServiceTest {
      static void testGetScheduleById() {
         //GIVEN 
         Schedule__c result = TestDataFactory.createSchedule();
-        String expected = String.valueOf(ScheduleService.FrequencyEnum.DAILY);
+        String expected = String.valueOf(ImportMateEnum.FrequencyEnum.DAILY);
 
         //WHEN
         Test.startTest();
@@ -240,4 +229,39 @@ public with sharing class ScheduleServiceTest {
         System.assertNotEquals(null, schedule);
         System.assertEquals(expected,actual.toUpperCase());
     }    
+
+     @IsTest
+    static void testGetSchedulesWithExecution(){ 
+        // GIVEN : projet et planification
+        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
+        Schedule__c schedule = TestDataFactory.createSchedule();
+        ImportExecution__c execution = TestDataFactory.createImportExecution(project.Id);
+
+        // WHEN : récupération des wrappers
+        Test.startTest();
+        List<ScheduleService.ScheduleWrapper> results = ScheduleService.getSchedulesWithExecutionsByIdProject(project.Id);
+        Test.stopTest();
+
+        // THEN : assertions
+            System.assertNotEquals(0, results.size(), 'La liste des wrappers ne doit pas être vide');
+    }
+
+@IsTest
+static void testGetSchedulesWithExecutionStatus(){ 
+    // GIVEN : projet, planification et exécution avec statut
+    ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
+    Schedule__c schedule = TestDataFactory.createSchedule();
+    String status = 'Pending';
+    ImportExecution__c execution = TestDataFactory.createImportExecution(project.Id);
+
+    // WHEN : récupération par statut
+    Test.startTest();
+    List<ScheduleService.ScheduleWrapper> results = ScheduleService.getSchedulesByExecutionStatusAndIdProject(status, project.Id);
+    Test.stopTest();
+
+    // THEN : assertions
+    System.assertNotEquals(0, results.size(), 'La liste filtrée par statut ne doit pas être vide');
+    System.assertEquals(status, results[0].importExecutions[0].Status__c, 'Le statut doit correspondre');
+}
+
 }

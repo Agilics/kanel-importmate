@@ -1,18 +1,19 @@
-import { LightningElement, track,api, wire } from "lwc";
+import { api,track,wire } from 'lwc';
 import SCHEDULE_OBJECT from "@salesforce/schema/Schedule__c";
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 import FREQUENCY_FIELD from "@salesforce/schema/Schedule__c.Frequency__c";
 import getPickListValues from "@salesforce/apex/ScheduleController.getPickListValues";
 import addSchedule from "@salesforce/apex/ScheduleController.addSchedule";
+import { LightningModal } from 'lightning/modal';
 
-export default class ScheduleCreatorComponent extends LightningElement {
-  @track executionDate;
-  @api projectId;
-  nextExecution;
-  @track nextRun;
-  @track picklistValues = []; // list of frequency  DAILY | WEEKLY | MONTHLY
-  @track selectedFrequency = "Daily";
-  @track showSchedule;
+export default class ScheduleRegisterModal extends LightningModal {
+    @api projectId;
+    @track executionDate; 
+    nextExecution;
+    @track nextRun;
+    @track picklistValues = []; // list of frequency  DAILY | WEEKLY | MONTHLY
+    @track selectedFrequency = "Daily";
+    @track showSchedule;
 
   //Récupération des valeurs de la liste de sélection de Frequency__c(Daily | Weekly | Monthly)
   @wire(getPickListValues, {
@@ -51,7 +52,7 @@ export default class ScheduleCreatorComponent extends LightningElement {
   }
 
   //Enregistrement  d'une nouvelle planification
-  async handleAddSchedule(event) {
+  async handleAddSchedule() {
     //Récupération de l'id du projet sélectionné
 
     try {
@@ -82,6 +83,7 @@ export default class ScheduleCreatorComponent extends LightningElement {
         );
 
         this.resetFields(); // Réintialisation de tous les champs de texte | combo box
+        this.close(result);
         //TODO envoyer un boolean pour refresh la liste
         //   this.showSchedule = event.detail;
         // return refreshApex(this.wiredSchedulesResult); //  refresh datatable
