@@ -1,3 +1,8 @@
+/**
+ * @Last Modification: 30-12-2025
+ * @Last Modification By : Mouhamed NIANG
+ * ReadOnly Field Mapping SourceField -> TargetField
+ */
 import { wire, api, track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent'; 
 import TRANSFORMATION_OBJECT from '@salesforce/schema/TransformationRule__c'; 
@@ -44,7 +49,7 @@ export default class TransformationSaveModal extends LightningModal {
     // Handlers UI
     // ------------------------
     get mappingInfo(){
-        return `${this.mapping.version} -> ${this.mapping.sourceColumn} `
+        return ` ${this.mapping.sourceColumn} -> ${this.mapping.targetField} `
     }
 
 
@@ -174,6 +179,7 @@ export default class TransformationSaveModal extends LightningModal {
            
             const rule = await createRule(payload);
             const ruleId = rule.Id; 
+            this.dispatchEvent(new CustomEvent('refresh')); //refresh the rules list
             
             this.close(ruleId);
             
@@ -299,7 +305,7 @@ export default class TransformationSaveModal extends LightningModal {
             
             // Options pour le combobox "Mapping Field"
             this.fieldMappingOptions = data.map(m => ({
-                label: `${m.targetField} → ${m.sourceField || m.version}`,
+                label: `${m.targetField} → ${m.sourceField || m.targetField }`,
                 value: m.id
             }));
             
