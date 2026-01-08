@@ -35,7 +35,7 @@ export default class ScheduleRegisterModal extends LightningModal {
       this.showToast(
         "Error",
         error?.body?.message ||
-          "Erreur lors de la récupération des valeurs des planifications",
+          "Error whil de la récupération des valeurs des planifications",
         "error"
       );
     }

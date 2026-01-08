@@ -11,7 +11,7 @@ import getCompatibleSObjects from "@salesforce/apex/ImportProjectController.getC
 
 
 export default class ProjectFormComponent extends LightningElement {
-     @api projectName = "";
+  @api projectName = "";
   @api description = "";
   @api targetObject = "";
   @track options = [];
