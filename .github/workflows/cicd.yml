@@ -58,7 +58,7 @@ jobs:
       - name: Authenticate to Integration Sandbox
         run: |
           printf "%s" "${{ secrets.SF_JWT_KEY_FILE }}" > jwt.key
-          sf org login jwt --client-id ${{ secrets.SF_CONNECTED_APP_CONSUMER_KEY }} --jwt-key-file jwt.key --username ${{ secrets.SF_INT_USERNAME }} --instance-url ${{ secrets.SF_INT_INSTANCE_URL }} --alias int-sandbox
+          sf org login jwt --client-id ${{ secrets.SF_CONNECTED_APP_CONSUMER_KEY }} --jwt-key-file jwt.key --username ${{ secrets.SF_INT_USERNAME }} --instance-url ${{ secrets.SF_INT_INSTANCE_URL }} 
       - name: Validation complète avec org cible
         run: |
           echo "🔍 Validation complète contre l'org d'intégration..."
