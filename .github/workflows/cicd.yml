@@ -57,8 +57,17 @@ jobs:
         run: npm install -g @salesforce/cli
       - name: Authenticate to Integration Sandbox
         run: |
-          printf "%s" "${{ secrets.SF_JWT_KEY_FILE }}" > jwt.key
-          sf org login jwt --client-id ${{ secrets.SF_CONNECTED_APP_CONSUMER_KEY }} --jwt-key-file jwt.key --username ${{ secrets.SF_INT_USERNAME }} --instance-url ${{ secrets.SF_INT_INSTANCE_URL }} --alias int-sandbox
+          # Create JWT key file
+          echo "$SF_JWT_KEY" | tr -d '\r' > jwt.key
+          chmod 600 jwt.key
+
+          # Authenticate with Salesforce
+          sf org login jwt --client-id "$SF_CLIENT_ID" --jwt-key-file jwt.key --username "$SF_USERNAME" --instance-url "$SF_INSTANCE_URL" --alias int-sandbox
+        env:
+          SF_JWT_KEY: ${{ secrets.SF_JWT_KEY_FILE }}
+          SF_CLIENT_ID: ${{ secrets.SF_CONNECTED_APP_CONSUMER_KEY }}
+          SF_USERNAME: ${{ secrets.SF_INT_USERNAME }}
+          SF_INSTANCE_URL: ${{ secrets.SF_INT_INSTANCE_URL }}
       - name: Validation complète avec org cible
         run: |
           echo "🔍 Validation complète contre l'org d'intégration..."
