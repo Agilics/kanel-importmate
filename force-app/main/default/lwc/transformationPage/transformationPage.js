@@ -136,6 +136,7 @@ export default class TransformationPage extends LightningElement {
   // Gestion du changement d'onglets de transformation
   handleTransformationChange(event) {
     this.activeTransformationTab = event.detail.activetab; 
+    this.pageIndex = 1; // réinitialisation de l'index
   }
 
   // Configuration des icônes
