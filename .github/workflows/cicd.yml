@@ -170,28 +170,60 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-      - name: Synchroniser package-lock.json
-        run: |
-          echo "🔄 Synchronisation du package-lock.json..."
-          rm -f package-lock.json
-          npm install
-          echo "✅ package-lock.json synchronisé"
       - run: npm ci
       - name: Install Salesforce CLI
         run: npm install -g @salesforce/cli
       - name: Authenticate to Packaging DE Org
         run: |
-          printf "%s" "${{ secrets.SF_JWT_KEY_FILE }}" > jwt.key
-          sf org login jwt --client-id ${{ secrets.SF_CONNECTED_APP_CONSUMER_KEY }} --jwt-key-file jwt.key --username ${{ secrets.SF_PKG_USERNAME }} --instance-url ${{ secrets.SF_PKG_INSTANCE_URL }} --alias pkg-org
+          # Create JWT key file
+          echo "$SF_JWT_KEY" | tr -d '\r' > jwt.key
+          chmod 600 jwt.key
+
+          # Authenticate with Salesforce
+          sf org login jwt --client-id "$SF_CLIENT_ID" --jwt-key-file jwt.key --username "$SF_USERNAME" --instance-url "$SF_INSTANCE_URL" --alias pkg-org
+        env:
+          SF_JWT_KEY: ${{ secrets.SF_JWT_KEY_FILE }}
+          SF_CLIENT_ID: ${{ secrets.SF_CONNECTED_APP_CONSUMER_KEY }}
+          SF_USERNAME: ${{ secrets.SF_PKG_USERNAME }}
+          SF_INSTANCE_URL: ${{ secrets.SF_PKG_INSTANCE_URL }}
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y jq
+      - name: Validation complète avec org de packaging
+        run: |
+          echo "🔍 Validation complète contre l'org de packaging..."
+          sf project deploy validate --source-dir force-app --target-org pkg-org
+          echo "✅ Validation complète réussie"
       - name: Create Package if not exists
         run: |
-          sf package create "KANEL-IMPORTMATE" --path force-app --package-type Unmanaged --target-dev-hub pkg-org || echo "Package already exists"
+          echo "📦 Création du package si nécessaire..."
+          if ! sf package list --target-dev-hub pkg-org --json | jq -e '.result[] | select(.Name=="KANEL-IMPORTMATE")' > /dev/null 2>&1; then
+            echo "📦 Le package n'existe pas, création en cours..."
+            sf package create "KANEL-IMPORTMATE" --path force-app --package-type Unmanaged --target-dev-hub pkg-org
+            echo "✅ Package créé avec succès"
+          else
+            echo "ℹ️ Le package existe déjà"
+          fi
       - name: Create Package Version
         id: create_version
         run: |
-          VERSION_ID=$(sf package version create --package "KANEL-IMPORTMATE" --installation-key-bypass --wait 20 --target-dev-hub pkg-org --json | jq -r '.result.SubscriberPackageVersionId')
+          echo "🚀 Création de la version du package..."
+          JSON_OUTPUT=$(sf package version create --package "KANEL-IMPORTMATE" --installation-key-bypass --wait 20 --target-dev-hub pkg-org --json)
+          
+          if [ $? -ne 0 ]; then
+            echo "❌ Erreur lors de la création de la version du package"
+            echo "$JSON_OUTPUT"
+            exit 1
+          fi
+          
+          VERSION_ID=$(echo "$JSON_OUTPUT" | jq -r '.result.SubscriberPackageVersionId // empty')
+          
+          if [ -z "$VERSION_ID" ] || [ "$VERSION_ID" == "null" ]; then
+            echo "❌ Erreur : Impossible d'extraire l'ID de version du package"
+            echo "$JSON_OUTPUT"
+            exit 1
+          fi
+          
+          echo "✅ Version du package créée : $VERSION_ID"
           echo "package_version_id=$VERSION_ID" >> $GITHUB_OUTPUT
       - run: rm -f jwt.key
 
