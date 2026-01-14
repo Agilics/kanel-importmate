@@ -1,4 +1,9 @@
-import { LightningElement, api,wire, track  } from 'lwc';
+/**
+ * @author      : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @created     : 13/01/2026 
+ * @last modified : Mouhamed NIANG
+ */
+import { LightningElement, api, wire, track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 // Import your Apex method to get mappings
 import getAllMappingsByProjectId from '@salesforce/apex/FieldMappingController.getAllMappingsByProjectId';
@@ -38,9 +43,10 @@ export default class TransformationMapperList extends LightningElement {
                  version:m.version,
                  lookupMatchField:m.lookupMatchField,
                  lookupObject:m.lookupObject,
-                 isLookup: m.isLookup,
+                 isLookup: m.isLookup === true,
                  id:m.id
              })); 
+             console.log(JSON.stringify(this.allMappings));
          } else if (error) {
              this.toastErr('Impossible de charger les mappings');
          }
@@ -111,8 +117,12 @@ export default class TransformationMapperList extends LightningElement {
                 (m.sourceColumn || '').toLowerCase().includes(q) ||
                 (m.targetField || '').toLowerCase().includes(q) ||
                 (m.version || '').toLowerCase().includes(q) ||
-                (m.lookupObject || '').toLowerCase().includes(q) ||
-                (m.lookupMatchField || '').toLowerCase().includes(q)
+                (m.isLookup &&
+                    (
+                    (m.lookupObject || '').toLowerCase().includes(q) ||
+                    (m.lookupMatchField || '').toLowerCase().includes(q)
+                    )
+                )
             );
         }
         

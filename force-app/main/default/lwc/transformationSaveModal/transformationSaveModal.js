@@ -1,7 +1,9 @@
 /**
- * @Last Modification: 30-12-2025
+ * @Last Modification: 01-14-2026
  * @Last Modification By : Mouhamed NIANG
- * ReadOnly Field Mapping SourceField -> TargetField
+ * Modifications :
+ * - add boolean value for boolean transformation prevent duplicate rules
+ * - ReadOnly Field Mapping SourceField -> TargetField
  */
 import { wire, api, track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent'; 
@@ -12,6 +14,7 @@ import RULE_TYPE_FIELD from '@salesforce/schema/TransformationRule__c.RuleType__
 import createRule from '@salesforce/apex/TransformationController.createRule'; 
 import getPickListValues from '@salesforce/apex/TransformationController.getPickListValues';
 import getAllMappingsByProjectId from '@salesforce/apex/FieldMappingController.getAllMappingsByProjectId';
+import doesTransformationExist from '@salesforce/apex/TransformationController.doesTransformationExist';
 
 export default class TransformationSaveModal extends LightningModal {
     @api projectId;
@@ -105,44 +108,39 @@ export default class TransformationSaveModal extends LightningModal {
     }
 
     // ------------------------
-    // Validation
+    // Validation Last Update on 01-14-2026
     // ------------------------
 
     validateForm() {
-        console.log('=== VALIDATION ===');
-        console.log('mappingId:', this.mappingId);
-        console.log('ruleType:', this.ruleType);
-        console.log('fields:', this.fields);
-        console.log('separator:', this.separator);
 
         if (!this.mappingId) {
-            return this.toastErr('Veuillez sélectionner un mapping de champ');
+            return this.toastErr(' Field mapping\'s required  ');
         }
 
         if (!this.ruleType) {
-            return this.toastErr('Veuillez sélectionner un type de règle');
+            return this.toastErr('Rule type\'s required .Please choose one rule ');
         }
 
         if ((!this.fields || this.fields.length === 0) && this.ruleType === 'Concatenation') {
-            return this.toastErr('Veuillez sélectionner au moins un champ source');
+            return this.toastErr('Source fields\'s required .Please choose one source field ');
         }
 
         switch (this.ruleType) {
             case 'Concatenation':
                 if (this.fields.length > 3) {
-                    return this.toastErr('Sélectionnez 3 champs maximum pour la concaténation');
+                    return this.toastErr('Maximum for concatenation  is 3 source fields ');
                 }
                 if (!this.separator) {
-                    return this.toastErr('Veuillez sélectionner un séparateur');
+                    return this.toastErr('Please select a separator ');
                 }
                 break;
 
             case 'EmailMasking':
                 if (!this.domain) {
-                    return this.toastErr('Veuillez spécifier un domaine pour le masquage email');
+                    return this.toastErr('Please select a domain');
                 }
                 if (this.fields.length === 0) {
-                    return this.toastErr('Veuillez sélectionner un champ email');
+                    return this.toastErr('Email is required');
                 }
                 break; 
             default:
@@ -153,7 +151,7 @@ export default class TransformationSaveModal extends LightningModal {
     }
 
     // ------------------------
-    // Sauvegarde
+    // Sauvegarde last Update on 01-14-2026
     // ------------------------
     
     
@@ -162,6 +160,23 @@ export default class TransformationSaveModal extends LightningModal {
            
             if (!this.validateForm()) {
                 return;
+            }
+
+             // Extraire sourceColumn et targetField depuis le mapping
+            const sourceColumn = this.mapping?.sourceColumn || '';
+            const targetField = this.mapping?.targetField || '';
+
+            const hasRuleExist = await doesTransformationExist({
+                projectId: this.projectId,
+                sourceColumn: sourceColumn,
+                targetField: targetField,
+                ruleType: this.ruleType.replaceAll(' ', '')
+            });
+ 
+           
+            if (hasRuleExist) {
+                this.close();
+                return this.showToast('Duplication rule', `Rule already exist for this mapping `, 'warning');
             }
         
             this.parameters = this.prepareParameters(this.fields, this.separator,this.booleanValue);
@@ -173,8 +188,7 @@ export default class TransformationSaveModal extends LightningModal {
                 Field: this.fields.join(this.separator.toString()), //source fields here
                 targetValue: this.targetValue, 
             }; 
-
-            console.log('Payload envoyé:', JSON.stringify(payload, null, 2));
+ 
         
            
             const rule = await createRule(payload);
@@ -185,7 +199,8 @@ export default class TransformationSaveModal extends LightningModal {
             
            this.showToast('Success', 'Rule added successfully with record ID:\t'+ ruleId , 'success');
            
-        }catch(error){
+        } catch (error) {
+            console.error('Error creating rule:', error);
            this.handleError(error); 
         }
     }
