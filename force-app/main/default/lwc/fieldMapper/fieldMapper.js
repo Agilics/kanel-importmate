@@ -1,9 +1,16 @@
+/**
+ * @Last modified by:   Mouhamed NIANG
+ * @Last modified time: 2026-01-14
+ * @Modification : - ajout de la méthode de désactivation du bouton continue en l'absence de mapping  
+ */
 import { LightningElement, api, track } from 'lwc';
 import fetchProjects from '@salesforce/apex/FieldMappingController.fetchProjects';
 import fetchObjects from '@salesforce/apex/FieldMappingController.fetchObjects';
 import fetchFields from '@salesforce/apex/FieldMappingController.fetchFields';
 import loadMappings from '@salesforce/apex/FieldMappingController.loadMappings';
 import saveMappingsJson from '@salesforce/apex/FieldMappingController.saveMappingsJson';
+import  getAllMappingsByProjectId from '@salesforce/apex/FieldMappingController.getAllMappingsByProjectId';
+
 
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin } from 'lightning/navigation';
@@ -650,6 +657,9 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
     this.ensureCsvSamplesFromSession();
     this.updateMappedSources();
 
+    //vérifie s'il existe des mappings pour le projet sélectionné
+    await this.checkProjectMappings();
+
     // Charger mapping existant s'il y en a
     await this.applySavedMappings({ silent: true });
   }
@@ -910,6 +920,9 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
         rowsJson: JSON.stringify(payload)
       });
 
+      //vérifie l'existance de mapping pour le projet sélectionné
+      await this.checkProjectMappings();
+
       this.toast('Success', 'Mappings saved.', 'success');
       this._refreshPreviewDebounced();
     } catch (error) {
@@ -1030,6 +1043,37 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
         }
       })
     );
+  }
+
+  @track projectHasMappings = false;
+  @track checkingMappings = false;
+
+  //Vérifie si le projet à des mappings associés
+  async checkProjectMappings() {
+    if (!this.selectedProjectId) {
+      this.projectHasMappings = false;
+      return;
+    }
+
+    this.checkingMappings = true;
+    try {
+      const mappings = await getAllMappingsByProjectId({
+        projectId: this.selectedProjectId
+      });
+      this.projectHasMappings = Array.isArray(mappings) && mappings.length > 0;
+    } catch (e) {
+      this.projectHasMappings = false;
+      console.error('[FieldMapper] checkProjectMappings error', e);
+    } finally {
+      this.checkingMappings = false;
+    }
+}
+
+
+
+  //check if there are mappings for the selected project
+  get  isContinueButtonDisabled() {
+     return !this.selectedProjectId || !this.projectHasMappings || this.checkingMappings;
   }
 
   /** ===== Settings Modal for preview ===== */

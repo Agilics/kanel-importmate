@@ -1,3 +1,8 @@
+/**
+ * @Last Modified by:   Mouhamed NIANG
+ * @Last Modified Date: 01-14-2026 
+ * Modification: ajout méthode de teste doesTransformationRuleExist
+ */
 @isTest
 public class TransformationRepositoryTest {
 
@@ -36,6 +41,75 @@ public class TransformationRepositoryTest {
             
             List<TransformationRule__c> insertedRules = [SELECT Id FROM TransformationRule__c];
             Assert.areEqual(1, insertedRules.size(), 'Rule should be saved successfully');
+        }
+    }
+
+    @isTest
+    static void testDoesTransformationExist_True() {
+        User admin = TestDataFactory.createAdminUser();
+        System.runAs(admin) {
+
+            ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
+            FieldMapping__c mapping = [SELECT Id,SourceColumn__c,TargetField__c FROM FieldMapping__c LIMIT 1];
+
+            TransformationRule__c rule = new TransformationRule__c(
+                Project__c = project.Id,
+                FieldMapping__c = mapping.Id,
+                RuleType__c = 'BooleanTransformation',
+                Parameters__c = '{}',
+                Order__c = 1
+            );
+            insert rule;
+
+        Test.startTest();
+            Boolean result = TransformationRepository.doesTransformationExist(
+                project.Id,
+                mapping.SourceColumn__c,
+                mapping.TargetField__c,
+                'BooleanTransformation'
+            );
+            Test.stopTest();
+
+            Assert.isTrue(result, 'La transformation devrait exister');
+        }
+    }
+
+    @isTest
+    static void testDoesTransformationExist_False_NoRule() {
+        User admin = TestDataFactory.createAdminUser();
+        System.runAs(admin) {
+
+            ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
+            FieldMapping__c mapping = [SELECT Id,SourceColumn__c,TargetField__c FROM FieldMapping__c LIMIT 1];
+
+            Test.startTest();
+            Boolean result = TransformationRepository.doesTransformationExist(
+                project.Id,
+                mapping.SourceColumn__c,
+                mapping.TargetField__c,
+                'BooleanTransformation'
+            );
+            Test.stopTest();
+
+            Assert.isFalse(result, 'Aucune transformation ne devrait exister');
+        }
+    }
+
+    @isTest
+    static void testDoesTransformationExist_InvalidParams() {
+        User admin = TestDataFactory.createAdminUser();
+        System.runAs(admin) {
+
+        Test.startTest();
+        Boolean result = TransformationRepository.doesTransformationExist(
+            null,
+            null,
+            null,
+            null
+        );
+        Test.stopTest();
+
+        Assert.isFalse(result, 'Avec des paramètres invalides, le résultat doit être false');
         }
     }
 

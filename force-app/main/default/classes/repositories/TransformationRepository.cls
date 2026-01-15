@@ -2,10 +2,13 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 12-30-2025
+ * @last modified on  : 01-14-2026
  * @last modified by  : Mouhamed NIANG
- * Modification: ajout  du champs FieldMapping__r.SourceColumn__c à la méthode  getRulesByProjectId
-**/
+ * Modification: 
+ *  -   ajout  du champs FieldMapping__r.SourceColumn__c à la méthode  getRulesByProjectId
+ *  -  ajout  Méthode doesTransformationExist pour gérer le cas où la transformation existe   
+
+ **/
 public with sharing class TransformationRepository {
 
     //save rules
@@ -123,6 +126,50 @@ public with sharing class TransformationRepository {
                 throw new TransformationException('Erreur lors de la suppression de la règle : ' + e.getMessage());
             }
         }
+    }
+ 
+
+     /**
+     * Vérifie si une transformation existe pour un enregistrement source et un type donné
+     *
+     * @param projectId : le projet de la transformation
+     * @param sourceColumn : le champ source de la transformation
+     * @param targetField : le champ cible de la transformation
+     * @param ruleType : le type de la transformation
+     * @return Boolean : true si la transformation existe, false sinon
+     */
+    public static Boolean doesTransformationExist
+    (
+        Id projectId,
+        String sourceColumn,
+        String targetField,
+        String ruleType
+    ) {
+        if(SecurityUtils.isAccessible(Schema.TransformationRule__c.SObjectType)) {
+            try {
+                if (String.isBlank(sourceColumn) ||
+                    String.isBlank(targetField) || 
+                    String.isBlank(ruleType) ||
+                    projectId == null
+                ) {
+                    return false;
+                }
+                
+                Integer countRules = [
+                    SELECT  count() FROM TransformationRule__c
+                    WHERE FieldMapping__r.SourceColumn__c = :sourceColumn
+                    AND FieldMapping__r.TargetField__c = :targetField
+                    AND FieldMapping__r.Project__c = :projectId
+                    LIMIT 1
+                ];
+
+                return countRules > 0;
+            } catch (DmlException e) {
+                ErrorLogService.logException(e);
+                throw new TransformationException('Error while verifying the transformation rule exist: ' + e.getMessage());
+            } 
+        }
+        return false;
     }
 
 }

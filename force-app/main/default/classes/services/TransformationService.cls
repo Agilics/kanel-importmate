@@ -2,8 +2,10 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 12-23-2025
+ * @last modified on  : 01-14-2026
  *  @last modified by mouhamedniang
+ * Modification: 
+ *  -   ajout méthode doesTransformationExist pour gérer la duplication des règles de transformation.
 **/
 public with sharing class TransformationService {
 
@@ -254,6 +256,21 @@ public with sharing class TransformationService {
         } catch (Exception e) {
             ErrorLogService.logException(e);
             throw new TransformationException('Erreur lors de la suppression de la règle : ' + e.getMessage());
+        }
+    }
+    
+    //verifier si une transformation existe 
+    public static Boolean doesTransformationExist( 
+        Id projectId,
+        String sourceColumn,
+        String targetField,
+        String ruleType
+    ){
+        try {
+            return TransformationRepository.doesTransformationExist(projectId,sourceColumn,targetField,ruleType);
+        } catch (Exception e) {
+            ErrorLogService.logException(e);
+            throw new TransformationException('Error during the verification of the rule : ' + e.getMessage());
         }
     }
 

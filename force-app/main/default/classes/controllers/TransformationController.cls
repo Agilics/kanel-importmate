@@ -3,9 +3,11 @@
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
  * @last modified on  : 12-23-2025
- * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
- * add method  deleteTransformationById 
- * add method   getRulesByProjectId
+ * @last modified by  : Mouhamed NIANG
+ * Modification:
+ *  - add method  doesTransformationExist prevent duplicate rules
+ *  - add method  deleteTransformationById 
+ *  - add method   getRulesByProjectId
 **/
 public with sharing class TransformationController {
 
@@ -84,4 +86,18 @@ public with sharing class TransformationController {
       }
     }
 
+    @AuraEnabled
+    public static Boolean doesTransformationExist
+    (
+        Id projectId,
+        String sourceColumn,
+        String targetField,
+        String ruleType
+    ) {
+      try {
+        return TransformationService.doesTransformationExist(projectId, sourceColumn, targetField, ruleType);
+      } catch (Exception e) {
+        throw new TransformationException(e.getMessage());
+      }
+    }
 }

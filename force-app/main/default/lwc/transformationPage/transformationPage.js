@@ -6,16 +6,21 @@ import getRulesByProjectId from "@salesforce/apex/TransformationController.getRu
 import deleteTransformationById from "@salesforce/apex/TransformationController.deleteTransformationById";
 
 import { refreshApex } from '@salesforce/apex';
+const DEFAULT_PAGE_SIZE = 4;
 
 export default class TransformationPage extends LightningElement {
   isWarningBadge = true;
   @api projectId; 
   @wire(searchProjetById, { projectId: "$projectId" }) selectedProject; 
   @track transformationsByMappingId = [];
-  wiredTransformationResults; // données affichées
+  wiredTransformationResults =[]; // données affichées
   _wiredResult; //  résultat du @wire (OBLIGATOIRE pour refreshApex)
   @track mappingId;
-  @track showMappings = false;  
+  @track showMappings = false; 
+  
+   // ===== Pagination =====
+  pageIndex = 1;
+  pageSize = DEFAULT_PAGE_SIZE;
   
   // Paramètre du filtre de transformations
   activeTransformationTab = "all";
@@ -28,8 +33,6 @@ export default class TransformationPage extends LightningElement {
     const { error, data } = result;
 
     if (data) {
-        console.log('Transformations reçues :', JSON.stringify(data));
-
         this.wiredTransformationResults = data.map(rule => {
             const iconConfig = this.getIconConfig(rule.RuleType__c);
             const category = this.getCategory(rule.RuleType__c); 
@@ -45,9 +48,7 @@ export default class TransformationPage extends LightningElement {
                 formattedRules: this.formatRuleContent(rule)
             };
         });
-
-        console.log('Transformations formatées :', this.wiredTransformationResults.length);
-    }
+  }
     else if (error) {
         console.error('Erreur chargement transformations:', error);
         this.wiredTransformationResults = [];
@@ -71,11 +72,25 @@ export default class TransformationPage extends LightningElement {
 
   // Filtrer les transformations selon l'onglet actif
   get filteredTransformations() {
+    if (!this.wiredTransformationResults) return [];
+
     if (this.activeTransformationTab === 'all') {
-      return this.wiredTransformationResults;
+        return this.wiredTransformationResults;
     }
-    return this.wiredTransformationResults.filter(t => t.category === this.activeTransformationTab);
+
+    return this.wiredTransformationResults.filter(
+        t => t.category === this.activeTransformationTab
+    );
   }
+
+
+  //récupèrer le total des transformations filtrées
+  get pagedTransformations() {
+    const start = (this.pageIndex - 1) * this.pageSize;
+    const end = start + this.pageSize;
+    return this.filteredTransformations.slice(start, end);
+  }
+
 
   // Ouverture du modal pour ajouter une nouvelle transformation
   async handleAddTransformation(event) {  
@@ -91,9 +106,7 @@ export default class TransformationPage extends LightningElement {
         onrefresh: async() => await refreshApex(this._wiredResult) // refresh list rule
       });
 
-      this.transformationId = result;
-      console.log(' Transformation créée avec ID:', this.transformationId);
-      
+      this.transformationId = result; 
     } catch (error) {
       console.error('Erreur lors de la création:', error);
       this.showToast('Erreur', 'Impossible de créer la transformation', 'error');
@@ -123,6 +136,7 @@ export default class TransformationPage extends LightningElement {
   // Gestion du changement d'onglets de transformation
   handleTransformationChange(event) {
     this.activeTransformationTab = event.detail.activetab; 
+    this.pageIndex = 1; // réinitialisation de l'index
   }
 
   // Configuration des icônes
@@ -202,6 +216,13 @@ export default class TransformationPage extends LightningElement {
     this.dispatchEvent(new CustomEvent("previous"));
   }
 
+  handlePageChange(event) {
+    const { pageIndex, showingFrom, showingTo } = event.detail;
+    this.pageIndex = pageIndex;
+    this.showingFrom = showingFrom;
+    this.showingTo = showingTo;
+  }
+
   async handleTransformationDelete(event) {
     try { 
       const ruleId = event.detail; 
@@ -212,7 +233,7 @@ export default class TransformationPage extends LightningElement {
           return;
       } 
       await deleteTransformationById({ transformationId: ruleId });
-      await refreshApex(this._wiredResult); // ✅ correction
+      await refreshApex(this._wiredResult);
 
       // Show success toast
       this.dispatchEvent(new ShowToastEvent({
@@ -234,6 +255,10 @@ export default class TransformationPage extends LightningElement {
   // Vérifier s'il y a des transformations
   get isTransformation() { 
     return this.wiredTransformationResults;
+  }
+
+  get hasTransformations() { 
+    return this.pagedTransformations.length > 0;
   }
 
   // Afficher un toast
