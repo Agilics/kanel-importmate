@@ -165,6 +165,16 @@ export default class TransformationPage extends LightningElement {
     this.pageIndex = 1; // réinitialisation de l'index
   }
 
+  resetPaginationIfNeeded() {
+    const total = this.filteredTransformations.length;
+    const maxPage = Math.max(1, Math.ceil(total / this.pageSize));
+
+    if (this.pageIndex > maxPage) {
+      this.pageIndex = maxPage;
+    }
+  }
+
+
   // Configuration des icônes
   getIconConfig(type) {
     switch(type) {
@@ -261,6 +271,8 @@ export default class TransformationPage extends LightningElement {
       await deleteTransformationById({ transformationId: ruleId });
       await refreshApex(this._wiredResult);
 
+      this.resetPaginationIfNeeded(); //refresh pagination
+
       // Show success toast
       this.dispatchEvent(new ShowToastEvent({
         title: 'Success',
@@ -280,11 +292,11 @@ export default class TransformationPage extends LightningElement {
 
   // Vérifier s'il y a des transformations
   get isTransformation() { 
-    return this.wiredTransformationResults;
+    return this.wiredTransformationResults?.length > 0;
   }
 
   get hasTransformations() { 
-    return this.pagedTransformations.length > 0;
+    return this.filteredTransformations.length > 0;
   }
 
   // Afficher un toast
