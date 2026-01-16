@@ -151,7 +151,7 @@ export default class TransformationSaveModal extends LightningModal {
     }
 
     // ------------------------
-    // Sauvegarde last Update on 01-14-2026
+    // Sauvegarde last Update on 01-16-2026
     // ------------------------
     
     
@@ -175,8 +175,12 @@ export default class TransformationSaveModal extends LightningModal {
  
            
             if (hasRuleExist) {
-                this.close();
-                return this.showToast('Duplication rule', `Rule already exist for this mapping `, 'warning');
+                this.close({
+                    success: false,
+                    message: 'Rule already exists',
+                    variant: 'warning'
+                });
+                return;
             }
         
             this.parameters = this.prepareParameters(this.fields, this.separator,this.booleanValue);
@@ -188,20 +192,23 @@ export default class TransformationSaveModal extends LightningModal {
                 Field: this.fields.join(this.separator.toString()), //source fields here
                 targetValue: this.targetValue, 
             }; 
- 
         
-           
             const rule = await createRule(payload);
             const ruleId = rule.Id; 
-            this.dispatchEvent(new CustomEvent('refresh')); //refresh the rules list
-            
-            this.close(ruleId);
-            
-           this.showToast('Success', 'Rule added successfully with record ID:\t'+ ruleId , 'success');
-           
+   
+            this.close({
+                success: true,
+                ruleId: rule.Id
+            });
+  
+             
         } catch (error) {
             console.error('Error creating rule:', error);
-           this.handleError(error); 
+             this.close({
+                success: false,
+                message: error.body?.message || error.message || 'Unknown error',
+                variant: 'error'
+            });
         }
     }
 
