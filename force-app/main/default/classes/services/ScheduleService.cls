@@ -3,14 +3,15 @@
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
  
- * @last modified on  : 12-24-2025
+ * @last modified on  : 01-12-2026
  * @last modified by  mouhamed niang
 **/
 public with sharing class ScheduleService{
     // Classe wrapper pour contenir le schedule et ses importations d'executions
     public class ScheduleWrapper {
+        @AuraEnabled public ImportProject__c project;
         @AuraEnabled
-        public Schedule__c schedule { get; set; } //attribut avec getters & setters
+        public List<Schedule__c> schedules { get; set; } //attribut avec getters & setters
         @AuraEnabled
         public List<ImportExecution__c> importExecutions { get; set; }
         
@@ -26,9 +27,8 @@ public with sharing class ScheduleService{
     public static Id schedule(String frequence,Datetime nextRun,String projectId) {
         try {
             if (
-                SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType) ||
-                SecurityUtils.isAccessible(Schema.ImportProject__c.SObjectType) ||
-                SecurityUtils.isCreateable(Schema.Schedule__c.SObjectType)
+                SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType) &&
+                SecurityUtils.isAccessible(Schema.ImportProject__c.SObjectType) 
             ) {
 
             //Intialisation de la planification
@@ -39,10 +39,15 @@ public with sharing class ScheduleService{
             );
 
                 ScheduleRepository.addSchedule(schedule);
+                
+                if (schedule.Id == null) {
+                    throw new ApplicationException('Failed to create schedule record');
+                }
+
                 String cron = buildCron(schedule.NextRun__c);
                 ScheduleJob scheduler = new ScheduleJob();
-                String name = 'Schedule Apex Job' + Datetime.now().getTime();
-                System.schedule(name, cron, scheduler);
+                String jobName = 'Schedule_' + schedule.Id + '_' + Datetime.now().getTime();
+                System.schedule(jobName, cron, scheduler);
             
                 return schedule.Id;
             }
@@ -61,7 +66,7 @@ public with sharing class ScheduleService{
      public static void deleteScheduleById(String scheduleId) {
         try {
             if(
-                SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType) ||
+                SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType) &&
                 SecurityUtils.isDeletable(Schema.Schedule__c.SObjectType)
             ) {
                 ScheduleRepository.deleteScheduleById(scheduleId);   

@@ -1,0 +1,114 @@
+<!--
+   @description       : 
+   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+   @group             : 
+   @last modified on  : 01-07-2026
+   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+   --> 
+<template>
+   <!-- header content -->
+   <div class="header">
+      <div class={boxIconClass}>
+         <lightning-icon
+            icon-name={iconName} 
+            class={iconClass}
+            size={iconSize}>
+         </lightning-icon>
+      </div>
+      <div class="text-content">
+         <h3 class="title">{titleCard}</h3>
+         <p class="txt subtitle">{subtitleCard}</p>
+      </div>
+   </div>
+   <!-- end header content-->
+   <!-- content --> 
+   <div class="slds-grid slds-wrap slds-gutters p-1">
+      <!-- Immediate Schedule -->
+      <template if:false={showScheduledCard}>
+         <lightning-layout multiple-rows="true" class="full-width">
+            <lightning-layout-item size="12" padding="around-small">
+               <!-- execution mode -->
+               <div class={formGroup}>
+                  <label class={formLabel} for="mode">
+                  Execution Mode 
+                  </label>
+                  <lightning-combobox 
+                     value={executionMode} 
+                     options={modeOptions}
+                     class="form-control"
+                     onchange={handleModeChange}>
+                  </lightning-combobox>
+               </div>
+            </lightning-layout-item>
+            <!-- Batch Size --> 
+            <lightning-layout-item size="12" padding="around-small">
+               <div class={formGroup}>
+                  <label class={formLabel} for="batch-size">
+                  Batch Size
+                  </label>
+                  <lightning-combobox 
+                        options={batchSizeOptions} 
+                        class="form-control" 
+                        id="batch-size"
+                        value={batchSize}
+                        onchange={handleBatchSizeChange}
+                  ></lightning-combobox>
+               </div>
+            </lightning-layout-item>
+            <!-- checkbox --> 
+            <lightning-layout-item size="12" padding="around-small">
+               <lightning-input type="checkbox" checked={sendEmailNotification}
+                     onchange={handleEmailNotificationChange} 
+                     label="Send email notifications on complete">
+               </lightning-input>
+            </lightning-layout-item>
+         </lightning-layout>
+      </template>
+   </div>
+   <!-- end Immediate Schedule --> 
+   <!-- scheduled execution -->
+   <div class="slds-grid slds-wrap slds-gutters p-1">
+      <template if:true={showScheduledCard}>
+         <lightning-layout multiple-rows="true" class="full-width">
+            <lightning-layout-item size="12" padding="around-small">
+               <!-- ComboBox for Select Frequency DAILY | WEEKLY | MONTHLY -->
+               <div class={formGroup}>
+                  <label class={formLabel} for="frequency">
+                  Frequency
+                  </label>
+                  <lightning-combobox
+                     class="frequency-combobox form-control "
+                     name="frequency" 
+                     id="frequency"
+                     value={selectedFrequency}
+                     options={frequencyOptions}
+                     onchange={handleFrequencyChange}
+                     ></lightning-combobox>
+               </div>
+            </lightning-layout-item>
+            <!-- start date time-->
+            <lightning-layout-item size="12"  padding="horizontal-small">
+               <div >
+                  <label for="start-date" class={formLabel}>Start Date & Time</label>
+                  <lightning-input
+                     class="time-input form-control "
+                     type="datetime" 
+                     id="start-date"
+                     value={nextRun}
+                     placeholder="mm/dd/yyyy --:-- --"
+                     onchange={handleNextRunChange}>
+                  </lightning-input>
+               </div>
+            </lightning-layout-item>
+            <!-- footer -->  
+            <lightning-layout-item size="12" padding="horizontal-small">
+               <div class="paragraph is-centered txt regular-text">
+                  Scheduled imports will use the same data source and<br/>
+                  transformations configured in previous steps.
+               </div>
+            </lightning-layout-item>
+         </lightning-layout>
+      </template>
+      <!-- end scheduled execution  -->
+   </div>
+</template>

@@ -2,8 +2,10 @@
  * @description       :  all operations available on Schedule__c Object
  * @author            : mouhamed niang
  * @group             :  
- * @last modified on  : 12-29-2025
+ * @last modified on  : 20-01-2025
  * @last modified by  : mouhamed niang
+ * Modifications : 
+ *  - Mise à jour de la méthode de suppression  deleteScheduleById
 **/
 public with sharing class ScheduleRepository {
     
@@ -24,9 +26,20 @@ public with sharing class ScheduleRepository {
     // Suppression d'une planification par l'id
     public static void deleteScheduleById(String scheduleId) {
         try {
-            delete [SELECT Id FROM Schedule__c WHERE Id = :scheduleId LIMIT 1];
+            // Trouver les jobs Apex liés
+            List<CronTrigger> triggers = [
+                SELECT Id, CronJobDetailId 
+                FROM CronTrigger 
+                WHERE CronJobDetail.Name = :('Schedule__c_' + scheduleId)
+            ];
+
+            for(CronTrigger ct : triggers){
+                System.abortJob(ct.Id);
+            }
+
+            delete [SELECT Id FROM Schedule__c WHERE Id = :scheduleId LIMIT 1]; //suppression
         } catch (DmlException e) {
-            //ErrorLogService.logException(e);
+            ErrorLogService.logException(e);
             throw new ApplicationException(e.getMessage());
         }
     }
@@ -99,6 +112,30 @@ public with sharing class ScheduleRepository {
         }
     }
 
+      
+    /**
+     * FIX: Méthodes manquantes pour résoudre erreur de compilation
+     * @description: Récupérer exécutions par projets (TOUS les statuts)
+     * @param projectIds Set d'Ids de projets
+     * @return Map<Id, List<ImportExecution__c>> Exécutions groupées par projet
+     */
+    private static Map<Id, List<ImportExecution__c>> getExecutionsByProject(Set<Id> projectIds) {
+        return getExecutionsByProject(projectIds, null);
+    }
+
+    /**
+     * @description Récupérer exécutions par projets ET statut
+     * @param projectIds Set d'Ids de projets
+     * @param status Statut à filtrer
+     * @return Map<Id, List<ImportExecution__c>> Exécutions filtrées
+     */
+    private static Map<Id, List<ImportExecution__c>> getExecutionsByProjectAndStatus(
+        Set<Id> projectIds, 
+        String status
+    ) {
+        return getExecutionsByProject(projectIds, status);
+    }
+
     public static List<Schedule__c> getPastSchedules() {
         if(SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType)){
             try {
@@ -141,7 +178,7 @@ public with sharing class ScheduleRepository {
                 }
 
                 // Map des exécutions par projet (tous statuts)
-                Map<Id, List<ImportExecution__c>> executionsByProject =getExecutionsByProject(projectIds);                
+                Map<Id, List<ImportExecution__c>> executionsByProject =getExecutionsByProject(projectIds,null);                
                 
                 // Créer les wrappers (Schedule & ImportExecution)
                 results = buildScheduleWrapper(schedules, executionsByProject);
@@ -193,13 +230,15 @@ public with sharing class ScheduleRepository {
         return new List<Schedule__c>();
     }
 
+
     // Créer les schedules wrappers
     private static List<ScheduleService.ScheduleWrapper> buildScheduleWrapper(List<Schedule__c> schedules, Map<Id, List<ImportExecution__c>> executionsByProject) {
         List<ScheduleService.ScheduleWrapper> results = new List<ScheduleService.ScheduleWrapper>();
         
         for (Schedule__c schedule : schedules) {
             ScheduleService.ScheduleWrapper wrapper = new ScheduleService.ScheduleWrapper();
-            wrapper.schedule = schedule;
+            wrapper.schedules = new List<Schedule__c>{ schedule };
+
             if (schedule.Project__c != null && executionsByProject.containsKey(schedule.Project__c)) {
                 wrapper.importExecutions = executionsByProject.get(schedule.Project__c);
             } else {
@@ -210,53 +249,34 @@ public with sharing class ScheduleRepository {
         return results;
     }
 
-       // Filtrer les éxécutions d'importations  (Mapper des executions par projet)
-    private static Map<Id, List<ImportExecution__c>> getExecutionsByProject(Set<Id> projectIds){
-        Map<Id, List<ImportExecution__c>> executionsByProject = new Map<Id, List<ImportExecution__c>>();
-        if (!projectIds.isEmpty() && SecurityUtils.isAccessible(Schema.ImportExecution__c.SObjectType)) {
-                List<ImportExecution__c> executions = [
-                    SELECT Id, Status__c, StartTime__c, EndTime__c, 
-                           TotalRecords__c, ProcessedRecords__c, FailedRecords__c,
-                           Project__c
-                    FROM ImportExecution__c
-                    WHERE Project__c IN :projectIds
-                    ORDER BY StartTime__c DESC
-                ];
-            
-            // On crée un Map avec comme clé l'ID du projet et valeur Liste de projets éxécutés
-            for (ImportExecution__c exec : executions) {
-                if (!executionsByProject.containsKey(exec.Project__c)) {
-                    executionsByProject.put(exec.Project__c, new List<ImportExecution__c>());
-                }
-                // insertion suivant l'id du projet de l'éxécution projet dans la liste
-                executionsByProject.get(exec.Project__c).add(exec);
+    // Filtrer les éxécutions d'importations  (Mapper des executions par projet)
+     // Récupérer les executions liées à un projet, optionnellement filtrées par status 
+     private static Map<Id, List<ImportExecution__c>> getExecutionsByProject(Set<Id> projectIds, String status) {
+
+            Map<Id, List<ImportExecution__c>> result = new Map<Id, List<ImportExecution__c>>();
+
+            if (projectIds.isEmpty()) return result;
+
+
+            if (status != null) {
+                String request = ' AND Status__c = :status';
             }
-       }
-       return executionsByProject;
+
+            String request = ' ORDER BY StartTime__c DESC';
+
+            String query =
+                'SELECT Id, Status__c, StartTime__c, EndTime__c, ' +
+                'TotalRecords__c, ProcessedRecords__c, FailedRecords__c, Project__c ' +
+                'FROM ImportExecution__c WHERE Project__c IN :projectIds' + request;
+
+            for (ImportExecution__c exec : Database.query(query)) {
+                if (!result.containsKey(exec.Project__c)) {
+                    result.put(exec.Project__c, new List<ImportExecution__c>());
+                }
+                result.get(exec.Project__c).add(exec);
+            }
+
+            return result;
     }
 
-    //filtrer par le status d'execution d'importation et par le projet
-    private static Map<Id, List<ImportExecution__c>> getExecutionsByProjectAndStatus(Set<Id> projectIds,String status){
-        Map<Id, List<ImportExecution__c>> executionsByProject = new Map<Id, List<ImportExecution__c>>();
-        if (!projectIds.isEmpty() && SecurityUtils.isAccessible(Schema.ImportExecution__c.SObjectType)) {
-                List<ImportExecution__c> executions = [
-                    SELECT Id, Status__c, StartTime__c, EndTime__c, 
-                           TotalRecords__c, ProcessedRecords__c, FailedRecords__c,
-                           Project__c
-                    FROM ImportExecution__c
-                    WHERE Project__c IN :projectIds AND Status__c=: status
-                    ORDER BY StartTime__c DESC
-                ];
-            
-            // On crée un Map avec comme clé l'ID du projet et valeur Liste de projets éxécutés
-            for (ImportExecution__c exec : executions) {
-                if (!executionsByProject.containsKey(exec.Project__c)) {
-                    executionsByProject.put(exec.Project__c, new List<ImportExecution__c>());
-                }
-                // insertion suivant l'id du projet de l'éxécution projet dans la liste
-                executionsByProject.get(exec.Project__c).add(exec);
-            }
-       }
-       return executionsByProject;
-    }       
 }

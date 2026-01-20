@@ -277,4 +277,3 @@ export default class ImportResults extends LightningElement {
         this.dispatchEvent(evt);
     }
 }
-

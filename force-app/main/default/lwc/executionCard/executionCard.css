@@ -1,0 +1,252 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  margin-bottom: 1rem;
+  gap: 1rem;
+}
+
+.is-centered{
+   display: flex;
+   align-items: center;
+   justify-content: center;
+} 
+
+.box-icon {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  border-radius: 12px;
+  flex-shrink: 0;
+}
+
+.label{
+  font-family: Inter;
+  font-weight: 500;
+  font-style: Medium;
+  font-size: 14px; 
+  line-height: 100%;
+  letter-spacing: 0%;
+
+}
+
+.box-icon-immediate{
+  background: #DBEAFE;
+}
+
+.box-icon-scheduled {
+  background: #F3E8FF;
+}
+
+/*Icons style*/
+ 
+ 
+
+/*Add the class name below to the lightning-icon element.*/
+.custom-icon-connected_apps { 
+ --slds-c-icon-color-foreground-default: #1e40af;
+ --slds-c-icon-color-background: transparent;
+}
+
+.custom-icon-calendar {
+  --slds-c-icon-color-foreground-default: #9333EA;
+  --slds-c-icon-color-background: transparent;
+}
+
+.text-content {
+  flex: 1;
+  min-width: 0;
+  padding: 0 ;
+}
+
+.title {
+  font-family: "Inter", sans-serif;
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 1.4;
+  color: #111827; 
+  word-wrap: break-word;
+}
+
+.subtitle {
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #4b5563;
+}
+
+
+.p-1{
+  padding: 0 0.5rem;
+}
+
+/*form controls */
+.form-control,
+lightning-input,
+lightning-combobox {
+  width: 100%;
+  margin: 0 0 0.75rem 0;
+} 
+.full-width {
+   width: 100%;
+}
+
+.full-width lightning-combobox,
+.full-width .slds-combobox_container {
+   width: 100%;
+}
+ 
+
+.paragraph{
+  background:#F9FAFB;
+  max-width: 430px;
+  height: 72px;
+  border-radius: 8px; 
+  opacity: 1; 
+  padding: 0 10px 5px ; 
+}
+
+/* Responsive breakpoints */
+/* Large devices (desktops, 992px and up)*/
+@media (min-width: 992px) { 
+   
+}
+
+/* Extra large devices (large desktops, 1200px and up)*/
+@media (min-width: 1200px) { 
+  
+}
+
+/* Tablettes et petits écrans (≤ 768px) */
+@media screen and (max-width: 768px) {
+  .card {
+    max-width: 100%;
+    padding: 1.25rem;
+    margin: 1rem auto;
+  }
+
+  .header {
+    gap: 0.75rem;
+  }
+
+
+  .title {
+    font-size: 18px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+  }
+
+  .item {
+    font-size: 14px;
+  }
+
+  .btn {
+    font-size: 15px;
+    height: 44px;
+  }
+}
+
+/* Mobiles (≤ 480px) */
+@media screen and (max-width: 480px) {
+  .card {
+    padding: 1rem;
+    margin: 0.75rem auto;
+    border-radius: 8px;
+  }
+
+  .header {
+    gap: 0.625rem;
+    flex-wrap: nowrap;
+  }
+
+  .box-icon {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    border-radius: 8px;
+  }
+
+  .title {
+    font-size: 16px;
+    line-height: 1.3;
+  }
+
+  .subtitle {
+    font-size: 13px;
+  }
+
+  
+ 
+
+  .item {
+    font-size: 13px;
+  }
+
+  .btn {
+    font-size: 14px;
+    height: 42px;
+  }
+}
+
+/* Petits mobiles (≤ 375px) */
+@media screen and (max-width: 375px) {
+  .card {
+    padding: 0.875rem;
+  }
+
+  .box-icon {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+  }
+
+  .title {
+    font-size: 15px;
+  }
+
+  .subtitle {
+    font-size: 12px;
+  }
+
+  .item {
+    font-size: 12px;
+  }
+
+  .btn {
+    font-size: 13px;
+    height: 40px;
+  }
+}
+
+/* Très petits mobiles (≤ 320px) */
+@media screen and (max-width: 320px) {
+  .card {
+    padding: 0.75rem;
+  }
+
+  .box-icon {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+  }
+
+  .title {
+    font-size: 14px;
+  }
+
+  .subtitle {
+    font-size: 11px;
+  }
+
+  .item {
+    font-size: 11px;
+  }
+
+  .btn {
+    font-size: 12px;
+    height: 38px;
+  }
+}
