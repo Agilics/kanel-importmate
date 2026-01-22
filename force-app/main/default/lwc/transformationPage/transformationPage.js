@@ -1,3 +1,10 @@
+/**
+ * @author : Mouhamed NIANG
+ * @date : 16/01/2026 
+ * @description : This component is used to display the transformations of a project
+ * @Modification : 
+ *  - modified the handleAddTransformation method to refresh the list of transformations 
+ */
 import { LightningElement, api, wire, track } from "lwc";
 import TransformationModal from 'c/transformationSaveModal';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
@@ -102,14 +109,33 @@ export default class TransformationPage extends LightningElement {
         targetObject: this.selectedProject?.data?.TargetObject__c,
         label: 'Add New rule',
         mappingId: event.detail.mappingId,
-        mapping: event.detail.mapping,
-        onrefresh: async() => await refreshApex(this._wiredResult) // refresh list rule
+        mapping: event.detail.mapping
       });
 
-      this.transformationId = result; 
+       if (!result) return;
+
+        if (result.success) {
+            await refreshApex(this._wiredResult);
+
+            this.showToast(
+                'Success',
+                `Rule created successfully`,
+                'success'
+            );
+        } else {
+            this.showToast(
+                'Warning',
+                result.message,
+                result.variant || 'warning'
+            );
+        }
     } catch (error) {
       console.error('Erreur lors de la création:', error);
-      this.showToast('Erreur', 'Impossible de créer la transformation', 'error');
+         this.showToast(
+            'Error',
+            error.message || 'Error creating rule',
+            'error'
+        );
     }
   }
 
@@ -138,6 +164,16 @@ export default class TransformationPage extends LightningElement {
     this.activeTransformationTab = event.detail.activetab; 
     this.pageIndex = 1; // réinitialisation de l'index
   }
+
+  resetPaginationIfNeeded() {
+    const total = this.filteredTransformations.length;
+    const maxPage = Math.max(1, Math.ceil(total / this.pageSize));
+
+    if (this.pageIndex > maxPage) {
+      this.pageIndex = maxPage;
+    }
+  }
+
 
   // Configuration des icônes
   getIconConfig(type) {
@@ -235,6 +271,8 @@ export default class TransformationPage extends LightningElement {
       await deleteTransformationById({ transformationId: ruleId });
       await refreshApex(this._wiredResult);
 
+      this.resetPaginationIfNeeded(); //refresh pagination
+
       // Show success toast
       this.dispatchEvent(new ShowToastEvent({
         title: 'Success',
@@ -254,11 +292,11 @@ export default class TransformationPage extends LightningElement {
 
   // Vérifier s'il y a des transformations
   get isTransformation() { 
-    return this.wiredTransformationResults;
+    return this.wiredTransformationResults?.length > 0;
   }
 
   get hasTransformations() { 
-    return this.pagedTransformations.length > 0;
+    return this.filteredTransformations.length > 0;
   }
 
   // Afficher un toast
