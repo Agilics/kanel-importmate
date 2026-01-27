@@ -8,6 +8,8 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { subscribe, unsubscribe, onError } from 'lightning/empApi';
 import { parseCsvData } from 'c/utility';
 
+const SS_SETTINGS_KEY = 'IM_dryRunValidatorSettings_v1';
+
 export default class DryRunValidator extends LightningElement {
   @api projectId = '';
   @api csvData = null;
@@ -25,8 +27,8 @@ export default class DryRunValidator extends LightningElement {
   @track selectedErrors = new Set();
 
   // Tabs filter
-  @track activeIssueTab = 'errors'; 
-  @track warningResults = [];       
+  @track activeIssueTab = 'errors';
+  @track warningResults = [];
 
   // Real-time progress (EMP)
   @track importStatus = null;
@@ -36,12 +38,32 @@ export default class DryRunValidator extends LightningElement {
   @track isAsyncValidation = false;
   @track initialTotalRecords = 0;
 
+  // ===== NEW: Settings / Extended validation =====
+  @track isSettingsOpen = false;
+  @track settings = {
+    mode: 'full', // 'full' | 'sample'
+    sampleSize: 50,
+    asyncThreshold: 200,
+    includeWarnings: true,
+    stopOnFirstErrorClientSide: false,
+    defaultTab: 'errors', // 'errors' | 'warnings' | 'all'
+    pageSize: 5
+  };
+
+  // Optional: quick client-side precheck (simple + safe)
+  @track precheck = {
+    totalRows: 0,
+    emptyRows: 0,
+    invalidRows: 0
+  };
+
   subscription = null;
   channelName = '/event/ImportStatusEvent__e';
 
   connectedCallback() {
     this.registerErrorListener();
     this.handleSubscribe();
+    this.restoreSettings();
 
     if (!this.validationResults) {
       this.setDefaultState();
@@ -50,6 +72,95 @@ export default class DryRunValidator extends LightningElement {
 
   disconnectedCallback() {
     this.handleUnsubscribe();
+  }
+
+  /** =========================
+   *  Settings (NEW)
+   *  ========================= */
+  restoreSettings() {
+    try {
+      const raw = sessionStorage.getItem(SS_SETTINGS_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      this.settings = { ...this.settings, ...parsed };
+      // keep pagination in sync
+      this.pageSize = Number(this.settings.pageSize) || 5;
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  persistSettings() {
+    try {
+      sessionStorage.setItem(SS_SETTINGS_KEY, JSON.stringify(this.settings));
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  openSettings() {
+    this.isSettingsOpen = true;
+  }
+
+  closeSettings() {
+    this.isSettingsOpen = false;
+  }
+
+  get modeOptions() {
+    return [
+      { label: 'Full validation (all rows)', value: 'full' },
+      { label: 'Sample validation (subset)', value: 'sample' }
+    ];
+  }
+
+  get tabOptions() {
+    return [
+      { label: 'Errors', value: 'errors' },
+      { label: 'Warnings', value: 'warnings' },
+      { label: 'All issues', value: 'all' }
+    ];
+  }
+
+  get pageSizeOptions() {
+    return [
+      { label: '5', value: '5' },
+      { label: '10', value: '10' },
+      { label: '20', value: '20' },
+      { label: '50', value: '50' }
+    ];
+  }
+
+  handleSettingChange(event) {
+    const name = event.target.name;
+    let value = event.detail?.value;
+
+    // lightning-input checkbox
+    if (event.target.type === 'checkbox') {
+      value = event.target.checked;
+    }
+
+    const next = { ...this.settings };
+
+    if (name === 'sampleSize' || name === 'asyncThreshold') {
+      next[name] = Math.max(1, parseInt(value, 10) || 1);
+    } else if (name === 'pageSize') {
+      next.pageSize = Math.max(1, parseInt(value, 10) || 5);
+    } else {
+      next[name] = value;
+    }
+
+    this.settings = next;
+
+    // sync pageSize instantly
+    this.pageSize = Number(this.settings.pageSize) || 5;
+    this.currentPage = 1;
+
+    this.persistSettings();
+  }
+
+  applyDefaultTabFromSettings() {
+    const t = this.settings?.defaultTab || 'errors';
+    this.activeIssueTab = t;
   }
 
   /** =========================
@@ -115,19 +226,27 @@ export default class DryRunValidator extends LightningElement {
       ? formatted
       : formatted.filter((e) => !((e.errorType || '').toLowerCase().includes('warn')));
 
-    this.warningResults = deducedWarnings;
+    // respect includeWarnings toggle
+    this.warningResults = this.settings.includeWarnings ? deducedWarnings : [];
 
     this.validationResults = {
       ...result,
       validationErrors: realErrors,
       errorCount: typeof result?.errorCount === 'number' ? result.errorCount : realErrors.length,
-      warningCount: typeof result?.warningCount === 'number' ? result.warningCount : deducedWarnings.length
+      warningCount:
+        typeof result?.warningCount === 'number'
+          ? result.warningCount
+          : (this.warningResults || []).length
     };
 
     this.validationExecuted = true;
 
-    // default tab
-    if ((this.validationResults.errorCount || 0) === 0 && (this.validationResults.warningCount || 0) > 0) {
+    // default tab logic:
+    // 1) if settings defaultTab set, use it
+    // 2) else fallback to "warnings if no errors"
+    if (this.settings?.defaultTab) {
+      this.applyDefaultTabFromSettings();
+    } else if ((this.validationResults.errorCount || 0) === 0 && (this.warningResults || []).length > 0) {
       this.activeIssueTab = 'warnings';
     } else {
       this.activeIssueTab = 'errors';
@@ -228,7 +347,6 @@ export default class DryRunValidator extends LightningElement {
       filtered = filtered.filter((issue) => issue.errorType === this.selectedErrorType);
     }
 
-   
     return filtered.map((issue) => ({
       ...issue,
       isSelected: this.selectedErrors.has(issue.id)
@@ -241,7 +359,6 @@ export default class DryRunValidator extends LightningElement {
     const start = (this.currentPage - 1) * this.pageSize;
     const end = Math.min(start + this.pageSize, this.filteredIssues.length);
 
-    
     return this.filteredIssues.slice(start, end).map((issue) => ({
       ...issue,
       levelClass: issue.issueLevel === 'Error' ? 'level-badge level-error' : 'level-badge level-warning'
@@ -632,10 +749,33 @@ export default class DryRunValidator extends LightningElement {
 
     this.warningResults = [];
     this.activeIssueTab = 'errors';
+
+    this.precheck = { totalRows: 0, emptyRows: 0, invalidRows: 0 };
   }
 
   async runDryRun() {
-    await this.runValidation(false);
+    const isSample = (this.settings?.mode || 'full') === 'sample';
+    await this.runValidation(isSample);
+  }
+
+  // Quick precheck (client-side): count empty rows / invalid objects
+  computePrecheck(rows) {
+    const stats = { totalRows: rows.length, emptyRows: 0, invalidRows: 0 };
+    rows.forEach((r) => {
+      if (!r || typeof r !== 'object') {
+        stats.invalidRows += 1;
+        return;
+      }
+      const values = Object.values(r);
+      const allBlank = values.length === 0 || values.every((v) => String(v ?? '').trim() === '');
+      if (allBlank) stats.emptyRows += 1;
+    });
+    return stats;
+  }
+
+  takeSample(rows, n) {
+    const size = Math.max(1, Math.min(rows.length, n));
+    return rows.slice(0, size);
   }
 
   async runValidation(isSample = false) {
@@ -655,11 +795,26 @@ export default class DryRunValidator extends LightningElement {
         return;
       }
 
-      const isLargeDataset = !isSample && parsedData.length > 200;
+      // extended client-side validation option (stop early)
+      this.precheck = this.computePrecheck(parsedData);
+      if (this.settings.stopOnFirstErrorClientSide && this.precheck.invalidRows > 0) {
+        this.showToast(
+          'Error',
+          `Client precheck failed: ${this.precheck.invalidRows} invalid row(s). Fix data then retry.`,
+          'error'
+        );
+        this.isLoading = false;
+        return;
+      }
+
+      const asyncThreshold = Number(this.settings?.asyncThreshold) || 200;
+      const isLargeDataset = !isSample && parsedData.length > asyncThreshold;
 
       let result;
       if (isSample) {
-        result = await validateSample({ projectId: this.projectId, sampleData: parsedData });
+        const sampleSize = Number(this.settings?.sampleSize) || 50;
+        const sample = this.takeSample(parsedData, sampleSize);
+        result = await validateSample({ projectId: this.projectId, sampleData: sample });
       } else {
         result = await runDryRunValidation({ projectId: this.projectId, csvData: parsedData });
       }
