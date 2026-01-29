@@ -136,4 +136,3 @@ public class ExecutionServiceTest {
         Assert.areEqual('Completed', execution.Status__c, 'Should complete immediately for empty data');
     }
 }
-

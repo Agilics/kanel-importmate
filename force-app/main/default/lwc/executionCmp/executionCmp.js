@@ -4,9 +4,26 @@ import startImport from '@salesforce/apex/DryRunController.startImport';
 import { parseCsvData } from 'c/utility';
 import { subscribe, unsubscribe, onError } from 'lightning/empApi';
 
+ 
 export default class ExecutionCmp extends LightningElement {
     @api projectId;
     @api csvData;
+
+    @track frequency='Weekly';
+    @track nextRun = this.convertDateFormat(new Date());
+
+    
+    //convert  date to format year - month - day hours:minutes
+    convertDateFormat(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+    }
+
+
     
     @track executionMode = 'Asynchronous';
     @track batchSize = 200;
@@ -33,23 +50,36 @@ export default class ExecutionCmp extends LightningElement {
     @track currentPage = 1;
     @track pageSize = 10;
     @track selectedErrors = new Set();
-    
+
+    //configuration card  ScheduleExecution 
+    showScheduledExecution = true;
+    hideScheduledExecution = false; 
+    // schedule | Immediate  cards form  style 
+    get formGroup(){return 'form-group';}
+
+    get formLabel(){return 'form-label';}
+
     subscription = null;
     channelName = '/event/ImportStatusEvent__e';
 
     //Execution mode options
-    executionModeOptions = [
-        { label: 'Asynchronous (recommended)', value: 'Asynchronous' },
-        { label: 'Synchronous', value: 'Synchronous' }
-    ];
+    get executionModeOptions () {   
+        return [
+            { label: 'Asynchronous (recommended)', value: 'Asynchronous' },
+            { label: 'Synchronous', value: 'Synchronous' }
+        ];
+    }
 
-    batchSizeOptions = [
-        { label: '50', value: 50 },
-        { label: '100', value: 100 },
-        { label: '200', value: 200 },
-        { label: '500', value: 500 }
-    ];
-
+    get batchSizeOptions (){ 
+        return [
+            { label: '50', value: 50 },
+            { label: '100', value: 100 },
+            { label: '200', value: 200 },
+            { label: '500', value: 500 }
+        ];
+    }
+    
+ 
     connectedCallback() {
         this.registerErrorListener();
     }
@@ -141,12 +171,22 @@ export default class ExecutionCmp extends LightningElement {
         this.executionMode = event.detail.value;
     }
 
-    handleBatchSizeChange(event) {
-        this.batchSize = event.detail.value;
+    handleBatchSizeChange(event) { 
+        this.batchSize = event.detail.value; 
     }
 
     handleEmailNotificationChange(event) {
-        this.sendEmailNotification = event.target.checked;
+        this.sendEmailNotification = event.detail.value;
+    }
+
+     //Mise à jour de la valeur de frequency
+    handleFrequencyChange(event) {
+        this.frequency = event.detail.value;
+    }
+
+    //Mise à next run
+    handlenextRunChange(event) {
+        this.nextRun = this.convertDateFormat(event.detail.value);
     }
 
 
@@ -273,6 +313,8 @@ export default class ExecutionCmp extends LightningElement {
         return false;
     }
 
+  
+
     get importProgressPercentage() {
         return Math.round(this.importProgress || 0);
     }
@@ -309,6 +351,8 @@ export default class ExecutionCmp extends LightningElement {
         }
         return classes;
     }
+
+
 
     processExecutionCompletionFromEvent(message, status) {
         this.isLoading = false;
@@ -377,69 +421,26 @@ export default class ExecutionCmp extends LightningElement {
         }
     }
 
+    /**
+     * transform CSV dta to List<Map<String, String>> format
+     */
+    transformCsvData(csvData) {
+        if (!csvData) {
+            return [];
+        }
 
-  transformCsvData(csvData) {
-  if (!csvData) return [];
+        if (typeof csvData === 'object' && csvData.columns && csvData.allRows) {
+            return this.transformFromObjectFormat(csvData);
+        }
 
-  if (Array.isArray(csvData)) {
-    return csvData.map((r) => (r && typeof r === 'object' ? r : {}));
-  }
+        //If csvData is a string, parse it using utility
+        if (typeof csvData === 'string') {
+            return parseCsvData(csvData);
+        }
 
-
-  if (typeof csvData === 'string') {
-    return parseCsvData(csvData);
-  }
-
-  if (typeof csvData === 'object') {
-    if (Array.isArray(csvData.columns) && Array.isArray(csvData.allRows)) {
-      const rows = this.transformFromValuesFormat(csvData.allRows, csvData.columns);
-      if (rows.length) return rows;
+        return [];
     }
 
-    if (Array.isArray(csvData.columns) && Array.isArray(csvData.rows)) {
-      return this.transformFromPlainObjects(csvData.rows, csvData.columns);
-    }
-    if (Array.isArray(csvData.rows)) {
-      return this.transformFromPlainObjects(csvData.rows);
-    }
-
-    const keys = Object.keys(csvData || {});
-    if (keys.length && typeof csvData[keys[0]] !== 'object') {
-      return [csvData];
-    }
-  }
-
-  return [];
-}
-transformFromValuesFormat(allRows, columns) {
-  if (!Array.isArray(allRows) || !Array.isArray(columns) || !columns.length) return [];
-
-  return allRows.map((row) => {
-    const out = {};
-    columns.forEach((col, i) => {
-      const v = row?.values?.[i]?.value ?? '';
-      out[col] = String(v ?? '');
-    });
-    return out;
-  });
-}
-transformFromPlainObjects(rows, columns) {
-  if (!Array.isArray(rows) || !rows.length) return [];
-
-  if (Array.isArray(columns) && columns.length) {
-    return rows.map((r) => {
-      const out = {};
-      columns.forEach((c) => (out[c] = String(r?.[c] ?? '')));
-      return out;
-    });
-  }
-
-  return rows.map((r) => {
-    const out = {};
-    Object.keys(r || {}).forEach((k) => (out[k] = String(r?.[k] ?? '')));
-    return out;
-  });
-}
     /**
      * transform CSV data from object format (columns + allRows) to List<Map<String, String>>
      */
@@ -470,5 +471,4 @@ transformFromPlainObjects(rows, columns) {
         console.log('Transformed CSV data from object format:', data.length, 'rows');
         return data;
     }
-    
 }

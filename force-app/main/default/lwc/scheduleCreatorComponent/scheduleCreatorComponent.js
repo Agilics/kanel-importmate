@@ -74,12 +74,6 @@ export default class ScheduleCreatorComponent extends LightningElement {
         nextRun: this.nextRun,
         projectId: this.projectId
       }).then((data) => {
-        //Affichage du message toast de succès
-        this.showToast(
-          "Success",
-          `Schedule  with ID:\t${data}  created  successfully !`,
-          "success"
-        );
 
         this.resetFields(); // Réintialisation de tous les champs de texte | combo box
         //TODO envoyer un boolean pour refresh la liste

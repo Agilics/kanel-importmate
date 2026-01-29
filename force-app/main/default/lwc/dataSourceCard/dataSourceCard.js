@@ -42,4 +42,3 @@ export default class DataSourceCard extends LightningElement {
       this.dispatchEvent(new CustomEvent("cardaction"));
     } 
   }
-  

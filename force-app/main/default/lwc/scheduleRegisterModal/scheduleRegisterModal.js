@@ -1,124 +1,136 @@
-import { api,track,wire } from 'lwc';
-import SCHEDULE_OBJECT from "@salesforce/schema/Schedule__c";
-import { ShowToastEvent } from "lightning/platformShowToastEvent";
-import FREQUENCY_FIELD from "@salesforce/schema/Schedule__c.Frequency__c";
-import getPickListValues from "@salesforce/apex/ScheduleController.getPickListValues";
-import addSchedule from "@salesforce/apex/ScheduleController.addSchedule";
-import { LightningModal } from 'lightning/modal';
+/**
+ * @Last Modification Date : 01-09-2026
+ * @Last Modification By : Mouhamed NIANG
+ * Switch LightningModal extends to LightningElement
+ */
+import { LightningElement, api, track ,wire} from 'lwc';
 
-export default class ScheduleRegisterModal extends LightningModal {
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+
+import SCHEDULE_OBJECT from '@salesforce/schema/Schedule__c';
+import FREQUENCY_FIELD from '@salesforce/schema/Schedule__c.Frequency__c';
+
+import getPickListValues from '@salesforce/apex/ScheduleController.getPickListValues';
+import addSchedule from '@salesforce/apex/ScheduleController.addSchedule';
+
+export default class ScheduleRegisterModal extends LightningElement {
     @api projectId;
-    @track executionDate; 
-    nextExecution;
+    
+
+    @track selectedFrequency = 'Daily';
+    @track picklistValues = [];
     @track nextRun;
-    @track picklistValues = []; // list of frequency  DAILY | WEEKLY | MONTHLY
-    @track selectedFrequency = "Daily";
-    @track showSchedule;
+    @track isLoading = false;
 
-  //Récupération des valeurs de la liste de sélection de Frequency__c(Daily | Weekly | Monthly)
-  @wire(getPickListValues, {
-    objectApiName: SCHEDULE_OBJECT.objectApiName,
-    fieldApiName: FREQUENCY_FIELD.fieldApiName
-  })
-  wiredPicklistValues({ error, data }) {
-    if (data) {
-      this.picklistValues = Object.entries(data).map(([label, value]) => ({
-        label,
-        value
-      }));
-      console.log(data);
-    } else if (error) {
-      console.error(
-        "Erreur lors de la récupération des valeurs de picklist : ",
-        error
-      );
-      this.showToast(
-        "Error",
-        error?.body?.message ||
-          "Error whil de la récupération des valeurs des planifications",
-        "error"
-      );
+    connectedCallback() {
+        // Initialize nextRun with current datetime in the correct format
+        const now = new Date();
+        this.nextRun = this.formatDateTimeLocal(now);
     }
-  }
 
-  //Mise à jour de la valeur de selectedFrequency
-  handleFrequencyChange(event) {
-    this.selectedFrequency = event.target.value;
-  }
-
-  //Mise à jour du champs de la date d'éxécution
-  handleNextRunChange(event) {
-    this.nextRun = event.target.value;
-  }
-
-  //Enregistrement  d'une nouvelle planification
-  async handleAddSchedule() {
-    //Récupération de l'id du projet sélectionné
-
-    try {
-      if(!this.projectId){
-         this.showToast("Error", "Project no were found .Please select one!", "error");
-        return;
-      }
-      if (!this.selectedFrequency || !this.nextRun) {
-        this.showToast("Warning", "All fields are required.", "warning");
-        return;
-      }
-      /**
-       * Création d'une planification via la fréquence , l'id du project
-       * et la date d'éxécution NextRun
-       *  Création d'une tâche Apex
-       */
-
-      const result = await addSchedule({
-        frequency: this.selectedFrequency,
-        nextRun: this.nextRun,
-        projectId: this.projectId
-      }).then((data) => {
-        //Affichage du message toast de succès
-        this.showToast(
-          "Success",
-          `Schedule  with ID:\t${data}  created  successfully !`,
-          "success"
-        );
-
-        this.resetFields(); // Réintialisation de tous les champs de texte | combo box
-        this.close(result);
-        //TODO envoyer un boolean pour refresh la liste
-        //   this.showSchedule = event.detail;
-        // return refreshApex(this.wiredSchedulesResult); //  refresh datatable
-      });
-    } catch (err) {
-      //Affichage d'un toast de message d'erreur
-      this.showToast(
-        "Error",
-        err?.body?.message || "An Error were occured while adding a schedule! ",
-        "error"
-      );
+    /**
+     * Format Date to yyyy-MM-ddThh:mm format for lightning-input type="datetime"
+     */
+    formatDateTimeLocal(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
     }
-  }
 
-  //cancel all actions
-  handleCancel() {
-    this.dispatchEvent(new CustomEvent("cancel"));
-  }
+    /**
+     * Convert local datetime string to ISO format for Apex
+     */
+    convertToISOFormat(dateTimeString) {
+        if (!dateTimeString) return null;
+        
+        // The lightning-input datetime returns format: "yyyy-MM-ddThh:mm"
+        // We need to convert it to ISO format for Salesforce
+        const date = new Date(dateTimeString);
+        
+        // Check if date is valid
+        if (isNaN(date.getTime())) {
+            console.error('Invalid date:', dateTimeString);
+            return null;
+        }
+        
+        return date.toISOString();
+    }
 
-  // réintialisation des valeurs de tous les champs  de textes | combo box
-  resetFields() {
-    // reset valeurs UI
-    this.template.querySelectorAll(".rounded-input").forEach((input) => {
-      input.value = "";
-    });
-  }
+    @wire(getPickListValues, {
+        objectApiName: SCHEDULE_OBJECT.objectApiName,
+        fieldApiName: FREQUENCY_FIELD.fieldApiName
+    })
+    wiredPicklistValues({ error, data }) {
+        if (data) {
+            this.picklistValues = Object.entries(data).map(([label, value]) => ({
+                label,
+                value
+            }));
+        } else if (error) {
+            console.error('Picklist error:', error);
+            this.showToast('Error', 'Unable to load frequencies', 'error');
+        }
+    }
+    
+    handleFrequencyChange(event) {
+        this.selectedFrequency = event.detail.value;
+    }
 
-  //affiche un flash message via un toast
-  showToast(title, message, variant) {
-    const event = new ShowToastEvent({
-      title: title,
-      message: message,
-      variant: variant,
-      mode: "dismissable"
-    });
-    this.dispatchEvent(event);
-  }
+    handleNextRunChange(event) {
+        this.nextRun = event.detail.value; 
+    }
+
+    async handleAddSchedule() {
+        if (!this.projectId) {
+            this.showToast('Error', 'Project context is missing.', 'error');
+            return;
+        }
+
+        if (!this.selectedFrequency || !this.nextRun) {
+            this.showToast('Warning', 'All fields are required.', 'warning');
+            return;
+        }
+
+        // Convert to ISO format for Apex
+        const nextRunISO = this.convertToISOFormat(this.nextRun);
+        
+        if (!nextRunISO) {
+            this.showToast('Error', 'Invalid date/time format', 'error');
+            return;
+        }
+
+        this.isLoading = true;
+
+        try {
+            
+            await addSchedule({
+                frequency: this.selectedFrequency,
+                nextRun: this.nextRun,
+                projectId: this.projectId
+            }); 
+
+          //  this.showToast('Success', 'Schedule added successfully', 'success');
+            this.dispatchEvent(
+                new CustomEvent(
+                    'addschedule'
+                ));
+
+        } catch (err) { 
+            const errorMessage = err?.body?.message || err?.message || 'Error adding schedule';
+            this.showToast('Error', errorMessage, 'error');
+        } finally {
+            this.isLoading = false;
+        }
+    }
+
+    handleCloseModal(event) {
+        this.dispatchEvent(new CustomEvent('closemodal'));
+    }
+
+    showToast(title, message, variant) {
+        this.dispatchEvent(new ShowToastEvent({ title, message, variant }));
+    }
 }

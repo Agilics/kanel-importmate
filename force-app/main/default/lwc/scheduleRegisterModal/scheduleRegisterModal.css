@@ -1,7 +1,25 @@
+:host {
+    --slds-c-modal-content-spacing-block-start: 0;
+    --slds-c-modal-content-spacing-block-end: 0;
+    --slds-c-modal-content-spacing-inline-start: 0;
+    --slds-c-modal-content-spacing-inline-end: 0;
+}
 /* ====== Modals ====== */
-.modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: flex; justify-content: center; align-items: center; z-index: 9999; }
-.modal { background: white; border-radius: 0.6rem; width: 420px; max-height: 85vh; overflow-y: auto; box-shadow: 0 8px 20px rgba(0,0,0,0.25); animation: fadeIn 0.25s ease; }
-.modal__header { background-color: #1E40AF;text-align: center;font-size: 1rem; font-weight: 600; padding: 1rem 1.2rem; border-bottom: 1px solid #eee;color: white; }
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.modal { background: white; border-radius: 1.5rem; width: 420px; max-height: 85vh; overflow-y: auto; box-shadow: 0 8px 20px rgba(0,0,0,0.25); animation: fadeIn 0.25s ease;max-height: none;overflow: visible; }
+.modal__header { background-color: #1E40AF;text-align: center;font-size: 1rem; font-weight: 600; padding: 1rem 1.2rem; border-bottom: 1px solid #eee;color: white;max-height: 60vh;overflow-y: auto; }
 .modal__body { padding: 1rem 1.2rem; }
 .modal__footer { display: flex; justify-content: flex-end; gap: 0.5rem; padding: 0.8rem 1.2rem; border-top: 1px solid #eee; }
 
@@ -70,21 +88,23 @@
 /* Bouton secondaire */
 .btn-secondary {
     background-color: #ffffff;
-    color: #374151;
-    border: 1px solid #d1d5db;
+    color:#1E40AF; 
+    border: 1px solid #0176d3;
     font-weight: 500;
 }
 
 .btn-secondary:hover {
     background-color: #f9fafb;
-    border-color: #9ca3af;
+    border-color: #1e40af;;
 }
 
 .btn-secondary:active {
     background-color: #f3f4f6;
     transform: translateY(1px);
 }
-
+lightning-button-icon.slds-modal__close {
+    display: none;
+}
 
 /* Responsive Design */
 @media (max-width: 768px) {

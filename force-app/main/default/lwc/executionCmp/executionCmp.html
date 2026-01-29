@@ -1,3 +1,10 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 01-07-2026
+  @last modified by  mouhamed niang
+-->
 <template>
     <div class="execution-container">
         <!-- Page Header -->
@@ -8,38 +15,63 @@
                     <p class="header-subtitle">Execute your import or schedule for recurring runs</p>
                 </div>
                 <div class="header-actions">
-                    <lightning-button
-                        label="Schedule Import"
-                        variant="neutral"
+                    <button 
                         onclick={handleScheduleImport}
                         disabled={isScheduleImportDisabled}
-                        icon-name="utility:event"
-                        icon-position="left"
-                        class="schedule-button">
-                    </lightning-button>
-                    <lightning-button
-                        label="Start Import"
-                        variant="brand"
+                        class="btn btn-secondary schedule-button">
+                        <lightning-icon icon-name="utility:event" class="icon secondary-icon"
+                        alternative-text='lightning_component' size='small' title='lightning_component'>
+                        </lightning-icon>
+                        <label style="padding:15px 0 ;">Schedule Import</label>
+                    </button>
+                    <button 
                         onclick={handleStartImport}
-                        disabled={isStartImportDisabled}
-                        icon-name="utility:play"
-                        icon-position="left"
-                        class="start-button">
-                    </lightning-button>
+                        disabled={isStartImportDisabled}  
+                        class="btn btn-primary start-button">
+                        <lightning-icon icon-name="utility:play" class="icon primary-icon"
+                        alternative-text='lightning_component' size='x-small' title='lightning_component'>
+                        </lightning-icon>
+                        Start Import
+                    </button>
                 </div>
             </div>
         </div>
 
-       
+        <!-- Page cards Scheduled | Immediate Execution -->
+        <div class="execution-grid "> 
+            <!-- Immediate Execution Card -->
+            <div class="execution-card">
+                <c-execution-card    
+                    batch-size={batchSize}
+                    batch-size-options={batchSizeOptions}
+                    onbatchsizechange={handleBatchSizeChange}
+                    execution-mode={executionMode}
+                    mode-options={executionModeOptions}
+                    show-scheduled-card={hideScheduledExecution}  
+                    onmodechange={handleExecutionModeChange} 
+                    onsendnotification={handleEmailNotificationChange}>
+                </c-execution-card>
+            </div>
 
+            <!-- Scheduled Execution -->
+            <div class="execution-card">
+                    <c-execution-card 
+                        selected-frequency={frequency}
+                        next-run={nextRun}
+                        show-scheduled-card={showScheduledExecution}
+                        onfrequencychange={handleFrequencyChange}
+                        onnextrunchange={handlenextRunChange}>
+                    </c-execution-card>
+            </div>
+        </div>
         <!-- Import Progress Section -->
         <template if:true={showImportProgress}>
             <div class="progress-section">
                 <div class="progress-header">
                     <div class="progress-header-left">
-                        <lightning-icon 
-                            icon-name={importStatusIconName} 
-                            size="small" 
+                        <lightning-icon
+                            icon-name={importStatusIconName}
+                            size="small"
                             class={statusIconClass}>
                         </lightning-icon>
                         <h2 class="progress-title">Import Execution Status</h2>
@@ -196,18 +228,20 @@
         </template>
 
         <!-- Active Schedules Section -->
-        <!-- <c-scheduled-schedules project-id={projectId}>
-        </c-scheduled-schedules> -->
+        <c-scheduled-schedules project-id={projectId}>
+        </c-scheduled-schedules>
 
         <!-- Navigation Buttons -->
         <div class="navigation-buttons">
-            <lightning-button
-                label="Back to Validation"
-                onclick={handlePreviousStep}
-                variant="neutral"
-                icon-name="utility:left"
-                icon-position="left">
-            </lightning-button>
+            <button type="button" class="btn btn-accent"
+                onclick={handlePreviousStep} >
+                <lightning-icon class="secondary-icon"
+                    size="x-small"
+                    icon-name="utility:left"
+                    icon-position="left">
+                </lightning-icon>
+                <span>Back to Validation</span>
+            </button>
         </div>
     </div>
 </template>

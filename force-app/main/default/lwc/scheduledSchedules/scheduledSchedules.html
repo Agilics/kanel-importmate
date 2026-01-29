@@ -1,0 +1,119 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 01-20-2026
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
+<template>
+    <div class="card" aria-label="list of schedules with status">
+        <div class="spaced-content head-card" aria-label="header">
+            <h2 class="card-title">Active Schedules</h2>
+            <button class="btn btn-primary" onclick={openAddScheduleModal} title="Add Schedule">
+                <lightning-icon icon-name="utility:add" 
+                                class="primary-icon icon"
+                                alternative-text="Add Schedule" size="xx-small">
+                </lightning-icon>
+                <label>Add Schedule</label>
+            </button>
+        </div>
+
+        <div class="footer-separator"></div>
+
+        <!--  Afficher le tableau SI hasSchedules est true -->
+        <template if:true={hasSchedules}>
+            <div class="schedules-container">
+                <table role="grid" aria-label="Schedule Project Table">
+                    <tbody>
+                        <template for:each={scheduledInfos} for:item="schedule">
+                            <tr key={schedule.id}>
+                                <td>
+                                    <div class=" project-cell">
+                                        <div class={schedule.boxIconClass} aria-label="box icon">
+                                            <lightning-icon
+                                                icon-name={schedule.iconStatusName} 
+                                                size="small"
+                                                class={schedule.iconClass}>
+                                            </lightning-icon> 
+                                        </div>
+                                        <div class="project-info">
+                                            <div class="project-name">{schedule.title}</div>
+                                            <div class="project-sub">{schedule.subtitle}</div>
+                                        </div>
+                                    </div>
+                                </td> 
+                                <!--td class="last-execution">{schedule.lastExecution}</td-->
+                                <td>
+                                    <span class={schedule.badgeStatusClass}>{schedule.statusLabel}</span>
+                                </td>
+                                <td class="actions"> 
+                                     
+                                    <!-- Paused / Play Action buttton-->
+                                    <lightning-icon
+                                        icon-name={schedule.iconActionName} 
+                                        onclick={handleToggleStatus}
+                                        data-id={schedule.id}
+                                        size="xx-small" 
+                                        alternative-text="Toggle Status"
+                                        title="Toggle Status"
+                                        class="action-icon">
+                                    </lightning-icon>
+
+                                    <!--edit button--> 
+                                    <lightning-icon
+                                        icon-name="utility:edit"
+                                        onclick={handleEditSchedule}
+                                        class="action-icon"
+                                        variant="neutral"
+                                        title="Edit"
+                                        size="xx-small" 
+                                        data-id={schedule.id}
+                                        disabled={isLoading}>
+                                    </lightning-icon>
+                                   
+                                    <!-- Delete button -->
+                                    <lightning-icon 
+                                        aria-label="Delete"
+                                        data-id={schedule.id}  
+                                        onclick={handleDeleteSchedule}
+                                        icon-name="utility:delete" 
+                                        size="xx-small" 
+                                        title='Delete'
+                                        class="action-icon"
+                                    >
+                                    </lightning-icon>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+            </div>
+            <!-- Pagination -->
+            <!--c-paginator-component
+                page-size={pageSize}
+                page-index={currentPage}
+                onpagechange={handlePageChange}>
+            </c-paginator-component-->
+        </template>
+
+        <!--  Afficher le message SI hasSchedules est false -->
+        <template if:false={hasSchedules}>
+            <div class="no-schedules-container ">
+                <lightning-icon icon-name="custom:custom64" size="large" class="no-schedules-icon"></lightning-icon>
+                <div class="is-centered">
+                    <p class="no-schedules-message">{noSchedulesMessage}</p>
+                </div>
+            </div>
+        </template>
+
+        <!-- Modal Add Schedule -->
+        <template if:true={showAddScheduleModal}>
+            <c-schedule-register-modal 
+                project-id={projectId}
+                show-add-schedule-modal={showAddScheduleModal}
+                onaddschedule={handleAddSchedule}
+                onclosemodal={handleCloseModal}>
+            </c-schedule-register-modal>
+        </template>
+    </div>
+</template>

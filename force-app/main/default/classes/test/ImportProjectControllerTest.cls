@@ -100,4 +100,4 @@ public with sharing class ImportProjectControllerTest {
         //then
         System.assertEquals(expected, hasProject, 'Failed to found the project ');
     }
-} 
+}
