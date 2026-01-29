@@ -2,11 +2,12 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 01-14-2026
+ * @last modified on  : 01-28-2026
  * @last modified by  : Mouhamed NIANG
  * Modification: 
  *  -   ajout  du champs FieldMapping__r.SourceColumn__c à la méthode  getRulesByProjectId
- *  -  ajout  Méthode doesTransformationExist pour gérer le cas où la transformation existe   
+ *  -  ajout  Méthode doesTransformationExist pour gérer le cas où la transformation existe
+ *  - modification de la méthode DoesTransformationExist    
 
  **/
 public with sharing class TransformationRepository {
@@ -154,22 +155,72 @@ public with sharing class TransformationRepository {
                 ) {
                     return false;
                 }
-                
-                Integer countRules = [
-                    SELECT  count() FROM TransformationRule__c
+
+                //  Récupérer les règles existantes pour ce champ
+                List<TransformationRule__c> existingRules = [
+                    SELECT Id, RuleType__c
+                    FROM TransformationRule__c
                     WHERE FieldMapping__r.SourceColumn__c = :sourceColumn
                     AND FieldMapping__r.TargetField__c = :targetField
                     AND FieldMapping__r.Project__c = :projectId
-                    LIMIT 1
                 ];
 
-                return countRules > 0;
+                // Bloquer si le même type existe déjà
+                for (TransformationRule__c rule : existingRules) {
+                    if (rule.RuleType__c == ruleType) {
+                        return true; // transformation déjà existante
+                    }
+                }
+
+                //  Bloquer si on dépasse 3 transformations
+                if (existingRules.size() >= 3) {
+                    throw new TransformationException(
+                        'Maximum of 3 transformations allowed for the same field'
+                    );
+                }
+                
             } catch (DmlException e) {
                 ErrorLogService.logException(e);
                 throw new TransformationException('Error while verifying the transformation rule exist: ' + e.getMessage());
             } 
         }
         return false;
+    }
+
+    
+    // mise à jour des règles
+    public static void updateRule(
+        Id ruleId,
+        String ruleType,
+        String parameters,
+        String sourceFields,
+        String targetValue
+    ) {
+        if (!SecurityUtils.isUpdateable(Schema.TransformationRule__c.SObjectType)) {
+            return;
+        }
+
+        try {
+            TransformationRule__c rule = [
+                SELECT Id
+                FROM TransformationRule__c
+                WHERE Id = :ruleId
+                LIMIT 1
+            ];
+
+            rule.RuleType__c = ruleType;
+            rule.Parameters__c = parameters;
+            rule.SourceFields__c = sourceFields;
+            rule.TargetValue__c = targetValue;
+
+            update rule;
+
+        } catch (DmlException e) {
+            ErrorLogService.logException(e);
+            throw new TransformationException(
+                'Error while updating rule ' + ruleId + ' : ' + e.getMessage()
+            );
+        }
     }
 
 }

@@ -1,9 +1,10 @@
 /**
  * @author : Mouhamed NIANG
- * @date : 16/01/2026 
+ * @date : 28/01/2026 
  * @description : This component is used to display the transformations of a project
  * @Modification : 
  *  - modified the handleAddTransformation method to refresh the list of transformations 
+ *  - add the handleEditTransformation method to refresh the list of transformations 
  */
 import { LightningElement, api, wire, track } from "lwc";
 import TransformationModal from 'c/transformationSaveModal';
@@ -99,36 +100,32 @@ export default class TransformationPage extends LightningElement {
   }
 
 
-  // Ouverture du modal pour ajouter une nouvelle transformation
+  // Ouverture du modal pour ajouter  une nouvelle transformation
   async handleAddTransformation(event) {  
     try {
       const result = await TransformationModal.open({ 
         size: 'large',
-        description: 'Ce modal permet la création de nouvelle règle transformation avec les mappings',
+        description: 'Ce modal permet la création & la modification de nouvelle règle transformation avec les mappings',
         projectId: this.projectId,
-        targetObject: this.selectedProject?.data?.TargetObject__c,
-        label: 'Add New rule',
+        targetObject: this.selectedProject?.data?.TargetObject__c, 
         mappingId: event.detail.mappingId,
-        mapping: event.detail.mapping
+        mapping: event.detail.mapping,
+        isEdit: false,
+
       });
 
        if (!result) return;
 
         if (result.success) {
             await refreshApex(this._wiredResult);
-
+            this.showToast('Success', result.message, 'success');
+          } else {
             this.showToast(
-                'Success',
-                `Rule created successfully`,
-                'success'
+              result.variant === 'error' ? 'Error' : 'Warning',
+              result.message || 'Update cancelled',
+              result.variant || 'warning'
             );
-        } else {
-            this.showToast(
-                'Warning',
-                result.message,
-                result.variant || 'warning'
-            );
-        }
+          }
     } catch (error) {
       console.error('Erreur lors de la création:', error);
          this.showToast(
@@ -257,6 +254,48 @@ export default class TransformationPage extends LightningElement {
     this.pageIndex = pageIndex;
     this.showingFrom = showingFrom;
     this.showingTo = showingTo;
+  }
+
+  async handleEditTransformation(event) {
+    try {
+      const existingRuleId = event.detail.ruleId; 
+      console.log('existingRuleId', existingRuleId);
+      const result = await TransformationModal.open({
+        size: 'large',
+        description: 'Ce modal permet la création et modification de règle transformation avec les mappings',
+        projectId: this.projectId,
+        targetObject: this.selectedProject?.data?.TargetObject__c,
+        mappingId: event.detail.mappingId,
+        mapping: event.detail.mapping,
+        isEdit: event.detail.isEdit,
+        existingRuleId: existingRuleId
+      });
+
+      if (!result) return;
+
+      if (result.success) {
+        await refreshApex(this._wiredResult);
+
+        this.showToast(
+          'Success',
+           result.message,
+          'success'
+        );
+      } else {
+        this.showToast(
+          'Warning',
+          result.message,
+          result.variant || 'warning'
+        );
+      }
+    } catch (error) {
+      console.error('Erreur lors de la création:', error);
+      this.showToast(
+        'Error',
+        error.message || 'Error creating rule',
+        'error'
+      );
+    }
   }
 
   async handleTransformationDelete(event) {

@@ -58,6 +58,11 @@ public with sharing class TransformationController {
         return TransformationService.getRulesByMappingId(mappingId);
     }
 
+    //récuperer une transformation par l'id
+    @AuraEnabled(cacheable = true)
+    public static TransformationRule__c getRuleById(String ruleId) {
+        return TransformationService.getRuleById(ruleId);
+    }
 
       //Récupére les valeurs du picklist
     @AuraEnabled(cacheable = true)
@@ -84,6 +89,21 @@ public with sharing class TransformationController {
         ErrorLogService.logException(e);
         throw new TransformationException('Transformation rule not found : ' + e.getMessage());
       }
+    }
+
+    @AuraEnabled
+    public static void updateRule(Id ruleId,
+        String ruleType,
+        String parameters,
+        String sourceFields,
+        String targetValue
+    ) {
+        try {
+          TransformationRepository.updateRule(ruleId, ruleType,parameters,sourceFields, targetValue);
+        } catch (Exception e) {
+            ErrorLogService.logException(e);
+            throw new TransformationException('Error during the update of the rule : ' + e.getMessage());
+        }
     }
 
     @AuraEnabled

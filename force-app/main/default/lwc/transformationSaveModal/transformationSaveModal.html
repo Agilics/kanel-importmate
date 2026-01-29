@@ -2,11 +2,11 @@
    @description       : 
    @author            : ChangeMeIn@UserSettingsUnder.SFDoc
    @group             : 
-   @last modified on  : 12-01-2025
+   @last modified on  : 28-01-2025
    @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
    -->
 <template>
-   <lightning-modal-header label={label}></lightning-modal-header>
+   <lightning-modal-header label={modalLabel}></lightning-modal-header>
    <lightning-modal-body>
       <div class="slds-form slds-form_stacked">
          <!-- Sélection du mapping -->
@@ -14,37 +14,14 @@
              Mapping Field<abbr class="slds-required" title="required">*</abbr>
             </label>
            <lightning-input  id="fieldMapping" type="text" value={mappingInfo} disabled></lightning-input>
-        <!-- <div class="slds-form-element slds-m-bottom_medium">
-            <label class="slds-form-element__label" for="fieldMapping">
-            Mapping Field<abbr class="slds-required" title="required">*</abbr>
-            </label>
-            <div class="slds-form-element__control">
-               <lightning-combobox id="fieldMapping" name="fieldMapping" value={mappingId}
-                  options={fieldMappingOptions} onchange={handleFieldMappingChange}>
-               </lightning-combobox>
-            </div>
-            <div class="slds-form-element__help">
-               Sélectionnez le mapping de champ auquel appliquer cette transformation
-            </div>
-         </div>
-          -->
-         <!-- Type de règle 
-            <lightning-dual-listbox name="transformations"
-                            label="Select transformations"
-                            source-label="Available"
-                            selected-label="Selected"
-                            options={ruleTypeOptions}
-                            field-level-help="Select your transformation" 
-                            onchange={handleRuleTypeChange}>
-                </lightning-dual-listbox>
-             -->   
+        
          <div class="slds-form-element slds-m-bottom_medium">
             <label class="slds-form-element__label" for="ruleType">
             Rule Type <abbr class="slds-required" title="required">*</abbr>
             </label>
             <div class="slds-form-element__control">
                <lightning-combobox id="ruleType" name="ruleType" value={ruleType} options={ruleTypeOptions}
-                  onchange={handleRuleTypeChange} >
+                  onchange={handleRuleTypeChange} class="rounded-input">
                </lightning-combobox>
             </div>
          </div>
@@ -58,7 +35,7 @@
                   <lightning-dual-listbox id="sourceFields" name="sourceFields" label="Champs sources"
                      source-label="Source Fields" selected-label="Target Fields"
                      options={targetFieldOptions} value={selectedColumns} onchange={handleSourceFieldsChange}
-                     max="3">
+                     max="3" class="rounded-input">
                   </lightning-dual-listbox>
                </div>
                <div class="slds-form-element__help">
@@ -70,7 +47,7 @@
                Separator
                </label>
                <div class="slds-form-element__control">
-                  <lightning-combobox id="separator" name="separator" value={separator} options={separatorOptions}
+                  <lightning-combobox id="separator" name="separator" class="rounded-input"  value={separator} options={separatorOptions}
                      onchange={handleSeparatorChange}>
                   </lightning-combobox>
                </div>
@@ -86,6 +63,7 @@
                         Choose the boolean value <abbr class="slds-required" title="required">*</abbr>
                      </label>
                   <lightning-input  
+                     class="rounded-input"
                      onchange={handleBooleanValueChange}
                      type="toggle"  
                      label='Boolean Value'
@@ -104,12 +82,20 @@
    <lightning-modal-footer>
       <div class="btns">
          <button aria-label="Cancel transformation rule creation" onclick={handleCancel}
-            class="btn btn-secondary">Cancel
+            class="btn btn-secondary">
+            <label>Cancel</label>
          </button>
-         <button aria-label="Save  transformation rule" class="btn btn-primary"
-            onclick={handleSaveTransformation}>
-         Save  rule
-         </button>
+         
+         <template if:true={isEdit}>
+            <button class="btn btn-primary" onclick={handleUpdateRule}>
+               <label>Update rule</label>
+            </button>
+         </template>
+         <template if:false={isEdit}>
+            <button class="btn btn-primary" onclick={handleSaveTransformation}>
+               <label>Save rule</label>
+            </button>
+         </template>
       </div>
    </lightning-modal-footer>
 </template>
