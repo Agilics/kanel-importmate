@@ -24,9 +24,26 @@
           </div>
 
           <p class="header-subtitle">Review and fix data issues before import</p>
+
+          <!-- NEW: Precheck -->
+          <template if:true={precheck.totalRows}>
+            <p class="precheck-line">
+              Precheck: {precheck.totalRows} row(s), {precheck.emptyRows} empty row(s), {precheck.invalidRows} invalid row(s)
+            </p>
+          </template>
         </div>
 
         <div class="header-right">
+          <!-- NEW: Settings -->
+          <lightning-button
+            label="Validation Settings"
+            onclick={openSettings}
+            disabled={isLoading}
+            variant="neutral"
+            icon-name="utility:settings"
+            icon-position="left">
+          </lightning-button>
+
           <lightning-button
             label="Run Validation"
             onclick={runDryRun}
@@ -48,6 +65,105 @@
         </div>
       </div>
     </div>
+
+    <!-- NEW: Settings Modal -->
+    <template if:true={isSettingsOpen}>
+      <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+        <div class="slds-modal__container">
+          <header class="slds-modal__header">
+            <h2 class="slds-text-heading_medium">Validation Settings</h2>
+          </header>
+
+          <div class="slds-modal__content slds-p-around_medium settings-body">
+            <div class="settings-grid">
+              <div class="settings-card">
+                <div class="settings-title">Mode</div>
+                <lightning-combobox
+                  name="mode"
+                  label="Validation mode"
+                  value={settings.mode}
+                  options={modeOptions}
+                  onchange={handleSettingChange}>
+                </lightning-combobox>
+
+                <lightning-input
+                  name="sampleSize"
+                  type="number"
+                  label="Sample size"
+                  value={settings.sampleSize}
+                  onchange={handleSettingChange}
+                  disabled={isLoading}>
+                </lightning-input>
+
+                <div class="settings-help">
+                  Sample size is used only when mode = Sample validation.
+                </div>
+              </div>
+
+              <div class="settings-card">
+                <div class="settings-title">Performance</div>
+                <lightning-input
+                  name="asyncThreshold"
+                  type="number"
+                  label="Async threshold (rows)"
+                  value={settings.asyncThreshold}
+                  onchange={handleSettingChange}>
+                </lightning-input>
+
+                <lightning-combobox
+                  name="pageSize"
+                  label="Table page size"
+                  value={settings.pageSize}
+                  options={pageSizeOptions}
+                  onchange={handleSettingChange}>
+                </lightning-combobox>
+
+                <div class="settings-help">
+                  If total rows &gt; threshold, validation switches to async and listens to platform events.
+                </div>
+              </div>
+
+              <div class="settings-card">
+                <div class="settings-title">Behavior</div>
+
+                <lightning-input
+                  name="includeWarnings"
+                  type="checkbox"
+                  label="Include warnings in the report"
+                  checked={settings.includeWarnings}
+                  onchange={handleSettingChange}>
+                </lightning-input>
+
+                <lightning-input
+                  name="stopOnFirstErrorClientSide"
+                  type="checkbox"
+                  label="Stop early if client precheck finds invalid rows"
+                  checked={settings.stopOnFirstErrorClientSide}
+                  onchange={handleSettingChange}>
+                </lightning-input>
+
+                <lightning-combobox
+                  name="defaultTab"
+                  label="Default tab after validation"
+                  value={settings.defaultTab}
+                  options={tabOptions}
+                  onchange={handleSettingChange}>
+                </lightning-combobox>
+
+                <div class="settings-help">
+                  Warnings display depends on the “Include warnings” toggle.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <footer class="slds-modal__footer">
+            <lightning-button label="Close" variant="neutral" onclick={closeSettings}></lightning-button>
+          </footer>
+        </div>
+      </section>
+      <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
 
     <!-- Progress -->
     <template if:true={importStatus}>
