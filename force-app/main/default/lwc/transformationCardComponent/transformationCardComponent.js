@@ -1,4 +1,4 @@
-import { LightningElement, api } from "lwc";
+import { LightningElement, api,track} from "lwc";
 
 export default class TransformationCardComponent extends LightningElement {
   @api iconName; // nom de l'icône à dispatcher vers TransformationPage
@@ -12,7 +12,9 @@ export default class TransformationCardComponent extends LightningElement {
   @api cardHeadSubtitle;
   @api mappings ;//propriété de mappings dispatcher vers le parent
   @api isWarningBadge = false; 
-  @api ruleId;
+  @api ruleId; 
+ 
+  
 
 
   //Getter style du badge 
@@ -30,7 +32,12 @@ export default class TransformationCardComponent extends LightningElement {
   // modification d'une transformation  dispatcher vers Transformation Page
   handleEditTransformation(event) {
     event.stopPropagation(); // Prevent card click
-   this.dispatchEvent(new CustomEvent("edittransformation"));
+    this.dispatchEvent(new CustomEvent("edittransformation", {
+     
+    detail: {ruleId:this.ruleId, isEdit:true},
+    bubbles: true,
+    composed: true
+    })); 
   }
 
  // Suppression d'une transformation - dispatcher vers Transformation Page

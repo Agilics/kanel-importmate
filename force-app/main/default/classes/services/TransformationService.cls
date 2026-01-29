@@ -248,6 +248,16 @@ public with sharing class TransformationService {
            );
         }
    }
+
+   //récuperer une transformation par l'id
+   public static TransformationRule__c getRuleById(String ruleId) {
+       try {
+           return TransformationRepository.getRuleById(ruleId);
+       } catch (Exception e) {
+           ErrorLogService.logException(e);
+           throw new TransformationException('Error during the retrieval of the rule : ' + e.getMessage());
+       }
+   }
    
     //suppression d'une transformation par l'id
     public static void  deleteRuleById (String ruleId){
@@ -271,6 +281,29 @@ public with sharing class TransformationService {
         } catch (Exception e) {
             ErrorLogService.logException(e);
             throw new TransformationException('Error during the verification of the rule : ' + e.getMessage());
+        }
+    }
+
+    /**
+     * Update a rule
+     * @param Id ruleId 
+     * @param String ruleType
+     * @param JSON  parameters
+     * @param String sourceFields
+     * @param String targetValue
+     */
+     public static void updateRule(
+        Id ruleId,
+        String ruleType,
+        String parameters,
+        String sourceFields,
+        String targetValue
+    )  {
+        try {
+            TransformationRepository.updateRule(ruleId, ruleType,parameters,sourceFields, targetValue);
+        } catch (Exception e) {
+            ErrorLogService.logException(e);
+            throw new TransformationException('Error during the update of the rule : ' + e.getMessage());
         }
     }
 
