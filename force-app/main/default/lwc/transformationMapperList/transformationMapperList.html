@@ -6,7 +6,7 @@
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
-  <div style="margin-bottom: 3.5rem:">
+  <div style="margin-bottom: 3.5rem;">
     <!-- Loading State -->
     <template if:true={isLoading}>
       <div class="card">
@@ -107,10 +107,7 @@
                     <td>{mapping.version}</td>
                     <td>
                       <template if:true={mapping.isLookup}>
-                        <span class="pill pill--yellow">Lookup</span>
-                      </template>
-                      <template if:false={mapping.isLookup}>
-                        <span class="pill pill--green">Direct</span>
+                        <span class="pill pill--green">Lookup</span>
                       </template>
                     </td>
                     <td>
@@ -121,7 +118,7 @@
                         </div>
                       </template>
                       <template if:false={mapping.isLookup}>
-                        <span class="slds-text-color_weak">—</span>
+                        <span class="slds-text-color_weak" style="text-align: center;">—</span>
                       </template>
                     </td>
                     <td class="actions-cell">
@@ -136,7 +133,7 @@
                           class="custom-icon-output"
                           size="x-small"
                         ></lightning-icon>
-                        <span>Transformation</span>
+                        <label>Add Rule</label>
                       </button>
                     </td>
                   </tr>

@@ -31,35 +31,48 @@
          </div>
          <!-- End tabs transformation select -->
          <!-- Liste des transformations -->  
-         <template for:each={filteredTransformations} for:item="t">
-            <c-transformation-card-component
-               key={t.id}
-               rule-id={t.id}
+         <template for:each={pagedTransformations} for:item="t">
+            <c-transformation-card-component 
+               key={t.id} 
+               rule-id={t.id} 
                card-head-title={t.displayTitle}
-               card-head-subtitle={t.displaySubtitle}
+               card-head-subtitle={t.displaySubtitle} 
                icon-name={t.iconName} 
                icon-box-class={t.iconBoxClass}
-               head-icon-class={t.headIconClass}
-               onruledelete = {handleTransformationDelete}
-               >
+               head-icon-class={t.headIconClass} 
+               onruledelete={handleTransformationDelete}
+               onedittransformation={handleEditTransformation}>
             </c-transformation-card-component>
          </template>
+         <!--End List of transformations --> 
+         <!-- Pagination -->
+      <c-paginator-component 
+         items={filteredTransformations}
+         page-size={pageSize} 
+         page-index={pageIndex}
+         onpagechange={handlePageChange}>
+      </c-paginator-component>
+         <!-- End Pagination --> 
       </template>
-      <template if:false={isTransformation} style="margin:1.33rem; ">
-         No transformation added yet.
+      <!-- No transformation rule-->
+      <template if:false={hasTransformations}>
+         <div class="no-rule-container">
+            <lightning-icon icon-name="custom:custom19" size="large" class="no-rule-icon"></lightning-icon>
+            <p class="no-rule-message">No transformation added yet. </p>
+         </div>
       </template>
       <footer class="footer-container">
          <div class="footer-separator"></div>
          <div class="footer-actions">
             <button class="btn btn-secondary" onclick={handleBackToMapping}>
                <lightning-icon icon-name="utility:back" size="x-small"></lightning-icon>
-               <span>Back to Mapping</span>
+               <label>Back to Mapping</label>
             </button>
             <div class="btns">
                <button class="btn btn-secondary" onclick={handleBackToMapping}>
                Save as Template
                </button>
-               <button class="btn-continue btn-primary" onclick={handleNextStep}  >
+               <button class="btn btn-primary" onclick={handleNextStep}  >
                   Continue to Validation
                   <lightning-icon class="icon-inline custom-icon-output" icon-name="standard:output" size="small"></lightning-icon>
                </button>

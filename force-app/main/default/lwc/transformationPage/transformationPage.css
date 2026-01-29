@@ -1,6 +1,13 @@
 .main {
- width:auto;height: 1517px;left: 320px;padding: 1.5rem 2rem; background: #f9fafb; font-family: "Salesforce Sans", Arial, sans-serif;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: 100vh;
+  padding: 1.5rem 2rem;
+  background: #f9fafb;
+  font-family: "Salesforce Sans", Arial, sans-serif;
 }
+
 /* HEADER */
 .header {
   display: flex;
@@ -8,84 +15,75 @@
   align-items: start;
   gap: 1rem;
   margin-bottom: 2rem;
-  width: 1056px;
-  height: 64px;
-
-  opacity: 1;
-  top: 76px;
-  left: 32px;
+  width: 100%;
+  max-width: 1056px;
 }
+
 .text-header {
   display: flex;
   flex-direction: column;
-  column-gap: 20px;
-}
-.header-title {
-  font-weight: 700;
-  font-style: Bold; 
-  font-size: 24px;
-  leading-trim: NONE;
-  line-height: 32px;
-  letter-spacing: 0%;
-  color: #111827;
-}
-.subtitle {
-  font-weight: 400;
-  font-style: Regular;
-  font-size: 16px;
-    font-family:"Inter";
-  line-height: 24px;
-  letter-spacing: 0%;
-  color: #4b5563;
-}
-.actions {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: space-around;
-  align-items: flex-start;
-  align-content: flex-start;
+  gap: 0.5rem;
+  flex: 1;
 }
 
-/* footer action css style*/
+.header-title {
+  font-weight: 700;
+  font-size: clamp(1.25rem, 4vw, 1.5rem);
+  line-height: 1.33;
+  color: #111827;
+  margin: 0;
+}
+
+.subtitle {
+  font-weight: 400;
+  font-size: clamp(0.875rem, 2vw, 1rem);
+  font-family: "Inter", sans-serif;
+  line-height: 1.5;
+  color: #4b5563;
+  margin: 0;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: flex-start;
+}
+
+/* FOOTER */
 .footer-container {
-  margin-top: 12px;
-  padding-bottom: 0.3em;
+  margin-top: 3rem;
   padding-top: 1.5rem;
 }
 
 .footer-separator {
   border-top: 1px solid #e2e8f0;
-  margin: 0 0 3rem 0;
-  width: 990;
-  height: 83;
-  angle: 0 deg;
-  opacity: 1;
-  top: 904px;
-  border-top-width: 1px;
+  margin: 0 0 1.5rem 0;
+  width: 100%;
 }
 
 .footer-actions {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 4px;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .btn {
   display: flex;
   align-items: center;
-  font-size:16px;
-  gap: 0.4rem;
-  padding: 0.6rem 1.2rem;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
   border-radius: 0.5rem;
   font-weight: 500;
-  font-style: Medium;
-  line-height: 100%;
-  letter-spacing: 0%;
-  text-align: center;
+  font-size: 1rem;
+  line-height: 1.5;
   cursor: pointer;
-  transition: all 0.25s ease-in-out; 
+  transition: all 0.25s ease-in-out;
+  white-space: nowrap;
+  border: none;
 }
 
 .btn span {
@@ -96,36 +94,38 @@
   background-color: #ffffff;
   border: 1px solid #d8dde6;
   color: #374151;
-  font-weight: 500;
-  font-style: Medium;
-  font-size: 16px;
-  line-height: 24px;
-  letter-spacing: 0%;
-  text-align: center;
 }
-/*save as template & continue to validation buttons group*/
-.btns{
+
+.btn-secondary:hover {
+  background-color: #f9fafb;
+}
+
+/* Buttons group */
+.btns {
   display: flex;
-  flex-direction: row;
-  row-gap: calc(100% - 5em);
-}
-/* Icône du bouton Continue */
-.custom-icon-output {
-  --slds-c-icon-color-foreground: #ffffff;
-  --slds-c-icon-color-background: #1e40af;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
 .btn-primary {
   background-color: #1e40af;
   color: #ffffff;
   border: none;
-  width: 138.703125px;
-  height: 40px;
-  opacity: 1;
-  border-radius: 8px;
-  top: 1px;
-  left: 189.39px; 
+  min-width: 180px;
+}
 
+.btn-primary:hover {
+  background-color: #1e3a8a;
+}
+
+.btn-continue {
+  min-width: 220px;
+}
+
+/* Icons */
+.custom-icon-output {
+  --slds-c-icon-color-foreground: #ffffff;
+  --slds-c-icon-color-background: #1e40af;
 }
 
 .icon-inline {
@@ -138,11 +138,145 @@
   --slds-c-icon-color-foreground: white;
   --slds-c-icon-color-background: #1e40af;
 }
-.btn-continue {
-  width: 242.28125px;
-  height: 48px;
-  opacity: 1;
-  top: 1px;
-  left: 200.2px;
-  margin-left: 22px;
+
+.no-rule-container{
+  display: flex; 
+  justify-content: center;
+  align-items: center;
+  min-height: 272px;
+  border-radius: 12px;
+  border-width: 1px;
+  border: 1px solid #E2E8F0;
+  box-shadow: 0px 1px 2px 0px #0000000D;
+  background: white;
+  border-radius: 0.75rem;
+  margin: 1.5rem 0 ;
+  padding: 1.5rem 0;
+  transition: box-shadow 0.2s ease; 
+}
+
+.no-rule-message{
+  font-size: 1.125rem;
+  color: #6b7280;
+  margin-left: 2rem;
+  max-width: 400px;
+}
+/* ========== RESPONSIVE MEDIA QUERIES ========== */
+
+/* Tablets (768px and below) */
+@media (max-width: 768px) {
+  .main {
+    padding: 1rem 1.5rem;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .header-title {
+    font-size: 1.5rem;
+  }
+
+  .subtitle {
+    font-size: 0.875rem;
+  }
+
+  .actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .footer-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .btns {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .btn {
+    flex: 1;
+    min-width: auto;
+  }
+
+  .btn-continue {
+    min-width: auto;
+  }
+}
+
+/* Mobile (576px and below) */
+@media (max-width: 576px) {
+  .main {
+    padding: 1rem;
+  }
+
+  .header {
+    margin-bottom: 1.5rem;
+  }
+
+  .header-title {
+    font-size: 1.25rem;
+  }
+
+  .subtitle {
+    font-size: 0.8125rem;
+  }
+
+  .footer-container {
+    margin-top: 2rem;
+    padding-top: 1rem;
+  }
+
+  .footer-separator {
+    margin-bottom: 1rem;
+  }
+
+  .btns {
+    flex-direction: column;
+  }
+
+  .btn {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    font-size: 0.9375rem;
+  }
+
+  .btn span {
+    font-size: 0.9375rem;
+  }
+}
+
+/* Small mobile (400px and below) */
+@media (max-width: 400px) {
+  .main {
+    padding: 0.75rem;
+  }
+
+  .header-title {
+    font-size: 1.125rem;
+  }
+
+  .subtitle {
+    font-size: 0.75rem;
+  }
+
+  .btn {
+    padding: 0.75rem 0.875rem;
+    font-size: 0.875rem;
+  }
+}
+
+/* Large screens (1200px and above) */
+@media (min-width: 1200px) {
+  .main {
+    padding: 2rem 3rem;
+  }
+
+  .header {
+    margin-bottom: 2.5rem;
+  }
 }

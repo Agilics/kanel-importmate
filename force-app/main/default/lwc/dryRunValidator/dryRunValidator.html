@@ -1,36 +1,49 @@
-<!--
-  @description       : Composant pour lancer un dry run de validation et afficher les erreurs
-  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
-  @group             : 
-  @last modified on  : 10-27-2025
-  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
--->
 <template>
   <div class="validation-container">
-    <!-- En-tête de la page -->
+    <!-- Header -->
     <div class="page-header">
       <div class="header-content">
         <div class="header-left">
-          <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.25rem;">
+          <div class="header-row">
             <h1 class="header-title">Data Validation</h1>
+
             <template if:true={validationExecuted}>
               <template if:true={hasErrors}>
                 <span class="error-status-badge">
-                  <lightning-icon icon-name="utility:error" size="xx-small" style="fill: currentColor;"></lightning-icon>
+                  <lightning-icon icon-name="utility:error" size="xx-small"></lightning-icon>
                   Validation completed with errors
                 </span>
               </template>
               <template if:false={hasErrors}>
-                <span class="error-status-badge" style="background-color: #d1fae5; color: #065f46;">
-                  <lightning-icon icon-name="utility:success" size="xx-small" style="fill: currentColor;"></lightning-icon>
+                <span class="error-status-badge success-badge">
+                  <lightning-icon icon-name="utility:success" size="xx-small"></lightning-icon>
                   Validation completed successfully
                 </span>
               </template>
             </template>
           </div>
+
           <p class="header-subtitle">Review and fix data issues before import</p>
+
+          <!-- NEW: Precheck -->
+          <template if:true={precheck.totalRows}>
+            <p class="precheck-line">
+              Precheck: {precheck.totalRows} row(s), {precheck.emptyRows} empty row(s), {precheck.invalidRows} invalid row(s)
+            </p>
+          </template>
         </div>
+
         <div class="header-right">
+          <!-- NEW: Settings -->
+          <lightning-button
+            label="Validation Settings"
+            onclick={openSettings}
+            disabled={isLoading}
+            variant="neutral"
+            icon-name="utility:settings"
+            icon-position="left">
+          </lightning-button>
+
           <lightning-button
             label="Run Validation"
             onclick={runDryRun}
@@ -39,10 +52,11 @@
             icon-name="utility:play"
             icon-position="left">
           </lightning-button>
+
           <lightning-button
-            label="Export Errors"
+            label="Export Report"
             onclick={exportErrors}
-            disabled={hasNoErrors}
+            disabled={isExportDisabled}
             variant="neutral"
             icon-name="utility:download"
             icon-position="left"
@@ -52,24 +66,126 @@
       </div>
     </div>
 
-    <!-- Section de progression de la validation -->
+    <!-- NEW: Settings Modal -->
+    <template if:true={isSettingsOpen}>
+      <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
+        <div class="slds-modal__container">
+          <header class="slds-modal__header">
+            <h2 class="slds-text-heading_medium">Validation Settings</h2>
+          </header>
+
+          <div class="slds-modal__content slds-p-around_medium settings-body">
+            <div class="settings-grid">
+              <div class="settings-card">
+                <div class="settings-title">Mode</div>
+                <lightning-combobox
+                  name="mode"
+                  label="Validation mode"
+                  value={settings.mode}
+                  options={modeOptions}
+                  onchange={handleSettingChange}>
+                </lightning-combobox>
+
+                <lightning-input
+                  name="sampleSize"
+                  type="number"
+                  label="Sample size"
+                  value={settings.sampleSize}
+                  onchange={handleSettingChange}
+                  disabled={isLoading}>
+                </lightning-input>
+
+                <div class="settings-help">
+                  Sample size is used only when mode = Sample validation.
+                </div>
+              </div>
+
+              <div class="settings-card">
+                <div class="settings-title">Performance</div>
+                <lightning-input
+                  name="asyncThreshold"
+                  type="number"
+                  label="Async threshold (rows)"
+                  value={settings.asyncThreshold}
+                  onchange={handleSettingChange}>
+                </lightning-input>
+
+                <lightning-combobox
+                  name="pageSize"
+                  label="Table page size"
+                  value={settings.pageSize}
+                  options={pageSizeOptions}
+                  onchange={handleSettingChange}>
+                </lightning-combobox>
+
+                <div class="settings-help">
+                  If total rows &gt; threshold, validation switches to async and listens to platform events.
+                </div>
+              </div>
+
+              <div class="settings-card">
+                <div class="settings-title">Behavior</div>
+
+                <lightning-input
+                  name="includeWarnings"
+                  type="checkbox"
+                  label="Include warnings in the report"
+                  checked={settings.includeWarnings}
+                  onchange={handleSettingChange}>
+                </lightning-input>
+
+                <lightning-input
+                  name="stopOnFirstErrorClientSide"
+                  type="checkbox"
+                  label="Stop early if client precheck finds invalid rows"
+                  checked={settings.stopOnFirstErrorClientSide}
+                  onchange={handleSettingChange}>
+                </lightning-input>
+
+                <lightning-combobox
+                  name="defaultTab"
+                  label="Default tab after validation"
+                  value={settings.defaultTab}
+                  options={tabOptions}
+                  onchange={handleSettingChange}>
+                </lightning-combobox>
+
+                <div class="settings-help">
+                  Warnings display depends on the “Include warnings” toggle.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <footer class="slds-modal__footer">
+            <lightning-button label="Close" variant="neutral" onclick={closeSettings}></lightning-button>
+          </footer>
+        </div>
+      </section>
+      <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- Progress -->
     <template if:true={importStatus}>
       <div class="validation-progress-section">
         <div class="progress-header">
           <div class="progress-header-left">
             <h2 class="progress-title">Validation Progress</h2>
+
             <template if:true={isImportInProgress}>
               <span class="status-badge in-progress">
                 <span class="status-dot"></span>
                 Validation in progress
               </span>
             </template>
+
             <template if:true={isImportCompleted}>
               <span class="status-badge completed">
                 <span class="status-dot"></span>
                 Completed
               </span>
             </template>
+
             <template if:true={isImportFailed}>
               <span class="status-badge failed">
                 <span class="status-dot"></span>
@@ -77,6 +193,7 @@
               </span>
             </template>
           </div>
+
           <div class="progress-header-right">
             <template if:true={isImportInProgress}>
               <lightning-button
@@ -91,36 +208,35 @@
         </div>
 
         <div class="progress-content">
-          <!-- Progress Bar -->
           <div class="progress-bar-container">
             <div class="progress-info">
-              <span class="progress-numbers">{processedCount}
- of {totalRecordsToProcess} records ({importProgressPercentage}%)</span>
+              <span class="progress-numbers">
+                {processedCount} of {totalRecordsToProcess} records ({importProgressPercentage}%)
+              </span>
             </div>
-            <lightning-progress-bar 
-              value={importProgressPercentage} 
-              variant={progressBarVariant}
-              size="large">
-            </lightning-progress-bar>
+
+            <lightning-progress-bar value={importProgressPercentage} variant={progressBarVariant} size="large"></lightning-progress-bar>
           </div>
 
-          <!-- Statistics Cards -->
           <div class="statistics-grid">
             <div class="stat-card stat-success">
               <div class="stat-number">{validCount}</div>
               <div class="stat-label">Validated</div>
               <div class="stat-percentage">{validPercentage}%</div>
             </div>
+
             <div class="stat-card stat-processing">
               <div class="stat-number">{processingCount}</div>
               <div class="stat-label">Processing</div>
               <div class="stat-percentage">{processingPercentage}%</div>
             </div>
+
             <div class="stat-card stat-error">
               <div class="stat-number">{failedCount}</div>
               <div class="stat-label">Failed</div>
               <div class="stat-percentage">{failedPercentage}%</div>
             </div>
+
             <div class="stat-card stat-remaining">
               <div class="stat-number">{remainingCount}</div>
               <div class="stat-label">Remaining</div>
@@ -128,7 +244,6 @@
             </div>
           </div>
 
-          <!-- Status Message -->
           <template if:true={importMessage}>
             <div class="message-box">
               <lightning-icon icon-name="utility:info" size="x-small"></lightning-icon>
@@ -136,10 +251,9 @@
             </div>
           </template>
 
-          <!-- Execution ID (minimized) -->
           <template if:true={currentExecutionId}>
             <div class="execution-id">
-              <span>Execution ID: </span>
+              <span>Execution ID:</span>
               <code>{currentExecutionId}</code>
             </div>
           </template>
@@ -147,207 +261,205 @@
       </div>
     </template>
 
-    <!-- Section des détails des erreurs (after validation completes) -->
-    <!-- Show error table when validation is executed (sync or async) -->
+    <!-- Validation Report -->
     <template if:true={showValidationSection}>
       <template if:true={validationExecuted}>
-        <template if:true={hasErrors}>
+        <template if:true={hasIssues}>
           <div class="error-details-section">
-            <h2 class="results-title">Error Details</h2>
+            <h2 class="results-title">Validation Report</h2>
 
-            <div class="error-details-content">
-              <!-- Barre de filtre et recherche -->
-              <div class="error-filters">
-                <!-- Tabs pour filtrer par type -->
-                <div class="error-tabs">
-                  <button class="error-tab error-tab-active">
-                    <span class="error-tab-badge error-badge">Errors ({errorCount})</span>
-                  </button>
-                  <button class="error-tab">
-                    <span class="error-tab-badge warning-badge">Warnings ({warningCount})</span>
-                  </button>
-                  <button class="error-tab">
-                    All Issues ({totalIssues})
-                  </button>
-                </div>
+            <div class="error-filters">
+              <div class="error-tabs">
+                <button class={errorsTabClass} data-tab="errors" onclick={handleTabClick}>
+                  <span class="error-tab-badge">Errors ({errorsCount})</span>
+                </button>
 
-                <!-- Recherche et filtres -->
-                <div class="filter-controls">
-                  <div class="search-container">
-                    <lightning-input
-                      type="search"
-                      placeholder="Search errors..."
-                      value={searchTerm}
-                      onchange={handleSearchChange}
-                      variant="label-hidden">
-                    </lightning-input>
-                  </div>
-                  <lightning-combobox
-                    name="errorTypeFilter"
-                    label="Filter"
-                    value={selectedErrorType}
-                    placeholder="All Error Types"
-                    options={errorTypeOptions}
-                    onchange={handleFilterChange}
+                <button class={warningsTabClass} data-tab="warnings" onclick={handleTabClick}>
+                  <span class="error-tab-badge">Warnings ({warningsCount})</span>
+                </button>
+
+                <button class={allTabClass} data-tab="all" onclick={handleTabClick}>
+                  All Issues ({issuesCount})
+                </button>
+              </div>
+
+              <div class="filter-controls">
+                <div class="search-container">
+                  <lightning-input
+                    type="search"
+                    placeholder="Search issues..."
+                    value={searchTerm}
+                    onchange={handleSearchChange}
                     variant="label-hidden">
-                  </lightning-combobox>
+                  </lightning-input>
                 </div>
+
+                <lightning-combobox
+                  name="typeFilter"
+                  label="Filter"
+                  value={selectedErrorType}
+                  placeholder="All Types"
+                  options={errorTypeOptions}
+                  onchange={handleFilterChange}
+                  variant="label-hidden">
+                </lightning-combobox>
               </div>
-
-              <!-- Summary of errors -->
-              <div class="slds-m-bottom_medium">
-                <div class="slds-text-body_regular">
-                  <strong>Total Errors Found: {totalErrorsCount}</strong>
-                  <template if:true={searchTerm}>
-                    <span class="slds-m-left_small">(Filtered: {filteredErrors.length})</span>
-                  </template>
-                </div>
-              </div>
-
-              <!-- Tableau des erreurs -->
-              <template if:true={hasErrors}>
-                <div class="slds-scrollable_x">
-                  <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped">
-                    <thead>
-                      <tr class="slds-line-height_reset">
-                        <th class="slds-text-title_caps" scope="col">
-                          <div class="slds-truncate" title="Select">
-                            <lightning-input type="checkbox" onchange={handleSelectAll}></lightning-input>
-                          </div>
-                        </th>
-                        <th class="slds-text-title_caps" scope="col">
-                          <div class="slds-truncate" title="ROW">ROW</div>
-                        </th>
-                        <th class="slds-text-title_caps" scope="col">
-                          <div class="slds-truncate" title="FIELD">FIELD</div>
-                        </th>
-                        <th class="slds-text-title_caps" scope="col">
-                          <div class="slds-truncate" title="ERROR TYPE">ERROR TYPE</div>
-                        </th>
-                        <th class="slds-text-title_caps" scope="col">
-                          <div class="slds-truncate" title="MESSAGE">MESSAGE</div>
-                        </th>
-                        <th class="slds-text-title_caps" scope="col">
-                          <div class="slds-truncate" title="ACTIONS">ACTIONS</div>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <template if:true={hasErrors}>
-                        <template for:each={paginatedErrors} for:item="error">
-                          <tr key={error.id} class="slds-hint-parent">
-                            <td data-label="Select">
-                              <lightning-input type="checkbox" data-error-id={error.id} onchange={handleErrorSelect} checked={error.isSelected}></lightning-input>
-                            </td>
-                            <td data-label="ROW">
-                              <div class="slds-truncate" title={error.lineNumber}>
-                                Row {error.lineNumber}
-                              </div>
-                            </td>
-                            <td data-label="FIELD">
-                              <div class="slds-truncate" title={error.fieldApiName}>
-                                {error.fieldApiName}
-                              </div>
-                            </td>
-                            <td data-label="ERROR TYPE">
-                              <span class="error-type-badge" data-error-type={error.errorType}>
-                                {error.errorType}
-                              </span>
-                            </td>
-                            <td data-label="MESSAGE">
-                              <div class="slds-truncate" title={error.errorMessage}>
-                                {error.errorMessage}
-                              </div>
-                            </td>
-                            <td data-label="ACTIONS">
-                              <div class="slds-button-group">
-                                <lightning-button-icon
-                                  icon-name="utility:edit"
-                                  size="small"
-                                  onclick={handleEditError}
-                                  data-error-id={error.id}
-                                  title="Edit">
-                                </lightning-button-icon>
-                                <lightning-button-icon
-                                  icon-name="utility:delete"
-                                  size="small"
-                                  onclick={handleDeleteError}
-                                  data-error-id={error.id}
-                                  title="Delete">
-                                </lightning-button-icon>
-                              </div>
-                            </td>
-                          </tr>
-                        </template>
-                        <template if:false={paginatedErrors.length}>
-                          <tr>
-                            <td colspan="7" class="slds-text-align_center slds-p-vertical_medium">
-                              <div class="slds-text-body_regular">No errors match your current filters.</div>
-                            </td>
-                          </tr>
-                        </template>
-                      </template>
-                    </tbody>
-                  </table>
-                </div>
-              </template>
-
-              <!-- Pagination -->
-              <template if:true={hasErrors}>
-                <div class="slds-grid slds-grid_align-spread slds-m-top_medium">
-                  <div class="slds-col">
-                    <p class="slds-text-body_small">
-                      Showing {startRecord} to {endRecord} of {filteredErrors.length} error(s)
-                      <template if:true={searchTerm}>
-                        <span class="slds-text-color_weak">(Total: {totalErrorsCount})</span>
-                      </template>
-                    </p>
-                  </div>
-                  <div class="slds-col">
-                    <template if:true={hasMultiplePages}>
-                      <div class="slds-button-group" role="group">
-                        <lightning-button
-                          label="Previous"
-                          onclick={handlePreviousPage}
-                          disabled={isFirstPage}
-                          variant="neutral">
-                        </lightning-button>
-                        <template for:each={pageButtons} for:item="pageButton">
-                          <lightning-button
-                            key={pageButton.number}
-                            label={pageButton.number}
-                            onclick={handlePageChange}
-                            data-page={pageButton.number}
-                            variant={pageButton.variant}>
-                          </lightning-button>
-                        </template>
-                        <lightning-button
-                          label="Next"
-                          onclick={handleNextPage}
-                          disabled={isLastPage}
-                          variant="neutral">
-                        </lightning-button>
-                      </div>
-                    </template>
-                  </div>
-                </div>
-              </template>
             </div>
+
+            <div class="slds-m-bottom_medium">
+              <div class="slds-text-body_regular">
+                <strong>Total Issues Found: {filteredIssues.length}</strong>
+                <template if:true={searchTerm}>
+                  <span class="slds-m-left_small">(Filtered)</span>
+                </template>
+              </div>
+            </div>
+
+            <!-- Table -->
+            <div class="slds-scrollable_x">
+              <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped">
+                <thead>
+                  <tr class="slds-line-height_reset">
+                    <th class="slds-text-title_caps" scope="col">
+                      <div class="slds-truncate" title="Select">
+                        <lightning-input type="checkbox" onchange={handleSelectAll}></lightning-input>
+                      </div>
+                    </th>
+
+                    <th class="slds-text-title_caps" scope="col">
+                      <div class="slds-truncate" title="LEVEL">LEVEL</div>
+                    </th>
+
+                    <th class="slds-text-title_caps" scope="col">
+                      <div class="slds-truncate" title="ROW">ROW</div>
+                    </th>
+
+                    <th class="slds-text-title_caps" scope="col">
+                      <div class="slds-truncate" title="FIELD">FIELD</div>
+                    </th>
+
+                    <th class="slds-text-title_caps" scope="col">
+                      <div class="slds-truncate" title="TYPE">TYPE</div>
+                    </th>
+
+                    <th class="slds-text-title_caps" scope="col">
+                      <div class="slds-truncate" title="MESSAGE">MESSAGE</div>
+                    </th>
+
+                    <th class="slds-text-title_caps" scope="col">
+                      <div class="slds-truncate" title="ACTIONS">ACTIONS</div>
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  <template for:each={paginatedIssues} for:item="issue">
+                    <tr key={issue.id} class="slds-hint-parent">
+                      <td data-label="Select">
+                        <lightning-input
+                          type="checkbox"
+                          data-error-id={issue.id}
+                          onchange={handleErrorSelect}
+                          checked={issue.isSelected}>
+                        </lightning-input>
+                      </td>
+
+                      <td data-label="LEVEL">
+                        <span class={issue.levelClass}>{issue.issueLevel}</span>
+                      </td>
+
+                      <td data-label="ROW">
+                        <div class="slds-truncate" title={issue.lineNumber}>
+                          <template if:true={issue.lineNumber}>Row {issue.lineNumber}</template>
+                          <template if:false={issue.lineNumber}>—</template>
+                        </div>
+                      </td>
+
+                      <td data-label="FIELD">
+                        <div class="slds-truncate" title={issue.fieldApiName}>{issue.fieldApiName}</div>
+                      </td>
+
+                      <td data-label="TYPE">
+                        <span class="error-type-badge" data-error-type={issue.errorType}>
+                          {issue.errorType}
+                        </span>
+                      </td>
+
+                      <td data-label="MESSAGE">
+                        <div class="slds-truncate" title={issue.errorMessage}>{issue.errorMessage}</div>
+                      </td>
+
+                      <td data-label="ACTIONS">
+                        <div class="slds-button-group">
+                          <lightning-button-icon
+                            icon-name="utility:edit"
+                            size="small"
+                            onclick={handleEditError}
+                            data-error-id={issue.id}
+                            title="Edit">
+                          </lightning-button-icon>
+                          <lightning-button-icon
+                            icon-name="utility:delete"
+                            size="small"
+                            onclick={handleDeleteError}
+                            data-error-id={issue.id}
+                            title="Delete">
+                          </lightning-button-icon>
+                        </div>
+                      </td>
+                    </tr>
+                  </template>
+
+                  <template if:true={hasNoIssuesToDisplay}>
+                    <tr>
+                      <td colspan="7" class="slds-text-align_center slds-p-vertical_medium">
+                        <div class="slds-text-body_regular">No issues match your current filters.</div>
+                      </td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Pagination -->
+            <template if:true={hasMultiplePages}>
+              <div class="slds-grid slds-grid_align-spread slds-m-top_medium">
+                <div class="slds-col">
+                  <p class="slds-text-body_small">
+                    Showing {startRecord} to {endRecord} of {filteredIssues.length} issue(s)
+                  </p>
+                </div>
+
+                <div class="slds-col">
+                  <div class="slds-button-group" role="group">
+                    <lightning-button label="Previous" onclick={handlePreviousPage} disabled={isFirstPage} variant="neutral"></lightning-button>
+
+                    <template for:each={pageButtons} for:item="p">
+                      <lightning-button
+                        key={p.number}
+                        label={p.number}
+                        onclick={handlePageChange}
+                        data-page={p.number}
+                        variant={p.variant}>
+                      </lightning-button>
+                    </template>
+
+                    <lightning-button label="Next" onclick={handleNextPage} disabled={isLastPage} variant="neutral"></lightning-button>
+                  </div>
+                </div>
+              </div>
+            </template>
           </div>
         </template>
 
-        <!-- Message de succès si aucune erreur -->
-        <template if:false={hasErrors}>
+        <!-- No issues -->
+        <template if:false={hasIssues}>
           <div class="slds-card slds-m-top_medium">
             <div class="slds-card__body slds-card__body_inner">
               <div class="slds-notify slds-notify_alert slds-theme_success" role="alert">
-                <span class="slds-assistive-text">Succès</span>
-                <lightning-icon 
-                  icon-name="utility:success" 
-                  size="small" 
-                  class="slds-m-right_x-small">
-                </lightning-icon>
-                <h2>Aucune erreur de validation détectée ! Les données sont prêtes pour l'import.</h2>
+                <span class="slds-assistive-text">Success</span>
+                <lightning-icon icon-name="utility:success" size="small" class="slds-m-right_x-small"></lightning-icon>
+                <h2>No validation issues detected! Data is ready for import.</h2>
               </div>
             </div>
           </div>
@@ -355,18 +467,14 @@
       </template>
     </template>
 
-
-    <!-- Spinner de chargement -->
+    <!-- Spinner -->
     <template if:true={isLoading}>
       <div class="slds-is-relative slds-m-top_medium">
-        <lightning-spinner
-          alternative-text="Validation en cours..."
-          size="medium">
-        </lightning-spinner>
+        <lightning-spinner alternative-text="Validation in progress..." size="medium"></lightning-spinner>
       </div>
     </template>
 
-    <!-- Boutons de navigation -->
+    <!-- Navigation buttons -->
     <div class="action-buttons-section">
       <div class="action-buttons-content">
         <lightning-button
@@ -377,14 +485,16 @@
           icon-name="utility:left"
           icon-position="left">
         </lightning-button>
+
         <div class="action-buttons-right">
           <lightning-button
-            label="Skip Errors & Continue"
+            label="Skip & Continue"
             onclick={handleSkipErrors}
             disabled={isLoading}
             variant="neutral"
             class="slds-m-right_x-small">
           </lightning-button>
+
           <lightning-button
             label="Proceed to Execution"
             onclick={handleNextStep}

@@ -1,29 +1,38 @@
 /**
- * @Last Modification: 30-12-2025
+ * @Last Modification: 01-28-2026
  * @Last Modification By : Mouhamed NIANG
- * ReadOnly Field Mapping SourceField -> TargetField
+ * Modifications :
+ * - add boolean value for boolean transformation prevent duplicate rules
+ * - ReadOnly Field Mapping SourceField -> TargetField
+ * - add update rule method
  */
 import { wire, api, track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent'; 
 import TRANSFORMATION_OBJECT from '@salesforce/schema/TransformationRule__c'; 
 import LightningModal from 'lightning/modal';
 import RULE_TYPE_FIELD from '@salesforce/schema/TransformationRule__c.RuleType__c';
-
+import getRuleById from '@salesforce/apex/TransformationController.getRuleById';
 import createRule from '@salesforce/apex/TransformationController.createRule'; 
 import getPickListValues from '@salesforce/apex/TransformationController.getPickListValues';
 import getAllMappingsByProjectId from '@salesforce/apex/FieldMappingController.getAllMappingsByProjectId';
+import doesTransformationExist from '@salesforce/apex/TransformationController.doesTransformationExist';
+import updateRule from '@salesforce/apex/TransformationController.updateRule';
 
 export default class TransformationSaveModal extends LightningModal {
-    @api projectId;
-    @api label;
+    @api projectId; 
     @api mappingId;  
     @api mapping;
 
     //target value for boolean 
     @track booleanValue = false;
 
+    initialRuleType;
+    hasLoadedRule = false;
+
+ 
+
     // Propriétés réactives
-    ruleType = ''; 
+    @track ruleType ; 
     selectedColumns = []; // IDs sélectionnés dans le dual-listbox
     @track separator = '';
     fields = []; // Noms de champs finaux ['firstname', 'lastname']
@@ -45,13 +54,190 @@ export default class TransformationSaveModal extends LightningModal {
         { label: 'New line', value: '\n' }
     ];
 
+    @api isEdit = false; // vrai si on édite une règle existante
+
+    @api existingRuleId;
+
+    @wire(getRuleById, { ruleId: '$existingRuleId' })
+    wiredExistingRuleById({ data, error }) {
+    if (data) {
+        this.isEdit = true;
+        this.existingRule = data;
+
+        console.log('Existing rule loaded:', JSON.stringify(data));
+        
+        this.targetValue = data.TargetValue__c;
+        this.mappingId = data.FieldMapping__c;
+        
+        this.mapping = {
+            sourceColumn: data.FieldMapping__r?.SourceColumn__c || '',
+            targetField: data.FieldMapping__r?.TargetField__c || ''
+        };
+
+        // Parameters
+        let params = {};
+        try {
+            params = data.Parameters__c ? JSON.parse(data.Parameters__c) : {};
+        } catch {
+            params = {};
+        } 
+
+        this.separator = params.separator || ',';
+        
+        // Si les options de picklist sont déjà chargées, assigner le ruleType maintenant
+        if (this.ruleTypeOptions.length > 0 && !this.hasLoadedRule) {
+            this.hasLoadedRule = true;
+            
+            const ruleTypeFromDB = data.RuleType__c;
+            console.log('Rule Type from DB:', ruleTypeFromDB);
+
+            const match = this.ruleTypeOptions.find(opt => {
+                console.log('Comparaison:', opt.value, '===', ruleTypeFromDB);
+                return opt.value === ruleTypeFromDB || opt.label === ruleTypeFromDB;
+            });
+           
+            console.log('Match trouvé:', match);
+            this.ruleType = match ? match.value : ruleTypeFromDB;
+            console.log('Rule Type assigné:', this.ruleType);
+        }
+        
+        // Gérer le cas Boolean Transformation
+        if (data.RuleType__c === 'BooleanTransformation') {
+            this.isBooleanTransformation = true;
+            if (params.trueValues && params.trueValues.length > 0) {
+                this.booleanValue = true;
+            } else if (params.falseValues && params.falseValues.length > 0) {
+                this.booleanValue = false;
+            }
+        }
+
+        this.fields = data.SourceFields__c
+            ? data.SourceFields__c.split(this.separator)
+            : [];
+
+        this.syncSelectedColumns();
+    }
+
+    if (error) {
+        console.error('Erreur chargement rule', error);
+        this.toastErr('Impossible de charger la règle');
+    }
+}
+    
+    syncSelectedColumns() {
+        if (!this.existingRule || !this.mappingIdToFieldMap.size || !this.fields.length) {
+            return;
+        }
+
+        this.selectedColumns = this.fields
+            .map(f =>
+                [...this.mappingIdToFieldMap.entries()]
+                    .find(([_, v]) => v === f)?.[0]
+            )
+            .filter(Boolean);
+        
+        console.log('Synchronized selected columns:', this.selectedColumns);
+    }
+
+    get ruleTypeLabel() {
+        if (!this.ruleType) {
+            return '';
+        }
+        
+        // Trouver le label correspondant à la valeur
+        const option = this.ruleTypeOptions.find(opt => opt.label === this.existingRule.RuleType__c );
+        return option ? option.label : this.ruleType;
+    }
+
+    loadRuleData(data) {
+        if (this.hasLoadedRule) {
+            return;
+        }
+        
+        this.hasLoadedRule = true;
+        
+        console.log('=== LOADING RULE DATA ===');
+        console.log('Rule Type from DB:', data.RuleType__c);
+        console.log('Available options:', JSON.stringify(this.ruleTypeOptions));
+        
+        // Vérifier que la valeur existe dans les options
+        const valueExists = this.ruleTypeOptions.some(opt => opt.value === data.RuleType__c);
+        console.log('Value exists in options?', valueExists);
+        
+        if (!valueExists) {
+            console.error('RuleType not found in options!');
+            console.log('Looking for:', data.RuleType__c);
+            console.log('Available values:', this.ruleTypeOptions.map(o => o.value));
+        }
+        
+        // Utiliser setTimeout pour forcer le rafraîchissement
+        setTimeout(() => {
+            this.ruleType = data.RuleType__c;
+            console.log('Rule Type assigned (after timeout):', this.ruleType);
+        }, 100);
+        
+        this.targetValue = data.TargetValue__c;
+        
+        // Récupérer le mappingId depuis la règle existante
+        this.mappingId = data.FieldMapping__c;
+        
+        // Récupérer le mapping complet pour l'affichage
+        this.mapping = {
+            sourceColumn: data.FieldMapping__r?.SourceColumn__c || '',
+            targetField: data.FieldMapping__r?.TargetField__c || ''
+        };
+
+        // Parameters
+        let params = {};
+        try {
+            params = data.Parameters__c ? JSON.parse(data.Parameters__c) : {};
+        } catch {
+            params = {};
+        }
+
+        this.separator = params.separator || ',';
+        
+        // Gérer le cas Boolean Transformation
+        if (data.RuleType__c === 'BooleanTransformation') {
+            this.isBooleanTransformation = true;
+            if (params.trueValues && params.trueValues.length > 0) {
+                this.booleanValue = true;
+            } else if (params.falseValues && params.falseValues.length > 0) {
+                this.booleanValue = false;
+            }
+        }
+
+        this.fields = data.SourceFields__c
+            ? data.SourceFields__c.split(this.separator)
+            : [];
+
+        this.syncSelectedColumns();
+        
+        console.log('=== RULE DATA LOADED ===');
+    }
+
+    
+    
+
+    get modalLabel(){
+        return this.isEdit ? 'Edit Rule' : 'Add New Rule';
+    } 
+    
     // ------------------------
     // Handlers UI
     // ------------------------
-    get mappingInfo(){
-        return ` ${this.mapping.sourceColumn} -> ${this.mapping.targetField} `
+     get mappingInfo() {
+        if (!this.mapping) {
+            return '';
+        }
+        
+        const source = this.mapping.sourceColumn || '';
+        const target = this.mapping.targetField || '';
+        
+        return `${source} → ${target}`;
     }
 
+     
 
     handleFieldMappingChange(event) {
         this.mappingId = event.detail.value;
@@ -100,49 +286,73 @@ export default class TransformationSaveModal extends LightningModal {
         console.log( this.booleanValue );
     }
  
+    
     handleCancel() {
+        this.resetState();
         this.close({ success: false });
     }
 
+    resetState() { 
+        // Réinitialiser toutes les propriétés
+        this.ruleType = '';
+        this.initialRuleType = '';
+        this.existingRule = null;
+        this.isEdit = false;
+        this.hasLoadedRule = false;
+        this.fields = [];
+        this.existingRuleId = null;
+        this.selectedColumns = [];
+        this.isBooleanTransformation = false;
+        this.booleanValue = false;
+        this.separator = '';
+        this.targetValue = '';
+        this.mappingId = null;
+        this.mapping = null;
+        this.parameters = '{}';
+    
+
+        //reset UI
+       this.template.querySelectorAll(".rounded-input").forEach((input) => {
+        input.value = "";
+        });
+    }
+
+
+
     // ------------------------
-    // Validation
+    // Validation Last Update on 01-14-2026
     // ------------------------
 
     validateForm() {
-        console.log('=== VALIDATION ===');
-        console.log('mappingId:', this.mappingId);
-        console.log('ruleType:', this.ruleType);
-        console.log('fields:', this.fields);
-        console.log('separator:', this.separator);
 
         if (!this.mappingId) {
-            return this.toastErr('Veuillez sélectionner un mapping de champ');
+            return this.toastErr(' Field mapping\'s required  ');
         }
 
         if (!this.ruleType) {
-            return this.toastErr('Veuillez sélectionner un type de règle');
+            return this.toastErr('Rule type\'s required .Please choose one rule ');
         }
 
         if ((!this.fields || this.fields.length === 0) && this.ruleType === 'Concatenation') {
-            return this.toastErr('Veuillez sélectionner au moins un champ source');
+            return this.toastErr('Source fields\'s required .Please choose one source field ');
         }
 
         switch (this.ruleType) {
             case 'Concatenation':
                 if (this.fields.length > 3) {
-                    return this.toastErr('Sélectionnez 3 champs maximum pour la concaténation');
+                    return this.toastErr('Maximum for concatenation  is 3 source fields ');
                 }
                 if (!this.separator) {
-                    return this.toastErr('Veuillez sélectionner un séparateur');
+                    return this.toastErr('Please select a separator ');
                 }
                 break;
 
             case 'EmailMasking':
                 if (!this.domain) {
-                    return this.toastErr('Veuillez spécifier un domaine pour le masquage email');
+                    return this.toastErr('Please select a domain');
                 }
                 if (this.fields.length === 0) {
-                    return this.toastErr('Veuillez sélectionner un champ email');
+                    return this.toastErr('Email is required');
                 }
                 break; 
             default:
@@ -153,14 +363,35 @@ export default class TransformationSaveModal extends LightningModal {
     }
 
     // ------------------------
-    // Sauvegarde
+    // Sauvegarde last Update on 01-16-2026
     // ------------------------
     
     
-    async handleSaveTransformation() { 
+    async handleSaveTransformation(event) { 
         try{
            
             if (!this.validateForm()) {
+                return;
+            }
+
+             // Extraire sourceColumn et targetField depuis le mapping
+            const sourceColumn = this.mapping?.sourceColumn || '';
+            const targetField = this.mapping?.targetField || '';
+
+            const hasRuleExist = await doesTransformationExist({
+                projectId: this.projectId,
+                sourceColumn: sourceColumn,
+                targetField: targetField,
+                ruleType: this.ruleType.replaceAll(' ', '')
+            });
+ 
+           
+            if (hasRuleExist) {
+                this.close({
+                    success: false,
+                    message: 'Rule already exists',
+                    variant: 'warning'
+                });
                 return;
             }
         
@@ -173,20 +404,68 @@ export default class TransformationSaveModal extends LightningModal {
                 Field: this.fields.join(this.separator.toString()), //source fields here
                 targetValue: this.targetValue, 
             }; 
-
-            console.log('Payload envoyé:', JSON.stringify(payload, null, 2));
         
-           
             const rule = await createRule(payload);
+            this.resetState();
             const ruleId = rule.Id; 
-            this.dispatchEvent(new CustomEvent('refresh')); //refresh the rules list
-            
-            this.close(ruleId);
-            
-           this.showToast('Success', 'Rule added successfully with record ID:\t'+ ruleId , 'success');
+   
+            this.close({
+                success: true,
+                ruleId: rule.Id,
+                message:'Rule created successfully'
+            });
            
-        }catch(error){
-           this.handleError(error); 
+  
+             
+        } catch (error) {
+            console.error('Error creating rule:', error);
+             this.close({
+                success: false,
+                message: error.body?.message || error.message || 'Unknown error',
+                variant: 'error'
+            });
+        }
+    }
+
+     
+
+    //mise à jour 
+    async handleUpdateRule() {
+        try {
+            if (!this.validateForm()) {
+                return;
+            }
+
+            this.parameters = this.prepareParameters(this.fields, this.separator, this.booleanValue);
+            
+            const payload = {
+                ruleId: this.existingRuleId,
+                projectId: this.projectId,
+                mappingId: this.mappingId,
+                ruleType: this.ruleType.replaceAll(' ', ''),
+                parameters: this.parameters,
+                Field: this.fields.join(this.separator.toString()),
+                targetValue: this.targetValue,
+            };
+
+            await updateRule(payload);
+
+            this.resetState();
+           
+
+            this.close({
+                success: true,
+                ruleId: this.existingRuleId,
+                message: 'Rule updated successfully'
+            });
+
+        } catch (error) {
+            console.error('Error updating rule:', error);
+            this.close({
+                success: false,
+                message: error.body?.message || error.message || 'Unknown error',
+                variant: 'error'
+            });
         }
     }
 
@@ -272,21 +551,45 @@ export default class TransformationSaveModal extends LightningModal {
     // ------------------------
     // Wire: Picklist + Mappings
     // ------------------------
+  
+    
 
     @wire(getPickListValues, {
         objectApiName: TRANSFORMATION_OBJECT.objectApiName,
         fieldApiName: RULE_TYPE_FIELD.fieldApiName
     })
     wiredPicklistValues({ data, error }) {
-        if (data) {
+        if (data) { 
+            
             this.ruleTypeOptions = Object.entries(data).map(([value, label]) => ({
                 label,
                 value
             }));
+
+             // assigner ruleType seulement si on a déjà une règle existante
+         /*  if (this.existingRule) {
+               this.hasLoadedRule = true;
+               this.initialRuleType = this.existingRule.RuleType__c;
+               
+            console.log('exist rule value', this.initialRuleType)
+
+
+                const match = this.ruleTypeOptions.find(
+                    opt => {
+                        console.log('Comparaison:', opt.label, this.initialRuleType);
+                        return opt.label === this.initialRuleType;
+                    }
+               );
+              
+               console.log('match', match);
+
+                this.ruleType = match ? match.value : this.initialRuleType;
+            }*/
+
             console.log('Types de règles chargés:', this.ruleTypeOptions);
         } else if (error) {
             console.error('Erreur chargement types de règles:', error);
-            this.toastErr('Impossible de charger les types de règles');
+          //  this.toastErr('Impossible de charger les types de règles');
         }
     }
 
@@ -302,7 +605,7 @@ export default class TransformationSaveModal extends LightningModal {
             });
             
             console.log('Map créée:', this.mappingIdToFieldMap);
-            
+            this.syncSelectedColumns();
             // Options pour le combobox "Mapping Field"
             this.fieldMappingOptions = data.map(m => ({
                 label: `${m.targetField} → ${m.sourceField || m.targetField }`,
@@ -357,6 +660,8 @@ export default class TransformationSaveModal extends LightningModal {
             return true;
         });
     }
+
+    
 
     // ------------------------
 // Gestion centralisée des erreurs

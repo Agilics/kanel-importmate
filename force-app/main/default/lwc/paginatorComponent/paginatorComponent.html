@@ -1,0 +1,54 @@
+<template>
+    <!-- Pagination -->
+    <template if:true={hasItems}>
+        <div class={paginationWrapperClass}>
+            <!-- Navigation Container -->
+            <div class="pagination-navigation is-centered" aria-label="pagination controls">
+                <!-- Previous button -->
+                 <template if:true={showNavigationButtons}>
+                    <button type="button" class="pagination-btn pagination-btn--nav" onclick={gotoPreviousPage} disabled={isFirstPage}
+                        aria-label="Go to previous page">
+                        <lightning-icon icon-name="utility:chevronleft" size="xx-small" class="pagination-icon"></lightning-icon>
+                        <label class="pagination-btn-text">Previous</label>
+                    </button>
+                 </template>
+                   
+
+                <!-- Page Numbers -->
+                <div class={paginationClass}>
+                    <template for:each={pageNumbers} for:item="page">
+                        <span key={page.key} class="pagination-item">
+                            <template if:true={page.isEllipsis}>
+                                <span class="pagination-ellipsis">{page.label}</span>
+                            </template>
+
+                            <template if:false={page.isEllipsis}>
+                                <button type="button" 
+                                    class={page.buttonClass}
+                                    data-page={page.page} onclick={gotoPage}
+                                    aria-label={page.ariaLabel}
+                                    aria-current={page.ariaCurrent}>
+                                    <label class="pagination-btn-text">{page.label}</label>
+                                </button>
+                            </template>
+                        </span>
+                    </template>
+                </div>
+
+                <!-- Next button --> 
+                 <template if:true={showNavigationButtons}>
+                    <button type="button" class="pagination-btn pagination-btn--nav" onclick={gotoNextPage} disabled={isLastPage}
+                        aria-label="Go to next page">
+                        <span class="pagination-btn-text">Next</span>
+                        <lightning-icon icon-name="utility:chevronright" size="xx-small" class="pagination-icon"></lightning-icon>
+                    </button>
+                 </template>  
+            </div>
+            <!-- Displayed Items Info -->
+            <div class="pagination-info is-centered" aria-label="pagination information">
+                Showing {showingOnPage} of {totalEntries} results
+            </div>
+        </div>
+      
+    </template>
+</template>

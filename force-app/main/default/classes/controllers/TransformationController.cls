@@ -3,9 +3,11 @@
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
  * @last modified on  : 12-23-2025
- * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
- * add method  deleteTransformationById 
- * add method   getRulesByProjectId
+ * @last modified by  : Mouhamed NIANG
+ * Modification:
+ *  - add method  doesTransformationExist prevent duplicate rules
+ *  - add method  deleteTransformationById 
+ *  - add method   getRulesByProjectId
 **/
 public with sharing class TransformationController {
 
@@ -56,6 +58,11 @@ public with sharing class TransformationController {
         return TransformationService.getRulesByMappingId(mappingId);
     }
 
+    //récuperer une transformation par l'id
+    @AuraEnabled(cacheable = true)
+    public static TransformationRule__c getRuleById(String ruleId) {
+        return TransformationService.getRuleById(ruleId);
+    }
 
       //Récupére les valeurs du picklist
     @AuraEnabled(cacheable = true)
@@ -84,4 +91,33 @@ public with sharing class TransformationController {
       }
     }
 
+    @AuraEnabled
+    public static void updateRule(Id ruleId,
+        String ruleType,
+        String parameters,
+        String sourceFields,
+        String targetValue
+    ) {
+        try {
+          TransformationRepository.updateRule(ruleId, ruleType,parameters,sourceFields, targetValue);
+        } catch (Exception e) {
+            ErrorLogService.logException(e);
+            throw new TransformationException('Error during the update of the rule : ' + e.getMessage());
+        }
+    }
+
+    @AuraEnabled
+    public static Boolean doesTransformationExist
+    (
+        Id projectId,
+        String sourceColumn,
+        String targetField,
+        String ruleType
+    ) {
+      try {
+        return TransformationService.doesTransformationExist(projectId, sourceColumn, targetField, ruleType);
+      } catch (Exception e) {
+        throw new TransformationException(e.getMessage());
+      }
+    }
 }
