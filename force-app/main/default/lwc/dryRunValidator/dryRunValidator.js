@@ -41,12 +41,12 @@ export default class DryRunValidator extends LightningElement {
   // ===== NEW: Settings / Extended validation =====
   @track isSettingsOpen = false;
   @track settings = {
-    mode: 'full', // 'full' | 'sample'
+    mode: 'full', 
     sampleSize: 50,
     asyncThreshold: 200,
     includeWarnings: true,
     stopOnFirstErrorClientSide: false,
-    defaultTab: 'errors', // 'errors' | 'warnings' | 'all'
+    defaultTab: 'errors', 
     pageSize: 5
   };
 
@@ -83,7 +83,6 @@ export default class DryRunValidator extends LightningElement {
       if (!raw) return;
       const parsed = JSON.parse(raw);
       this.settings = { ...this.settings, ...parsed };
-      // keep pagination in sync
       this.pageSize = Number(this.settings.pageSize) || 5;
     } catch (e) {
       // ignore
@@ -917,7 +916,7 @@ export default class DryRunValidator extends LightningElement {
 
   /** =========================
    *  Helpers / UI actions
-   *  ========================= */
+   *  ========================= */ 
   showToast(title, message, variant) {
     this.dispatchEvent(new ShowToastEvent({ title, message, variant }));
   }
@@ -962,4 +961,5 @@ export default class DryRunValidator extends LightningElement {
   handleDeleteError() {
     this.showToast('Info', 'Delete is not implemented yet', 'info');
   }
+  
 }
