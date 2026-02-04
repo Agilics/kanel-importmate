@@ -2,7 +2,7 @@
    @description       : 
    @author            : ChangeMeIn@UserSettingsUnder.SFDoc
    @group             : 
-   @last modified on  : 12-23-2025
+   @last modified on  : 02-04-2026
    @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
    -->
 <template>
@@ -15,14 +15,16 @@
          <!-- Button  -->
       </div>
       <!-- Mapper List  for selected project--> 
-      <c-transformation-mapper-list 
+      <div class="content">
+         <c-transformation-mapper-list 
             project-id={projectId}
             onaddtransformation={handleAddTransformation}>
-      </c-transformation-mapper-list>
+         </c-transformation-mapper-list>
+      </div>
 
       <template if:true={isTransformation}>
          <!-- Tabs transformation select -->
-         <div style="margin-top:4rem;">
+         <div style="margin-top:12px;">
             <c-transformation-field-tabs
                active-tab={activeTransformationTab}
                onmovetransformation={handleTransformationChange}
