@@ -51,16 +51,16 @@ public with sharing class TransformationController {
     }
 
     @AuraEnabled
-public static Map<String, String> validateProjectRules(
-    String projectId, 
-    List<Map<String, String>> sampleData
-) {
-    try {
-        return TransformationService.validateAllRulesForProject(projectId, sampleData);
-    } catch (Exception e) {
-        throw new AuraHandledException('Error validating rules: ' + e.getMessage());
-    }
-}
+  public static Map<String, String> validateProjectRules(
+      String projectId, 
+      List<Map<String, String>> sampleData
+  ) {
+      try {
+          return TransformationService.validateAllRulesForProject(projectId, sampleData);
+      } catch (Exception e) {
+          throw new AuraHandledException('Error validating rules: ' + e.getMessage());
+      }
+  }
 
       
 

@@ -12,7 +12,7 @@ import TRANSFORMATION_OBJECT from '@salesforce/schema/TransformationRule__c';
 import LightningModal from 'lightning/modal';
 import RULE_TYPE_FIELD from '@salesforce/schema/TransformationRule__c.RuleType__c';
 import getRuleById from '@salesforce/apex/TransformationController.getRuleById';
-import createRule from '@salesforce/apex/TransformationController.createRule'; 
+import createRule from '@salesforce/apex/TransformationController.createRule';
 import getPickListValues from '@salesforce/apex/TransformationController.getPickListValues';
 import getAllMappingsByProjectId from '@salesforce/apex/FieldMappingController.getAllMappingsByProjectId';
 import doesTransformationExist from '@salesforce/apex/TransformationController.doesTransformationExist';
