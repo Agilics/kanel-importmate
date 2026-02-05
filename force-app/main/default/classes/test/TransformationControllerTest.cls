@@ -2,7 +2,7 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- *  @last modified on  : 01-14-2026
+ *  @last modified on  : 02-05-2026
  * @last modified by  :Mouhamed NIANG
  * Modifications ajout des méthodes de tests :
  *  - testGetRulesByProjectId_Success
@@ -39,6 +39,7 @@ public class TransformationControllerTest {
             )
         };
         insert mappings;
+
     }
 
     // Test createRule via le controller
@@ -329,4 +330,124 @@ public class TransformationControllerTest {
     }
 
  
+     @IsTest
+    static void testUpdateRule_success() {
+        // ===== Given =====
+         ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
+        FieldMapping__c mapping = [SELECT Id FROM FieldMapping__c LIMIT 1];
+
+        String parameters = '{"targetType":"boolean","trueValues":["yes","true","1"],"falseValues":["no","false","0"]}';
+
+        TransformationRule__c rule = TransformationController.createRule(
+            project.Id,
+            mapping.Id,
+            'BooleanTransformation',
+            parameters,
+            'IsActive',
+            'false'
+        );
+        // ===== When =====
+        Test.startTest();
+        TransformationService.updateRule(
+            rule.Id,
+            'UppercaseTransformation',
+            '{"mode":"upper"}',
+            'Name',
+            'DEFAULT'
+        );
+        Test.stopTest();
+
+        // ===== Then =====
+        TransformationRule__c updatedRule = [
+            SELECT RuleType__c, Parameters__c, SourceFields__c, TargetValue__c
+            FROM TransformationRule__c
+            WHERE Id = :rule.Id
+        ];
+
+        System.assertEquals(
+            'UppercaseTransformation',
+            updatedRule.RuleType__c
+        );
+        System.assertEquals(
+            '{"mode":"upper"}',
+            updatedRule.Parameters__c
+        );
+        System.assertEquals(
+            'Name',
+            updatedRule.SourceFields__c
+        );
+        System.assertEquals(
+            'DEFAULT',
+            updatedRule.TargetValue__c
+        );
+    }
+
+    @IsTest
+    static void testUpdateRule_error() {
+        Boolean exceptionThrown = false;
+
+        try {
+            Test.startTest();
+            TransformationService.updateRule(
+                '000000000000000AAA', // Id invalide
+                'UppercaseTransformation',
+                '{}',
+                'Name',
+                'X'
+            );
+            Test.stopTest();
+        } catch (TransformationException e) {
+            exceptionThrown = true;
+            System.assert(
+                e.getMessage().contains('Error during the update of the rule'),
+                'Message d’erreur attendu'
+            );
+        }
+
+        System.assert(
+            exceptionThrown,
+            'Une TransformationException devait être levée'
+        );
+    }
+    @IsTest
+    static void testValidateAllRules_nominal() {
+        ImportProject__c project =
+            [SELECT Id FROM ImportProject__c LIMIT 1];
+        FieldMapping__c mapping = [SELECT Id FROM FieldMapping__c LIMIT 1];
+
+        String parameters = '{"targetType":"boolean","trueValues":["yes","true","1"],"falseValues":["no","false","0"]}';
+
+        TransformationRule__c rule = TransformationController.createRule(
+            project.Id,
+            mapping.Id,
+            'BooleanTransformation',
+            parameters,
+            'IsActive',
+            'false'
+        );
+        List<Map<String, String>> sampleData =
+            TestDataFactory.createTestCsvData(1);
+
+        Test.startTest();
+        Map<String, String> result =
+            TransformationService.validateAllRulesForProject(
+                project.Id,
+                sampleData
+            );
+        Test.stopTest();
+
+        System.assertNotEquals(
+            0,
+            result.size(),
+            'One rule should be evaluated'
+        );
+
+        for (String status : result.values()) {
+            System.assert(
+                status == 'Valid' || status == 'Invalid',
+                'Statut invalide'
+            );
+        }
+    }
+
 }

@@ -1,3 +1,9 @@
+/**
+ * @Last Modification Date : 05-02-2026
+ * @Last Modification By : Mouhamed Niang
+ * @Modification :
+ *  - Fix issue with EmailMaskTransformation
+ */
 @isTest
 public class TransformationUtilsTest {
 
@@ -74,7 +80,7 @@ public class TransformationUtilsTest {
     static void testGetTransformerWithEmailMasking() {
         Test.startTest();
         
-        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
+         ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
         List<FieldMapping__c> mappings = [SELECT Id FROM FieldMapping__c LIMIT 1];
         
         //Create a transformation rule with EmailMasking type
@@ -82,17 +88,18 @@ public class TransformationUtilsTest {
             Project__c = project.Id,
             FieldMapping__c = mappings[0].Id,
             RuleType__c = 'EmailMask',
-            Parameters__c = '{}',
+            Parameters__c = '{"domain":"example.com"}',
             TargetValue__c = 'masked@example.com',
             Order__c = 1
         );
+        
         insert rule;
         
         //Get transformer
         ITransformationRule transformer = TransformationUtils.getTransformer(rule);
         
         //Verify that null is returned since EmailMaskTransformation is commented out
-        Assert.isNull(transformer, 'Transformer should be null for EmailMasking (not implemented)');
+        Assert.isNotNull(transformer, 'Transformer should be null for EmailMasking (not implemented)');
         
         Test.stopTest();
     }

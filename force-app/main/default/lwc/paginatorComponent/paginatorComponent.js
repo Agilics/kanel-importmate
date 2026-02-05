@@ -4,6 +4,10 @@ export default class PaginatorComponent extends LightningElement {
     @api items = [];
     @api pageSize;
     @api pageIndex;
+    @api showInfo;
+
+    //
+    @api showRuleType = !false;
 
     // ===== Pagination Parameters =====
     get totalPages() {
@@ -17,7 +21,7 @@ export default class PaginatorComponent extends LightningElement {
     get isLastPage() {
         return this.pageIndex >= this.totalPages;
     }
-
+ 
     get showingOnPage() {
         if (!Array.isArray(this.items) || this.items.length === 0) {
             return 0;
@@ -29,9 +33,6 @@ export default class PaginatorComponent extends LightningElement {
         return Math.min(end, this.items.length) - start;
     }
 
-
-
-  
    
     get totalEntries() {
         return this.items.length;
@@ -123,8 +124,13 @@ export default class PaginatorComponent extends LightningElement {
     get paginationClass() {
         return this.showNavigationButtons ? 'pagination-pages is-centered' : 'pagination-pages';
     }
+
+    @api
+    get paginationInfoMessage() {
+        return `Showing ${this.showingOnPage} of ${this.totalEntries} results`;
+    }
     
     get paginationWrapperClass() {
-        return this.showNavigationButtons ? 'pagination-wrapper' : 'pagination-wrapper pagination-wrapper--single';
+        return this.showNavigationButtons ? 'pagination-wrapper--transparent' : 'pagination-wrapper--transparent pagination-wrapper--single';
     }
 }

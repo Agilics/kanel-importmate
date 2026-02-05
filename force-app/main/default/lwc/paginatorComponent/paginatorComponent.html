@@ -2,6 +2,13 @@
     <!-- Pagination -->
     <template if:true={hasItems}>
         <div class={paginationWrapperClass}>
+            <!-- Displayed Items Info -->
+            <template if:true={showInfo}>
+                <div class="pagination-info is-centered" aria-label="pagination information">
+                    {paginationInfoMessage}
+                </div>
+            </template>
+
             <!-- Navigation Container -->
             <div class="pagination-navigation is-centered" aria-label="pagination controls">
                 <!-- Previous button -->
@@ -9,7 +16,6 @@
                     <button type="button" class="pagination-btn pagination-btn--nav" onclick={gotoPreviousPage} disabled={isFirstPage}
                         aria-label="Go to previous page">
                         <lightning-icon icon-name="utility:chevronleft" size="xx-small" class="pagination-icon"></lightning-icon>
-                        <label class="pagination-btn-text">Previous</label>
                     </button>
                  </template>
                    
@@ -38,16 +44,11 @@
                 <!-- Next button --> 
                  <template if:true={showNavigationButtons}>
                     <button type="button" class="pagination-btn pagination-btn--nav" onclick={gotoNextPage} disabled={isLastPage}
-                        aria-label="Go to next page">
-                        <span class="pagination-btn-text">Next</span>
+                        aria-label="Go to next page"> 
                         <lightning-icon icon-name="utility:chevronright" size="xx-small" class="pagination-icon"></lightning-icon>
                     </button>
                  </template>  
-            </div>
-            <!-- Displayed Items Info -->
-            <div class="pagination-info is-centered" aria-label="pagination information">
-                Showing {showingOnPage} of {totalEntries} results
-            </div>
+            </div> 
         </div>
       
     </template>

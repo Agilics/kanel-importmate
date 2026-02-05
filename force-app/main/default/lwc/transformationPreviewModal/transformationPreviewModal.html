@@ -1,0 +1,218 @@
+<!-- sldsValidatorIgnore -->
+<template> 
+    <section class="modal-backdrop">
+            <div class="modal">
+                <header class="modal-header">
+                    <div class="position-between  row-direction" aria-label="test run title with button test run">
+                       
+                        <div class="position-between row-direction">
+                            <!-- test run button-->
+                            <button class="box-icon position-between is-centered test-run-card-icon-box" 
+                               disabled={isRunTestDisabled}
+                                onclick={handlePreviewChanges}>
+                                <lightning-icon icon-name="utility:play" class="test-run-card-icon" size="small">
+                                </lightning-icon>
+                            </button>
+                            <!-- text section -->
+                            <div class="position-between  column-direction align-start">
+                                <h2 class="header-title">Test Run - Row Selection</h2>
+                                <p class="regular-text subtitle-color">Select rows to apply the transformations and preview results </p>
+                            </div>
+                        </div>
+                       
+                       </div>
+
+                        <!-- Close Modal Button-->
+                    <lightning-icon icon-name="utility:close" class="test-run-card-icon" size="small" onclick={handleCloseModal}></lightning-icon>
+                    
+                </header>
+                <div class="modal-body">
+                    <div class="parent">
+                        <div class="data-table " aria-label="data table">
+                            <div class="header-section">
+                                <div class="contents ml-1">
+                                    <lightning-input type="checkbox" label="Select all on page" name="select" checked={selectAllRows}
+                                        onchange={handleCheckboxChange}
+                                        disabled={disableSelections}
+                                        ></lightning-input>
+                                    <p class="regular-text"> {rows} of {maxRows} rows selected</p>
+                                </div>
+
+                                <div class="contents">
+                                    <button class="btn btn-outline-secondary" onclick={openFilters}>
+                                        <lightning-icon 
+                                        icon-name='utility:filterList' 
+                                        alternative-text='filterList' 
+                                        size='x-small'
+                                        title='filterList'></lightning-icon>
+                                        <p> Filter</p>
+                                    </button>
+                                </div>
+                            </div>
+                           
+                            <!-- alert message--> 
+                            <div class="alert">
+                                <lightning-icon
+                                    class="primary-icon"
+                                    icon-name='utility:info' 
+                                    alternative-text='info' 
+                                    size='small'
+                                    title='info'
+                                ></lightning-icon>
+                                <strong style="color: #1E40AF; margin-left: 0.5rem;margin-right: 0.5rem;">{rows} rows selected</strong> 
+                                 <template for:each={allRuleTypes} for:item="ruleType">
+                                    {ruleType}
+                                 </template> transformations will be applied .
+                            </div>
+
+                           <div class="positon-between " style="margin-bottom: 0.5rem;">
+                                <template if:true={hasDataToPreview} aria-label="data grid view">
+                                    <!-- DATAGRID FOR  PREVIEW RULES-->
+                                    <div class="myTable" style="height: 310px;margin-top: 0.5rem;">
+                                        <lightning-datatable 
+                                            key-field="id" 
+                                            data={tableData} 
+                                            onrowaction={handleRuleSummary} 
+                                            column-widths-mode="auto"
+                                            onrowselection={handleRowSelection} 
+                                            selected-rows={selectedRows} 
+                                            default-sort-direction={defaultSortDirection}
+                                            hide-checkbox-column={disableSelections}
+                                            sorted-direction={sortDirection}
+                                            sorted-by={sortedBy}
+                                            onsort={onHandleSort}
+                                            columns={columns}>
+                                        </lightning-datatable>
+                                    </div>
+                                </template>
+
+                                <template if:false={hasDataToPreview} aria-label="no data message">
+                                    <div class="no-data-message">
+                                        <p>No data available to preview</p>
+                                    </div>
+                                </template>
+
+                                <div style="margin-top: 1rem;">
+                                    <!-- Pagination-->
+                                    <c-paginator-component items={allRows} page-size={pageSize} 
+                                        page-index={pageIndex} show-info={showInfo}
+                                        onpagechange={handlePageChange}></c-paginator-component>
+                                    <!--end pagination-->
+                                </div>
+                                
+                           </div>
+                        </div>
+                        
+                        <div class="sidebar-container">
+                            <div class="info-card ">
+                                <h2 class="slds-text-heading_medium p-2">Applicable Transformations</h2>
+                                <p class="p-2">Rules that will be selected rows</p>
+                                <div class="bottom-sepator"></div>
+                            </div>
+                            
+                            <!-- rules-container -->
+                            <div class="rules-container  p-2" aria-label="Rule cards related to the project">
+                                <template if:true={currentRule}>
+                                    <c-transformation-card-component key={currentRule.id}  icon-name={currentRule.iconName}
+                                        icon-box-class={currentRule.iconBoxClass} head-icon-class={currentRule.headIconClass}
+                                        card-head-title={currentRule.displayTitle} order={currentRule.order} rule-type={currentRule.ruleType}
+                                        target-field={currentRule.targetField} status="Active"  rule={currentRule}
+                                        show-action-buttons={showActionButtons} show-rule-type="false">
+                                    </c-transformation-card-component>
+                                </template>   
+                            </div>
+                            
+                            <div class="p-2">
+                                <div class=" preview-card ">
+                                    <h2 class="slds-text-heading_small pt-1">Preview for Selected Row</h2>
+                                    <!-- Before Transformation -->
+                                    <template for:each={previewItemsToShow} for:item="item" if:true={hasDataToPreview}>
+                                        <p class="m-1" key={item.id}>Before</p>
+                                        <div key={item.id} class="before-transformation p-1 radius  position-between column-direction info-section">
+                                            <div class="before-transformation-content ">
+                                                <p class="field-label p-2">
+                                                    {item.beforeValue}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <!-- After Transformation -->
+                                        <p class="m-1" key={item.id}>After</p>
+                                        <div key={item.id} class="after-transformation radius p-1  position-between column-direction info-section">
+                                            <div class="after-transformation-content">
+                                                <p class="field-label p-2">
+                                                    <template if:true={item.afterValue}>
+                                                        {item.afterValue}
+                                                    </template>
+                                                    <template if:false={item.afterValue}>
+                                                        <em style="color: #6b7280;">No transformation yet</em>
+                                                    </template>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </template>
+                                </div>  
+                            </div>
+                           
+                            <div class="is-centered " style="padding: 0 1.6rem;">
+                                <button class="btn btn-primary"  >
+                                    <lightning-icon icon-name="utility:play" class="white-icon" size="x-small"></lightning-icon>
+                                    Apply Transformations
+                                </button>
+                            </div>
+                        </div>
+                      
+                    </div>
+                  </div>
+            </div>
+    </section>
+
+    <!-- Filters Modal -->
+    <template if:true={showFilters}>
+        <section class="modal-backdrop">
+            <div class="modal modal-small">
+    
+                <!-- Header -->
+                <header class="modal-header position-between row-direction">
+                    <h2 class="header-title">Filter Rows</h2>
+                    <lightning-icon icon-name="utility:close" size="small" onclick={closeFilters}>
+                    </lightning-icon>
+                </header>
+    
+                <!-- Body -->
+                <div class="modal-body column-direction p-2">
+    
+                    <label class="lbl">Column</label>
+                    <select class="input-field" value={filterColumn} onchange={handleFilterColumn}>
+                        <option value="">-- choose --</option>
+                        <template for:each={columns} for:item="c">
+                            <option key={c.fieldName} value={c.fieldName}>
+                                {c.label}
+                            </option>
+                        </template>
+                    </select>
+    
+                    <label class="label slds-m-top_small">Operator</label>
+                    <select class="input-field" value={filterOperator} onchange={handleFilterOperator}>
+                        <option value="contains">contains</option>
+                        <option value="equals">equals</option>
+                        <option value="starts">starts with</option>
+                    </select>
+    
+                    <label class="label slds-m-top_small">Value</label>
+                    <input class="input-field" type="text" value={filterValue} onchange={handleFilterValue} />
+                </div>
+    
+                <!-- Footer -->
+                <footer class="modal__footer position-between mt-5 row-direction">
+                    <button class="button btn-outline-primary" onclick={clearFilters}>Clear</button>
+                    <div class="modal__spacer"></div>
+                    <button class=" button btn-outline-primary" onclick={closeFilters}>Cancel</button>
+                    <button class="button btn-primary" onclick={applyFilters}>Apply</button>
+                </footer>
+    
+            </div>
+        </section>
+    </template>
+
+</template>
+    

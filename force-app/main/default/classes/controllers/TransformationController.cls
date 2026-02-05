@@ -26,7 +26,7 @@ public with sharing class TransformationController {
     }
 
     //Générer un aperçu 
-    @AuraEnabled(cacheable = true)
+    @AuraEnabled
     public static List<Map<String, String>> generatePreview(String mappingId, List<Map<String, String>> sampleData){
      return TransformationService.generatePreview(mappingId, sampleData);
     }
@@ -49,6 +49,18 @@ public with sharing class TransformationController {
      public static Map<String, Object> getTransformationSummary(String mappingId) {
         return TransformationService.getTransformationSummary(mappingId);
     }
+
+    @AuraEnabled
+public static Map<String, String> validateProjectRules(
+    String projectId, 
+    List<Map<String, String>> sampleData
+) {
+    try {
+        return TransformationService.validateAllRulesForProject(projectId, sampleData);
+    } catch (Exception e) {
+        throw new AuraHandledException('Error validating rules: ' + e.getMessage());
+    }
+}
 
       
 

@@ -8,7 +8,17 @@
 	display: flex;
 	align-items: center;
 	gap: 2rem;
-	margin-top: 2rem;
+	margin: 0;
+	flex-wrap: nowrap;
+}
+.pagination-wrapper--transparent{
+	background: transparent;
+	backdrop-filter: none;
+	box-shadow: none;
+	display: flex;
+	align-items: center;
+	gap: 2rem;
+	margin: 0;
 	flex-wrap: nowrap;
 }
 
@@ -95,7 +105,7 @@
 .pagination-btn--page {
 	width: 2.5rem;
 	height: 2.5rem;
-	border-radius: 50%;
+	border-radius: 0.3rem;
 	font-size: 1rem;
 }
 
