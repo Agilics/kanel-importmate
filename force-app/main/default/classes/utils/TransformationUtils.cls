@@ -2,21 +2,25 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 10-24-2025
+ * @last modified on  : 02-02-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+ * Modification : changement de la classe de transformation
+ * pour la gestion des transformations de type Concatenation
+ * et PhoneMask
+ *
 **/
 public with sharing class TransformationUtils {
 
     public static ITransformationRule getTransformer(TransformationRule__c rule) {
         if (rule.RuleType__c == 'BooleanTransformation') {
             return new BooleanTransformation();
-        } else if (rule.RuleType__c == 'EmailMasking') {
+        } else if (rule.RuleType__c == 'EmailMask') {
             return new EmailMaskTransformation();
-        }else if(rule.RuleType__c == 'LowerCaseTransformation'){
+        }else if(rule.RuleType__c == 'LowercaseTransformation'){
             return new LowerCaseTransformation();
-        }else if(rule.RuleType__c == 'UpperCaseTransformation'){
+        }else if(rule.RuleType__c == 'UppercaseTransformation'){
             return new UpperCaseTransformation();
-        }else if(rule.RuleType__c == 'ConcatenationTransformation') {
+        }else if(rule.RuleType__c == 'Concatenation') {
             return new ConcatenationTransformation();
         }else if(rule.RuleType__c =='PhoneMask'){
             return new PhoneMaskTransformation();
