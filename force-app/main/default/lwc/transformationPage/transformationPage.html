@@ -2,7 +2,7 @@
    @description       : 
    @author            : ChangeMeIn@UserSettingsUnder.SFDoc
    @group             : 
-   @last modified on  : 12-23-2025
+   @last modified on  : 02-04-2026
    @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
    -->
 <template>
@@ -15,14 +15,16 @@
          <!-- Button  -->
       </div>
       <!-- Mapper List  for selected project--> 
-      <c-transformation-mapper-list 
+      <div class="content">
+         <c-transformation-mapper-list 
             project-id={projectId}
             onaddtransformation={handleAddTransformation}>
-      </c-transformation-mapper-list>
+         </c-transformation-mapper-list>
+      </div>
 
       <template if:true={isTransformation}>
          <!-- Tabs transformation select -->
-         <div style="margin-top:4rem;">
+         <div style="margin-top:12px;">
             <c-transformation-field-tabs
                active-tab={activeTransformationTab}
                onmovetransformation={handleTransformationChange}
@@ -39,7 +41,11 @@
                card-head-subtitle={t.displaySubtitle} 
                icon-name={t.iconName} 
                icon-box-class={t.iconBoxClass}
-               head-icon-class={t.headIconClass} 
+               head-icon-class={t.headIconClass}
+               order={t.order}
+               target-field={t.targetField}
+               rule-type={t.ruleType} 
+               status={status}
                onruledelete={handleTransformationDelete}
                onedittransformation={handleEditTransformation}>
             </c-transformation-card-component>
@@ -55,7 +61,7 @@
          <!-- End Pagination --> 
       </template>
       <!-- No transformation rule-->
-      <template if:false={hasTransformations}>
+      <template if:false={isTransformation}>
          <div class="no-rule-container">
             <lightning-icon icon-name="custom:custom19" size="large" class="no-rule-icon"></lightning-icon>
             <p class="no-rule-message">No transformation added yet. </p>

@@ -1,3 +1,31 @@
+/* SECTION HEADERS */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.section-header h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1f2937;
+  font-family: Inter;
+  font-style: Semi Bold;
+  font-size: 20px;
+  line-height: 28px;
+  letter-spacing: 0%;
+}
+
+.form-row{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content:flex-start;
+    align-items: flex-start;
+    gap: 0 1rem;
+    align-content: flex-start;
+}
 /* Conteneur des boutons du footer */
 .btns {
     display: flex;
@@ -22,6 +50,10 @@
     transition: all 0.2s ease-in-out;
     border: none;
     min-height: 40px;
+}
+
+.primary-icon{
+ --slds-c-icon-color-foreground-default: #1e40af;
 }
 
 /* Bouton primaire */
@@ -122,3 +154,5 @@ lightning-dual-listbox {
     color: #374151;
     margin-bottom: 0.5rem;
 }
+
+ 

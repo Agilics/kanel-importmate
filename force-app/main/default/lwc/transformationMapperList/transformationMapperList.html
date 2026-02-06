@@ -2,11 +2,11 @@
   @description       : 
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
   @group             : 
-  @last modified on  : 11-27-2025
+  @last modified on  : 02-04-2026
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
-  <div style="margin-bottom: 3.5rem;">
+  <div>
     <!-- Loading State -->
     <template if:true={isLoading}>
       <div class="card">
@@ -29,7 +29,7 @@
 
     <!-- Mappings Table -->
     <template if:true={hasMappings}>
-      <div class="card slds-m-top_medium">
+      <div class="card">
         <div class="toolbar">
           <div class="toolbar__left">
             <div class="card__title">Available Mappings</div>

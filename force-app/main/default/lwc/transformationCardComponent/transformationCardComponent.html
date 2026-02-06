@@ -1,3 +1,10 @@
+<!--
+  @description       : 
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 02-04-2026
+  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+-->
 <template>
   <div class={cardClass}>
     <!-- card headers -->
@@ -5,11 +12,7 @@
       <!-- title with icon-->
       <div class="title-with-icon">
         <div class={iconBoxClass}>
-          <lightning-icon
-            icon-name={iconName}
-            class={headIconClass}
-            size="small"
-          ></lightning-icon>
+          <lightning-icon icon-name={iconName} class={headIconClass} size="small"></lightning-icon>
         </div>
         <div class="header-content">
           <div class="header-title">{cardHeadTitle}</div>
@@ -18,69 +21,52 @@
       </div>
 
       <!-- actions buttons -->
-      <div class="actions">
-        <!-- badge status -->
-        <div class={badgeClass}>{badgeText}</div>
-        <!-- end badge status -->
-        <!-- icon buttons for editing & removing -->
-        <lightning-icon
-          class="btn-action-icons"
-          icon-name="utility:edit"
-          alternative-text="edit"
-          size="xx-small"
-          title="edit"
-          onclick={handleEditTransformation}
-          style="cursor: pointer;:hover{background-color: #1e40af; }"
-        ></lightning-icon>
+       <template if:true={showActionButtons}>
 
-        <lightning-icon
-          class="btn-action-icons"
-          icon-name="utility:delete"
-          style="cursor: pointer;:hover{background-color: #1e40af; }"
-          alternative-text="delete"
-          onclick={handleDeleteTransformation}
-          title="delete"
-          size="xx-small"
-        ></lightning-icon>
-      </div>
+      <div class="actions">
+      
+        <!-- icon buttons for editing & removing -->
+        <lightning-icon class="btn-action-icons" icon-name="utility:edit" alternative-text="edit" size="xx-small" title="edit"
+          style="cursor: pointer"></lightning-icon>
+      
+        <lightning-icon class="btn-action-icons custom-icon-delete" icon-name="utility:delete" style="cursor: pointer"
+          alternative-text="delete" onclick={handleDeleteTransformation} title="delete" size="xx-small"></lightning-icon>
+      </div>  
+      </template>
+    
     </div>
 
     <!-- card body -->
-    <div class="card-content">
-      <!-- if it's not a lead card-->
-      <template if:false={isLeadStatus}>
+    <div class="card-content"> 
         <div class="transformation-rules">
-          <h3 class="content-title regular-text-size">Transformation Rules</h3>
-          <div class="infos">
-            <template for:each={transformationsRulesContent} for:item="item">
-              <div key={item.Id} class="check-list">
-                <div class="dot is-centered" arial-label="check circle icon">
-                  <lightning-icon
-                    icon-name="utility:check"
-                    alternative-text="check"
-                    class="custom-icon-check"
-                    title="check"
-                    size="xx-small"
-                  ></lightning-icon>
-                </div>
-                <p class="regular-text regular-text-size">{item.label}</p>
-              </div>
-            </template>
+          <div class="infos">       
+                <div class="info-content">
+                  <p class="regular-text regular-text-size">Field : {targetField}</p>
+                  <template if:true={showRuleType}>
+                    <p class="regular-text regular-text-size">Type : {ruleType}</p>
+                  </template>
+                  <template if:true={showOrder}>
+                    <p class="regular-text regular-text-size">
+                      Order: {order}
+                    </p>
+                  </template>
+                  <template if:true={status}>
+                      <div class={badgeClass}>{status}</div>
+                  </template>
+                </div> 
           </div>
-        </div>
-      </template>
+        </div> 
 
-      <!-- if it's a lead card value mappings-->
-      <template if:true={isLeadStatus}>
-        <div class="transformation-rules">
-          <h3 class="content-title regular-text-size">Value Mappings</h3>
-          <template for:each={mappings} for:item='item'>
-            <div class="lead-content" key={item.Id}>
-              <p class="regular-text regular-text-size">{item.label}</p>
+      <!-- data first -->
+      <template if:true={showComparison}>
+          <div class="transformation-rules">
+            <h3 class="content-title regular-text-size">Example:</h3>
+            <div class="lead-content">
+              <p class="regular-text regular-text-size">{dataComparison}</p>
             </div>
-          </template>
-        </div>
+          </div>
       </template>
+       
     </div>
   </div>
 </template>

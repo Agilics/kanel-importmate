@@ -2,20 +2,50 @@
    @description       : 
    @author            : ChangeMeIn@UserSettingsUnder.SFDoc
    @group             : 
-   @last modified on  : 28-01-2025
+   @last modified on  : 02-04-2026
    @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
    -->
 <template>
    <lightning-modal-header label={modalLabel}></lightning-modal-header>
    <lightning-modal-body>
       <div class="slds-form slds-form_stacked">
+
+         <div class="section-header">
+             <lightning-icon 
+               icon-name='utility:data_mapping' 
+               alternative-text='calculated_insights' class="primary-icon" size='medium'
+               title='calculated_insights'>
+            </lightning-icon>
+            <h2>Mapping</h2>
+         </div>
+         
+
          <!-- Sélection du mapping -->
-            <label class="slds-form-element__label" for="fieldMapping">
-             Mapping Field<abbr class="slds-required" title="required">*</abbr>
-            </label>
-           <lightning-input  id="fieldMapping" type="text" value={mappingInfo} disabled></lightning-input>
-        
-         <div class="slds-form-element slds-m-bottom_medium">
+         <div class="form-row">
+            <div class="form-control">
+            <label class="slds-form-element__label" for="sourceColumn">
+               Source Column<abbr class="slds-required" title="required">*</abbr>
+               </label>
+            <lightning-input  id="sourceColumn" type="text" value={source} disabled></lightning-input>
+            </div>
+            <div class="form-control">
+                <label class="slds-form-element__label" for="targetField">
+                  Target Field<abbr class="slds-required" title="required">*</abbr>
+                  </label>
+               <lightning-input  id="targetField" type="text" value={target} disabled></lightning-input>
+               </div>
+            </div>
+
+         <!-- rule section-->
+          <div class="section-header">
+             <lightning-icon
+               icon-name='utility:formula'
+               alternative-text='utility:formula' class="primary-icon" size='medium'
+               title='utility:formula'>
+            </lightning-icon>
+            <h2>Rules</h2>
+         </div>
+         <div class="slds-form-element">
             <label class="slds-form-element__label" for="ruleType">
             Rule Type <abbr class="slds-required" title="required">*</abbr>
             </label>

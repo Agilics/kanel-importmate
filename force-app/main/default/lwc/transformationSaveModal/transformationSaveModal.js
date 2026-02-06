@@ -1,10 +1,11 @@
 /**
- * @Last Modification: 01-28-2026
+ * @Last Modification: 02-04-2026
  * @Last Modification By : Mouhamed NIANG
  * Modifications :
  * - add boolean value for boolean transformation prevent duplicate rules
  * - ReadOnly Field Mapping SourceField -> TargetField
  * - add update rule method
+ * - Update UI/UX
  */
 import { wire, api, track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent'; 
@@ -20,14 +21,16 @@ import updateRule from '@salesforce/apex/TransformationController.updateRule';
 
 export default class TransformationSaveModal extends LightningModal {
     @api projectId; 
-    @api mappingId;  
-    @api mapping;
+    @api mappingId; 
 
     //target value for boolean 
     @track booleanValue = false;
 
     initialRuleType;
     hasLoadedRule = false;
+
+    @api mapping = { sourceColumn: '', targetField: '' };
+
 
  
 
@@ -226,18 +229,16 @@ export default class TransformationSaveModal extends LightningModal {
     // ------------------------
     // Handlers UI
     // ------------------------
-     get mappingInfo() {
-        if (!this.mapping) {
-            return '';
-        }
-        
-        const source = this.mapping.sourceColumn || '';
-        const target = this.mapping.targetField || '';
-        
-        return `${source} → ${target}`;
+
+    get source() {
+        return this.mapping?.sourceColumn ?? '';
     }
 
-     
+    get target() {
+        return this.mapping?.targetField ?? '';
+    }
+
+
 
     handleFieldMappingChange(event) {
         this.mappingId = event.detail.value;
@@ -306,10 +307,13 @@ export default class TransformationSaveModal extends LightningModal {
         this.booleanValue = false;
         this.separator = '';
         this.targetValue = '';
-        this.mappingId = null;
-        this.mapping = null;
+        this.mappingId = null; 
         this.parameters = '{}';
-    
+        this.mapping = {
+            sourceColumn: '',
+            targetField: ''
+        };
+
 
         //reset UI
        this.template.querySelectorAll(".rounded-input").forEach((input) => {
@@ -380,8 +384,8 @@ export default class TransformationSaveModal extends LightningModal {
 
             const hasRuleExist = await doesTransformationExist({
                 projectId: this.projectId,
-                sourceColumn: sourceColumn,
-                targetField: targetField,
+                sourceColumn: this.source,
+                targetField: this.target,
                 ruleType: this.ruleType.replaceAll(' ', '')
             });
  

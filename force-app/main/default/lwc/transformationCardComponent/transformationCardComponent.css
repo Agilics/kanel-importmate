@@ -6,12 +6,19 @@
 /* Card Container */
 .card {
   width: 100%;
-  max-width: 1054px;
   border-radius: 8px;
   padding: 1rem;
   background: #fff;
-  box-shadow: 0px 1px 2px 0px #0000000D;
-  margin: 0 0 2rem 0;
+  box-shadow: 0px 1px 2px 0px #0000000D;  
+  margin: 0 0 0.75rem 0; 
+}
+.info-content {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  align-content: flex-start;
 }
 
 /* Card Header */
@@ -126,11 +133,7 @@ margin: 0 16px 0 0;
 display: flex;
 justify-content: center;
 align-items: center;
-align-content: center;
-display: flex;
-align-items: center;
-justify-content: center;
-text-align: center;
+align-content: center; 
 }
 /* Email icon */
 .custom-icon-email {
@@ -236,9 +239,8 @@ border: 1px solid #e5e7eb;
   .box-icon {
     width: 2rem;
     height: 2rem;
-    
-  display: flex;
-  justify-content: center;
-  align-items: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 }
