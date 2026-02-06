@@ -33,7 +33,7 @@ public with sharing class ProjectServiceTest {
     Test.stopTest();
   
   //Assert
-    System.assertEquals(
+    Assert.areEqual(
       0,
       projects.size(),
       'Avec un limitor négatif on attend une liste vide'
@@ -53,13 +53,13 @@ public with sharing class ProjectServiceTest {
     Test.stopTest();
 
     // Assert : vérifier des assertions
-    System.assertNotEquals(null, projects, 'La liste ne doit pas être nulle');
-    System.assertEquals(
+    Assert.isNotNull( projects, 'La liste ne doit pas être nulle');
+    Assert.areEqual (
       expectedValue,
       projects.size(),
       'Doit retourner 3 projets max'
     );
-    System.assert(
+    Assert.isNotNull (
       projects[0].CreatedDate >= projects[1].CreatedDate,
       'Les projets doivent être triés par date DESC'
     );
@@ -76,8 +76,8 @@ public with sharing class ProjectServiceTest {
     Test.stopTest();
    
    //Assert
-    System.assert(results.size() > 0, 'Le taille de la liste est positif');
-    System.assertEquals(
+    Assert.is(results.size() > 0, 'Le taille de la liste est positif');
+    Assert.areEqual (
       expected,
       results.size(),
       'La taille de la liste fait 5'
@@ -99,7 +99,7 @@ public with sharing class ProjectServiceTest {
     Test.stopTest();
    
     //Assert
-    System.assertNotEquals(null, result, 'Insérer avec success');
+    Assert.isNotNull(result, 'Insérer avec success');
   }
 
   @IsTest
@@ -137,8 +137,8 @@ public with sharing class ProjectServiceTest {
     Test.stopTest();
 
     //Vérification des assertions 
-    System.assertNotEquals(null, results, 'Resultat non null');
-    System.assertEquals(expectedTargetObject, results[0].Name, 'Success');
+    Assert.isNull(results, 'Resultat non null');
+    Assert.areEqual (expectedTargetObject, results[0].Name, 'Success');
   }
   @isTest
   private static void testSearchProjectNameEmptyTerm() {
@@ -147,7 +147,7 @@ public with sharing class ProjectServiceTest {
     Test.stopTest();
 
     //Vérification des assertions
-    System.assertNotEquals(null, results, 'Resultat non null');
+    Assert.isNotNull(results, 'Resultat non null');
   }
 
 
@@ -161,8 +161,8 @@ public with sharing class ProjectServiceTest {
     Test.stopTest();
 
     //ASSERT
-    System.assertNotEquals(false, isValid, 'L\'objet est valide');
-    System.assertEquals(true, isValid, 'L\'objet est valide');
+    Assert.isTrue( isValid, 'L\'objet est valide');
+    Assert.areEqual (true, isValid, 'L\'objet est valide');
   }
 
   //Tester la mise à jour d'un projet importé
@@ -198,18 +198,18 @@ public with sharing class ProjectServiceTest {
     Test.stopTest();
 
     // ------ Assertion pour vérifier si l'objet est vide -------
-    System.assertNotEquals(
-      null,
+    Assert.isNotNull(
       actualProject,
       'L\'objet des projets importés'
     );
 
     //Assertions pour vérifier les champs nom et descriptions
-    System.assertEquals(expectedName, actualProject.Name);
-    System.assertEquals(expectedTargetObject, actualProject.TargetObject__c);
-    System.assertEquals(
+    Assert.areEqual (expectedName, actualProject.Name,'Failed to update');
+    Assert.areEqual (expectedTargetObject, actualProject.TargetObject__c,'Failed to update');
+    Assert.areEqual (
       expectedDescription,
-      actualProject.Description__c
+      actualProject.Description__c,
+      'Failed to update'
     );
   }
 
@@ -235,10 +235,10 @@ public with sharing class ProjectServiceTest {
 
     // Assertion
 
-    System.Assert.isNotNull(actual, 'No found project!');
+    Assert.isNotNull(actual, 'No found project!');
     
 
-    System.assertEquals(expectedName, actual.Name);
+    Assert.areEqual(expectedName, actual.Name,'No project fount');
   }
 
 
@@ -270,9 +270,7 @@ public with sharing class ProjectServiceTest {
 
 
     // ****** Assertions ****** 
-     System.assertEquals(expectedTrue, actual);
-   //  System.assertEquals(expectedFalse, isProject);
-    // System.assertNotEquals(expectedFalse, actual);
+     Assert.areEqual(expectedTrue, actual,'Error while test found project');
   }
 
   @IsTest

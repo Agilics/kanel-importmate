@@ -747,21 +747,27 @@ public class TransformationServiceTest {
             WHERE Id = :rule.Id
         ];
 
-        System.assertEquals(
+        Assert.areEqual(
             'UppercaseTransformation',
-            updatedRule.RuleType__c
+            updatedRule.RuleType__c,
+            'Error failed to update rule on case test update rule success'
         );
-        System.assertEquals(
+        Assert.areEqual(
             '{"mode":"upper"}',
-            updatedRule.Parameters__c
+            updatedRule.Parameters__c,
+            'Error failed to update rule on case test update rule success'
         );
-        System.assertEquals(
+        Assert.areEqual(
             'Name',
-            updatedRule.SourceFields__c
+            updatedRule.SourceFields__c,
+            'Error failed to update rule on case test update rule success'
+
         );
-        System.assertEquals(
+        Assert.areEqual (
             'DEFAULT',
-            updatedRule.TargetValue__c
+            updatedRule.TargetValue__c,
+            'Error failed to update rule on case test update rule success'
+
         );
     }
 

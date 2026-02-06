@@ -14,7 +14,7 @@ public with sharing class ObjectMetadataServiceTest {
 			Test.stopTest();
 			
 			//then
-			System.assert(objects.size() > 0, 'No objects found');
+			Assert.isTrue(objects.size() > 0, 'No objects found');
 	}
 
 	@isTest
@@ -29,8 +29,8 @@ public with sharing class ObjectMetadataServiceTest {
 		Test.stopTest();
 		
 		//then
-		System.assert(objects.size() > 0, 'No objects found');
-		System.assert(
+		Assert.isTrue(objects.size() > 0, 'No objects found');
+		Assert.isTrue(
 			fields.size() > 0,
 			'No fields found for object: ' + objectName
 		);
@@ -108,7 +108,7 @@ public with sharing class ObjectMetadataServiceTest {
         Map<String, String> values = ObjectMetadataService.getPickListValues(objectApiName, fieldApiName);
         Test.stopTest();
 
-        System.assertNotEquals(0, values.size(), 'La map de valeurs picklist ne doit pas être vide');
-        System.assert(values.containsKey('Prospect'), 'La valeur Prospect doit exister');
+        Assert.areNotEqua(0, values.size(), 'La map de valeurs picklist ne doit pas être vide');
+       Assert.isNotNull(values.containsKey('Prospect'), 'La valeur Prospect doit exister');
     }
   }
