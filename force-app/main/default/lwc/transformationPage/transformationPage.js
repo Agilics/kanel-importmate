@@ -1,13 +1,15 @@
 /**
  * @author : Mouhamed NIANG
- * @date : 28/01/2026 
+ * @date : 06/02/2026 
  * @description : This component is used to display the transformations of a project
  * @Modification : 
  *  - modified the handleAddTransformation method to refresh the list of transformations 
  *  - add the handleEditTransformation method to refresh the list of transformations 
+ * 
  */
 import { LightningElement, api, wire, track } from "lwc";
 import TransformationModal from 'c/transformationSaveModal';
+import LightningConfirm from 'lightning/confirm';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import searchProjetById from '@salesforce/apex/ImportProjectController.searchProjetById'; 
 import getRulesByProjectId from "@salesforce/apex/TransformationController.getRulesByProjectId";
@@ -307,12 +309,19 @@ export default class TransformationPage extends LightningElement {
   async handleTransformationDelete(event) {
     try { 
       const ruleId = event.detail; 
-      /*eslint no-alert: "error"*/
-      const isConfirm = confirm('Are you sure you want to delete this transformation? This action cannot be undone.');
-      // Confirm deletion
+      const isConfirm = await LightningConfirm.open({
+        message: "Are you sure you want to delete this transformation? This action cannot be undone.",
+        variant: "header",
+        label: "Delete Transformation", 
+        theme:'warning'
+      }); 
+      
+      // Abort  deletion if user click on cancel
       if (!isConfirm) {
           return;
       } 
+
+      // While confirm is true, delete transformation
       await deleteTransformationById({ transformationId: ruleId });
       await refreshApex(this._wiredResult);
 

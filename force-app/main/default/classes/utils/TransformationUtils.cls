@@ -35,14 +35,22 @@ public with sharing class TransformationUtils {
             RuleType__c = ruleType,
             Parameters__c = parameters,
             SourceFields__c = sourceFields,
-            TargetValue__c = targetValue
+            TargetValue__c = targetValue,
+            Order__c = getNextOrder(mappingId)
         );
     }
 
+    //récupérer l'ordre suivant pour un mapping donné
+    public static Integer getNextOrder(String mappingId) {
+        AggregateResult aggregateResult = [
+            SELECT MAX(Order__c) 
+            FROM TransformationRule__c 
+            WHERE FieldMapping__c = :mappingId 
+        ];
 
-    public static Integer getNextOrder(String projectId) {
-        List<TransformationRule__c> rules = TransformationRepository.getRulesByProjectId(projectId);
-        return rules.size() + 1;
+        Integer maxOrder = Integer.valueOf(aggregateResult.get('expr0'));
+
+        return maxOrder == null  ? 1 : maxOrder + 1;
     }
 
     

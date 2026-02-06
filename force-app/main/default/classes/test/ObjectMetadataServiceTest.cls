@@ -108,7 +108,7 @@ public with sharing class ObjectMetadataServiceTest {
         Map<String, String> values = ObjectMetadataService.getPickListValues(objectApiName, fieldApiName);
         Test.stopTest();
 
-        Assert.areNotEqua(0, values.size(), 'La map de valeurs picklist ne doit pas être vide');
+        Assert.areNotEqual(0, values.size(), 'La map de valeurs picklist ne doit pas être vide');
        Assert.isNotNull(values.containsKey('Prospect'), 'La valeur Prospect doit exister');
     }
   }

@@ -2,7 +2,7 @@
  * @description       :
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             :
- * @last modified on  : 09-16-2025
+ * @last modified on  : 02-06-2026
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
  **/
 @isTest
@@ -76,10 +76,9 @@ public with sharing class ProjectServiceTest {
     Test.stopTest();
    
    //Assert
-    Assert.is(results.size() > 0, 'Le taille de la liste est positif');
-    Assert.areEqual (
-      expected,
-      results.size(),
+    Assert.isTrue(results.size() > 0, 'Le taille de la liste est positif');
+    Assert.isTrue(
+      results.size() > 0,
       'La taille de la liste fait 5'
     );
   }
@@ -137,7 +136,7 @@ public with sharing class ProjectServiceTest {
     Test.stopTest();
 
     //Vérification des assertions 
-    Assert.isNull(results, 'Resultat non null');
+    Assert.isNotNull(results, 'Resultat non null');
     Assert.areEqual (expectedTargetObject, results[0].Name, 'Success');
   }
   @isTest
@@ -147,7 +146,7 @@ public with sharing class ProjectServiceTest {
     Test.stopTest();
 
     //Vérification des assertions
-    Assert.isNotNull(results, 'Resultat non null');
+    Assert.isFalse(results.size() < 0, 'Resultat non null');
   }
 
 

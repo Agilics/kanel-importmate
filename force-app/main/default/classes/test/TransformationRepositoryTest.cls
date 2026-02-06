@@ -291,35 +291,43 @@ public class TransformationRepositoryTest {
         }
     }
 
-    @isTest
+     @isTest
     static void testDeleteRule_InvalidId() {
         User admin = TestDataFactory.createAdminUser();
         System.runAs(admin) {
+
             ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
-            List<FieldMapping__c> mappings = [SELECT Id FROM FieldMapping__c LIMIT 1];
-            
-            // Create test rule
+            FieldMapping__c mapping = [SELECT Id FROM FieldMapping__c LIMIT 1];
+
+            // Création puis suppression réelle
             TransformationRule__c rule = new TransformationRule__c(
                 Project__c = project.Id,
-                FieldMapping__c = mappings[0].Id,
+                FieldMapping__c = mapping.Id,
                 RuleType__c = 'BooleanTransformation',
                 Parameters__c = '{}',
                 Order__c = 1
             );
             insert rule;
-
             delete rule;
-            
+
             Test.startTest();
+            Boolean exceptionThrown = false;
+
             try {
                 TransformationRepository.deleteRule(rule.Id);
-                Assert.fail('Should throw exception for invalid ID');
-            } catch (Exception e) {
-                Assert.isTrue(e.getMessage().contains('Erreur lors de la suppression'), 'Should throw TransformationException');
+            } catch (TransformationException e) {
+                exceptionThrown = true;
             }
+
             Test.stopTest();
+
+            Assert.isTrue(
+                exceptionThrown,
+                'Une TransformationException doit être levée si la règle n’existe pas'
+            );
         }
     }
+
 
     @isTest
     static void testGetRulesByProjectId_WithRelationships() {
