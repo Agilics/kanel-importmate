@@ -2,7 +2,7 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 01-14-2026
+ * @last modified on  : 0-02-2026
  *  @last modified by mouhamedniang
  * Modification: 
  *  -   ajout méthode doesTransformationExist pour gérer la duplication des règles de transformation.
@@ -63,6 +63,7 @@ public with sharing class TransformationService {
             );
         }
     }
+    
 
     //Apply transformations for an entire row across all mappings
     public static Map<String, String> applyTransformationsForRow(Map<String, String> row, List<FieldMapping__c> mappings, Map<String, List<TransformationRule__c>> rulesByMappingId) {
@@ -97,39 +98,98 @@ public with sharing class TransformationService {
         }
     }
 
+ 
+  
     //Générer un aperçu 
     public static List<Map<String, String>> generatePreview(String mappingId, List<Map<String, String>> sampleData) {
         try {
-            List<Map<String, String>> preview = new List<Map<String, String>>();
-            Integer batchSize = 200;
-            //get rules once
-            Map<String, List<TransformationRule__c>> rulesByMappingId = TransformationRepository.getRulesByProjectIdGroupedByMapping(sampleData[0].get('ProjectId'));
-
-
-            for (Integer i = 0; i < sampleData.size() && i < batchSize; i++) {
-                Map<String, String> row = sampleData[i];
-                Map<String, String> transformed = applyTransformations(mappingId, row, rulesByMappingId);
-                preview.add(new Map<String, String>{
-                    'Original' => row.get('Field'),
-                    'Transformed' => transformed.get('Field')
-                });
+            if (sampleData == null || sampleData.isEmpty()) {
+                throw new TransformationException('Sample data is empty');
             }
+            
+            List<Map<String, String>> preview = new List<Map<String, String>>();
+            
+            // Récupérer TOUTES les règles du projet 
+            String projectId = sampleData[0].get('ProjectId');
+            Map<String, List<TransformationRule__c>> rulesByMappingId = 
+                TransformationRepository.getRulesByProjectIdGroupedByMapping(projectId);
+            
+            System.debug('=== GENERATE PREVIEW DEBUG ===');
+            System.debug('Project ID: ' + projectId);
+            System.debug('Mapping IDs with rules: ' + rulesByMappingId.keySet());
+            System.debug('Total rules count: ' + rulesByMappingId.values().size());
+            
+            // Pour chaque mapping, afficher les règles
+            for (String mapId : rulesByMappingId.keySet()) {
+                System.debug('Mapping ' + mapId + ' has ' + rulesByMappingId.get(mapId).size() + ' rules');
+                for (TransformationRule__c rule : rulesByMappingId.get(mapId)) {
+                    System.debug('  - Rule: ' + rule.RuleType__c + ' for field: ' + rule.FieldMapping__r.TargetField__c);
+                }
+            }
+            
+            // Appliquer les transformations à chaque ligne
+            for (Map<String, String> row : sampleData) {
+                Map<String, String> previewRow = new Map<String, String>();
+                
+                // Copier le ProjectId
+                previewRow.put('ProjectId', row.get('ProjectId'));
+                
+                // Cloner la ligne pour appliquer les transformations
+                Map<String, String> transformedRow = row.clone();
+                
+                // APPLIQUER TOUTES LES TRANSFORMATIONS (pour tous les mappings)
+                for (String mapId : rulesByMappingId.keySet()) {
+                    List<TransformationRule__c> rules = rulesByMappingId.get(mapId);
+                    
+                    if (rules != null && !rules.isEmpty()) {
+                        System.debug('Applying ' + rules.size() + ' rules for mapping: ' + mapId);
+                        transformedRow = applyTransformations(mapId, transformedRow, rulesByMappingId);
+                    }
+                }
+                
+                System.debug('Original row: ' + JSON.serialize(row));
+                System.debug('Transformed row: ' + JSON.serialize(transformedRow));
+        
+                // Pour chaque champ (sauf ProjectId), créer les colonnes Original et Transformed
+                for (String fieldName : row.keySet()) {
+                    if (fieldName != 'ProjectId') {
+                        String originalValue = row.get(fieldName) != null ? row.get(fieldName) : '';
+                        String transformedValue = transformedRow.get(fieldName) != null ? transformedRow.get(fieldName) : originalValue;
+                        
+                        previewRow.put(fieldName + '_Original', originalValue);
+                        previewRow.put(fieldName + '_Transformed', transformedValue);
+                        
+                        System.debug('Field ' + fieldName + ': "' + originalValue + '" => "' + transformedValue + '"');
+                    }
+                }
+                
+                preview.add(previewRow);
+            }
+            
+            System.debug('=== PREVIEW RESULT ===');
+            System.debug('Preview size: ' + preview.size());
+            System.debug('Preview data: ' + JSON.serialize(preview));
+            
             return preview;
+            
         } catch (Exception e) {
+            System.debug('ERROR in generatePreview: ' + e.getMessage());
+            System.debug('Stack trace: ' + e.getStackTraceString());
+            
             Map<String, Object> context = new Map<String, Object>{
                 'mappingId' => mappingId,
-                'dataSize' => sampleData.size(),
-                'originalError' => e.getMessage()
+                'dataSize' => sampleData?.size(),
+                'originalError' => e.getMessage(),
+                'stackTrace' => e.getStackTraceString()
             };
             throw new TransformationException(
                 'Erreur inattendue lors de la génération de l\'aperçu: ' + e.getMessage(),
                 Constants.ERROR_CODE_TRANSFORMATION,
                 context
             );
-        } 
+        }
     }
-    
-    //Valider une règle de transformation avant de l'appliquer
+        //Valider une règle de transformation avant de l'appliquer
     public static void validateTransformationRule(TransformationRule__c rule, Map<String, String> sampleData) {
         try {
             ITransformationRule transformer = TransformationUtils.getTransformer(rule);
@@ -183,6 +243,55 @@ public with sharing class TransformationService {
         }
     }
 
+    /**
+ * Valide toutes les règles d'un projet pour un échantillon de données
+ * @param projectId ID du projet
+ * @param sampleData Liste de lignes à valider
+ * @return Map<String, String> : ruleId => 'Valid' ou 'Invalid'
+ */
+public static Map<String, String> validateAllRulesForProject(
+    String projectId, 
+    List<Map<String, String>> sampleData
+) {
+    Map<String, String> ruleStatusMap = new Map<String, String>();
+    
+    try {
+        if (sampleData == null || sampleData.isEmpty()) {
+            return ruleStatusMap;
+        }
+        
+        // Récupérer toutes les règles du projet
+        List<TransformationRule__c> rules = TransformationRepository.getRulesByProjectId(projectId);
+        
+        // Utiliser la première ligne comme échantillon
+        Map<String, String> sampleRow = sampleData[0];
+        
+        // Valider chaque règle
+        for (TransformationRule__c rule : rules) {
+            try {
+                ITransformationRule transformer = TransformationUtils.getTransformer(rule);
+                Boolean isValid = transformer.validate(sampleRow, rule);
+                ruleStatusMap.put(rule.Id, isValid ? 'Valid' : 'Invalid');
+            } catch (Exception e) {
+                System.debug('Validation error for rule ' + rule.Id + ': ' + e.getMessage());
+                ruleStatusMap.put(rule.Id, 'Invalid');
+            }
+        }
+        
+        return ruleStatusMap;
+        
+    } catch (Exception e) {
+        System.debug('ERROR in validateAllRulesForProject: ' + e.getMessage());
+        throw new TransformationException(
+            'Error validating rules: ' + e.getMessage(),
+            Constants.ERROR_CODE_TRANSFORMATION,
+            new Map<String, Object>{
+                'projectId' => projectId,
+                'sampleDataSize' => sampleData?.size()
+            }
+        );
+    }
+}
     //récuperer les transformations par l'id du mapping 
     public static List<TransformationRule__c> getRulesByMappingId(String mappingId) {
          try {

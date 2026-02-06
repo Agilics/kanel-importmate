@@ -2,10 +2,12 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 01-14-2026
+ * @last modified on  : 02-06-2026
  * @last modified by  : Mouhamed NIANG
  * Modification: 
  *  -   ajout test pour des méthodes doesTransformationExist
+ *  -  ajout test pour des méthodes updateRule
+ *  -  ajout test pour des méthodes validateAllRulesForProject
 **/
 
 @isTest
@@ -615,7 +617,7 @@ public class TransformationServiceTest {
         // THEN
         Integer countRules = [
             SELECT COUNT()
-            FROM TransformationRule__c
+            FROM TransformationRule__c 
         ];
 
         Assert.areEqual(0, countRules, 'The rule should be deleted');
@@ -707,6 +709,130 @@ public class TransformationServiceTest {
         Test.stopTest();
 
         Assert.isFalse(result, 'Avec des paramètres invalides, le résultat doit être false');
+        }
+    }
+
+ 
+     @IsTest
+    static void testUpdateRule_success() {
+        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
+        List<FieldMapping__c> mappings = [SELECT Id FROM FieldMapping__c LIMIT 1];
+        // ===== Given =====
+        String parameters = '{"targetType":"boolean","trueValues":["yes","true","1"],"falseValues":["no","false","0"]}';
+          TransformationRule__c rule = TransformationService.createRule(
+            project.Id,
+            mappings[0].Id,
+            'BooleanTransformation',
+            parameters,
+            'IsActive',
+            'false'
+        );
+      
+
+        // ===== When =====
+        Test.startTest();
+        TransformationService.updateRule(
+            rule.Id,
+            'UppercaseTransformation',
+            '{"mode":"upper"}',
+            'Name',
+            'DEFAULT'
+        );
+        Test.stopTest();
+
+        // ===== Then =====
+        TransformationRule__c updatedRule = [
+            SELECT RuleType__c, Parameters__c, SourceFields__c, TargetValue__c
+            FROM TransformationRule__c
+            WHERE Id = :rule.Id
+        ];
+
+        Assert.areEqual(
+            'UppercaseTransformation',
+            updatedRule.RuleType__c,
+            'Error failed to update rule on case test update rule success'
+        );
+        Assert.areEqual(
+            '{"mode":"upper"}',
+            updatedRule.Parameters__c,
+            'Error failed to update rule on case test update rule success'
+        );
+        Assert.areEqual(
+            'Name',
+            updatedRule.SourceFields__c,
+            'Error failed to update rule on case test update rule success'
+
+        );
+        Assert.areEqual (
+            'DEFAULT',
+            updatedRule.TargetValue__c,
+            'Error failed to update rule on case test update rule success'
+
+        );
+    }
+
+    @IsTest
+    static void testUpdateRule_error() {
+        Boolean exceptionThrown = false;
+
+        try {
+            Test.startTest();
+            TransformationService.updateRule(
+                '000000000000000AAA', // Id invalide
+                'UppercaseTransformation',
+                '{}',
+                'Name',
+                'X'
+            );
+            Test.stopTest();
+        } catch (TransformationException e) {
+            exceptionThrown = true;
+            Assert.isTrue(
+                e.getMessage().contains('Error during the update of the rule'),
+                'Message d’erreur attendu'
+            );
+        }
+
+        Assert.isTrue(
+            exceptionThrown,
+            'Une TransformationException devait être levée'
+        );
+    }
+    @IsTest
+    static void testValidateAllRules_nominal() {
+        ImportProject__c project =
+            [SELECT Id FROM ImportProject__c LIMIT 1];
+        List<FieldMapping__c> mappings = [SELECT Id FROM FieldMapping__c LIMIT 1];
+        List<Map<String, String>> sampleData =
+            TestDataFactory.createTestCsvData(1);
+              TransformationRule__c rule = TransformationService.createRule(
+            project.Id,
+            mappings[0].Id,
+            'BooleanTransformation',
+            '{"targetType":"boolean","trueValues":["yes","true","1"],"falseValues":["no","false","0"]}',
+            'IsActive',
+            'false'
+        );
+
+        Test.startTest();
+        Map<String, String> result =
+            TransformationService.validateAllRulesForProject(
+                project.Id,
+                sampleData
+            );
+        Test.stopTest();
+
+        Assert.areNotEqual(
+            0,
+            result.size(),
+            'One rule should be evaluated'
+        );
+
+        for (String status : result.values()) {
+            Assert.isTrue(
+                status == 'Valid' || status == 'Invalid',
+                'Statut invalide'
+            );
         }
     }
 }

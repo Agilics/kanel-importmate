@@ -118,16 +118,19 @@ public with sharing class TransformationRepository {
     }
 
     //delete rule
-    public static void deleteRule(String ruleId) {
-        if (SecurityUtils.isDeletable(Schema.TransformationRule__c.SObjectType)) {
-            try {
-                delete new TransformationRule__c(Id = ruleId);
-            } catch (DmlException e) {
-                ErrorLogService.logException(e);
-                throw new TransformationException('Erreur lors de la suppression de la règle : ' + e.getMessage());
-            }
+    public static void deleteRule(Id ruleId) {
+        if (ruleId == null) {
+            throw new TransformationException('Erreur lors de la suppression: ID invalide');
+        }
+
+        try {
+            TransformationRule__c rule = [SELECT Id FROM TransformationRule__c WHERE Id = :ruleId LIMIT 1];
+            delete rule;
+        } catch (QueryException e) {
+            throw new TransformationException('Erreur lors de la suppression: règle non trouvée');
         }
     }
+
  
 
      /**
@@ -179,7 +182,7 @@ public with sharing class TransformationRepository {
                     );
                 }
                 
-            } catch (DmlException e) {
+            } catch (QueryException e) {
                 ErrorLogService.logException(e);
                 throw new TransformationException('Error while verifying the transformation rule exist: ' + e.getMessage());
             } 

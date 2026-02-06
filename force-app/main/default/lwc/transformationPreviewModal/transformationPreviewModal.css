@@ -1,0 +1,490 @@
+.white-icon {
+    --slds-c-icon-color-foreground-default: #ffffff;
+}
+
+/*Modal CSS*/
+:host {
+    --slds-c-modal-content-spacing-block-start: 0;
+    --slds-c-modal-content-spacing-block-end: 0;
+    --slds-c-modal-content-spacing-inline-start: 0;
+    --slds-c-modal-content-spacing-inline-end: 0;
+}
+
+.header-section {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-start;
+    align-content: flex-start;
+}
+
+.contents {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+    align-content: flex-start;
+    margin-right: 20px;
+}
+
+.apply-preview-container {
+    background-color: #F9FAFB;
+}
+
+/**/
+.position-between {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.align-center {
+    align-items: center;
+}
+
+.row-direction {
+    flex-direction: row;
+}
+
+.align-start {
+    justify-content: flex-start;
+    align-items: flex-start;
+    align-content: flex-start;
+}
+
+.column-direction {
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+/*Play icon & box icon for test run */
+.test-run-card-icon-box {
+    background: #dbeafe;
+    border: 1px solid #e5e7eb;
+    text-decoration: none;
+}
+.label {
+     display: block; font-size: 0.85rem; color: #333; margin-bottom: 0.2rem;
+ }
+.input-field{
+    width: 100%;
+    padding: 0.4rem 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 0.3rem;
+    font-size: 0.85rem;
+}
+
+/*default box icon*/
+.box-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    margin: 0 16px 0 0;
+}
+
+/* center text & items*/
+.is-centered {
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+    display: flex;
+}
+
+.hero {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+    align-content: flex-start;
+}
+
+.right-items {
+    border-right: 1px solid gray;
+    background-color: #f3f4f6;
+    padding: 16px;
+    margin: 16px 0 0 16px;
+    ;
+}
+
+.test-run-card-icon {
+    --slds-c-icon-color-foreground-default: #1f41a6;
+}
+
+.test-run-card-icon-box:hover {
+    cursor: pointer;
+}
+
+/* font styles*/
+.header-title {
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+.subtitle-color {
+    color: #727273;
+}
+
+.regular-text {
+    font-weight: 400;
+    font-size: 14px;
+}
+
+/* alert message*/
+.alert {
+    padding: 12px 1.3rem;
+    margin: .3rem 0 0 0;
+    background-color: #EEF6FE;
+    color: #5E82E4;
+    border-radius: 8px;
+}
+
+/* ====== Modals ====== */
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.modal {
+    background: white;
+    border-radius: 0.5rem;
+    width: 1080px;
+    height: calc(100vh - 1em);
+    overflow-y: auto;
+    margin: 0.2em 0;
+    flex-direction: column;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+}
+
+.modal-header {
+    flex-shrink: 0;
+    background-color: #fff;
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 1rem 1.2rem;
+    border-radius: 0.5rem;
+    border-bottom: 1px solid #eee;
+    color: #000;
+    max-height: 20vh;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.modal-body {
+    flex-grow: 1;
+    padding: 1rem 1.2rem;
+    padding: 1rem 1.2rem;
+}
+
+/* Modal Small pour les filtres */
+.modal.modal-small {
+    width: 400px;
+    max-height: 80vh;
+}
+
+.modal__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-top: 1px solid #e5e7eb; 
+    border-radius: 0 0 0.5rem 0.5rem;
+    max-height: 20vh; 
+    flex-shrink: 0; 
+}
+
+/* Modifie la structure de la grille */
+.parent {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr) 320px;
+    grid-template-rows: auto;
+    gap: 20px;
+    align-items: start;
+    /* Aligne les éléments en haut */
+}
+
+.data-table {
+    grid-column: span 4;
+}
+
+/* Crée un conteneur pour grouper tous les éléments de droite */
+.sidebar-container {
+    grid-column: 5;
+    display: flex;
+    flex-direction: column;
+    background-color: #F9FAFB;
+    border-left: 1px solid #e5e7eb;
+    gap: 10px;
+    /* Contrôle précis de l'espace entre info, rules et preview */
+}
+
+.rules-container {
+    width: 100%;
+}
+
+.info-card,
+.rules-container,
+.preview-card {
+    width: 100%;
+}
+
+.preview-card {
+    width: 100%;
+    border-radius: 8px;
+    background: #fff;
+    padding: 0 2em;
+    box-shadow: 0px 1px 2px 0px #0000000D;
+    margin: 0 0 5px 0;
+}
+
+.bottom-sepator {
+    border-bottom: 1px solid #e5e7eb;
+    padding: 0 0 8px 0;
+    margin-bottom: 8px;
+}
+
+.info-card {
+    background-color: #ffff;
+}
+
+.bottom-sepator {
+    border-bottom: 1px solid #727273;
+    padding: 0 0 12px 0;
+}
+
+.rules-container-wrapper {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    grid-gap: 10px;
+}
+
+.pt-1 {
+    padding-top: 5px;
+}
+
+.p-2 {
+    padding: 0 0.5rem;
+}
+
+.p-3 {
+    padding: 0 2rem;
+}
+
+.ml-1 {
+    margin-left: 0.2rem;
+}
+.mt-5{
+    margin-top: 3em;
+}
+
+/* center datalist body*/
+THIS .slds-grid_align-end {
+    justify-content: center !important;
+}
+
+/* Section before transformation */
+.before-transformation {
+    background-color: #F9FAFB;
+}
+
+/* Section after transformation */
+.after-transformation {
+    background-color: #EEF7FF;
+}
+
+.field-label {
+    display: flex;
+}
+
+/* Padding & margin*/
+.p-1 {
+    padding: 0.65rem;
+    margin-bottom: 1.1rem;
+}
+
+.pt-1 {
+    padding-top: 0.5rem;
+}
+
+.m-1 {
+    margin: 10px 0 10px 0;
+}
+
+.radius {
+    border-radius: 8px;
+}
+
+/* Styles de base des boutons */
+.btn {
+    border-radius: 0.5rem;
+    font-weight: 300;
+    font-size: 14px;
+    font-family: "Salesforce Sans", Arial, sans-serif;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    border: none;
+    padding: 4px 1rem;
+    width: 100%;
+    height: 40px;
+    gap: 0 1rem;
+}
+
+/* Bouton primaire */
+.btn-primary {
+    background-color: #1e40af;
+    color: #ffffff;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+.btn-primary:hover {
+    background-color: #1e3a8a;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.btn-primary:active {
+    background-color: #1e3a8a;
+    transform: translateY(1px);
+}
+
+.btn-primary:disabled {
+    background-color: #9ca3af;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Form Groups */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+ 
+ 
+
+/* Styles de base des boutons */
+.btn {
+    border-radius: 0.5rem;
+    font-weight: 300;
+    font-size: 14px;
+    font-family: "Salesforce Sans", Arial, sans-serif; 
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+    border: none; 
+    padding: 4px 1rem;
+    width: 100%;
+    height: 40px;
+    gap: 0 1rem;
+}
+
+/* Bouton primaire */
+.btn-primary {
+    background-color: #1e40af;
+    color: #ffffff;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+}
+
+.btn-primary:hover {
+    background-color: #1e3a8a;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.btn-primary:active {
+    background-color: #1e3a8a;
+    transform: translateY(1px);
+}
+
+.btn-primary:disabled {
+    background-color: #9ca3af;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+.button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.35rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+}
+.btn-outline-secondary{
+    background: transparent;
+    color: #000;
+    padding: 12px 11px;
+    display: flex;
+    border: 1px solid #000;
+}
+.btn-outline-primary{
+    background: transparent;
+    color: #1E40AF;
+    border: 1px solid #0176d3;
+}
+
+.btn-outline-primary:hover{
+    background: #e5f2ff;
+}
+/* Form Groups */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+/* Bouton secondaire */
+.btn-secondary {
+    background-color: #ffffff;
+    color: #1E40AF;
+    border: 1px solid #0176d3;
+    font-weight: 500;
+}
+
+.btn-secondary:hover {
+    background-color: #f9fafb;
+    border-color: #1e40af;
+}
+
+.btn-secondary:active {
+    background-color: #f3f4f6;
+    transform: translateY(1px);
+}
+
+lightning-button-icon.slds-modal-close {
+    display: none;
+}
+.primary-icon{ 
+  --slds-c-icon-color-foreground-default: #1e40af;
+}
+
+
+
+ 
