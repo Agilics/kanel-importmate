@@ -1,18 +1,30 @@
-import { LightningElement, api,track} from "lwc";
+/**
+ * @Last Modification Date: 02-04-2025
+ * @Last  Modification By : Mouhamed 
+ * @Modification: Update UX/UI  
+ */
+import { LightningElement, api } from "lwc";
 
 export default class TransformationCardComponent extends LightningElement {
   @api iconName; // nom de l'icône à dispatcher vers TransformationPage
   @api headIconClass; // la classe css de l'icône à dispatcher vers TransformationPage
   @api iconBoxClass; // la classe css du box contenant l'icône à dispatcher vers TransformationPage
   @api statusTransformationClass; // la classe css du status de la transformation dispatcher vers le parent
-  @api transformationRule;
-  @api transformationsRulesContent = [];
-  @api isLeadStatus =false;
   @api cardHeadTitle;
   @api cardHeadSubtitle;
   @api mappings ;//propriété de mappings dispatcher vers le parent
   @api isWarningBadge = false; 
   @api ruleId; 
+  @api showComparison = false; 
+  @api showOrder = false;
+  @api status;
+  @api rule;
+  @api targetField;
+  @api ruleType;
+  @api order;
+  @api showActionButtons = !false;
+
+
  
   
 
@@ -27,6 +39,7 @@ export default class TransformationCardComponent extends LightningElement {
     return this.isWarningBadge ? 'Warning':'Active';
   }
   
+ 
 
  
   // modification d'une transformation  dispatcher vers Transformation Page
@@ -54,9 +67,7 @@ export default class TransformationCardComponent extends LightningElement {
 
     //Getter pour la classe conditionnelle de la carte
   get cardClass(){
-    return this.isLeadStatus  ? 'card card-lead-height':'card card-regular-height';
+    return 'card card-regular-height';
   }
-
-
   
 }

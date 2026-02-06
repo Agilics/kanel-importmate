@@ -1,28 +1,25 @@
+
 .main {
   width: 100%;
   max-width: 1200px;
-  margin: 0 auto;
-  min-height: 100vh;
-  padding: 1.5rem 2rem;
   background: #f9fafb;
   font-family: "Salesforce Sans", Arial, sans-serif;
+   min-height: calc(100vh - 120px); 
 }
+
+ 
 
 /* HEADER */
 .header {
   display: flex;
   justify-content: space-between;
-  align-items: start;
-  gap: 1rem;
-  margin-bottom: 2rem;
-  width: 100%;
-  max-width: 1056px;
+  align-items: start; 
+  margin-bottom: 5px;
 }
 
 .text-header {
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  flex-direction: column; 
   flex: 1;
 }
 
@@ -30,8 +27,7 @@
   font-weight: 700;
   font-size: clamp(1.25rem, 4vw, 1.5rem);
   line-height: 1.33;
-  color: #111827;
-  margin: 0;
+  color: #111827; 
 }
 
 .subtitle {
@@ -39,8 +35,7 @@
   font-size: clamp(0.875rem, 2vw, 1rem);
   font-family: "Inter", sans-serif;
   line-height: 1.5;
-  color: #4b5563;
-  margin: 0;
+  color: #4b5563; 
 }
 
 .actions {
@@ -276,7 +271,4 @@
     padding: 2rem 3rem;
   }
 
-  .header {
-    margin-bottom: 2.5rem;
-  }
 }

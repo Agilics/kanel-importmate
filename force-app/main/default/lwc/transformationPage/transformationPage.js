@@ -25,6 +25,8 @@ export default class TransformationPage extends LightningElement {
   _wiredResult; //  résultat du @wire (OBLIGATOIRE pour refreshApex)
   @track mappingId;
   @track showMappings = false; 
+  status;
+
   
    // ===== Pagination =====
   pageIndex = 1;
@@ -53,7 +55,11 @@ export default class TransformationPage extends LightningElement {
                 iconName: iconConfig.icon,
                 iconBoxClass: iconConfig.boxClass,
                 headIconClass: iconConfig.iconClass,
-                formattedRules: this.formatRuleContent(rule)
+                showOrder: rule.Order__c ? true : false,
+                order: rule.Order__c, 
+                targetField: rule.FieldMapping__r.TargetField__c,
+                formattedRules: this.formatRuleContent(rule),
+                
             };
         });
   }
@@ -104,7 +110,7 @@ export default class TransformationPage extends LightningElement {
   async handleAddTransformation(event) {  
     try {
       const result = await TransformationModal.open({ 
-        size: 'large',
+        size: 'medium',
         description: 'Ce modal permet la création & la modification de nouvelle règle transformation avec les mappings',
         projectId: this.projectId,
         targetObject: this.selectedProject?.data?.TargetObject__c, 
