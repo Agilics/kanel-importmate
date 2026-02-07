@@ -122,29 +122,11 @@ export function parseCsvLine(line, delimiter = ',') {
 }
 
 /**
- * Detects if the app is running in Salesforce Console
- */
-export function isConsoleApp() {
-    //Check for console-specific APIs
-    return !!(
-        window.sforce?.console ||
-        window.sf?.console ||
-        window.parent?.sforce?.console ||
-        window.parent?.sf?.console ||
-        (typeof window !== 'undefined' && 
-         (window.location?.href?.includes('/console/') ||
-          window.location?.href?.includes('console=true') ||
-          window.location?.search?.includes('console=true')))
-    );
-}
-
-/**
  * Sets up a beforeunload handler to warn users when closing the page
  */
 export function setupBeforeUnloadWarning(shouldWarn) {
     const handler = (event) => {
         if (shouldWarn && shouldWarn()) {
-            //Modern browsers ignore custom messages, but we still need to set returnValue
             const message = 'You have unsaved changes. Are you sure you want to leave?';
             event.preventDefault();
             event.returnValue = message;
@@ -157,41 +139,4 @@ export function setupBeforeUnloadWarning(shouldWarn) {
     return () => {
         window.removeEventListener('beforeunload', handler);
     };
-}
-
-/**
- * Sets up console navigation handlers if running in console
- */
-export function setupConsoleNavigationHandlers(onNavigation, shouldWarn) {
-    if (!isConsoleApp()) {
-        return;
-    }
-
-    const consoleApi = window.sforce?.console || window.sf?.console || window.parent?.sforce?.console || window.parent?.sf?.console;
-    
-    if (!consoleApi) {
-        return;
-    }
-
-    //Listen for console navigation events
-    if (consoleApi.onFocusedPrimaryTab) {
-        consoleApi.onFocusedPrimaryTab((response) => {
-            if (response.success && shouldWarn && shouldWarn()) {
-                if (onNavigation) {
-                    onNavigation('primaryTab', response);
-                }
-            }
-        });
-    }
-
-    //Listen for subtab navigation events
-    if (consoleApi.onFocusedSubtab) {
-        consoleApi.onFocusedSubtab((response) => {
-            if (response.success && shouldWarn && shouldWarn()) {
-                if (onNavigation) {
-                    onNavigation('subtab', response);
-                }
-            }
-        });
-    }
 }

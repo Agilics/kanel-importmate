@@ -27,6 +27,10 @@ export default class MainComponent extends LightningElement {
   showExecutionHistory = false;
   isLoading = false;
   activePage = PAGES.DASHBOARD;
+  
+  //Navigation and unsaved changes tracking
+  hasUnsavedChanges = false;
+  beforeUnloadHandler = null;
 
   // Mapping data
   mappingHeadersCsv = '';
@@ -47,12 +51,52 @@ export default class MainComponent extends LightningElement {
   baseSteps = STEP_CONFIG;
   @track showProjectForm = false;
 
-  // Wire config
+  //Wire config
   recentProjectsLimit = RECENT_PROJECTS_LIMIT;
   @wire(getRecentsProjects, {
       limitor: '$recentProjectsLimit'
   })
   importProjects;
+
+  connectedCallback() {
+    this.setupBeforeUnloadHandler();
+  }
+
+  disconnectedCallback() {
+    this.removeBeforeUnloadHandler();
+  }
+
+  //Sets up the beforeunload event handler to warn users when closing the page
+  setupBeforeUnloadHandler() {
+    this.beforeUnloadHandler = (event) => {
+      if (this.hasUnsavedChanges) {
+        const message = 'You have unsaved changes. Are you sure you want to leave?';
+        event.preventDefault();
+        event.returnValue = message;
+        return message;
+      }
+    };
+    
+    window.addEventListener('beforeunload', this.beforeUnloadHandler);
+  }
+
+  //Removes the beforeunload event handler
+  removeBeforeUnloadHandler() {
+    if (this.beforeUnloadHandler) {
+      window.removeEventListener('beforeunload', this.beforeUnloadHandler);
+      this.beforeUnloadHandler = null;
+    }
+  }
+
+  //Marks that there are unsaved changes
+  markAsUnsaved() {
+    this.hasUnsavedChanges = true;
+  }
+
+  //Marks that all changes are saved
+  markAsSaved() {
+    this.hasUnsavedChanges = false;
+  }
 
   get steps() {
       return this.baseSteps.map((step) => {
@@ -137,6 +181,7 @@ export default class MainComponent extends LightningElement {
           });
 
           this.currentProject = result;
+          this.markAsSaved();
           this.showToast(
               TOAST_VARIANTS.SUCCESS,
               MESSAGES.PROJECT_CREATED.replace('{0}', result.Id),
@@ -176,7 +221,8 @@ export default class MainComponent extends LightningElement {
 
   handleCsvLoaded(event) {
       this.csvData = event.detail?.csvData || event.detail || {};
-      // eslint-disable-next-line no-console
+      //Mark as unsaved when CSV is loaded
+      this.markAsUnsaved(); 
       console.log(
           'csvData loaded in mainComponent:',
           this.csvData?.allRows ?
@@ -205,14 +251,17 @@ export default class MainComponent extends LightningElement {
 
   handleProjectNameChange(event) {
       this.projectName = event.detail;
+      this.markAsUnsaved();
   }
 
   handleDescriptionChange(event) {
       this.description = event.detail;
+      this.markAsUnsaved();
   }
 
   handleTargetObjectChange(event) {
       this.targetObject = event.detail;
+      this.markAsUnsaved();
   }
 
   showToast(title, message, variant) {
@@ -295,6 +344,7 @@ export default class MainComponent extends LightningElement {
       if (this.currentProject) {
           this.currentStep = STEPS.FIELD_MAPPING;
           this.updateUIForStep(this.currentStep);
+          this.markAsUnsaved();
       } else {
           this.showToast(
               TOAST_VARIANTS.WARNING,
@@ -493,6 +543,6 @@ export default class MainComponent extends LightningElement {
       this.currentMappings = Array.isArray(d.mappings) ? d.mappings : [];
       this.currentStep = STEPS.TRANSFORMATIONS;
       this.updateUIForStep(this.currentStep);
-  }
-
+      this.markAsUnsaved();
+  }  
 }
