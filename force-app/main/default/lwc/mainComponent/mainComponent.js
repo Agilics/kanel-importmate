@@ -24,6 +24,7 @@ export default class MainComponent extends LightningElement {
   // UI state
   showCreatorSection = false;
   showDashboard = true;
+  showExecutionHistory = false;
   isLoading = false;
   activePage = PAGES.DASHBOARD;
 
@@ -419,6 +420,27 @@ export default class MainComponent extends LightningElement {
                   TOAST_VARIANTS.INFO
               );
               break;
+          case QUICK_ACTIONS.EXECUTION_HISTORY:
+          case 'Execution History':
+          case 'Historique des executions':
+              this.showExecutionHistory = true;
+              this.showDashboard = false;
+              this.showCreatorSection = false;
+              break;
+          case 'Recent Projects':
+              this.showDashboard = true;
+              this.showExecutionHistory = false;
+              this.showCreatorSection = false;
+              this.currentStep = STEPS.PROJECT_SETUP;
+              this.updateUIForStep(this.currentStep);
+              break;
+          case 'Analytics':
+              this.showToast(
+                  TOAST_VARIANTS.INFO,
+                  'Analytics feature coming soon',
+                  TOAST_VARIANTS.INFO
+              );
+              break;
           default:
               break;
       }
@@ -429,14 +451,17 @@ export default class MainComponent extends LightningElement {
           this.showDashboard = true;
           this.activePage = PAGES.DASHBOARD;
           this.showCreatorSection = false;
+          this.showExecutionHistory = false;
           this.selectedDataSource = null;
       } else if (stepNumber === STEPS.DATA_SOURCE) {
           this.selectedDataSource = null;
           this.showDashboard = false;
+          this.showExecutionHistory = false;
           this.activePage = PAGES.PROJECTS;
           this.showCreatorSection = false;
       } else {
           this.showDashboard = false;
+          this.showExecutionHistory = false;
           this.activePage = PAGES.PROJECTS;
           this.showCreatorSection = false;
       }
