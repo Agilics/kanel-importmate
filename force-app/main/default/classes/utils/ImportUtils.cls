@@ -160,6 +160,57 @@ public with sharing class ImportUtils {
         }
     }
     
+    /**
+     * Convert a string value to the appropriate type based on the field type
+     */
+    public static Object convertValueToFieldType(String value, String objectName, String fieldName) {
+        if (String.isBlank(value)) {
+            return null;
+        }
+        
+        try {
+            Schema.DescribeFieldResult fieldDescribe = ObjectMetadataService.getFieldDescribe(objectName, fieldName);
+            if (fieldDescribe == null) {
+                // Field not found, return original value
+                return value;
+            }
+            
+            Schema.DisplayType fieldType = fieldDescribe.getType();
+            
+            switch on fieldType {
+                when DATE {
+                    return Date.valueOf(value);
+                }
+                when DATETIME {
+                    // Try to parse as full datetime first (YYYY-MM-DD HH:MM:SS)
+                    try {
+                        return Datetime.valueOf(value);
+                    } catch (Exception e) {
+                        // If that fails, try to parse as date only (YYYY-MM-DD) and convert to datetime
+                        Date dateOnly = Date.valueOf(value);
+                        return Datetime.newInstance(dateOnly, Time.newInstance(0, 0, 0, 0));
+                    }
+                }
+                when DOUBLE, CURRENCY, PERCENT {
+                    return Decimal.valueOf(value);
+                }
+                when INTEGER {
+                    return Integer.valueOf(value);
+                }
+                when BOOLEAN {
+                    return Boolean.valueOf(value);
+                }
+                when else {
+                    return value;
+                }
+            }
+        } catch (Exception e) {
+            // If conversion fails, return the original string value
+            // This allows Salesforce to attempt its own conversion
+            return value;
+        }
+    }
+    
     public class LookupQueryRequest {
         public String objectName;
         public String fieldName;
