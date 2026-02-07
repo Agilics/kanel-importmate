@@ -64,11 +64,27 @@ public with sharing class ValidationUtils {
     //Datetime validation
     public static ValidationResult validateDatetime(String datetimeValue, String fieldName) {
         try {
+            // First try to parse as full datetime format (YYYY-MM-DD HH:MM:SS)
             Datetime.valueOf(datetimeValue);
             return new ValidationResult(true);
         } catch (Exception e) {
-            return new ValidationResult(false, 'Invalid datetime format: ' + datetimeValue, Constants.INVALID_DATETIME_FORMAT,
-                new Map<String, Object>{ 'fieldName' => fieldName, 'datetimeValue' => datetimeValue });
+            //If that fails, try to parse as date only (YYYY-MM-DD) and convert to datetime
+            try {
+                Date dateOnly = Date.valueOf(datetimeValue);
+                //Convert date to datetime (defaults to midnight)
+                Datetime.newInstance(dateOnly, Time.newInstance(0, 0, 0, 0));
+                return new ValidationResult(true);
+            } catch (Exception e2) {
+                //Check if it looks like a date format but is invalid (e.g., invalid month/day)
+                String errorMessage = 'Invalid datetime format: ' + datetimeValue;
+                if (Pattern.matches('\\d{4}-\\d{2}-\\d{2}.*', datetimeValue)) {
+                    errorMessage += '. Expected format: YYYY-MM-DD or YYYY-MM-DD HH:MM:SS';
+                } else {
+                    errorMessage += '. Expected format: YYYY-MM-DD HH:MM:SS or YYYY-MM-DD';
+                }
+                return new ValidationResult(false, errorMessage, Constants.INVALID_DATETIME_FORMAT,
+                    new Map<String, Object>{ 'fieldName' => fieldName, 'datetimeValue' => datetimeValue });
+            }
         }
     }
     
