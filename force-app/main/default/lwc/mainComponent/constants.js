@@ -34,7 +34,8 @@ export const QUICK_ACTIONS = {
   EXPORT_DATA: "exportData",
   RECENT_PROJECTS: "recentProjects",
   IMPORT_TEMPLATES: "importTemplates",
-  ANALYTICS: "analytics"
+  ANALYTICS: "analytics",
+  EXECUTION_HISTORY: "executionHistory"
 };
 
 // Messages
