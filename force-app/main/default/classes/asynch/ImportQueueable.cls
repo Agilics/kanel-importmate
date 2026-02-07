@@ -113,7 +113,9 @@ public with sharing class ImportQueueable implements Queueable, Database.AllowsC
                             String transformedValue = getProcessedValue(transformedRow, targetField, mapping.SourceColumn__c, sourceValue);
 
                             if (String.isNotBlank(transformedValue)) {
-                                record.put(targetField, transformedValue);
+                                // Convert value to appropriate type based on field type
+                                Object convertedValue = ImportUtils.convertValueToFieldType(transformedValue, targetObject, targetField);
+                                record.put(targetField, convertedValue);
                             }
                         }
                     }
