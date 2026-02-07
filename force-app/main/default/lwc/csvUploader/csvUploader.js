@@ -4,7 +4,7 @@ const SS_ROWS_KEY = 'IM_csvRows';
 const SS_COLS_KEY = 'IM_sourceColumnsCsv';
 
 const DEFAULT_PREVIEW_LIMIT = 100;
-const DEFAULT_PAGE_SIZE = 5;
+const DEFAULT_PAGE_SIZE = 3;
 
 export default class CsvUploader extends LightningElement {
   @api title = 'CSV Data Import & Display';
