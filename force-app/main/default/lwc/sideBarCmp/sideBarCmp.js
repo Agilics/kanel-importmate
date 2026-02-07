@@ -10,7 +10,8 @@ export default class SideBarCmp extends LightningElement {
 
     quickActions = [
         { icon: 'utility:refresh', label: 'Recent Projects' },
-        { icon: 'utility:chart', label: 'Analytics' }
+        { icon: 'utility:chart', label: 'Analytics' },
+        { icon: 'utility:clock', label: 'Execution History' }
     ];
 
     get steps() {
@@ -46,8 +47,11 @@ export default class SideBarCmp extends LightningElement {
 
     handleQuickAction(event) {
         const actionLabel = event.currentTarget.dataset.action;
+        console.log('Sidebar quick action handler:', actionLabel);
         this.dispatchEvent(new CustomEvent('quickaction', {
-            detail: actionLabel
+            detail: actionLabel,
+            bubbles: true,
+            composed: true
         }));
     }
 

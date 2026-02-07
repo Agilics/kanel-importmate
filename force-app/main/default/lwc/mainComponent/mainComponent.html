@@ -38,6 +38,14 @@
 
       <!-- Main Content Area -->
       <div class="main-content">
+        <!-- Execution History View -->
+        <template if:true={showExecutionHistory}>
+          <div class="content-container ih">
+            <c-import-history onnewimportproject={openProjectForm}>
+            </c-import-history>
+          </div>
+        </template>
+
         <!-- Dashboard View -->
         <template if:true={showDashboard}>
           <div class="content-container">

@@ -49,6 +49,10 @@
   line-height: 1.3;
 }
 
+.content-container.ih {
+  overflow: visible;
+}
+
 /* Responsive */
 @media (max-width: 900px) {
   .app-layout {
