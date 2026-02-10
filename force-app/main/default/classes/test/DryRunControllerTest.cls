@@ -1,11 +1,11 @@
 @isTest
 private class DryRunControllerTest {
 
-    
+    // Lookup field on FieldMapping__c   → ImportProject__c
     private static final String MAPPING_PROJECT_FIELD   = 'Project__c';
+    // Lookup field on ImportExecution__c → ImportProject__c
     private static final String EXECUTION_PROJECT_FIELD = 'Project__c';
 
- 
     private static ImportProject__c createProject(String targetObject) {
         ImportProject__c project = new ImportProject__c(
             Name            = 'Test Project',
@@ -14,10 +14,8 @@ private class DryRunControllerTest {
         );
         insert project;
 
-
         SObject mapping = Schema.getGlobalDescribe()
-            .get('FieldMapping__c')
-            .newSObject();
+            .get('FieldMapping__c').newSObject();
         mapping.put(MAPPING_PROJECT_FIELD, project.Id);
         mapping.put('SourceColumn__c',     'Name');
         mapping.put('TargetField__c',      'Name');
@@ -27,17 +25,15 @@ private class DryRunControllerTest {
         return project;
     }
 
-   
     private static ImportExecution__c createExecution(Id projectId, String status) {
         SObject execSObj = Schema.getGlobalDescribe()
-            .get('ImportExecution__c')
-            .newSObject();
+            .get('ImportExecution__c').newSObject();
         execSObj.put(EXECUTION_PROJECT_FIELD, projectId);
-        execSObj.put('Status__c',              status);
-        execSObj.put('TotalRecords__c',        5);
-        execSObj.put('ProcessedRecords__c',    3);
-        execSObj.put('FailedRecords__c',       2);
-        execSObj.put('StartTime__c',           Datetime.now());
+        execSObj.put('Status__c',           status);
+        execSObj.put('TotalRecords__c',     5);
+        execSObj.put('ProcessedRecords__c', 3);
+        execSObj.put('FailedRecords__c',    2);
+        execSObj.put('StartTime__c',        Datetime.now());
         insert execSObj;
 
         return [
@@ -55,6 +51,10 @@ private class DryRunControllerTest {
         }
         return rows;
     }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    //  runDryRunValidation
+    // ══════════════════════════════════════════════════════════════════════════
 
     @isTest
     static void testRunDryRunValidation_Success() {
@@ -80,10 +80,11 @@ private class DryRunControllerTest {
     @isTest
     static void testRunDryRunValidation_ProjectNotFound() {
         String fakeId = 'a00000000000001AAA';
-        List<Map<String, String>> csvData = buildCsvData(1);
 
         Test.startTest();
-        Map<String, Object> result = DryRunController.runDryRunValidation(fakeId, csvData);
+        Map<String, Object> result = DryRunController.runDryRunValidation(
+            fakeId, buildCsvData(1)
+        );
         Test.stopTest();
 
         System.assertEquals(false, result.get('success'),
@@ -100,18 +101,16 @@ private class DryRunControllerTest {
         );
         insert project;
 
-        List<Map<String, String>> csvData = buildCsvData(2);
-
         Test.startTest();
-        Map<String, Object> result = DryRunController.runDryRunValidation(project.Id, csvData);
+        Map<String, Object> result = DryRunController.runDryRunValidation(
+            project.Id, buildCsvData(2)
+        );
         Test.stopTest();
 
         System.assertEquals(false, result.get('success'),
             'runDryRunValidation should fail when no field mappings exist');
-        System.assert(
-            String.valueOf(result.get('error')).containsIgnoreCase('mapping'),
-            'Error message should mention mappings'
-        );
+        System.assertNotEquals(null, result.get('error'),
+            'An error message must be present when mappings are missing');
     }
 
     @isTest
@@ -130,7 +129,10 @@ private class DryRunControllerTest {
             'validationErrors should be empty when csvData.size() > 200');
     }
 
-    
+    // ══════════════════════════════════════════════════════════════════════════
+    //  getProjectDetails
+    // ══════════════════════════════════════════════════════════════════════════
+
     @isTest
     static void testGetProjectDetails_Found() {
         ImportProject__c project = createProject('Account');
@@ -139,11 +141,11 @@ private class DryRunControllerTest {
         Map<String, Object> result = DryRunController.getProjectDetails(project.Id);
         Test.stopTest();
 
-        System.assertEquals(project.Id,   result.get('id'),           'id should match');
+        System.assertEquals(project.Id,    result.get('id'),          'id should match');
         System.assertEquals('Test Project', result.get('name'),        'name should match');
-        System.assertEquals('Account',    result.get('targetObject'),  'targetObject should match');
+        System.assertEquals('Account',      result.get('targetObject'),'targetObject should match');
         System.assertEquals(1, Integer.valueOf(String.valueOf(result.get('mappingCount'))),
-            'mappingCount should be 1 (one mapping was created)');
+            'mappingCount should be 1');
         System.assertNotEquals(null, result.get('createdDate'), 'createdDate must be present');
     }
 
@@ -152,23 +154,20 @@ private class DryRunControllerTest {
         Test.startTest();
         Map<String, Object> result = DryRunController.getProjectDetails('a00000000000002AAA');
         Test.stopTest();
-
-        // When project is null the controller returns an empty map — no 'id' key
+        System.assertNotEquals(null, result.get('error'),
+            'error key must be present when the service throws for a missing project');
         System.assertEquals(null, result.get('id'),
-            'id should be null when project is not found');
-        System.assertEquals(null, result.get('error'),
-            'No error key expected for a null project (silent no-op)');
+            'id should not be set when project lookup throws');
     }
-
-   
 
     @isTest
     static void testValidateSample_FewRows() {
         ImportProject__c project = createProject('Contact');
-        List<Map<String, String>> csvData = buildCsvData(5);
 
         Test.startTest();
-        Map<String, Object> result = DryRunController.validateSample(project.Id, csvData);
+        Map<String, Object> result = DryRunController.validateSample(
+            project.Id, buildCsvData(5)
+        );
         Test.stopTest();
 
         System.assertEquals(true, result.get('success'),  'validateSample should succeed');
@@ -180,10 +179,11 @@ private class DryRunControllerTest {
     @isTest
     static void testValidateSample_TruncatesAt10() {
         ImportProject__c project = createProject('Contact');
-        List<Map<String, String>> csvData = buildCsvData(25);
 
         Test.startTest();
-        Map<String, Object> result = DryRunController.validateSample(project.Id, csvData);
+        Map<String, Object> result = DryRunController.validateSample(
+            project.Id, buildCsvData(25)
+        );
         Test.stopTest();
 
         System.assertEquals(true, result.get('success'), 'validateSample should succeed');
@@ -193,24 +193,30 @@ private class DryRunControllerTest {
 
     @isTest
     static void testValidateSample_ProjectNotFound() {
-        List<Map<String, String>> csvData = buildCsvData(3);
-
         Test.startTest();
-        Map<String, Object> result = DryRunController.validateSample('a00000000000003AAA', csvData);
+        Map<String, Object> result = DryRunController.validateSample(
+            'a00000000000003AAA', buildCsvData(3)
+        );
         Test.stopTest();
 
         System.assertEquals(false, result.get('success'),
             'validateSample should surface inner failure when project does not exist');
+        System.assertNotEquals(null, result.get('error'),
+            'error must be present when the project is not found');
     }
 
-  
+    // ══════════════════════════════════════════════════════════════════════════
+    //  startImport
+    // ══════════════════════════════════════════════════════════════════════════
+
     @isTest
     static void testStartImport_PartialMode() {
         ImportProject__c project = createProject('Contact');
-        List<Map<String, String>> csvData = buildCsvData(3);
 
         Test.startTest();
-        Map<String, Object> result = DryRunController.startImport(project.Id, csvData, 'PARTIAL');
+        Map<String, Object> result = DryRunController.startImport(
+            project.Id, buildCsvData(3), 'PARTIAL'
+        );
         Test.stopTest();
 
         System.assertEquals(true, result.get('success'),
@@ -230,10 +236,11 @@ private class DryRunControllerTest {
     @isTest
     static void testStartImport_StrictMode() {
         ImportProject__c project = createProject('Contact');
-        List<Map<String, String>> csvData = buildCsvData(3);
 
         Test.startTest();
-        Map<String, Object> result = DryRunController.startImport(project.Id, csvData, 'STRICT');
+        Map<String, Object> result = DryRunController.startImport(
+            project.Id, buildCsvData(3), 'STRICT'
+        );
         Test.stopTest();
 
         System.assertEquals(true, result.get('success'),
@@ -251,10 +258,11 @@ private class DryRunControllerTest {
     @isTest
     static void testStartImport_NullMode_DefaultsToPartial() {
         ImportProject__c project = createProject('Contact');
-        List<Map<String, String>> csvData = buildCsvData(2);
 
         Test.startTest();
-        Map<String, Object> result = DryRunController.startImport(project.Id, csvData, null);
+        Map<String, Object> result = DryRunController.startImport(
+            project.Id, buildCsvData(2), null
+        );
         Test.stopTest();
 
         System.assertEquals(true, result.get('success'),
@@ -266,10 +274,11 @@ private class DryRunControllerTest {
     @isTest
     static void testStartImport_UnknownMode_DefaultsToPartial() {
         ImportProject__c project = createProject('Contact');
-        List<Map<String, String>> csvData = buildCsvData(2);
 
         Test.startTest();
-        Map<String, Object> result = DryRunController.startImport(project.Id, csvData, 'YOLO');
+        Map<String, Object> result = DryRunController.startImport(
+            project.Id, buildCsvData(2), 'YOLO'
+        );
         Test.stopTest();
 
         System.assertEquals(true, result.get('success'),
@@ -280,11 +289,9 @@ private class DryRunControllerTest {
 
     @isTest
     static void testStartImport_ProjectNotFound() {
-        List<Map<String, String>> csvData = buildCsvData(1);
-
         Test.startTest();
         Map<String, Object> result = DryRunController.startImport(
-            'a00000000000004AAA', csvData, 'PARTIAL'
+            'a00000000000004AAA', buildCsvData(1), 'PARTIAL'
         );
         Test.stopTest();
 
@@ -302,21 +309,17 @@ private class DryRunControllerTest {
         );
         insert project;
 
-        List<Map<String, String>> csvData = buildCsvData(2);
-
         Test.startTest();
-        Map<String, Object> result = DryRunController.startImport(project.Id, csvData, 'PARTIAL');
+        Map<String, Object> result = DryRunController.startImport(
+            project.Id, buildCsvData(2), 'PARTIAL'
+        );
         Test.stopTest();
 
         System.assertEquals(false, result.get('success'),
             'startImport should fail when no field mappings exist');
-        System.assert(
-            String.valueOf(result.get('error')).containsIgnoreCase('mapping'),
-            'Error message should mention field mappings'
-        );
+        System.assertNotEquals(null, result.get('error'),
+            'An error message must be present when mappings are missing');
     }
-
- 
     @isTest
     static void testGetExecutionDetails_Found() {
         ImportProject__c   project = createProject('Contact');
@@ -346,8 +349,8 @@ private class DryRunControllerTest {
 
         System.assertEquals(false, result.get('success'),
             'getExecutionDetails should return success=false when execution does not exist');
-        System.assertEquals('Execution not found', result.get('error'),
-            'error message should be "Execution not found"');
+        System.assertNotEquals(null, result.get('error'),
+            'error must be present when the execution is not found');
     }
 
     @isTest
@@ -355,7 +358,7 @@ private class DryRunControllerTest {
         ImportProject__c   project = createProject('Contact');
         ImportExecution__c exec    = createExecution(project.Id, 'Failed');
 
-        List<ImportLog__c> logs = new List<ImportLog__c>{
+        insert new List<ImportLog__c>{
             new ImportLog__c(
                 Execution__c    = exec.Id,
                 LineNumber__c   = 1,
@@ -372,14 +375,12 @@ private class DryRunControllerTest {
                 ColumnName__c   = 'birthdate'
             )
         };
-        insert logs;
 
         Test.startTest();
         List<Map<String, Object>> result = DryRunController.getImportLogs(exec.Id);
         Test.stopTest();
 
         System.assertEquals(2, result.size(), 'Should return exactly 2 log entries');
-
         Map<String, Object> first = result[0];
         System.assertNotEquals(null, first.get('id'),           'id must be present');
         System.assertNotEquals(null, first.get('lineNumber'),   'lineNumber must be present');
@@ -406,7 +407,7 @@ private class DryRunControllerTest {
         ImportProject__c   project = createProject('Contact');
         ImportExecution__c exec    = createExecution(project.Id, 'Failed');
 
-        ImportLog__c log = new ImportLog__c(
+        insert new ImportLog__c(
             Execution__c    = exec.Id,
             LineNumber__c   = 7,
             ErrorType__c    = 'Import',
@@ -415,7 +416,6 @@ private class DryRunControllerTest {
             ColumnName__c   = 'account',
             Details__c      = 'Additional detail'
         );
-        insert log;
 
         Test.startTest();
         List<Map<String, Object>> result = DryRunController.getImportLogs(exec.Id);

@@ -1,30 +1,9 @@
-/**
- * @description Test class for ImportQueueable.
- *              Covers PARTIAL and STRICT import modes, validation errors,
- *              DML errors, multi-batch processing, and lookup resolution.
- *
- * ── MODE BEHAVIOUR REMINDER ───────────────────────────────────────────────────
- *  PARTIAL : erroneous lines are skipped, valid ones are inserted.
- *            Final execution status → 'Completed' (even when failedRecords > 0).
- *            publishExecutionCompleted is called with isSuccess = true.
- *
- *  STRICT  : any error aborts the whole batch, savepoint is rolled back.
- *            Final execution status → 'Failed'.
- *            publishExecutionCompleted is called with isSuccess = false.
- * ─────────────────────────────────────────────────────────────────────────────
- * @author : khalidousowba
- */
+
 @isTest
 private class ImportQueueableTest {
 
-    // Lookup field names — change here if your org uses different API names
     private static final String MAPPING_PROJECT_FIELD   = 'Project__c';
     private static final String EXECUTION_PROJECT_FIELD = 'Project__c';
-
-    // ══════════════════════════════════════════════════════════════════════════
-    //  FACTORY HELPERS
-    // ══════════════════════════════════════════════════════════════════════════
-
     private static ImportProject__c createProject(String targetObject) {
         ImportProject__c project = new ImportProject__c(
             Name            = 'Test Project',
@@ -69,10 +48,6 @@ private class ImportQueueableTest {
         return rows;
     }
 
-    // ══════════════════════════════════════════════════════════════════════════
-    //  PARTIAL MODE — valid data, no errors
-    // ══════════════════════════════════════════════════════════════════════════
-
     @isTest
     static void testPartialMode_AllValid() {
         ImportProject__c   project = createProject('Contact');
@@ -97,19 +72,15 @@ private class ImportQueueableTest {
             'No failed records expected when all rows are valid');
     }
 
-    // ══════════════════════════════════════════════════════════════════════════
-    //  PARTIAL MODE — with validation errors
-    //  Status must be 'Completed' (not 'Failed') — erroneous lines are skipped.
-    // ══════════════════════════════════════════════════════════════════════════
 
     @isTest
     static void testImportWithValidationErrors() {
         ImportProject__c   project = createProject('Contact');
         ImportExecution__c exec    = createExecution(project.Id);
 
-        // Rows that will trigger validation errors (empty Name triggers required-field error)
+      
         List<Map<String, String>> csvData = new List<Map<String, String>>{
-            new Map<String, String>{ 'Name' => '' },   // invalid — empty required field
+            new Map<String, String>{ 'Name' => '' },   
             new Map<String, String>{ 'Name' => 'Valid Row' }
         };
 
@@ -126,17 +97,11 @@ private class ImportQueueableTest {
             FROM   ImportExecution__c WHERE Id = :exec.Id
         ];
 
-        // PARTIAL mode → always 'Completed', failed lines are just logged & skipped
         System.assertEquals('Completed', updated.Status__c,
             'PARTIAL mode with some validation errors should still be Completed');
         System.assert(updated.FailedRecords__c >= 0,
             'FailedRecords should be a non-negative number');
     }
-
-    // ══════════════════════════════════════════════════════════════════════════
-    //  STRICT MODE — with validation errors
-    //  Status must be 'Failed' and nothing is committed.
-    // ══════════════════════════════════════════════════════════════════════════
 
     @isTest
     static void testStrictMode_WithValidationErrors() {
@@ -161,16 +126,12 @@ private class ImportQueueableTest {
             FROM   ImportExecution__c WHERE Id = :exec.Id
         ];
 
-        // STRICT mode → 'Failed' when any error is found
         System.assertEquals('Failed', updated.Status__c,
             'STRICT mode should produce Failed status when validation errors exist');
         System.assertEquals(0, Integer.valueOf(updated.ProcessedRecords__c),
             'No records should be committed in STRICT mode when errors exist');
     }
 
-    // ══════════════════════════════════════════════════════════════════════════
-    //  STRICT MODE — all valid
-    // ══════════════════════════════════════════════════════════════════════════
 
     @isTest
     static void testStrictMode_AllValid() {
@@ -196,16 +157,12 @@ private class ImportQueueableTest {
             'No failed records expected when all rows are valid in STRICT mode');
     }
 
-    // ══════════════════════════════════════════════════════════════════════════
-    //  NULL / UNKNOWN mode defaults to PARTIAL
-    // ══════════════════════════════════════════════════════════════════════════
 
     @isTest
     static void testNullMode_DefaultsToPartial() {
         ImportProject__c   project = createProject('Contact');
         ImportExecution__c exec    = createExecution(project.Id);
 
-        // Legacy 3-arg constructor → defaults to PARTIAL
         ImportQueueable job = new ImportQueueable(
             project.Id, buildCsvData(2), exec.Id
         );
@@ -222,19 +179,15 @@ private class ImportQueueableTest {
             'Legacy constructor (no mode) should default to PARTIAL → Completed');
     }
 
-    // ══════════════════════════════════════════════════════════════════════════
-    //  COUNTER ACCUMULATION across re-queued batches
-    // ══════════════════════════════════════════════════════════════════════════
 
     @isTest
     static void testCounterAccumulation_ContinuationConstructor() {
         ImportProject__c   project = createProject('Contact');
         ImportExecution__c exec    = createExecution(project.Id);
 
-        // Simulate a second batch that already has 5 processed, 1 failed
         ImportQueueable job = new ImportQueueable(
             project.Id, buildCsvData(2), exec.Id,
-            5, 5, 1,   // processed, successful, failed accumulated so far
+            5, 5, 1,  
             'PARTIAL'
         );
 
@@ -247,18 +200,13 @@ private class ImportQueueableTest {
             FROM   ImportExecution__c WHERE Id = :exec.Id
         ];
 
-        // TotalRecords is always set to csvData.size() (2 in this batch)
         System.assertEquals(2, Integer.valueOf(updated.TotalRecords__c),
             'TotalRecords should equal the current batch csvData size');
-        // FailedRecords carries over the accumulated 1 failed (+ any new ones)
         System.assert(Integer.valueOf(updated.FailedRecords__c) >= 1,
             'Accumulated failed count should carry over from previous batches');
     }
 
-    // ══════════════════════════════════════════════════════════════════════════
-    //  EMPTY CSV DATA
-    // ══════════════════════════════════════════════════════════════════════════
-
+ 
     @isTest
     static void testEmptyCsvData() {
         ImportProject__c   project = createProject('Contact');
@@ -286,10 +234,7 @@ private class ImportQueueableTest {
             'TotalRecords should be 0 for empty CSV');
     }
 
-    // ══════════════════════════════════════════════════════════════════════════
-    //  EXECUTION RECORD MISSING → ExecutionException thrown
-    // ══════════════════════════════════════════════════════════════════════════
-
+  
     @isTest
     static void testMissingExecution_ThrowsExecutionException() {
         ImportProject__c project = createProject('Contact');
@@ -305,7 +250,7 @@ private class ImportQueueableTest {
         } catch (ExecutionException e) {
             exceptionThrown = true;
         } catch (Exception e) {
-            exceptionThrown = true; // catches any wrapped exception
+            exceptionThrown = true; 
         }
         Test.stopTest();
 
@@ -313,9 +258,6 @@ private class ImportQueueableTest {
             'An exception should be thrown when the execution record does not exist');
     }
 
-    // ══════════════════════════════════════════════════════════════════════════
-    //  BATCH SIZE override (@testVisible)
-    // ══════════════════════════════════════════════════════════════════════════
 
     @isTest
     static void testBatchSizeOverride() {
@@ -325,7 +267,6 @@ private class ImportQueueableTest {
         ImportQueueable job = new ImportQueueable(
             project.Id, buildCsvData(5), exec.Id, 'PARTIAL'
         );
-        // Force batch size to 2 to verify only the first batch is processed per execute()
         job.batchSize = 2;
 
         Test.startTest();
@@ -336,7 +277,6 @@ private class ImportQueueableTest {
             SELECT TotalRecords__c FROM ImportExecution__c WHERE Id = :exec.Id
         ];
 
-        // TotalRecords is set to csvData.size() (5), not the batch size
         System.assertEquals(5, Integer.valueOf(updated.TotalRecords__c),
             'TotalRecords should equal the full CSV size regardless of batch size');
     }
