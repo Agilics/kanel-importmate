@@ -127,13 +127,7 @@ export default class TransformationPage extends LightningElement {
         if (result.success) {
             await refreshApex(this._wiredResult);
             this.showToast('Success', result.message, 'success');
-          } else {
-            this.showToast(
-              result.variant === 'error' ? 'Error' : 'Warning',
-              result.message || 'Update cancelled',
-              result.variant || 'warning'
-            );
-          }
+        }
     } catch (error) {
       console.error('Erreur lors de la création:', error);
          this.showToast(
@@ -267,9 +261,14 @@ export default class TransformationPage extends LightningElement {
   async handleEditTransformation(event) {
     try {
       const existingRuleId = event.detail.ruleId; 
-      console.log('existingRuleId', existingRuleId);
+      const ruleType = this._wiredResult.data.find(rule => rule.Id === existingRuleId)?.RuleType__c; 
+    
+      // On adapte la taille dynamiquement
+      const modalSize = (ruleType === 'Concatenation' || ruleType === 'BooleanTransformation') 
+                      ? 'large' 
+                      : 'small';
       const result = await TransformationModal.open({
-        size: 'large',
+        size: modalSize,
         description: 'Ce modal permet la  modification de règle transformation avec les mappings',
         projectId: this.projectId,
         targetObject: this.selectedProject?.data?.TargetObject__c,
@@ -279,7 +278,7 @@ export default class TransformationPage extends LightningElement {
         existingRuleId: existingRuleId
       });
 
-      if (!result) return;
+      if (!result || result === 'okay') return;
 
       if (result.success) {
         await refreshApex(this._wiredResult);
@@ -289,13 +288,13 @@ export default class TransformationPage extends LightningElement {
            result.message,
           'success'
         );
-      } else {
-        this.showToast(
-          'Warning',
-          result.message,
-          result.variant || 'warning'
-        );
-      }
+      }else if (result.message) {
+            this.showToast(
+                'Warning',
+                result.message,
+                result.variant || 'warning'
+            );
+        }
     } catch (error) {
       console.error('Erreur lors de la création:', error);
       this.showToast(
