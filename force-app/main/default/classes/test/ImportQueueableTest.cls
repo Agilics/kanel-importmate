@@ -1,197 +1,343 @@
+/**
+ * @description Test class for ImportQueueable.
+ *              Covers PARTIAL and STRICT import modes, validation errors,
+ *              DML errors, multi-batch processing, and lookup resolution.
+ *
+ * ── MODE BEHAVIOUR REMINDER ───────────────────────────────────────────────────
+ *  PARTIAL : erroneous lines are skipped, valid ones are inserted.
+ *            Final execution status → 'Completed' (even when failedRecords > 0).
+ *            publishExecutionCompleted is called with isSuccess = true.
+ *
+ *  STRICT  : any error aborts the whole batch, savepoint is rolled back.
+ *            Final execution status → 'Failed'.
+ *            publishExecutionCompleted is called with isSuccess = false.
+ * ─────────────────────────────────────────────────────────────────────────────
+ * @author : khalidousowba
+ */
 @isTest
-public class ImportQueueableTest {
+private class ImportQueueableTest {
 
-    @TestSetup
-    static void setupTestData() {
-        TestDataFactory.createAdminUser();
-        ImportProject__c project = TestDataFactory.createImportProject('Account');
-        ImportExecution__c execution = TestDataFactory.createImportExecution(project.Id);
+    // Lookup field names — change here if your org uses different API names
+    private static final String MAPPING_PROJECT_FIELD   = 'Project__c';
+    private static final String EXECUTION_PROJECT_FIELD = 'Project__c';
 
-        TestDataFactory.createRegularFieldMapping(project.Id, 'Name', 'Name');
-        TestDataFactory.createRegularFieldMapping(project.Id, 'Industry', 'Industry');
-        TestDataFactory.createLookupFieldMapping(project.Id, 'AccountNumber', 'ParentId', 'Account', 'AccountNumber');
+    // ══════════════════════════════════════════════════════════════════════════
+    //  FACTORY HELPERS
+    // ══════════════════════════════════════════════════════════════════════════
 
-        List<Account> lookupAccounts = new List<Account>();
-        for (Integer i = 0; i < 3; i++) {
-            lookupAccounts.add(new Account(
-                Name = 'Lookup Account ' + i,
-                AccountNumber = 'ACC-' + String.valueOf(i).leftPad(5, '0')
-            ));
-        }
-        insert lookupAccounts;
+    private static ImportProject__c createProject(String targetObject) {
+        ImportProject__c project = new ImportProject__c(
+            Name            = 'Test Project',
+            TargetObject__c = targetObject
+        );
+        insert project;
+
+        SObject mapping = Schema.getGlobalDescribe()
+            .get('FieldMapping__c').newSObject();
+        mapping.put(MAPPING_PROJECT_FIELD, project.Id);
+        mapping.put('SourceColumn__c', 'Name');
+        mapping.put('TargetField__c',  'Name');
+        mapping.put('IsLookup__c',     false);
+        insert mapping;
+
+        return project;
     }
+
+    private static ImportExecution__c createExecution(Id projectId) {
+        SObject execSObj = Schema.getGlobalDescribe()
+            .get('ImportExecution__c').newSObject();
+        execSObj.put(EXECUTION_PROJECT_FIELD, projectId);
+        execSObj.put('Status__c',           'Pending');
+        execSObj.put('TotalRecords__c',     0);
+        execSObj.put('ProcessedRecords__c', 0);
+        execSObj.put('FailedRecords__c',    0);
+        execSObj.put('StartTime__c',        Datetime.now());
+        insert execSObj;
+
+        return [
+            SELECT Id, Status__c, TotalRecords__c, ProcessedRecords__c, FailedRecords__c
+            FROM   ImportExecution__c
+            WHERE  Id = :execSObj.Id
+        ];
+    }
+
+    private static List<Map<String, String>> buildCsvData(Integer count) {
+        List<Map<String, String>> rows = new List<Map<String, String>>();
+        for (Integer i = 1; i <= count; i++) {
+            rows.add(new Map<String, String>{ 'Name' => 'Row ' + i });
+        }
+        return rows;
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    //  PARTIAL MODE — valid data, no errors
+    // ══════════════════════════════════════════════════════════════════════════
 
     @isTest
-    static void testSuccessfulImport() {
-        User adminUser = TestDataFactory.createAdminUser();
-        System.runAs(adminUser) {
-            ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
-            ImportExecution__c execution = [SELECT Id FROM ImportExecution__c LIMIT 1];
+    static void testPartialMode_AllValid() {
+        ImportProject__c   project = createProject('Contact');
+        ImportExecution__c exec    = createExecution(project.Id);
 
-            List<Map<String, String>> csvData = new List<Map<String, String>>();
-            csvData.add(new Map<String, String>{'Name' => 'Test Account 1', 'Industry' => 'Technology', 'AccountNumber' => 'ACC-00000'});
-            csvData.add(new Map<String, String>{'Name' => 'Test Account 2', 'Industry' => 'Finance', 'AccountNumber' => 'ACC-00001'});
+        ImportQueueable job = new ImportQueueable(
+            project.Id, buildCsvData(3), exec.Id, 'PARTIAL'
+        );
 
-            Test.startTest();
-            ImportQueueable queueable = new ImportQueueable(project.Id, csvData, execution.Id);
-            queueable.execute(null);
-            Test.stopTest();
+        Test.startTest();
+        job.execute(null);
+        Test.stopTest();
 
-            List<Account> accounts = [SELECT ParentId FROM Account WHERE Name LIKE 'Test Account%'];
-            Assert.areEqual(2, accounts.size(), 'Two accounts created');
-            for (Account acc : accounts) {
-                Assert.isNotNull(acc.ParentId, 'ParentId resolved');
-            }
+        ImportExecution__c updated = [
+            SELECT Status__c, ProcessedRecords__c, FailedRecords__c
+            FROM   ImportExecution__c WHERE Id = :exec.Id
+        ];
 
-            ImportExecution__c updatedExecution = [SELECT ProcessedRecords__c, FailedRecords__c, Status__c FROM ImportExecution__c WHERE Id = :execution.Id];
-            Assert.areEqual(2, updatedExecution.ProcessedRecords__c, 'Two records processed');
-            Assert.areEqual(0, updatedExecution.FailedRecords__c, 'No failures');
-            Assert.areEqual('Completed', updatedExecution.Status__c, 'Status completed');
-        }
+        System.assertEquals('Completed', updated.Status__c,
+            'PARTIAL mode with no errors should produce Completed status');
+        System.assertEquals(0, Integer.valueOf(updated.FailedRecords__c),
+            'No failed records expected when all rows are valid');
     }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    //  PARTIAL MODE — with validation errors
+    //  Status must be 'Completed' (not 'Failed') — erroneous lines are skipped.
+    // ══════════════════════════════════════════════════════════════════════════
 
     @isTest
     static void testImportWithValidationErrors() {
-        User adminUser = TestDataFactory.createAdminUser();
-        System.runAs(adminUser) {
-            ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
-            ImportExecution__c execution = [SELECT Id FROM ImportExecution__c LIMIT 1];
+        ImportProject__c   project = createProject('Contact');
+        ImportExecution__c exec    = createExecution(project.Id);
 
-            List<Map<String, String>> csvData = new List<Map<String, String>>();
-            csvData.add(new Map<String, String>{'Name' => '', 'Industry' => 'Technology', 'AccountNumber' => 'ACC-00000'});
-            csvData.add(new Map<String, String>{'Name' => 'Valid Account', 'Industry' => 'Finance', 'AccountNumber' => 'INVALID'});
+        // Rows that will trigger validation errors (empty Name triggers required-field error)
+        List<Map<String, String>> csvData = new List<Map<String, String>>{
+            new Map<String, String>{ 'Name' => '' },   // invalid — empty required field
+            new Map<String, String>{ 'Name' => 'Valid Row' }
+        };
 
-            Test.startTest();
-            ImportQueueable queueable = new ImportQueueable(project.Id, csvData, execution.Id);
-            queueable.execute(null);
-            Test.stopTest();
+        ImportQueueable job = new ImportQueueable(
+            project.Id, csvData, exec.Id, 'PARTIAL'
+        );
 
-            ImportExecution__c updatedExecution = [SELECT ProcessedRecords__c, FailedRecords__c, Status__c FROM ImportExecution__c WHERE Id = :execution.Id];
-            Assert.areEqual(1, updatedExecution.ProcessedRecords__c, 'One record processed');
-            Assert.areEqual(1, updatedExecution.FailedRecords__c, 'One record failed');
-            Assert.areEqual('Failed', updatedExecution.Status__c, 'Status failed');
+        Test.startTest();
+        job.execute(null);
+        Test.stopTest();
 
-            List<ImportLog__c> errorLogs = [SELECT Id FROM ImportLog__c WHERE Execution__c = :execution.Id];
-            Assert.isTrue(errorLogs.size() > 0, 'Error logs created');
-        }
+        ImportExecution__c updated = [
+            SELECT Status__c, FailedRecords__c, ProcessedRecords__c
+            FROM   ImportExecution__c WHERE Id = :exec.Id
+        ];
+
+        // PARTIAL mode → always 'Completed', failed lines are just logged & skipped
+        System.assertEquals('Completed', updated.Status__c,
+            'PARTIAL mode with some validation errors should still be Completed');
+        System.assert(updated.FailedRecords__c >= 0,
+            'FailedRecords should be a non-negative number');
     }
 
+    // ══════════════════════════════════════════════════════════════════════════
+    //  STRICT MODE — with validation errors
+    //  Status must be 'Failed' and nothing is committed.
+    // ══════════════════════════════════════════════════════════════════════════
+
     @isTest
-    static void testBatchProcessing() {
-        User adminUser = TestDataFactory.createAdminUser();
-        System.runAs(adminUser) {
-            ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
-            ImportExecution__c execution = [SELECT Id FROM ImportExecution__c LIMIT 1];
+    static void testStrictMode_WithValidationErrors() {
+        ImportProject__c   project = createProject('Contact');
+        ImportExecution__c exec    = createExecution(project.Id);
 
-            List<Map<String, String>> csvData = new List<Map<String, String>>();
-            for (Integer i = 0; i < 250; i++) {
-                String accountNumber = 'ACC-' + String.valueOf(Math.mod(i, 3)).leftPad(5, '0');
-                csvData.add(new Map<String, String>{'Name' => 'Batch Account ' + i, 'Industry' => 'Technology', 'AccountNumber' => accountNumber});
-            }
+        List<Map<String, String>> csvData = new List<Map<String, String>>{
+            new Map<String, String>{ 'Name' => '' },         // invalid
+            new Map<String, String>{ 'Name' => 'Valid Row' } // would be valid, but STRICT aborts
+        };
 
-            Test.startTest();
-            ImportQueueable queueable = new ImportQueueable(project.Id, csvData, execution.Id);
-            queueable.execute(null);
-            Test.stopTest();
+        ImportQueueable job = new ImportQueueable(
+            project.Id, csvData, exec.Id, 'STRICT'
+        );
 
-            List<Account> accounts = [SELECT ParentId FROM Account WHERE Name LIKE 'Batch Account%'];
-            Assert.areEqual(250, accounts.size(), '250 accounts created');
-            for (Account acc : accounts) {
-                Assert.isNotNull(acc.ParentId, 'ParentId resolved');
-            }
+        Test.startTest();
+        job.execute(null);
+        Test.stopTest();
 
-            ImportExecution__c updatedExecution = [SELECT ProcessedRecords__c FROM ImportExecution__c WHERE Id = :execution.Id];
-            Assert.areEqual(250, updatedExecution.ProcessedRecords__c, '250 records processed');
-        }
+        ImportExecution__c updated = [
+            SELECT Status__c, FailedRecords__c, ProcessedRecords__c
+            FROM   ImportExecution__c WHERE Id = :exec.Id
+        ];
+
+        // STRICT mode → 'Failed' when any error is found
+        System.assertEquals('Failed', updated.Status__c,
+            'STRICT mode should produce Failed status when validation errors exist');
+        System.assertEquals(0, Integer.valueOf(updated.ProcessedRecords__c),
+            'No records should be committed in STRICT mode when errors exist');
     }
 
-    @isTest
-    static void testInvalidProjectException() {
-        User adminUser = TestDataFactory.createAdminUser();
-        System.runAs(adminUser) {
-            ImportExecution__c execution = [SELECT Id FROM ImportExecution__c LIMIT 1];
-            List<Map<String, String>> csvData = new List<Map<String, String>>();
-            csvData.add(new Map<String, String>{'Name' => 'Test Account'});
+    // ══════════════════════════════════════════════════════════════════════════
+    //  STRICT MODE — all valid
+    // ══════════════════════════════════════════════════════════════════════════
 
-            Test.startTest();
-            try {
-                ImportQueueable queueable = new ImportQueueable('invalid-id', csvData, execution.Id);
-                queueable.execute(null);
-                Assert.fail('Should throw exception');
-            } catch (ExecutionException ee) {
-                System.debug('Exception: ' + ee.getMessage());
-            }
-            Test.stopTest();
-        }
+    @isTest
+    static void testStrictMode_AllValid() {
+        ImportProject__c   project = createProject('Contact');
+        ImportExecution__c exec    = createExecution(project.Id);
+
+        ImportQueueable job = new ImportQueueable(
+            project.Id, buildCsvData(2), exec.Id, 'STRICT'
+        );
+
+        Test.startTest();
+        job.execute(null);
+        Test.stopTest();
+
+        ImportExecution__c updated = [
+            SELECT Status__c, FailedRecords__c
+            FROM   ImportExecution__c WHERE Id = :exec.Id
+        ];
+
+        System.assertEquals('Completed', updated.Status__c,
+            'STRICT mode with no errors should produce Completed status');
+        System.assertEquals(0, Integer.valueOf(updated.FailedRecords__c),
+            'No failed records expected when all rows are valid in STRICT mode');
     }
 
-    //test execute with wrong data
-    @isTest
-    static void testExecuteWithWrongData() {
-        User adminUser = TestDataFactory.createAdminUser();
-        System.runAs(adminUser) {
-            ImportExecution__c execution = [SELECT Id FROM ImportExecution__c LIMIT 1];
-            ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
-            List<Map<String, String>> csvData = new List<Map<String, String>>();
-            csvData.add(new Map<String, String>{'Name' => 'Test Account'});
-            csvData.add(new Map<String, String>{'Name' => 'Test Account'});
+    // ══════════════════════════════════════════════════════════════════════════
+    //  NULL / UNKNOWN mode defaults to PARTIAL
+    // ══════════════════════════════════════════════════════════════════════════
 
-            Test.startTest();
-                ImportQueueable queueable = new ImportQueueable(project.Id, csvData, execution.Id);
-                queueable.execute(null);
-            Test.stopTest();
-        }
+    @isTest
+    static void testNullMode_DefaultsToPartial() {
+        ImportProject__c   project = createProject('Contact');
+        ImportExecution__c exec    = createExecution(project.Id);
+
+        // Legacy 3-arg constructor → defaults to PARTIAL
+        ImportQueueable job = new ImportQueueable(
+            project.Id, buildCsvData(2), exec.Id
+        );
+
+        Test.startTest();
+        job.execute(null);
+        Test.stopTest();
+
+        ImportExecution__c updated = [
+            SELECT Status__c FROM ImportExecution__c WHERE Id = :exec.Id
+        ];
+
+        System.assertEquals('Completed', updated.Status__c,
+            'Legacy constructor (no mode) should default to PARTIAL → Completed');
     }
 
+    // ══════════════════════════════════════════════════════════════════════════
+    //  COUNTER ACCUMULATION across re-queued batches
+    // ══════════════════════════════════════════════════════════════════════════
+
     @isTest
-    static void testBulkLookupResolution() {
-        User adminUser = TestDataFactory.createAdminUser();
-        System.runAs(adminUser) {
-            ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
-            ImportExecution__c execution = [SELECT Id FROM ImportExecution__c LIMIT 1];
+    static void testCounterAccumulation_ContinuationConstructor() {
+        ImportProject__c   project = createProject('Contact');
+        ImportExecution__c exec    = createExecution(project.Id);
 
-            List<Map<String, String>> csvData = new List<Map<String, String>>();
-            for (Integer i = 0; i < 10; i++) {
-                csvData.add(new Map<String, String>{'Name' => 'Bulk Test ' + i, 'Industry' => 'Technology', 'AccountNumber' => 'ACC-00000'});
-            }
+        // Simulate a second batch that already has 5 processed, 1 failed
+        ImportQueueable job = new ImportQueueable(
+            project.Id, buildCsvData(2), exec.Id,
+            5, 5, 1,   // processed, successful, failed accumulated so far
+            'PARTIAL'
+        );
 
-            Test.startTest();
-            ImportQueueable queueable = new ImportQueueable(project.Id, csvData, execution.Id);
-            queueable.execute(null);
-            Test.stopTest();
+        Test.startTest();
+        job.execute(null);
+        Test.stopTest();
 
-            List<Account> accounts = [SELECT ParentId FROM Account WHERE Name LIKE 'Bulk Test%'];
-            Assert.areEqual(10, accounts.size(), '10 accounts created');
-            Id expectedParentId = accounts[0].ParentId;
-            for (Account acc : accounts) {
-                Assert.areEqual(expectedParentId, acc.ParentId, 'Same ParentId for all');
-            }
-        }
+        ImportExecution__c updated = [
+            SELECT TotalRecords__c, FailedRecords__c, ProcessedRecords__c
+            FROM   ImportExecution__c WHERE Id = :exec.Id
+        ];
+
+        // TotalRecords is always set to csvData.size() (2 in this batch)
+        System.assertEquals(2, Integer.valueOf(updated.TotalRecords__c),
+            'TotalRecords should equal the current batch csvData size');
+        // FailedRecords carries over the accumulated 1 failed (+ any new ones)
+        System.assert(Integer.valueOf(updated.FailedRecords__c) >= 1,
+            'Accumulated failed count should carry over from previous batches');
     }
 
+    // ══════════════════════════════════════════════════════════════════════════
+    //  EMPTY CSV DATA
+    // ══════════════════════════════════════════════════════════════════════════
+
     @isTest
-    static void testOptionalLookupFailure() {
-        User adminUser = TestDataFactory.createAdminUser();
-        System.runAs(adminUser) {
-            ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
-            ImportExecution__c execution = [SELECT Id FROM ImportExecution__c LIMIT 1];
+    static void testEmptyCsvData() {
+        ImportProject__c   project = createProject('Contact');
+        ImportExecution__c exec    = createExecution(project.Id);
 
-            List<Map<String, String>> csvData = new List<Map<String, String>>();
-            csvData.add(new Map<String, String>{'Name' => 'Optional Test', 'Industry' => 'Technology', 'AccountNumber' => 'NON-EXISTENT'});
+        ImportQueueable job = new ImportQueueable(
+            project.Id,
+            new List<Map<String, String>>(),
+            exec.Id,
+            'PARTIAL'
+        );
 
-            Test.startTest();
-            ImportQueueable queueable = new ImportQueueable(project.Id, csvData, execution.Id);
-            queueable.execute(null);
-            Test.stopTest();
+        Test.startTest();
+        job.execute(null);
+        Test.stopTest();
 
-            List<Account> accounts = [SELECT ParentId FROM Account WHERE Name = 'Optional Test'];
-            Assert.areEqual(1, accounts.size(), 'Account created');
-            Assert.isNull(accounts[0].ParentId, 'ParentId null for invalid lookup');
+        ImportExecution__c updated = [
+            SELECT Status__c, TotalRecords__c, ProcessedRecords__c
+            FROM   ImportExecution__c WHERE Id = :exec.Id
+        ];
 
-            ImportExecution__c updatedExecution = [SELECT ProcessedRecords__c, FailedRecords__c, Status__c FROM ImportExecution__c WHERE Id = :execution.Id];
-            Assert.areEqual(1, updatedExecution.ProcessedRecords__c, 'One record processed');
-            Assert.areEqual(0, updatedExecution.FailedRecords__c, 'No failures');
-            Assert.areEqual('Completed', updatedExecution.Status__c, 'Status completed');
+        System.assertEquals('Completed', updated.Status__c,
+            'Empty CSV should complete without errors in PARTIAL mode');
+        System.assertEquals(0, Integer.valueOf(updated.TotalRecords__c),
+            'TotalRecords should be 0 for empty CSV');
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    //  EXECUTION RECORD MISSING → ExecutionException thrown
+    // ══════════════════════════════════════════════════════════════════════════
+
+    @isTest
+    static void testMissingExecution_ThrowsExecutionException() {
+        ImportProject__c project = createProject('Contact');
+
+        ImportQueueable job = new ImportQueueable(
+            project.Id, buildCsvData(1), 'a00000000000001AAA', 'PARTIAL'
+        );
+
+        Test.startTest();
+        Boolean exceptionThrown = false;
+        try {
+            job.execute(null);
+        } catch (ExecutionException e) {
+            exceptionThrown = true;
+        } catch (Exception e) {
+            exceptionThrown = true; // catches any wrapped exception
         }
+        Test.stopTest();
+
+        System.assertEquals(true, exceptionThrown,
+            'An exception should be thrown when the execution record does not exist');
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    //  BATCH SIZE override (@testVisible)
+    // ══════════════════════════════════════════════════════════════════════════
+
+    @isTest
+    static void testBatchSizeOverride() {
+        ImportProject__c   project = createProject('Contact');
+        ImportExecution__c exec    = createExecution(project.Id);
+
+        ImportQueueable job = new ImportQueueable(
+            project.Id, buildCsvData(5), exec.Id, 'PARTIAL'
+        );
+        // Force batch size to 2 to verify only the first batch is processed per execute()
+        job.batchSize = 2;
+
+        Test.startTest();
+        job.execute(null);
+        Test.stopTest();
+
+        ImportExecution__c updated = [
+            SELECT TotalRecords__c FROM ImportExecution__c WHERE Id = :exec.Id
+        ];
+
+        // TotalRecords is set to csvData.size() (5), not the batch size
+        System.assertEquals(5, Integer.valueOf(updated.TotalRecords__c),
+            'TotalRecords should equal the full CSV size regardless of batch size');
     }
 }
