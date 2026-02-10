@@ -64,7 +64,7 @@
                <div class="slds-form-element__control">
                   <lightning-dual-listbox id="sourceFields" name="sourceFields" label="Champs sources"
                      source-label="Source Fields" selected-label="Target Fields"
-                     options={targetFieldOptions} value={selectedColumns} onchange={handleSourceFieldsChange}
+                     options={targetFieldOptions} value={preSelectedColumns}  onchange={handleTargetFieldsChange}
                      max="3" class="rounded-input">
                   </lightning-dual-listbox>
                </div>

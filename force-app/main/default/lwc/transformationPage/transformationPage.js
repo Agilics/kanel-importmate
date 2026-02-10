@@ -1,6 +1,6 @@
 /**
  * @author : Mouhamed NIANG
- * @date : 06/02/2026 
+ * @date : 09/02/2026 
  * @description : This component is used to display the transformations of a project
  * @Modification : 
  *  - modified the handleAddTransformation method to refresh the list of transformations 
@@ -113,7 +113,7 @@ export default class TransformationPage extends LightningElement {
     try {
       const result = await TransformationModal.open({ 
         size: 'medium',
-        description: 'Ce modal permet la création & la modification de nouvelle règle transformation avec les mappings',
+        description: 'Ce modal permet la création  de nouvelle règle transformation avec les mappings',
         projectId: this.projectId,
         targetObject: this.selectedProject?.data?.TargetObject__c, 
         mappingId: event.detail.mappingId,
@@ -270,12 +270,12 @@ export default class TransformationPage extends LightningElement {
       console.log('existingRuleId', existingRuleId);
       const result = await TransformationModal.open({
         size: 'large',
-        description: 'Ce modal permet la création et modification de règle transformation avec les mappings',
+        description: 'Ce modal permet la  modification de règle transformation avec les mappings',
         projectId: this.projectId,
         targetObject: this.selectedProject?.data?.TargetObject__c,
         mappingId: event.detail.mappingId,
         mapping: event.detail.mapping,
-        isEdit: event.detail.isEdit,
+        isEdit: true,
         existingRuleId: existingRuleId
       });
 
