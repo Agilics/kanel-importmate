@@ -1,10 +1,37 @@
+/**
+ * @description Test class for DryRunController.
+ *
+ * ── ACTUAL SERVICE BEHAVIOURS (confirmed from deployment errors) ──────────────
+ *
+ *  ProjectService.getProjectById(fakeId)
+ *    → THROWS "List has no rows for assignment to SObject"  (does NOT return null)
+ *    → controller catch sets result.get('error') = that message
+ *
+ *  ExecutionRepository.getImportExecutionById(fakeId)
+ *    → THROWS — actual error starts with "Error retrieving execution: List has no rows..."
+ *    → controller catch sets result.get('error') = that message
+ *    → the 'execution != null' branch is NEVER reached for a fake Id
+ *
+ *  FieldMappingService.getAllMappingsByProject(projectId) with no mappings
+ *    → Returns an empty list (does NOT throw)
+ *    → Controller throws AuraHandledException('No field mappings found for project')
+ *    → Actual error message: "Script-thrown exception"  (AuraHandledException wraps the message)
+ *    → We assert only: success=false + error != null  (no text assertion on the message)
+ *
+ * ── FIELD NAME CONSTANTS ─────────────────────────────────────────────────────
+ *  Change if your org uses different lookup field API names.
+ * ─────────────────────────────────────────────────────────────────────────────
+ * @author : khalidousowba
+ */
 @isTest
 private class DryRunControllerTest {
 
-    // Lookup field on FieldMapping__c   → ImportProject__c
     private static final String MAPPING_PROJECT_FIELD   = 'Project__c';
-    // Lookup field on ImportExecution__c → ImportProject__c
     private static final String EXECUTION_PROJECT_FIELD = 'Project__c';
+
+    // ══════════════════════════════════════════════════════════════════════════
+    //  FACTORY HELPERS
+    // ══════════════════════════════════════════════════════════════════════════
 
     private static ImportProject__c createProject(String targetObject) {
         ImportProject__c project = new ImportProject__c(
@@ -17,9 +44,9 @@ private class DryRunControllerTest {
         SObject mapping = Schema.getGlobalDescribe()
             .get('FieldMapping__c').newSObject();
         mapping.put(MAPPING_PROJECT_FIELD, project.Id);
-        mapping.put('SourceColumn__c',     'Name');
-        mapping.put('TargetField__c',      'Name');
-        mapping.put('IsLookup__c',         false);
+        mapping.put('SourceColumn__c', 'Name');
+        mapping.put('TargetField__c',  'Name');
+        mapping.put('IsLookup__c',     false);
         insert mapping;
 
         return project;
@@ -59,42 +86,45 @@ private class DryRunControllerTest {
     @isTest
     static void testRunDryRunValidation_Success() {
         ImportProject__c project = createProject('Contact');
-        List<Map<String, String>> csvData = buildCsvData(3);
 
         Test.startTest();
-        Map<String, Object> result = DryRunController.runDryRunValidation(project.Id, csvData);
+        Map<String, Object> result = DryRunController.runDryRunValidation(
+            project.Id, buildCsvData(3)
+        );
         Test.stopTest();
 
-        System.assertEquals(true, result.get('success'),
-            'runDryRunValidation should return success=true for a valid project');
+        System.assertEquals(true,  result.get('success'),
+            'Should succeed for a valid project with mappings');
         System.assertNotEquals(null, result.get('executionId'),
-            'An executionId must be present in the result');
+            'executionId must be present');
         System.assertEquals(project.Name, result.get('projectName'),
-            'projectName should match the inserted project');
+            'projectName must match');
         System.assertEquals('Contact', result.get('targetObject'),
-            'targetObject should match the project targetObject');
+            'targetObject must match');
         System.assertNotEquals(null, result.get('validationErrors'),
             'validationErrors key must be present');
     }
 
     @isTest
     static void testRunDryRunValidation_ProjectNotFound() {
-        String fakeId = 'a00000000000001AAA';
-
+        // ProjectService throws "List has no rows" → controller returns success=false
+        // with the exception message in 'error'. We do NOT assert on the message text.
         Test.startTest();
         Map<String, Object> result = DryRunController.runDryRunValidation(
-            fakeId, buildCsvData(1)
+            'a00000000000001AAA', buildCsvData(1)
         );
         Test.stopTest();
 
         System.assertEquals(false, result.get('success'),
-            'runDryRunValidation should return success=false when project is not found');
+            'Should return success=false when project is not found');
         System.assertNotEquals(null, result.get('error'),
-            'An error message must be present when project is not found');
+            'error must be present');
     }
 
     @isTest
     static void testRunDryRunValidation_NoMappings() {
+        // AuraHandledException text is exposed as "Script-thrown exception" in test context.
+        // → assert only: success=false and error != null (no text assertion).
         ImportProject__c project = new ImportProject__c(
             Name            = 'No Mapping Project',
             TargetObject__c = 'Contact'
@@ -108,25 +138,26 @@ private class DryRunControllerTest {
         Test.stopTest();
 
         System.assertEquals(false, result.get('success'),
-            'runDryRunValidation should fail when no field mappings exist');
+            'Should fail when no field mappings exist');
         System.assertNotEquals(null, result.get('error'),
-            'An error message must be present when mappings are missing');
+            'error must be present when mappings are missing');
     }
 
     @isTest
     static void testRunDryRunValidation_LargeDataSet_SkipsLogFetch() {
         ImportProject__c project = createProject('Contact');
-        List<Map<String, String>> csvData = buildCsvData(201);
 
         Test.startTest();
-        Map<String, Object> result = DryRunController.runDryRunValidation(project.Id, csvData);
+        Map<String, Object> result = DryRunController.runDryRunValidation(
+            project.Id, buildCsvData(201)
+        );
         Test.stopTest();
 
         System.assertEquals(true, result.get('success'),
-            'runDryRunValidation should succeed even with 201 rows');
+            'Should succeed even with 201 rows');
         List<Object> errors = (List<Object>) result.get('validationErrors');
         System.assertEquals(0, errors.size(),
-            'validationErrors should be empty when csvData.size() > 200');
+            'validationErrors must be empty when csvData.size() > 200 (log fetch skipped)');
     }
 
     // ══════════════════════════════════════════════════════════════════════════
@@ -141,24 +172,35 @@ private class DryRunControllerTest {
         Map<String, Object> result = DryRunController.getProjectDetails(project.Id);
         Test.stopTest();
 
-        System.assertEquals(project.Id,    result.get('id'),          'id should match');
-        System.assertEquals('Test Project', result.get('name'),        'name should match');
-        System.assertEquals('Account',      result.get('targetObject'),'targetObject should match');
+        System.assertEquals(project.Id,    result.get('id'),           'id must match');
+        System.assertEquals('Test Project', result.get('name'),         'name must match');
+        System.assertEquals('Account',      result.get('targetObject'), 'targetObject must match');
         System.assertEquals(1, Integer.valueOf(String.valueOf(result.get('mappingCount'))),
-            'mappingCount should be 1');
-        System.assertNotEquals(null, result.get('createdDate'), 'createdDate must be present');
+            'mappingCount must be 1');
+        System.assertNotEquals(null, result.get('createdDate'),
+            'createdDate must be present');
     }
 
     @isTest
     static void testGetProjectDetails_NotFound() {
+        // ProjectService.getProjectById throws "List has no rows for assignment to SObject"
+        // when the Id doesn't exist. The controller catches it and sets 'error'.
+        // Actual: error = "List has no rows for assignment to SObject"  (not null)
         Test.startTest();
         Map<String, Object> result = DryRunController.getProjectDetails('a00000000000002AAA');
         Test.stopTest();
+
+        // error IS present (set by the catch block)
         System.assertNotEquals(null, result.get('error'),
-            'error key must be present when the service throws for a missing project');
+            'error must be present when the service throws for a missing project');
+        // id is never set because the exception occurs before the if(project != null) block
         System.assertEquals(null, result.get('id'),
-            'id should not be set when project lookup throws');
+            'id must not be set when project lookup throws');
     }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    //  validateSample
+    // ══════════════════════════════════════════════════════════════════════════
 
     @isTest
     static void testValidateSample_FewRows() {
@@ -170,10 +212,10 @@ private class DryRunControllerTest {
         );
         Test.stopTest();
 
-        System.assertEquals(true, result.get('success'),  'validateSample should succeed');
+        System.assertEquals(true, result.get('success'),  'Should succeed');
         System.assertEquals(true, result.get('isSample'), 'isSample must be true');
         System.assertEquals(5, Integer.valueOf(String.valueOf(result.get('sampleSize'))),
-            'sampleSize should equal the original row count when ≤ 10');
+            'sampleSize must equal original count when ≤ 10');
     }
 
     @isTest
@@ -186,9 +228,9 @@ private class DryRunControllerTest {
         );
         Test.stopTest();
 
-        System.assertEquals(true, result.get('success'), 'validateSample should succeed');
+        System.assertEquals(true, result.get('success'), 'Should succeed');
         System.assertEquals(10, Integer.valueOf(String.valueOf(result.get('sampleSize'))),
-            'sampleSize must be capped at 10 when more than 10 rows are provided');
+            'sampleSize must be capped at 10');
     }
 
     @isTest
@@ -200,9 +242,9 @@ private class DryRunControllerTest {
         Test.stopTest();
 
         System.assertEquals(false, result.get('success'),
-            'validateSample should surface inner failure when project does not exist');
+            'Should fail when project does not exist');
         System.assertNotEquals(null, result.get('error'),
-            'error must be present when the project is not found');
+            'error must be present');
     }
 
     // ══════════════════════════════════════════════════════════════════════════
@@ -219,17 +261,14 @@ private class DryRunControllerTest {
         );
         Test.stopTest();
 
-        System.assertEquals(true, result.get('success'),
-            'startImport should succeed in PARTIAL mode');
-        System.assertEquals('PARTIAL', result.get('importMode'),
-            'importMode in result must be PARTIAL');
-        System.assertNotEquals(null, result.get('executionId'),
-            'executionId must be returned');
+        System.assertEquals(true,     result.get('success'),    'Should succeed');
+        System.assertEquals('PARTIAL', result.get('importMode'), 'importMode must be PARTIAL');
+        System.assertNotEquals(null,   result.get('executionId'), 'executionId must be present');
         System.assertEquals(3, Integer.valueOf(String.valueOf(result.get('totalRecords'))),
-            'totalRecords should equal the CSV row count');
+            'totalRecords must match CSV size');
         System.assert(
             String.valueOf(result.get('message')).contains('PARTIAL'),
-            'message should mention the import mode'
+            'message must mention PARTIAL'
         );
     }
 
@@ -243,15 +282,12 @@ private class DryRunControllerTest {
         );
         Test.stopTest();
 
-        System.assertEquals(true, result.get('success'),
-            'startImport should succeed in STRICT mode');
-        System.assertEquals('STRICT', result.get('importMode'),
-            'importMode in result must be STRICT');
-        System.assertNotEquals(null, result.get('executionId'),
-            'executionId must be returned');
+        System.assertEquals(true,    result.get('success'),    'Should succeed');
+        System.assertEquals('STRICT', result.get('importMode'), 'importMode must be STRICT');
+        System.assertNotEquals(null,  result.get('executionId'), 'executionId must be present');
         System.assert(
             String.valueOf(result.get('message')).contains('STRICT'),
-            'message should mention the import mode'
+            'message must mention STRICT'
         );
     }
 
@@ -265,10 +301,8 @@ private class DryRunControllerTest {
         );
         Test.stopTest();
 
-        System.assertEquals(true, result.get('success'),
-            'startImport should succeed when importMode is null');
-        System.assertEquals('PARTIAL', result.get('importMode'),
-            'null importMode must default to PARTIAL');
+        System.assertEquals(true,     result.get('success'),    'Should succeed');
+        System.assertEquals('PARTIAL', result.get('importMode'), 'null mode must default to PARTIAL');
     }
 
     @isTest
@@ -281,10 +315,8 @@ private class DryRunControllerTest {
         );
         Test.stopTest();
 
-        System.assertEquals(true, result.get('success'),
-            'startImport should succeed with an unrecognised mode');
-        System.assertEquals('PARTIAL', result.get('importMode'),
-            'Unrecognised importMode must default to PARTIAL');
+        System.assertEquals(true,     result.get('success'),    'Should succeed');
+        System.assertEquals('PARTIAL', result.get('importMode'), 'Unknown mode must default to PARTIAL');
     }
 
     @isTest
@@ -296,13 +328,15 @@ private class DryRunControllerTest {
         Test.stopTest();
 
         System.assertEquals(false, result.get('success'),
-            'startImport should fail when project does not exist');
+            'Should fail when project does not exist');
         System.assertNotEquals(null, result.get('error'),
-            'An error message must be present');
+            'error must be present');
     }
 
     @isTest
     static void testStartImport_NoMappings() {
+        // AuraHandledException in test context → error = "Script-thrown exception"
+        // → assert only: success=false and error != null (no text assertion on content)
         ImportProject__c project = new ImportProject__c(
             Name            = 'No Mapping Project',
             TargetObject__c = 'Contact'
@@ -316,10 +350,15 @@ private class DryRunControllerTest {
         Test.stopTest();
 
         System.assertEquals(false, result.get('success'),
-            'startImport should fail when no field mappings exist');
+            'Should fail when no field mappings exist');
         System.assertNotEquals(null, result.get('error'),
-            'An error message must be present when mappings are missing');
+            'error must be present when mappings are missing');
     }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    //  getExecutionDetails
+    // ══════════════════════════════════════════════════════════════════════════
+
     @isTest
     static void testGetExecutionDetails_Found() {
         ImportProject__c   project = createProject('Contact');
@@ -329,29 +368,33 @@ private class DryRunControllerTest {
         Map<String, Object> result = DryRunController.getExecutionDetails(exec.Id);
         Test.stopTest();
 
-        System.assertEquals(true, result.get('success'),
-            'getExecutionDetails should succeed');
-        System.assertEquals(exec.Id, result.get('id'),
-            'id should match the execution');
-        System.assertEquals('Completed', result.get('status'),
-            'status should be Completed');
+        System.assertEquals(true,        result.get('success'), 'Should succeed');
+        System.assertEquals(exec.Id,     result.get('id'),      'id must match');
+        System.assertEquals('Completed', result.get('status'),  'status must match');
         System.assertEquals(5, Integer.valueOf(String.valueOf(result.get('totalRecords'))),
-            'totalRecords should be 5');
+            'totalRecords must be 5');
         System.assertEquals(2, Integer.valueOf(String.valueOf(result.get('failedRecords'))),
-            'failedRecords should be 2');
+            'failedRecords must be 2');
     }
 
     @isTest
     static void testGetExecutionDetails_NotFound() {
+        // ExecutionRepository.getImportExecutionById throws for a fake Id.
+        // Actual error caught: "Error retrieving execution: List has no rows..."
+        // → assert only: success=false and error != null (no text assertion).
         Test.startTest();
         Map<String, Object> result = DryRunController.getExecutionDetails('a00000000000005AAA');
         Test.stopTest();
 
         System.assertEquals(false, result.get('success'),
-            'getExecutionDetails should return success=false when execution does not exist');
+            'Should return success=false when execution is not found');
         System.assertNotEquals(null, result.get('error'),
-            'error must be present when the execution is not found');
+            'error must be present');
     }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    //  getImportLogs
+    // ══════════════════════════════════════════════════════════════════════════
 
     @isTest
     static void testGetImportLogs_WithLogs() {
@@ -380,7 +423,7 @@ private class DryRunControllerTest {
         List<Map<String, Object>> result = DryRunController.getImportLogs(exec.Id);
         Test.stopTest();
 
-        System.assertEquals(2, result.size(), 'Should return exactly 2 log entries');
+        System.assertEquals(2, result.size(), 'Should return 2 log entries');
         Map<String, Object> first = result[0];
         System.assertNotEquals(null, first.get('id'),           'id must be present');
         System.assertNotEquals(null, first.get('lineNumber'),   'lineNumber must be present');
@@ -397,9 +440,8 @@ private class DryRunControllerTest {
         List<Map<String, Object>> result = DryRunController.getImportLogs(exec.Id);
         Test.stopTest();
 
-        System.assertNotEquals(null, result, 'Result should never be null');
-        System.assertEquals(0, result.size(),
-            'Should return empty list when no logs exist');
+        System.assertNotEquals(null, result, 'Result must not be null');
+        System.assertEquals(0, result.size(), 'Should return empty list when no logs exist');
     }
 
     @isTest
@@ -425,10 +467,10 @@ private class DryRunControllerTest {
         Map<String, Object> entry = result[0];
 
         System.assertEquals(7, Integer.valueOf(String.valueOf(entry.get('lineNumber'))),
-            'lineNumber should be 7');
-        System.assertEquals('Import',           entry.get('errorType'),    'errorType should match');
-        System.assertEquals('AccountId',        entry.get('fieldApiName'), 'fieldApiName should match');
-        System.assertEquals('account',          entry.get('columnName'),   'columnName should match');
-        System.assertEquals('Additional detail', entry.get('details'),     'details should match');
+            'lineNumber must be 7');
+        System.assertEquals('Import',           entry.get('errorType'),    'errorType must match');
+        System.assertEquals('AccountId',        entry.get('fieldApiName'), 'fieldApiName must match');
+        System.assertEquals('account',          entry.get('columnName'),   'columnName must match');
+        System.assertEquals('Additional detail', entry.get('details'),     'details must match');
     }
 }
