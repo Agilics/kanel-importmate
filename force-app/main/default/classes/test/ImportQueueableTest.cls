@@ -24,7 +24,6 @@ private class ImportQueueableTest {
         ImportExecution__c execution = new ImportExecution__c(
             Project__c      = projectId,
             Status__c       = status,
-            Type__c         = 'Import',
             TotalRecords__c = 0,
             StartTime__c    = Datetime.now()
         );
@@ -144,7 +143,10 @@ private class ImportQueueableTest {
 
     @isTest
     static void testExecuteThrowsWhenProjectMissing() {
-        ImportExecution__c execution = createExecution(null, 'Pending');
+        // Project__c is required on the execution — use a real project for the DML,
+        // but pass a non-existent project Id to the queueable so ProjectService fails.
+        ImportProject__c dummyProject = createProject('Contact');
+        ImportExecution__c execution = createExecution(dummyProject.Id, 'Pending');
         List<Map<String, String>> csvData = buildCsvData(1);
 
         ImportQueueable q = new ImportQueueable(
