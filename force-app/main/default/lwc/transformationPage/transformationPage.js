@@ -111,6 +111,7 @@ export default class TransformationPage extends LightningElement {
   // Ouverture du modal pour ajouter  une nouvelle transformation
   async handleAddTransformation(event) {  
     try {
+      this.refreshTransformations();
       const result = await TransformationModal.open({ 
         size: 'medium',
         description: 'Ce modal permet la création  de nouvelle règle transformation avec les mappings',

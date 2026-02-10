@@ -47,6 +47,8 @@ export default class TransformationSaveModal extends LightningModal {
     fieldMappingOptions = [];
     targetFieldOptions = [];
 
+    wiredResultToRefresh;
+
     separatorOptions = [
         { label: 'Tab', value: '\t' },
         { label: 'Comma', value: ',' },
@@ -60,7 +62,10 @@ export default class TransformationSaveModal extends LightningModal {
     @api existingRuleId;
 
     @wire(getRuleById, { ruleId: '$existingRuleId' })
-    wiredExistingRuleById({ data, error }) {
+    wiredExistingRuleById(result) {
+        this.wiredResultToRefresh = result;
+        const { data, error } = result;
+
         if (data) {
             this.isEdit = true;
             this.existingRule = data;
@@ -97,7 +102,7 @@ export default class TransformationSaveModal extends LightningModal {
             console.log('Fields chargés:', this.fields);
 
             // Si les options de picklist sont déjà chargées, assigner le ruleType maintenant
-            this.syncRuleType(data, this.ruleTypeOptions, this.hasLoadedRule);
+            this.syncRuleType(data);
     
             this.getFieldsForBooleanTransformation(data, params);
             
@@ -112,18 +117,18 @@ export default class TransformationSaveModal extends LightningModal {
     }
 
     // Méthode pour synchroniser le RuleType une fois que les options sont chargées
-    syncRuleType(existingRule, ruleTypeOptions, hasLoadedRule) {
+    syncRuleType(existingRule) {
         // On ne procède que si on a TOUTES les billes en main
-        if (existingRule && ruleTypeOptions.length > 0 && !hasLoadedRule) {
+        if (existingRule && this.ruleTypeOptions.length > 0 && !this.hasLoadedRule) {
             const ruleTypeFromDB = existingRule.RuleType__c;
             
-            const match = ruleTypeOptions.find(opt => 
+            const match = this.ruleTypeOptions.find(opt => 
                 opt.value === ruleTypeFromDB || opt.label === ruleTypeFromDB
             );
 
             if (match) {
                 this.ruleType = match.value;
-                hasLoadedRule = true; // On marque comme chargé pour éviter les boucles
+                this.hasLoadedRule = true; // On marque comme chargé pour éviter les boucles
                 console.log('Sync RuleType Success:', this.ruleType);
             }
         }
@@ -185,7 +190,7 @@ export default class TransformationSaveModal extends LightningModal {
         
         // Trouver le label correspondant à la valeur
         const option = this.ruleTypeOptions.find(opt => opt.label === this.existingRule?.RuleType__c);
-        return option ? option.label : this.ruleType;
+        return option ? option.label : '';
     }
 
     get modalLabel() {
@@ -493,7 +498,7 @@ export default class TransformationSaveModal extends LightningModal {
             await updateRule(payload);
 
             // RAFRAÎCHISSEMENT DU CACHE ICI
-            await refreshApex(this.wiredRuleResult);
+            await refreshApex(this.wiredResultToRefresh);
 
             this.resetState();
 
