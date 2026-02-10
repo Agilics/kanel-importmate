@@ -1,5 +1,9 @@
 <template>
   <div class="execution-container">
+
+    <!-- ═══════════════════════════════════════════════════════════
+         PAGE HEADER
+    ════════════════════════════════════════════════════════════ -->
     <div class="page-header">
       <div class="header-content">
         <div class="header-left">
@@ -8,6 +12,13 @@
         </div>
 
         <div class="header-actions">
+
+          <!-- Current mode badge (always visible) -->
+          <div class={importModeBadgeClass}>
+            <lightning-icon icon-name={importModeIconName} size="xx-small"></lightning-icon>
+            <span>{importModeLabel}</span>
+          </div>
+
           <lightning-button
             label="Export Logs"
             variant="neutral"
@@ -41,6 +52,105 @@
       </div>
     </div>
 
+    <!-- ═══════════════════════════════════════════════════════════
+         IMPORT MODE SELECTION MODAL
+    ════════════════════════════════════════════════════════════ -->
+    <template if:true={showModeModal}>
+      <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open mode-modal" aria-modal="true">
+        <div class="slds-modal__container mode-modal-container">
+
+          <!-- Header -->
+          <header class="slds-modal__header mode-modal-header">
+            <lightning-icon icon-name="utility:settings" size="small" class="modal-header-icon"></lightning-icon>
+            <h2 class="slds-modal__title mode-modal-title">Choose Import Mode</h2>
+            <p class="mode-modal-subtitle">How should the import handle erroneous lines?</p>
+            <button class="slds-button slds-button_icon slds-modal__close mode-modal-close" onclick={handleCloseModeModal}>
+              <lightning-icon icon-name="utility:close" size="small"></lightning-icon>
+            </button>
+          </header>
+
+          <!-- Body -->
+          <div class="slds-modal__content mode-modal-body">
+
+            <!-- Option: Partial -->
+            <div class={partialModeOptionClass} onclick={handleSelectPartialMode}>
+              <div class="mode-option-icon mode-option-icon--partial">
+                <lightning-icon icon-name="utility:filterList" size="medium"></lightning-icon>
+              </div>
+              <div class="mode-option-content">
+                <div class="mode-option-header">
+                  <span class="mode-option-title">Partial Import</span>
+                  <span class="mode-option-tag mode-option-tag--partial">Recommended</span>
+                </div>
+                <p class="mode-option-desc">
+                  Valid lines are imported. Lines containing errors are <strong>skipped and logged</strong>
+                  without interrupting the rest of the import.
+                </p>
+                <ul class="mode-option-bullets">
+                  <li>✔ Maximises the number of records imported</li>
+                  <li>✔ Full error log available for review</li>
+                  <li>✔ Can re-run only the failed lines afterwards</li>
+                </ul>
+              </div>
+              <template if:true={isPartialMode}>
+                <div class="mode-option-check">
+                  <lightning-icon icon-name="utility:check" size="small"></lightning-icon>
+                </div>
+              </template>
+            </div>
+
+            <!-- Option: Strict -->
+            <div class={strictModeOptionClass} onclick={handleSelectStrictMode}>
+              <div class="mode-option-icon mode-option-icon--strict">
+                <lightning-icon icon-name="utility:ban" size="medium"></lightning-icon>
+              </div>
+              <div class="mode-option-content">
+                <div class="mode-option-header">
+                  <span class="mode-option-title">Strict Import</span>
+                  <span class="mode-option-tag mode-option-tag--strict">All-or-nothing</span>
+                </div>
+                <p class="mode-option-desc">
+                  The import <strong>stops immediately</strong> when the first error is encountered.
+                  No records are committed until the file is entirely clean.
+                </p>
+                <ul class="mode-option-bullets">
+                  <li>✔ Guarantees data consistency</li>
+                  <li>✔ Ideal for transactional datasets</li>
+                  <li>⚠ Requires fixing all errors before retrying</li>
+                </ul>
+              </div>
+              <template if:true={isStrictMode}>
+                <div class="mode-option-check">
+                  <lightning-icon icon-name="utility:check" size="small"></lightning-icon>
+                </div>
+              </template>
+            </div>
+
+          </div>
+
+          <!-- Footer -->
+          <footer class="slds-modal__footer mode-modal-footer">
+            <lightning-button
+              label="Cancel"
+              variant="neutral"
+              onclick={handleCloseModeModal}
+            ></lightning-button>
+            <lightning-button
+              label="Confirm &amp; Continue"
+              variant="brand"
+              onclick={handleConfirmMode}
+              icon-name="utility:forward"
+              icon-position="right"
+            ></lightning-button>
+          </footer>
+        </div>
+      </section>
+      <div class="slds-backdrop slds-backdrop_open"></div>
+    </template>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         IMPORT PROGRESS SECTION
+    ════════════════════════════════════════════════════════════ -->
     <template if:true={showImportProgress}>
       <div class="progress-section">
         <div class="progress-header">
@@ -50,13 +160,33 @@
           </div>
 
           <div class="progress-header-right">
+            <span class={importModeBadgeClass}>
+              <lightning-icon icon-name={importModeIconName} size="xx-small"></lightning-icon>
+              {importModeLabel}
+            </span>
             <span class={importStatusClass}>{formattedImportStatus}</span>
           </div>
         </div>
 
+        <!-- Mode info banner (contextual) -->
+        <div class="mode-info-banner">
+          <template if:true={isPartialMode}>
+            <lightning-icon icon-name="utility:filterList" size="xx-small"></lightning-icon>
+            <span><strong>Partial mode:</strong> erroneous lines are skipped — valid records are still imported.</span>
+          </template>
+          <template if:true={isStrictMode}>
+            <lightning-icon icon-name="utility:ban" size="xx-small"></lightning-icon>
+            <span><strong>Strict mode:</strong> the import will stop on first error — no record will be committed.</span>
+          </template>
+        </div>
+
         <div class="progress-content">
           <div class="progress-bar-container">
-            <lightning-progress-bar value={importProgressPercentage} variant={progressBarVariant} size="large"></lightning-progress-bar>
+            <lightning-progress-bar
+              value={importProgressPercentage}
+              variant={progressBarVariant}
+              size="large"
+            ></lightning-progress-bar>
 
             <div class="progress-info">
               <span class="progress-numbers">{importProgressPercentage}%</span>
@@ -70,51 +200,82 @@
           <template if:true={currentExecutionId}>
             <div class="execution-details">
               <div class="detail-item">
-                <span class="detail-label">Execution ID:</span>
+                <span class="detail-label">Execution ID</span>
                 <span class="detail-value">{currentExecutionId}</span>
               </div>
-
               <div class="detail-item">
-                <span class="detail-label">Status:</span>
+                <span class="detail-label">Import Mode</span>
+                <span class="detail-value">{importModeLabel}</span>
+              </div>
+              <div class="detail-item">
+                <span class="detail-label">Status</span>
                 <span class="detail-value">{formattedImportStatus}</span>
               </div>
 
               <template if:true={showImportResults}>
                 <div class="detail-item">
-                  <span class="detail-label">Total Records:</span>
+                  <span class="detail-label">Total Records</span>
                   <span class="detail-value">{totalRecords}</span>
                 </div>
-
                 <div class="detail-item">
-                  <span class="detail-label">Processed:</span>
+                  <span class="detail-label">Processed</span>
                   <span class="detail-value">{processedRecords}</span>
                 </div>
-
                 <div class="detail-item">
-                  <span class="detail-label">Successful:</span>
+                  <span class="detail-label">Successful</span>
                   <span class="detail-value success-value">{successfulRecords}</span>
                 </div>
-
                 <div class="detail-item">
-                  <span class="detail-label">Failed:</span>
+                  <span class="detail-label">Failed</span>
                   <span class="detail-value error-value">{failedRecords}</span>
                 </div>
+                <template if:true={showSkippedRecords}>
+                  <div class="detail-item">
+                    <span class="detail-label">Skipped (partial mode)</span>
+                    <span class="detail-value warning-value">{skippedRecords}</span>
+                  </div>
+                </template>
               </template>
             </div>
           </template>
 
+          <!-- In progress spinner text -->
           <template if:true={isImportInProgress}>
             <div class="spinner-container">
-              <p class="spinner-text">Processing your import... Please wait.</p>
+              <p class="spinner-text">Processing your import… Please wait.</p>
             </div>
           </template>
 
+          <!-- Partial success banner -->
+          <template if:true={isImportPartialSuccess}>
+            <div class="partial-success-message">
+              <lightning-icon icon-name="utility:warning" size="small" variant="warning"></lightning-icon>
+              <div>
+                <p class="msg-title">Import completed with some errors (Partial mode)</p>
+                <p class="msg-sub">
+                  {successfulRecords} record(s) imported · {failedRecords} line(s) skipped.
+                  Export logs to review skipped lines.
+                </p>
+              </div>
+            </div>
+          </template>
+
+          <!-- Strict mode failure banner -->
           <template if:true={isImportFailed}>
             <div class="error-message">
               <lightning-icon icon-name="utility:error" size="small" variant="error"></lightning-icon>
               <div>
-                <p class="msg-title">Import failed. You can still export logs.</p>
-                <p class="msg-sub">Export uses the execution id to fetch logs from Apex.</p>
+                <template if:true={isStrictMode}>
+                  <p class="msg-title">Import aborted — Strict mode</p>
+                  <p class="msg-sub">
+                    An error was detected and the import was stopped. No records were committed.
+                    Fix all errors in the CSV then retry.
+                  </p>
+                </template>
+                <template if:false={isStrictMode}>
+                  <p class="msg-title">Import failed. You can still export logs.</p>
+                  <p class="msg-sub">Export uses the execution id to fetch logs from Apex.</p>
+                </template>
               </div>
             </div>
           </template>
@@ -122,10 +283,20 @@
       </div>
     </template>
 
+    <!-- ═══════════════════════════════════════════════════════════
+         IMPORT RESULTS
+    ════════════════════════════════════════════════════════════ -->
     <template if:true={showImportResults}>
-      <c-import-results execution-id={currentExecutionId} total-errors={totalErrors} failed-records={failedRecords}></c-import-results>
+      <c-import-results
+        execution-id={currentExecutionId}
+        total-errors={totalErrors}
+        failed-records={failedRecords}
+      ></c-import-results>
     </template>
 
+    <!-- ═══════════════════════════════════════════════════════════
+         NAVIGATION
+    ════════════════════════════════════════════════════════════ -->
     <div class="navigation-buttons">
       <lightning-button
         label="Back to Validation"
@@ -135,5 +306,6 @@
         icon-position="left"
       ></lightning-button>
     </div>
+
   </div>
 </template>

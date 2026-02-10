@@ -5,6 +5,12 @@ import getImportLogs from '@salesforce/apex/DryRunController.getImportLogs';
 import { parseCsvData } from 'c/utility';
 import { subscribe, unsubscribe, onError } from 'lightning/empApi';
 
+// Import modes
+const IMPORT_MODE = {
+  PARTIAL: 'PARTIAL',  
+  STRICT:  'STRICT'    
+};
+
 export default class ExecutionCmp extends LightningElement {
   @api projectId;
   @api csvData;
@@ -22,8 +28,14 @@ export default class ExecutionCmp extends LightningElement {
   @track failedRecords = 0;
   @track successfulRecords = 0;
   @track totalErrors = 0;
+  @track skippedRecords = 0;
 
   @track showImportResults = false;
+
+  // ── Import mode state ──────────────────────────────────────────────────────
+  @track importMode = IMPORT_MODE.PARTIAL;
+  @track showModeModal = false;
+  @track pendingModeAction = null; // 'start' | 'schedule'
 
   subscription = null;
   channelName = '/event/ImportStatusEvent__e';
@@ -62,13 +74,20 @@ export default class ExecutionCmp extends LightningElement {
 
   get isImportFailed() {
     if (this.importStatus === 'Failed') return true;
-
     const progressComplete = (this.importProgress || 0) >= 100;
     const statusComplete = this.importStatus === 'Completed';
     const isFinished = progressComplete || statusComplete;
-
     if (isFinished && this.failedRecords > 0) return true;
     return false;
+  }
+
+  get isImportPartialSuccess() {
+    return (
+      this.importMode === IMPORT_MODE.PARTIAL &&
+      this.showImportResults &&
+      this.successfulRecords > 0 &&
+      this.failedRecords > 0
+    );
   }
 
   get importProgressPercentage() {
@@ -84,17 +103,20 @@ export default class ExecutionCmp extends LightningElement {
   get importStatusIconName() {
     if (this.isImportCompleted) return 'utility:success';
     if (this.isImportFailed) return 'utility:error';
+    if (this.isImportPartialSuccess) return 'utility:warning';
     return 'utility:info';
   }
 
   get importStatusClass() {
     if (this.isImportCompleted) return 'status-badge completed';
     if (this.isImportFailed) return 'status-badge failed';
+    if (this.isImportPartialSuccess) return 'status-badge partial';
     return 'status-badge in-progress';
   }
 
   get formattedImportStatus() {
     if (this.isImportCompleted) return 'Completed';
+    if (this.isImportPartialSuccess) return 'Partial Success';
     if (this.isImportFailed) return 'Failed';
     if (this.isImportInProgress) return 'In Progress';
     return this.importStatus || 'Pending';
@@ -106,8 +128,76 @@ export default class ExecutionCmp extends LightningElement {
     return classes;
   }
 
-  // ---------------- IMPORT START ----------------
-  async handleStartImport() {
+  get isPartialMode() {
+    return this.importMode === IMPORT_MODE.PARTIAL;
+  }
+
+  get isStrictMode() {
+    return this.importMode === IMPORT_MODE.STRICT;
+  }
+
+  get importModeLabel() {
+    return this.isPartialMode ? 'Partial Import' : 'Strict Import';
+  }
+
+  get importModeDescription() {
+    return this.isPartialMode
+      ? 'Valid lines will be imported. Erroneous lines are skipped.'
+      : 'Import stops immediately on the first error.';
+  }
+
+  get importModeBadgeClass() {
+    return this.isPartialMode ? 'mode-badge mode-partial' : 'mode-badge mode-strict';
+  }
+
+  get importModeIconName() {
+    return this.isPartialMode ? 'utility:filterList' : 'utility:ban';
+  }
+
+  get partialModeOptionClass() {
+    return `mode-option${this.isPartialMode ? ' mode-option--selected' : ''}`;
+  }
+
+  get strictModeOptionClass() {
+    return `mode-option${this.isStrictMode ? ' mode-option--selected' : ''}`;
+  }
+
+  get showSkippedRecords() {
+    return this.isPartialMode && this.skippedRecords > 0;
+  }
+
+  
+  openModeModal(action) {
+    this.pendingModeAction = action;
+    this.showModeModal = true;
+  }
+
+  handleCloseModeModal() {
+    this.showModeModal = false;
+    this.pendingModeAction = null;
+  }
+
+  handleSelectPartialMode() {
+    this.importMode = IMPORT_MODE.PARTIAL;
+  }
+
+  handleSelectStrictMode() {
+    this.importMode = IMPORT_MODE.STRICT;
+  }
+
+  handleConfirmMode() {
+    this.showModeModal = false;
+    const action = this.pendingModeAction;
+    this.pendingModeAction = null;
+
+    if (action === 'start') {
+      this.executeStartImport();
+    } else if (action === 'schedule') {
+      this.executeScheduleImport();
+    }
+  }
+
+  handleStartImport() {
     if (!this.projectId) {
       this.showToast('Error', 'Project ID is required', 'error');
       return;
@@ -116,10 +206,65 @@ export default class ExecutionCmp extends LightningElement {
       this.showToast('Error', 'CSV data is required', 'error');
       return;
     }
+    this.openModeModal('start');
+  }
 
+  handleScheduleImport() {
+    if (!this.projectId) {
+      this.showToast('Error', 'Project ID is required', 'error');
+      return;
+    }
+    this.openModeModal('schedule');
+  }
+
+  handlePreviousStep() {
+    this.dispatchEvent(new CustomEvent('previous'));
+  }
+
+  async executeStartImport() {
     this.isLoading = true;
+    this.resetImportState();
 
-    // reset UI
+    try {
+      const parsedCsvData = this.transformCsvData(this.csvData);
+      if (!parsedCsvData || parsedCsvData.length === 0) {
+        this.showToast('Error', 'No valid data found in CSV', 'error');
+        return;
+      }
+
+      const result = await startImport({
+        projectId: this.projectId,
+        csvData: parsedCsvData,
+        importMode: this.importMode            
+      });
+
+      this.currentExecutionId = result.executionId;
+      this.totalRecords = parsedCsvData.length;
+
+      this.showImportProgress = true;
+      this.importStatus = 'InProgress';
+      this.importProgress = 0;
+      this.importMessage = 'Import started...';
+
+      this.handleSubscribe();
+      this.showToast(
+        'Success',
+        `Import started in ${this.importModeLabel} mode`,
+        'success'
+      );
+    } catch (error) {
+      this.showToast('Error', error?.body?.message || error?.message || 'Error starting import', 'error');
+      console.error('Error starting import:', error);
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  executeScheduleImport() {
+    this.showToast('Info', `Schedule import (${this.importModeLabel}) – coming soon`, 'info');
+  }
+
+  resetImportState() {
     this.showImportResults = false;
     this.showImportProgress = false;
     this.currentExecutionId = null;
@@ -131,44 +276,11 @@ export default class ExecutionCmp extends LightningElement {
     this.failedRecords = 0;
     this.successfulRecords = 0;
     this.totalErrors = 0;
-
-    try {
-      const parsedCsvData = this.transformCsvData(this.csvData);
-      if (!parsedCsvData || parsedCsvData.length === 0) {
-        this.showToast('Error', 'No valid data found in CSV', 'error');
-        return;
-      }
-
-      const result = await startImport({ projectId: this.projectId, csvData: parsedCsvData });
-
-      this.currentExecutionId = result.executionId;
-      this.totalRecords = parsedCsvData.length;
-
-      this.showImportProgress = true;
-      this.importStatus = 'InProgress';
-      this.importProgress = 0;
-      this.importMessage = 'Import started...';
-
-      this.handleSubscribe();
-      this.showToast('Success', 'Import started successfully', 'success');
-    } catch (error) {
-      this.showToast('Error', error?.body?.message || error?.message || 'Error starting import', 'error');
-      console.error('Error starting import:', error);
-    } finally {
-      this.isLoading = false;
-    }
+    this.skippedRecords = 0;
   }
 
-  handleScheduleImport() {}
-
-  handlePreviousStep() {
-    this.dispatchEvent(new CustomEvent('previous'));
-  }
-
-  // ---------------- EVENTS ----------------
   handleSubscribe() {
     const messageCallback = (response) => this.handlePlatformEvent(response);
-
     subscribe(this.channelName, -1, messageCallback)
       .then((response) => (this.subscription = response))
       .catch((error) => console.error('Error subscribing: ', JSON.stringify(error)));
@@ -199,7 +311,9 @@ export default class ExecutionCmp extends LightningElement {
       const wasCompleted = prevProgress >= 99.5 || prevStatus === 'Completed';
       const wasFailed = prevStatus === 'Failed';
 
-      const shouldFinalize = (progressComplete || statusCompleted || statusFailed) && !(wasCompleted || wasFailed);
+      const shouldFinalize =
+        (progressComplete || statusCompleted || statusFailed) && !(wasCompleted || wasFailed);
+
       if (shouldFinalize) {
         this.processExecutionCompletionFromEvent(this.importMessage, this.importStatus);
       }
@@ -207,12 +321,12 @@ export default class ExecutionCmp extends LightningElement {
   }
 
   processExecutionCompletionFromEvent(message, status) {
-    // sécurité
     this.isLoading = false;
 
     let successfulCount = 0;
     let failedCount = 0;
     let totalErrorsCount = 0;
+    let skippedCount = 0;
 
     if (message) {
       const processedMatch = message.match(/Processed:\s*(-?\d+)/i);
@@ -223,17 +337,25 @@ export default class ExecutionCmp extends LightningElement {
 
       const totalErrorsMatch = message.match(/Total Errors:\s*(-?\d+)/i);
       if (totalErrorsMatch) totalErrorsCount = Math.max(0, parseInt(totalErrorsMatch[1], 10));
+
+      const skippedMatch = message.match(/Skipped:\s*(-?\d+)/i);
+      if (skippedMatch) skippedCount = Math.max(0, parseInt(skippedMatch[1], 10));
     }
 
     this.successfulRecords = successfulCount;
     this.failedRecords = failedCount;
     this.totalErrors = totalErrorsCount;
+    this.skippedRecords = skippedCount;
     this.processedRecords = this.successfulRecords;
+
+    if (this.isStrictMode && failedCount > 0) {
+      this.importStatus = 'Failed';
+      this.importProgress = 0; 
+    }
 
     this.showImportResults = true;
   }
 
-  // ---------------- EXPORT CSV (AUTONOME) ----------------
   async handleExportLogsCsv() {
     if (!this.currentExecutionId) {
       this.showToast('Info', 'No execution id yet.', 'info');
@@ -264,21 +386,20 @@ export default class ExecutionCmp extends LightningElement {
     }
   }
 
- 
   normalizeLogsForExport(raw) {
     if (!Array.isArray(raw)) return [];
-
-    return raw.map((log, index) => {
-      const lineNumber = log.lineNumber ?? log.LineNumber__c ?? log.RowNumber__c ?? null;
-      const errorType = log.errorType ?? log.ErrorType__c ?? log.Type__c ?? '';
-      const errorMessage = log.errorMessage ?? log.ErrorMessage__c ?? log.Message__c ?? '';
-      const fieldApiName = log.fieldApiName ?? log.FieldApiName__c ?? log.Field__c ?? '';
-      const columnName = log.columnName ?? log.ColumnName__c ?? '';
-      const currentValue = log.currentValue ?? log.CurrentValue__c ?? log.Value__c ?? '';
-      const details = log.details ?? log.Details__c ?? '';
+    return raw.map((log) => {
+      const lineNumber     = log.lineNumber      ?? log.LineNumber__c   ?? log.RowNumber__c   ?? null;
+      const errorType      = log.errorType       ?? log.ErrorType__c    ?? log.Type__c        ?? '';
+      const errorMessage   = log.errorMessage    ?? log.ErrorMessage__c ?? log.Message__c     ?? '';
+      const fieldApiName   = log.fieldApiName    ?? log.FieldApiName__c ?? log.Field__c       ?? '';
+      const columnName     = log.columnName      ?? log.ColumnName__c   ?? '';
+      const currentValue   = log.currentValue    ?? log.CurrentValue__c ?? log.Value__c       ?? '';
+      const details        = log.details         ?? log.Details__c      ?? '';
 
       return {
         executionId: this.currentExecutionId,
+        importMode: this.importMode,
         lineNumber,
         fieldApiName,
         columnName,
@@ -292,23 +413,15 @@ export default class ExecutionCmp extends LightningElement {
 
   getCsvColumns(logs) {
     const preferred = [
-      'executionId',
-      'lineNumber',
-      'fieldApiName',
-      'columnName',
-      'errorType',
-      'errorMessage',
-      'currentValue',
-      'details'
+      'executionId', 'importMode',
+      'lineNumber', 'fieldApiName', 'columnName',
+      'errorType', 'errorMessage', 'currentValue', 'details'
     ];
-
     const allKeys = new Set();
     logs.forEach((l) => Object.keys(l || {}).forEach((k) => allKeys.add(k)));
 
     const cols = [];
-    preferred.forEach((k) => {
-      if (allKeys.has(k)) cols.push(k);
-    });
+    preferred.forEach((k) => { if (allKeys.has(k)) cols.push(k); });
     [...allKeys].filter((k) => !cols.includes(k)).sort().forEach((k) => cols.push(k));
     return cols;
   }
@@ -320,46 +433,39 @@ export default class ExecutionCmp extends LightningElement {
       if (/[",\n]/.test(s)) s = `"${s.replace(/"/g, '""')}"`;
       return s;
     };
-
     const header = columns.map(esc).join(',');
-    const lines = rows.map((r) => columns.map((c) => esc(r?.[c])).join(','));
+    const lines  = rows.map((r) => columns.map((c) => esc(r?.[c])).join(','));
     return [header, ...lines].join('\n');
   }
 
   buildLogsFileName() {
-    const exec = this.currentExecutionId ? `_${this.currentExecutionId}` : '';
+    const exec  = this.currentExecutionId ? `_${this.currentExecutionId}` : '';
+    const mode  = `_${this.importMode.toLowerCase()}`;
     const stamp = new Date().toISOString().replace(/[:.]/g, '-');
-    return `import_logs${exec}_${stamp}.csv`;
+    return `import_logs${exec}${mode}_${stamp}.csv`;
   }
 
   downloadCsv(csvContent, fileName) {
-  const utf8Bom = '\uFEFF'; 
-  const content = utf8Bom + (csvContent || '');
+    const utf8Bom = '\uFEFF';
+    const content = utf8Bom + (csvContent || '');
+    const dataUrl = 'data:text/csv;charset=utf-8,' + encodeURIComponent(content);
+    const a = document.createElement('a');
+    a.href = dataUrl;
+    a.setAttribute('download', fileName || 'export.csv');
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  }
 
-  const dataUrl = 'data:text/csv;charset=utf-8,' + encodeURIComponent(content);
-
-  const a = document.createElement('a');
-  a.href = dataUrl;
-  a.setAttribute('download', fileName || 'export.csv');
-  a.style.display = 'none';
-
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-}
-
-
-  // ---------------- UTIL ----------------
   showToast(title, message, variant) {
     this.dispatchEvent(new ShowToastEvent({ title, message, variant }));
   }
 
   transformCsvData(csvData) {
     if (!csvData) return [];
-
     if (Array.isArray(csvData)) return csvData.map((r) => (r && typeof r === 'object' ? r : {}));
     if (typeof csvData === 'string') return parseCsvData(csvData);
-
     if (typeof csvData === 'object') {
       if (Array.isArray(csvData.columns) && Array.isArray(csvData.allRows)) {
         return csvData.allRows.map((row) => {

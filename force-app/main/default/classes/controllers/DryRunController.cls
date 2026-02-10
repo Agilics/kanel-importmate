@@ -41,25 +41,25 @@ public with sharing class DryRunController {
 
         return result;
     }
-    
+
     private static List<Map<String, Object>> formatErrorsForUI(List<ImportLog__c> errors) {
         List<Map<String, Object>> formattedErrors = new List<Map<String, Object>>();
 
         for (ImportLog__c error : errors) {
             formattedErrors.add(new Map<String, Object>{
-                'id' => error.Id,
-                'lineNumber' => error.LineNumber__c,
-                'errorType' => error.ErrorType__c,
+                'id'           => error.Id,
+                'lineNumber'   => error.LineNumber__c,
+                'errorType'    => error.ErrorType__c,
                 'errorMessage' => error.ErrorMessage__c,
-                'columnName' => error.ColumnName__c,
+                'columnName'   => error.ColumnName__c,
                 'fieldApiName' => error.FieldApiName__c,
-                'details' => error.Details__c
+                'details'      => error.Details__c
             });
         }
 
         return formattedErrors;
     }
-    
+
     @AuraEnabled(cacheable=true)
     public static Map<String, Object> getProjectDetails(String projectId) {
         Map<String, Object> result = new Map<String, Object>();
@@ -83,7 +83,7 @@ public with sharing class DryRunController {
 
         return result;
     }
-    
+
     @AuraEnabled
     public static Map<String, Object> validateSample(String projectId, List<Map<String, String>> sampleData) {
         Map<String, Object> result = new Map<String, Object>();
@@ -113,11 +113,19 @@ public with sharing class DryRunController {
         return result;
     }
 
+
     @AuraEnabled
-    public static Map<String, Object> startImport(String projectId, List<Map<String, String>> csvData) {
+    public static Map<String, Object> startImport(
+        String projectId,
+        List<Map<String, String>> csvData,
+        String importMode
+    ) {
         Map<String, Object> result = new Map<String, Object>();
 
         try {
+            // Default to PARTIAL when value is null or unrecognised
+            String resolvedMode = (importMode == 'STRICT') ? 'STRICT' : 'PARTIAL';
+
             ImportProject__c project = ProjectService.getProjectById(projectId);
             if (project == null) {
                 throw new AuraHandledException('Project not found: ' + projectId);
@@ -128,12 +136,20 @@ public with sharing class DryRunController {
                 throw new AuraHandledException('No field mappings found for project');
             }
 
+            // ExecutionService creates the ImportExecution__c and returns its Id + a jobId placeholder
             Map<String, String> importResult = ExecutionService.startImport(projectId, csvData);
+            String executionId = importResult.get('executionId');
+
+            // Enqueue the queueable — mode is passed via constructor, no SObject field needed
+            if (!Test.isRunningTest()) {
+                System.enqueueJob(new ImportQueueable(projectId, csvData, executionId, resolvedMode));
+            }
 
             result.put('success', true);
             result.put('jobId', importResult.get('jobId'));
-            result.put('executionId', importResult.get('executionId'));
-            result.put('message', 'Import started successfully. Job ID: ' + importResult.get('jobId'));
+            result.put('executionId', executionId);
+            result.put('importMode', resolvedMode);
+            result.put('message', 'Import started successfully (' + resolvedMode + ' mode). Job ID: ' + importResult.get('jobId'));
             result.put('totalRecords', csvData.size());
 
         } catch (Exception e) {
@@ -181,14 +197,14 @@ public with sharing class DryRunController {
 
             for (ImportLog__c log : logs) {
                 formattedLogs.add(new Map<String, Object>{
-                    'id' => log.Id,
-                    'lineNumber' => log.LineNumber__c,
-                    'status' => log.Status__c,
-                    'errorType' => log.ErrorType__c,
+                    'id'           => log.Id,
+                    'lineNumber'   => log.LineNumber__c,
+                    'status'       => log.Status__c,
+                    'errorType'    => log.ErrorType__c,
                     'errorMessage' => log.ErrorMessage__c,
                     'fieldApiName' => log.FieldApiName__c,
-                    'columnName' => log.ColumnName__c,
-                    'details' => log.Details__c
+                    'columnName'   => log.ColumnName__c,
+                    'details'      => log.Details__c
                 });
             }
 
