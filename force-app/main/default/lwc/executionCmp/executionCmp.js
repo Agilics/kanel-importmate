@@ -7,8 +7,8 @@ import { subscribe, unsubscribe, onError } from 'lightning/empApi';
 
 // Import modes
 const IMPORT_MODE = {
-  PARTIAL: 'PARTIAL',  
-  STRICT:  'STRICT'    
+  PARTIAL: 'PARTIAL',
+  STRICT:  'STRICT'
 };
 
 export default class ExecutionCmp extends LightningElement {
@@ -32,20 +32,30 @@ export default class ExecutionCmp extends LightningElement {
 
   @track showImportResults = false;
 
-  // ── Import mode state ──────────────────────────────────────────────────────
+  
   @track importMode = IMPORT_MODE.PARTIAL;
-  @track showModeModal = false;
-  @track pendingModeAction = null; // 'start' | 'schedule'
+  @track showModeDropdown = false;
 
   subscription = null;
   channelName = '/event/ImportStatusEvent__e';
 
   connectedCallback() {
     onError((error) => console.error('EMP API error: ', JSON.stringify(error)));
+    
+    this._outsideClickHandler = this.handleOutsideClick.bind(this);
+    document.addEventListener('click', this._outsideClickHandler);
   }
 
   disconnectedCallback() {
     this.handleUnsubscribe();
+    document.removeEventListener('click', this._outsideClickHandler);
+  }
+
+  handleOutsideClick(event) {
+    const dropdown = this.template.querySelector('.mode-dropdown-wrapper');
+    if (dropdown && !dropdown.contains(event.target)) {
+      this.showModeDropdown = false;
+    }
   }
 
   get isStartImportDisabled() {
@@ -154,48 +164,40 @@ export default class ExecutionCmp extends LightningElement {
     return this.isPartialMode ? 'utility:filterList' : 'utility:ban';
   }
 
-  get partialModeOptionClass() {
-    return `mode-option${this.isPartialMode ? ' mode-option--selected' : ''}`;
+  get partialOptionClass() {
+    return `dropdown-option${this.isPartialMode ? ' dropdown-option--active' : ''}`;
   }
 
-  get strictModeOptionClass() {
-    return `mode-option${this.isStrictMode ? ' mode-option--selected' : ''}`;
+  get strictOptionClass() {
+    return `dropdown-option${this.isStrictMode ? ' dropdown-option--active' : ''}`;
+  }
+
+  get dropdownClass() {
+    return `mode-dropdown${this.showModeDropdown ? ' mode-dropdown--open' : ''}`;
   }
 
   get showSkippedRecords() {
     return this.isPartialMode && this.skippedRecords > 0;
   }
 
-  
-  openModeModal(action) {
-    this.pendingModeAction = action;
-    this.showModeModal = true;
+
+  handleToggleDropdown(event) {
+    event.stopPropagation();
+    this.showModeDropdown = !this.showModeDropdown;
   }
 
-  handleCloseModeModal() {
-    this.showModeModal = false;
-    this.pendingModeAction = null;
-  }
-
-  handleSelectPartialMode() {
+  handleSelectPartialMode(event) {
+    event.stopPropagation();
     this.importMode = IMPORT_MODE.PARTIAL;
+    this.showModeDropdown = false;
   }
 
-  handleSelectStrictMode() {
+  handleSelectStrictMode(event) {
+    event.stopPropagation();
     this.importMode = IMPORT_MODE.STRICT;
+    this.showModeDropdown = false;
   }
 
-  handleConfirmMode() {
-    this.showModeModal = false;
-    const action = this.pendingModeAction;
-    this.pendingModeAction = null;
-
-    if (action === 'start') {
-      this.executeStartImport();
-    } else if (action === 'schedule') {
-      this.executeScheduleImport();
-    }
-  }
 
   handleStartImport() {
     if (!this.projectId) {
@@ -206,7 +208,7 @@ export default class ExecutionCmp extends LightningElement {
       this.showToast('Error', 'CSV data is required', 'error');
       return;
     }
-    this.openModeModal('start');
+    this.executeStartImport();
   }
 
   handleScheduleImport() {
@@ -214,7 +216,7 @@ export default class ExecutionCmp extends LightningElement {
       this.showToast('Error', 'Project ID is required', 'error');
       return;
     }
-    this.openModeModal('schedule');
+    this.executeScheduleImport();
   }
 
   handlePreviousStep() {
@@ -235,7 +237,7 @@ export default class ExecutionCmp extends LightningElement {
       const result = await startImport({
         projectId: this.projectId,
         csvData: parsedCsvData,
-        importMode: this.importMode            
+        importMode: this.importMode
       });
 
       this.currentExecutionId = result.executionId;
@@ -350,7 +352,7 @@ export default class ExecutionCmp extends LightningElement {
 
     if (this.isStrictMode && failedCount > 0) {
       this.importStatus = 'Failed';
-      this.importProgress = 0; 
+      this.importProgress = 0;
     }
 
     this.showImportResults = true;
@@ -389,13 +391,13 @@ export default class ExecutionCmp extends LightningElement {
   normalizeLogsForExport(raw) {
     if (!Array.isArray(raw)) return [];
     return raw.map((log) => {
-      const lineNumber     = log.lineNumber      ?? log.LineNumber__c   ?? log.RowNumber__c   ?? null;
-      const errorType      = log.errorType       ?? log.ErrorType__c    ?? log.Type__c        ?? '';
-      const errorMessage   = log.errorMessage    ?? log.ErrorMessage__c ?? log.Message__c     ?? '';
-      const fieldApiName   = log.fieldApiName    ?? log.FieldApiName__c ?? log.Field__c       ?? '';
-      const columnName     = log.columnName      ?? log.ColumnName__c   ?? '';
-      const currentValue   = log.currentValue    ?? log.CurrentValue__c ?? log.Value__c       ?? '';
-      const details        = log.details         ?? log.Details__c      ?? '';
+      const lineNumber   = log.lineNumber    ?? log.LineNumber__c   ?? log.RowNumber__c  ?? null;
+      const errorType    = log.errorType     ?? log.ErrorType__c    ?? log.Type__c       ?? '';
+      const errorMessage = log.errorMessage  ?? log.ErrorMessage__c ?? log.Message__c    ?? '';
+      const fieldApiName = log.fieldApiName  ?? log.FieldApiName__c ?? log.Field__c      ?? '';
+      const columnName   = log.columnName    ?? log.ColumnName__c   ?? '';
+      const currentValue = log.currentValue  ?? log.CurrentValue__c ?? log.Value__c      ?? '';
+      const details      = log.details       ?? log.Details__c      ?? '';
 
       return {
         executionId: this.currentExecutionId,

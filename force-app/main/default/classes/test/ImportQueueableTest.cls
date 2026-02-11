@@ -1,15 +1,5 @@
-/**
- * @description Test class for ImportQueueable
- * @author      Test
- * @group       Tests
- */
 @isTest
 private class ImportQueueableTest {
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // Test data helpers
-    // ─────────────────────────────────────────────────────────────────────────
-
     private static ImportProject__c createProject(String targetObject) {
         ImportProject__c project = new ImportProject__c(
             Name          = 'Test Project',
@@ -62,10 +52,6 @@ private class ImportQueueableTest {
         return rows;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Constructor tests
-    // ─────────────────────────────────────────────────────────────────────────
-
     @isTest
     static void testConstructorWithModePartial() {
         ImportQueueable q = new ImportQueueable(
@@ -110,10 +96,6 @@ private class ImportQueueableTest {
         System.assertNotEquals(null, q, 'Full 7-arg constructor should work');
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // execute() — missing execution record
-    // ─────────────────────────────────────────────────────────────────────────
-
     @isTest
     static void testExecuteThrowsWhenExecutionMissing() {
         ImportProject__c project = createProject('Contact');
@@ -137,14 +119,8 @@ private class ImportQueueableTest {
         System.assert(threw, 'Should throw when execution record is missing');
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // execute() — missing project
-    // ─────────────────────────────────────────────────────────────────────────
-
     @isTest
     static void testExecuteThrowsWhenProjectMissing() {
-        // Project__c is required on the execution — use a real project for the DML,
-        // but pass a non-existent project Id to the queueable so ProjectService fails.
         ImportProject__c dummyProject = createProject('Contact');
         ImportExecution__c execution = createExecution(dummyProject.Id, 'Pending');
         List<Map<String, String>> csvData = buildCsvData(1);
@@ -164,10 +140,6 @@ private class ImportQueueableTest {
 
         System.assert(threw, 'Should throw when project is missing');
     }
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // PARTIAL mode — happy path
-    // ─────────────────────────────────────────────────────────────────────────
 
     @isTest
     static void testExecutePartialModeHappyPath() {
@@ -197,19 +169,14 @@ private class ImportQueueableTest {
             'PARTIAL mode should complete even with partial failures');
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // STRICT mode — validation error aborts
-    // ─────────────────────────────────────────────────────────────────────────
-
     @isTest
     static void testExecuteStrictModeAbortOnValidationError() {
         ImportProject__c   project   = createProject('Contact');
         ImportExecution__c execution = createExecution(project.Id, 'Pending');
-        // No mappings → validation will fail
         createMapping(project.Id, 'LastName', 'LastName', false, null, null);
 
         List<Map<String, String>> csvData = new List<Map<String, String>>{
-            new Map<String, String>{ 'LastName' => '' }    // blank required-ish field
+            new Map<String, String>{ 'LastName' => '' }    
         };
 
         ImportQueueable q = new ImportQueueable(
@@ -221,12 +188,10 @@ private class ImportQueueableTest {
         try {
             q.execute(null);
         } catch (Exception e) {
-            // may or may not throw depending on ValidationService stub
+            
         }
         Test.stopTest();
 
-        // Execution should be Failed or Completed — both are acceptable outcomes
-        // depending on whether mock ValidationService returns errors
         ImportExecution__c updated = [
             SELECT Status__c FROM ImportExecution__c WHERE Id = :execution.Id
         ];
@@ -234,9 +199,7 @@ private class ImportQueueableTest {
             'Execution status should be set after STRICT processing');
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Batch size — small batchSize to trigger pagination
-    // ─────────────────────────────────────────────────────────────────────────
+   
 
     @isTest
     static void testSmallBatchSizeTriggersNextBatch() {
@@ -249,10 +212,10 @@ private class ImportQueueableTest {
         ImportQueueable q = new ImportQueueable(
             project.Id, csvData, execution.Id, 0, 0, 0, 'PARTIAL'
         );
-        q.batchSize = 2; // Forces 3 batches for 5 rows
+        q.batchSize = 2;
 
         Test.startTest();
-        q.execute(null); // In test, processRemainingDataSynchronously is called
+        q.execute(null); 
         Test.stopTest();
 
         ImportExecution__c updated = [
@@ -262,10 +225,6 @@ private class ImportQueueableTest {
             'Execution should be finalised after all batches');
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Counter accumulation across batches
-    // ─────────────────────────────────────────────────────────────────────────
-
     @isTest
     static void testCounterAccumulation() {
         ImportProject__c   project   = createProject('Contact');
@@ -274,7 +233,6 @@ private class ImportQueueableTest {
 
         List<Map<String, String>> csvData = buildCsvData(3);
 
-        // Simulate second batch with accumulated counters
         ImportQueueable q = new ImportQueueable(
             project.Id, csvData, execution.Id, 10, 8, 2, 'PARTIAL'
         );
@@ -288,15 +246,9 @@ private class ImportQueueableTest {
             FROM ImportExecution__c
             WHERE Id = :execution.Id
         ];
-        // Failed records should be at least 2 (from accumulated counters)
         System.assert(updated.FailedRecords__c >= 2,
             'Failed counter should carry over from prior batches');
     }
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // PARTIAL mode — empty csv
-    // ─────────────────────────────────────────────────────────────────────────
-
     @isTest
     static void testExecuteWithEmptyCsvData() {
         ImportProject__c   project   = createProject('Contact');
@@ -323,10 +275,6 @@ private class ImportQueueableTest {
             'TotalRecords should be 0 for empty CSV');
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Null importMode defaults to PARTIAL
-    // ─────────────────────────────────────────────────────────────────────────
-
     @isTest
     static void testNullImportModeDefaultsToPartial() {
         ImportProject__c   project   = createProject('Contact');
@@ -350,22 +298,15 @@ private class ImportQueueableTest {
             'Null mode defaults to PARTIAL → should complete');
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Lookup mapping path
-    // ─────────────────────────────────────────────────────────────────────────
+   
 
     @isTest
     static void testExecuteWithLookupMapping() {
         ImportProject__c   project   = createProject('Contact');
         ImportExecution__c execution = createExecution(project.Id, 'Pending');
 
-        // Non-lookup mapping
         createMapping(project.Id, 'LastName', 'LastName', false, null, null);
-
-        // Lookup mapping
         createMapping(project.Id, 'AccountName', 'AccountId', true, 'Account', 'Name');
-
-        // Create a real Account so lookup can resolve
         Account acct = new Account(Name = 'ACME');
         insert acct;
 
@@ -391,9 +332,7 @@ private class ImportQueueableTest {
             'Execution should finalise when lookup mapping is present');
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // STRICT mode — zero failures → Completed
-    // ─────────────────────────────────────────────────────────────────────────
+
 
     @isTest
     static void testStrictModeZeroFailuresCompletesSuccessfully() {
@@ -416,14 +355,10 @@ private class ImportQueueableTest {
         ImportExecution__c updated = [
             SELECT Status__c FROM ImportExecution__c WHERE Id = :execution.Id
         ];
-        // If no validation/DML errors: STRICT produces 'Completed'
+       
         System.assertNotEquals(null, updated.Status__c,
             'STRICT mode should set a final status');
     }
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // finaliseExecution — EndTime is set
-    // ─────────────────────────────────────────────────────────────────────────
 
     @isTest
     static void testFinaliseExecutionSetsEndTime() {
@@ -448,9 +383,6 @@ private class ImportQueueableTest {
             'EndTime should be populated after finalisation');
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Progress events fire every 50 rows (smoke test with > 50 rows)
-    // ─────────────────────────────────────────────────────────────────────────
 
     @isTest
     static void testProgressPublishedForLargeBatch() {
@@ -458,7 +390,7 @@ private class ImportQueueableTest {
         ImportExecution__c execution = createExecution(project.Id, 'Pending');
         createMapping(project.Id, 'FirstName', 'FirstName', false, null, null);
 
-        List<Map<String, String>> csvData = buildCsvData(55); // >50 triggers progress event
+        List<Map<String, String>> csvData = buildCsvData(55); 
 
         ImportQueueable q = new ImportQueueable(
             project.Id, csvData, execution.Id, 'PARTIAL'
@@ -475,10 +407,6 @@ private class ImportQueueableTest {
             '55-row batch should complete in PARTIAL mode');
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // isRunningTest path — synchronous recursion
-    // ─────────────────────────────────────────────────────────────────────────
-
     @isTest
     static void testSynchronousProcessingPathInTests() {
         ImportProject__c   project   = createProject('Contact');
@@ -493,7 +421,7 @@ private class ImportQueueableTest {
         q.batchSize = 2;
 
         Test.startTest();
-        q.execute(null);  // remaining 2 rows processed synchronously via processRemainingDataSynchronously
+        q.execute(null);  
         Test.stopTest();
 
         ImportExecution__c updated = [

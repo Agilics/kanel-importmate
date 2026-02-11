@@ -1,14 +1,7 @@
-/**
- * @description Test class for DryRunController
- * @author      Test
- * @group       Tests
- */
 @isTest
 private class DryRunControllerTest {
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // Test data helpers
-    // ─────────────────────────────────────────────────────────────────────────
+   
 
     private static ImportProject__c createProject(String targetObject) {
         ImportProject__c project = new ImportProject__c(
@@ -55,9 +48,7 @@ private class DryRunControllerTest {
         return rows;
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // runDryRunValidation
-    // ─────────────────────────────────────────────────────────────────────────
+  
 
     @isTest
     static void testRunDryRunValidationSuccess() {
@@ -94,7 +85,6 @@ private class DryRunControllerTest {
     @isTest
     static void testRunDryRunValidationNoMappings() {
         ImportProject__c project = createProject('Contact');
-        // No mappings inserted
         List<Map<String, String>> csvData = buildCsvData(1);
 
         Test.startTest();
@@ -117,7 +107,6 @@ private class DryRunControllerTest {
         Map<String, Object> result = DryRunController.runDryRunValidation(project.Id, csvData);
         Test.stopTest();
 
-        // errorSummary is always present when success=true
         if ((Boolean) result.get('success')) {
             System.assertNotEquals(null, result.get('errorSummary'),
                 'errorSummary should be returned');
@@ -130,7 +119,6 @@ private class DryRunControllerTest {
     static void testRunDryRunValidationSmallCsvIncludesValidationErrors() {
         ImportProject__c project = createProject('Contact');
         createMapping(project.Id, 'FirstName', 'FirstName');
-        // ≤200 rows → errors fetched from DB
         List<Map<String, String>> csvData = buildCsvData(10);
 
         Test.startTest();
@@ -148,7 +136,6 @@ private class DryRunControllerTest {
     static void testRunDryRunValidationLargeCsvSkipsDetailErrors() {
         ImportProject__c project = createProject('Contact');
         createMapping(project.Id, 'FirstName', 'FirstName');
-        // >200 rows → detailed error list is skipped
         List<Map<String, String>> csvData = buildCsvData(201);
 
         Test.startTest();
@@ -156,15 +143,12 @@ private class DryRunControllerTest {
         Test.stopTest();
 
         if ((Boolean) result.get('success')) {
-            // errorCount and totalRecords should still be populated
             System.assertNotEquals(null, result.get('totalRecords'),
                 'totalRecords should be set even for large CSV');
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // getProjectDetails
-    // ─────────────────────────────────────────────────────────────────────────
+    
 
     @isTest
     static void testGetProjectDetailsSuccess() {
@@ -188,9 +172,7 @@ private class DryRunControllerTest {
         Map<String, Object> result = DryRunController.getProjectDetails('nonExistentId');
         Test.stopTest();
 
-        // ProjectService.getProjectById may return null (no 'id' key)
-        // or throw a QueryException caught internally (sets 'error' key).
-        // Both are valid — we only assert 'id' is absent.
+      
         System.assertEquals(null, result.get('id'),
             'id should be null when project is not found');
     }
@@ -210,9 +192,7 @@ private class DryRunControllerTest {
             'mappingCount should equal number of inserted mappings');
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // validateSample
-    // ─────────────────────────────────────────────────────────────────────────
+    
 
     @isTest
     static void testValidateSampleWithFewRows() {
@@ -285,9 +265,7 @@ private class DryRunControllerTest {
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // startImport
-    // ─────────────────────────────────────────────────────────────────────────
+   
 
     @isTest
     static void testStartImportPartialMode() {
@@ -385,9 +363,7 @@ private class DryRunControllerTest {
         }
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // getExecutionDetails
-    // ─────────────────────────────────────────────────────────────────────────
+   
 
     @isTest
     static void testGetExecutionDetailsFound() {
@@ -432,9 +408,7 @@ private class DryRunControllerTest {
             'Status field should reflect the execution status');
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // getImportLogs
-    // ─────────────────────────────────────────────────────────────────────────
+  
 
     @isTest
     static void testGetImportLogsEmptyResult() {
@@ -454,7 +428,6 @@ private class DryRunControllerTest {
         ImportProject__c   project   = createProject('Contact');
         ImportExecution__c execution = createExecution(project.Id, 'Completed', 2, 1);
 
-        // Insert a log record
         ImportLog__c log = new ImportLog__c(
             Execution__c    = execution.Id,
             LineNumber__c   = 1,
@@ -514,15 +487,11 @@ private class DryRunControllerTest {
         }
         Test.stopTest();
 
-        // Depending on the implementation of ImportLogService, it may or may not throw.
-        // Either outcome is acceptable; we just ensure no silent data corruption.
+    
         System.assert(threw || !threw, 'getImportLogs with null id should not corrupt state');
     }
 
-    // ─────────────────────────────────────────────────────────────────────────
-    // formatErrorsForUI — indirectly tested via runDryRunValidation
-    // ─────────────────────────────────────────────────────────────────────────
-
+  
     @isTest
     static void testFormattedErrorsContainExpectedKeys() {
         ImportProject__c project = createProject('Contact');
@@ -538,7 +507,6 @@ private class DryRunControllerTest {
             List<Object> errors = (List<Object>) result.get('validationErrors');
             if (!errors.isEmpty()) {
                 Map<String, Object> firstError = (Map<String, Object>) errors[0];
-                // All expected keys should be present (even if null)
                 System.assert(firstError.containsKey('id'),           'id key expected');
                 System.assert(firstError.containsKey('lineNumber'),   'lineNumber key expected');
                 System.assert(firstError.containsKey('errorType'),    'errorType key expected');

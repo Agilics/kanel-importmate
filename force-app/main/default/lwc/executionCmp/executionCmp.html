@@ -13,10 +13,57 @@
 
         <div class="header-actions">
 
-          <!-- Current mode badge (always visible) -->
-          <div class={importModeBadgeClass}>
-            <lightning-icon icon-name={importModeIconName} size="xx-small"></lightning-icon>
-            <span>{importModeLabel}</span>
+          <!-- ── Import Mode Dropdown ────────────────────────── -->
+          <div class="mode-dropdown-wrapper">
+            <button class={importModeBadgeClass} onclick={handleToggleDropdown} type="button">
+              <lightning-icon icon-name={importModeIconName} size="xx-small"></lightning-icon>
+              <span>{importModeLabel}</span>
+              <lightning-icon icon-name="utility:chevrondown" size="xx-small" class="chevron-icon"></lightning-icon>
+            </button>
+
+            <template if:true={showModeDropdown}>
+              <div class="mode-dropdown">
+
+                <!-- Option: Partial -->
+                <button class={partialOptionClass} onclick={handleSelectPartialMode} type="button">
+                  <div class="dropdown-option-left">
+                    <div class="dropdown-option-icon dropdown-option-icon--partial">
+                      <lightning-icon icon-name="utility:filterList" size="x-small"></lightning-icon>
+                    </div>
+                    <div class="dropdown-option-text">
+                      <span class="dropdown-option-label">Partial Import</span>
+                      <span class="dropdown-option-tag dropdown-option-tag--partial">Recommended</span>
+                    </div>
+                  </div>
+                  <div class="dropdown-option-tooltip">
+                    Valid lines are imported.<br/>Erroneous lines are <strong>skipped and logged</strong> without interrupting the rest of the import.
+                  </div>
+                  <template if:true={isPartialMode}>
+                    <lightning-icon icon-name="utility:check" size="x-small" class="dropdown-option-check"></lightning-icon>
+                  </template>
+                </button>
+
+                <!-- Option: Strict -->
+                <button class={strictOptionClass} onclick={handleSelectStrictMode} type="button">
+                  <div class="dropdown-option-left">
+                    <div class="dropdown-option-icon dropdown-option-icon--strict">
+                      <lightning-icon icon-name="utility:ban" size="x-small"></lightning-icon>
+                    </div>
+                    <div class="dropdown-option-text">
+                      <span class="dropdown-option-label">Strict Import</span>
+                      <span class="dropdown-option-tag dropdown-option-tag--strict">All-or-nothing</span>
+                    </div>
+                  </div>
+                  <div class="dropdown-option-tooltip">
+                    The import <strong>stops immediately</strong> on the first error.<br/>No records are committed until the file is entirely clean.
+                  </div>
+                  <template if:true={isStrictMode}>
+                    <lightning-icon icon-name="utility:check" size="x-small" class="dropdown-option-check"></lightning-icon>
+                  </template>
+                </button>
+
+              </div>
+            </template>
           </div>
 
           <lightning-button
@@ -51,102 +98,6 @@
         </div>
       </div>
     </div>
-
-    <!-- ═══════════════════════════════════════════════════════════
-         IMPORT MODE SELECTION MODAL
-    ════════════════════════════════════════════════════════════ -->
-    <template if:true={showModeModal}>
-      <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open mode-modal" aria-modal="true">
-        <div class="slds-modal__container mode-modal-container">
-
-          <!-- Header -->
-          <header class="slds-modal__header mode-modal-header">
-            <lightning-icon icon-name="utility:settings" size="small" class="modal-header-icon"></lightning-icon>
-            <h2 class="slds-modal__title mode-modal-title">Choose Import Mode</h2>
-            <p class="mode-modal-subtitle">How should the import handle erroneous lines?</p>
-            <button class="slds-button slds-button_icon slds-modal__close mode-modal-close" onclick={handleCloseModeModal}>
-              <lightning-icon icon-name="utility:close" size="small"></lightning-icon>
-            </button>
-          </header>
-
-          <!-- Body -->
-          <div class="slds-modal__content mode-modal-body">
-
-            <!-- Option: Partial -->
-            <div class={partialModeOptionClass} onclick={handleSelectPartialMode}>
-              <div class="mode-option-icon mode-option-icon--partial">
-                <lightning-icon icon-name="utility:filterList" size="medium"></lightning-icon>
-              </div>
-              <div class="mode-option-content">
-                <div class="mode-option-header">
-                  <span class="mode-option-title">Partial Import</span>
-                  <span class="mode-option-tag mode-option-tag--partial">Recommended</span>
-                </div>
-                <p class="mode-option-desc">
-                  Valid lines are imported. Lines containing errors are <strong>skipped and logged</strong>
-                  without interrupting the rest of the import.
-                </p>
-                <ul class="mode-option-bullets">
-                  <li>✔ Maximises the number of records imported</li>
-                  <li>✔ Full error log available for review</li>
-                  <li>✔ Can re-run only the failed lines afterwards</li>
-                </ul>
-              </div>
-              <template if:true={isPartialMode}>
-                <div class="mode-option-check">
-                  <lightning-icon icon-name="utility:check" size="small"></lightning-icon>
-                </div>
-              </template>
-            </div>
-
-            <!-- Option: Strict -->
-            <div class={strictModeOptionClass} onclick={handleSelectStrictMode}>
-              <div class="mode-option-icon mode-option-icon--strict">
-                <lightning-icon icon-name="utility:ban" size="medium"></lightning-icon>
-              </div>
-              <div class="mode-option-content">
-                <div class="mode-option-header">
-                  <span class="mode-option-title">Strict Import</span>
-                  <span class="mode-option-tag mode-option-tag--strict">All-or-nothing</span>
-                </div>
-                <p class="mode-option-desc">
-                  The import <strong>stops immediately</strong> when the first error is encountered.
-                  No records are committed until the file is entirely clean.
-                </p>
-                <ul class="mode-option-bullets">
-                  <li>✔ Guarantees data consistency</li>
-                  <li>✔ Ideal for transactional datasets</li>
-                  <li>⚠ Requires fixing all errors before retrying</li>
-                </ul>
-              </div>
-              <template if:true={isStrictMode}>
-                <div class="mode-option-check">
-                  <lightning-icon icon-name="utility:check" size="small"></lightning-icon>
-                </div>
-              </template>
-            </div>
-
-          </div>
-
-          <!-- Footer -->
-          <footer class="slds-modal__footer mode-modal-footer">
-            <lightning-button
-              label="Cancel"
-              variant="neutral"
-              onclick={handleCloseModeModal}
-            ></lightning-button>
-            <lightning-button
-              label="Confirm &amp; Continue"
-              variant="brand"
-              onclick={handleConfirmMode}
-              icon-name="utility:forward"
-              icon-position="right"
-            ></lightning-button>
-          </footer>
-        </div>
-      </section>
-      <div class="slds-backdrop slds-backdrop_open"></div>
-    </template>
 
     <!-- ═══════════════════════════════════════════════════════════
          IMPORT PROGRESS SECTION
@@ -239,14 +190,12 @@
             </div>
           </template>
 
-          <!-- In progress spinner text -->
           <template if:true={isImportInProgress}>
             <div class="spinner-container">
               <p class="spinner-text">Processing your import… Please wait.</p>
             </div>
           </template>
 
-          <!-- Partial success banner -->
           <template if:true={isImportPartialSuccess}>
             <div class="partial-success-message">
               <lightning-icon icon-name="utility:warning" size="small" variant="warning"></lightning-icon>
@@ -260,7 +209,6 @@
             </div>
           </template>
 
-          <!-- Strict mode failure banner -->
           <template if:true={isImportFailed}>
             <div class="error-message">
               <lightning-icon icon-name="utility:error" size="small" variant="error"></lightning-icon>
