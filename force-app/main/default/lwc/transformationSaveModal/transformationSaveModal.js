@@ -9,6 +9,7 @@
  */
 import { wire, api, track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent'; 
+import { refreshApex } from '@salesforce/apex';
 import TRANSFORMATION_OBJECT from '@salesforce/schema/TransformationRule__c'; 
 import LightningModal from 'lightning/modal';
 import RULE_TYPE_FIELD from '@salesforce/schema/TransformationRule__c.RuleType__c';
@@ -46,6 +47,8 @@ export default class TransformationSaveModal extends LightningModal {
     fieldMappingOptions = [];
     targetFieldOptions = [];
 
+    wiredResultToRefresh;
+
     separatorOptions = [
         { label: 'Tab', value: '\t' },
         { label: 'Comma', value: ',' },
@@ -59,7 +62,10 @@ export default class TransformationSaveModal extends LightningModal {
     @api existingRuleId;
 
     @wire(getRuleById, { ruleId: '$existingRuleId' })
-    wiredExistingRuleById({ data, error }) {
+    wiredExistingRuleById(result) {
+        this.wiredResultToRefresh = result;
+        const { data, error } = result;
+
         if (data) {
             this.isEdit = true;
             this.existingRule = data;
@@ -96,18 +102,7 @@ export default class TransformationSaveModal extends LightningModal {
             console.log('Fields chargés:', this.fields);
 
             // Si les options de picklist sont déjà chargées, assigner le ruleType maintenant
-            if (this.ruleTypeOptions.length > 0 && !this.hasLoadedRule) {
-                this.hasLoadedRule = true;
-            
-                const ruleTypeFromDB = data.RuleType__c;
-                console.log('Rule Type from DB:', ruleTypeFromDB);
-
-                const match = this.ruleTypeOptions.find(opt => {
-                    return opt.value === ruleTypeFromDB || opt.label === ruleTypeFromDB;
-                });
-           
-                this.ruleType = match ? match.value : ruleTypeFromDB;
-            }
+            this.syncRuleType(data);
     
             this.getFieldsForBooleanTransformation(data, params);
             
@@ -118,6 +113,24 @@ export default class TransformationSaveModal extends LightningModal {
         if (error) {
             console.error('Erreur chargement rule', error);
             this.toastErr('Impossible de charger la règle');
+        }
+    }
+
+    // Méthode pour synchroniser le RuleType une fois que les options sont chargées
+    syncRuleType(existingRule) {
+        // On ne procède que si on a TOUTES les billes en main
+        if (existingRule && this.ruleTypeOptions.length > 0 && !this.hasLoadedRule) {
+            const ruleTypeFromDB = existingRule.RuleType__c;
+            
+            const match = this.ruleTypeOptions.find(opt => 
+                opt.value === ruleTypeFromDB || opt.label === ruleTypeFromDB
+            );
+
+            if (match) {
+                this.ruleType = match.value;
+                this.hasLoadedRule = true; // On marque comme chargé pour éviter les boucles
+                console.log('Sync RuleType Success:', this.ruleType);
+            }
         }
     }
 
@@ -177,7 +190,7 @@ export default class TransformationSaveModal extends LightningModal {
         
         // Trouver le label correspondant à la valeur
         const option = this.ruleTypeOptions.find(opt => opt.label === this.existingRule?.RuleType__c);
-        return option ? option.label : this.ruleType;
+        return option ? option.label : '';
     }
 
     get modalLabel() {
@@ -270,7 +283,7 @@ export default class TransformationSaveModal extends LightningModal {
  
     handleCancel() {
         this.resetState();
-        this.close({ success: false });
+        this.close();
     }
 
     disconnectedCallback() {
@@ -278,44 +291,43 @@ export default class TransformationSaveModal extends LightningModal {
         this.resetState();
     }
 
+     // Méthode experte pour réinitialiser le composant
+    @api
     resetState() {
-        // Réinitialiser toutes les propriétés
-        this.ruleType = '';
+        // 1. Réinitialisation des états logiques
+        this.ruleType = undefined;
         this.existingRule = null;
         this.isEdit = false;
         this.hasLoadedRule = false;
         this.fields = [];
-        this.targetFields = [];
-        this.existingRuleId = null;
         this.selectedColumns = [];
         this.isBooleanTransformation = false;
         this.booleanValue = false;
         this.separator = '';
         this.targetValue = '';
         this.mappingId = null;
-        this.parameters = '{}';
         this.domain = '';
         this.phone = '';
-        
+
+        // Réinitialisation de l'objet mapping
         this.mapping = {
             sourceColumn: '',
             targetField: ''
         };
 
-        // Reset UI
-        Promise.resolve().then(() => {
-            const inputs = this.template.querySelectorAll(".rounded-input");
-            if (inputs && inputs.length > 0) {
-                inputs.forEach((input) => {
-                    input.value = "";
-                });
-            }
-        
-            const comboboxes = this.template.querySelectorAll("lightning-combobox");
-            if (comboboxes && comboboxes.length > 0) {
-                comboboxes.forEach((combo) => {
-                    combo.value = null;
-                });
+        // 2. Nettoyage visuel des composants Lightning
+        // On utilise querySelectorAll pour vider les valeurs et effacer les messages d'erreur
+        const inputFields = [
+            ...this.template.querySelectorAll('lightning-input'),
+            ...this.template.querySelectorAll('lightning-combobox'),
+            ...this.template.querySelectorAll('lightning-dual-listbox')
+        ];
+
+        inputFields.forEach(field => {
+            if (field.reportValidity) {
+                field.value = field.tagName === 'LIGHTNING-DUAL-LISTBOX' ? [] : undefined;
+                field.setCustomValidity(''); // Supprime les messages d'erreur personnalisés
+                field.reportValidity(); // Rafraîchit l'état visuel
             }
         });
     }
@@ -484,6 +496,9 @@ export default class TransformationSaveModal extends LightningModal {
             
             const savedRuleId = this.existingRuleId;
             await updateRule(payload);
+
+            // RAFRAÎCHISSEMENT DU CACHE ICI
+            await refreshApex(this.wiredResultToRefresh);
 
             this.resetState();
 
