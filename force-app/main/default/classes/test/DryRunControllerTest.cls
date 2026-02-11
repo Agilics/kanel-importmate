@@ -1,8 +1,5 @@
 @isTest
 private class DryRunControllerTest {
-
-   
-
     private static ImportProject__c createProject(String targetObject) {
         ImportProject__c project = new ImportProject__c(
             Name            = 'Test Project',

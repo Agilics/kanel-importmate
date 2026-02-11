@@ -1,13 +1,3 @@
-/**
- * @description       : Processes CSV import rows in batches.
- *                      Supports two modes:
- *                        - PARTIAL : skip erroneous lines, import valid ones
- *                        - STRICT  : abort on first error, rollback everything
- * @author            : khalidousowba
- * @group             :
- * @last modified on  : 12-11-2025
- * @last modified by  : khalidousowba
- **/
 public with sharing class ImportQueueable implements Queueable, Database.AllowsCallouts {
 
     private String  projectId;
@@ -16,13 +6,9 @@ public with sharing class ImportQueueable implements Queueable, Database.AllowsC
     private Integer processedRecords;
     private Integer successfulRecords;
     private Integer failedRecords;
-    private String  importMode;   // 'PARTIAL' | 'STRICT'  — in-memory only, no custom field needed
+    private String  importMode;  
 
     @testvisible private Integer batchSize = 200;
-
-    // ── Constructors ──────────────────────────────────────────────────────────
-
-    /** First batch (no accumulated counters yet). */
     public ImportQueueable(
         String projectId,
         List<Map<String, String>> csvData,
@@ -32,7 +18,6 @@ public with sharing class ImportQueueable implements Queueable, Database.AllowsC
         this(projectId, csvData, executionId, 0, 0, 0, importMode);
     }
 
-    /** Continuation batch with accumulated counters. */
     public ImportQueueable(
         String  projectId,
         List<Map<String, String>> csvData,
@@ -51,8 +36,6 @@ public with sharing class ImportQueueable implements Queueable, Database.AllowsC
         this.importMode        = (importMode == 'STRICT') ? 'STRICT' : 'PARTIAL';
     }
 
-    // ── Legacy constructors (backward-compatibility / existing tests) ─────────
-
     public ImportQueueable(String projectId, List<Map<String, String>> csvData, String executionId) {
         this(projectId, csvData, executionId, 0, 0, 0, 'PARTIAL');
     }
@@ -68,7 +51,6 @@ public with sharing class ImportQueueable implements Queueable, Database.AllowsC
         this(projectId, csvData, executionId, processed, successful, failed, 'PARTIAL');
     }
 
-    // ── Main execute ──────────────────────────────────────────────────────────
 
     public void execute(QueueableContext context) {
         try {
@@ -77,7 +59,7 @@ public with sharing class ImportQueueable implements Queueable, Database.AllowsC
                 throw new ExecutionException('Missing execution record');
             }
 
-            // Safety default — never null at runtime
+   
             if (String.isBlank(importMode)) {
                 importMode = 'PARTIAL';
             }
@@ -97,7 +79,6 @@ public with sharing class ImportQueueable implements Queueable, Database.AllowsC
             }
             String targetObject = project.TargetObject__c;
 
-            // ── Build current batch ───────────────────────────────────────────
             Integer currentBatchSize = Math.min(batchSize, csvData.size());
             List<Map<String, String>> currentBatch = new List<Map<String, String>>();
             for (Integer i = 0; i < currentBatchSize; i++) {
@@ -106,10 +87,8 @@ public with sharing class ImportQueueable implements Queueable, Database.AllowsC
 
             Integer startLineNumber = processedRecords + 1;
 
-            // STRICT mode only: savepoint so we can roll the whole batch back
             Savepoint sp = (importMode == 'STRICT') ? Database.setSavepoint() : null;
 
-            // ── Validation pass ───────────────────────────────────────────────
             List<ImportLog__c> errors = new List<ImportLog__c>();
 
             List<ImportLog__c> validationErrors = ValidationService.validateBatch(
@@ -149,7 +128,7 @@ public with sharing class ImportQueueable implements Queueable, Database.AllowsC
 
             for (Integer i = 0; i < currentBatch.size(); i++) {
 
-                if (errorRowIndices.contains(i)) continue; // PARTIAL: skip invalid rows
+                if (errorRowIndices.contains(i)) continue; 
 
                 Map<String, String> row        = currentBatch[i];
                 Integer             lineNumber = startLineNumber + i;
@@ -305,13 +284,10 @@ public with sharing class ImportQueueable implements Queueable, Database.AllowsC
                 ImportLogService.logImportLogs(errors);
             }
 
-            // ── Finalise execution record ─────────────────────────────────────
-            // PARTIAL → always Completed (skips surfaced via counters in the LWC)
-            // STRICT  → Completed only when zero failures
+           
             String finalStatus = (importMode == 'STRICT' && failedRecords > 0) ? 'Failed' : 'Completed';
             finaliseExecution(execution, finalStatus, successfulRecords, failedRecords);
 
-            // ── Queue next batch or publish completion ────────────────────────
             if (currentBatchSize < csvData.size()) {
                 List<Map<String, String>> remainingData = new List<Map<String, String>>();
                 for (Integer i = currentBatchSize; i < csvData.size(); i++) {
@@ -356,12 +332,7 @@ public with sharing class ImportQueueable implements Queueable, Database.AllowsC
         }
     }
 
-    // ── Private helpers ───────────────────────────────────────────────────────
-
-    /**
-     * Centralised STRICT abort: rollback → log → finalise → publish.
-     * Call as:  abortStrict(sp, execution, errors); return;
-     */
+ 
     private void abortStrict(Savepoint sp, ImportExecution__c execution, List<ImportLog__c> errors) {
         Database.rollback(sp);
         if (!errors.isEmpty()) ImportLogService.logImportLogs(errors);
@@ -371,10 +342,7 @@ public with sharing class ImportQueueable implements Queueable, Database.AllowsC
         );
     }
 
-    /**
-     * Updates the execution record with final counters and status.
-     * No reference to any ImportMode__c field — mode is runtime-only.
-     */
+   
     private void finaliseExecution(
         ImportExecution__c execution,
         String  status,
@@ -389,9 +357,7 @@ public with sharing class ImportQueueable implements Queueable, Database.AllowsC
         ExecutionRepository.updateImportExecution(execution);
     }
 
-    /**
-     * Builds an ImportLog__c from a typed exception that exposes getContext().
-     */
+  
     private ImportLog__c buildErrorLog(
         String              executionId,
         Integer             lineNumber,
@@ -412,9 +378,7 @@ public with sharing class ImportQueueable implements Queueable, Database.AllowsC
         return log;
     }
 
-    /**
-     * Builds ImportLog__c records from a DmlException.
-     */
+   
     private List<ImportLog__c> buildDmlErrors(DmlException e, Integer startLineNumber, String executionId) {
         List<ImportLog__c> dmlErrors = new List<ImportLog__c>();
         for (Integer i = 0; i < e.getNumDml(); i++) {
@@ -435,9 +399,7 @@ public with sharing class ImportQueueable implements Queueable, Database.AllowsC
         return dmlErrors;
     }
 
-    /**
-     * Resolves all lookup fields for records about to be inserted.
-     */
+   
     private void resolveLookups(
         List<SObject>                           recordsToInsert,
         Map<Integer, List<Map<String, Object>>> lookupNeedsByRow,
