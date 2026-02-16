@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomLabels xmlns="http://soap.sforce.com/2006/04/metadata">
+    <!-- Project form  -->
+    <labels>
+        <fullName>ProjectForm_Title</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Title for projection information section</shortDescription>
+        <value>New Project</value>
+    </labels>
+
+    <labels>
+        <fullName>ProjectForm_Subtitle</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SubTitle for projection information section</shortDescription>
+        <value>Set up your data import project with target object and configuration</value>
+    </labels>
+
+    <labels>
+        <fullName>ProjectForm_Info_Section_Label</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Section's Project Information</shortDescription>
+        <value>Project Information</value>
+    </labels>
+
+    <labels>
+        <fullName>ProjectForm_Target_Section_Label</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Section's title Target Object Configuration</shortDescription>
+        <value>Target Object Configuration</value>
+    </labels>
+
+    <labels>
+        <fullName>ProjectForm_Name</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for Project Name field</shortDescription>
+        <value>Project Name</value>
+    </labels>
+
+    <labels>
+        <fullName>ProjectForm_Helper_Name</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for helper name</shortDescription>
+        <value>Choose a clear, descriptive name for easy identification</value>
+    </labels>
+
+    <labels>
+        <fullName>ProjectForm_Helper_Target_Object</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for helper Target Object field</shortDescription>
+        <value>Select the Salesforce object where data will be imported</value>
+    </labels>
+
+    <labels>
+        <fullName>ProjectForm_Helper_Description</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for helper description</shortDescription>
+        <value>Provide details about data source, business purpose, and expected outcomes</value>
+    </labels>
+
+    <labels>
+        <fullName>ProjectForm_Description</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for Description field</shortDescription>
+        <value>Description</value>
+    </labels>
+
+    <labels>
+        <fullName>ProjectForm_Target_Object</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for Target Object field</shortDescription>
+        <value>Target Salesforce Object</value>
+    </labels>
+
+    <labels>
+        <fullName>ProjectForm_Save_Button</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for save button</shortDescription>
+        <value>Save & Continue to Data Source</value>
+    </labels>
+    <labels>
+        <fullName>ProjectForm_Cancel_Button</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for  exit button</shortDescription>
+        <value>Cancel</value>
+    </labels>
+    <!--placeholders-->
+     <labels>
+        <fullName>ImportProject_Description_Placeholder</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Placeholder for import project description</shortDescription>
+        <value>Describe the purpose and scope of this import project...</value>
+    </labels>
+     <labels>
+        <fullName>ImportProject_Name_Placeholder</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Placeholder for import project name</shortDescription>
+        <value>Enter a descriptive project name (e.g., Q4 Contact Import)</value>
+    </labels>
+    <!-- end project project form-->
+
+</CustomLabels>
