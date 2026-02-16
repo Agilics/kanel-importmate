@@ -20,6 +20,9 @@ import helperNameLabel from "@salesforce/label/c.ProjectForm_Helper_Name";
 import helperDescriptionLabel from "@salesforce/label/c.ProjectForm_Helper_Description";
 import helpertargetObjectLabel from "@salesforce/label/c.ProjectForm_Helper_Target_Object";
 
+//placeholder
+import NAME_PLACEHOLDER from '@salesforce/label/c.ImportProject_Name_Placeholder';
+import DESCRIPTION_PLACEHOLDER from '@salesforce/label/c.ImportProject_Description_Placeholder';
 export default class ProjectFormComponent extends LightningElement {
   @api projectName = "";
   @api description = "";
@@ -42,6 +45,9 @@ export default class ProjectFormComponent extends LightningElement {
     helpertargetObjectLabel,
  
   };
+
+  descriptionPlaceholder = DESCRIPTION_PLACEHOLDER;
+  projectNamePlaceholder = NAME_PLACEHOLDER;
 
   // Permet au parent de définir des valeurs initiales dans le champs target object
   connectedCallback() {

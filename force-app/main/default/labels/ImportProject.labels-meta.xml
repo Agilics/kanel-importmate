@@ -95,6 +95,21 @@
         <shortDescription>Label for  exit button</shortDescription>
         <value>Cancel</value>
     </labels>
+    <!--placeholders-->
+     <labels>
+        <fullName>ImportProject_Description_Placeholder</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Placeholder for import project description</shortDescription>
+        <value>Describe the purpose and scope of this import project...</value>
+    </labels>
+     <labels>
+        <fullName>ImportProject_Name_Placeholder</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Placeholder for import project name</shortDescription>
+        <value>Enter a descriptive project name (e.g., Q4 Contact Import)</value>
+    </labels>
     <!-- end project project form-->
 
 </CustomLabels>

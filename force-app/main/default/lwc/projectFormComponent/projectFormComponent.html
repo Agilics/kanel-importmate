@@ -26,14 +26,14 @@
       <div class="section-header">
         <lightning-icon icon-name="utility:info" alternative-text="Info"
           class="icon-colors"></lightning-icon>
-        <h2>{projectInfoSectionLabel}</h2>
+        <h2>{label.projectInfoSectionLabel}</h2>
       </div>
       <div class="form-group">
         <label class="custom-label name-label" for="project-name">
           {label.projectNameLabel}<span class="required">*</span>
         </label>
         <lightning-input id="project-name" class="rounded-input" style="width: 100%" type="text"
-          placeholder="Enter a descriptive project name (e.g., Q4 Contact Import)"
+          placeholder= {projectNamePlaceholder}
           onchange={handleProjectNameChange}></lightning-input>
       </div>
       <p class="help-text">
@@ -45,7 +45,7 @@
         {label.descriptionLabel}
       </label>
       <lightning-textarea class="input-field rounded-input" name="description" style="margin-top: -1.6rem; "
-        placeholder="Describe the purpose and scope of this import project..."
+        placeholder={descriptionPlaceholder}
         onchange={handleDescriptionChange}></lightning-textarea>
       <p class="help-text">
         {label.helperDescriptionLabel}

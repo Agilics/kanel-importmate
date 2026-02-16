@@ -50,5 +50,14 @@
         <label>Annuler</label>
         <name>ProjectForm_Cancel_Button</name>      
     </customLabels>
-   
+   <customLabels>
+        <label>Décrivez l’objectif et le périmètre de ce projet d’import...</label>
+        <name>ImportProject_Description_Placeholder</name>
+    </customLabels>
+    <customLabels>
+        <label>Saisissez un nom de projet descriptif (ex. : Import des contacts T4)</label>
+        <name>ImportProject_Name_Placeholder</name>
+    </customLabels>
+
+
 </Translations>
