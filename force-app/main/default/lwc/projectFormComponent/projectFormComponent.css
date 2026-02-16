@@ -23,6 +23,10 @@
 .breadcrumb-separator {
   color: #9ca3af;
 }
+.main-content{
+  display: grid;
+  grid-template-columns:repeat(auto-fit, minmax(800px,1fr)); gap:24px;
+}
 
 /* HEADER */
 .header {

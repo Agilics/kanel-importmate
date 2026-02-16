@@ -5,10 +5,20 @@
  * Changement composant c-project-form du méthode targetobjectchange -> targetchange
  */
 import { LightningElement, api, track } from "lwc";
-
 //import methods from Controller
 import getCompatibleSObjects from "@salesforce/apex/ImportProjectController.getCompatibleSObjects";
-
+// Import des labels
+import projectInfoLabel from "@salesforce/label/c.ProjectForm_Title";
+import projectDetailsLabel from "@salesforce/label/c.ProjectForm_Subtitle";
+import targetObjectInfoLabel from "@salesforce/label/c.ProjectForm_Target_Section_Label";
+import projectNameLabel from "@salesforce/label/c.ProjectForm_Name";
+import descriptionLabel from "@salesforce/label/c.ProjectForm_Description"; 
+import projectInfoSectionLabel from "@salesforce/label/c.ProjectForm_Info_Section_Label";
+import targetObjectLabel from "@salesforce/label/c.ProjectForm_Target_Object";
+//helper text labels
+import helperNameLabel from "@salesforce/label/c.ProjectForm_Helper_Name";
+import helperDescriptionLabel from "@salesforce/label/c.ProjectForm_Helper_Description";
+import helpertargetObjectLabel from "@salesforce/label/c.ProjectForm_Helper_Target_Object";
 
 export default class ProjectFormComponent extends LightningElement {
   @api projectName = "";
@@ -17,6 +27,21 @@ export default class ProjectFormComponent extends LightningElement {
   @track options = [];
   @api project;
   @api currentStep;
+
+  label = { 
+    projectDetailsLabel,
+    projectInfoSectionLabel,
+    projectNameLabel,
+    descriptionLabel,
+    targetObjectLabel,
+    projectInfoLabel,
+    projectDetailsLabel,
+    targetObjectInfoLabel,
+    helperNameLabel,
+    helperDescriptionLabel,
+    helpertargetObjectLabel,
+ 
+  };
 
   // Permet au parent de définir des valeurs initiales dans le champs target object
   connectedCallback() {

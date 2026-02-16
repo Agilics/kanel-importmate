@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Translations xmlns="http://soap.sforce.com/2006/04/metadata">
+
+    <customLabels>
+        <label>Nombre del proyecto</label>
+        <name>ProjectForm_Name</name>
+    </customLabels>
+
+    <customLabels>
+        <label>Descripción</label>
+        <name>ProjectForm_Description</name>
+    </customLabels>
+
+    <customLabels>
+        <label>Objeto Salesforce de destino</label>
+        <name>ProjectForm_Target_Object</name>
+    </customLabels>
+
+    <customLabels>
+        <label>Información del proyecto</label>
+        <name>ProjectForm_Info_Section_Label</name>
+    </customLabels>
+
+    <customLabels>
+        <label>Configuración del objeto de destino</label>
+        <name>ProjectForm_Target_Section_Label</name>
+    </customLabels>
+
+    <customLabels>
+        <label>Elija un nombre claro y descriptivo para facilitar la identificación</label>
+        <name>ProjectForm_Helper_Name</name>
+    </customLabels>
+
+    <customLabels>
+        <label>Proporcione detalles sobre la fuente de datos, el objetivo empresarial y los resultados esperados</label>
+        <name>ProjectForm_Helper_Description</name>
+    </customLabels>
+
+    <customLabels>
+        <label>Seleccione el objeto de Salesforce donde se importarán los datos</label>
+        <name>ProjectForm_Helper_Target_Object</name>
+    </customLabels>
+
+    <customLabels>
+        <label>Nuevo proyecto</label>
+        <name>ProjectForm_Title</name>
+    </customLabels>
+
+    <customLabels>
+        <label>Configure su proyecto de importación de datos con el objeto de destino y la configuración</label>
+        <name>ProjectForm_Subtitle</name>
+    </customLabels>
+
+    <customLabels>
+        <label>Guardar y continuar con la fuente de datos</label>
+        <name>ProjectForm_Save_Button</name>
+    </customLabels>
+    <customLabels>
+        <label>Cancelar</label>
+        <name>ProjectForm_Cancel_Button</name>
+    </customLabels>
+
+</Translations>
