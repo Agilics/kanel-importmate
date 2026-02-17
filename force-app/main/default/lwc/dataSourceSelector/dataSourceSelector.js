@@ -182,7 +182,6 @@ handleStartMapping(evt) {
   }
 }
 
- 
  handleBackToMain() {
   this.dispatchEvent(
     new CustomEvent("previous", {
