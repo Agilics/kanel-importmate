@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Translations xmlns="http://soap.sforce.com/2006/04/metadata">
+ 
+    <!-- SIDEBAR - STEPS -->
+
+    <customLabels>
+        <name>SideBar_Step_ProjectSetup</name>
+        <label>Configuration du projet</label>
+    </customLabels>
+
+    <customLabels>
+        <name>SideBar_Step_DataSource</name>
+        <label>Source de données</label>
+    </customLabels>
+
+    <customLabels>
+        <name>SideBar_Step_FieldMapping</name>
+        <label>Mapping des champs</label>
+    </customLabels>
+
+    <customLabels>
+        <name>SideBar_Step_Transformations</name>
+        <label>Transformations</label>
+    </customLabels>
+
+    <customLabels>
+        <name>SideBar_Step_Validation</name>
+        <label>Validation</label>
+    </customLabels>
+
+    <customLabels>
+        <name>SideBar_Step_Execution</name>
+        <label>Exécution</label>
+    </customLabels>
+
+    <!-- SIDEBAR - QUICK ACTIONS -->
+
+    <customLabels>
+        <name>SideBar_QuickAction_Recent_Project</name>
+        <label>Projets récents</label>
+    </customLabels>
+
+    <customLabels>
+        <name>SideBar_QuickAction_Analytics</name>
+        <label>Analytique</label>
+    </customLabels>
+
+    <customLabels>
+        <name>SideBar_QuickAction_ExecutionHistory</name>
+        <label>Historique des exécutions</label>
+    </customLabels>
+
+    <!-- DASHBOARD - FILTER TABS -->
+    
+    <customLabels>
+        <name>Dashboard_FilterTab_Title</name>
+        <label>Projets</label>
+    </customLabels>
+    <customLabels>
+        <name>Dashboard_FilterTab_Subtitle</name>
+        <label>Gérez vos projets d'importation de données</label>
+    </customLabels>
+
+    <customLabels>
+        <name>Dashboard_Input_Search_Projects_Placeholder</name>
+        <label>Rechercher des projets...</label>
+    </customLabels>
+
+    <customLabels>
+        <name>Dashboard_FilterTab_All_Projects</name>
+        <label>Tous les projets</label>
+    </customLabels>
+
+    <customLabels>
+        <name>Dashboard_FilterTab_Active</name>
+        <label>Actifs</label>
+    </customLabels>
+
+    <customLabels>
+        <name>Dashboard_FilterTab_Completed</name>
+        <label>Terminés</label>
+    </customLabels>
+
+    <customLabels>
+        <name>Dashboard_FilterTab_Scheduled</name>
+        <label>Planifiés</label>
+    </customLabels>
+
+    
+    <!-- DASHBOARD - STATS -->
+
+    <customLabels>
+        <name>Dashboard_Stat_TotalProjects</name>
+        <label>Total des projets</label>
+    </customLabels>
+
+    <customLabels>
+        <name>Dashboard_Stat_RecordImported</name>
+        <label>Enregistrements importés</label>
+    </customLabels>
+
+    <customLabels>
+        <name>Dashboard_Stat_SuccessRate</name>
+        <label>Taux de réussite</label>
+    </customLabels>
+
+    <customLabels>
+        <name>Dashboard_Stat_ActiveProject</name>
+        <label>Projets actifs</label>
+    </customLabels>
+
+    
+    <!-- DASHBOARD - NO PROJECT MESSAGES -->
+    
+
+    <customLabels>
+        <name>Dashboard_No_Project_Message</name>
+        <label>Aucun projet trouvé. Veuillez créer un nouveau projet pour commencer.</label>
+    </customLabels>
+
+    <customLabels>
+        <name>Dashboard_No_Project_Error_Message</name>
+        <label>Erreur lors du chargement des projets. Veuillez réessayer.</label>
+    </customLabels>
+
+    
+    <!-- DASHBOARD - ALERT MESSAGES -->
+    
+    <customLabels>
+        <name>Dashboard_Delete_Confirm_Header</name>
+        <label>Confirmer la suppression</label>
+    </customLabels>
+
+    <customLabels>
+        <name>Dashboard_Confirm_Delete_Message</name>
+        <label>Êtes-vous sûr de vouloir supprimer ce projet ? Cette action est irréversible.</label>
+    </customLabels>
+
+    <customLabels>
+        <name>Dashboard_Delete_Success_Message</name>
+        <label>Projet supprimé avec succès.</label>
+    </customLabels>
+    
+    <!--Etiquette des  noms de boutons -->
+    <customLabels>
+        <name>Dashboard_Button_New_Project</name>
+        <label>Nouveau Projet</label>
+    </customLabels>
+    <customLabels>
+        <name>Dashboard_Button_Create_First_Project</name>
+        <label>Créer votre premier projet</label>
+    </customLabels>
+</Translations>

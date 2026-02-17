@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomLabels xmlns="http://soap.sforce.com/2006/04/metadata">
+
+    <!-- STEPS --> 
+    <labels>
+        <fullName>Main_Step_ProjectSetup</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Step 1 - Project Setup</shortDescription>
+        <value>Project Setup</value>
+    </labels>
+
+    <labels>
+        <fullName>Main_Step_DataSource</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Step 2 - Data Source selection</shortDescription>
+        <value>Data Source</value>
+    </labels>
+
+    <labels>
+        <fullName>Main_Step_FieldMapping</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Step 3 - Field Mapping configuration</shortDescription>
+        <value>Field Mapping</value>
+    </labels>
+
+    <labels>
+        <fullName>Main_Step_Transformations</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Step 4 - Data Transformations</shortDescription>
+        <value>Transformations</value>
+    </labels>
+
+    <labels>
+        <fullName>Main_Step_Validation</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Step 5 - Validation (Dry Run)</shortDescription>
+        <value>Validation</value>
+    </labels>
+
+    <labels>
+        <fullName>Main_Step_Execution</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Step 6 - Execution</shortDescription>
+        <value>Execution</value>
+    </labels>
+ 
+    <!-- MESSAGES --> 
+
+    <labels>
+        <fullName>Main_Message_AllFieldsRequired</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Validation message</shortDescription>
+        <value>All fields are required</value>
+    </labels>
+
+    <labels>
+        <fullName>Main_Message_ProjectExists</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Project duplication message</shortDescription>
+        <value>A project with this name and target object already exists</value>
+    </labels>
+
+    <labels>
+        <fullName>Main_Message_ProjectCreated</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Project creation success</shortDescription>
+        <value>Project created successfully with ID: {0}</value>
+    </labels>
+
+    <labels>
+        <fullName>Main_Message_ErrorOccurred</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Generic error message</shortDescription>
+        <value>An error occurred</value>
+    </labels>
+    <labels>
+        <fullName>Main_Message_SelectProjectFirst</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Select project validation message</shortDescription>
+        <value>Please select or create a project first</value>
+    </labels>
+    <labels>
+        <fullName>Main_Message_CreateProjectFirst</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Create project validation message</shortDescription>
+        <value>Please create a project first</value>
+    </labels>
+    <labels>
+        <fullName>Main_Message_ImportStarted</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Import started message</shortDescription>
+        <value>Import started in {0} mode with batch size {1}</value>
+    </labels>
+    <labels>
+        <fullName>Main_Message_ImportStarted</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Import started message</shortDescription>
+        <value>Import started in {0} mode with batch size {1}</value>
+    </labels>
+    <labels>
+        <fullName>Main_Message_Logs_Coming_Soon</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Logs feature coming soon message</shortDescription>
+        <value>Logs feature coming soon</value>
+    </labels>
+
+    <labels>
+        <fullName>Main_Message_SETTINGS_COMING_SOON</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Settings feature coming soon message</shortDescription>
+        <value>Settings feature coming soon</value>
+    </labels>
+    <labels>
+        <fullName>Main_Message_VIEW_LOGS</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Viewing logs message</shortDescription>
+        <value>Viewing logs</value>
+    </labels>
+    <labels>
+        <fullName>Main_Message_EXPORT_COMING_SOON</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Export feature coming soon message</shortDescription>
+        <value>Export feature coming soon</value>
+    </labels>
+    
+</CustomLabels>
