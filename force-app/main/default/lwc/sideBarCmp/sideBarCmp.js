@@ -10,7 +10,7 @@ import STEP_EXECUTION from '@salesforce/label/c.SideBar_Step_Execution';
 // QUICK ACTIONS
 import QUICK_ACTION_RECENT_PROJECT from '@salesforce/label/c.SideBar_QuickAction_Recent_Project';
 import QUICK_ACTION_ANALYTICS from '@salesforce/label/c.SideBar_QuickAction_Analytics';
-import QUICK_ACTION_EXECUTION_HISTORY from '@salesforce/label/c.SideBar_QuickAction_ExecutionHistory';
+import QUICK_ACTION_EXECUTION_HISTORY from '@salesforce/label/c.SideBar_QuickAction_Execution';
 
 export default class SideBarCmp extends LightningElement {
     @api currentStep = 1;
