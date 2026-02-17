@@ -65,7 +65,7 @@
         <value>Analytics</value>
     </labels>
     <labels>
-        <fullName>SideBar_QuickAction_ExecutionHistory</fullName>
+        <fullName>SideBar_QuickAction_Execution</fullName>
         <language>en_US</language>
         <protected>false</protected>
         <shortDescription>Execution History button label</shortDescription>

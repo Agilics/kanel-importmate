@@ -83,6 +83,15 @@
     </labels>
 
     <labels>
+        <fullName>Dashboard_Stat_RecordImported</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Stat label for record imported</shortDescription>
+        <value>Record Imported</value>
+        <categories>Dashboard Stat</categories>
+    </labels>
+
+    <labels>
         <fullName>Dashboard_Stat_SuccessRate</fullName>
         <language>en_US</language>
         <protected>false</protected>

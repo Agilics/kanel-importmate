@@ -150,4 +150,26 @@
         <name>Dashboard_Button_Create_First_Project</name>
         <label>Créer votre premier projet</label>
     </customLabels>
+
+    <!-- Détails de projets  -->
+     <customLabels>
+        <name>ProjectCard_Meta_Target</name>
+        <label>Cible :</label>
+    </customLabels>
+    <customLabels>
+        <name>ProjectCard_Meta_Records</name>
+        <label>Enregistrements :</label>
+    </customLabels>
+    <customLabels>
+        <name>ProjectCard_Meta_Modified</name>
+        <label>Modifié le :</label>
+    </customLabels>
+    <customLabels>
+        <name>ProjectCard_Progress_Label</name>
+        <label>Progression</label>
+    </customLabels>
+    <customLabels>
+        <name>ProjectCard_No_Description</name>
+        <label>Aucune description</label>
+    </customLabels>
 </Translations>
