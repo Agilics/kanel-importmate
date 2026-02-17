@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>LogLimitReached__c</fullName>
+    <defaultValue>false</defaultValue>
+    <description>True when the execution reached the max number of ImportLog records.</description>
+    <externalId>false</externalId>
+    <inlineHelpText>Checked when log creation is capped to avoid hitting platform limits.</inlineHelpText>
+    <label>Log Limit Reached</label>
+    <trackTrending>false</trackTrending>
+    <type>Checkbox</type>
+</CustomField>
