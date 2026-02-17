@@ -25,16 +25,32 @@
 
           <p class="header-subtitle">Review and fix data issues before import</p>
 
-          <!-- NEW: Precheck -->
+          <!-- PRECHECK -->
           <template if:true={precheck.totalRows}>
             <p class="precheck-line">
               Precheck: {precheck.totalRows} row(s), {precheck.emptyRows} empty row(s), {precheck.invalidRows} invalid row(s)
             </p>
           </template>
+
+          <!-- LINE COUNTER BADGE (NEW) -->
+          <template if:true={showLineCounter}>
+            <div class={lineCounterClass}>
+              <div class="line-counter-icon">
+                <lightning-icon icon-name="utility:rows" size="xx-small"></lightning-icon>
+              </div>
+              <div class="line-counter-text">
+                <span class="line-counter-label">{lineCounterLabel}</span>
+                <div class="line-counter-track">
+                  <div class="line-counter-fill" style={lineCounterFillStyle}></div>
+                </div>
+              </div>
+              <div class="line-counter-pct">{analyzedLinesPercentage}%</div>
+            </div>
+          </template>
         </div>
 
         <div class="header-right">
-          <!-- NEW: Settings -->
+          <!-- Settings -->
           <lightning-button
             label="Validation Settings"
             onclick={openSettings}
@@ -66,7 +82,7 @@
       </div>
     </div>
 
-    <!-- NEW: Settings Modal -->
+    <!-- Settings Modal -->
     <template if:true={isSettingsOpen}>
       <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
         <div class="slds-modal__container">
@@ -151,7 +167,7 @@
                 </lightning-combobox>
 
                 <div class="settings-help">
-                  Warnings display depends on the “Include warnings” toggle.
+                  Warnings display depends on the "Include warnings" toggle.
                 </div>
               </div>
             </div>

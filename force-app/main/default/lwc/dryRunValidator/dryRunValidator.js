@@ -641,6 +641,55 @@ export default class DryRunValidator extends LightningElement {
     return Math.round((this.remainingCount / this.totalRecordsToProcess) * 100);
   }
 
+  /** =========================
+   *  LINE COUNTER (NEW)
+   *  ========================= */
+  get analyzedLinesCount() {
+    if (!this.validationExecuted && !this.isAsyncValidation) return 0;
+    if (this.isAsyncValidation) return this.processedCount;
+    return this.totalRecords;
+  }
+
+  get totalLinesCount() {
+    return this.totalRecordsToProcess || this.totalRecords || 0;
+  }
+
+  get analyzedLinesPercentage() {
+    if (this.totalLinesCount === 0) return 0;
+    return Math.min(100, Math.round((this.analyzedLinesCount / this.totalLinesCount) * 100));
+  }
+
+  get lineCounterLabel() {
+    if (!this.totalLinesCount) return 'Waiting for data...';
+    if (this.isAsyncValidation && this.isImportInProgress) {
+      return `Analyzing... ${this.analyzedLinesCount} / ${this.totalLinesCount} lines`;
+    }
+    if (this.validationExecuted) {
+      return `${this.analyzedLinesCount} / ${this.totalLinesCount} lines analyzed`;
+    }
+    return `${this.totalLinesCount} lines ready to analyze`;
+  }
+
+  get showLineCounter() {
+    return this.totalLinesCount > 0;
+  }
+
+  get lineCounterClass() {
+    if (this.isAsyncValidation && this.isImportInProgress) return 'line-counter-bar in-progress';
+    if (this.validationExecuted) return 'line-counter-bar completed';
+    return 'line-counter-bar idle';
+  }
+
+  get lineCounterFillStyle() {
+    const pct = this.analyzedLinesPercentage;
+    const color = this.isImportInProgress
+      ? '#4f46e5'
+      : this.validationExecuted
+      ? '#059669'
+      : '#9ca3af';
+    return `width: ${pct}%; background-color: ${color}; transition: width 0.4s ease;`;
+  }
+
   handlePlatformEvent(response) {
     const payload = response.data.payload;
     const executionId = payload.ExecutionId__c;

@@ -1,11 +1,3 @@
-<!--
-  @description       : Main component hosting all ImportMate application components
-  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
-  @group             : 
-  @last modified on  : 12-23-2025
-  @last modified by  mouhamed niang
-  remplacement de dataSourcePage par dataSource
--->
 <template>
   <template if:true={isLoading}>
     <div class="slds-spinner_container">
@@ -101,13 +93,16 @@
 
               <!-- Step 3 & 4: Field Mapping & Transformations -->
               <template if:true={isMappingAndTransformation}>
-                <c-field-mapper
-                  preselected-project-id={currentProject.Id}
-                  preselected-target-object={mappingTargetObject}
-                  source-columns-csv={mappingHeadersCsv}
-                  onprevious={handleBackToStep}
-                  oncontinue={handleContinueFromFieldMapper}
-                ></c-field-mapper>
+               <c-field-mapper
+                preselected-project-id={currentProject.Id}
+                preselected-target-object={mappingTargetObject}
+                source-columns-csv={mappingHeadersCsv}
+                csv-rows={mappingSampleRows}
+                total-row-count={mappingTotalRowCount}
+                onprevious={handleBackToStep}
+                oncontinue={handleContinueFromFieldMapper}
+              ></c-field-mapper>
+
 
               </template>
 

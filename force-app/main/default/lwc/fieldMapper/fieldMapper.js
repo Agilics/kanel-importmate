@@ -1,16 +1,10 @@
-/**
- * @Last modified by:   Mouhamed NIANG
- * @Last modified time: 2026-01-14
- * @Modification : - ajout de la méthode de désactivation du bouton continue en l'absence de mapping  
- */
 import { LightningElement, api, track } from 'lwc';
 import fetchProjects from '@salesforce/apex/FieldMappingController.fetchProjects';
 import fetchObjects from '@salesforce/apex/FieldMappingController.fetchObjects';
 import fetchFields from '@salesforce/apex/FieldMappingController.fetchFields';
 import loadMappings from '@salesforce/apex/FieldMappingController.loadMappings';
 import saveMappingsJson from '@salesforce/apex/FieldMappingController.saveMappingsJson';
-import  getAllMappingsByProjectId from '@salesforce/apex/FieldMappingController.getAllMappingsByProjectId';
-
+import getAllMappingsByProjectId from '@salesforce/apex/FieldMappingController.getAllMappingsByProjectId';
 
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin } from 'lightning/navigation';
@@ -41,6 +35,8 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
   _sourceColumnsCsv = '';
 
   @api totalRowCount;
+
+  /** ====== API: csvRows / sourceColumnsCsv ====== */
   @api
   get csvRows() {
     return this._csvRows;
@@ -48,10 +44,10 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
   set csvRows(v) {
     this._csvRows = Array.isArray(v) ? v : [];
     this.initMappings();
+    this.rebuildInitialColumns();
+    this.availableSourceColumns = [...(this.initialSourceColumns || [])];
 
     if (this._csvRows.length) {
-      this.initialSourceColumns = Object.keys(this._csvRows[0] || {});
-      this.availableSourceColumns = [...this.initialSourceColumns];
       this._refreshPreviewDebounced();
     }
   }
@@ -64,13 +60,9 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
     this._sourceColumnsCsv = (v || '').trim();
     this.initMappings();
 
-    if (!this.initialSourceColumns?.length && this._sourceColumnsCsv) {
-      this.initialSourceColumns = this._sourceColumnsCsv
-        .split(',')
-        .map((s) => s.trim())
-        .filter(Boolean);
-      this.availableSourceColumns = [...this.initialSourceColumns];
-    }
+  
+    this.rebuildInitialColumns();
+    this.availableSourceColumns = [...(this.initialSourceColumns || [])];
   }
 
   @api version;
@@ -104,19 +96,13 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
   /** ===== Derived labels ===== */
   get rowCountLabel() {
     const n = this.totalRowCount;
-    if (typeof n === 'number' && Number.isFinite(n) && n >= 0) {
-      return n;
-    }
+    if (typeof n === 'number' && Number.isFinite(n) && n >= 0) return n;
     return Array.isArray(this._csvRows) ? this._csvRows.length : 0;
   }
 
   get sourceTitle() {
-    if (this.sourceLabel) {
-      return `Source Data (${this.sourceLabel})`;
-    }
-    if (this.selectedTargetObject) {
-      return `Source Data (${this.selectedTargetObject})`;
-    }
+    if (this.sourceLabel) return `Source Data (${this.sourceLabel})`;
+    if (this.selectedTargetObject) return `Source Data (${this.selectedTargetObject})`;
     return 'Source Data';
   }
 
@@ -126,7 +112,7 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
   }
 
   /** ===== State ===== */
-  @track versionInput = ''; 
+  @track versionInput = '';
   @track projects = [];
   @track availableObjects = [];
   @track selectedProjectId = '';
@@ -146,26 +132,17 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
   @track showSettingsModal = false;
   @track settingsPreviewRowLimit = 4;
 
-  _refreshPreviewDebounced = microtaskDebounce(() =>
-    this.rebuildClientPreview()
-  );
+  _refreshPreviewDebounced = microtaskDebounce(() => this.rebuildClientPreview());
 
   /** ===== Options & helpers ===== */
   get projectOptions() {
-    return (this.projects || []).map((p) => ({
-      label: p.name,
-      value: p.id
-    }));
+    return (this.projects || []).map((p) => ({ label: p.name, value: p.id }));
   }
 
   get availableObjectsOptions() {
-    const list = Array.isArray(this.availableObjects)
-      ? this.availableObjects
-      : [];
+    const list = Array.isArray(this.availableObjects) ? this.availableObjects : [];
     return list.map((o) => {
-      if (typeof o === 'string') {
-        return { label: o, value: o };
-      }
+      if (typeof o === 'string') return { label: o, value: o };
       const label = o?.label || o?.name || o?.apiName || String(o);
       const value = o?.value || o?.apiName || o?.name || String(o);
       return { label, value };
@@ -198,16 +175,13 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
     (this.mappings || []).forEach((m) => {
       if (m?.sourceColumn) bySource.set(m.sourceColumn, m);
     });
-    const cols = Array.isArray(this.initialSourceColumns)
-      ? this.initialSourceColumns
-      : [];
+
+    const cols = Array.isArray(this.initialSourceColumns) ? this.initialSourceColumns : [];
     return cols.map((name) => {
       const m = bySource.get(name);
       const status = !m ? 'unmapped' : m.isLookup ? 'transform' : 'mapped';
       const examples = this._examplesForSource(name, 2);
-      const subtitle = examples.length
-        ? `Text \u2022 ${examples.join(', ')}…`
-        : 'Text \u2022';
+      const subtitle = examples.length ? `Text \u2022 ${examples.join(', ')}…` : 'Text \u2022';
 
       return {
         name,
@@ -224,23 +198,19 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
     return this.sourceList.length > 0;
   }
 
-  /** Summary*/
+  /** Summary */
   get summaryTotalFields() {
     return (this.targetFields || []).length;
   }
   get summaryMappedCount() {
-    return (this.targetFields || []).filter(
-      (f) => f.mappedSources?.length
-    ).length;
+    return (this.targetFields || []).filter((f) => f.mappedSources?.length).length;
   }
   get summaryUnmappedCount() {
     return Math.max(this.summaryTotalFields - this.summaryMappedCount, 0);
   }
   get summaryWithTransformCount() {
     return (this.targetFields || []).filter((f) =>
-      (f.mappedSources || []).some(
-        (ms) => ms.mapping && ms.mapping.isLookup
-      )
+      (f.mappedSources || []).some((ms) => ms.mapping && ms.mapping.isLookup)
     ).length;
   }
 
@@ -251,19 +221,15 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
     return this.summaryUnmappedCount;
   }
 
-  /**Mapping lookup field  */
+  /** Mapping lookup field */
   get currentLookupCount() {
-    return (this.mappings || []).filter(
-      (m) => m && m.isLookup === true
-    ).length;
+    return (this.mappings || []).filter((m) => m && m.isLookup === true).length;
   }
 
   /** Preview helpers */
   get mappedFields() {
     const tf = Array.isArray(this.targetFields) ? this.targetFields : [];
-    return tf.filter(
-      (f) => Array.isArray(f.mappedSources) && f.mappedSources.length > 0
-    );
+    return tf.filter((f) => Array.isArray(f.mappedSources) && f.mappedSources.length > 0);
   }
   get hasMappedFields() {
     return this.mappedFields.length > 0;
@@ -272,10 +238,48 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
     return Math.max(this.mappedFields.length, 1);
   }
   get hasClientPreview() {
-    return (
-      Array.isArray(this.clientPreviewRows) &&
-      this.clientPreviewRows.length > 0
-    );
+    return Array.isArray(this.clientPreviewRows) && this.clientPreviewRows.length > 0;
+  }
+
+  parseHeaderColumns(csv) {
+    return (csv || '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+  }
+
+  computeColumnsFromRows(rows, maxScan = 2000) {
+    const list = Array.isArray(rows) ? rows : [];
+    const seen = new Set();
+    const out = [];
+    const n = Math.min(list.length, maxScan);
+
+    for (let i = 0; i < n; i += 1) {
+      const r = list[i];
+      if (!r) continue;
+      Object.keys(r).forEach((k) => {
+        const key = (k || '').trim();
+        if (!key) return;
+        if (!seen.has(key)) {
+          seen.add(key);
+          out.push(key);
+        }
+      });
+    }
+    return out;
+  }
+
+  rebuildInitialColumns() {
+    // 1) Header is truth (captures empty columns too)
+    const headerCols = this.parseHeaderColumns(this._sourceColumnsCsv);
+    if (headerCols.length) {
+      this.initialSourceColumns = headerCols;
+      return;
+    }
+
+    // 2) Otherwise union of keys across many rows (row[0] can miss keys)
+    const cols = this.computeColumnsFromRows(this._csvRows, 2000);
+    this.initialSourceColumns = cols;
   }
 
   /** ===== Field type → label & icon ===== */
@@ -337,8 +341,7 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
       t.includes('reference') ||
       t.includes('lookup') ||
       name.endsWith('id') ||
-      (name.endsWith('__c') &&
-        (lbl.includes('account') || lbl.includes('contact')))
+      (name.endsWith('__c') && (lbl.includes('account') || lbl.includes('contact')))
     ) {
       uiType = 'Lookup';
       iconKind = 'lookup';
@@ -365,11 +368,7 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
         .map((p) => ({
           id: p.id || p.Id,
           name: p.name || p.Name,
-          targetObject:
-            p.targetObject ||
-            p.TargetObject ||
-            p.Target_Object__c ||
-            p.Target_SObject__c
+          targetObject: p.targetObject || p.TargetObject || p.Target_Object__c || p.Target_SObject__c
         }))
         .filter((p) => p.id && p.name);
 
@@ -381,35 +380,21 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
   }
 
   async tryApplyPreselection() {
-    if (this._appliedPreselect) {
-      return;
-    }
+    if (this._appliedPreselect) return;
 
     let project = null;
-    if (
-      this._preselectedProjectId &&
-      Array.isArray(this.projects) &&
-      this.projects.length
-    ) {
+
+    if (this._preselectedProjectId && Array.isArray(this.projects) && this.projects.length) {
       project = this.projects.find((p) => p.id === this._preselectedProjectId);
     }
 
-    if (
-      !project &&
-      this.preselectedProjectName &&
-      Array.isArray(this.projects) &&
-      this.projects.length
-    ) {
+    if (!project && this.preselectedProjectName && Array.isArray(this.projects) && this.projects.length) {
       const want = this.preselectedProjectName.toLowerCase();
-      project = this.projects.find(
-        (p) => (p.name || '').toLowerCase() === want
-      );
+      project = this.projects.find((p) => (p.name || '').toLowerCase() === want);
     }
 
     if (!project) {
-      if (!this._preselectedProjectId && !this.preselectedProjectName) {
-        return;
-      }
+      if (!this._preselectedProjectId && !this.preselectedProjectName) return;
 
       project = {
         id: this._preselectedProjectId || `tmp-${Date.now()}`,
@@ -420,12 +405,10 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
     }
 
     this.selectedProjectId = project.id;
-    this.selectedTargetObject =
-      this._preselectedTargetObject || project.targetObject || '';
+    this.selectedTargetObject = this._preselectedTargetObject || project.targetObject || '';
 
     await this.loadTargetFields();
     this.updateMappedSources();
-
     await this.applySavedMappings({ silent: true });
 
     this._appliedPreselect = true;
@@ -446,9 +429,7 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
       return;
     }
     try {
-      const result = await fetchFields({
-        objectApiName: this.selectedTargetObject
-      });
+      const result = await fetchFields({ objectApiName: this.selectedTargetObject });
 
       this.targetFields = (result || []).map((f) => {
         const apiName = f.apiName || f.ApiName;
@@ -461,12 +442,7 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
           f.nillable === false ||
           f.isNillable === false;
 
-        const meta = this.computeFieldTypeAndIcon(
-          apiName,
-          label,
-          dataType,
-          isRequired
-        );
+        const meta = this.computeFieldTypeAndIcon(apiName, label, dataType, isRequired);
 
         return {
           apiName,
@@ -499,24 +475,18 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
         .filter((m) => m.targetField === field.apiName)
         .forEach((m) => {
           if (!m || !m.sourceColumn) return;
-          if (!uniq.has(m.sourceColumn)) {
-            uniq.set(m.sourceColumn, m);
-          }
+          if (!uniq.has(m.sourceColumn)) uniq.set(m.sourceColumn, m);
         });
 
       const mappedSources = Array.from(uniq.values()).map((m) => {
         const isTransform = !!m.isLookup;
-        const chipClass = `chip ${
-          isTransform ? 'chip--transform' : 'chip--mapped'
-        }`;
+        const chipClass = `chip ${isTransform ? 'chip--transform' : 'chip--mapped'}`;
 
         return {
           key: `${field.apiName}__${m.sourceColumn}`,
           sourceColumn: m.sourceColumn,
           mapping: m,
-          lookupFieldsOptions: Array.isArray(
-            this.lookupFieldsByObject[m.lookupObject]
-          )
+          lookupFieldsOptions: Array.isArray(this.lookupFieldsByObject[m.lookupObject])
             ? this.lookupFieldsByObject[m.lookupObject]
             : [],
           chipClass
@@ -524,22 +494,13 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
       });
 
       const hasMappings = mappedSources.length > 0;
-      const hasTransform = mappedSources.some(
-        (ms) => ms.mapping && ms.mapping.isLookup
-      );
+      const hasTransform = mappedSources.some((ms) => ms.mapping && ms.mapping.isLookup);
 
       const cardClasses = ['fm-target-card'];
-      if (hasTransform) {
-        cardClasses.push('fm-target-card--transform');
-      } else if (hasMappings) {
-        cardClasses.push('fm-target-card--mapped');
-      }
+      if (hasTransform) cardClasses.push('fm-target-card--transform');
+      else if (hasMappings) cardClasses.push('fm-target-card--mapped');
 
-      return {
-        ...field,
-        mappedSources,
-        cardClass: cardClasses.join(' ')
-      };
+      return { ...field, mappedSources, cardClass: cardClasses.join(' ') };
     });
 
     // mapped first
@@ -564,19 +525,26 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
       const rowsStr = window.sessionStorage.getItem(SS_ROWS_KEY);
       const colsStr = window.sessionStorage.getItem(SS_COLS_KEY);
       const rows = rowsStr ? JSON.parse(rowsStr) : [];
+
       if (Array.isArray(rows) && rows.length) {
         this._csvRows = rows;
-        this.initialSourceColumns = Object.keys(rows[0] || {});
-        this.availableSourceColumns = [...this.initialSourceColumns];
+
+        if (!this._sourceColumnsCsv && colsStr) {
+          this._sourceColumnsCsv = (colsStr || '').trim();
+        }
+        this.rebuildInitialColumns();
+        this.availableSourceColumns = [...(this.initialSourceColumns || [])];
+
         this._refreshPreviewDebounced();
         return;
       }
-      if (!this.initialSourceColumns?.length && colsStr) {
-        this.initialSourceColumns = colsStr
-          .split(',')
-          .map((s) => s.trim())
-          .filter(Boolean);
-        this.availableSourceColumns = [...this.initialSourceColumns];
+
+      if (!this._sourceColumnsCsv && colsStr) {
+        this._sourceColumnsCsv = (colsStr || '').trim();
+      }
+      if (!this.initialSourceColumns?.length) {
+        this.rebuildInitialColumns();
+        this.availableSourceColumns = [...(this.initialSourceColumns || [])];
       }
     } catch (e) {
       console.error('[FieldMapper] ensureCsvSamplesFromSession error', e);
@@ -594,10 +562,7 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
     }
 
     const limit = this.previewRowLimit || 4;
-    const srcRows = (Array.isArray(this._csvRows) ? this._csvRows : []).slice(
-      0,
-      limit
-    );
+    const srcRows = (Array.isArray(this._csvRows) ? this._csvRows : []).slice(0, limit);
 
     if (!srcRows.length) {
       const byColExamples = new Map();
@@ -605,6 +570,7 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
         const col = f.mappedSources[0]?.sourceColumn;
         byColExamples.set(col, this._examplesForSource(col, limit));
       });
+
       const rowCount = Math.max(
         1,
         ...Array.from(byColExamples.values()).map((a) => a.length || 0)
@@ -646,21 +612,20 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
   async handleProjectChange(e) {
     const selectedId = e.detail?.value || e.target.value;
     this.selectedProjectId = selectedId;
+
     const project = (this.projects || []).find((p) => p.id === selectedId);
     this.selectedTargetObject = project ? project.targetObject : '';
     if (project) this.projects = [project];
 
     this.mappings = [];
-    this.availableSourceColumns = [...this.initialSourceColumns];
+    this.rebuildInitialColumns();
+    this.availableSourceColumns = [...(this.initialSourceColumns || [])];
 
     await this.loadTargetFields();
     this.ensureCsvSamplesFromSession();
     this.updateMappedSources();
 
-    //vérifie s'il existe des mappings pour le projet sélectionné
     await this.checkProjectMappings();
-
-    // Charger mapping existant s'il y en a
     await this.applySavedMappings({ silent: true });
   }
 
@@ -668,9 +633,7 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
   async handleLookupObjectChange(e) {
     const sourceColumn = e.target.dataset.source;
     const lookupObject = e.detail?.value || e.target.value;
-    const m = (this.mappings || []).find(
-      (x) => x.sourceColumn === sourceColumn
-    );
+    const m = (this.mappings || []).find((x) => x.sourceColumn === sourceColumn);
     if (!m) return;
     m.lookupObject = lookupObject || null;
     m.lookupMatchField = null;
@@ -680,16 +643,10 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
         const fields = await fetchFields({ objectApiName: lookupObject });
         this.lookupFieldsByObject = {
           ...this.lookupFieldsByObject,
-          [lookupObject]: (fields || []).map((f) => ({
-            label: f.label,
-            value: f.apiName
-          }))
+          [lookupObject]: (fields || []).map((f) => ({ label: f.label, value: f.apiName }))
         };
       } catch (err) {
-        this.lookupFieldsByObject = {
-          ...this.lookupFieldsByObject,
-          [lookupObject]: []
-        };
+        this.lookupFieldsByObject = { ...this.lookupFieldsByObject, [lookupObject]: [] };
         console.error('[FieldMapper] handleLookupObjectChange error', err);
       }
     }
@@ -699,9 +656,7 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
   handleLookupFieldChange(e) {
     const sourceColumn = e.target.dataset.source;
     const val = e.detail?.value || e.target.value;
-    const m = (this.mappings || []).find(
-      (x) => x.sourceColumn === sourceColumn
-    );
+    const m = (this.mappings || []).find((x) => x.sourceColumn === sourceColumn);
     if (m) {
       m.lookupMatchField = val || null;
       this.updateMappedSources();
@@ -712,23 +667,14 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
     const sourceColumn = e.target.dataset.source;
     const checked = e.target.checked;
 
-    const m = (this.mappings || []).find(
-      (x) => x.sourceColumn === sourceColumn
-    );
-    if (!m) {
-      return;
-    }
+    const m = (this.mappings || []).find((x) => x.sourceColumn === sourceColumn);
+    if (!m) return;
 
     if (checked && !m.isLookup) {
       const current = this.currentLookupCount;
       if (current >= 3) {
         e.target.checked = false;
-
-        this.toast(
-          'Limit reached',
-          'You can configure at most 3 lookup fields in this mapping.',
-          'warning'
-        );
+        this.toast('Limit reached', 'You can configure at most 3 lookup fields in this mapping.', 'warning');
         return;
       }
     }
@@ -765,9 +711,7 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
     );
     if (already) return;
 
-    const idx = (this.mappings || []).findIndex(
-      (m) => m.sourceColumn === sourceColumn
-    );
+    const idx = (this.mappings || []).findIndex((m) => m.sourceColumn === sourceColumn);
     if (idx >= 0) {
       this.mappings[idx] = {
         ...this.mappings[idx],
@@ -789,28 +733,21 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
           lookupMatchField: null
         }
       ];
-      this.availableSourceColumns = (this.availableSourceColumns || []).filter(
-        (c) => c !== sourceColumn
-      );
+      this.availableSourceColumns = (this.availableSourceColumns || []).filter((c) => c !== sourceColumn);
     }
 
     this.updateMappedSources();
   }
 
   handleRemoveMapping(e) {
-    const sourceColumn =
-      e.currentTarget?.dataset?.source || e.target.dataset.source;
+    const sourceColumn = e.currentTarget?.dataset?.source || e.target.dataset.source;
     if (!sourceColumn) return;
 
-    this.mappings = (this.mappings || []).filter(
-      (m) => m.sourceColumn !== sourceColumn
-    );
+    this.mappings = (this.mappings || []).filter((m) => m.sourceColumn !== sourceColumn);
 
     if (!(this.availableSourceColumns || []).includes(sourceColumn)) {
       const newAvail = [...this.availableSourceColumns, sourceColumn];
-      this.availableSourceColumns = this.initialSourceColumns.filter(
-        (s) => newAvail.indexOf(s) !== -1
-      );
+      this.availableSourceColumns = this.initialSourceColumns.filter((s) => newAvail.indexOf(s) !== -1);
     }
     this.updateMappedSources();
   }
@@ -821,9 +758,7 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
   }
 
   handleAutoMapClick() {
-    const srcCols = Array.isArray(this.initialSourceColumns)
-      ? this.initialSourceColumns
-      : [];
+    const srcCols = Array.isArray(this.initialSourceColumns) ? this.initialSourceColumns : [];
     if (!srcCols.length || !(this.targetFields || []).length) return;
 
     const srcByNorm = new Map();
@@ -831,10 +766,7 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
       srcByNorm.set(this.normalizeName(c), c);
     });
 
-    const mappedSources = new Set(
-      (this.mappings || []).map((m) => m.sourceColumn)
-    );
-
+    const mappedSources = new Set((this.mappings || []).map((m) => m.sourceColumn));
     const newMappings = [...(this.mappings || [])];
 
     (this.targetFields || []).forEach((f) => {
@@ -844,9 +776,7 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
       const normLabel = this.normalizeName(f.label);
       const normApi = this.normalizeName(f.apiName);
       const candidate =
-        srcByNorm.get(normLabel) ||
-        srcByNorm.get(normApi) ||
-        (normLabel.endsWith('name') && srcByNorm.get('name'));
+        srcByNorm.get(normLabel) || srcByNorm.get(normApi) || (normLabel.endsWith('name') && srcByNorm.get('name'));
 
       if (!candidate) return;
       if (mappedSources.has(candidate)) return;
@@ -867,9 +797,7 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
     this.mappings = newMappings;
 
     const mapped = new Set(this.mappings.map((m) => m.sourceColumn));
-    this.availableSourceColumns = this.initialSourceColumns.filter(
-      (c) => !mapped.has(c)
-    );
+    this.availableSourceColumns = this.initialSourceColumns.filter((c) => !mapped.has(c));
 
     this.updateMappedSources();
   }
@@ -877,18 +805,11 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
   /** ===== Save / load ===== */
   async handleSave() {
     try {
-      if (!this.selectedProjectId) {
-        throw new Error('Please select a Project before saving.');
-      }
+      if (!this.selectedProjectId) throw new Error('Please select a Project before saving.');
 
-      // Limite 3 champs lookup max
       const lookupCount = this.currentLookupCount;
       if (lookupCount > 3) {
-        this.toast(
-          'Limit reached',
-          'You can configure at most 3 lookup fields in this mapping.',
-          'warning'
-        );
+        this.toast('Limit reached', 'You can configure at most 3 lookup fields in this mapping.', 'warning');
         return;
       }
 
@@ -896,10 +817,7 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
       this.versionInput = ver;
 
       const payload = (this.mappings || [])
-        .filter(
-          (m) =>
-            m.sourceColumn && m.targetField && this.selectedProjectId
-        )
+        .filter((m) => m.sourceColumn && m.targetField && this.selectedProjectId)
         .map((m) => ({
           id: m.id || null,
           projectId: this.selectedProjectId,
@@ -911,25 +829,19 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
           lookupMatchField: m.lookupMatchField || ''
         }));
 
-      if (!payload.length) {
-        throw new Error('No valid mapping rows to save.');
-      }
+      if (!payload.length) throw new Error('No valid mapping rows to save.');
 
       await saveMappingsJson({
         targetObjectApiName: this.selectedTargetObject,
         rowsJson: JSON.stringify(payload)
       });
 
-      //vérifie l'existance de mapping pour le projet sélectionné
       await this.checkProjectMappings();
 
       this.toast('Success', 'Mappings saved.', 'success');
       this._refreshPreviewDebounced();
     } catch (error) {
-      const msg =
-        error?.body?.message ||
-        error?.message ||
-        'Failed to save mappings.';
+      const msg = error?.body?.message || error?.message || 'Failed to save mappings.';
       this.toast('Error', msg, 'error');
     }
   }
@@ -942,16 +854,11 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
     const { silent = false } = opts;
 
     if (!this.selectedProjectId) {
-      if (!silent) {
-        this.toast('Info', 'Select a project first.', 'info');
-      }
+      if (!silent) this.toast('Info', 'Select a project first.', 'info');
       return;
     }
-
     if (!this.selectedTargetObject) {
-      if (!silent) {
-        this.toast('Info', 'Target object is missing for this project.', 'info');
-      }
+      if (!silent) this.toast('Info', 'Target object is missing for this project.', 'info');
       return;
     }
 
@@ -964,17 +871,10 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
 
       const rows = Array.isArray(saved) ? saved : [];
       if (!rows.length) {
-        if (!silent) {
-          this.toast(
-            'Info',
-            'No saved mappings found for this project.',
-            'info'
-          );
-        }
+        if (!silent) this.toast('Info', 'No saved mappings found for this project.', 'info');
         return;
       }
 
-      // Version fixe interne, pas d'historique
       const effectiveVersion = this.versionInput || '1.0';
       this.versionInput = effectiveVersion;
 
@@ -993,23 +893,17 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
       (this.mappings || []).forEach((m) => {
         if (m?.sourceColumn) mapped.add(m.sourceColumn);
       });
-      this.availableSourceColumns = this.initialSourceColumns.filter(
-        (c) => !mapped.has(c)
-      );
+
+      this.rebuildInitialColumns();
+      this.availableSourceColumns = (this.initialSourceColumns || []).filter((c) => !mapped.has(c));
 
       this.updateMappedSources();
       this._refreshPreviewDebounced();
 
-      if (!silent) {
-        this.toast('Loaded', 'Existing mappings loaded.', 'success');
-      }
+      if (!silent) this.toast('Loaded', 'Existing mappings loaded.', 'success');
     } catch (e) {
       if (!silent) {
-        this.toast(
-          'Error',
-          e?.body?.message || 'Failed to load saved mappings.',
-          'error'
-        );
+        this.toast('Error', e?.body?.message || 'Failed to load saved mappings.', 'error');
       } else {
         console.error('[FieldMapper] applySavedMappings error', e);
       }
@@ -1022,14 +916,13 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
 
   handleClearAllClick() {
     this.mappings = [];
-    this.availableSourceColumns = [...this.initialSourceColumns];
+    this.rebuildInitialColumns();
+    this.availableSourceColumns = [...(this.initialSourceColumns || [])];
     this.updateMappedSources();
   }
 
   handleBackClick() {
-    this.dispatchEvent(
-      new CustomEvent('previous', { bubbles: true, composed: true })
-    );
+    this.dispatchEvent(new CustomEvent('previous', { bubbles: true, composed: true }));
   }
 
   handleContinueClick() {
@@ -1048,7 +941,6 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
   @track projectHasMappings = false;
   @track checkingMappings = false;
 
-  //Vérifie si le projet à des mappings associés
   async checkProjectMappings() {
     if (!this.selectedProjectId) {
       this.projectHasMappings = false;
@@ -1057,9 +949,7 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
 
     this.checkingMappings = true;
     try {
-      const mappings = await getAllMappingsByProjectId({
-        projectId: this.selectedProjectId
-      });
+      const mappings = await getAllMappingsByProjectId({ projectId: this.selectedProjectId });
       this.projectHasMappings = Array.isArray(mappings) && mappings.length > 0;
     } catch (e) {
       this.projectHasMappings = false;
@@ -1067,13 +957,10 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
     } finally {
       this.checkingMappings = false;
     }
-}
+  }
 
-
-
-  //check if there are mappings for the selected project
-  get  isContinueButtonDisabled() {
-     return !this.selectedProjectId || !this.projectHasMappings || this.checkingMappings;
+  get isContinueButtonDisabled() {
+    return !this.selectedProjectId || !this.projectHasMappings || this.checkingMappings;
   }
 
   /** ===== Settings Modal for preview ===== */
@@ -1084,9 +971,7 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
 
   handleSettingsRowLimitChange(e) {
     const v = parseInt(e.target.value, 10);
-    if (Number.isFinite(v)) {
-      this.settingsPreviewRowLimit = v;
-    }
+    if (Number.isFinite(v)) this.settingsPreviewRowLimit = v;
   }
 
   handleSettingsCancel() {
@@ -1095,9 +980,7 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
 
   handleSettingsApply() {
     let v = parseInt(this.settingsPreviewRowLimit, 10);
-    if (!Number.isFinite(v) || v <= 0) {
-      v = 4;
-    }
+    if (!Number.isFinite(v) || v <= 0) v = 4;
     if (v > 50) v = 50;
     this.previewRowLimit = v;
     this.showSettingsModal = false;
@@ -1149,29 +1032,17 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
   }
 
   connectedCallback() {
-    // On fige la version interne par défaut à 1.0 (sans historique)
     this.versionInput = this.version || '1.0';
 
-    if (
-      Array.isArray(this._csvRows) &&
-      this._csvRows.length > 0 &&
-      !this._sourceColumnsCsv
-    ) {
-      const first = this._csvRows[0] || {};
-      this.initialSourceColumns = Object.keys(first);
-      this.availableSourceColumns = [...this.initialSourceColumns];
-    } else {
-      const csv = this._sourceColumnsCsv || '';
-      this.initialSourceColumns = csv
-        ? csv
-            .split(',')
-            .map((s) => s.trim())
-            .filter(Boolean)
-        : [];
-      this.availableSourceColumns = [...this.initialSourceColumns];
-    }
+    // FIX: build columns safely (header > union of keys)
+    this.rebuildInitialColumns();
+    this.availableSourceColumns = [...(this.initialSourceColumns || [])];
 
     this.ensureCsvSamplesFromSession();
+    // After session load, rebuild again (rows/cols may have appeared)
+    this.rebuildInitialColumns();
+    this.availableSourceColumns = [...(this.initialSourceColumns || [])];
+
     this.initMappings();
 
     if (this._preselectedTargetObject && !this.selectedTargetObject) {
