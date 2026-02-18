@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
     <label>ImportMate Admin</label>
     <description>Full access to all ImportMate custom objects, fields, and Apex classes.</description>
@@ -244,7 +244,7 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
-        <field>ImportExecution__c.LogsCapped__c</field>
+        <field>ImportExecution__c.LogLimitReached__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
