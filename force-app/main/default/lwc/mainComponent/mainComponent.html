@@ -83,13 +83,14 @@
               </template>
 
               <!-- Step 2: SOQL Builder -->
-              <template if:true={showSoqlBuilder}>
+            <template if:true={showSoqlBuilder}>
                 <c-soql-builder
-                  project-target-object={mappingTargetObject}
+                  project-target-object={currentProjectTargetObject}
                   onstartmapping={handleStartMapping}
                   onprevious={handleBackToDataSourceSelection}
                 ></c-soql-builder>
-              </template>
+            </template>
+
 
               <!-- Step 3 & 4: Field Mapping & Transformations -->
               <template if:true={isMappingAndTransformation}>

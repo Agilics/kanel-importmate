@@ -61,6 +61,11 @@ export default class MainComponent extends LightningElement {
     return [];
   }
 
+  get currentProjectTargetObject() {
+  return this.getTargetObjectFromProject(this.currentProject || {});
+}
+
+
   get mappingTotalRowCount() {
     const all = this.csvData?.allRows;
     if (Array.isArray(all)) return all.length;
@@ -163,7 +168,6 @@ export default class MainComponent extends LightningElement {
   handleCsvLoaded(event) {
     // accepte plusieurs formats venant du CsvUploader
     this.csvData = event.detail?.csvData || event.detail || {};
-    // eslint-disable-next-line no-console
     console.log(
       'csvData loaded in mainComponent:',
       this.csvData?.allRows ? `Object with ${this.csvData.allRows.length} rows` : JSON.stringify(this.csvData)
