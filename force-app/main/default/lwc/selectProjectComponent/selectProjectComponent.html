@@ -2,7 +2,7 @@
   @description       : 
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
   @group             : 
-  @last modified on  : 10-27-2025
+  @last modified on  : 02-19-2026
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
@@ -18,7 +18,7 @@
           title="info"
           style="margin-right: 10px"
         ></lightning-icon>
-        No project import yet, please add
+        {label.noProject}
       </h3>
     </template>
 
@@ -37,7 +37,7 @@
           <lightning-card>
             <table class="styled-table">
               <caption class="slds-text-align_center">
-                Import projects Informations
+                {label.title}
               </caption>
               <thead>
                 <tr>
@@ -72,7 +72,7 @@
                       <lightning-button
                         onclick={handleShowDetailProject}
                         variant="brand"
-                        label="Select"
+                        label={button.select}
                         icon-name="action:preview"
                         data-id={project.Id}
                       >
@@ -93,7 +93,7 @@
     <lightning-button
       id="close"
       class="ok"
-      label="Close"
+      label={button.close}
       onclick={handleCloseModal}
       variant="neutral"
     ></lightning-button>

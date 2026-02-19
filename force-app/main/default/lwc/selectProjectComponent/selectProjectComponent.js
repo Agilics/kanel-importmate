@@ -2,12 +2,21 @@
 import { api, track, wire } from "lwc";
 import LightningModal from "lightning/modal";
 
+import CloseButtonModal from '@salesforce/label/c.SelectProject_Close_Button';
+import SelectButton from '@salesforce/label/c.SelectProject_Select_Button';
+import projectNameLabel from "@salesforce/label/c.ProjectForm_Name";
+import descriptionLabel from "@salesforce/label/c.ProjectForm_Description"; 
+import targetObjectLabel from "@salesforce/label/c.ProjectForm_Target_Object";
+import noProjectMessage from "@salesforce/label/c.SelectProject_No_Project";
+import cardTitle from "@salesforce/label/c.SelectProject_Card_Title";
+
+
 import searchProjectsByName from "@salesforce/apex/ImportProjectController.searchProjectsByName";
 export default class SelectProjectComponent extends LightningModal {
   columns = [
-    { fieldName: "ProjectName", label: "Project name" },
-    { fieldName: "TargetObject", label: "Target object" },
-    { fieldName: "Description", label: "Description" },
+    { fieldName: "ProjectName", label: projectNameLabel },
+    { fieldName: "TargetObject", label: targetObjectLabel },
+    { fieldName: "Description", label: descriptionLabel },
     { fieldName: "Actions", label: "Actions" }
   ];
   @api selectedProject;
@@ -16,6 +25,16 @@ export default class SelectProjectComponent extends LightningModal {
   @track error;
   @track nom = "";
   @track projects = [];
+
+  button = {
+    close:CloseButtonModal,
+    select:SelectButton
+  }
+
+  label = {
+    title: cardTitle ,
+    noProject: noProjectMessage
+  }
 
   @wire(searchProjectsByName, { nom: "$nom" })
   wiredSearchProjectHandler({ error, data }) {
