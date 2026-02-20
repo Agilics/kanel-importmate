@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomLabels xmlns="http://soap.sforce.com/2006/04/metadata">
+    <labels>
+        <fullName>IM_FieldMapper_Title</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>IM_FieldMapper_Title</shortDescription>
+        <value>IM_FieldMapper_Title</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_AddCondition</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Add Condition</shortDescription>
+        <value>Add Condition</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_Clear</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Clear</shortDescription>
+        <value>Clear</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_ConditionBuilder</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Condition Builder</shortDescription>
+        <value>Condition Builder</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_ContinueToMapping</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Continue to Field Mapping</shortDescription>
+        <value>Continue to Field Mapping</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_CopyError</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Clipboard not available</shortDescription>
+        <value>Clipboard not available</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_CopyQuery</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Copy Query</shortDescription>
+        <value>Copy Query</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_CopySuccess</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Query copied to clipboard</shortDescription>
+        <value>Query copied to clipboard</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_Direction</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Direction</shortDescription>
+        <value>Direction</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_Export</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Export</shortDescription>
+        <value>Export</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_FoundRecords</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>found {0} records</shortDescription>
+        <value>found {0} records</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_GeneratedQuery</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Generated SOQL Query</shortDescription>
+        <value>Generated SOQL Query</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_NoRows</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>No records found</shortDescription>
+        <value>No records found</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_Offset</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Offset</shortDescription>
+        <value>Offset</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_OrderBy</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Order By</shortDescription>
+        <value>Order By</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_PreviewResults</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Preview Results</shortDescription>
+        <value>Preview Results</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_QueryResultsPreview</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Query Results Preview</shortDescription>
+        <value>Query Results Preview</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_QuerySettings</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Query Settings</shortDescription>
+        <value>Query Settings</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_RecordLimit</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Record Limit</shortDescription>
+        <value>Record Limit</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_SelectAll</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Select all</shortDescription>
+        <value>Select all</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_SelectFields</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Select Fields</shortDescription>
+        <value>Select Fields</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_SelectedObject</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Selected Object</shortDescription>
+        <value>Selected Object</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_Title</fullName>
+        <categories>ImportMate</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>SOQL Builder - Title</shortDescription>
+        <value>SOQL Builder</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_ValidateQuery</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Validate Query</shortDescription>
+        <value>Validate Query</value>
+    </labels>
+</CustomLabels>
