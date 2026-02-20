@@ -5,6 +5,34 @@ import { NavigationMixin } from "lightning/navigation";
 import fetchFields from "@salesforce/apex/QueryBuilderController.fetchFields";
 import buildAndRunQueryEx from "@salesforce/apex/QueryBuilderController.buildAndRunQueryEx";
 
+// ===== Custom Labels =====
+import IM_Soql_Title from "@salesforce/label/c.IM_Soql_Title";
+import IM_Soql_SelectedObject from "@salesforce/label/c.IM_Soql_SelectedObject";
+import IM_Soql_SelectFields from "@salesforce/label/c.IM_Soql_SelectFields";
+import IM_Soql_SelectAll from "@salesforce/label/c.IM_Soql_SelectAll";
+import IM_Soql_Clear from "@salesforce/label/c.IM_Soql_Clear";
+import IM_Soql_QuerySettings from "@salesforce/label/c.IM_Soql_QuerySettings";
+import IM_Soql_RecordLimit from "@salesforce/label/c.IM_Soql_RecordLimit";
+import IM_Soql_OrderBy from "@salesforce/label/c.IM_Soql_OrderBy";
+import IM_Soql_Direction from "@salesforce/label/c.IM_Soql_Direction";
+import IM_Soql_ValidateQuery from "@salesforce/label/c.IM_Soql_ValidateQuery";
+import IM_Soql_PreviewResults from "@salesforce/label/c.IM_Soql_PreviewResults";
+
+import IM_Soql_ConditionBuilder from "@salesforce/label/c.IM_Soql_ConditionBuilder";
+import IM_Soql_AddCondition from "@salesforce/label/c.IM_Soql_AddCondition";
+
+import IM_Soql_GeneratedQuery from "@salesforce/label/c.IM_Soql_GeneratedQuery";
+import IM_Soql_CopyQuery from "@salesforce/label/c.IM_Soql_CopyQuery";
+
+import IM_Soql_QueryResultsPreview from "@salesforce/label/c.IM_Soql_QueryResultsPreview";
+import IM_Soql_Export from "@salesforce/label/c.IM_Soql_Export";
+import IM_Soql_ContinueToMapping from "@salesforce/label/c.IM_Soql_ContinueToMapping";
+
+import IM_Soql_NoRows from "@salesforce/label/c.IM_Soql_NoRows";
+import IM_Soql_FoundRecords from "@salesforce/label/c.IM_Soql_FoundRecords";
+import IM_Soql_CopySuccess from "@salesforce/label/c.IM_Soql_CopySuccess";
+import IM_Soql_CopyError from "@salesforce/label/c.IM_Soql_CopyError";
+
 const OP_MAP = {
   equals: "=",
   notequals: "!=",
@@ -16,30 +44,55 @@ const OP_MAP = {
   lte: "<="
 };
 
-const uid = () =>
-  `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
+const uid = () => `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
 
 export default class SoqlBuilder extends NavigationMixin(LightningElement) {
-  //project target object from parent
-   _projectTargetObject = "";
+  // expose labels to template
+  labels = {
+    IM_Soql_Title,
+    IM_Soql_SelectedObject,
+    IM_Soql_SelectFields,
+    IM_Soql_SelectAll,
+    IM_Soql_Clear,
+    IM_Soql_QuerySettings,
+    IM_Soql_RecordLimit,
+    IM_Soql_OrderBy,
+    IM_Soql_Direction,
+    IM_Soql_ValidateQuery,
+    IM_Soql_PreviewResults,
+    IM_Soql_ConditionBuilder,
+    IM_Soql_AddCondition,
+    IM_Soql_GeneratedQuery,
+    IM_Soql_CopyQuery,
+    IM_Soql_QueryResultsPreview,
+    IM_Soql_Export,
+    IM_Soql_ContinueToMapping,
+    IM_Soql_NoRows,
+    IM_Soql_FoundRecords,
+    IM_Soql_CopySuccess,
+    IM_Soql_CopyError
+  };
+
+  // ===== API from parent =====
+  _projectTargetObject = "";
 
   @api
   get projectTargetObject() {
     return this._projectTargetObject;
   }
   set projectTargetObject(value) {
-    const next = value || "";
+    const next = (value || "").trim();
+    // eslint-disable-next-line no-console
     console.log("[SOQL] projectTargetObject set to:", next);
-    if (next === this._projectTargetObject) {
-      return;
-    }
+    if (next === this._projectTargetObject) return;
 
     this._projectTargetObject = next;
 
-    if (next) {
-      this.initializeFromTargetObject();
-    }
+    // IMPORTANT: ensure initialization even if component already rendered
+    if (next) this.initializeFromTargetObject();
   }
+
+  // ===== State =====
   selectedObject = "";
   @track fieldsMeta = [];
   @track selectedFields = [];
@@ -61,10 +114,10 @@ export default class SoqlBuilder extends NavigationMixin(LightningElement) {
     { label: "LAST", value: "LAST" }
   ];
 
-  // Conditions
   @track conditions = [
     { id: uid(), field: "Name", operator: "contains", value: "", joiner: "AND" }
   ];
+
   operatorOptions = [
     { label: "equals", value: "equals" },
     { label: "not equals", value: "notequals" },
@@ -94,31 +147,16 @@ export default class SoqlBuilder extends NavigationMixin(LightningElement) {
   get foundCountText() {
     return (this.displayRows.length || 0).toLocaleString();
   }
-  get statObject() {
-    return this.selectedObject || "—";
-  }
-  get statFieldsSelectedText() {
-    return `${this.selectedFields.length} of ${this.fieldsMeta.length}`;
-  }
-  get statConditionsActiveText() {
-    const n = (this.conditions || []).filter(
-      (c) => c.field && (c.value ?? "") !== ""
-    ).length;
-    return `${n} active`;
-  }
-  get statEstRecordsText() {
-    return this.hasRows ? this.foundCountText : "—";
+  get foundRecordsLabel() {
+    // label contains "found {0} records"
+    return (this.labels.IM_Soql_FoundRecords || "found {0} records").replace("{0}", this.foundCountText);
   }
   get fieldOptions() {
-    return this.fieldsMeta.map((f) => ({
-      label: f.label,
-      value: f.apiName
-    }));
+    return (this.fieldsMeta || []).map((f) => ({ label: f.label, value: f.apiName }));
   }
   get isContinueDisabled() {
     const hasCols = Array.isArray(this.columns) && this.columns.length > 0;
-    const hasSel =
-      Array.isArray(this.selectedFields) && this.selectedFields.length > 0;
+    const hasSel = Array.isArray(this.selectedFields) && this.selectedFields.length > 0;
     return !(hasCols || hasSel);
   }
 
@@ -127,15 +165,11 @@ export default class SoqlBuilder extends NavigationMixin(LightningElement) {
     const selectPart = ["Id", ...this.selectedFields].join(", ");
     const where = this.buildWhereClause();
     const order = this.orderByField
-      ? `\nORDER BY ${this.orderByField} ${this.orderDirection}${
-          this.nullsBehavior ? " NULLS " + this.nullsBehavior : ""
-        }`
+      ? `\nORDER BY ${this.orderByField} ${this.orderDirection}${this.nullsBehavior ? " NULLS " + this.nullsBehavior : ""}`
       : "";
     const limit = `\nLIMIT ${this.limitRows}`;
     const offset = this.offsetRows ? `\nOFFSET ${this.offsetRows}` : "";
-    return `SELECT\n  ${selectPart}\nFROM ${this.selectedObject}${
-      where ? "\nWHERE " + where : ""
-    }${order}${limit}${offset}`;
+    return `SELECT\n  ${selectPart}\nFROM ${this.selectedObject}${where ? "\nWHERE " + where : ""}${order}${limit}${offset}`;
   }
 
   get soqlTokens() {
@@ -144,93 +178,78 @@ export default class SoqlBuilder extends NavigationMixin(LightningElement) {
 
   // ===== Lifecycle =====
   connectedCallback() {
-    // If parent set it before render
+    // If parent sets api before render, still safe
     if (this._projectTargetObject) {
       this.initializeFromTargetObject();
     }
   }
-initializeFromTargetObject() {
-  if (!this._projectTargetObject) {
-    return;
+
+  initializeFromTargetObject() {
+    if (!this._projectTargetObject) return;
+
+    this.selectedObject = this._projectTargetObject; 
+    this.selectedFields = [];
+    this.columns = [];
+    this.queryResults = [];
+    this.displayRows = [];
+    this.orderByField = "";
+    this.conditions = [{ id: uid(), field: "Name", operator: "contains", value: "", joiner: "AND" }];
+
+    this.loadFieldsForObject(this.selectedObject);
   }
 
-  this.selectedObject = this._projectTargetObject;
-  this.selectedFields = [];
-  this.columns = [];
-  this.queryResults = [];
-  this.displayRows = [];
-  this.orderByField = "";
-  this.conditions = [
-    { id: uid(), field: "Name", operator: "contains", value: "", joiner: "AND" }
-  ];
+  loadFieldsForObject(objectName) {
+    if (!objectName) {
+      this.fieldsMeta = [];
+      this.orderByFieldOptions = [];
+      return;
+    }
 
-  this.loadFieldsForObject(this.selectedObject);
-}
+    fetchFields({ objectName })
+      .then((result) => {
+        let meta;
 
-loadFieldsForObject(objectName) {
-  if (!objectName) {
-    this.fieldsMeta = [];
-    this.orderByFieldOptions = [];
-    return;
-  }
-
-  fetchFields({ objectName })
-    .then((result) => {
-      let meta;
-
-      if (Array.isArray(result) && typeof result[0] === "string") {
-        meta = result.map((fieldApi) => ({
-          apiName: fieldApi,
-          label: this.prettyLabel(fieldApi),
-          type: "Text",
-          checked: false
-        }));
-      } else {
-        meta = (result || []).map((f) => {
-          const fieldApi = f.apiName || f.name || f;
-          return {
+        if (Array.isArray(result) && typeof result[0] === "string") {
+          meta = result.map((fieldApi) => ({
             apiName: fieldApi,
-            label: f.label || this.prettyLabel(fieldApi),
-            type: f.type || "Text",
+            label: this.prettyLabel(fieldApi),
+            type: "Text",
             checked: false
-          };
+          }));
+        } else {
+          meta = (result || []).map((f) => {
+            const fieldApi = f.apiName || f.name || f;
+            return {
+              apiName: fieldApi,
+              label: f.label || this.prettyLabel(fieldApi),
+              type: f.type || "Text",
+              checked: false
+            };
+          });
+        }
+
+        meta.sort((a, b) => {
+          if (a.apiName === "Id") return -1;
+          if (b.apiName === "Id") return 1;
+          return a.label.localeCompare(b.label);
         });
-      }
 
-      meta.sort((a, b) => {
-        if (a.apiName === "Id") return -1;
-        if (b.apiName === "Id") return 1;
-        return a.label.localeCompare(b.label);
+        this.fieldsMeta = meta;
+        this.orderByFieldOptions = [{ label: "None", value: "" }, ...meta.map((m) => ({ label: m.label, value: m.apiName }))];
+
+        this.syncFieldChecks();
+      })
+      .catch((err) => {
+        // eslint-disable-next-line no-console
+        console.error("[SOQL] loadFieldsForObject error", err);
+        this.showToast("Error", "Unable to load fields.", "error");
       });
-
-      this.fieldsMeta = meta;
-      this.orderByFieldOptions = [
-        { label: "None", value: "" },
-        ...meta.map((m) => ({
-          label: m.label,
-          value: m.apiName
-        }))
-      ];
-
-      this.syncFieldChecks();
-    })
-    .catch(() => {
-      this.showToast(
-        "Erreur",
-        "Impossible de charger les champs.",
-        "error"
-      );
-    });
-}
-
+  }
 
   // ===== Field selection =====
   syncFieldChecks() {
     const sel = new Set(this.selectedFields);
-    this.fieldsMeta = (this.fieldsMeta || []).map((f) => ({
-      ...f,
-      checked: sel.has(f.apiName)
-    }));
+    this.fieldsMeta = (this.fieldsMeta || []).map((f) => ({ ...f, checked: sel.has(f.apiName) }));
   }
 
   toggleField(e) {
@@ -246,7 +265,7 @@ loadFieldsForObject(objectName) {
   }
 
   selectAll() {
-    this.selectedFields = this.fieldsMeta.map((f) => f.apiName);
+    this.selectedFields = (this.fieldsMeta || []).map((f) => f.apiName);
     this.syncFieldChecks();
   }
 
@@ -277,91 +296,44 @@ loadFieldsForObject(objectName) {
 
   // ===== Condition builder =====
   addCondition() {
-    this.conditions = [
-      ...this.conditions,
-      {
-        id: uid(),
-        field: "",
-        operator: "equals",
-        value: "",
-        joiner: "AND"
-      }
-    ];
+    this.conditions = [...this.conditions, { id: uid(), field: "", operator: "equals", value: "", joiner: "AND" }];
   }
 
   removeCondition(e) {
     const idx = Number(e.currentTarget?.dataset?.idx);
     const next = [...this.conditions];
     next.splice(idx, 1);
-    this.conditions =
-      next.length > 0
-        ? next
-        : [
-            {
-              id: uid(),
-              field: "",
-              operator: "equals",
-              value: "",
-              joiner: "AND"
-            }
-          ];
+    this.conditions = next.length > 0 ? next : [{ id: uid(), field: "", operator: "equals", value: "", joiner: "AND" }];
   }
 
   updateCondField(e) {
     const idx = Number(e.currentTarget?.dataset?.idx);
     if (Number.isNaN(idx)) return;
-    this.conditions = this.conditions.map((c, i) => {
-      if (i === idx) {
-        return { ...c, field: e.detail.value || "" };
-      }
-      return c;
-    });
+    this.conditions = this.conditions.map((c, i) => (i === idx ? { ...c, field: e.detail.value || "" } : c));
   }
-
   updateCondOp(e) {
     const idx = Number(e.currentTarget?.dataset?.idx);
     if (Number.isNaN(idx)) return;
-    this.conditions = this.conditions.map((c, i) => {
-      if (i === idx) {
-        return { ...c, operator: e.detail.value || "equals" };
-      }
-      return c;
-    });
+    this.conditions = this.conditions.map((c, i) => (i === idx ? { ...c, operator: e.detail.value || "equals" } : c));
   }
-
   updateCondVal(e) {
     const idx = Number(e.currentTarget?.dataset?.idx);
     if (Number.isNaN(idx)) return;
-    this.conditions = this.conditions.map((c, i) => {
-      if (i === idx) {
-        return { ...c, value: e.detail.value ?? "" };
-      }
-      return c;
-    });
+    this.conditions = this.conditions.map((c, i) => (i === idx ? { ...c, value: e.detail.value ?? "" } : c));
   }
-
   updateCondJoiner(e) {
     const idx = Number(e.currentTarget?.dataset?.idx);
     if (Number.isNaN(idx)) return;
-    this.conditions = this.conditions.map((c, i) => {
-      if (i === idx) {
-        return { ...c, joiner: e.detail.value || "AND" };
-      }
-      return c;
-    });
+    this.conditions = this.conditions.map((c, i) => (i === idx ? { ...c, joiner: e.detail.value || "AND" } : c));
   }
 
   // ===== Actions =====
   handleValidate() {
     if (!this.selectedObject || this.selectedFields.length === 0) {
-      this.showToast(
-        "Attention",
-        "Veuillez sélectionner au moins un champ.",
-        "warning"
-      );
+      this.showToast("Warning", "Please select at least one field.", "warning");
       return;
     }
-    this.showToast("OK", "La requête semble valide.", "success");
+    this.showToast("OK", "Query looks valid.", "success");
   }
 
   handlePreview() {
@@ -385,105 +357,79 @@ loadFieldsForObject(objectName) {
       .join("\n");
 
     const csv = `${header}\n${body}`;
-    const blob = new Blob([csv], {
-      type: "text/csv;charset=utf-8;"
-    });
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${
-      this.selectedObject || "soql"
-    }-results.csv`;
+    a.download = `${this.selectedObject || "soql"}-results.csv`;
     a.click();
     URL.revokeObjectURL(url);
   }
 
-// ===== Run Query =====
-runQuery() {
-  if (
-    !this.selectedObject ||
-    !Array.isArray(this.selectedFields) ||
-    this.selectedFields.length === 0
-  ) {
-    this.showToast(
-      "Attention",
-      "Veuillez sélectionner au moins un champ.",
-      "warning"
-    );
-    return;
-  }
+  
+  runQuery() {
+    if (!this.selectedObject || !Array.isArray(this.selectedFields) || this.selectedFields.length === 0) {
+      this.showToast("Warning", "Please select at least one field.", "warning");
+      return Promise.resolve([]);
+    }
 
-  const where = this.buildWhereClause();
+    const where = this.buildWhereClause();
 
-  this.isLoading = true;
-  this.queryResults = [];
-  this.columns = [];
-  this.displayRows = [];
+    this.isLoading = true;
+    this.queryResults = [];
+    this.columns = [];
+    this.displayRows = [];
 
-  const params = {
-    objectName: this.selectedObject,
-    fieldList: this.selectedFields,
-    whereClause: where,
-    orderByField: this.orderByField || "",
-    orderDirection: this.orderDirection || "ASC",
-    nullsBehavior: this.nullsBehavior || "",
-    limitRows: this.coerceInt(this.limitRows, 200),
-    offsetRows: this.coerceInt(this.offsetRows, 0)
-  };
+    const params = {
+      objectName: this.selectedObject,
+      fieldList: this.selectedFields,
+      whereClause: where,
+      orderByField: this.orderByField || "",
+      orderDirection: this.orderDirection || "ASC",
+      nullsBehavior: this.nullsBehavior || "",
+      limitRows: this.coerceInt(this.limitRows, 200),
+      offsetRows: this.coerceInt(this.offsetRows, 0)
+    };
 
-  buildAndRunQueryEx({ params })
-    .then((rows) => {
-      const safeRows = Array.isArray(rows) ? rows : [];
-      const toKey = (fieldApi) => (
-        fieldApi.includes(".")
-          ? fieldApi.replace(/\./g, "__")
-          : fieldApi
-      );
+    return buildAndRunQueryEx({ params })
+      .then((rows) => {
+        const safeRows = Array.isArray(rows) ? rows : [];
+        const toKey = (fieldApi) => (fieldApi.includes(".") ? fieldApi.replace(/\./g, "__") : fieldApi);
 
-      this.columns = ["Id", ...this.selectedFields].map((fieldApi) => ({
-        api: fieldApi,
-        key: toKey(fieldApi),
-        label: this.prettyLabel(fieldApi)
-      }));
+        this.columns = ["Id", ...this.selectedFields].map((fieldApi) => ({
+          api: fieldApi,
+          key: toKey(fieldApi),
+          label: this.prettyLabel(fieldApi)
+        }));
 
-      const makeId = (record, index) => {
-        if (record && record.Id) {
-          return record.Id;
+        const makeId = (record, index) => (record && record.Id ? record.Id : `row_${index}_${Math.random().toString(36).slice(2, 7)}`);
+
+        this.displayRows = safeRows.map((record, index) => ({
+          id: makeId(record, index),
+          cells: this.columns.map((column) => {
+            const value = record[column.key];
+            const str = value != null ? String(value) : "";
+            return { key: column.key, value, isBadge: str && this.badgeValues.has(str) };
+          })
+        }));
+
+        this.queryResults = safeRows;
+
+        if (safeRows.length === 0) {
+          this.showToast("Info", this.labels.IM_Soql_NoRows || "No records found.", "info");
         }
-        return `row_${index}_${Math.random().toString(36).slice(2, 7)}`;
-      };
 
-      this.displayRows = safeRows.map((record, index) => ({
-        id: makeId(record, index),
-        cells: this.columns.map((column) => {
-          const value = record[column.key];
-          const str = value != null ? String(value) : "";
-          return {
-            key: column.key,
-            value,
-            isBadge: str && this.badgeValues.has(str)
-          };
-        })
-      }));
-
-      this.queryResults = safeRows;
-
-      if (safeRows.length === 0) {
-        this.showToast("Info", "Aucun enregistrement trouvé.", "info");
-      }
-    })
-    .catch((err) => {
-      const msg =
-        (err && err.body && err.body.message) ||
-        err?.message ||
-        "Échec de l’exécution de la requête.";
-      this.showToast("Erreur", msg, "error");
-    })
-    .finally(() => {
-      this.isLoading = false;
-    });
-}
-
+        return safeRows;
+      })
+      .catch((err) => {
+        const msg = err?.body?.message || err?.message || "Query execution failed.";
+        this.showToast("Error", msg, "error");
+        return [];
+      })
+      .finally(() => {
+        this.isLoading = false;
+      });
+  }
 
   // ===== WHERE builder =====
   buildWhereClause() {
@@ -491,31 +437,19 @@ runQuery() {
 
     for (let i = 0; i < this.conditions.length; i++) {
       const c = this.conditions[i];
-      if (
-        !c.field ||
-        c.value === "" ||
-        c.value === null ||
-        c.value === undefined
-      ) {
-        continue;
-      }
+      if (!c.field || c.value === "" || c.value === null || c.value === undefined) continue;
 
       let val = String(c.value).trim();
       const isNumber = /^\d+(\.\d+)?$/.test(val);
       const isDateLike = /^\d{4}-\d{2}-\d{2}/.test(val);
 
-      if (c.operator === "contains") {
-        val = `%${val}%`;
-      } else if (c.operator === "startswith") {
-        val = `${val}%`;
-      }
+      if (c.operator === "contains") val = `%${val}%`;
+      else if (c.operator === "startswith") val = `${val}%`;
 
-      if (
-        !isNumber &&
-        !isDateLike ||
-        c.operator === "contains" ||
-        c.operator === "startswith"
-      ) {
+      const needsQuotes =
+        ((!isNumber && !isDateLike) || c.operator === "contains" || c.operator === "startswith");
+
+      if (needsQuotes) {
         val = `'${val.replace(/'/g, "\\'")}'`;
       }
 
@@ -532,185 +466,116 @@ runQuery() {
     return parts.join("");
   }
 
-
   handleBackToMain() {
-  this.dispatchEvent(
-    new CustomEvent("previous", {
-      bubbles: true,
-      composed: true
-    })
-  );
-}
+    this.dispatchEvent(new CustomEvent("previous", { bubbles: true, composed: true }));
+  }
 
+  // ===== Copy =====
+  copySoql() {
+    const text = this.soqlText || "";
+    if (!text.trim()) {
+      this.showToast("Info", "No SOQL query to copy.", "info");
+      return;
+    }
+
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard
+        .writeText(text)
+        .then(() => this.showToast("Copied!", this.labels.IM_Soql_CopySuccess || "Copied.", "success"))
+        .catch(() => this.copySoqlFallback(text));
+    } else {
+      this.copySoqlFallback(text);
+    }
+  }
+
+  copySoqlFallback(text) {
+    try {
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.setAttribute("readonly", "");
+      textarea.style.position = "absolute";
+      textarea.style.left = "-9999px";
+      document.body.appendChild(textarea);
+      textarea.select();
+
+      const ok = document.execCommand("copy");
+      document.body.removeChild(textarea);
+
+      if (ok) {
+        this.showToast("Copied!", this.labels.IM_Soql_CopySuccess || "Copied.", "success");
+      } else {
+        throw new Error("Copy failed");
+      }
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error("Copy fallback failed", e);
+      this.showToast("Copy failed", this.labels.IM_Soql_CopyError || "Clipboard not available.", "error");
+    }
+  }
+
+  // ===== Continue to mapping =====
+  handleContinue(event) {
+    try {
+      event?.preventDefault?.();
+      event?.stopPropagation?.();
+
+      const run = (!Array.isArray(this.queryResults) || this.queryResults.length === 0) ? this.runQuery() : Promise.resolve(this.queryResults);
+
+      run.then(() => this._handleContinueSafe()).catch((err) => {
+        // eslint-disable-next-line no-console
+        console.error("[SOQL Builder] handleContinue error", err);
+      });
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error("[SOQL Builder] handleContinue error", err);
+      this.showToast("Error", err?.message || "Internal error.", "error");
+    }
+  }
+
+  _handleContinueSafe() {
+    if (!this.selectedObject || !Array.isArray(this.selectedFields) || this.selectedFields.length === 0) {
+      this.showToast("Warning", "Select an object and at least one field.", "warning");
+      return;
+    }
+
+    const cleaned = this.selectedFields.map((f) => (f || "").trim()).filter(Boolean);
+    const rawRows = Array.isArray(this.queryResults) ? this.queryResults : [];
+    const totalRowCount = rawRows.length;
+
+    const rowsForMapping = rawRows.map((r) => {
+      const obj = {};
+      cleaned.forEach((fieldApi) => {
+        const key = fieldApi.includes(".") ? fieldApi.replace(/\./g, "__") : fieldApi;
+        obj[fieldApi] = r[key];
+      });
+      return obj;
+    });
+
+    this.dispatchEvent(
+      new CustomEvent("startmapping", {
+        detail: {
+          source: "SOQL",
+          columns: cleaned,
+          rows: rowsForMapping,
+          totalRowCount,
+          sourceLabel: this.selectedObject || "SOQL results"
+        },
+        bubbles: true,
+        composed: true
+      })
+    );
+  }
 
   // ===== Utils =====
   prettyLabel(apiName) {
-    let s = apiName
-      .replace(/__/g, " ")
-      .replace(/\./g, " ")
-      .replace(/_/g, " ");
-    s = s
-      .replace(/([a-z])([A-Z])/g, "$1 $2")
-      .replace(/\s+/g, " ")
-      .trim();
+    let s = apiName.replace(/__/g, " ").replace(/\./g, " ").replace(/_/g, " ");
+    s = s.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/\s+/g, " ").trim();
     return s.charAt(0).toUpperCase() + s.slice(1);
   }
 
   showToast(title, message, variant) {
     this.dispatchEvent(new ShowToastEvent({ title, message, variant }));
   }
-
-  copySoql() {
-  const text = this.soqlText || "";
-
-  if (!text.trim()) {
-    this.showToast("Info", "No SOQL query to copy.", "info");
-    return;
-  }
-
-  if (
-    typeof navigator !== "undefined" &&
-    navigator.clipboard &&
-    typeof navigator.clipboard.writeText === "function"
-  ) {
-    navigator.clipboard
-      .writeText(text)
-      .then(() => {
-        this.showToast(
-          "Copied!",
-          "SOQL query copied to clipboard.",
-          "success"
-        );
-      })
-      .catch((err) => {
-        // Fallback if writeText fails
-        console.warn("navigator.clipboard.writeText failed", err);
-        this.copySoqlFallback(text);
-      });
-  } else {
-    this.copySoqlFallback(text);
-  }
-}
-
-// Helper fallback using a hidden textarea
-copySoqlFallback(text) {
-  try {
-    if (typeof document === "undefined") {
-      throw new Error("Document not available");
-    }
-
-    const textarea = document.createElement("textarea");
-    textarea.value = text;
-    textarea.setAttribute("readonly", "");
-    textarea.style.position = "absolute";
-    textarea.style.left = "-9999px";
-    document.body.appendChild(textarea);
-    textarea.select();
-
-    const ok = document.execCommand("copy");
-    document.body.removeChild(textarea);
-
-    if (ok) {
-      this.showToast(
-        "Copied!",
-        "SOQL query copied to clipboard.",
-        "success"
-      );
-    } else {
-      throw new Error("execCommand('copy') returned false");
-    }
-  } catch (e) {
-    console.error("Copy fallback failed", e);
-    this.showToast(
-      "Copy failed",
-      "Clipboard is not available in this context.",
-      "error"
-    );
-  }
-}
-
-
- handleContinue(event) {
-  try {
-    event?.preventDefault?.();
-    event?.stopPropagation?.();
-    // If no results yet, run the query first, then continue
-    if (!Array.isArray(this.queryResults) || this.queryResults.length === 0) {
-      this.runQuery()
-        ?.then(() => {
-          this._handleContinueSafe();
-        })
-        .catch((err) => {
-          console.error("[SOQL Builder] handleContinue/runQuery error", err);
-        });
-    } else {
-      this._handleContinueSafe();
-    }
-  } catch (err) {
-    console.error("[SOQL Builder] handleContinue error", err);
-    this.showToast(
-      "Erreur",
-      err?.message || "Erreur interne lors du passage au mapping.",
-      "error"
-    );
-  }
-}
-
-
- _handleContinueSafe() {
-  // Basic validation
-  if (!this.selectedObject || !Array.isArray(this.selectedFields) || this.selectedFields.length === 0) {
-    this.showToast(
-      'Attention',
-      'Veuillez sélectionner un objet et au moins un champ avant de continuer.',
-      'warning'
-    );
-    return;
-  }
-  const cleaned = this.selectedFields
-    .map((f) => (f || '').trim())
-    .filter((f) => !!f);
-
-  if (!cleaned.length) {
-    this.showToast(
-      'Attention',
-      'Veuillez sélectionner au moins un champ valide.',
-      'warning'
-    );
-    return;
-  }
-
-  const rawRows = Array.isArray(this.queryResults) ? this.queryResults : [];
-  const totalRowCount = rawRows.length;
-  const rowsForMapping = rawRows.map((r) => {
-    const obj = {};
-    cleaned.forEach((fieldApi) => {
-      const key =
-        fieldApi && fieldApi.includes('.')
-          ? fieldApi.replace(/\./g, '__')
-          : fieldApi;
-
-      obj[fieldApi] = r[key];
-    });
-    return obj;
-  });
-
-  this.dispatchEvent(
-    new CustomEvent('startmapping', {
-      detail: {
-        source: 'SOQL',
-        columns: cleaned,               
-        rows: rowsForMapping,           
-        totalRowCount,                  
-        sourceLabel: this.selectedObject || 'SOQL results'
-      },
-      bubbles: true,
-      composed: true
-    })
-  );
-}
-
-
 }
 
 // ===== Tokenizer helper =====
@@ -718,48 +583,31 @@ function tokenizeSoql(input) {
   const src = String(input || "");
   if (!src) return [];
 
-  const kw =
-    "SELECT|FROM|WHERE|AND|OR|ORDER|BY|LIMIT|DESC|ASC|LIKE|NULLS|FIRST|LAST|OFFSET";
+  const kw = "SELECT|FROM|WHERE|AND|OR|ORDER|BY|LIMIT|DESC|ASC|LIKE|NULLS|FIRST|LAST|OFFSET";
   const re = new RegExp(
     [
-      "('(?:''|[^'])*')", // strings
-      `\\b(?:${kw})\\b`, // keywords
-      "(?:>=|<=|!=|=|>|<)", // operators
-      "[A-Za-z_][\\w.]*", // identifiers
-      "\\s+", // whitespace
-      "." // anything else
+      "('(?:''|[^'])*')",
+      `\\b(?:${kw})\\b`,
+      "(?:>=|<=|!=|=|>|<)",
+      "[A-Za-z_][\\w.]*",
+      "\\s+",
+      "."
     ].join("|"),
     "g"
   );
 
   const tokens = [];
   let m;
-
   while ((m = re.exec(src)) !== null) {
     const lex = m[0];
-
-    if (m[1]) {
-      tokens.push({ text: lex, cls: "string" });
-    } else if (new RegExp(`^\\b(?:${kw})\\b$`, "i").test(lex)) {
-      tokens.push({ text: lex, cls: "keyword" });
-    } else if (/^(>=|<=|!=|=|>|<)$/.test(lex)) {
-      tokens.push({ text: lex, cls: "operator" });
-    } else if (/^[A-Za-z_][\w.]*$/.test(lex)) {
-      const isCommon = /^(Id|Name|Email|CreatedDate|Type|Account|Contact)$/i.test(
-        lex
-      );
+    if (m[1]) tokens.push({ text: lex, cls: "string" });
+    else if (new RegExp(`^\\b(?:${kw})\\b$`, "i").test(lex)) tokens.push({ text: lex, cls: "keyword" });
+    else if (/^(>=|<=|!=|=|>|<)$/.test(lex)) tokens.push({ text: lex, cls: "operator" });
+    else if (/^[A-Za-z_][\w.]*$/.test(lex)) {
+      const isCommon = /^(Id|Name|Email|CreatedDate|Type|Account|Contact)$/i.test(lex);
       tokens.push({ text: lex, cls: isCommon ? "field" : "" });
-    } else if (/^\s+$/.test(lex)) {
-      tokens.push({ text: lex, cls: "" });
-    } else {
-      tokens.push({ text: lex, cls: "" });
-    }
+    } else tokens.push({ text: lex, cls: "" });
   }
-  
 
   return tokens.map((t, i) => ({ ...t, key: `tok_${i}` }));
-
-  
-
-  
 }
