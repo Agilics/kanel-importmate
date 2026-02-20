@@ -1,123 +1,112 @@
-<!--
-  @description       : 
-  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
-  @group             : 
-  @last modified on  : 10-27-2025
-  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
--->
 <template>
   <section class="cards" aria-label="Project options">
+    
+    <!-- Create New Project -->
     <a
       class="card"
       tabindex="0"
       role="button"
       aria-pressed="false"
       onclick={handleShow}
-      aria-label="Create a new project"
+      aria-label={labels.PROJECT_RECENT_TITLE}
     >
       <div class="header is-center">
         <div class="icon-container" aria-hidden="true">
           <lightning-icon
             icon-name="utility:add"
-            alternative-text="Utility add"
-            title="add"
+            alternative-text="add"
           ></lightning-icon>
         </div>
-        <h3>Create New Project</h3>
+        <h3>{labels.PROJECT_RECENT_TITLE}</h3>
       </div>
-      <p>
-        Start with a new import project. Define your target object and project
-        settings.
-      </p>
     </a>
 
+    <!-- Use Existing Project -->
     <a
       onclick={handleFindExistingProject}
       class="card"
       tabindex="0"
       role="button"
       aria-pressed="false"
-      aria-label="Select an existing project"
+      aria-label={labels.PROJECT_RECENT_USE_EXISTING}
     >
       <div class="header is-center">
         <lightning-icon
           icon-name="utility:form"
           alternative-text="form"
           size="large"
-          title="form"
         ></lightning-icon>
 
-        <h3>Use Existing Project</h3>
+        <h3>{labels.PROJECT_RECENT_USE_EXISTING}</h3>
       </div>
 
       <p>
-        Continue with a previously created project. Reuse your field mappings
-        and settings.
+        {labels.PROJECT_RECENT_USE_EXISTING_DESC}
       </p>
     </a>
   </section>
 
+  <!-- Recent Projects Section -->
   <section class="recent-projects-wrapper" aria-label="Recent Projects">
-    <div class="recent-title">Recent Projects</div>
+    
+    <div class="recent-title">
+      {labels.PROJECT_RECENT_RECENT_PROJECTS}
+    </div>
+
+    <!-- No Project Case -->
     <template if:true={hasNoProjects}>
       <h3 class="empty slds-text-align_center">
         <lightning-icon
-          id="info"
           icon-name="action:info"
           alternative-text="info"
           size="large"
-          title="info"
           style="margin-right: 10px"
         ></lightning-icon>
-        No project import yet, please add
+        {labels.PROJECT_RECENT_NO_PROJECT}
       </h3>
     </template>
 
+    <!-- Projects List -->
     <template if:false={hasNoProjects}>
       <div class="recent-projects">
-        <div class="project-item" tabindex="0">
-          <div class="main">
-            <template for:each={projects.data} for:item="pro">
-              <div class="project-item" key={pro}>
-                <!-- Ligne 1 : Nom du projet -->
-                <span class="project-name">{pro.Name}</span>
+        <template for:each={formattedProjects} for:item="pro">
+          
+          <div class="project-item" key={pro.Id}>
 
-                <!-- Ligne 2 : Target + bouton -->
-                <div class="project-row">
-                  <span class="project-meta">
-                    Target Sobject : {pro.TargetObject__c}
-                  </span>
-                  <button
-                    key={pro.Id}
-                    data-id={pro.Id}
-                    class="btn-select"
-                    type="button"
-                    aria-label="Select this project"
-                    onclick={handleShowSelectProject}
-                  >
-                    Select this project
-                  </button>
-                </div>
+            <!-- Project Name -->
+            <span class="project-name">
+              {pro.Name}
+            </span>
 
-                <!-- Ligne 3 : Date de création -->
-                <small
-                  class="project-meta"
-                  name="created-date"
-                  id="created-date"
-                >
-                  Created :
-                  <lightning-formatted-date-time
-                    value={pro.CreatedDate}
-                    month="2-digit"
-                    day="2-digit"
-                    year="numeric"
-                  ></lightning-formatted-date-time>
-                </small>
-              </div>
-            </template>
+            <!-- Target + Button -->
+            <div class="project-row">
+              <span class="project-meta">
+                {labels.PROJECT_RECENT_TARGET_SOBJECT}: {pro.TargetObject__c}
+              </span>
+
+              <button
+                key={pro.Id}
+                data-id={pro.Id}
+                class="btn-select"
+                type="button"
+                aria-label={labels.PROJECT_RECENT_SELECT_PROJECT}
+                onclick={handleShowSelectProject}
+              >
+                {labels.PROJECT_RECENT_SELECT_PROJECT}
+              </button>
+            </div>
+
+            <!-- Created Date -->
+            <small class="project-meta">
+              {labels.PROJECT_RECENT_CREATED_LABEL}
+              {pro.formattedDate}
+            </small>
+
           </div>
-        </div>
+
+        </template>
       </div>
     </template>
+
   </section>
 </template>

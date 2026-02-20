@@ -16,7 +16,10 @@
     "KANEL-IMPORTMATE": "0HogL0000000K3ZSAU"
   },
   "edition": "Developer",
-  "features": ["EnableSetPasswordInApi"],
+  "features": [
+    "EnableSetPasswordInApi",
+    "Translations"
+  ],
   "settings": {
     "lightningExperienceSettings": {
       "enableS1DesktopEnabled": true,
@@ -24,6 +27,8 @@
     },
     "mobileSettings": {
       "enableS1EncryptedStoragePref2": false
+    },"translationSettings": {
+      "enableTranslationWorkbench": true
     }
   }
 }

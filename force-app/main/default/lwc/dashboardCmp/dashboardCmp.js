@@ -4,15 +4,46 @@ import deleteProject from '@salesforce/apex/DashboardController.deleteProject';
 import { refreshApex } from '@salesforce/apex';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { navigateToPage } from 'c/utility'
+import LightningConfirm from "lightning/confirm";
+// import labels for tab filters
+import Dashboard_Filter_All_Project from '@salesforce/label/c.Dashboard_FilterTab_All_Projects';
+import Dashboard_Filter_Active from '@salesforce/label/c.Dashboard_FilterTab_Active';
+import Dashboard_Filter_Completed from '@salesforce/label/c.Dashboard_FilterTab_Completed'; 
+import Dashboard_Filter_Scheduled from '@salesforce/label/c.Dashboard_FilterTab_Scheduled';
+
+import Dashboard_Input_Search_Placeholder from '@salesforce/label/c.Dashboard_Input_Search_Projects_Placeholder';
+import Dashboard_FilterTab_Title from '@salesforce/label/c.Dashboard_FilterTab_Title';
+import Dashboard_Project_Details_Title from '@salesforce/label/c.Dashboard_FilterTab_Subtitle';
+
+import Dashboard_Delete_Confirm_Header from '@salesforce/label/c.Dashboard_Delete_Confirm_Header'; 
+
+//import labels for toast messages & dialog confirmation
+import Dashboard_Delete_Confirm from '@salesforce/label/c.Dashboard_Confirm_Delete_Message';
+import Dashboard_Delete_Success from '@salesforce/label/c.Dashboard_Delete_Success_Message';
+ 
+// Label for no projects message
+import Dashboard_No_Projects from '@salesforce/label/c.Dashboard_No_Project_Message';
+import Dashboard_No_Project_Error_Message from '@salesforce/label/c.Dashboard_No_Project_Error_Message';
+
+// Card Key Metrics labels
+import Dashboard_Stat_Total_Projects from '@salesforce/label/c.Dashboard_Stat_TotalProjects';
+import Dashboard_Stat_Records_Imported from '@salesforce/label/c.Dashboard_Stat_RecordImported';
+import Dashboard_Stat_Success_Rate from '@salesforce/label/c.Dashboard_Stat_SuccessRate';
+import Dashboard_Stat_Active_Projects from '@salesforce/label/c.Dashboard_Stat_ActiveProject';
+
+// label for buttons
+
+import Dashboard_Button_New_Project from '@salesforce/label/c.Dashboard_Button_New_Project';
+import Dashboard_Button_Create_First_Project from '@salesforce/label/c.Dashboard_Button_Create_First_Project';
 
 export default class DashboardCmp extends LightningElement {
     @track stats = [];
 
     @track filterTabs = [
-        { label: 'All Projects', value: 'all', active: true },
-        { label: 'Active', value: 'active', active: false },
-        { label: 'Completed', value: 'completed', active: false },
-        { label: 'Scheduled', value: 'scheduled', active: false }
+        { label: Dashboard_Filter_All_Project, value: 'all', active: true },
+        { label: Dashboard_Filter_Active, value: 'active', active: false },
+        { label: Dashboard_Filter_Completed, value: 'completed', active: false },
+        { label: Dashboard_Filter_Scheduled, value: 'scheduled', active: false }
     ];
 
     @track projects = [];
@@ -21,6 +52,18 @@ export default class DashboardCmp extends LightningElement {
     @track error;
     searchTerm = '';
     wiredDashboardResult;
+
+    buttonLabel = {
+        newProject: Dashboard_Button_New_Project,
+        createFirstProject: Dashboard_Button_Create_First_Project
+    };
+
+    sections ={
+        title: Dashboard_FilterTab_Title,
+        detailsTitle: Dashboard_Project_Details_Title
+    }
+
+    placeholder = Dashboard_Input_Search_Placeholder;
 
     // Wire to get dashboard data
     @wire(getDashboardData, { limitor: 50 })
@@ -36,7 +79,7 @@ export default class DashboardCmp extends LightningElement {
                 this.stats = [
                     {
                         id: 1,
-                        label: 'Total Projects',
+                        label: Dashboard_Stat_Total_Projects,
                         value: String(result.data.stats.totalProjects || 0),
                         change: '',
                         changeLabel: '',
@@ -45,7 +88,7 @@ export default class DashboardCmp extends LightningElement {
                     },
                     {
                         id: 2,
-                        label: 'Records Imported',
+                        label: Dashboard_Stat_Records_Imported,
                         value: result.data.stats.recordsImportedFormatted || '0',
                         change: '',
                         changeLabel: '',
@@ -54,7 +97,7 @@ export default class DashboardCmp extends LightningElement {
                     },
                     {
                         id: 3,
-                        label: 'Success Rate',
+                        label: Dashboard_Stat_Success_Rate,
                         value: result.data.stats.successRateFormatted || '0%',
                         change: '',
                         changeLabel: '',
@@ -63,7 +106,7 @@ export default class DashboardCmp extends LightningElement {
                     },
                     {
                         id: 4,
-                        label: 'Active Projects',
+                        label: Dashboard_Stat_Active_Projects,
                         value: String(result.data.stats.activeSchedules || 0),
                         change: '',
                         changeLabel: '',
@@ -85,29 +128,34 @@ export default class DashboardCmp extends LightningElement {
         }
     }
 
+    //vérification de la présence de projets pour afficher le message approprié
     get hasProjects() {
         return this.projects && this.projects.length > 0;
     }
 
+    //vérification de l'état de chargement ou d'erreur pour afficher le message approprié
     get noProjectsMessage() {
         if (this.isLoading) {
             return 'Loading projects...';
         }
         if (this.error) {
-            return 'Error loading projects. Please try again.';
+            return Dashboard_No_Project_Error_Message;
         }
-        return 'No projects found. Create your first project to get started.';
+        return Dashboard_No_Projects;
     }
 
+    //recherche de projets par nom, cible ou description
     handleSearch(event) {
         this.searchTerm = event.target.value.toLowerCase();
         this.filterProjects();
     }
 
+    //création d'un nouveau projet
     handleNewProject() {
         this.dispatchEvent(new CustomEvent('newproject'));
     }
 
+    // gestion du changement de filtre
     handleFilterChange(event) {
         const selectedValue = event.currentTarget.dataset.value;
         this.filterTabs = this.filterTabs.map(tab => ({
@@ -117,6 +165,7 @@ export default class DashboardCmp extends LightningElement {
         this.filterProjects();
     }
 
+    // filtrage des projets en fonction du statut et de la recherche
     filterProjects() {
         const activeFilter = this.filterTabs.find(tab => tab.active)?.value || 'all';
         let filtered = [...this.allProjects];
@@ -157,6 +206,7 @@ export default class DashboardCmp extends LightningElement {
         this.projects = filtered;
     }
 
+    //sélection d'un projet
     handleProjectSelect(event) {
         const projectId = event.detail;
         this.dispatchEvent(new CustomEvent('projectselect', {
@@ -164,6 +214,7 @@ export default class DashboardCmp extends LightningElement {
         }));
     }
 
+    //modification d'un projet
     handleProjectEdit(event) {
         const projectId = event.detail;
         // Dispatch edit event to parent
@@ -172,11 +223,18 @@ export default class DashboardCmp extends LightningElement {
         }));
     }
 
+    //suppression d'un projet avec confirmation
     async handleProjectDelete(event) {
         const projectId = event.detail;
         
+        const confirm = await LightningConfirm.open({
+            message: Dashboard_Delete_Confirm,
+            variant: 'header',
+            label: Dashboard_Delete_Confirm_Header,
+            theme: 'warning'
+        });
         // Confirm deletion
-        if (!confirm('Are you sure you want to delete this project? This action cannot be undone.')) {
+        if (!confirm) {
             return;
         }
         
@@ -187,7 +245,7 @@ export default class DashboardCmp extends LightningElement {
             // Show success toast
             this.dispatchEvent(new ShowToastEvent({
                 title: 'Success',
-                message: 'Project deleted successfully',
+                message: Dashboard_Delete_Success,
                 variant: 'success'
             }));
             

@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Translations xmlns="http://soap.sforce.com/2006/04/metadata">
+    
+    <!-- import recent projects -->
+    
+    <customLabels>
+        <name>ProjectRecent_Name</name>
+        <label>Nom du projet</label>
+    </customLabels>
+
+    <customLabels>
+        <name>ProjectRecent_Description</name>
+        <label>Description</label>
+    </customLabels>
+
+    <customLabels>
+        <name>ProjectRecent_Target_Object</name>
+        <label>Objet Salesforce cible</label>
+    </customLabels>
+
+    <customLabels>
+        <name>ProjectRecent_Title</name>
+        <label>Créer un nouveau projet</label>
+    </customLabels>
+
+    <customLabels>
+        <name>ProjectRecent_Use_Existing</name>
+        <label>Utiliser un projet existant</label>
+    </customLabels>
+
+    <customLabels>
+        <name>ProjectRecent_Use_Existing_Description</name>
+        <label>Continuer avec un projet déjà créé. Réutilisez vos mappings de champs et paramètres.</label>
+    </customLabels>
+
+    <customLabels>
+        <name>ProjectRecent_Recent_Projects</name>
+        <label>Projets récents</label>
+    </customLabels>
+
+    <customLabels>
+        <name>ProjectRecent_No_Project</name>
+        <label>Aucun projet d'import pour le moment, veuillez en ajouter un.</label>
+    </customLabels>
+
+    <customLabels>
+        <name>ProjectRecent_Select_Project</name>
+        <label>Sélectionner ce projet</label>
+    </customLabels>
+
+    <customLabels>
+        <name>ProjectRecent_Target_SObject</name>
+        <label>Objet cible :</label>
+    </customLabels>
+
+    <customLabels>
+        <name>ProjectRecent_Created_Label</name>
+        <label>Créé le :</label>
+    </customLabels>
+ 
+    <!-- DASHBOARD - FILTER TABS -->
+    
+    <customLabels>
+        <name>Dashboard_FilterTab_Title</name>
+        <label>Projets</label>
+    </customLabels>
+    <customLabels>
+        <name>Dashboard_FilterTab_Subtitle</name>
+        <label>Gérez vos projets d'importation de données</label>
+    </customLabels>
+
+    <customLabels>
+        <name>Dashboard_Input_Search_Projects_Placeholder</name>
+        <label>Rechercher des projets...</label>
+    </customLabels>
+
+    <customLabels>
+        <name>Dashboard_FilterTab_All_Projects</name>
+        <label>Tous les projets</label>
+    </customLabels>
+
+    <customLabels>
+        <name>Dashboard_FilterTab_Active</name>
+        <label>Actifs</label>
+    </customLabels>
+
+    <customLabels>
+        <name>Dashboard_FilterTab_Completed</name>
+        <label>Terminés</label>
+    </customLabels>
+
+    <customLabels>
+        <name>Dashboard_FilterTab_Scheduled</name>
+        <label>Planifiés</label>
+    </customLabels>
+
+    
+    <!-- DASHBOARD - STATS -->
+
+    <customLabels>
+        <name>Dashboard_Stat_TotalProjects</name>
+        <label>Total des projets</label>
+    </customLabels>
+
+    <customLabels>
+        <name>Dashboard_Stat_RecordImported</name>
+        <label>Enregistrements importés</label>
+    </customLabels>
+
+    <customLabels>
+        <name>Dashboard_Stat_SuccessRate</name>
+        <label>Taux de réussite</label>
+    </customLabels>
+
+    <customLabels>
+        <name>Dashboard_Stat_ActiveProject</name>
+        <label>Projets actifs</label>
+    </customLabels>
+
+    
+    <!-- DASHBOARD - NO PROJECT MESSAGES -->
+    
+
+    <customLabels>
+        <name>Dashboard_No_Project_Message</name>
+        <label>Aucun projet trouvé. Veuillez créer un nouveau projet pour commencer.</label>
+    </customLabels>
+
+    <customLabels>
+        <name>Dashboard_No_Project_Error_Message</name>
+        <label>Erreur lors du chargement des projets. Veuillez réessayer.</label>
+    </customLabels>
+
+    
+    <!-- DASHBOARD - ALERT MESSAGES -->
+    
+    <customLabels>
+        <name>Dashboard_Delete_Confirm_Header</name>
+        <label>Confirmer la suppression</label>
+    </customLabels>
+
+    <customLabels>
+        <name>Dashboard_Confirm_Delete_Message</name>
+        <label>Êtes-vous sûr de vouloir supprimer ce projet ? Cette action est irréversible.</label>
+    </customLabels>
+
+    <customLabels>
+        <name>Dashboard_Delete_Success_Message</name>
+        <label>Projet supprimé avec succès.</label>
+    </customLabels>
+    
+    <!--Etiquette des  noms de boutons -->
+    <customLabels>
+        <name>Dashboard_Button_New_Project</name>
+        <label>Nouveau Projet</label>
+    </customLabels>
+    <customLabels>
+        <name>Dashboard_Button_Create_First_Project</name>
+        <label>Créer votre premier projet</label>
+    </customLabels>
+
+    <!-- Détails de projets  -->
+     <customLabels>
+        <name>ProjectCard_Meta_Target</name>
+        <label>Cible :</label>
+    </customLabels>
+    <customLabels>
+        <name>ProjectCard_Meta_Records</name>
+        <label>Enregistrements :</label>
+    </customLabels>
+    <customLabels>
+        <name>ProjectCard_Meta_Modified</name>
+        <label>Modifié le :</label>
+    </customLabels>
+    <customLabels>
+        <name>ProjectCard_Progress_Label</name>
+        <label>Progression</label>
+    </customLabels>
+    <customLabels>
+        <name>ProjectCard_No_Description</name>
+        <label>Aucune description</label>
+    </customLabels>
+    
+    
+
+</Translations>
