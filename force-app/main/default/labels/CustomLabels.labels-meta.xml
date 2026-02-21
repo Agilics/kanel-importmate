@@ -169,4 +169,263 @@
         <shortDescription>Validate Query</shortDescription>
         <value>Validate Query</value>
     </labels>
+    <labels>
+        <fullName>IM_FM_Apply</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Apply</shortDescription>
+        <value>Apply</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_AutoMap</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Auto-Map</shortDescription>
+        <value>Auto-Map</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_Back</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Back</shortDescription>
+        <value>Back</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_Cancel</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Cancel</shortDescription>
+        <value>Cancel</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_ClearAll</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Clear All</shortDescription>
+        <value>Clear All</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_Configure</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Configure</shortDescription>
+        <value>Configure</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_Continue</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Continue</shortDescription>
+        <value>Continue</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_DropHint</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Drop here or select</shortDescription>
+        <value>Drop here or select</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_LimitReached_Body</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>You can configure at most 3 lookup fields in this mapping</shortDescription>
+        <value>You can configure at most 3 lookup fields in this mapping</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_LimitReached_Title</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Limit reached</shortDescription>
+        <value>Limit reached</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_Loaded_Body</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Existing mappings loaded</shortDescription>
+        <value>Existing mappings loaded</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_Loaded_Title</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Loaded</shortDescription>
+        <value>Loaded</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_LookupObject</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Lookup Object</shortDescription>
+        <value>Lookup Object</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_Mapped</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Mapped</shortDescription>
+        <value>Mapped</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_MatchField</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Match Field</shortDescription>
+        <value>Match Field</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_NoPreview</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>No preview available</shortDescription>
+        <value>No preview available</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_NoSavedMappings</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>No saved mappings found for this project</shortDescription>
+        <value>No saved mappings found for this project</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_NoSourceColumns</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>No source columns</shortDescription>
+        <value>No source columns</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_NoValidRows</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>No valid mapping rows to save</shortDescription>
+        <value>No valid mapping rows to save</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_NumberOfPreviewRows</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Number of preview rows</shortDescription>
+        <value>Number of preview rows</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_PreviewSettings</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Preview settings</shortDescription>
+        <value>Preview settings</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_PreviewSubtitle</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Preview of mapped data with transformations applied</shortDescription>
+        <value>Preview of mapped data with transformations applied</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_PreviewTitle</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Data Preview</shortDescription>
+        <value>Data Preview</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_Rows</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>rows</shortDescription>
+        <value>rows</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_SalesforceFields</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Salesforce Fields</shortDescription>
+        <value>Salesforce Fields</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_SaveError_Body</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Failed to save mappings</shortDescription>
+        <value>Failed to save mappings</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_SaveError_Title</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Error</shortDescription>
+        <value>Error</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_SaveMapping</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Save Mapping</shortDescription>
+        <value>Save Mapping</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_SaveSuccess_Body</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Mappings saved</shortDescription>
+        <value>Mappings saved</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_SaveSuccess_Title</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Success</shortDescription>
+        <value>Success</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_SelectProjectFirst</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Please select a Project before saving</shortDescription>
+        <value>Please select a Project before saving</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_SourceData</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Source Data</shortDescription>
+        <value>Source Data</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_Subtitle</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Map source columns to Salesforce fields</shortDescription>
+        <value>Map source columns to Salesforce fields</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_Title</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Field Mapping</shortDescription>
+        <value>Field Mapping</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_Transform</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>+Transform</shortDescription>
+        <value>+Transform</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_Unmapped</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Unmapped</shortDescription>
+        <value>Unmapped</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_UseAsLookup</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Use as lookup</shortDescription>
+        <value>Use as lookup</value>
+    </labels>
 </CustomLabels>

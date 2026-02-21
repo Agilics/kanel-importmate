@@ -8,6 +8,46 @@ import saveMappingsJson from '@salesforce/apex/FieldMappingController.saveMappin
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { NavigationMixin } from 'lightning/navigation';
 
+// ── Custom Labels ──────────────────────────────────────────────────────────────
+import LABEL_APPLY           from '@salesforce/label/c.IM_FM_Apply';
+import LABEL_AUTOMAP         from '@salesforce/label/c.IM_FM_AutoMap';
+import LABEL_BACK            from '@salesforce/label/c.IM_FM_Back';
+import LABEL_CANCEL          from '@salesforce/label/c.IM_FM_Cancel';
+import LABEL_CLEARALL        from '@salesforce/label/c.IM_FM_ClearAll';
+import LABEL_CONFIGURE       from '@salesforce/label/c.IM_FM_Configure';
+import LABEL_CONTINUE        from '@salesforce/label/c.IM_FM_Continue';
+import LABEL_DROP_HINT       from '@salesforce/label/c.IM_FM_DropHint';
+import LABEL_LIMIT_BODY      from '@salesforce/label/c.IM_FM_LimitReached_Body';
+import LABEL_LIMIT_TITLE     from '@salesforce/label/c.IM_FM_LimitReached_Title';
+import LABEL_LOADED_BODY     from '@salesforce/label/c.IM_FM_Loaded_Body';
+import LABEL_LOADED_TITLE    from '@salesforce/label/c.IM_FM_Loaded_Title';
+import LABEL_LOOKUP_OBJECT   from '@salesforce/label/c.IM_FM_LookupObject';
+import LABEL_MAPPED          from '@salesforce/label/c.IM_FM_Mapped';
+import LABEL_MATCH_FIELD     from '@salesforce/label/c.IM_FM_MatchField';
+import LABEL_NO_PREVIEW      from '@salesforce/label/c.IM_FM_NoPreview';
+import LABEL_NO_SAVED        from '@salesforce/label/c.IM_FM_NoSavedMappings';
+import LABEL_NO_SOURCE_COLS  from '@salesforce/label/c.IM_FM_NoSourceColumns';
+import LABEL_NO_VALID_ROWS   from '@salesforce/label/c.IM_FM_NoValidRows';
+import LABEL_NB_PREVIEW_ROWS from '@salesforce/label/c.IM_FM_NumberOfPreviewRows';
+import LABEL_PREVIEW_SETTINGS from '@salesforce/label/c.IM_FM_PreviewSettings';
+import LABEL_PREVIEW_SUBTITLE from '@salesforce/label/c.IM_FM_PreviewSubtitle';
+import LABEL_PREVIEW_TITLE   from '@salesforce/label/c.IM_FM_PreviewTitle';
+import LABEL_ROWS            from '@salesforce/label/c.IM_FM_Rows';
+import LABEL_SF_FIELDS       from '@salesforce/label/c.IM_FM_SalesforceFields';
+import LABEL_SAVE_ERROR_BODY from '@salesforce/label/c.IM_FM_SaveError_Body';
+import LABEL_SAVE_ERROR_TITLE from '@salesforce/label/c.IM_FM_SaveError_Title';
+import LABEL_SAVE_MAPPING    from '@salesforce/label/c.IM_FM_SaveMapping';
+import LABEL_SAVE_OK_BODY    from '@salesforce/label/c.IM_FM_SaveSuccess_Body';
+import LABEL_SAVE_OK_TITLE   from '@salesforce/label/c.IM_FM_SaveSuccess_Title';
+import LABEL_SELECT_PROJECT  from '@salesforce/label/c.IM_FM_SelectProjectFirst';
+import LABEL_SOURCE_DATA     from '@salesforce/label/c.IM_FM_SourceData';
+import LABEL_SUBTITLE        from '@salesforce/label/c.IM_FM_Subtitle';
+import LABEL_TITLE           from '@salesforce/label/c.IM_FM_Title';
+import LABEL_UNMAPPED        from '@salesforce/label/c.IM_FM_Unmapped';
+import LABEL_TRANSFORM       from '@salesforce/label/c.IM_FM_Transform';
+import LABEL_USE_AS_LOOKUP   from '@salesforce/label/c.IM_FM_UseAsLookup';
+// ──────────────────────────────────────────────────────────────────────────────
+
 function microtaskDebounce(fn) {
   let scheduled = false;
   let lastArgs;
@@ -28,6 +68,33 @@ const SS_ROWS_KEY = 'IM_csvRows';
 const SS_COLS_KEY = 'IM_sourceColumnsCsv';
 
 export default class FieldMapper extends NavigationMixin(LightningElement) {
+  // ── Exposed label properties (bound in template) ──────────────────────────
+  label_Apply           = LABEL_APPLY;
+  label_AutoMap         = LABEL_AUTOMAP;
+  label_Back            = LABEL_BACK;
+  label_Cancel          = LABEL_CANCEL;
+  label_ClearAll        = LABEL_CLEARALL;
+  label_Configure       = LABEL_CONFIGURE;
+  label_Continue        = LABEL_CONTINUE;
+  label_LookupObject    = LABEL_LOOKUP_OBJECT;
+  label_Mapped          = LABEL_MAPPED;
+  label_MatchField      = LABEL_MATCH_FIELD;
+  label_NoPreview       = LABEL_NO_PREVIEW;
+  label_NoSourceColumns = LABEL_NO_SOURCE_COLS;
+  label_NumberOfPreviewRows = LABEL_NB_PREVIEW_ROWS;
+  label_PreviewSettings = LABEL_PREVIEW_SETTINGS;
+  label_PreviewSubtitle = LABEL_PREVIEW_SUBTITLE;
+  label_PreviewTitle    = LABEL_PREVIEW_TITLE;
+  label_Rows            = LABEL_ROWS;
+  label_SalesforceFields = LABEL_SF_FIELDS;
+  label_SaveMapping     = LABEL_SAVE_MAPPING;
+  label_Title           = LABEL_TITLE;
+  label_Subtitle        = LABEL_SUBTITLE;
+  label_Unmapped        = LABEL_UNMAPPED;
+  label_Transform       = LABEL_TRANSFORM;
+  label_UseAsLookup     = LABEL_USE_AS_LOOKUP;
+  // ──────────────────────────────────────────────────────────────────────────
+
   _csvRows = [];
   _sourceColumnsCsv = '';
 
@@ -96,9 +163,9 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
   }
 
   get sourceTitle() {
-    if (this.sourceLabel) return `Source Data (${this.sourceLabel})`;
-    if (this.selectedTargetObject) return `Source Data (${this.selectedTargetObject})`;
-    return 'Source Data';
+    if (this.sourceLabel) return `${LABEL_SOURCE_DATA} (${this.sourceLabel})`;
+    if (this.selectedTargetObject) return `${LABEL_SOURCE_DATA} (${this.selectedTargetObject})`;
+    return LABEL_SOURCE_DATA;
   }
 
   get currentProjectName() {
@@ -156,7 +223,7 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
     ).length;
   }
 
-  /** ===== Continue enabled logic (FIX) ===== */
+  /** ===== Continue enabled logic ===== */
   get hasValidMappings() {
     return (this.mappings || []).some((m) => m?.sourceColumn && m?.targetField);
   }
@@ -215,9 +282,16 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
       const examples = this._examplesForSource(name, 2);
       const subtitle = examples.length ? `Text \u2022 ${examples.join(', ')}…` : 'Text \u2022';
 
+      const pillLabel = status === 'mapped'
+        ? LABEL_MAPPED
+        : status === 'transform'
+          ? LABEL_TRANSFORM
+          : LABEL_UNMAPPED;
+
       return {
         name,
         subtitle,
+        pillLabel,
         isMapped: status === 'mapped',
         isUnmapped: status === 'unmapped',
         isTransform: status === 'transform',
@@ -588,7 +662,7 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
       const current = this.currentLookupCount;
       if (current >= 3) {
         e.target.checked = false;
-        this.toast('Limit reached', 'You can configure at most 3 lookup fields in this mapping.', 'warning');
+        this.toast(LABEL_LIMIT_TITLE, LABEL_LIMIT_BODY, 'warning');
         return;
       }
     }
@@ -717,11 +791,11 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
   /** ===== Save / load ===== */
   async handleSave() {
     try {
-      if (!this.selectedProjectId) throw new Error('Please select a Project before saving.');
+      if (!this.selectedProjectId) throw new Error(LABEL_SELECT_PROJECT);
 
       const lookupCount = this.currentLookupCount;
       if (lookupCount > 3) {
-        this.toast('Limit reached', 'You can configure at most 3 lookup fields in this mapping.', 'warning');
+        this.toast(LABEL_LIMIT_TITLE, LABEL_LIMIT_BODY, 'warning');
         return;
       }
 
@@ -741,17 +815,17 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
           lookupMatchField: m.lookupMatchField || ''
         }));
 
-      if (!payload.length) throw new Error('No valid mapping rows to save.');
+      if (!payload.length) throw new Error(LABEL_NO_VALID_ROWS);
 
       await saveMappingsJson({
         targetObjectApiName: this.selectedTargetObject,
         rowsJson: JSON.stringify(payload)
       });
 
-      this.toast('Success', 'Mappings saved.', 'success');
+      this.toast(LABEL_SAVE_OK_TITLE, LABEL_SAVE_OK_BODY, 'success');
     } catch (error) {
-      const msg = error?.body?.message || error?.message || 'Failed to save mappings.';
-      this.toast('Error', msg, 'error');
+      const msg = error?.body?.message || error?.message || LABEL_SAVE_ERROR_BODY;
+      this.toast(LABEL_SAVE_ERROR_TITLE, msg, 'error');
     }
   }
 
@@ -772,7 +846,10 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
       });
 
       const rows = Array.isArray(saved) ? saved : [];
-      if (!rows.length) return;
+      if (!rows.length) {
+        if (!silent) this.toast(LABEL_LOADED_TITLE, LABEL_NO_SAVED, 'info');
+        return;
+      }
 
       const effectiveVersion = this.versionInput || '1.0';
       this.versionInput = effectiveVersion;
@@ -797,9 +874,9 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
       this.updateMappedSources();
       this._refreshPreviewDebounced();
 
-      if (!silent) this.toast('Loaded', 'Existing mappings loaded.', 'success');
+      if (!silent) this.toast(LABEL_LOADED_TITLE, LABEL_LOADED_BODY, 'success');
     } catch (e) {
-      if (!silent) this.toast('Error', e?.body?.message || 'Failed to load saved mappings.', 'error');
+      if (!silent) this.toast(LABEL_SAVE_ERROR_TITLE, e?.body?.message || LABEL_SAVE_ERROR_BODY, 'error');
     }
   }
 
@@ -814,10 +891,9 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
     this.dispatchEvent(new CustomEvent('previous', { bubbles: true, composed: true }));
   }
 
-  /** CONTINUE EVENT FIXED */
   handleContinueClick() {
     if (this.isContinueButtonDisabled) {
-      this.toast('Info', 'Add at least one valid mapping before continuing.', 'info');
+      this.toast('Info', LABEL_DROP_HINT, 'info');
       return;
     }
 
@@ -867,8 +943,8 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
             title: 'Mapping Summary',
             data: {
               totalFields: { label: 'Total Fields', value: this.summaryTotalFields },
-              mappedFieldsCount: { label: 'Mapped', value: this.summaryMappedCount },
-              unmappedFieldsCount: { label: 'Unmapped', value: this.summaryUnmappedCount },
+              mappedFieldsCount: { label: LABEL_MAPPED, value: this.summaryMappedCount },
+              unmappedFieldsCount: { label: LABEL_UNMAPPED, value: this.summaryUnmappedCount },
               withTransformationsCount: { label: 'With Transformations', value: this.summaryWithTransformCount }
             }
           },

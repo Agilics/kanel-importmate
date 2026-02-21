@@ -3,8 +3,8 @@
     <div class="fm-root">
       <div class="fm-header slds-p-horizontal_medium slds-p-top_medium">
         <div class="fm-title">
-          <h1 class="fm-heading">Field Mapping</h1>
-          <p class="fm-subtitle">Map source columns to Salesforce fields</p>
+          <h1 class="fm-heading">{label_Title}</h1>
+          <p class="fm-subtitle">{label_Subtitle}</p>
 
           <template if:true={selectedProjectId}>
             <div class="fm-meta">
@@ -14,13 +14,13 @@
         </div>
 
         <div class="fm-actions">
-          <lightning-button label="Auto-Map" class="ghost" onclick={handleAutoMapClick}></lightning-button>
-          <lightning-button label="Clear All" onclick={handleClearAllClick}></lightning-button>
-          <lightning-button label="Save Mapping" onclick={handleSaveMapping}></lightning-button>
-          <lightning-button label="Back" onclick={handleBackClick}></lightning-button>
+          <lightning-button label={label_AutoMap} class="ghost" onclick={handleAutoMapClick}></lightning-button>
+          <lightning-button label={label_ClearAll} onclick={handleClearAllClick}></lightning-button>
+          <lightning-button label={label_SaveMapping} onclick={handleSaveMapping}></lightning-button>
+          <lightning-button label={label_Back} onclick={handleBackClick}></lightning-button>
           <lightning-button
             variant="brand"
-            label="Continue"
+            label={label_Continue}
             onclick={handleContinueClick}
             disabled={isContinueButtonDisabled}
           ></lightning-button>
@@ -32,7 +32,7 @@
         <section class="fm-panel">
           <div class="fm-panel__header">
             <h2>{sourceTitle}</h2>
-            <span class="fm-count">{rowCountLabel} rows</span>
+            <span class="fm-count">{rowCountLabel} {label_Rows}</span>
           </div>
 
           <div class="fm-source-list">
@@ -52,21 +52,13 @@
                     </div>
                   </div>
 
-                  <template if:true={item.isMapped}>
-                    <span class={item.pillClass}>Mapped</span>
-                  </template>
-                  <template if:true={item.isUnmapped}>
-                    <span class={item.pillClass}>Unmapped</span>
-                  </template>
-                  <template if:true={item.isTransform}>
-                    <span class={item.pillClass}>+Transform</span>
-                  </template>
+                  <span class={item.pillClass}>{item.pillLabel}</span>
                 </div>
               </template>
             </template>
 
             <template if:false={hasSourceList}>
-              <p class="muted">No source columns.</p>
+              <p class="muted">{label_NoSourceColumns}</p>
             </template>
           </div>
         </section>
@@ -75,11 +67,11 @@
         <section class="fm-right">
           <div class="fm-target-header">
             <div class="title">
-              <h2>Salesforce Fields ({selectedTargetObject})</h2>
+              <h2>{label_SalesforceFields} ({selectedTargetObject})</h2>
             </div>
 
             <span class="set" onclick={openSettings}>
-              <span class="set-label">Configure</span>
+              <span class="set-label">{label_Configure}</span>
             </span>
           </div>
 
@@ -124,7 +116,7 @@
                     <div key={ms.key} class="lookup-block">
                       <lightning-input
                         type="checkbox"
-                        label="Use as lookup"
+                        label={label_UseAsLookup}
                         checked={ms.mapping.isLookup}
                         data-source={ms.sourceColumn}
                         onchange={handleLookupToggle}
@@ -134,7 +126,7 @@
                         <div class="lookup-row">
                           <lightning-combobox
                             class="lkp"
-                            label="Lookup Object"
+                            label={label_LookupObject}
                             value={ms.mapping.lookupObject}
                             data-source={ms.sourceColumn}
                             options={availableObjectsOptions}
@@ -143,7 +135,7 @@
 
                           <lightning-combobox
                             class="lkp"
-                            label="Match Field"
+                            label={label_MatchField}
                             value={ms.mapping.lookupMatchField}
                             data-source={ms.sourceColumn}
                             options={ms.lookupFieldsOptions}
@@ -162,7 +154,8 @@
 
       <!-- Preview -->
       <div class="fm-preview slds-p-horizontal_medium slds-p-bottom_large">
-        <div class="prev-title">Data Preview</div>
+        <div class="prev-title">{label_PreviewTitle}</div>
+        <div class="prev-subtitle">{label_PreviewSubtitle}</div>
         <div class="table-wrap">
           <table class="prev-table">
             <thead>
@@ -187,7 +180,7 @@
 
               <template if:false={hasClientPreview}>
                 <tr>
-                  <td colspan={previewColspan} class="muted">No preview available.</td>
+                  <td colspan={previewColspan} class="muted">{label_NoPreview}</td>
                 </tr>
               </template>
             </tbody>
@@ -199,14 +192,14 @@
     <!-- Settings modal -->
     <template if:true={showSettingsModal}>
       <section class="fm-modal-backdrop" role="presentation">
-        <div class="fm-modal" role="dialog" aria-modal="true" aria-label="Preview settings">
+        <div class="fm-modal" role="dialog" aria-modal="true" aria-label={label_PreviewSettings}>
           <header class="fm-modal__header">
-            <h2>Preview settings</h2>
+            <h2>{label_PreviewSettings}</h2>
           </header>
           <div class="fm-modal__body">
             <lightning-input
               type="number"
-              label="Number of preview rows"
+              label={label_NumberOfPreviewRows}
               value={settingsPreviewRowLimit}
               min="1"
               max="50"
@@ -214,8 +207,8 @@
             ></lightning-input>
           </div>
           <footer class="fm-modal__footer">
-            <lightning-button label="Cancel" onclick={handleSettingsCancel}></lightning-button>
-            <lightning-button variant="brand" label="Apply" onclick={handleSettingsApply}></lightning-button>
+            <lightning-button label={label_Cancel} onclick={handleSettingsCancel}></lightning-button>
+            <lightning-button variant="brand" label={label_Apply} onclick={handleSettingsApply}></lightning-button>
           </footer>
         </div>
       </section>
