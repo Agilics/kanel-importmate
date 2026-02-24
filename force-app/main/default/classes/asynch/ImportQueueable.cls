@@ -12,6 +12,7 @@ public with sharing class ImportQueueable implements Queueable, Database.AllowsC
     private Integer processedRecords;
     private Integer successfulRecords;
     private Integer failedRecords;
+    private String importMode;
     @testvisible private Integer batchSize = 200;
 
     public ImportQueueable(String projectId, List<Map<String, String>> csvData, String executionId) {
@@ -87,7 +88,7 @@ public with sharing class ImportQueueable implements Queueable, Database.AllowsC
                 try {
                     SObject record = ObjectMetadataService.getGlobalDescribeMap().get(targetObject).newSObject();
 
-                    // Apply all transformations for the entire row once (same as validation phase)
+                    //apply transformations for the row
                     Map<String, String> transformedRow = TransformationService.applyTransformationsForRow(row, mappings, rulesByMappingId);
 
                     List<Map<String, Object>> lookupDetailsForRecord = new List<Map<String, Object>>();
@@ -109,11 +110,9 @@ public with sharing class ImportQueueable implements Queueable, Database.AllowsC
                                 lookupDetailsForRecord.add(lookupDetails);
                             }
                         } else {
-                            // Use transformed value from the fully transformed row
                             String transformedValue = getProcessedValue(transformedRow, targetField, mapping.SourceColumn__c, sourceValue);
 
                             if (String.isNotBlank(transformedValue)) {
-                                // Convert value to appropriate type based on field type
                                 Object convertedValue = ImportUtils.convertValueToFieldType(transformedValue, targetObject, targetField);
                                 record.put(targetField, convertedValue);
                             }
@@ -193,7 +192,6 @@ public with sharing class ImportQueueable implements Queueable, Database.AllowsC
                     failedRecords++;
                 
                 } catch (Exception e) {
-                    // Generic exception
                     errors.add(ValidationUtils.createValidationError(
                         executionId, 
                         lineNumber, 
@@ -207,7 +205,6 @@ public with sharing class ImportQueueable implements Queueable, Database.AllowsC
 
             if (!recordsToInsert.isEmpty() && !lookupNeedsByRow.isEmpty()) {
                 Map<String, Map<String, Set<String>>> lookupGroupsByTypeAndField = new Map<String, Map<String, Set<String>>>();
-                Map<String, Map<String, Map<String, Id>>> foundIdsByTypeAndField = new Map<String, Map<String, Map<String, Id>>>();
 
                 for (List<Map<String, Object>> lookupsForRecord : lookupNeedsByRow.values()) {
                     for (Map<String, Object> lookupInfo : lookupsForRecord) {
@@ -218,7 +215,6 @@ public with sharing class ImportQueueable implements Queueable, Database.AllowsC
                         if (String.isNotBlank(lookupObject) && String.isNotBlank(lookupField) && String.isNotBlank(lookupValue)) {
                             if (!lookupGroupsByTypeAndField.containsKey(lookupObject)) {
                                 lookupGroupsByTypeAndField.put(lookupObject, new Map<String, Set<String>>());
-                                foundIdsByTypeAndField.put(lookupObject, new Map<String, Map<String, Id>>());
                             }
 
                             if (!lookupGroupsByTypeAndField.get(lookupObject).containsKey(lookupField)) {
@@ -230,47 +226,7 @@ public with sharing class ImportQueueable implements Queueable, Database.AllowsC
                     }
                 }
 
-                for (String lookupObject : lookupGroupsByTypeAndField.keySet()) {
-                    Map<String, Set<String>> fieldMappingsForType = lookupGroupsByTypeAndField.get(lookupObject);
-
-                    for (String lookupField : fieldMappingsForType.keySet()) {
-                        Set<String> lookupValues = fieldMappingsForType.get(lookupField);
-
-                        // Query existing records only (no creation)
-                        String soqlQuery = 'SELECT Id, ' + String.escapeSingleQuotes(lookupField) +
-                                         ' FROM ' + String.escapeSingleQuotes(lookupObject) +
-                                         ' WHERE ' + String.escapeSingleQuotes(lookupField) + ' IN :lookupValues';
-
-                        List<SObject> existingRecords = Database.query(soqlQuery);
-                        Map<String, Id> valueToIdMap = new Map<String, Id>();
-
-                        for (SObject record : existingRecords) {
-                            Object fieldValue = record.get(lookupField);
-                            if (fieldValue != null) {
-                                String stringValue = String.valueOf(fieldValue);
-                                valueToIdMap.put(stringValue, record.Id);
-                            }
-                        }
-
-                        // Check for missing values and log warnings (don't create)
-                        Set<String> foundValues = valueToIdMap.keySet();
-                        List<String> missingValues = new List<String>();
-                        for (String lookupValue : lookupValues) {
-                            if (!foundValues.contains(lookupValue)) {
-                                missingValues.add(lookupValue);
-                            }
-                        }
-
-                        if (!missingValues.isEmpty()) {
-                            // Missing values are logged but not created
-                        }
-
-                        if (!foundIdsByTypeAndField.get(lookupObject).containsKey(lookupField)) {
-                            foundIdsByTypeAndField.get(lookupObject).put(lookupField, new Map<String, Id>());
-                        }
-                        foundIdsByTypeAndField.get(lookupObject).put(lookupField, valueToIdMap);
-                    }
-                }
+                Map<String, Map<String, Map<String, Id>>> foundIdsByTypeAndField = resolveLookupIdsByObject(lookupGroupsByTypeAndField);
 
                 for (Integer i = 0; i < recordsToInsert.size(); i++) {
                     SObject record = recordsToInsert[i];
@@ -296,17 +252,15 @@ public with sharing class ImportQueueable implements Queueable, Database.AllowsC
                 }
             }
 
-            // Insert records with all-or-nothing behavior
             if (!recordsToInsert.isEmpty()) {
                 try {
-                    database.insert(recordsToInsert,true);
-                    // Count successful insertions
+                    database.insert(recordsToInsert, false);
+                    //TODO: DML MODE Upsert - Insert - Update
                     successfulRecords += recordsToInsert.size();
                 } catch (DmlException e) {
                     Integer numDmlErrors = e.getNumDml();
                     Set<Integer> dmlErrorIndices = new Set<Integer>();
-                    
-                    Set<Integer> uniqueDmlFailedLines = new Set<Integer>(); // Track unique line numbers that failed in DML
+                    Set<Integer> uniqueDmlFailedLines = new Set<Integer>();
                     for (Integer i = 0; i < numDmlErrors; i++) {
                         Integer failedRecordIndex = e.getDmlIndex(i);
                         String dmlMessage = e.getDmlMessage(i);
@@ -368,7 +322,6 @@ public with sharing class ImportQueueable implements Queueable, Database.AllowsC
                     processRemainingDataSynchronously(projectId, remainingData, executionId, processedRecords, successfulRecords, failedRecords);
                 }
             } else {
-                // Publish completion with correct statistics
                 PublisherService.publishExecutionCompleted(executionId, failedRecords == 0, successfulRecords, failedRecords, totalErrors);
             }
         } catch (ExecutionException ee) {
@@ -391,6 +344,78 @@ public with sharing class ImportQueueable implements Queueable, Database.AllowsC
             transformedValue = originalValue;
         }
         return transformedValue;
+    }
+
+    private Map<String, Map<String, Map<String, Id>>> resolveLookupIdsByObject(Map<String, Map<String, Set<String>>> lookupGroupsByTypeAndField) {
+        Map<String, Map<String, Map<String, Id>>> foundIdsByTypeAndField = new Map<String, Map<String, Map<String, Id>>>();
+        Map<String, Schema.SObjectType> globalDescribe = ObjectMetadataService.getGlobalDescribeMap();
+
+        for (String lookupObject : lookupGroupsByTypeAndField.keySet()) {
+            if (!globalDescribe.containsKey(lookupObject)) {
+                continue;
+            }
+
+            Map<String, Set<String>> fieldsByObject = lookupGroupsByTypeAndField.get(lookupObject);
+            if (fieldsByObject == null || fieldsByObject.isEmpty()) {
+                continue;
+            }
+
+            Map<String, Schema.SObjectField> objectFields =
+                globalDescribe.get(lookupObject).getDescribe().fields.getMap();
+
+            List<String> validLookupFields = new List<String>();
+            Set<String> allLookupValues = new Set<String>();
+
+            for (String lookupField : fieldsByObject.keySet()) {
+                if (!objectFields.containsKey(lookupField)) {
+                    continue;
+                }
+                Set<String> fieldValues = fieldsByObject.get(lookupField);
+                if (fieldValues == null || fieldValues.isEmpty()) {
+                    continue;
+                }
+                validLookupFields.add(lookupField);
+                allLookupValues.addAll(fieldValues);
+            }
+
+            if (validLookupFields.isEmpty() || allLookupValues.isEmpty()) {
+                continue;
+            }
+
+            List<String> whereClauses = new List<String>();
+            for (String lookupField : validLookupFields) {
+                whereClauses.add(lookupField + ' IN :allLookupValues');
+            }
+
+            String soqlQuery = 'SELECT Id, ' + String.join(validLookupFields, ',') +
+                               ' FROM ' + lookupObject +
+                               ' WHERE ' + String.join(whereClauses, ' OR ');
+
+            List<SObject> existingRecords = Database.query(soqlQuery);
+            if (!foundIdsByTypeAndField.containsKey(lookupObject)) {
+                foundIdsByTypeAndField.put(lookupObject, new Map<String, Map<String, Id>>());
+            }
+
+            for (String lookupField : validLookupFields) {
+                if (!foundIdsByTypeAndField.get(lookupObject).containsKey(lookupField)) {
+                    foundIdsByTypeAndField.get(lookupObject).put(lookupField, new Map<String, Id>());
+                }
+            }
+
+            for (SObject existingRecord : existingRecords) {
+                for (String lookupField : validLookupFields) {
+                    Object fieldValue = existingRecord.get(lookupField);
+                    if (fieldValue != null) {
+                        String lookupValue = String.valueOf(fieldValue);
+                        if (fieldsByObject.get(lookupField).contains(lookupValue)) {
+                            foundIdsByTypeAndField.get(lookupObject).get(lookupField).put(lookupValue, existingRecord.Id);
+                        }
+                    }
+                }
+            }
+        }
+
+        return foundIdsByTypeAndField;
     }
 
     private void processRemainingDataSynchronously(String projectId, List<Map<String, String>> remainingData, String executionId, Integer processed, Integer successful, Integer failed) {
