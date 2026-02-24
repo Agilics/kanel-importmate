@@ -71,12 +71,12 @@ jobs:
       - name: Validation complète avec org cible
         run: |
           echo "🔍 Validation complète contre l'org d'intégration..."
-          sf project deploy validate --source-dir force-app --target-org int-sandbox
+          sf project deploy validate --source-dir force-app --target-org int-sandbox --pre-destructive-changes config/destructive/destructiveChanges.xml --post-destructive-changes config/destructive/destructiveChangesPost.xml
           echo "✅ Validation complète réussie"
       - name: Deploy & Test in Integration Sandbox
         run: |
           echo "🚀 Deploying to integration sandbox for pre-merge validation..."
-          sf project deploy start --source-dir force-app --target-org int-sandbox --ignore-conflicts
+          sf project deploy start --source-dir force-app --target-org int-sandbox --ignore-conflicts --pre-destructive-changes config/destructive/destructiveChanges.xml --post-destructive-changes config/destructive/destructiveChangesPost.xml
           echo "🧪 Running tests in integration sandbox..."
           sf apex run test --test-level RunLocalTests --target-org int-sandbox --wait 10
           echo "✅ Pre-merge validation successful - ready to merge!"
@@ -112,12 +112,12 @@ jobs:
       - name: Validation complète avec org cible
         run: |
           echo "🔍 Validation complète contre l'org d'intégration..."
-          sf project deploy validate --source-dir force-app --target-org int-sandbox
+          sf project deploy validate --source-dir force-app --target-org int-sandbox --pre-destructive-changes config/destructive/destructiveChanges.xml --post-destructive-changes config/destructive/destructiveChangesPost.xml
           echo "✅ Validation complète réussie"
 
       - name: Deploy & Test in Integration Sandbox
         run: |
-          sf project deploy start --source-dir force-app --target-org int-sandbox --ignore-conflicts
+          sf project deploy start --source-dir force-app --target-org int-sandbox --ignore-conflicts --pre-destructive-changes config/destructive/destructiveChanges.xml --post-destructive-changes config/destructive/destructiveChangesPost.xml
           sf apex run test --test-level RunLocalTests --target-org int-sandbox --wait 10
       - run: rm -f jwt.key
 
@@ -148,12 +148,12 @@ jobs:
       - name: Validation complète avec org UAT
         run: |
           echo "🔍 Validation complète contre l'org UAT..."
-          sf project deploy validate --source-dir force-app --target-org uat-org
+          sf project deploy validate --source-dir force-app --target-org uat-org --pre-destructive-changes config/destructive/destructiveChanges.xml --post-destructive-changes config/destructive/destructiveChangesPost.xml
           echo "✅ Validation complète réussie"
 
       - name: Deploy & Test in UAT Sandbox
         run: |
-          sf project deploy start --source-dir force-app --target-org uat-org --ignore-conflicts
+          sf project deploy start --source-dir force-app --target-org uat-org --ignore-conflicts --pre-destructive-changes config/destructive/destructiveChanges.xml --post-destructive-changes config/destructive/destructiveChangesPost.xml
           sf apex run test --test-level RunLocalTests --target-org uat-org --wait 10
       - run: rm -f jwt.key
 
@@ -191,7 +191,7 @@ jobs:
       - name: Validation complète avec org de packaging
         run: |
           echo "🔍 Validation complète contre l'org de packaging..."
-          sf project deploy validate --source-dir force-app --target-org pkg-org
+          sf project deploy validate --source-dir force-app --target-org pkg-org --pre-destructive-changes config/destructive/destructiveChanges.xml --post-destructive-changes config/destructive/destructiveChangesPost.xml
           echo "✅ Validation complète réussie"
       - name: Create Package if not exists
         run: |
