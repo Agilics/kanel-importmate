@@ -1,7 +1,6 @@
 import { LightningElement, api } from 'lwc';
 
-const SS_ROWS_KEY = 'IM_csvRows';
-const SS_COLS_KEY = 'IM_sourceColumnsCsv';
+
 
 export default class DataSourceSelector extends LightningElement {
   currentStep = 2;
@@ -91,17 +90,6 @@ export default class DataSourceSelector extends LightningElement {
   let totalRowCount = rows.length;
   if (typeof totalFromDetail === 'number' && Number.isFinite(totalFromDetail)) {
     totalRowCount = totalFromDetail;
-  }
-
-  try {
-    if (columns.length) {
-      window.sessionStorage.setItem(SS_COLS_KEY, columns.join(','));
-    }
-    if (rows.length) {
-      window.sessionStorage.setItem(SS_ROWS_KEY, JSON.stringify(rows));
-    }
-  } catch (e) {
-    console.debug('[DataSourceSelector] sessionStorage unavailable', e);
   }
 
   this.dispatchEvent(

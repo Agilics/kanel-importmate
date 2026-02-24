@@ -21,7 +21,7 @@ const DEFAULT_PAGE_SIZE = 4;
 export default class TransformationPage extends LightningElement {
   isWarningBadge = true;
   @api projectId; 
-  @wire(searchProjetById, { projectId: "$projectId" }) selectedProject; 
+  @wire(searchProjetById, { id: "$projectId" }) selectedProject; 
   @track transformationsByMappingId = [];
   wiredTransformationResults =[]; // données affichées
   _wiredResult; //  résultat du @wire (OBLIGATOIRE pour refreshApex)

@@ -70,8 +70,7 @@ export default class DashboardCmp extends LightningElement {
     wiredDashboard(result) {
         this.wiredDashboardResult = result;
         if (result.data) {
-            // Process projects
-            this.allProjects = result.data.projects || [];
+            this.allProjects = (result.data.projects || []).map((project) => this.normalizeProject(project));
             this.projects = [...this.allProjects];
             
             // Process stats
@@ -146,7 +145,7 @@ export default class DashboardCmp extends LightningElement {
 
     //recherche de projets par nom, cible ou description
     handleSearch(event) {
-        this.searchTerm = event.target.value.toLowerCase();
+        this.searchTerm = (event.target.value || '').toLowerCase();
         this.filterProjects();
     }
 
@@ -158,48 +157,49 @@ export default class DashboardCmp extends LightningElement {
     // gestion du changement de filtre
     handleFilterChange(event) {
         const selectedValue = event.currentTarget.dataset.value;
-        this.filterTabs = this.filterTabs.map(tab => ({
-            ...tab,
-            active: tab.value === selectedValue
-        }));
+        this.filterTabs = this.filterTabs.map((tab) => {
+            const active = tab.value === selectedValue;
+            return {
+                ...tab,
+                active,
+                className: active ? 'filter-tab active' : 'filter-tab'
+            };
+        });
         this.filterProjects();
     }
 
     // filtrage des projets en fonction du statut et de la recherche
     filterProjects() {
-        const activeFilter = this.filterTabs.find(tab => tab.active)?.value || 'all';
+        const activeFilter = this.filterTabs.find((tab) => tab.active)?.value || 'all';
         let filtered = [...this.allProjects];
 
-        // Apply status filter
         if (activeFilter !== 'all') {
-            filtered = filtered.filter(project => {
-                // Récupérer le statut depuis la dernière exécution
-                const lastExecution = project.ImportExecutions__r && project.ImportExecutions__r.length > 0 
-                    ? project.ImportExecutions__r[0] 
-                    : null;
-                const status = (lastExecution?.Status__c || '').toLowerCase();
-                
-                // Mapper les statuts aux filtres
+            filtered = filtered.filter((project) => {
+                const status = project._normalizedStatus;
+
                 if (activeFilter === 'active') {
-                    return status === 'inprogress' || status === 'pending';
-                } else if (activeFilter === 'completed') {
+                    return status === 'inprogress';
+                }
+                if (activeFilter === 'completed') {
                     return status === 'completed';
-                } else if (activeFilter === 'scheduled') {
+                }
+                if (activeFilter === 'scheduled') {
                     return status === 'pending';
                 }
                 return false;
             });
         }
 
-        // Apply search filter
         if (this.searchTerm) {
-            filtered = filtered.filter(project => {
+            filtered = filtered.filter((project) => {
                 const name = (project.Name || '').toLowerCase();
                 const target = (project.TargetObject__c || '').toLowerCase();
                 const description = (project.Description__c || '').toLowerCase();
-                return name.includes(this.searchTerm) || 
-                       target.includes(this.searchTerm) || 
-                       description.includes(this.searchTerm);
+                return (
+                    name.includes(this.searchTerm) ||
+                    target.includes(this.searchTerm) ||
+                    description.includes(this.searchTerm)
+                );
             });
         }
 
@@ -217,7 +217,6 @@ export default class DashboardCmp extends LightningElement {
     //modification d'un projet
     handleProjectEdit(event) {
         const projectId = event.detail;
-        // Dispatch edit event to parent
         this.dispatchEvent(new CustomEvent('projectedit', {
             detail: projectId
         }));
@@ -237,21 +236,18 @@ export default class DashboardCmp extends LightningElement {
         if (!confirm) {
             return;
         }
-        
+
         try {
             this.isLoading = true;
             await deleteProject({ projectId: projectId });
-            
-            // Show success toast
+
             this.dispatchEvent(new ShowToastEvent({
                 title: 'Success',
                 message: Dashboard_Delete_Success,
                 variant: 'success'
             }));
-            
-            // Refresh dashboard data
+
             await this.refreshDashboard();
-            
         } catch (error) {
             console.error('Error deleting project:', error);
             this.dispatchEvent(new ShowToastEvent({
