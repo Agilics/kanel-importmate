@@ -3,16 +3,15 @@ import getDashboardData from '@salesforce/apex/DashboardController.getDashboardD
 import deleteProject from '@salesforce/apex/DashboardController.deleteProject';
 import { refreshApex } from '@salesforce/apex';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import { navigateToPage } from 'c/utility'
 
 export default class DashboardCmp extends LightningElement {
     @track stats = [];
 
     @track filterTabs = [
-        { label: 'All Projects', value: 'all', active: true },
-        { label: 'Active', value: 'active', active: false },
-        { label: 'Completed', value: 'completed', active: false },
-        { label: 'Scheduled', value: 'scheduled', active: false }
+        { label: 'All Projects', value: 'all', active: true, className: 'filter-tab active' },
+        { label: 'Active', value: 'active', active: false, className: 'filter-tab' },
+        { label: 'Completed', value: 'completed', active: false, className: 'filter-tab' },
+        { label: 'Scheduled', value: 'scheduled', active: false, className: 'filter-tab' }
     ];
 
     @track projects = [];
@@ -22,57 +21,14 @@ export default class DashboardCmp extends LightningElement {
     searchTerm = '';
     wiredDashboardResult;
 
-    // Wire to get dashboard data
     @wire(getDashboardData, { limitor: 50 })
     wiredDashboard(result) {
         this.wiredDashboardResult = result;
         if (result.data) {
-            // Process projects
-            this.allProjects = result.data.projects || [];
+            this.allProjects = (result.data.projects || []).map((project) => this.normalizeProject(project));
             this.projects = [...this.allProjects];
-            
-            // Process stats
-            if (result.data.stats) {
-                this.stats = [
-                    {
-                        id: 1,
-                        label: 'Total Projects',
-                        value: String(result.data.stats.totalProjects || 0),
-                        change: '',
-                        changeLabel: '',
-                        icon: 'standard:folder',
-                        iconColor: 'blue'
-                    },
-                    {
-                        id: 2,
-                        label: 'Records Imported',
-                        value: result.data.stats.recordsImportedFormatted || '0',
-                        change: '',
-                        changeLabel: '',
-                        icon: 'standard:data_integration_hub',
-                        iconColor: 'green'
-                    },
-                    {
-                        id: 3,
-                        label: 'Success Rate',
-                        value: result.data.stats.successRateFormatted || '0%',
-                        change: '',
-                        changeLabel: '',
-                        icon: 'standard:approval',
-                        iconColor: 'green'
-                    },
-                    {
-                        id: 4,
-                        label: 'Active Projects',
-                        value: String(result.data.stats.activeSchedules || 0),
-                        change: '',
-                        changeLabel: '',
-                        icon: 'standard:event',
-                        iconColor: 'purple'
-                    }
-                ];
-            }
-            
+            this.stats = this.buildStats(result.data.stats, this.allProjects);
+
             this.isLoading = false;
             this.error = undefined;
         } else if (result.error) {
@@ -100,7 +56,7 @@ export default class DashboardCmp extends LightningElement {
     }
 
     handleSearch(event) {
-        this.searchTerm = event.target.value.toLowerCase();
+        this.searchTerm = (event.target.value || '').toLowerCase();
         this.filterProjects();
     }
 
@@ -110,51 +66,139 @@ export default class DashboardCmp extends LightningElement {
 
     handleFilterChange(event) {
         const selectedValue = event.currentTarget.dataset.value;
-        this.filterTabs = this.filterTabs.map(tab => ({
-            ...tab,
-            active: tab.value === selectedValue
-        }));
+        this.filterTabs = this.filterTabs.map((tab) => {
+            const active = tab.value === selectedValue;
+            return {
+                ...tab,
+                active,
+                className: active ? 'filter-tab active' : 'filter-tab'
+            };
+        });
         this.filterProjects();
     }
 
     filterProjects() {
-        const activeFilter = this.filterTabs.find(tab => tab.active)?.value || 'all';
+        const activeFilter = this.filterTabs.find((tab) => tab.active)?.value || 'all';
         let filtered = [...this.allProjects];
 
-        // Apply status filter
         if (activeFilter !== 'all') {
-            filtered = filtered.filter(project => {
-                // Récupérer le statut depuis la dernière exécution
-                const lastExecution = project.ImportExecutions__r && project.ImportExecutions__r.length > 0 
-                    ? project.ImportExecutions__r[0] 
-                    : null;
-                const status = (lastExecution?.Status__c || '').toLowerCase();
-                
-                // Mapper les statuts aux filtres
+            filtered = filtered.filter((project) => {
+                const status = project._normalizedStatus;
+
                 if (activeFilter === 'active') {
-                    return status === 'inprogress' || status === 'pending';
-                } else if (activeFilter === 'completed') {
+                    return status === 'inprogress';
+                }
+                if (activeFilter === 'completed') {
                     return status === 'completed';
-                } else if (activeFilter === 'scheduled') {
+                }
+                if (activeFilter === 'scheduled') {
                     return status === 'pending';
                 }
                 return false;
             });
         }
 
-        // Apply search filter
         if (this.searchTerm) {
-            filtered = filtered.filter(project => {
+            filtered = filtered.filter((project) => {
                 const name = (project.Name || '').toLowerCase();
                 const target = (project.TargetObject__c || '').toLowerCase();
                 const description = (project.Description__c || '').toLowerCase();
-                return name.includes(this.searchTerm) || 
-                       target.includes(this.searchTerm) || 
-                       description.includes(this.searchTerm);
+                return (
+                    name.includes(this.searchTerm) ||
+                    target.includes(this.searchTerm) ||
+                    description.includes(this.searchTerm)
+                );
             });
         }
 
         this.projects = filtered;
+    }
+
+    normalizeProject(project) {
+        const normalized = { ...project };
+        const lastExecution = project?.ImportExecutions__r?.length ? project.ImportExecutions__r[0] : null;
+
+        const total = Number(lastExecution?.TotalRecords__c || 0);
+        const processed = Number(lastExecution?.ProcessedRecords__c || 0);
+        const failed = Number(lastExecution?.FailedRecords__c || 0);
+        const statusRaw = (lastExecution?.Status__c || '').toLowerCase();
+
+        normalized._lastExecution = lastExecution;
+        normalized._totalRecords = Math.max(0, total);
+        normalized._processedRecords = Math.max(0, processed);
+        normalized._failedRecords = Math.max(0, failed);
+        normalized._successRecords = Math.max(0, normalized._processedRecords - normalized._failedRecords);
+        normalized._normalizedStatus = this.normalizeStatus(statusRaw);
+
+        return normalized;
+    }
+
+    normalizeStatus(status) {
+        if (status === 'inprogress' || status === 'in progress') return 'inprogress';
+        if (status === 'pending') return 'pending';
+        if (status === 'completed') return 'completed';
+        if (status === 'failed') return 'failed';
+        if (status === 'cancelled') return 'cancelled';
+        return 'draft';
+    }
+
+    buildStats(serverStats, projects) {
+        const totalProjects = Number(serverStats?.totalProjects ?? (projects || []).length);
+        const recordsImported = serverStats?.recordsImportedFormatted || this.formatNumber(serverStats?.totalRecordsImported);
+        const successRate = serverStats?.successRateFormatted || '0%';
+        let activeProjects = 0;
+
+        (projects || []).forEach((project) => {
+            if (project._normalizedStatus === 'inprogress' || project._normalizedStatus === 'pending') {
+                activeProjects += 1;
+            }
+        });
+
+        return [
+            {
+                id: 1,
+                label: 'Total Projects',
+                value: String(totalProjects),
+                change: '',
+                changeLabel: '',
+                icon: 'standard:folder',
+                iconColor: 'blue'
+            },
+            {
+                id: 2,
+                label: 'Records Imported',
+                value: recordsImported,
+                change: '',
+                changeLabel: '',
+                icon: 'standard:data_integration_hub',
+                iconColor: 'green'
+            },
+            {
+                id: 3,
+                label: 'Success Rate',
+                value: successRate,
+                change: '',
+                changeLabel: '',
+                icon: 'standard:approval',
+                iconColor: 'green'
+            },
+            {
+                id: 4,
+                label: 'Active Projects',
+                value: String(activeProjects),
+                change: '',
+                changeLabel: '',
+                icon: 'standard:event',
+                iconColor: 'purple'
+            }
+        ];
+    }
+
+    formatNumber(value) {
+        const num = Number(value || 0);
+        if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
+        if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
+        return String(Math.round(num));
     }
 
     handleProjectSelect(event) {
@@ -166,7 +210,6 @@ export default class DashboardCmp extends LightningElement {
 
     handleProjectEdit(event) {
         const projectId = event.detail;
-        // Dispatch edit event to parent
         this.dispatchEvent(new CustomEvent('projectedit', {
             detail: projectId
         }));
@@ -174,26 +217,22 @@ export default class DashboardCmp extends LightningElement {
 
     async handleProjectDelete(event) {
         const projectId = event.detail;
-        
-        // Confirm deletion
+
         if (!confirm('Are you sure you want to delete this project? This action cannot be undone.')) {
             return;
         }
-        
+
         try {
             this.isLoading = true;
             await deleteProject({ projectId: projectId });
-            
-            // Show success toast
+
             this.dispatchEvent(new ShowToastEvent({
                 title: 'Success',
                 message: 'Project deleted successfully',
                 variant: 'success'
             }));
-            
-            // Refresh dashboard data
+
             await this.refreshDashboard();
-            
         } catch (error) {
             console.error('Error deleting project:', error);
             this.dispatchEvent(new ShowToastEvent({
