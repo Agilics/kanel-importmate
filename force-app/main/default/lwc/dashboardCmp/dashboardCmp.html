@@ -48,7 +48,7 @@
                 <template for:each={filterTabs} for:item="tab">
                     <button 
                         key={tab.value} 
-                        class={tab.active} 
+                        class={tab.className} 
                         data-value={tab.value}
                         onclick={handleFilterChange}>
                         {tab.label}

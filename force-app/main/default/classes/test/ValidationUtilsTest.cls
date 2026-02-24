@@ -56,7 +56,7 @@ public class ValidationUtilsTest {
         Assert.isTrue(result1.isValid, 'Valid email should pass');
         
         ValidationUtils.ValidationResult result2 = ValidationUtils.validateEmail('user.name+tag@domain.co.uk', 'Email');
-        Assert.isFalse(result2.isValid, 'Complex valid email should not pass');
+        Assert.isTrue(result2.isValid, 'Email with + and subdomain should pass');
         
         //Invalid emails
         ValidationUtils.ValidationResult result3 = ValidationUtils.validateEmail('invalid-email', 'Email');
@@ -350,7 +350,7 @@ public class ValidationUtilsTest {
         
         //Test email with special characters
         ValidationUtils.ValidationResult result1 = ValidationUtils.validateEmail('test+tag@example.com', 'Email');
-        Assert.isFalse(result1.isValid, 'Email with + should not be valid');
+        Assert.isTrue(result1.isValid, 'Email with + is valid per RFC 5321');
         
         ValidationUtils.ValidationResult result2 = ValidationUtils.validateEmail('test.name@example-domain.com', 'Email');
         Assert.isTrue(result2.isValid, 'Email with . and - should be valid');

@@ -2,6 +2,8 @@ public with sharing class ObjectMetadataService {
     private static List<String> objectsCache;
     private static Map<String, Map<String, Schema.SObjectField>> fieldsCache = new Map<String, Map<String, Schema.SObjectField>>();
     private static Map<String, Schema.SObjectType> globalDescribe;
+    private static Map<String, Map<String, Schema.SObjectField>> rawFieldsByObject = new Map<String, Map<String, Schema.SObjectField>>();
+    private static Map<String, Set<String>> picklistValuesCache = new Map<String, Set<String>>();
 
     public static Map<String, Schema.SObjectType> getGlobalDescribeMap() {
         if (globalDescribe == null) {
@@ -92,38 +94,27 @@ public with sharing class ObjectMetadataService {
         }
         
         try {
-            // Get the field describe result
-            Schema.SObjectType sObjectType = getGlobalDescribeMap().get(objectName);
-            if (sObjectType == null) {
+            Map<String, Schema.SObjectField> fieldMap = getRawFieldsForObject(objectName);
+            if (fieldMap == null || !fieldMap.containsKey(fieldApiName)) {
                 return false;
             }
-            
-            Schema.DescribeSObjectResult describeResult = sObjectType.getDescribe();
-            Map<String, Schema.SObjectField> fieldMap = describeResult.fields.getMap();
-            
-            if (!fieldMap.containsKey(fieldApiName)) {
-                return false;
-            }
-            
-            Schema.SObjectField field = fieldMap.get(fieldApiName);
-            Schema.DescribeFieldResult fieldDescribe = field.getDescribe();
-            
-            // Check if it's a picklist field
+
+            Schema.DescribeFieldResult fieldDescribe = fieldMap.get(fieldApiName).getDescribe();
             if (fieldDescribe.getType() != Schema.DisplayType.PICKLIST) {
                 return true;
             }
-            
-            // Get picklist values
-            List<Schema.PicklistEntry> picklistValues = fieldDescribe.getPicklistValues();
-            
-            // Check if the value matches any picklist entry (case-insensitive)
-            for (Schema.PicklistEntry entry : picklistValues) {
-                if (entry.getValue().equalsIgnoreCase(value) || entry.getLabel().equalsIgnoreCase(value)) {
-                    return true;
+
+            String cacheKey = objectName + '.' + fieldApiName;
+            if (!picklistValuesCache.containsKey(cacheKey)) {
+                Set<String> allowedValues = new Set<String>();
+                for (Schema.PicklistEntry entry : fieldDescribe.getPicklistValues()) {
+                    allowedValues.add(entry.getValue() == null ? '' : entry.getValue().toLowerCase());
+                    allowedValues.add(entry.getLabel() == null ? '' : entry.getLabel().toLowerCase());
                 }
+                picklistValuesCache.put(cacheKey, allowedValues);
             }
-            
-            return false;
+
+            return picklistValuesCache.get(cacheKey).contains(value.toLowerCase());
         } catch (Exception e) {
             ErrorLogService.logException(e);
             return false;
@@ -131,20 +122,35 @@ public with sharing class ObjectMetadataService {
     }
 
     public static Schema.DisplayType getFieldType(String objectName, String fieldApiName) {
-        Schema.SObjectType sObjectType = getGlobalDescribeMap().get(objectName);
-        if (sObjectType == null) {
+        Map<String, Schema.SObjectField> objectFields = getRawFieldsForObject(objectName);
+        if (objectFields == null || !objectFields.containsKey(fieldApiName)) {
             return null;
         }
-        return sObjectType.getDescribe().fields.getMap().get(fieldApiName).getDescribe().getType();
+        return objectFields.get(fieldApiName).getDescribe().getType();
     }
 
     //get describe of the field
     public static Schema.DescribeFieldResult getFieldDescribe(String objectName, String fieldApiName) {
-        Schema.SObjectType sObjectType = getGlobalDescribeMap().get(objectName);
-        if (sObjectType == null) {
+        Map<String, Schema.SObjectField> objectFields = getRawFieldsForObject(objectName);
+        if (objectFields == null || !objectFields.containsKey(fieldApiName)) {
             return null;
         }
-        return sObjectType.getDescribe().fields.getMap().get(fieldApiName).getDescribe();
+        return objectFields.get(fieldApiName).getDescribe();
+    }
+
+    private static Map<String, Schema.SObjectField> getRawFieldsForObject(String objectName) {
+        if (String.isBlank(objectName)) {
+            return null;
+        }
+        if (!rawFieldsByObject.containsKey(objectName)) {
+            Schema.SObjectType sObjectType = getGlobalDescribeMap().get(objectName);
+            if (sObjectType == null) {
+                rawFieldsByObject.put(objectName, null);
+                return null;
+            }
+            rawFieldsByObject.put(objectName, sObjectType.getDescribe().fields.getMap());
+        }
+        return rawFieldsByObject.get(objectName);
     }
 
     public static Map<String,String> getPickListValues(String objectApiName, String fieldApiName){

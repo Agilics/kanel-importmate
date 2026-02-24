@@ -6,6 +6,11 @@
  * @last modified by  : khalidousowba
 **/
 public with sharing class Constants {
+    public static final Integer STAGING_BATCH_SIZE = 2000;
+    public static final Integer IMPORT_BATCH_SIZE_DRY_RUN = 5;
+    public static final Integer IMPORT_BATCH_SIZE_IMPORT = 25;
+    public static final Integer MAX_LOGS_PER_EXECUTION = 10000;
+
     public static final String BOOLEAN_TYPE = 'Boolean';
     public static final String DATE_TYPE = 'Date';
     public static final String DATETIME_TYPE = 'DateTime';
@@ -45,6 +50,26 @@ public with sharing class Constants {
     public static final String EXECUTION_STATUS_IN_PROGRESS = 'InProgress';
     public static final String EXECUTION_STATUS_SUSPENDED = 'Suspended';
     public static final String EXECUTION_STATUS_PENDING = 'Pending';
+    public static final String EXECUTION_STATUS_CANCELLED = 'Cancelled';
+
+    public static final String EXECUTION_PHASE_STAGING = 'Staging';
+    public static final String EXECUTION_PHASE_PREPROCESSING = 'PreProcessing';
+    public static final String EXECUTION_PHASE_VALIDATING = 'Validating';
+    public static final String EXECUTION_PHASE_IMPORTING = 'Importing';
+    public static final String EXECUTION_PHASE_CLEANUP = 'Cleanup';
+    public static final String EXECUTION_PHASE_COMPLETED = 'Completed';
+
+    public static final Integer SYNC_THRESHOLD = 50;
+    public static final Integer SMALL_BATCH_THRESHOLD = 5000;
+
+    public static final Integer PREPROCESS_BATCH_SIZE = 200;
+    public static final Integer IMPORT_DML_BATCH_SIZE = 200;
+    public static final Integer CLEANUP_BATCH_SIZE = 2000;
+    public static final Integer STAGING_RETENTION_DAYS = 2;
+
+    public static final String TIER_SYNC = 'Sync';
+    public static final String TIER_SMALL_BATCH = 'SmallBatch';
+    public static final String TIER_FULL_PIPELINE = 'FullPipeline';
 
     public static final String EXECUTION_TYPE_VALIDATION = 'Validation';
     public static final String EXECUTION_TYPE_TRANSFORMATION = 'Transformation';
