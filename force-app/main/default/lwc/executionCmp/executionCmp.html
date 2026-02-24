@@ -51,6 +51,16 @@
 
           <div class="progress-header-right">
             <span class={importStatusClass}>{formattedImportStatus}</span>
+            <template if:true={canCancelImport}>
+              <lightning-button
+                label="Cancel Import"
+                variant="destructive-text"
+                onclick={handleCancelImport}
+                icon-name="utility:close"
+                icon-position="left"
+                class="slds-m-left_small"
+              ></lightning-button>
+            </template>
           </div>
         </div>
 

@@ -12,7 +12,7 @@ private class ImportBatchTest {
             project.Id, 'AccountNumber', 'AccountNumber'
         );
 
-        //Execution for import mode
+        //import mode execution
         ImportExecution__c importExecution = TestDataFactory.createImportExecution(
             project.Id, Constants.EXECUTION_TYPE_IMPORT
         );
@@ -35,7 +35,7 @@ private class ImportBatchTest {
         }
         insert rows;
 
-        //Execution for dry run mode
+        //dry run execution
         ImportExecution__c dryRunExecution = new ImportExecution__c(
             Project__c = project.Id,
             Status__c = Constants.EXECUTION_STATUS_IN_PROGRESS,
@@ -60,7 +60,7 @@ private class ImportBatchTest {
         }
         insert dryRunRows;
 
-        //Cancelled execution
+        //cancelled execution
         ImportExecution__c cancelledExecution = new ImportExecution__c(
             Project__c = project.Id,
             Status__c = Constants.EXECUTION_STATUS_CANCELLED,
@@ -101,7 +101,7 @@ private class ImportBatchTest {
         Database.executeBatch(new ImportBatch(execution.Id, false), 200);
         Test.stopTest();
 
-        //Staging rows should be marked processed
+        //staging rows marked processed
         Integer unprocessed = [
             SELECT COUNT()
             FROM StagingRow__c
@@ -109,11 +109,11 @@ private class ImportBatchTest {
         ];
         Assert.areEqual(0, unprocessed, 'All staging rows should be marked processed');
 
-        //Accounts should be created
+        //accounts created
         Integer accountsAfter = [SELECT COUNT() FROM Account WHERE Name LIKE 'Test Account%'];
         Assert.isTrue(accountsAfter > accountsBefore, 'Accounts should be inserted');
 
-        //Execution should be finalized
+        //execution finalized
         ImportExecution__c updatedExecution = [
             SELECT Status__c, Phase__c, EndTime__c, ProcessedRecords__c
             FROM ImportExecution__c
@@ -143,11 +143,11 @@ private class ImportBatchTest {
         Database.executeBatch(new ImportBatch(execution.Id, true), 200);
         Test.stopTest();
 
-        //No accounts should be created in dry run
+        //no accounts in dry run
         Integer accountsAfter = [SELECT COUNT() FROM Account WHERE Name LIKE 'DryRun Account%'];
         Assert.areEqual(accountsBefore, accountsAfter, 'Dry run should not insert any records');
 
-        //Staging rows should still be marked processed
+        //rows still marked processed
         Integer unprocessed = [
             SELECT COUNT()
             FROM StagingRow__c
@@ -155,7 +155,7 @@ private class ImportBatchTest {
         ];
         Assert.areEqual(0, unprocessed, 'All staging rows should be marked processed even in dry run');
 
-        //Execution should be finalized
+        //execution finalized
         ImportExecution__c updatedExecution = [
             SELECT Status__c, Phase__c, EndTime__c
             FROM ImportExecution__c
@@ -178,8 +178,7 @@ private class ImportBatchTest {
         Database.executeBatch(new ImportBatch(execution.Id, false), 200);
         Test.stopTest();
 
-        //Rows should still be marked processed (execute runs but skips logic, rows still updated)
-        //The key assertion: no accounts created from cancelled execution
+        //no accounts from cancelled execution
         Integer accountsCreated = [SELECT COUNT() FROM Account WHERE Name LIKE 'Cancelled Account%'];
         Assert.areEqual(0, accountsCreated, 'Cancelled execution should not create records');
     }
@@ -198,7 +197,7 @@ private class ImportBatchTest {
         );
         insert execution;
 
-        //Rows with missing required Name field
+        //rows with missing Name
         List<StagingRow__c> badRows = new List<StagingRow__c>();
         for (Integer i = 1; i <= 2; i++) {
             badRows.add(new StagingRow__c(
@@ -216,7 +215,7 @@ private class ImportBatchTest {
         Database.executeBatch(new ImportBatch(execution.Id, false), 200);
         Test.stopTest();
 
-        //Staging rows should be marked processed
+        //staging rows marked processed
         Integer unprocessed = [
             SELECT COUNT()
             FROM StagingRow__c
@@ -224,7 +223,7 @@ private class ImportBatchTest {
         ];
         Assert.areEqual(0, unprocessed, 'All staging rows should be marked processed');
 
-        //Execution should be finalized
+        //execution finalized
         ImportExecution__c updatedExecution = [
             SELECT Status__c, Phase__c, EndTime__c, FailedRecords__c
             FROM ImportExecution__c
@@ -247,7 +246,7 @@ private class ImportBatchTest {
         );
         insert execution;
 
-        //No staging rows - batch should complete without error
+        //no rows, should complete cleanly
         Test.startTest();
         Database.executeBatch(new ImportBatch(execution.Id, false), 200);
         Test.stopTest();
