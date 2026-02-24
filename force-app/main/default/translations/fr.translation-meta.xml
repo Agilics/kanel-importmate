@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Translations xmlns="http://soap.sforce.com/2006/04/metadata">
+    <!-- Page Title & Subtitle -->
+    <customLabels>
+        <name>DataSource_Title</name>
+        <label>Choisir une source de données</label>
+    </customLabels>
+    <customLabels>
+        <name>DataSource_Subtitle</name>
+        <label>Sélectionnez comment vous souhaitez importer vos données dans Salesforce</label>
+    </customLabels>
+
+    <!-- File Upload Card -->
+    <customLabels>
+        <name>DataSource_FileUpload_Title</name>
+        <label>Importation de fichier</label>
+    </customLabels>
+    <customLabels>
+        <name>DataSource_FileUpload_Description</name>
+        <label>Importer depuis des fichiers CSV ou Excel</label>
+    </customLabels>
+    <customLabels>
+        <name>DataSource_FileUpload_Feature1</name>
+        <label>Prise en charge des formats CSV et Excel</label>
+    </customLabels>
+    <customLabels>
+        <name>DataSource_FileUpload_Feature2</name>
+        <label>Détection automatique du délimiteur</label>
+    </customLabels>
+    <customLabels>
+        <name>DataSource_FileUpload_Feature3</name>
+        <label>Prévisualisation et validation du fichier</label>
+    </customLabels>
+    <customLabels>
+        <name>DataSource_FileUpload_Button</name>
+        <label>Choisir l'importation de fichier</label>
+    </customLabels>
+
+    <!-- Salesforce Query Card -->
+    <customLabels>
+        <name>DataSource_SalesforceQuery_Title</name>
+        <label>Requête Salesforce</label>
+    </customLabels>
+    <customLabels>
+        <name>DataSource_SalesforceQuery_Description</name>
+        <label>Importer depuis Salesforce via SOQL</label>
+    </customLabels>
+    <customLabels>
+        <name>DataSource_SalesforceQuery_Feature1</name>
+        <label>Interface visuelle de création de requêtes</label>
+    </customLabels>
+    <customLabels>
+        <name>DataSource_SalesforceQuery_Feature2</name>
+        <label>Validation de requête en temps réel</label>
+    </customLabels>
+    <customLabels>
+        <name>DataSource_SalesforceQuery_Feature3</name>
+        <label>Prévisualisation des résultats de la requête</label>
+    </customLabels>
+    <customLabels>
+        <name>DataSource_SalesforceQuery_Button</name>
+        <label>Choisir le constructeur de requêtes</label>
+    </customLabels>
+
+    <!-- Navigation -->
+    <customLabels>
+        <name>DataSource_Back_Button</name>
+        <label>Retour</label>
+    </customLabels>
+
+</Translations>
