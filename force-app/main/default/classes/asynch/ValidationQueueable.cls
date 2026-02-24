@@ -5,7 +5,7 @@ public with sharing class ValidationQueueable implements Queueable {
     private Integer failedRecords;
     private Integer totalRecords;
     private Integer processedRecords;
-    @testvisible private Integer batchSize = 300;
+    @testvisible private Integer batchSize = 100;
 
     public ValidationQueueable(String projectId, List<Map<String, String>> csvData, String executionId) {
         this.projectId = projectId;
