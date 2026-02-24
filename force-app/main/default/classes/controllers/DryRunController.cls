@@ -11,48 +11,6 @@ public with sharing class DryRunController {
     }
 
     @AuraEnabled
-    public static Map<String, Object> runDryRunValidation(String projectId, List<Map<String, String>> csvData) {
-        Map<String, Object> result = new Map<String, Object>();
-
-        try {
-            ImportProject__c project = ProjectService.getProjectById(projectId);
-            if (project == null) {
-                throw new AuraHandledException('Project not found: ' + projectId);
-            }
-
-            List<FieldMapping__c> mappings = FieldMappingService.getAllMappingsByProject(projectId);
-            if (mappings.isEmpty()) {
-                throw new AuraHandledException('No field mappings found for project');
-            }
-
-            result = ExecutionService.dryRunValidation(projectId, csvData);
-            ImportExecution__c execution = ExecutionRepository.getImportExecutionById(result.get('executionId').toString());
-
-            List<ImportLog__c> validationErrors = new List<ImportLog__c>();
-            if (csvData != null && csvData.size() <= 200) {
-                validationErrors = ImportLogService.getLogsByExecutionId(result.get('executionId').toString());
-            }
-
-            Map<String, Integer> errorSummary = ExecutionService.getValidationSummary(result.get('executionId').toString());
-
-            result.put('success', true);
-            result.put('totalRecords', execution.TotalRecords__c != null ? Integer.valueOf(execution.TotalRecords__c) : 0);
-            result.put('errorCount', execution.FailedRecords__c != null ? Integer.valueOf(execution.FailedRecords__c) : 0);
-            result.put('errorSummary', errorSummary);
-            result.put('validationErrors', formatErrorsForUI(validationErrors));
-            result.put('projectName', project.Name);
-            result.put('targetObject', project.TargetObject__c);
-
-        } catch (Exception e) {
-            result.put('success', false);
-            result.put('error', e.getMessage());
-            safeLogException(e);
-        }
-
-        return result;
-    }
-
-    @AuraEnabled
     public static Map<String, Object> runDryRunValidationRollback(String projectId, List<Map<String, String>> csvData) {
         Map<String, Object> result = new Map<String, Object>();
 
@@ -221,76 +179,6 @@ public with sharing class DryRunController {
         return result;
     }
     
-    @AuraEnabled
-    public static Map<String, Object> validateSample(String projectId, List<Map<String, String>> sampleData) {
-        Map<String, Object> result = new Map<String, Object>();
-
-        try {
-            //small sync check only
-            List<Map<String, String>> sampleRows = sampleData == null
-                ? new List<Map<String, String>>()
-                : sampleData;
-
-            if (sampleRows.size() > MAX_SYNC_ROLLBACK_ROWS) {
-                result.put('success', false);
-                result.put('isSample', true);
-                result.put('sampleSize', sampleRows.size());
-                result.put(
-                    'error',
-                    'Sample validation supports up to ' + MAX_SYNC_ROLLBACK_ROWS +
-                    ' rows. Use async batch validation for larger samples.'
-                );
-                return result;
-            }
-
-            Map<String, Object> sampleResult = runDryRunValidationRollback(projectId, sampleRows);
-
-            result.put('success', true);
-            result.put('sampleSize', sampleRows.size());
-            result.put('isSample', true);
-            result.putAll(sampleResult);
-
-        } catch (Exception e) {
-            result.put('success', false);
-            result.put('error', e.getMessage());
-            safeLogException(e);
-        }
-
-        return result;
-    }
-
-    @AuraEnabled
-    public static Map<String, Object> startImport(String projectId, List<Map<String, String>> csvData) {
-        Map<String, Object> result = new Map<String, Object>();
-
-        try {
-            ImportProject__c project = ProjectService.getProjectById(projectId);
-            if (project == null) {
-                throw new AuraHandledException('Project not found: ' + projectId);
-            }
-
-            List<FieldMapping__c> mappings = FieldMappingService.getAllMappingsByProject(projectId);
-            if (mappings.isEmpty()) {
-                throw new AuraHandledException('No field mappings found for project');
-            }
-
-            Map<String, String> importResult = ExecutionService.startImport(projectId, csvData);
-
-            result.put('success', true);
-            result.put('jobId', importResult.get('jobId'));
-            result.put('executionId', importResult.get('executionId'));
-            result.put('message', 'Import started successfully. Job ID: ' + importResult.get('jobId'));
-            result.put('totalRecords', csvData.size());
-
-        } catch (Exception e) {
-            result.put('success', false);
-            result.put('error', e.getMessage());
-            safeLogException(e);
-        }
-
-        return result;
-    }
-
     @AuraEnabled(cacheable=false)
     public static Map<String, Object> getExecutionDetails(String executionId) {
         Map<String, Object> result = new Map<String, Object>();

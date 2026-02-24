@@ -174,8 +174,7 @@ public class ImportUtilsTest {
             System.debug('Test Records after lookup resolution: ' + testRecords);
             
             //Verify lookups were resolved
-            // Note: This test was expecting lookup resolution to work, but that functionality
-            // is now tested through integration tests in ImportQueueableTest and ValidationServiceTest
+            //lookup resolution tested in LookupResolverTest and batch integration tests
             Assert.isNotNull(testRecords, 'Records should not be null');
         }
     }
