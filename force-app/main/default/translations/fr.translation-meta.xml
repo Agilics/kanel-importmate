@@ -1,180 +1,71 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Translations xmlns="http://soap.sforce.com/2006/04/metadata">
- <!-- pagination info -->
-   <customLabels>
-        <name>CsvUploader_PageTitle</name>
-        <label>Importation et affichage des données CSV</label>
-    </customLabels>
-    <!-- Page Header -->
+    <!-- Page Title & Subtitle -->
     <customLabels>
-        <name>CsvUploader_PageSubtitle</name>
-        <label>Importez votre fichier CSV et prévisualisez les données</label>
+        <name>DataSource_Title</name>
+        <label>Choisir une source de données</label>
     </customLabels>
     <customLabels>
-        <name>CsvUploader_ImportSettings_Button</name>
-        <label>Paramètres d'importation</label>
+        <name>DataSource_Subtitle</name>
+        <label>Sélectionnez comment vous souhaitez importer vos données dans Salesforce</label>
     </customLabels>
 
     <!-- File Upload Card -->
     <customLabels>
-        <name>CsvUploader_Card_Title</name>
+        <name>DataSource_FileUpload_Title</name>
         <label>Importation de fichier</label>
     </customLabels>
     <customLabels>
-        <name>CsvUploader_Card_Subtitle</name>
-        <label>Importez votre fichier CSV pour charger les données</label>
+        <name>DataSource_FileUpload_Description</name>
+        <label>Importer depuis des fichiers CSV ou Excel</label>
+    </customLabels>
+    <customLabels>
+        <name>DataSource_FileUpload_Feature1</name>
+        <label>Prise en charge des formats CSV et Excel</label>
+    </customLabels>
+    <customLabels>
+        <name>DataSource_FileUpload_Feature2</name>
+        <label>Détection automatique du délimiteur</label>
+    </customLabels>
+    <customLabels>
+        <name>DataSource_FileUpload_Feature3</name>
+        <label>Prévisualisation et validation du fichier</label>
+    </customLabels>
+    <customLabels>
+        <name>DataSource_FileUpload_Button</name>
+        <label>Choisir l'importation de fichier</label>
     </customLabels>
 
-    <!-- pagination info -->
+    <!-- Salesforce Query Card -->
     <customLabels>
-        <name>DataTable_Showing_Entries</name>
-        <label>Affichage de {0} à {1} sur {2} éléments</label>
-    </customLabels>
-    
-    <!-- Dropzone -->
-    <customLabels>
-        <name>CsvUploader_Dropzone_Text</name>
-        <label>Déposez votre fichier CSV ici</label>
+        <name>DataSource_SalesforceQuery_Title</name>
+        <label>Requête Salesforce</label>
     </customLabels>
     <customLabels>
-        <name>CsvUploader_Dropzone_Browse</name>
-        <label>ou parcourir les fichiers</label>
+        <name>DataSource_SalesforceQuery_Description</name>
+        <label>Importer depuis Salesforce via SOQL</label>
     </customLabels>
     <customLabels>
-        <name>CsvUploader_Dropzone_Hint</name>
-        <label>Fichiers CSV jusqu'à 50 Mo acceptés</label>
+        <name>DataSource_SalesforceQuery_Feature1</name>
+        <label>Interface visuelle de création de requêtes</label>
     </customLabels>
     <customLabels>
-        <name>CsvUploader_Loading_Text</name>
-        <label>Chargement…</label>
-    </customLabels>
-
-    <!-- Data Table -->
-    <customLabels>
-        <name>CsvUploader_Table_Title</name>
-        <label>Données importées</label>
+        <name>DataSource_SalesforceQuery_Feature2</name>
+        <label>Validation de requête en temps réel</label>
     </customLabels>
     <customLabels>
-        <name>CsvUploader_Search_Placeholder</name>
-        <label>Rechercher dans les données...</label>
+        <name>DataSource_SalesforceQuery_Feature3</name>
+        <label>Prévisualisation des résultats de la requête</label>
     </customLabels>
     <customLabels>
-        <name>CsvUploader_Filters_Button</name>
-        <label>Filtres</label>
-    </customLabels>
-    <customLabels>
-        <name>CsvUploader_Table_Actions</name>
-        <label>Actions</label>
-    </customLabels>
-    <customLabels>
-        <name>CsvUploader_Table_Edit_Tooltip</name>
-        <label>Modifier</label>
-    </customLabels>
-    <customLabels>
-        <name>CsvUploader_Table_Preview_Tooltip</name>
-        <label>Prévisualiser</label>
+        <name>DataSource_SalesforceQuery_Button</name>
+        <label>Choisir le constructeur de requêtes</label>
     </customLabels>
 
-    <!-- Pagination -->
+    <!-- Navigation -->
     <customLabels>
-        <name>CsvUploader_Pagination_Previous</name>
-        <label>Précédent</label>
-    </customLabels>
-    <customLabels>
-        <name>CsvUploader_Pagination_Next</name>
-        <label>Suivant</label>
-    </customLabels>
-
-    <!-- Footer -->
-    <customLabels>
-        <name>CsvUploader_Back_Button</name>
-        <label>Retour à la source de données</label>
-    </customLabels>
-    <customLabels>
-        <name>CsvUploader_ContinueMapping_Button</name>
-        <label>Continuer vers le mapping</label>
-    </customLabels>
-
-    <!-- Filters Modal -->
-    <customLabels>
-        <name>CsvUploader_Modal_Filters_Title</name>
-        <label>Filtres</label>
-    </customLabels>
-    <customLabels>
-        <name>CsvUploader_Modal_Filters_Column</name>
-        <label>Colonne</label>
-    </customLabels>
-    <customLabels>
-        <name>CsvUploader_Modal_Filters_ColumnDefault</name>
-        <label>-- choisir --</label>
-    </customLabels>
-    <customLabels>
-        <name>CsvUploader_Modal_Filters_Operator</name>
-        <label>Opérateur</label>
-    </customLabels>
-    <customLabels>
-        <name>CsvUploader_Modal_Filters_OpContains</name>
-        <label>contient</label>
-    </customLabels>
-    <customLabels>
-        <name>CsvUploader_Modal_Filters_OpEquals</name>
-        <label>est égal à</label>
-    </customLabels>
-    <customLabels>
-        <name>CsvUploader_Modal_Filters_OpStarts</name>
-        <label>commence par</label>
-    </customLabels>
-    <customLabels>
-        <name>CsvUploader_Modal_Filters_Value</name>
-        <label>Valeur</label>
-    </customLabels>
-    <customLabels>
-        <name>CsvUploader_Modal_Filters_Clear</name>
-        <label>Effacer</label>
-    </customLabels>
-
-    <!-- Settings Modal -->
-    <customLabels>
-        <name>CsvUploader_Modal_Settings_Title</name>
-        <label>Paramètres d'importation</label>
-    </customLabels>
-    <customLabels>
-        <name>CsvUploader_Modal_Settings_RowsPerPage</name>
-        <label>Lignes par page</label>
-    </customLabels>
-    <customLabels>
-        <name>CsvUploader_Modal_Settings_PreviewLimit</name>
-        <label>Limite de prévisualisation (fichiers volumineux)</label>
-    </customLabels>
-
-    <!-- Preview Modal -->
-    <customLabels>
-        <name>CsvUploader_Modal_Preview_Title</name>
-        <label>Prévisualisation de la ligne</label>
-    </customLabels>
-
-    <!-- Edit Modal -->
-    <customLabels>
-        <name>CsvUploader_Modal_Edit_Title</name>
-        <label>Modifier la ligne</label>
-    </customLabels>
-
-    <!-- Shared Modal Buttons -->
-    <customLabels>
-        <name>CsvUploader_Modal_Cancel</name>
-        <label>Annuler</label>
-    </customLabels>
-    <customLabels>
-        <name>CsvUploader_Modal_Apply</name>
-        <label>Appliquer</label>
-    </customLabels>
-    <customLabels>
-        <name>CsvUploader_Modal_Close</name>
-        <label>Fermer</label>
-    </customLabels>
-    <customLabels>
-        <name>CsvUploader_Modal_Save</name>
-        <label>Enregistrer</label>
+        <name>DataSource_Back_Button</name>
+        <label>Retour</label>
     </customLabels>
 
 </Translations>
