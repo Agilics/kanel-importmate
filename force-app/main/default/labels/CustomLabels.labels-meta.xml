@@ -1,0 +1,330 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomLabels xmlns="http://soap.sforce.com/2006/04/metadata">
+
+    <!-- Page Header -->
+    <labels>
+        <fullName>CsvUploader_PageSubtitle</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_PageSubtitle</shortDescription>
+        <value>Upload your CSV file and preview the data</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_ImportSettings_Button</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_ImportSettings_Button</shortDescription>
+        <value>Import Settings</value>
+    </labels>
+
+    <!-- File Upload Card -->
+    <labels>
+        <fullName>CsvUploader_Card_Title</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Card_Title</shortDescription>
+        <value>File Upload</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Card_Subtitle</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Card_Subtitle</shortDescription>
+        <value>Upload your CSV file to import data</value>
+    </labels>
+
+    <!-- Dropzone -->
+    <labels>
+        <fullName>CsvUploader_Dropzone_Text</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Dropzone_Text</shortDescription>
+        <value>Drop your CSV file here</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Dropzone_Browse</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Dropzone_Browse</shortDescription>
+        <value>or browse files</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Dropzone_Hint</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Dropzone_Hint</shortDescription>
+        <value>Supports CSV files up to 50MB</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Loading_Text</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Loading_Text</shortDescription>
+        <value>Loading…</value>
+    </labels>
+
+    <!-- Data Table -->
+    <labels>
+        <fullName>CsvUploader_Table_Title</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Table_Title</shortDescription>
+        <value>Imported Data</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Search_Placeholder</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Search_Placeholder</shortDescription>
+        <value>Search data...</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Filters_Button</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Filters_Button</shortDescription>
+        <value>Filters</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Table_Actions</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Table_Actions</shortDescription>
+        <value>Actions</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Table_Edit_Tooltip</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Table_Edit_Tooltip</shortDescription>
+        <value>Edit</value>
+    </labels>
+     <labels>
+        <fullName>CsvUploader_PageTitle</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Titre de la page</shortDescription>
+        <value>CSV Data Import & Display</value>
+    </labels>
+    <labels>
+        <fullName>DataTable_Showing_Entries</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Pagination informations</shortDescription>
+        <value>Showing {0} to {1} of {2} entries</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Table_Preview_Tooltip</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Table_Preview_Tooltip</shortDescription>
+        <value>Preview</value>
+    </labels>
+
+    <!-- Pagination -->
+    <labels>
+        <fullName>CsvUploader_Pagination_Previous</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Pagination_Previous</shortDescription>
+        <value>Previous</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Pagination_Next</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Pagination_Next</shortDescription>
+        <value>Next</value>
+    </labels>
+
+    <!-- Footer -->
+    <labels>
+        <fullName>CsvUploader_Back_Button</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Back_Button</shortDescription>
+        <value>Back to Data Source</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_ContinueMapping_Button</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_ContinueMapping_Button</shortDescription>
+        <value>Continue to Mapping</value>
+    </labels>
+
+    <!-- Filters Modal -->
+    <labels>
+        <fullName>CsvUploader_Modal_Filters_Title</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Filters_Title</shortDescription>
+        <value>Filters</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Filters_Column</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Filters_Column</shortDescription>
+        <value>Column</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Filters_ColumnDefault</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Filters_ColumnDefault</shortDescription>
+        <value>-- choose --</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Filters_Operator</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Filters_Operator</shortDescription>
+        <value>Operator</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Filters_OpContains</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Filters_OpContains</shortDescription>
+        <value>contains</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Filters_OpEquals</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Filters_OpEquals</shortDescription>
+        <value>equals</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Filters_OpStarts</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Filters_OpStarts</shortDescription>
+        <value>starts with</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Filters_Value</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Filters_Value</shortDescription>
+        <value>Value</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Filters_Clear</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Filters_Clear</shortDescription>
+        <value>Clear</value>
+    </labels>
+
+    <!-- Settings Modal -->
+    <labels>
+        <fullName>CsvUploader_Modal_Settings_Title</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Settings_Title</shortDescription>
+        <value>Import Settings</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Settings_RowsPerPage</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Settings_RowsPerPage</shortDescription>
+        <value>Rows per page</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Settings_PreviewLimit</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Settings_PreviewLimit</shortDescription>
+        <value>Preview limit (large files)</value>
+    </labels>
+
+    <!-- Preview Modal -->
+    <labels>
+        <fullName>CsvUploader_Modal_Preview_Title</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Preview_Title</shortDescription>
+        <value>Row Preview</value>
+    </labels>
+
+    <!-- Edit Modal -->
+    <labels>
+        <fullName>CsvUploader_Modal_Edit_Title</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Edit_Title</shortDescription>
+        <value>Edit Row</value>
+    </labels>
+
+    <!-- Shared Modal Buttons -->
+    <labels>
+        <fullName>CsvUploader_Modal_Cancel</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Cancel</shortDescription>
+        <value>Cancel</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Apply</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Apply</shortDescription>
+        <value>Apply</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Close</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Close</shortDescription>
+        <value>Close</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Save</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Save</shortDescription>
+        <value>Save</value>
+    </labels>
+
+</CustomLabels>
