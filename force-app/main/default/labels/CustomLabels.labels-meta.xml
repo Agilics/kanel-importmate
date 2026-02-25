@@ -1,7 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomLabels xmlns="http://soap.sforce.com/2006/04/metadata">
 
-    <!-- Project Tab filters -->
+    <!-- Project Card - Header actions -->
+
+    <!-- Project Card - Meta items -->
+    <labels>
+        <fullName>ProjectCard_Meta_Target</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for target object meta item</shortDescription>
+        <value>Target:</value>
+        <categories>ProjectCard Meta</categories>
+    </labels>
+
+    <labels>
+        <fullName>ProjectCard_Meta_Records</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for records count meta item</shortDescription>
+        <value>Records:</value>
+        <categories>ProjectCard Meta</categories>
+    </labels>
+
+    <labels>
+        <fullName>ProjectCard_Meta_Modified</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for last modified date meta item</shortDescription>
+        <value>Modified:</value>
+        <categories>ProjectCard Meta</categories>
+    </labels>
+
+    <!-- Project Card - Progress section -->
+    <labels>
+        <fullName>ProjectCard_Progress_Label</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for progress bar section</shortDescription>
+        <value>Progress</value>
+        <categories>ProjectCard Progress</categories>
+    </labels>
+
+    <labels>
+        <fullName>ProjectCard_No_Description</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription> No Description text </shortDescription>
+        <value>No Description</value>
+        <categories>ProjectCard text</categories>
+    </labels>
+      <!-- Project Tab filters -->
      <labels>
         <fullName>Dashboard_FilterTab_Title</fullName>
         <language>en_US</language>
@@ -172,6 +220,108 @@
         <shortDescription>Label for Create Your First Project</shortDescription>
         <value>Create Your First Project</value>
         <categories>Dashboard Button</categories>
+    </labels>
+     <!-- ===================== -->
+    <!-- PROJECT RECENT - LWC -->
+    <!-- ===================== -->
+
+    <labels>
+        <fullName>ProjectRecent_Name</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Project name label</shortDescription>
+        <value>Project Name</value>
+        <categories>Project Recent</categories>
+    </labels>
+
+    <labels>
+        <fullName>ProjectRecent_Description</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Project description label</shortDescription>
+        <value>Description</value>
+        <categories>Project Recent</categories>
+    </labels>
+
+    <labels>
+        <fullName>ProjectRecent_Target_Object</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Target Salesforce object label</shortDescription>
+        <value>Target Salesforce Object</value>
+        <categories>Project Recent</categories>
+    </labels>
+
+    <labels>
+        <fullName>ProjectRecent_Title</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Create new project title</shortDescription>
+        <value>Create New Project</value>
+        <categories>Project Recent</categories>
+    </labels>
+
+    <labels>
+        <fullName>ProjectRecent_Use_Existing</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Use existing project card title</shortDescription>
+        <value>Use Existing Project</value>
+        <categories>Project Recent</categories>
+    </labels>
+
+    <labels>
+        <fullName>ProjectRecent_Use_Existing_Description</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Description for using an existing project</shortDescription>
+        <value>Continue with a previously created project. Reuse your field mappings and settings.</value>
+        <categories>Project Recent</categories>
+    </labels>
+
+    <labels>
+        <fullName>ProjectRecent_Recent_Projects</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Recent projects section title</shortDescription>
+        <value>Recent Projects</value>
+        <categories>Project Recent</categories>
+    </labels>
+
+    <labels>
+        <fullName>ProjectRecent_No_Project</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>No project message</shortDescription>
+        <value>No project import yet, please add</value>
+        <categories>Project Recent</categories>
+    </labels>
+
+    <labels>
+        <fullName>ProjectRecent_Select_Project</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Select project button</shortDescription>
+        <value>Select this project</value>
+        <categories>Project Recent</categories>
+    </labels>
+
+    <labels>
+        <fullName>ProjectRecent_Target_SObject</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Target object label in project list</shortDescription>
+        <value>Target SObject :</value>
+        <categories>Project Recent</categories>
+    </labels>
+
+    <labels>
+        <fullName>ProjectRecent_Created_Label</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Created date label</shortDescription>
+        <value>Created :</value>
+        <categories>Project Recent</categories>
     </labels>
 
 </CustomLabels>
