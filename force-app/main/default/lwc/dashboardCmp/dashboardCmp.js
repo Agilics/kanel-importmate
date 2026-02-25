@@ -3,15 +3,47 @@ import getDashboardData from '@salesforce/apex/DashboardController.getDashboardD
 import deleteProject from '@salesforce/apex/DashboardController.deleteProject';
 import { refreshApex } from '@salesforce/apex';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { navigateToPage } from 'c/utility'
+import LightningConfirm from "lightning/confirm";
+// import labels for tab filters
+import Dashboard_Filter_All_Project from '@salesforce/label/c.Dashboard_FilterTab_All_Projects';
+import Dashboard_Filter_Active from '@salesforce/label/c.Dashboard_FilterTab_Active';
+import Dashboard_Filter_Completed from '@salesforce/label/c.Dashboard_FilterTab_Completed'; 
+import Dashboard_Filter_Scheduled from '@salesforce/label/c.Dashboard_FilterTab_Scheduled';
+
+import Dashboard_Input_Search_Placeholder from '@salesforce/label/c.Dashboard_Input_Search_Projects_Placeholder';
+import Dashboard_FilterTab_Title from '@salesforce/label/c.Dashboard_FilterTab_Title';
+import Dashboard_Project_Details_Title from '@salesforce/label/c.Dashboard_FilterTab_Subtitle';
+
+import Dashboard_Delete_Confirm_Header from '@salesforce/label/c.Dashboard_Delete_Confirm_Header'; 
+
+//import labels for toast messages & dialog confirmation
+import Dashboard_Delete_Confirm from '@salesforce/label/c.Dashboard_Confirm_Delete_Message';
+import Dashboard_Delete_Success from '@salesforce/label/c.Dashboard_Delete_Success_Message';
+ 
+// Label for no projects message
+import Dashboard_No_Projects from '@salesforce/label/c.Dashboard_No_Project_Message';
+import Dashboard_No_Project_Error_Message from '@salesforce/label/c.Dashboard_No_Project_Error_Message';
+
+// Card Key Metrics labels
+import Dashboard_Stat_Total_Projects from '@salesforce/label/c.Dashboard_Stat_TotalProjects';
+import Dashboard_Stat_Records_Imported from '@salesforce/label/c.Dashboard_Stat_RecordImported';
+import Dashboard_Stat_Success_Rate from '@salesforce/label/c.Dashboard_Stat_SuccessRate';
+import Dashboard_Stat_Active_Projects from '@salesforce/label/c.Dashboard_Stat_ActiveProject';
+
+// label for buttons
+
+import Dashboard_Button_New_Project from '@salesforce/label/c.Dashboard_Button_New_Project';
+import Dashboard_Button_Create_First_Project from '@salesforce/label/c.Dashboard_Button_Create_First_Project';
 
 export default class DashboardCmp extends LightningElement {
     @track stats = [];
 
     @track filterTabs = [
-        { label: 'All Projects', value: 'all', active: true, className: 'filter-tab active' },
-        { label: 'Active', value: 'active', active: false, className: 'filter-tab' },
-        { label: 'Completed', value: 'completed', active: false, className: 'filter-tab' },
-        { label: 'Scheduled', value: 'scheduled', active: false, className: 'filter-tab' }
+        { label: Dashboard_Filter_All_Project, value: 'all', active: true },
+        { label: Dashboard_Filter_Active, value: 'active', active: false },
+        { label: Dashboard_Filter_Completed, value: 'completed', active: false },
+        { label: Dashboard_Filter_Scheduled, value: 'scheduled', active: false }
     ];
 
     @track projects = [];
@@ -21,14 +53,68 @@ export default class DashboardCmp extends LightningElement {
     searchTerm = '';
     wiredDashboardResult;
 
+    buttonLabel = {
+        newProject: Dashboard_Button_New_Project,
+        createFirstProject: Dashboard_Button_Create_First_Project
+    };
+
+    sections ={
+        title: Dashboard_FilterTab_Title,
+        detailsTitle: Dashboard_Project_Details_Title
+    }
+
+    placeholder = Dashboard_Input_Search_Placeholder;
+
+    // Wire to get dashboard data
     @wire(getDashboardData, { limitor: 50 })
     wiredDashboard(result) {
         this.wiredDashboardResult = result;
         if (result.data) {
             this.allProjects = (result.data.projects || []).map((project) => this.normalizeProject(project));
             this.projects = [...this.allProjects];
-            this.stats = this.buildStats(result.data.stats, this.allProjects);
-
+            
+            // Process stats
+            if (result.data.stats) {
+                this.stats = [
+                    {
+                        id: 1,
+                        label: Dashboard_Stat_Total_Projects,
+                        value: String(result.data.stats.totalProjects || 0),
+                        change: '',
+                        changeLabel: '',
+                        icon: 'standard:folder',
+                        iconColor: 'blue'
+                    },
+                    {
+                        id: 2,
+                        label: Dashboard_Stat_Records_Imported,
+                        value: result.data.stats.recordsImportedFormatted || '0',
+                        change: '',
+                        changeLabel: '',
+                        icon: 'standard:data_integration_hub',
+                        iconColor: 'green'
+                    },
+                    {
+                        id: 3,
+                        label: Dashboard_Stat_Success_Rate,
+                        value: result.data.stats.successRateFormatted || '0%',
+                        change: '',
+                        changeLabel: '',
+                        icon: 'standard:approval',
+                        iconColor: 'green'
+                    },
+                    {
+                        id: 4,
+                        label: Dashboard_Stat_Active_Projects,
+                        value: String(result.data.stats.activeSchedules || 0),
+                        change: '',
+                        changeLabel: '',
+                        icon: 'standard:event',
+                        iconColor: 'purple'
+                    }
+                ];
+            }
+            
             this.isLoading = false;
             this.error = undefined;
         } else if (result.error) {
@@ -41,29 +127,34 @@ export default class DashboardCmp extends LightningElement {
         }
     }
 
+    //vérification de la présence de projets pour afficher le message approprié
     get hasProjects() {
         return this.projects && this.projects.length > 0;
     }
 
+    //vérification de l'état de chargement ou d'erreur pour afficher le message approprié
     get noProjectsMessage() {
         if (this.isLoading) {
             return 'Loading projects...';
         }
         if (this.error) {
-            return 'Error loading projects. Please try again.';
+            return Dashboard_No_Project_Error_Message;
         }
-        return 'No projects found. Create your first project to get started.';
+        return Dashboard_No_Projects;
     }
 
+    //recherche de projets par nom, cible ou description
     handleSearch(event) {
         this.searchTerm = (event.target.value || '').toLowerCase();
         this.filterProjects();
     }
 
+    //création d'un nouveau projet
     handleNewProject() {
         this.dispatchEvent(new CustomEvent('newproject'));
     }
 
+    // gestion du changement de filtre
     handleFilterChange(event) {
         const selectedValue = event.currentTarget.dataset.value;
         this.filterTabs = this.filterTabs.map((tab) => {
@@ -77,6 +168,7 @@ export default class DashboardCmp extends LightningElement {
         this.filterProjects();
     }
 
+    // filtrage des projets en fonction du statut et de la recherche
     filterProjects() {
         const activeFilter = this.filterTabs.find((tab) => tab.active)?.value || 'all';
         let filtered = [...this.allProjects];
@@ -114,93 +206,7 @@ export default class DashboardCmp extends LightningElement {
         this.projects = filtered;
     }
 
-    normalizeProject(project) {
-        const normalized = { ...project };
-        const lastExecution = project?.ImportExecutions__r?.length ? project.ImportExecutions__r[0] : null;
-
-        const total = Number(lastExecution?.TotalRecords__c || 0);
-        const processed = Number(lastExecution?.ProcessedRecords__c || 0);
-        const failed = Number(lastExecution?.FailedRecords__c || 0);
-        const statusRaw = (lastExecution?.Status__c || '').toLowerCase();
-
-        normalized._lastExecution = lastExecution;
-        normalized._totalRecords = Math.max(0, total);
-        normalized._processedRecords = Math.max(0, processed);
-        normalized._failedRecords = Math.max(0, failed);
-        normalized._successRecords = Math.max(0, normalized._processedRecords - normalized._failedRecords);
-        normalized._normalizedStatus = this.normalizeStatus(statusRaw);
-
-        return normalized;
-    }
-
-    normalizeStatus(status) {
-        if (status === 'inprogress' || status === 'in progress') return 'inprogress';
-        if (status === 'pending') return 'pending';
-        if (status === 'completed') return 'completed';
-        if (status === 'failed') return 'failed';
-        if (status === 'cancelled') return 'cancelled';
-        return 'draft';
-    }
-
-    buildStats(serverStats, projects) {
-        const totalProjects = Number(serverStats?.totalProjects ?? (projects || []).length);
-        const recordsImported = serverStats?.recordsImportedFormatted || this.formatNumber(serverStats?.totalRecordsImported);
-        const successRate = serverStats?.successRateFormatted || '0%';
-        let activeProjects = 0;
-
-        (projects || []).forEach((project) => {
-            if (project._normalizedStatus === 'inprogress' || project._normalizedStatus === 'pending') {
-                activeProjects += 1;
-            }
-        });
-
-        return [
-            {
-                id: 1,
-                label: 'Total Projects',
-                value: String(totalProjects),
-                change: '',
-                changeLabel: '',
-                icon: 'standard:folder',
-                iconColor: 'blue'
-            },
-            {
-                id: 2,
-                label: 'Records Imported',
-                value: recordsImported,
-                change: '',
-                changeLabel: '',
-                icon: 'standard:data_integration_hub',
-                iconColor: 'green'
-            },
-            {
-                id: 3,
-                label: 'Success Rate',
-                value: successRate,
-                change: '',
-                changeLabel: '',
-                icon: 'standard:approval',
-                iconColor: 'green'
-            },
-            {
-                id: 4,
-                label: 'Active Projects',
-                value: String(activeProjects),
-                change: '',
-                changeLabel: '',
-                icon: 'standard:event',
-                iconColor: 'purple'
-            }
-        ];
-    }
-
-    formatNumber(value) {
-        const num = Number(value || 0);
-        if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
-        if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
-        return String(Math.round(num));
-    }
-
+    //sélection d'un projet
     handleProjectSelect(event) {
         const projectId = event.detail;
         this.dispatchEvent(new CustomEvent('projectselect', {
@@ -208,6 +214,7 @@ export default class DashboardCmp extends LightningElement {
         }));
     }
 
+    //modification d'un projet
     handleProjectEdit(event) {
         const projectId = event.detail;
         this.dispatchEvent(new CustomEvent('projectedit', {
@@ -215,10 +222,18 @@ export default class DashboardCmp extends LightningElement {
         }));
     }
 
+    //suppression d'un projet avec confirmation
     async handleProjectDelete(event) {
         const projectId = event.detail;
-
-        if (!confirm('Are you sure you want to delete this project? This action cannot be undone.')) {
+        
+        const confirm = await LightningConfirm.open({
+            message: Dashboard_Delete_Confirm,
+            variant: 'header',
+            label: Dashboard_Delete_Confirm_Header,
+            theme: 'warning'
+        });
+        // Confirm deletion
+        if (!confirm) {
             return;
         }
 
@@ -228,7 +243,7 @@ export default class DashboardCmp extends LightningElement {
 
             this.dispatchEvent(new ShowToastEvent({
                 title: 'Success',
-                message: 'Project deleted successfully',
+                message: Dashboard_Delete_Success,
                 variant: 'success'
             }));
 
