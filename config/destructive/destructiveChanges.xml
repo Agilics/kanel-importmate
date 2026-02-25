@@ -1,8 +1,4 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<<<<<<< feature/traduction-formulaires-projet
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
-=======
-<Package xmlns="http://soap.sforce.com/2006/04/metadata"> 
->>>>>>> develop
   <version>58.0</version>
 </Package>
