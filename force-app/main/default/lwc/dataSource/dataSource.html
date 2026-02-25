@@ -2,51 +2,55 @@
    @description       : Data source selector page - shows selection cards for CSV or SOQL
    @author            : ChangeMeIn@UserSettingsUnder.SFDoc
    @group             : 
-   @last modified on  : 12-22-2025
+   @last modified on  : 02-23-2026
    @last modified by  : Mouhamed NIANG
+   @Modification: Add custom labels
 -->
-<template>
+   <template>
     <div class="container" id="container">
-      <!-- header title -->
-      <div class="header">
-        <h1 class="header-title">Choose Data Source</h1>
-        <p class="header-subtitle">
-          Select how you want to import your data into Salesforce
-        </p>
-      </div>
-      <div class="cards">
-        <!-- CARD FILE UPLOAD -->
-        <div class="upload">
-          <c-data-source-card
-            contents={uploadContents}
-            title={uploadTitle}
-            subtitle={uploadSubtitle}
-            is-upload={isUpload}
-            current-project={currentProject}
-            oncardaction={handleCSV}
-          >
-          </c-data-source-card>
+
+        <!-- Header title -->
+        <div class="header">
+            <h1 class="header-title">{label.title}</h1>
+            <p class="header-subtitle">{label.subtitle}</p>
         </div>
-        <!-- END CARD FILE UPLOAD -->
-  
-        <!-- CARD QUERY BUILDER -->
-        <div class="query">
-          <c-data-source-card
-            contents={queryContents}
-            title={queryTitle}
-            subtitle={querySubTitle}
-            is-upload={isNotUpload}
-            current-project={currentProject}
-            oncardaction={handleSOQL}
-          >
-          </c-data-source-card>
+
+        <div class="cards">
+
+            <!-- CARD FILE UPLOAD -->
+            <div class="upload">
+                <c-data-source-card
+                    contents={uploadContents}
+                    title={label.uploadTitle}
+                    subtitle={label.uploadSubtitle}
+                    text-button={textButton}
+                    is-upload={isUpload}
+                    current-project={currentProject}
+                    oncardaction={handleCSV}
+                ></c-data-source-card>
+            </div>
+            <!-- END CARD FILE UPLOAD -->
+
+            <!-- CARD QUERY BUILDER -->
+            <div class="query">
+                <c-data-source-card
+                    contents={queryContents}
+                    title={label.queryTitle}
+                    subtitle={label.querySubTitle}
+                    text-button={textButton}
+                    is-upload={isNotUpload}
+                    current-project={currentProject}
+                    oncardaction={handleSOQL}
+                ></c-data-source-card>
+            </div>
+            <!-- END CARD QUERY BUILDER -->
+
         </div>
-        <!-- END CARD QUERY UPLOAD -->
-      </div>
-  
-        <!-- Cancel Button -->
-      <button type="button" class="btn btn-secondary" onclick={handleBackToProjectSetup}>
-          <span>Back</span>
-      </button>
+
+        <!-- Back Button -->
+        <button type="button" class="btn btn-secondary" onclick={handleBackToProjectSetup}>
+            <span>{label.back}</span>
+        </button>
+
     </div>
-  </template>
+</template>

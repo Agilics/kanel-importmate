@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomLabels xmlns="http://soap.sforce.com/2006/04/metadata">
+
+    <!-- Page Title & Subtitle -->
+    <labels>
+        <fullName>DataSource_Title</fullName>
+        <categories>DataSource</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DataSource_Title</shortDescription>
+        <value>Choose Data Source</value>
+    </labels>
+    <labels>
+        <fullName>DataSource_Subtitle</fullName>
+        <categories>DataSource</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DataSource_Subtitle</shortDescription>
+        <value>Select how you want to import your data into Salesforce</value>
+    </labels>
+
+    <!-- File Upload Card -->
+    <labels>
+        <fullName>DataSource_FileUpload_Title</fullName>
+        <categories>DataSource</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DataSource_FileUpload_Title</shortDescription>
+        <value>File Upload</value>
+    </labels>
+    <labels>
+        <fullName>DataSource_FileUpload_Description</fullName>
+        <categories>DataSource</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DataSource_FileUpload_Description</shortDescription>
+        <value>Import from CSV or Excel files</value>
+    </labels>
+    <labels>
+        <fullName>DataSource_FileUpload_Feature1</fullName>
+        <categories>DataSource</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DataSource_FileUpload_Feature1</shortDescription>
+        <value>Support for CSV and Excel formats</value>
+    </labels>
+    <labels>
+        <fullName>DataSource_FileUpload_Feature2</fullName>
+        <categories>DataSource</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DataSource_FileUpload_Feature2</shortDescription>
+        <value>Automatic delimiter detection</value>
+    </labels>
+    <labels>
+        <fullName>DataSource_FileUpload_Feature3</fullName>
+        <categories>DataSource</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DataSource_FileUpload_Feature3</shortDescription>
+        <value>File preview and validation</value>
+    </labels>
+    <labels>
+        <fullName>DataSource_FileUpload_Button</fullName>
+        <categories>DataSource</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DataSource_FileUpload_Button</shortDescription>
+        <value>Choose File Upload</value>
+    </labels>
+
+    <!-- Salesforce Query Card -->
+    <labels>
+        <fullName>DataSource_SalesforceQuery_Title</fullName>
+        <categories>DataSource</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DataSource_SalesforceQuery_Title</shortDescription>
+        <value>Salesforce Query</value>
+    </labels>
+    <labels>
+        <fullName>DataSource_SalesforceQuery_Description</fullName>
+        <categories>DataSource</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DataSource_SalesforceQuery_Description</shortDescription>
+        <value>Import from Salesforce using SOQL</value>
+    </labels>
+    <labels>
+        <fullName>DataSource_SalesforceQuery_Feature1</fullName>
+        <categories>DataSource</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DataSource_SalesforceQuery_Feature1</shortDescription>
+        <value>Visual query builder interface</value>
+    </labels>
+    <labels>
+        <fullName>DataSource_SalesforceQuery_Feature2</fullName>
+        <categories>DataSource</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DataSource_SalesforceQuery_Feature2</shortDescription>
+        <value>Real-time query validation</value>
+    </labels>
+    <labels>
+        <fullName>DataSource_SalesforceQuery_Feature3</fullName>
+        <categories>DataSource</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DataSource_SalesforceQuery_Feature3</shortDescription>
+        <value>Preview query results</value>
+    </labels>
+    <labels>
+        <fullName>DataSource_SalesforceQuery_Button</fullName>
+        <categories>DataSource</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DataSource_SalesforceQuery_Button</shortDescription>
+        <value>Choose Query Builder</value>
+    </labels>
+
+    <!-- Navigation -->
+    <labels>
+        <fullName>DataSource_Back_Button</fullName>
+        <categories>DataSource</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DataSource_Back_Button</shortDescription>
+        <value>Back</value>
+    </labels>
+
+</CustomLabels>
