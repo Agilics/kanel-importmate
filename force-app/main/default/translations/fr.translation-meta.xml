@@ -1,148 +1,83 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<CustomLabels xmlns="http://soap.sforce.com/2006/04/metadata">
-    <!-- Project form  -->
-    <labels>
-        <fullName>ProjectForm_Title</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Title for projection information section</shortDescription>
-        <value>New Project</value>
-    </labels>
+<Translations xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customLabels>
+        <label>Nom du Projet</label>
+        <name>ProjectForm_Name</name>
+    </customLabels>
+    <customLabels>
+        <label>Description</label>
+        <name>ProjectForm_Description</name>
+    </customLabels>
+    <customLabels>
+        <label>Objet Salesforce Cible</label>
+        <name>ProjectForm_Target_Object</name>
+    </customLabels>
+    <customLabels>
+        <label>Informations sur le projet</label>
+        <name>ProjectForm_Info_Section_Label</name>
+    </customLabels>
+    <customLabels>
+        <label>Configuration de l'objet cible</label>
+        <name>ProjectForm_Target_Section_Label</name>
+    </customLabels>
+    <customLabels>
+        <label>Choisissez un nom clair et descriptif pour une identification facile</label>
+        <name>ProjectForm_Helper_Name</name>
+    </customLabels>
+    <customLabels>
+        <label>Fournissez des détails sur la source des données, l'objectif commercial et les résultats attendus</label>
+        <name>ProjectForm_Helper_Description</name>
+    </customLabels>
+    <customLabels>
+        <label>Sélectionnez l'objet Salesforce où les données seront importées</label>
+        <name>ProjectForm_Helper_Target_Object</name>       
+    </customLabels>
 
-    <labels>
-        <fullName>ProjectForm_Subtitle</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>SubTitle for projection information section</shortDescription>
-        <value>Set up your data import project with target object and configuration</value>
-    </labels>
+    <customLabels>
+        <label>Nouveau Projet</label>
+        <name>ProjectForm_Title</name>
+    </customLabels>
+    <customLabels>
+        <label>Configurez votre projet d'importation de données avec l'objet cible et la configuration</label>
+        <name>ProjectForm_Subtitle</name>
+    </customLabels>
 
-    <labels>
-        <fullName>ProjectForm_Info_Section_Label</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Section's Project Information</shortDescription>
-        <value>Project Information</value>
-    </labels>
+    <customLabels>
+        <label>Enregistrer et continuer avec la source de données</label>
+        <name>ProjectForm_Save_Button</name>
+    </customLabels>
+    <customLabels>
+        <label>Annuler</label>
+        <name>ProjectForm_Cancel_Button</name>      
+    </customLabels>
+   <customLabels>
+        <label>Décrivez l’objectif et le périmètre de ce projet d’import...</label>
+        <name>ImportProject_Description_Placeholder</name>
+    </customLabels>
+    <customLabels>
+        <label>Saisissez un nom de projet descriptif (ex. : Import des contacts T4)</label>
+        <name>ImportProject_Name_Placeholder</name>
+    </customLabels>
 
-    <labels>
-        <fullName>ProjectForm_Target_Section_Label</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Section's title Target Object Configuration</shortDescription>
-        <value>Target Object Configuration</value>
-    </labels>
 
-    <labels>
-        <fullName>ProjectForm_Name</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Label for Project Name field</shortDescription>
-        <value>Project Name</value>
-    </labels>
+     <!-- SELECT PROJECT - FORM --> 
+    <customLabels>
+        <name>SelectProject_No_Project</name>
+        <label>Aucun projet d'import pour le moment, veuillez en ajouter un.</label>
+    </customLabels>
 
-    <labels>
-        <fullName>ProjectForm_Helper_Name</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Label for helper name</shortDescription>
-        <value>Choose a clear, descriptive name for easy identification</value>
-    </labels>
+    <customLabels>
+        <name>SelectProject_Card_Title</name>
+        <label>Informations sur les projets d'import</label>
+    </customLabels>
 
-    <labels>
-        <fullName>ProjectForm_Helper_Target_Object</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Label for helper Target Object field</shortDescription>
-        <value>Select the Salesforce object where data will be imported</value>
-    </labels>
+    <customLabels>
+        <name>SelectProject_Close_Button</name>
+        <label>Fermer</label>
+    </customLabels>
 
-    <labels>
-        <fullName>ProjectForm_Helper_Description</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Label for helper description</shortDescription>
-        <value>Provide details about data source, business purpose, and expected outcomes</value>
-    </labels>
-
-    <labels>
-        <fullName>ProjectForm_Description</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Label for Description field</shortDescription>
-        <value>Description</value>
-    </labels>
-
-    <labels>
-        <fullName>ProjectForm_Target_Object</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Label for Target Object field</shortDescription>
-        <value>Target Salesforce Object</value>
-    </labels>
-
-    <labels>
-        <fullName>ProjectForm_Save_Button</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Label for save button</shortDescription>
-        <value>Save & Continue to Data Source</value>
-    </labels>
-    <labels>
-        <fullName>ProjectForm_Cancel_Button</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Label for  exit button</shortDescription>
-        <value>Cancel</value>
-    </labels>
-    <!--placeholders-->
-     <labels>
-        <fullName>ImportProject_Description_Placeholder</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Placeholder for import project description</shortDescription>
-        <value>Describe the purpose and scope of this import project...</value>
-    </labels>
-     <labels>
-        <fullName>ImportProject_Name_Placeholder</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Placeholder for import project name</shortDescription>
-        <value>Enter a descriptive project name (e.g., Q4 Contact Import)</value>
-    </labels>
-    <!-- end project project form-->
-
-    <!--select form -->
-    <labels>
-        <fullName>SelectProject_No_Project</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>message for no project found</shortDescription>
-        <value>  No project import yet, please add</value>
-    </labels>
-
-    <labels>
-        <fullName>SelectProject_Card_Title</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>message for no project found</shortDescription>
-        <value>Import projects Informations</value>
-    </labels>
-
-    <labels>
-        <fullName>SelectProject_Close_Button</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Boutton de fermeture du modal</shortDescription>
-        <value>Close</value>
-    </labels>
-
-    <labels>
-        <fullName>SelectProject_Select_Button</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Boutton de selection de projet</shortDescription>
-        <value>Select</value>
-    </labels>
-
-</CustomLabels>
+    <customLabels>
+        <name>SelectProject_Select_Button</name>
+        <label>Sélectionner</label>
+    </customLabels>
+</Translations>
