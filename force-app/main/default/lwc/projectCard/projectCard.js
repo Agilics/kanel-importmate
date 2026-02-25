@@ -81,10 +81,11 @@ export default class ProjectCard extends LightningElement {
 
     get progressPercentage() {
         const lastExecution = this.getLastExecution();
-        const total = lastExecution?.TotalRecords__c || 0;
-        const processed = lastExecution?.ProcessedRecords__c || 0;
-        if (total === 0) return 0;
-        return Math.round((processed / total) * 100);
+        const total = Number(lastExecution?.TotalRecords__c || 0);
+        const processed = Number(lastExecution?.ProcessedRecords__c || 0);
+        if (total <= 0) return 0;
+        const rawPercent = Math.round((processed / total) * 100);
+        return Math.max(0, Math.min(100, rawPercent));
     }
 
     get progressStyle() {

@@ -192,6 +192,12 @@
                 Failed
               </span>
             </template>
+            <template if:true={isImportCancelled}>
+              <span class="status-badge failed">
+                <span class="status-dot"></span>
+                Cancelled
+              </span>
+            </template>
           </div>
 
           <div class="progress-header-right">
@@ -202,6 +208,15 @@
                 icon-name="utility:close"
                 icon-position="left"
                 onclick={handleCancelValidation}>
+              </lightning-button>
+            </template>
+            <template if:true={canRetryValidation}>
+              <lightning-button
+                label="Retry Validation"
+                variant="brand-outline"
+                icon-name="utility:refresh"
+                icon-position="left"
+                onclick={handleRetryValidation}>
               </lightning-button>
             </template>
           </div>
@@ -227,7 +242,7 @@
 
             <div class="stat-card stat-processing">
               <div class="stat-number">{processingCount}</div>
-              <div class="stat-label">Processing</div>
+              <div class="stat-label">{processingLabel}</div>
               <div class="stat-percentage">{processingPercentage}%</div>
             </div>
 
@@ -239,7 +254,7 @@
 
             <div class="stat-card stat-remaining">
               <div class="stat-number">{remainingCount}</div>
-              <div class="stat-label">Remaining</div>
+              <div class="stat-label">{remainingLabel}</div>
               <div class="stat-percentage">{remainingPercentage}%</div>
             </div>
           </div>
@@ -308,7 +323,10 @@
 
             <div class="slds-m-bottom_medium">
               <div class="slds-text-body_regular">
-                <strong>Total Issues Found: {filteredIssues.length}</strong>
+                <strong>Total Issues Found: {displayedIssuesCount}</strong>
+                <template if:true={hasPartialIssuesLoaded}>
+                  <span class="slds-m-left_small">(showing partial results from {issuesCount} total)</span>
+                </template>
                 <template if:true={searchTerm}>
                   <span class="slds-m-left_small">(Filtered)</span>
                 </template>

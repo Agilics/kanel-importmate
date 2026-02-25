@@ -1,8 +1,5 @@
 import { LightningElement, track, api } from 'lwc';
 
-const SS_ROWS_KEY = 'IM_csvRows';
-const SS_COLS_KEY = 'IM_sourceColumnsCsv';
-
 const DEFAULT_PREVIEW_LIMIT = 100;
 const DEFAULT_PAGE_SIZE = 3;
 
@@ -152,15 +149,26 @@ export default class CsvUploader extends LightningElement {
       this.totalRows = totalRowCount;
       this.pageIndex = 1;
       this.isPreview = totalRowCount > this.previewLimit;
+
+      //convert to plain objects
+      const previewPlainRows = this.toObjectRows(
+        previewRows,
+        columns,
+        this.previewLimit
+      );
+      const allPlainRows = this.toObjectRows(
+        allRows,
+        columns,
+        totalRowCount
+      );
+
       this.dispatchEvent(
         new CustomEvent('csvloaded', {
           detail: {
             columns,
-            rows: this.toObjectRows(
-              previewRows,
-              columns,
-              this.previewLimit
-            ),
+            rows: previewPlainRows,
+            allRows: allPlainRows,
+            rawCsvText: text,
             totalRowCount,
             fileName: this.fileName,
             fileSize: this.fileSize
@@ -323,30 +331,8 @@ handleGoForMapping() {
     ? this.allRows.length
     : 0;
 
-  const plainRows = this.toObjectRows(
-    this.allRows,
-    this.columns,
-    totalRowCount || this.previewLimit
-  );
-
-  try {
-    window.sessionStorage.setItem(SS_COLS_KEY, this.columns.join(','));
-    window.sessionStorage.setItem(SS_ROWS_KEY, JSON.stringify(plainRows));
-  } catch (e) {
-    console.debug('[CsvUploader] sessionStorage unavailable', e);
-  }
   this.dispatchEvent(
-    new CustomEvent('gotomapping', {
-      detail: {
-        columns: this.columns,
-        rows: plainRows,
-        totalRowCount,      
-        fileName: this.fileName,
-        fileSize: this.fileSize
-      },
-      bubbles: true,
-      composed: true
-    })
+    new CustomEvent('gotomapping')
   );
 }
 

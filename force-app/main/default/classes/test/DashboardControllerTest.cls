@@ -100,16 +100,172 @@ public with sharing class DashboardControllerTest {
 
     @isTest
     static void testDeleteProjectException() {
+        Boolean hasException = false;
         Test.startTest();
         try {
             DashboardController.deleteProject(null);
         } catch (AuraHandledException e) {
-            System.debug('e.getMessage(): ' + e.getMessage());
-            /* Assert.isTrue(
-                e.getMessage().contains('Error deleting project'),
-                'Error message should indicate delete failure'
-            ); */
+            hasException = true;
         }
         Test.stopTest();
+
+        Assert.isTrue(hasException, 'Expected AuraHandledException when project id is null');
+    }
+
+    @isTest
+    static void testDeleteExecutionHistory() {
+        User admin = getAdminUser();
+        Id executionId;
+
+        System.runAs(admin) {
+            ImportProject__c project = TestDataFactory.createImportProjectWithTargetObject('Account');
+            ImportExecution__c execution = TestDataFactory.createImportExecution(project.Id, Constants.EXECUTION_TYPE_IMPORT);
+            execution.Status__c = Constants.EXECUTION_STATUS_COMPLETED;
+            update execution;
+            executionId = execution.Id;
+
+            TestDataFactory.createImportLogs(execution.Id, 2);
+            insert new StagingRow__c(
+                Execution__c = execution.Id,
+                LineNumber__c = 1,
+                RawData__c = '{"Name":"Acme"}',
+                Processed__c = false
+            );
+
+            Test.startTest();
+            Map<String, Object> result = DashboardController.deleteExecutionHistory(execution.Id);
+            Test.stopTest();
+
+            Assert.areEqual(true, result.get('success'), 'Delete method should return success');
+        }
+
+        Integer executionCount = [
+            SELECT COUNT()
+            FROM ImportExecution__c
+            WHERE Id = :executionId
+        ];
+        Integer logsCount = [
+            SELECT COUNT()
+            FROM ImportLog__c
+            WHERE Execution__c = :executionId
+        ];
+        Integer stagingCount = [
+            SELECT COUNT()
+            FROM StagingRow__c
+            WHERE Execution__c = :executionId
+        ];
+
+        Assert.areEqual(0, executionCount, 'Execution should be deleted');
+        Assert.areEqual(0, logsCount, 'Logs should be deleted with execution');
+        Assert.areEqual(0, stagingCount, 'Staging rows should be deleted before execution');
+    }
+
+    @isTest
+    static void testDeleteExecutionHistoryRunningFails() {
+        User admin = getAdminUser();
+
+        System.runAs(admin) {
+            ImportProject__c project = TestDataFactory.createImportProjectWithTargetObject('Contact');
+            ImportExecution__c execution = TestDataFactory.createImportExecution(project.Id, Constants.EXECUTION_TYPE_IMPORT);
+            execution.Status__c = Constants.EXECUTION_STATUS_IN_PROGRESS;
+            update execution;
+
+            Boolean hasException = false;
+            Test.startTest();
+            try {
+                DashboardController.deleteExecutionHistory(execution.Id);
+                Assert.isTrue(false, 'Expected AuraHandledException when deleting running execution');
+            } catch (AuraHandledException e) {
+                hasException = true;
+            }
+            Test.stopTest();
+
+            Assert.isTrue(hasException, 'Deletion must fail for a running execution');
+        }
+    }
+
+    @isTest
+    static void testDeleteExecutionHistoriesMixed() {
+        User admin = getAdminUser();
+        Id completedExecutionId;
+        Id runningExecutionId;
+
+        System.runAs(admin) {
+            ImportProject__c project = TestDataFactory.createImportProjectWithTargetObject('Account');
+
+            ImportExecution__c completedExecution = TestDataFactory.createImportExecution(
+                project.Id,
+                Constants.EXECUTION_TYPE_IMPORT
+            );
+            completedExecution.Status__c = Constants.EXECUTION_STATUS_COMPLETED;
+            update completedExecution;
+            completedExecutionId = completedExecution.Id;
+
+            ImportExecution__c runningExecution = TestDataFactory.createImportExecution(
+                project.Id,
+                Constants.EXECUTION_TYPE_IMPORT
+            );
+            runningExecution.Status__c = Constants.EXECUTION_STATUS_IN_PROGRESS;
+            update runningExecution;
+            runningExecutionId = runningExecution.Id;
+
+            TestDataFactory.createImportLogs(completedExecution.Id, 1);
+            insert new StagingRow__c(
+                Execution__c = completedExecution.Id,
+                LineNumber__c = 1,
+                RawData__c = '{"Name":"Bulk"}',
+                Processed__c = false
+            );
+
+            Test.startTest();
+            Map<String, Object> result = DashboardController.deleteExecutionHistories(new List<Id>{
+                completedExecution.Id,
+                runningExecution.Id,
+                UserInfo.getUserId()
+            });
+            Test.stopTest();
+
+            Assert.areEqual(
+                1,
+                Integer.valueOf(String.valueOf(result.get('deletedCount'))),
+                'One execution should be deleted'
+            );
+            Assert.areEqual(
+                1,
+                Integer.valueOf(String.valueOf(result.get('skippedRunningCount'))),
+                'One running execution should be skipped'
+            );
+            Assert.areEqual(
+                1,
+                Integer.valueOf(String.valueOf(result.get('skippedNotFoundCount'))),
+                'One id should be skipped as not found'
+            );
+        }
+
+        Integer completedCount = [
+            SELECT COUNT()
+            FROM ImportExecution__c
+            WHERE Id = :completedExecutionId
+        ];
+        Integer runningCount = [
+            SELECT COUNT()
+            FROM ImportExecution__c
+            WHERE Id = :runningExecutionId
+        ];
+        Integer completedLogsCount = [
+            SELECT COUNT()
+            FROM ImportLog__c
+            WHERE Execution__c = :completedExecutionId
+        ];
+        Integer completedStagingCount = [
+            SELECT COUNT()
+            FROM StagingRow__c
+            WHERE Execution__c = :completedExecutionId
+        ];
+
+        Assert.areEqual(0, completedCount, 'Completed execution should be deleted');
+        Assert.areEqual(1, runningCount, 'Running execution should stay');
+        Assert.areEqual(0, completedLogsCount, 'Related logs should be removed');
+        Assert.areEqual(0, completedStagingCount, 'Related staging rows should be removed');
     }
 }
