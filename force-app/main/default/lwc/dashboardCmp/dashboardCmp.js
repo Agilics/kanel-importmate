@@ -199,42 +199,39 @@ export default class DashboardCmp extends LightningElement {
         });
 
         return [
-            {
+              {
                 id: 1,
-                label: 'Total Projects',
-                value: String(totalProjects),
+                label: Dashboard_Stat_Total_Projects,
+                value: String(totalProjects || 0),
                 change: '',
                 changeLabel: '',
                 icon: 'standard:folder',
                 iconColor: 'blue'
-            },
-            {
+            }, {
                 id: 2,
-                label: 'Records Imported',
-                value: recordsImported,
+                label: Dashboard_Stat_Records_Imported,
+                value: recordsImported  || '0',
                 change: '',
                 changeLabel: '',
                 icon: 'standard:data_integration_hub',
                 iconColor: 'green'
-            },
-            {
+            }, {
                 id: 3,
-                label: 'Success Rate',
-                value: successRate,
+                label: Dashboard_Stat_Success_Rate,
+                value: successRate ,
                 change: '',
                 changeLabel: '',
                 icon: 'standard:approval',
                 iconColor: 'green'
-            },
-            {
+            }, {
                 id: 4,
-                label: 'Active Projects',
+                label: Dashboard_Stat_Active_Projects,
                 value: String(activeProjects),
                 change: '',
                 changeLabel: '',
                 icon: 'standard:event',
                 iconColor: 'purple'
-            }
+            } 
         ];
     }
 
