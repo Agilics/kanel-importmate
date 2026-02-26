@@ -91,12 +91,12 @@ export default class DashboardCmp extends LightningElement {
 
     get noProjectsMessage() {
         if (this.isLoading) {
-            return 'Loading projects...';
+            return Dashboard_Loading_Message;
         }
         if (this.error) {
-            return 'Error loading projects. Please try again.';
+            return Dashboard_No_Project_Error_Message;
         }
-        return 'No projects found. Create your first project to get started.';
+        return  Dashboard_No_Projects;
     }
 
     handleSearch(event) {
@@ -256,18 +256,18 @@ export default class DashboardCmp extends LightningElement {
         }));
     }
 
+     //suppression d'un projet avec confirmation
     async handleProjectDelete(event) {
         const projectId = event.detail;
-
-
-        const isConfirm = await LightningConfirm.open({
-            message: "Are you sure you want to delete this project ? This action cannot be undone.",
-            variant: "header",
-            label: "Delete import project", 
-            theme:'alt-inverse'
-        }); 
-
-        if (!isConfirm) {
+        
+        const confirm = await LightningConfirm.open({
+            message: Dashboard_Delete_Confirm,
+            variant: 'header',
+            label: Dashboard_Delete_Confirm_Header,
+            theme: 'alt-inverse'
+        });
+        // Confirm deletion
+        if (!confirm) {
             return;
         }
 
@@ -277,7 +277,7 @@ export default class DashboardCmp extends LightningElement {
 
             this.dispatchEvent(new ShowToastEvent({
                 title: 'Success',
-                message: 'Project deleted successfully',
+                message: Dashboard_Delete_Success,
                 variant: 'success'
             }));
 

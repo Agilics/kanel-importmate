@@ -1,7 +1,405 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomLabels xmlns="http://soap.sforce.com/2006/04/metadata">
 
-    <!-- Page Title & Subtitle -->
+    <!-- import recent projects -->
+
+    <labels>
+        <fullName>ProjectRecent_Name</fullName>
+        <categories>Project Recent</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Project name label</shortDescription>
+        <value>Project Name</value>
+    </labels>
+    <labels>
+        <fullName>ProjectRecent_Description</fullName>
+        <categories>Project Recent</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Project description label</shortDescription>
+        <value>Description</value>
+    </labels>
+    <labels>
+        <fullName>ProjectRecent_Target_Object</fullName>
+        <categories>Project Recent</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Target Salesforce object label</shortDescription>
+        <value>Target Salesforce Object</value>
+    </labels>
+    <labels>
+        <fullName>ProjectRecent_Title</fullName>
+        <categories>Project Recent</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Create new project title</shortDescription>
+        <value>Create New Project</value>
+    </labels>
+    <labels>
+        <fullName>ProjectRecent_Use_Existing</fullName>
+        <categories>Project Recent</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Use existing project card title</shortDescription>
+        <value>Use Existing Project</value>
+    </labels>
+    <labels>
+        <fullName>ProjectRecent_Use_Existing_Description</fullName>
+        <categories>Project Recent</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Description for using an existing project</shortDescription>
+        <value>Continue with a previously created project. Reuse your field mappings and settings.</value>
+    </labels>
+    <labels>
+        <fullName>ProjectRecent_Recent_Projects</fullName>
+        <categories>Project Recent</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Recent projects section title</shortDescription>
+        <value>Recent Projects</value>
+    </labels>
+    <labels>
+        <fullName>ProjectRecent_No_Project</fullName>
+        <categories>Project Recent</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>No project message</shortDescription>
+        <value>No project import yet, please add</value>
+    </labels>
+    <labels>
+        <fullName>ProjectRecent_Select_Project</fullName>
+        <categories>Project Recent</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Select project button</shortDescription>
+        <value>Select this project</value>
+    </labels>
+    <labels>
+        <fullName>ProjectRecent_Target_SObject</fullName>
+        <categories>Project Recent</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Target object label in project list</shortDescription>
+        <value>Target SObject :</value>
+    </labels>
+    <labels>
+        <fullName>ProjectRecent_Created_Label</fullName>
+        <categories>Project Recent</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Created date label</shortDescription>
+        <value>Created :</value>
+    </labels>
+
+    <!-- DASHBOARD - FILTER TABS -->
+
+    <labels>
+        <fullName>Dashboard_FilterTab_Title</fullName>
+        <categories>Dashboard Filter projects</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Title for tab filter section</shortDescription>
+        <value>Projects</value>
+    </labels>
+    <labels>
+        <fullName>Dashboard_FilterTab_Subtitle</fullName>
+        <categories>Dashboard Filter projects</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SubTitle for tab filter section</shortDescription>
+        <value>Manage your data import projects</value>
+    </labels>
+    <labels>
+        <fullName>Dashboard_Input_Search_Projects_Placeholder</fullName>
+        <categories>Dashboard Filter projects</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Input search project by keyword</shortDescription>
+        <value>Search projects...</value>
+    </labels>
+    <labels>
+        <fullName>Dashboard_FilterTab_All_Projects</fullName>
+        <categories>Dashboard Filter projects</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Tab filter for all projects</shortDescription>
+        <value>All Projects</value>
+    </labels>
+    <labels>
+        <fullName>Dashboard_FilterTab_Active</fullName>
+        <categories>Dashboard Filter project</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Tab filter for active project</shortDescription>
+        <value>Active</value>
+    </labels>
+    <labels>
+        <fullName>Dashboard_FilterTab_Completed</fullName>
+        <categories>Dashboard Filter project</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Tab filter for completed project</shortDescription>
+        <value>Completed</value>
+    </labels>
+    <labels>
+        <fullName>Dashboard_FilterTab_Scheduled</fullName>
+        <categories>Dashboard Filters project</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Tab filter for project scheduled</shortDescription>
+        <value>Scheduled</value>
+    </labels>
+
+    <!-- DASHBOARD - STATS -->
+
+    <labels>
+        <fullName>Dashboard_Stat_TotalProjects</fullName>
+        <categories>Dashboard Stat</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Stat label for total project</shortDescription>
+        <value>Total Projects</value>
+    </labels>
+    <labels>
+        <fullName>Dashboard_Stat_RecordImported</fullName>
+        <categories>Dashboard Stat</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Stat label for record imported</shortDescription>
+        <value>Record Imported</value>
+    </labels>
+    <labels>
+        <fullName>Dashboard_Stat_SuccessRate</fullName>
+        <categories>Dashboard Stat</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Stat label for success rate</shortDescription>
+        <value>Success Rate</value>
+    </labels>
+    <labels>
+        <fullName>Dashboard_Stat_ActiveProject</fullName>
+        <categories>Dashboard Stat</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Stat label for active project</shortDescription>
+        <value>Active Projects</value>
+    </labels>
+
+    <!-- DASHBOARD - NO PROJECT MESSAGES -->
+
+    <labels>
+        <fullName>Dashboard_No_Project_Message</fullName>
+        <categories>Dashboard Project Message</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>No project found message</shortDescription>
+        <value>No projects found. Create your first project to get started.</value>
+    </labels>
+    <labels>
+        <fullName>Dashboard_No_Project_Error_Message</fullName>
+        <categories>Dashboard Project Message</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Error loading projects message</shortDescription>
+        <value>Error loading projects. Please try again.</value>
+    </labels>
+
+    <!-- DASHBOARD - ALERT MESSAGES -->
+
+    <labels>
+        <fullName>Dashboard_Delete_Confirm_Header</fullName>
+        <categories>Dashboard Project Dialogue Confirm Header</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Header for confirm dialogue on project delete</shortDescription>
+        <value>Confirm Deletion</value>
+    </labels>
+    <labels>
+        <fullName>Dashboard_Confirm_Delete_Message</fullName>
+        <categories>Dashboard Project Alert Message</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Alert message for project deletion</shortDescription>
+        <value>Are you sure you want to delete this project? This action cannot be undone.</value>
+    </labels>
+    <labels>
+        <fullName>Dashboard_Delete_Success_Message</fullName>
+        <categories>Dashboard Project Alert Message</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Success message for project deletion</shortDescription>
+        <value>Project deleted successfully.</value>
+    </labels>
+
+    <!-- Etiquette des noms de boutons -->
+
+    <labels>
+        <fullName>Dashboard_Button_New_Project</fullName>
+        <categories>Dashboard Button</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for new project button</shortDescription>
+        <value>New Project</value>
+    </labels>
+    <labels>
+        <fullName>Dashboard_Button_Create_First_Project</fullName>
+        <categories>Dashboard Button</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for Create Your First Project</shortDescription>
+        <value>Create Your First Project</value>
+    </labels>
+
+    <!-- Détails de projets -->
+
+    <labels>
+        <fullName>ProjectCard_Meta_Target</fullName>
+        <categories>ProjectCard Meta</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for target object meta item</shortDescription>
+        <value>Target:</value>
+    </labels>
+    <labels>
+        <fullName>ProjectCard_Meta_Records</fullName>
+        <categories>ProjectCard Meta</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for records count meta item</shortDescription>
+        <value>Records:</value>
+    </labels>
+    <labels>
+        <fullName>ProjectCard_Meta_Modified</fullName>
+        <categories>ProjectCard Meta</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for last modified date meta item</shortDescription>
+        <value>Modified:</value>
+    </labels>
+    <labels>
+        <fullName>ProjectCard_Progress_Label</fullName>
+        <categories>ProjectCard Progress</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for progress bar section</shortDescription>
+        <value>Progress</value>
+    </labels>
+    <labels>
+        <fullName>ProjectCard_No_Description</fullName>
+        <categories>ProjectCard text</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>No Description text</shortDescription>
+        <value>No Description</value>
+    </labels>
+
+    <!-- main -->
+
+    <labels>
+        <fullName>ALL_FIELDS_REQUIRED</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>All fields validation message</shortDescription>
+        <value>All fields are required</value>
+    </labels>
+    <labels>
+        <fullName>PROJECT_EXISTS</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Duplicate project message</shortDescription>
+        <value>A project with this name and target object already exists</value>
+    </labels>
+    <labels>
+        <fullName>PROJECT_CREATED</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Project created success message</shortDescription>
+        <value>Project created successfully with ID: {0}</value>
+    </labels>
+    <labels>
+        <fullName>ERROR_OCCURRED</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Generic error message</shortDescription>
+        <value>An error occurred</value>
+    </labels>
+    <labels>
+        <fullName>SELECT_PROJECT_FIRST</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Select project message</shortDescription>
+        <value>Please select or create a project first</value>
+    </labels>
+    <labels>
+        <fullName>CREATE_PROJECT_FIRST</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Create project first message</shortDescription>
+        <value>Please create a project first</value>
+    </labels>
+    <labels>
+        <fullName>IMPORT_STARTED</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Import started message</shortDescription>
+        <value>Import started in {0} mode with batch size {1}</value>
+    </labels>
+    <labels>
+        <fullName>LOGS_COMING_SOON</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Logs feature placeholder</shortDescription>
+        <value>Logs feature coming soon</value>
+    </labels>
+    <labels>
+        <fullName>SETTINGS_COMING_SOON</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Settings feature placeholder</shortDescription>
+        <value>Settings feature coming soon</value>
+    </labels>
+    <labels>
+        <fullName>VIEW_LOGS</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>View logs action</shortDescription>
+        <value>Viewing logs</value>
+    </labels>
+    <labels>
+        <fullName>EXPORT_COMING_SOON</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Export feature placeholder</shortDescription>
+        <value>Export feature coming soon</value>
+    </labels>
+    <labels>
+        <fullName>ANALYTICS_COMING_SOON</fullName>
+        <categories>Main</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Analytics feature placeholder</shortDescription>
+        <value>Analytics feature coming soon</value>
+    </labels>
+    <labels>
+        <fullName>SEARCH_PROJECTS_FEATURE</fullName>
+        <categories>Main</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Search projects feature</shortDescription>
+        <value>Search projects feature</value>
+    </labels>
+    <labels>
+        <fullName>UNSAVED_CHANGES_WARNING</fullName>
+        <categories>Main</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Unsaved changes warning</shortDescription>
+        <value>You have unsaved changes. Are you sure you want to leave?</value>
+    </labels>
+
+    <!-- DataSource -->
+
     <labels>
         <fullName>DataSource_Title</fullName>
         <categories>DataSource</categories>
@@ -18,8 +416,6 @@
         <shortDescription>DataSource_Subtitle</shortDescription>
         <value>Select how you want to import your data into Salesforce</value>
     </labels>
-
-    <!-- File Upload Card -->
     <labels>
         <fullName>DataSource_FileUpload_Title</fullName>
         <categories>DataSource</categories>
@@ -68,8 +464,6 @@
         <shortDescription>DataSource_FileUpload_Button</shortDescription>
         <value>Choose File Upload</value>
     </labels>
-
-    <!-- Salesforce Query Card -->
     <labels>
         <fullName>DataSource_SalesforceQuery_Title</fullName>
         <categories>DataSource</categories>
@@ -118,9 +512,6 @@
         <shortDescription>DataSource_SalesforceQuery_Button</shortDescription>
         <value>Choose Query Builder</value>
     </labels>
-
-
-    <!-- Navigation -->
     <labels>
         <fullName>DataSource_Back_Button</fullName>
         <categories>DataSource</categories>
@@ -130,473 +521,16 @@
         <value>Back</value>
     </labels>
 
-    <!-- Project Tab filters -->
-     <labels>
-        <fullName>Dashboard_FilterTab_Title</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Title for tab filter section</shortDescription>
-        <value>Projects</value>
-        <categories>Dashboard Filter projects</categories>
-    </labels>
-    <labels>
-        <fullName>Dashboard_FilterTab_Subtitle</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>SubTitle for tab filter section</shortDescription>
-        <value>Manage your data import projects</value>
-        <categories>Dashboard Filter projects</categories>
-    </labels>
+    <!-- CsvUploader -->
 
     <labels>
-        <fullName>Dashboard_Input_Search_Projects_Placeholder</fullName>
+        <fullName>CsvUploader_PageTitle</fullName>
+        <categories>CsvUploader</categories>
         <language>en_US</language>
         <protected>false</protected>
-        <shortDescription>Input search project by keyword</shortDescription>
-        <value>Search projects...</value>
-        <categories>Dashboard Filter projects</categories>
+        <shortDescription>Titre de la page</shortDescription>
+        <value>CSV Data Import &amp; Display</value>
     </labels>
-    <labels>
-        <fullName>Dashboard_FilterTab_All_Projects</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Tab filter for all projects</shortDescription>
-        <value>All Projects</value>
-        <categories>Dashboard Filter projects</categories>
-    </labels>
-
-    <labels>
-        <fullName>Dashboard_FilterTab_Active</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Tab filter for active project</shortDescription>
-        <value>Active</value>
-        <categories>Dashboard Filter project</categories>
-    </labels>
-
-    <labels>
-        <fullName>Dashboard_FilterTab_Completed</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Tab filter for completed project</shortDescription>
-        <value>Completed</value>
-        <categories>Dashboard Filter project</categories>
-    </labels>
-
-    <labels>
-        <fullName>Dashboard_FilterTab_Scheduled</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Tab filter for project scheduled</shortDescription>
-        <value>Scheduled</value>
-        <categories>Dashboard Filters project</categories>
-    </labels>
-
-    <!-- Dashboard for Statistiques -->
-    <labels>
-        <fullName>Dashboard_Stat_TotalProjects</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Stat label for total project</shortDescription>
-        <value>Total Projects</value>
-        <categories>Dashboard Stat</categories>
-    </labels>
-
-    <labels>
-        <fullName>Dashboard_Stat_RecordImported</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Stat label for record imported</shortDescription>
-        <value>Record Imported</value>
-        <categories>Dashboard Stat</categories>
-    </labels>
-
-    <labels>
-        <fullName>Dashboard_Stat_RecordImported</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Stat label for record imported</shortDescription>
-        <value>Record Imported</value>
-        <categories>Dashboard Stat</categories>
-    </labels>
-
-    <labels>
-        <fullName>Dashboard_Stat_SuccessRate</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Stat label for success rate</shortDescription>
-        <value>Success Rate</value>
-        <categories>Dashboard Stat</categories>
-    </labels>
-
-    <labels>
-        <fullName>Dashboard_Stat_ActiveProject</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Stat label for active project</shortDescription>
-        <value>Active Projects</value>
-        <categories>Dashboard Stat</categories>
-    </labels>
-
-    <!-- Message no project -->
-    <labels>
-        <fullName>Dashboard_No_Project_Message</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Message displayed when no project is found</shortDescription>
-        <value>No projects found. Please create a new project to get started.</value>
-        <categories>Dashboard Message</categories>
-    </labels>
-
-    <labels>
-        <fullName>Dashboard_No_Project_Error_Message</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Message displayed when error project is found during import</shortDescription>
-        <value>Error loading projects. Please try again.</value>
-        <categories>Dashboard Message</categories>
-    </labels>
-
-    <!-- Alert messages for project deletion -->
-     <labels>
-        <fullName>Dashboard_Delete_Confirm_Header</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Hearder for confirm dialogue on project delete</shortDescription>
-        <value>Confirm Deletion</value>
-        <categories>Dashboard Project Dialogue Confirm Header</categories>
-    </labels>
-    <labels>
-        <fullName>Dashboard_Confirm_Delete_Message</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Alert message for project deletion</shortDescription>
-        <value>Are you sure you want to delete this project? This action cannot be undone.</value>
-        <categories>Dashboard Project Alert Message</categories>
-    </labels>
-
-    <labels>
-        <fullName>Dashboard_Delete_Success_Message</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Success message for project deletion</shortDescription>
-        <value>Project deleted successfully.</value>
-        <categories>Dashboard Project Alert Message</categories>
-    </labels>
-
-    <!-- Label for buttons -->
-    <labels>
-        <fullName>Dashboard_Button_New_Project</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Label for new project button</shortDescription>
-        <value>New Project</value>
-        <categories>Dashboard Button</categories>
-    </labels>
-
-    <labels>
-        <fullName>Dashboard_Button_Create_First_Project</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Label for Create Your First Project</shortDescription>
-        <value>Create Your First Project</value>
-        <categories>Dashboard Button</categories>
-    </labels> 
-    <!-- PROJECT RECENT - LWC --> 
-
-    <labels>
-        <fullName>ProjectRecent_Name</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Project name label</shortDescription>
-        <value>Project Name</value>
-        <categories>Project Recent</categories>
-    </labels>
-
-    <labels>
-        <fullName>ProjectRecent_Description</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Project description label</shortDescription>
-        <value>Description</value>
-        <categories>Project Recent</categories>
-    </labels>
-
-    <labels>
-        <fullName>ProjectRecent_Target_Object</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Target Salesforce object label</shortDescription>
-        <value>Target Salesforce Object</value>
-        <categories>Project Recent</categories>
-    </labels>
-
-    <labels>
-        <fullName>ProjectRecent_Title</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Create new project title</shortDescription>
-        <value>Create New Project</value>
-        <categories>Project Recent</categories>
-    </labels>
-
-    <labels>
-        <fullName>ProjectRecent_Use_Existing</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Use existing project card title</shortDescription>
-        <value>Use Existing Project</value>
-        <categories>Project Recent</categories>
-    </labels>
-
-    <labels>
-        <fullName>ProjectRecent_Use_Existing_Description</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Description for using an existing project</shortDescription>
-        <value>Continue with a previously created project. Reuse your field mappings and settings.</value>
-        <categories>Project Recent</categories>
-    </labels>
-
-    <labels>
-        <fullName>ProjectRecent_Recent_Projects</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Recent projects section title</shortDescription>
-        <value>Recent Projects</value>
-        <categories>Project Recent</categories>
-    </labels>
-
-    <labels>
-        <fullName>ProjectRecent_No_Project</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>No project message</shortDescription>
-        <value>No project import yet, please add</value>
-        <categories>Project Recent</categories>
-    </labels>
-
-    <labels>
-        <fullName>ProjectRecent_Select_Project</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Select project button</shortDescription>
-        <value>Select this project</value>
-        <categories>Project Recent</categories>
-    </labels>
-
-    <labels>
-        <fullName>ProjectRecent_Target_SObject</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Target object label in project list</shortDescription>
-        <value>Target SObject :</value>
-        <categories>Project Recent</categories>
-    </labels>
-
-    <labels>
-        <fullName>ProjectRecent_Created_Label</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Created date label</shortDescription>
-        <value>Created :</value>
-        <categories>Project Recent</categories>
-    </labels>
-
-     <!-- Project Card - Header actions -->
-    <!-- Project Card - Meta items -->
-    <labels>
-        <fullName>ProjectCard_Meta_Target</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Label for target object meta item</shortDescription>
-        <value>Target:</value>
-        <categories>ProjectCard Meta</categories>
-    </labels>
-
-    <labels>
-        <fullName>ProjectCard_Meta_Records</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Label for records count meta item</shortDescription>
-        <value>Records:</value>
-        <categories>ProjectCard Meta</categories>
-    </labels>
-
-    <labels>
-        <fullName>ProjectCard_Meta_Modified</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Label for last modified date meta item</shortDescription>
-        <value>Modified:</value>
-        <categories>ProjectCard Meta</categories>
-    </labels>
-
-    <!-- Project Card - Progress section -->
-    <labels>
-        <fullName>ProjectCard_Progress_Label</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Label for progress bar section</shortDescription>
-        <value>Progress</value>
-        <categories>ProjectCard Progress</categories>
-    </labels>
-
-    <labels>
-        <fullName>ProjectCard_No_Description</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription> No Description text </shortDescription>
-        <value>No Description</value>
-        <categories>ProjectCard text</categories>
-    </labels>
-     <!-- Project form  -->
-    <labels>
-        <fullName>ProjectForm_Title</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Title for projection information section</shortDescription>
-        <value>New Project</value>
-    </labels>
-
-    <labels>
-        <fullName>ProjectForm_Subtitle</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>SubTitle for projection information section</shortDescription>
-        <value>Set up your data import project with target object and configuration</value>
-    </labels>
-
-    <labels>
-        <fullName>ProjectForm_Info_Section_Label</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Section's Project Information</shortDescription>
-        <value>Project Information</value>
-    </labels>
-
-    <labels>
-        <fullName>ProjectForm_Target_Section_Label</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Section's title Target Object Configuration</shortDescription>
-        <value>Target Object Configuration</value>
-    </labels>
-
-    <labels>
-        <fullName>ProjectForm_Name</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Label for Project Name field</shortDescription>
-        <value>Project Name</value>
-    </labels>
-
-    <labels>
-        <fullName>ProjectForm_Helper_Name</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Label for helper name</shortDescription>
-        <value>Choose a clear, descriptive name for easy identification</value>
-    </labels>
-
-    <labels>
-        <fullName>ProjectForm_Helper_Target_Object</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Label for helper Target Object field</shortDescription>
-        <value>Select the Salesforce object where data will be imported</value>
-    </labels>
-
-    <labels>
-        <fullName>ProjectForm_Helper_Description</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Label for helper description</shortDescription>
-        <value>Provide details about data source, business purpose, and expected outcomes</value>
-    </labels>
-
-    <labels>
-        <fullName>ProjectForm_Description</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Label for Description field</shortDescription>
-        <value>Description</value>
-    </labels>
-
-    <labels>
-        <fullName>ProjectForm_Target_Object</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Label for Target Object field</shortDescription>
-        <value>Target Salesforce Object</value>
-    </labels>
-
-    <labels>
-        <fullName>ProjectForm_Save_Button</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Label for save button</shortDescription>
-        <value>Save & Continue to Data Source</value>
-    </labels>
-    <labels>
-        <fullName>ProjectForm_Cancel_Button</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Label for  exit button</shortDescription>
-        <value>Cancel</value>
-    </labels>
-    <!--placeholders-->
-     <labels>
-        <fullName>ImportProject_Description_Placeholder</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Placeholder for import project description</shortDescription>
-        <value>Describe the purpose and scope of this import project...</value>
-    </labels>
-     <labels>
-        <fullName>ImportProject_Name_Placeholder</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Placeholder for import project name</shortDescription>
-        <value>Enter a descriptive project name (e.g., Q4 Contact Import)</value>
-    </labels>
-    <!-- end project project form-->
-
-    <!--select form -->
-    <labels>
-        <fullName>SelectProject_No_Project</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>message for no project found</shortDescription>
-        <value>  No project import yet, please add</value>
-    </labels>
-
-    <labels>
-        <fullName>SelectProject_Card_Title</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>message for no project found</shortDescription>
-        <value>Import projects Informations</value>
-    </labels>
-
-    <labels>
-        <fullName>SelectProject_Close_Button</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Boutton de fermeture du modal</shortDescription>
-        <value>Close</value>
-    </labels>
-
-    <labels>
-        <fullName>SelectProject_Select_Button</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Boutton de selection de projet</shortDescription>
-        <value>Select</value>
-    </labels>
-
-    <!-- CSV Uploader -->
-      <!-- Page Header -->
     <labels>
         <fullName>CsvUploader_PageSubtitle</fullName>
         <categories>CsvUploader</categories>
@@ -613,8 +547,6 @@
         <shortDescription>CsvUploader_ImportSettings_Button</shortDescription>
         <value>Import Settings</value>
     </labels>
-
-    <!-- File Upload Card -->
     <labels>
         <fullName>CsvUploader_Card_Title</fullName>
         <categories>CsvUploader</categories>
@@ -631,8 +563,6 @@
         <shortDescription>CsvUploader_Card_Subtitle</shortDescription>
         <value>Upload your CSV file to import data</value>
     </labels>
-
-    <!-- Dropzone -->
     <labels>
         <fullName>CsvUploader_Dropzone_Text</fullName>
         <categories>CsvUploader</categories>
@@ -665,8 +595,6 @@
         <shortDescription>CsvUploader_Loading_Text</shortDescription>
         <value>Loading…</value>
     </labels>
-
-    <!-- Data Table -->
     <labels>
         <fullName>CsvUploader_Table_Title</fullName>
         <categories>CsvUploader</categories>
@@ -707,13 +635,13 @@
         <shortDescription>CsvUploader_Table_Edit_Tooltip</shortDescription>
         <value>Edit</value>
     </labels>
-     <labels>
-        <fullName>CsvUploader_PageTitle</fullName>
+    <labels>
+        <fullName>CsvUploader_Table_Preview_Tooltip</fullName>
         <categories>CsvUploader</categories>
         <language>en_US</language>
         <protected>false</protected>
-        <shortDescription>Titre de la page</shortDescription>
-        <value>CSV Data Import & Display</value>
+        <shortDescription>CsvUploader_Table_Preview_Tooltip</shortDescription>
+        <value>Preview</value>
     </labels>
     <labels>
         <fullName>DataTable_Showing_Entries</fullName>
@@ -723,16 +651,6 @@
         <shortDescription>Pagination informations</shortDescription>
         <value>Showing {0} to {1} of {2} entries</value>
     </labels>
-    <labels>
-        <fullName>CsvUploader_Table_Preview_Tooltip</fullName>
-        <categories>CsvUploader</categories>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>CsvUploader_Table_Preview_Tooltip</shortDescription>
-        <value>Preview</value>
-    </labels>
-
-    <!-- Pagination -->
     <labels>
         <fullName>CsvUploader_Pagination_Previous</fullName>
         <categories>CsvUploader</categories>
@@ -749,8 +667,6 @@
         <shortDescription>CsvUploader_Pagination_Next</shortDescription>
         <value>Next</value>
     </labels>
-
-    <!-- Footer -->
     <labels>
         <fullName>CsvUploader_Back_Button</fullName>
         <categories>CsvUploader</categories>
@@ -767,8 +683,6 @@
         <shortDescription>CsvUploader_ContinueMapping_Button</shortDescription>
         <value>Continue to Mapping</value>
     </labels>
-
-    <!-- Filters Modal -->
     <labels>
         <fullName>CsvUploader_Modal_Filters_Title</fullName>
         <categories>CsvUploader</categories>
@@ -841,8 +755,6 @@
         <shortDescription>CsvUploader_Modal_Filters_Clear</shortDescription>
         <value>Clear</value>
     </labels>
-
-    <!-- Settings Modal -->
     <labels>
         <fullName>CsvUploader_Modal_Settings_Title</fullName>
         <categories>CsvUploader</categories>
@@ -867,8 +779,6 @@
         <shortDescription>CsvUploader_Modal_Settings_PreviewLimit</shortDescription>
         <value>Preview limit (large files)</value>
     </labels>
-
-    <!-- Preview Modal -->
     <labels>
         <fullName>CsvUploader_Modal_Preview_Title</fullName>
         <categories>CsvUploader</categories>
@@ -877,8 +787,6 @@
         <shortDescription>CsvUploader_Modal_Preview_Title</shortDescription>
         <value>Row Preview</value>
     </labels>
-
-    <!-- Edit Modal -->
     <labels>
         <fullName>CsvUploader_Modal_Edit_Title</fullName>
         <categories>CsvUploader</categories>
@@ -887,8 +795,6 @@
         <shortDescription>CsvUploader_Modal_Edit_Title</shortDescription>
         <value>Edit Row</value>
     </labels>
-
-    <!-- Shared Modal Buttons -->
     <labels>
         <fullName>CsvUploader_Modal_Cancel</fullName>
         <categories>CsvUploader</categories>
@@ -921,13 +827,137 @@
         <shortDescription>CsvUploader_Modal_Save</shortDescription>
         <value>Save</value>
     </labels>
-    <!--show message pagination info-->
+
+    <!-- ProjectForm -->
+
     <labels>
-        <fullName>DataTable_Showing_Entries</fullName>
-        <categories>Pagination</categories>
-         <language>en_US</language>
+        <fullName>ProjectForm_Title</fullName>
+        <language>en_US</language>
         <protected>false</protected>
-        <shortDescription>show message pagination info</shortDescription>
-        <value>Showing {0} to {1} of {2} entries</value>
+        <shortDescription>Title for project information section</shortDescription>
+        <value>New Project</value>
     </labels>
+    <labels>
+        <fullName>ProjectForm_Subtitle</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SubTitle for project information section</shortDescription>
+        <value>Set up your data import project with target object and configuration</value>
+    </labels>
+    <labels>
+        <fullName>ProjectForm_Info_Section_Label</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Section Project Information</shortDescription>
+        <value>Project Information</value>
+    </labels>
+    <labels>
+        <fullName>ProjectForm_Name</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for Project Name field</shortDescription>
+        <value>Project Name</value>
+    </labels>
+    <labels>
+        <fullName>ProjectForm_Helper_Name</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for helper name</shortDescription>
+        <value>Choose a clear, descriptive name for easy identification</value>
+    </labels>
+    <labels>
+        <fullName>ImportProject_Name_Placeholder</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Placeholder for import project name</shortDescription>
+        <value>Enter a descriptive project name (e.g., Q4 Contact Import)</value>
+    </labels>
+    <labels>
+        <fullName>ProjectForm_Description</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for Description field</shortDescription>
+        <value>Description</value>
+    </labels>
+    <labels>
+        <fullName>ProjectForm_Helper_Description</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for helper description</shortDescription>
+        <value>Provide details about data source, business purpose, and expected outcomes</value>
+    </labels>
+    <labels>
+        <fullName>ImportProject_Description_Placeholder</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Placeholder for import project description</shortDescription>
+        <value>Describe the purpose and scope of this import project...</value>
+    </labels>
+    <labels>
+        <fullName>ProjectForm_Target_Section_Label</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Section title Target Object Configuration</shortDescription>
+        <value>Target Object Configuration</value>
+    </labels>
+    <labels>
+        <fullName>ProjectForm_Target_Object</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for Target Object field</shortDescription>
+        <value>Target Salesforce Object</value>
+    </labels>
+    <labels>
+        <fullName>ProjectForm_Helper_Target_Object</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for helper Target Object field</shortDescription>
+        <value>Select the Salesforce object where data will be imported</value>
+    </labels>
+    <labels>
+        <fullName>ProjectForm_Save_Button</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for save button</shortDescription>
+        <value>Save &amp; Continue to Data Source</value>
+    </labels>
+    <labels>
+        <fullName>ProjectForm_Cancel_Button</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for exit button</shortDescription>
+        <value>Cancel</value>
+    </labels>
+
+    <!-- SelectProject -->
+
+    <labels>
+        <fullName>SelectProject_Card_Title</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Card title for select project</shortDescription>
+        <value>Import projects Informations</value>
+    </labels>
+    <labels>
+        <fullName>SelectProject_No_Project</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Message for no project found</shortDescription>
+        <value>No project import yet, please add</value>
+    </labels>
+    <labels>
+        <fullName>SelectProject_Select_Button</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Button to select project</shortDescription>
+        <value>Select</value>
+    </labels>
+    <labels>
+        <fullName>SelectProject_Close_Button</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Button to close modal</shortDescription>
+        <value>Close</value>
+    </labels>
+
 </CustomLabels>

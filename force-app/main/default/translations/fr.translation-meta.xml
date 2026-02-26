@@ -504,4 +504,71 @@
         <name>CsvUploader_Modal_Save</name>
         <label>Enregistrer</label>
     </customLabels>
+    
+
+    <customLabels>
+        <name>SEARCH_PROJECTS_FEATURE</name>
+        <label>Fonctionnalité de recherche de projets</label>
+    </customLabels>
+
+    <customLabels>
+        <name>UNSAVED_CHANGES_WARNING</name>
+        <label>Vous avez des modifications non enregistrées. Voulez-vous vraiment quitter ?</label>
+    </customLabels>
+
+      <customLabels>
+        <name>ALL_FIELDS_REQUIRED</name>
+        <label>Tous les champs sont obligatoires</label>
+    </customLabels>
+
+    <customLabels>
+        <name>PROJECT_EXISTS</name>
+        <label>Un projet avec ce nom et cet objet cible existe déjà</label>
+    </customLabels>
+
+    <customLabels>
+        <name>PROJECT_CREATED</name>
+        <label>Projet créé avec succès avec l’ID : {0}</label>
+    </customLabels>
+
+    <customLabels>
+        <name>ERROR_OCCURRED</name>
+        <label>Une erreur s’est produite</label>
+    </customLabels>
+
+    <customLabels>
+        <name>SELECT_PROJECT_FIRST</name>
+        <label>Veuillez d’abord sélectionner ou créer un projet</label>
+    </customLabels>
+
+    <customLabels>
+        <name>CREATE_PROJECT_FIRST</name>
+        <label>Veuillez d’abord créer un projet</label>
+    </customLabels>
+
+    <customLabels>
+        <name>IMPORT_STARTED</name>
+        <label>Import démarré en mode {0} avec une taille de lot de {1}</label>
+    </customLabels>
+
+    <customLabels>
+        <name>LOGS_COMING_SOON</name>
+        <label>La fonctionnalité des journaux arrive bientôt</label>
+    </customLabels>
+
+    <customLabels>
+        <name>SETTINGS_COMING_SOON</name>
+        <label>La fonctionnalité des paramètres arrive bientôt</label>
+    </customLabels>
+
+    <customLabels>
+        <name>VIEW_LOGS</name>
+        <label>Affichage des journaux</label>
+    </customLabels>
+
+    <customLabels>
+        <name>EXPORT_COMING_SOON</name>
+        <label>La fonctionnalité d'export arrive bientôt</label>
+    </customLabels>
+
 </Translations>
