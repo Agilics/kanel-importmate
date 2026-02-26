@@ -1,20 +1,18 @@
 <!--
-   @description       : 
-   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
-   @group             : 
-   @last modified on  : 02-04-2026
-   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
-   -->
+   @description       : TransformationPage - HTML template with Custom Labels integration
+   @author            : Mouhamed NIANG
+   @last modified on  : 02-24-2026
+-->
 <template>
    <div class="main">
       <div class="header">
          <div class="text-header">
-            <h1 class="header-title">Data Transformations</h1>
-            <p class="subtitle">Set up your data import project</p>
+            <h1 class="header-title">{labels.title}</h1>
+            <p class="subtitle">{labels.subtitle}</p>
          </div>
          <!-- Button  -->
       </div>
-      <!-- Mapper List  for selected project--> 
+      <!-- Mapper List for selected project --> 
       <div class="content">
          <c-transformation-mapper-list 
             project-id={projectId}
@@ -27,11 +25,11 @@
          <div style="margin-top:12px;">
             <c-transformation-field-tabs
                active-tab={activeTransformationTab}
-               onmovetransformation={handleTransformationChange}
-               >
+               onmovetransformation={handleTransformationChange}>
             </c-transformation-field-tabs>
          </div>
          <!-- End tabs transformation select -->
+
          <!-- Liste des transformations -->  
          <template for:each={pagedTransformations} for:item="t">
             <c-transformation-card-component 
@@ -50,36 +48,39 @@
                onedittransformation={handleEditTransformation}>
             </c-transformation-card-component>
          </template>
-         <!--End List of transformations --> 
+         <!-- End List of transformations --> 
+
          <!-- Pagination -->
-      <c-paginator-component 
-         items={filteredTransformations}
-         page-size={pageSize} 
-         page-index={pageIndex}
-         onpagechange={handlePageChange}>
-      </c-paginator-component>
+         <c-paginator-component 
+            items={filteredTransformations}
+            page-size={pageSize} 
+            page-index={pageIndex}
+            onpagechange={handlePageChange}>
+         </c-paginator-component>
          <!-- End Pagination --> 
       </template>
-      <!-- No transformation rule-->
+
+      <!-- No transformation rule -->
       <template if:false={isTransformation}>
          <div class="no-rule-container">
             <lightning-icon icon-name="custom:custom19" size="large" class="no-rule-icon"></lightning-icon>
-            <p class="no-rule-message">No transformation added yet. </p>
+            <p class="no-rule-message">{labels.noRule}</p>
          </div>
       </template>
+
       <footer class="footer-container">
          <div class="footer-separator"></div>
          <div class="footer-actions">
             <button class="btn btn-secondary" onclick={handleBackToMapping}>
                <lightning-icon icon-name="utility:back" size="x-small"></lightning-icon>
-               <label>Back to Mapping</label>
+               <label>{labels.backToMapping}</label>
             </button>
             <div class="btns">
                <button class="btn btn-secondary" onclick={handleBackToMapping}>
-               Save as Template
+                  {labels.saveAsTemplate}
                </button>
-               <button class="btn btn-primary" onclick={handleNextStep}  >
-                  Continue to Validation
+               <button class="btn btn-primary" onclick={handleNextStep}>
+                  {labels.continueToValidation}
                   <lightning-icon class="icon-inline custom-icon-output" icon-name="standard:output" size="small"></lightning-icon>
                </button>
             </div>
