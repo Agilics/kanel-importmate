@@ -1790,7 +1790,7 @@
         <shortDescription>Label for Description field</shortDescription>
         <value>Description</value>
     </labels>
-    <labels>
+    <labels> 
         <fullName>ProjectForm_Helper_Description</fullName>
         <language>en_US</language>
         <protected>false</protected>
@@ -2337,4 +2337,307 @@
         <value>Sample validation (subset)</value>
     </labels>
 
+     <labels>
+        <fullName>IM_EX_Title</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_EX_Title</shortDescription>
+        <value>Import Execution</value>
+    </labels>
+    <labels>
+        <fullName>IM_EX_Subtitle</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_EX_Subtitle</shortDescription>
+        <value>Execute your import or schedule for recurring runs</value>
+    </labels>
+    <labels>
+        <fullName>IM_EX_Btn_ExportLogs</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_EX_Btn_ExportLogs</shortDescription>
+        <value>Export Logs</value>
+    </labels>
+    <labels>
+        <fullName>IM_EX_Btn_ScheduleImport</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_EX_Btn_ScheduleImport</shortDescription>
+        <value>Schedule Import</value>
+    </labels>
+    <labels>
+        <fullName>IM_EX_Btn_StartImport</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_EX_Btn_StartImport</shortDescription>
+        <value>Start Import</value>
+    </labels>
+    <labels>
+        <fullName>IM_EX_Btn_CancelImport</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_EX_Btn_CancelImport</shortDescription>
+        <value>Cancel Import</value>
+    </labels>
+    <labels>
+        <fullName>IM_EX_Btn_BackToValidation</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_EX_Btn_BackToValidation</shortDescription>
+        <value>Back to Validation</value>
+    </labels>
+    <labels>
+        <fullName>IM_EX_Progress_Title</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_EX_Progress_Title</shortDescription>
+        <value>Import Execution Status</value>
+    </labels>
+    <labels>
+        <fullName>IM_EX_Status_Completed</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_EX_Status_Completed</shortDescription>
+        <value>Completed</value>
+    </labels>
+    <labels>
+        <fullName>IM_EX_Status_Cancelled</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_EX_Status_Cancelled</shortDescription>
+        <value>Cancelled</value>
+    </labels>
+    <labels>
+        <fullName>IM_EX_Status_Failed</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_EX_Status_Failed</shortDescription>
+        <value>Failed</value>
+    </labels>
+    <labels>
+        <fullName>IM_EX_Status_InProgress</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_EX_Status_InProgress</shortDescription>
+        <value>In Progress</value>
+    </labels>
+    <labels>
+        <fullName>IM_EX_Status_Pending</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_EX_Status_Pending</shortDescription>
+        <value>Pending</value>
+    </labels>
+    <labels>
+        <fullName>IM_EX_Detail_ExecutionId</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_EX_Detail_ExecutionId</shortDescription>
+        <value>Execution ID:</value>
+    </labels>
+    <labels> 
+        <fullName>IM_EX_Detail_Status</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_EX_Detail_Status</shortDescription>
+        <value>Status:</value>
+    </labels>
+    <labels>
+        <fullName>IM_EX_Detail_TotalRecords</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_EX_Detail_TotalRecords</shortDescription>
+        <value>Total Records:</value>
+    </labels>
+    <labels>
+        <fullName>IM_EX_Detail_Processed</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_EX_Detail_Processed</shortDescription>
+        <value>Processed:</value>
+    </labels>
+    <labels>
+        <fullName>IM_EX_Detail_Successful</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_EX_Detail_Successful</shortDescription>
+        <value>Successful:</value>
+    </labels>
+    <labels>
+        <fullName>IM_EX_Detail_Failed</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_EX_Detail_Failed</shortDescription>
+        <value>Failed:</value>
+    </labels>
+    <labels>
+        <fullName>IM_EX_Processing_Message</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_EX_Processing_Message</shortDescription>
+        <value>Processing your import... Please wait.</value>
+    </labels>
+    <labels>
+        <fullName>IM_EX_Failed_Title</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_EX_Failed_Title</shortDescription>
+        <value>Import failed. You can still export logs.</value>
+    </labels>
+    <labels>
+        <fullName>IM_EX_Failed_Subtitle</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_EX_Failed_Subtitle</shortDescription>
+        <value>Export uses the execution id to fetch logs from Apex.</value>
+    </labels>
+
+
+    <labels>
+        <fullName>IM_IR_Title</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_IR_Title</shortDescription>
+        <value>Import Results</value>
+    </labels>
+    <labels>
+        <fullName>IM_IR_Loading</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_IR_Loading</shortDescription>
+        <value>Loading import results...</value>
+    </labels>
+    <labels>
+        <fullName>IM_IR_Search_Placeholder</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_IR_Search_Placeholder</shortDescription>
+        <value>Search errors...</value>
+    </labels>
+    <labels>
+        <fullName>IM_IR_Filter_AllTypes</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_IR_Filter_AllTypes</shortDescription>
+        <value>All Error Types</value>
+    </labels>
+    <labels>
+        <fullName>IM_IR_Summary_TotalErrors</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_IR_Summary_TotalErrors</shortDescription>
+        <value>Total Errors Found:</value>
+    </labels>
+    <labels>
+        <fullName>IM_IR_Summary_FailedLines</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_IR_Summary_FailedLines</shortDescription>
+        <value>Failed Lines:</value>
+    </labels>
+    <labels>
+        <fullName>IM_IR_Summary_Filtered</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_IR_Summary_Filtered</shortDescription>
+        <value>Filtered:</value>
+    </labels>
+    <labels>
+        <fullName>IM_IR_Col_Row</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_IR_Col_Row</shortDescription>
+        <value>ROW</value>
+    </labels>
+    <labels>
+        <fullName>IM_IR_Col_Field</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_IR_Col_Field</shortDescription>
+        <value>FIELD</value>
+    </labels>
+    <labels>
+        <fullName>IM_IR_Col_ErrorType</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_IR_Col_ErrorType</shortDescription>
+        <value>ERROR TYPE</value>
+    </labels>
+    <labels>
+        <fullName>IM_IR_Col_Message</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_IR_Col_Message</shortDescription>
+        <value>MESSAGE</value>
+    </labels>
+    <labels>
+        <fullName>IM_IR_Col_CurrentValue</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_IR_Col_CurrentValue</shortDescription>
+        <value>CURRENT VALUE</value>
+    </labels>
+    <labels>
+        <fullName>IM_IR_NoMatch</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_IR_NoMatch</shortDescription>
+        <value>No errors match your current filters.</value>
+    </labels>
+    <labels>
+        <fullName>IM_IR_NoErrors</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_IR_NoErrors</shortDescription>
+        <value>No errors found.</value>
+    </labels>
+    <labels>
+        <fullName>IM_IR_Pagination_Showing</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_IR_Pagination_Showing</shortDescription>
+        <value>Showing</value>
+    </labels>
+    <labels>
+        <fullName>IM_IR_Pagination_To</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_IR_Pagination_To</shortDescription>
+        <value>to</value>
+    </labels>
+    <labels>
+        <fullName>IM_IR_Pagination_Of</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_IR_Pagination_Of</shortDescription>
+        <value>of</value>
+    </labels>
+    <labels>
+        <fullName>IM_IR_Pagination_Errors</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_IR_Pagination_Errors</shortDescription>
+        <value>errors</value>
+    </labels>
+    <labels>
+        <fullName>IM_IR_Pagination_Previous</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_IR_Pagination_Previous</shortDescription>
+        <value>Previous</value>
+    </labels>
+    <labels>
+        <fullName>IM_IR_Pagination_Next</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_IR_Pagination_Next</shortDescription>
+        <value>Next</value>
+    </labels>
+    <labels>
+        <fullName>IM_IR_Success</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_IR_Success</shortDescription>
+        <value>No errors found. Import completed successfully!</value>
+    </labels>
 </CustomLabels>
