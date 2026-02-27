@@ -1,6 +1,917 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomLabels xmlns="http://soap.sforce.com/2006/04/metadata">
+    <labels>
+        <fullName>IM_FM_Apply</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Apply</shortDescription>
+        <value>Apply</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_AutoMap</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Auto-Map</shortDescription>
+        <value>Auto-Map</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_Back</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Back</shortDescription>
+        <value>Back</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_Cancel</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Cancel</shortDescription>
+        <value>Cancel</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_ClearAll</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Clear All</shortDescription>
+        <value>Clear All</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_Configure</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Configure</shortDescription>
+        <value>Configure</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_Continue</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Continue</shortDescription>
+        <value>Continue</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_DropHint</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Drop here or select</shortDescription>
+        <value>Drop here or select</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_LimitReached_Body</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>You can configure at most 3 lookup fields in this mapping</shortDescription>
+        <value>You can configure at most 3 lookup fields in this mapping</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_LimitReached_Title</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Limit reached</shortDescription>
+        <value>Limit reached</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_Loaded_Body</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Existing mappings loaded</shortDescription>
+        <value>Existing mappings loaded</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_Loaded_Title</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Loaded</shortDescription>
+        <value>Loaded</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_LookupObject</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Lookup Object</shortDescription>
+        <value>Lookup Object</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_Mapped</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Mapped</shortDescription>
+        <value>Mapped</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_MatchField</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Match Field</shortDescription>
+        <value>Match Field</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_NoPreview</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>No preview available</shortDescription>
+        <value>No preview available</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_NoSavedMappings</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>No saved mappings found for this project</shortDescription>
+        <value>No saved mappings found for this project</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_NoSourceColumns</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>No source columns</shortDescription>
+        <value>No source columns</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_NoValidRows</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>No valid mapping rows to save</shortDescription>
+        <value>No valid mapping rows to save</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_NumberOfPreviewRows</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Number of preview rows</shortDescription>
+        <value>Number of preview rows</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_PreviewSettings</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Preview settings</shortDescription>
+        <value>Preview settings</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_PreviewSubtitle</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Preview of mapped data with transformations applied</shortDescription>
+        <value>Preview of mapped data with transformations applied</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_PreviewTitle</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Data Preview</shortDescription>
+        <value>Data Preview</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_Rows</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>rows</shortDescription>
+        <value>rows</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_SalesforceFields</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Salesforce Fields</shortDescription>
+        <value>Salesforce Fields</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_SaveError_Body</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Failed to save mappings</shortDescription>
+        <value>Failed to save mappings</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_SaveError_Title</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Error</shortDescription>
+        <value>Error</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_SaveMapping</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Save Mapping</shortDescription>
+        <value>Save Mapping</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_SaveSuccess_Body</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Mappings saved</shortDescription>
+        <value>Mappings saved</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_SaveSuccess_Title</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Success</shortDescription>
+        <value>Success</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_SelectProjectFirst</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Please select a Project before saving</shortDescription>
+        <value>Please select a Project before saving</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_SourceData</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Source Data</shortDescription>
+        <value>Source Data</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_Subtitle</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Map source columns to Salesforce fields</shortDescription>
+        <value>Map source columns to Salesforce fields</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_Title</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Field Mapping</shortDescription>
+        <value>Field Mapping</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_Transform</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>+Transform</shortDescription>
+        <value>+Transform</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_Unmapped</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Unmapped</shortDescription>
+        <value>Unmapped</value>
+    </labels>
+    <labels>
+        <fullName>IM_FM_UseAsLookup</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Use as lookup</shortDescription>
+        <value>Use as lookup</value>
+    </labels>
+    <labels>
+        <fullName>IM_FieldMapper_Title</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>IM_FieldMapper_Title</shortDescription>
+        <value>IM_FieldMapper_Title</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_AddCondition</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Add Condition</shortDescription>
+        <value>Add Condition</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_Clear</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Clear</shortDescription>
+        <value>Clear</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_ConditionBuilder</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Condition Builder</shortDescription>
+        <value>Condition Builder</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_ContinueToMapping</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Continue to Field Mapping</shortDescription>
+        <value>Continue to Field Mapping</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_CopyError</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Clipboard not available</shortDescription>
+        <value>Clipboard not available</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_CopyQuery</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Copy Query</shortDescription>
+        <value>Copy Query</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_CopySuccess</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Query copied to clipboard</shortDescription>
+        <value>Query copied to clipboard</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_Direction</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Direction</shortDescription>
+        <value>Direction</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_Export</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Export</shortDescription>
+        <value>Export</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_FoundRecords</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>found {0} records</shortDescription>
+        <value>found {0} records</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_GeneratedQuery</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Generated SOQL Query</shortDescription>
+        <value>Generated SOQL Query</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_NoRows</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>No records found</shortDescription>
+        <value>No records found</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_Offset</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Offset</shortDescription>
+        <value>Offset</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_OrderBy</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Order By</shortDescription>
+        <value>Order By</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_PreviewResults</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Preview Results</shortDescription>
+        <value>Preview Results</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_QueryResultsPreview</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Query Results Preview</shortDescription>
+        <value>Query Results Preview</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_QuerySettings</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Query Settings</shortDescription>
+        <value>Query Settings</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_RecordLimit</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Record Limit</shortDescription>
+        <value>Record Limit</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_SelectAll</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Select all</shortDescription>
+        <value>Select all</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_SelectFields</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Select Fields</shortDescription>
+        <value>Select Fields</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_SelectedObject</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Selected Object</shortDescription>
+        <value>Selected Object</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_Title</fullName>
+        <categories>ImportMate</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>SOQL Builder - Title</shortDescription>
+        <value>SOQL Builder</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_ValidateQuery</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Validate Query</shortDescription>
+        <value>Validate Query</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Actions</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Actions</shortDescription>
+        <value>Actions</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_AddRule</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Add Rule</shortDescription>
+        <value>Add Rule</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_AvailableMappings</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Available Mappings</shortDescription>
+        <value>Mappings disponibles</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_BackToMapping</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Back to Mapping</shortDescription>
+        <value>Back to Mapping</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_ContinueToValidation</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Continue to Validation</shortDescription>
+        <value>Continue to Validation</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_DeleteConfirm_Label</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Delete Transformation</shortDescription>
+        <value>Delete Transformation</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_DeleteConfirm_Message</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Are you sure you want to delete this transformation? This action cannot be undon</shortDescription>
+        <value>Are you sure you want to delete this transformation? This action cannot be undone.</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_DeleteSuccess_Message</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Transformation deleted successfully</shortDescription>
+        <value>Transformation deleted successfully</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_DeleteSuccess_Title</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Success</shortDescription>
+        <value>Success</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Error_CreateRule</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Error creating rule</shortDescription>
+        <value>Error creating rule</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Error_DeleteRule</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Error deleting rule</shortDescription>
+        <value>Error deleting rule</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Error_Title</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Error</shortDescription>
+        <value>Error</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_LookupDetails</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Lookup Details</shortDescription>
+        <value>Lookup Details</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_MappingsCount</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>{0} mappings</shortDescription>
+        <value>{0} mappings</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Modal_AddRule</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Add New Rule</shortDescription>
+        <value>Add New Rule</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Modal_BooleanValue</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Boolean Value</shortDescription>
+        <value>Boolean Value</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Modal_Cancel</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Cancel</shortDescription>
+        <value>Cancel</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Modal_ChooseBoolean</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Choose the boolean value</shortDescription>
+        <value>Choose the boolean value</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Modal_EditRule</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Edit Rule</shortDescription>
+        <value>Edit Rule</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Modal_No</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>No</shortDescription>
+        <value>No</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Modal_On</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>on</shortDescription>
+        <value>on</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Modal_RuleType</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Rule Type</shortDescription>
+        <value>Rule Type</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Modal_SaveRule</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Save rule</shortDescription>
+        <value>Save rule</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Modal_SectionMapping</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Mapping</shortDescription>
+        <value>Mapping</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Modal_SectionRules</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Rules</shortDescription>
+        <value>Rules</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Modal_SelectFieldsHelp</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Select 1 to a maximum of 3 fields.</shortDescription>
+        <value>Select 1 to a maximum of 3 fields.</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Modal_SelectOption</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Select an option</shortDescription>
+        <value>Select an option</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Modal_SelectedLabel</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Selected Fields</shortDescription>
+        <value>Selected Fields</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Modal_Separator</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Separator</shortDescription>
+        <value>Separator</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Modal_SourceFields</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Source Fields</shortDescription>
+        <value>Source Fields</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Modal_SourceLabel</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Available Fields</shortDescription>
+        <value>Champs disponibles</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Modal_UpdateRule</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Update rule</shortDescription>
+        <value>Update rule</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Modal_Yes</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Yes</shortDescription>
+        <value>Yes</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Next</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Next</shortDescription>
+        <value>Next</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_NoRule</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>No transformation added yet</shortDescription>
+        <value>No transformation added yet</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Picklist_BooleanTransformation</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Boolean Transformation</shortDescription>
+        <value>Boolean Transformation</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Picklist_Concatenation</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Concatenation</shortDescription>
+        <value>Concatenation</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Picklist_EmailMask</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Email Validation &amp; Format</shortDescription>
+        <value>Email Validation &amp; Format</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Picklist_LowercaseTransformation</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Lowercase Conversion</shortDescription>
+        <value>Lowercase Conversion</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Picklist_PhoneMask</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Phone Number Formatting</shortDescription>
+        <value>Phone Number Formatting</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Picklist_UppercaseTransformation</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Uppercase Conversion</shortDescription>
+        <value>Uppercase Conversion</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Previous</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Previous</shortDescription>
+        <value>Previous</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_RuleTitle_Boolean</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Boolean Transformation</shortDescription>
+        <value>Boolean Transformation</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_RuleTitle_Concatenation</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Field Concatenation</shortDescription>
+        <value>Field Concatenation</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_RuleTitle_EmailMask</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Email Validation &amp; Format</shortDescription>
+        <value>Email Validation &amp; Format</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_RuleTitle_Lowercase</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Lowercase Conversion</shortDescription>
+        <value>Lowercase Conversion</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_RuleTitle_PhoneMask</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Phone Number Formatting</shortDescription>
+        <value>Phone Number Formatting</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_RuleTitle_Uppercase</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Uppercase Conversion</shortDescription>
+        <value>Uppercase Conversion</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_SaveAsTemplate</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Save as Template</shortDescription>
+        <value>Save as Template</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_SearchMappings</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Search mappings...</shortDescription>
+        <value>Search mappings...</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Sep_Comma</fullName>
+        <categories>IM_TR</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Separator option - Comma</shortDescription>
+        <value>Comma</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Sep_NewLine</fullName>
+        <categories>IM_TR</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Separator option - New line</shortDescription>
+        <value>New line</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Sep_SemiComma</fullName>
+        <categories>IM_TR</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Separator option - Semi Comma</shortDescription>
+        <value>Semi Comma</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Sep_Space</fullName>
+        <categories>IM_TR</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Separator option - Space</shortDescription>
+        <value>Space</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Sep_Tab</fullName>
+        <categories>IM_TR</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Separator option - Tab</shortDescription>
+        <value>Tab</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_ShowingEntries</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Showing {0} to {1} of {2} entries</shortDescription>
+        <value>Showing {0} to {1} of {2} entries</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_SourceColumn</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Source Column</shortDescription>
+        <value>Source Column</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Subtitle</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Set up your data import project</shortDescription>
+        <value>Set up your data import project</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Tab_AllFields</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>All Fields</shortDescription>
+        <value>All Fields</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Tab_Boolean</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Boolean Transformation</shortDescription>
+        <value>Boolean Transformation</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Tab_Case</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Case Transformation</shortDescription>
+        <value>Case Transformation</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Tab_Mask</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Data Masking</shortDescription>
+        <value>Data Masking</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_TargetField</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Target Field</shortDescription>
+        <value>Target Field</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Title</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Data Transformations</shortDescription>
+        <value>Data Transformations</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Type</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Type</shortDescription>
+        <value>Type</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_UnknownField</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Unknown Field</shortDescription>
+        <value>Unknown Field</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Version</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Version</shortDescription>
+        <value>Version</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Warning_Title</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Warning</shortDescription>
+        <value>Warning</value>
+    </labels>
 
+
+    
     <!-- import recent projects -->
 
     <labels>
