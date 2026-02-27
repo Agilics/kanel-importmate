@@ -571,4 +571,436 @@
         <label>La fonctionnalité d'export arrive bientôt</label>
     </customLabels>
 
+      <customLabels>
+        <name>IM_DRY_Title</name>
+        <label>Validation des données</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Subtitle</name>
+        <label>Examinez et corrigez les erreurs avant l&apos;import</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Status_WithErrors</name>
+        <label>Validation terminée avec des erreurs</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Status_Success</name>
+        <label>Validation terminée avec succès</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Btn_Settings</name>
+        <label>Paramètres de validation</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Btn_RunValidation</name>
+        <label>Lancer la validation</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Btn_ExportReport</name>
+        <label>Exporter le rapport</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Btn_CancelValidation</name>
+        <label>Annuler la validation</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Btn_RetryValidation</name>
+        <label>Relancer la validation</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Btn_Back</name>
+        <label>Retour au mapping &amp; transformations</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Btn_Skip</name>
+        <label>Ignorer &amp; continuer</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Btn_Proceed</name>
+        <label>Passer à l&apos;exécution</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Btn_Close</name>
+        <label>Fermer</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Settings_Title</name>
+        <label>Paramètres de validation</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Settings_Mode</name>
+        <label>Mode</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Settings_ModeLabel</name>
+        <label>Mode de validation</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Settings_SampleSize</name>
+        <label>Taille de l&apos;échantillon</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Settings_SampleHelp</name>
+        <label>La taille de l&apos;échantillon s&apos;applique uniquement en mode échantillon.</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Settings_Performance</name>
+        <label>Performance</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Settings_AsyncThreshold</name>
+        <label>Seuil asynchrone (lignes)</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Settings_PageSize</name>
+        <label>Taille de page du tableau</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Settings_PerformanceHelp</name>
+        <label>Si le nombre de lignes dépasse le seuil, la validation passe en mode asynchrone.</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Settings_Behavior</name>
+        <label>Comportement</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Settings_IncludeWarnings</name>
+        <label>Inclure les avertissements dans le rapport</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Settings_StopOnError</name>
+        <label>Arrêter si la vérification client trouve des lignes invalides</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Settings_DefaultTab</name>
+        <label>Onglet par défaut après validation</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Settings_BehaviorHelp</name>
+        <label>L&apos;affichage des avertissements dépend du bouton Inclure les avertissements.</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Progress_Title</name>
+        <label>Progression de la validation</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Progress_InProgress</name>
+        <label>Validation en cours</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Progress_Completed</name>
+        <label>Terminée</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Progress_Failed</name>
+        <label>Échouée</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Progress_Cancelled</name>
+        <label>Annulée</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Progress_Validated</name>
+        <label>Validés</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Progress_FailedStat</name>
+        <label>Échoués</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Progress_ExecutionId</name>
+        <label>ID d&apos;exécution :</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Report_Title</name>
+        <label>Rapport de validation</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Tab_Errors</name>
+        <label>Erreurs</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Tab_Warnings</name>
+        <label>Avertissements</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Tab_AllIssues</name>
+        <label>Tous les problèmes</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Search_Placeholder</name>
+        <label>Rechercher un problème...</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Filter_AllTypes</name>
+        <label>Tous les types</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Col_Level</name>
+        <label>NIVEAU</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Col_Row</name>
+        <label>LIGNE</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Col_Field</name>
+        <label>CHAMP</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Col_Type</name>
+        <label>TYPE</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Col_Message</name>
+        <label>MESSAGE</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Col_Actions</name>
+        <label>ACTIONS</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_NoIssues_Message</name>
+        <label>Aucun problème ne correspond à vos filtres.</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_NoErrors_Message</name>
+        <label>Aucun problème détecté ! Les données sont prêtes pour l&apos;import.</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Pagination_Showing</name>
+        <label>Affichage</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Pagination_To</name>
+        <label>à</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Pagination_Of</name>
+        <label>sur</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Pagination_Issues</name>
+        <label>problème(s)</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Pagination_Previous</name>
+        <label>Précédent</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Pagination_Next</name>
+        <label>Suivant</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Mode_Full</name>
+        <label>Validation complète (toutes les lignes)</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Mode_Sample</name>
+        <label>Validation par échantillon (sous-ensemble)</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Title</name>
+        <label>Règles de transformation</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Subtitle</name>
+        <label>Gérez vos règles de transformation de données</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_NoRule</name>
+        <label>Aucune règle de transformation définie</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_BackToMapping</name>
+        <label>Retour au mapping</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_SaveAsTemplate</name>
+        <label>Sauvegarder comme modèle</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_ContinueToValidation</name>
+        <label>Continuer vers la validation</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_SourceColumn</name>
+        <label>Colonne source</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_TargetField</name>
+        <label>Champ cible</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_UnknownField</name>
+        <label>Champ inconnu</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Error_Title</name>
+        <label>Erreur</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Warning_Title</name>
+        <label>Avertissement</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_DeleteSuccess_Title</name>
+        <label>Succès</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_DeleteSuccess_Message</name>
+        <label>Règle supprimée avec succès</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_DeleteConfirm_Label</name>
+        <label>Confirmer la suppression</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_DeleteConfirm_Message</name>
+        <label>Êtes-vous sûr de vouloir supprimer cette règle ?</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Error_CreateRule</name>
+        <label>Erreur lors de la création de la règle</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Error_DeleteRule</name>
+        <label>Erreur lors de la suppression de la règle</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Modal_AddRule</name>
+        <label>Ajouter une règle</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Modal_EditRule</name>
+        <label>Modifier la règle</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Modal_SectionMapping</name>
+        <label>Mapping</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Modal_SectionRules</name>
+        <label>Règles</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Modal_RuleType</name>
+        <label>Type de règle</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Modal_SelectOption</name>
+        <label>Sélectionner une option</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Modal_SourceFields</name>
+        <label>Champs source</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Modal_SourceLabel</name>
+        <label>Source disponible</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Modal_SelectedLabel</name>
+        <label>Sélectionnés</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Modal_SelectFieldsHelp</name>
+        <label>Sélectionnez les champs à inclure</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Modal_On</name>
+        <label>Sur</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Modal_Separator</name>
+        <label>Séparateur</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Modal_ChooseBoolean</name>
+        <label>Choisir la valeur booléenne</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Modal_BooleanValue</name>
+        <label>Valeur booléenne</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Modal_Yes</name>
+        <label>Oui</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Modal_No</name>
+        <label>Non</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Modal_Cancel</name>
+        <label>Annuler</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Modal_SaveRule</name>
+        <label>Sauvegarder la règle</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Modal_UpdateRule</name>
+        <label>Mettre à jour la règle</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Picklist_BooleanTransformation</name>
+        <label>Transformation booléenne</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Picklist_Concatenation</name>
+        <label>Concaténation</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Picklist_EmailMask</name>
+        <label>Masque email</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Picklist_PhoneMask</name>
+        <label>Masque téléphone</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Picklist_LowercaseTransformation</name>
+        <label>Conversion minuscules</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Picklist_UppercaseTransformation</name>
+        <label>Conversion majuscules</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Sep_Tab</name>
+        <label>Tabulation</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Sep_Comma</name>
+        <label>Virgule</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Sep_Space</name>
+        <label>Espace</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Sep_SemiComma</name>
+        <label>Point-virgule</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Sep_NewLine</name>
+        <label>Nouvelle ligne</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Tab_AllFields</name>
+        <label>Tous les champs</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Tab_Boolean</name>
+        <label>Transformation booléenne</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Tab_Case</name>
+        <label>Transformation de casse</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Tab_Mask</name>
+        <label>Masquage de données</label>
+    </customLabels>
 </Translations>

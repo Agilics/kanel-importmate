@@ -1870,5 +1870,471 @@
         <shortDescription>Button to close modal</shortDescription>
         <value>Close</value>
     </labels>
+ <labels>
+        <fullName>IM_DRY_Title</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Page Title</shortDescription>
+        <value>Data Validation</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Subtitle</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Page Subtitle</shortDescription>
+        <value>Review and fix data issues before import</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Status_WithErrors</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Status with errors</shortDescription>
+        <value>Validation completed with errors</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Status_Success</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Status success</shortDescription>
+        <value>Validation completed successfully</value>
+    </labels>
+
+    <!-- Buttons -->
+    <labels>
+        <fullName>IM_DRY_Btn_Settings</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Button Settings</shortDescription>
+        <value>Validation Settings</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Btn_RunValidation</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Button Run Validation</shortDescription>
+        <value>Run Validation</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Btn_ExportReport</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Button Export Report</shortDescription>
+        <value>Export Report</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Btn_CancelValidation</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Button Cancel Validation</shortDescription>
+        <value>Cancel Validation</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Btn_RetryValidation</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Button Retry Validation</shortDescription>
+        <value>Retry Validation</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Btn_Back</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Button Back</shortDescription>
+        <value>Back to Mapping &amp; Transformations</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Btn_Skip</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Button Skip</shortDescription>
+        <value>Skip &amp; Continue</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Btn_Proceed</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Button Proceed</shortDescription>
+        <value>Proceed to Execution</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Btn_Close</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Button Close</shortDescription>
+        <value>Close</value>
+    </labels>
+
+    <!-- Settings Modal -->
+    <labels>
+        <fullName>IM_DRY_Settings_Title</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Settings Modal Title</shortDescription>
+        <value>Validation Settings</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Settings_Mode</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Settings Mode section</shortDescription>
+        <value>Mode</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Settings_ModeLabel</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Settings Validation mode label</shortDescription>
+        <value>Validation mode</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Settings_SampleSize</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Settings Sample size</shortDescription>
+        <value>Sample size</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Settings_SampleHelp</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Settings Sample help text</shortDescription>
+        <value>Sample size is used only when mode = Sample validation.</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Settings_Performance</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Settings Performance section</shortDescription>
+        <value>Performance</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Settings_AsyncThreshold</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Settings Async threshold</shortDescription>
+        <value>Async threshold (rows)</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Settings_PageSize</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Settings Table page size</shortDescription>
+        <value>Table page size</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Settings_PerformanceHelp</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Settings Performance help text</shortDescription>
+        <value>If total rows exceed the threshold, validation switches to async mode.</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Settings_Behavior</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Settings Behavior section</shortDescription>
+        <value>Behavior</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Settings_IncludeWarnings</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Settings Include warnings</shortDescription>
+        <value>Include warnings in the report</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Settings_StopOnError</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Settings Stop on error</shortDescription>
+        <value>Stop early if client precheck finds invalid rows</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Settings_DefaultTab</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Settings Default tab</shortDescription>
+        <value>Default tab after validation</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Settings_BehaviorHelp</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Settings Behavior help text</shortDescription>
+        <value>Warnings display depends on the Include warnings toggle.</value>
+    </labels>
+
+    <!-- Progress -->
+    <labels>
+        <fullName>IM_DRY_Progress_Title</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Progress Title</shortDescription>
+        <value>Validation Progress</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Progress_InProgress</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Progress In Progress</shortDescription>
+        <value>Validation in progress</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Progress_Completed</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Progress Completed</shortDescription>
+        <value>Completed</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Progress_Failed</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Progress Failed</shortDescription>
+        <value>Failed</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Progress_Cancelled</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Progress Cancelled</shortDescription>
+        <value>Cancelled</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Progress_Validated</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Stat Validated</shortDescription>
+        <value>Validated</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Progress_FailedStat</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Stat Failed</shortDescription>
+        <value>Failed</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Progress_ExecutionId</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Execution ID label</shortDescription>
+        <value>Execution ID:</value>
+    </labels>
+
+    <!-- Report / Table -->
+    <labels>
+        <fullName>IM_DRY_Report_Title</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Report Title</shortDescription>
+        <value>Validation Report</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Tab_Errors</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Tab Errors</shortDescription>
+        <value>Errors</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Tab_Warnings</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Tab Warnings</shortDescription>
+        <value>Warnings</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Tab_AllIssues</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Tab All Issues</shortDescription>
+        <value>All Issues</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Search_Placeholder</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Search placeholder</shortDescription>
+        <value>Search issues...</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Filter_AllTypes</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Filter All Types</shortDescription>
+        <value>All Types</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Col_Level</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Column Level</shortDescription>
+        <value>LEVEL</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Col_Row</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Column Row</shortDescription>
+        <value>ROW</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Col_Field</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Column Field</shortDescription>
+        <value>FIELD</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Col_Type</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Column Type</shortDescription>
+        <value>TYPE</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Col_Message</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Column Message</shortDescription>
+        <value>MESSAGE</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Col_Actions</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Column Actions</shortDescription>
+        <value>ACTIONS</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_NoIssues_Message</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - No issues message</shortDescription>
+        <value>No issues match your current filters.</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_NoErrors_Message</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - No errors success message</shortDescription>
+        <value>No validation issues detected! Data is ready for import.</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Pagination_Showing</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Pagination showing text</shortDescription>
+        <value>Showing</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Pagination_To</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Pagination to</shortDescription>
+        <value>to</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Pagination_Of</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Pagination of</shortDescription>
+        <value>of</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Pagination_Issues</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Pagination issues</shortDescription>
+        <value>issue(s)</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Pagination_Previous</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Pagination Previous</shortDescription>
+        <value>Previous</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Pagination_Next</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Pagination Next</shortDescription>
+        <value>Next</value>
+    </labels>
+
+    <!-- Mode options -->
+    <labels>
+        <fullName>IM_DRY_Mode_Full</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Mode Full</shortDescription>
+        <value>Full validation (all rows)</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Mode_Sample</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Mode Sample</shortDescription>
+        <value>Sample validation (subset)</value>
+    </labels>
 
 </CustomLabels>
