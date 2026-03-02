@@ -284,6 +284,10 @@ lightning-textarea textarea {
     padding: 1.75rem;
   }
   
+  .modal-padding{
+    padding: 0.75rem;
+  }
+
   .section-header {
     margin-bottom: 12px;
   }

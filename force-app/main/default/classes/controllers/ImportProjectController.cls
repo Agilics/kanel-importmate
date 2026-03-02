@@ -54,4 +54,10 @@ public class ImportProjectController {
     public static List<String> getCompatibleSObjects() {
       return ObjectMetadataService.getCompatibleSObjects();
     }
+
+    //mise à jour d'un projet importé
+    @AuraEnabled 
+    public static void updateProject(String projectId,String name,String description,String targetObject) {
+       ProjectService.updateProject(projectId, name, description, targetObject);
+    }
 }

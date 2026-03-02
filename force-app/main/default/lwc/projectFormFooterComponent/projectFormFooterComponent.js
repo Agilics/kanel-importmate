@@ -1,6 +1,12 @@
-import { LightningElement } from "lwc";
+import { LightningElement,api } from "lwc";
 
 export default class ProjectFormFooterComponent extends LightningElement {
+  @api openModal = false;
+
+  get footerClass(){
+    return this.openModal ? "footer-container" :"";
+  }
+
   //sauvegarde d'un nouveau projet
   handleCreateProject() {
     this.dispatchEvent(new CustomEvent("save"));

@@ -1,4 +1,4 @@
-import { LightningElement, track, wire } from 'lwc';
+import { LightningElement, track, wire,api } from 'lwc';
 import getDashboardData from '@salesforce/apex/DashboardController.getDashboardData';
 import deleteProject from '@salesforce/apex/DashboardController.deleteProject';
 import { refreshApex } from '@salesforce/apex';
@@ -245,6 +245,7 @@ export default class DashboardCmp extends LightningElement {
         }
     }
 
+    @api
     async refreshDashboard() {
         return refreshApex(this.wiredDashboardResult);
     }

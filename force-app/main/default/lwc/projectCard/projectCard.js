@@ -81,9 +81,7 @@ export default class ProjectCard extends LightningElement {
     handleCardClick() {
         // Dispatch event to parent with project ID
         const selectEvent = new CustomEvent('projectselect', {
-            detail: this.project,
-            bubbles: true,
-            composed: true
+            detail: this.project 
         });
         this.dispatchEvent(selectEvent);
     }

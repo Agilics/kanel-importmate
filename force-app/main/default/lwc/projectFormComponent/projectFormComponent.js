@@ -17,6 +17,7 @@ export default class ProjectFormComponent extends LightningElement {
   @track options = [];
   @api project;
   @api currentStep;
+  @api openModal = false; //affichage modal pour une modification
 
   // Permet au parent de définir des valeurs initiales dans le champs target object
   connectedCallback() {
@@ -88,6 +89,15 @@ export default class ProjectFormComponent extends LightningElement {
     this.template.querySelectorAll(".rounded-input").forEach((input) => {
       input.value = "";
     });
+  }
+
+  // classe css 
+  get containerClass(){
+    return this.openModal ? '':'main-content';
+  }
+
+  get contentClass(){
+    return this.openModal ? 'model-padding':'card';
   }
 
   //Masquer la section de création de projets
