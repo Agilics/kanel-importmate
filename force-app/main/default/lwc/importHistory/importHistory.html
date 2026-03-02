@@ -155,6 +155,15 @@
         <h2 class="ih-table-title">Execution History</h2>
 
         <div class="ih-table-header-right">
+          <lightning-button
+            label={deleteSelectedLabel}
+            variant="destructive-text"
+            icon-name="utility:delete"
+            icon-position="left"
+            onclick={handleDeleteSelected}
+            disabled={isBulkDeleteDisabled}
+          ></lightning-button>
+
           <div class="ih-search-wrapper">
             <lightning-input
               type="search"
@@ -174,9 +183,26 @@
       </div>
 
       <div class="ih-table-wrapper">
+        <template if:true={isDeleting}>
+          <div class="ih-spinner-overlay">
+            <lightning-spinner
+              alternative-text="Deleting executions"
+              size="small"
+            ></lightning-spinner>
+          </div>
+        </template>
+
         <table class="ih-table">
           <thead>
             <tr>
+              <th>
+                <lightning-input
+                  type="checkbox"
+                  variant="label-hidden"
+                  checked={isAllPageSelected}
+                  onchange={handleToggleSelectPage}
+                ></lightning-input>
+              </th>
               <th>Project</th>
               <th>Status</th>
               <th>Target Object</th>
@@ -192,6 +218,15 @@
               <template if:true={pageRows.length}>
                 <template for:each={pageRows} for:item="row">
                   <tr key={row.id}>
+                    <td>
+                      <lightning-input
+                        type="checkbox"
+                        variant="label-hidden"
+                        data-id={row.id}
+                        checked={row.isSelected}
+                        onchange={handleToggleSelectRow}
+                      ></lightning-input>
+                    </td>
                     <td>
                       <div class="ih-project-cell">
                         <div class={row.iconBgClass}>
@@ -215,7 +250,10 @@
                     </td>
 
                     <td>
-                      <span class={row.statusClass}>{row.statusLabel}</span>
+                      <div>
+                        <span class={row.statusClass}>{row.statusLabel}</span>
+                        <div class="ih-project-sub">{row.phaseText}</div>
+                      </div>
                     </td>
 
                     <td>
@@ -245,6 +283,16 @@
                           size="x-small"
                         ></lightning-button-icon>
 
+                        <lightning-button-icon
+                          icon-name="utility:delete"
+                          alternative-text="Delete"
+                          variant="bare"
+                          size="x-small"
+                          data-id={row.id}
+                          onclick={handleDeleteExecution}
+                          disabled={isBusy}
+                        ></lightning-button-icon>
+
                         <template if:true={row.showStatusDot}>
                           <span class={row.statusDotClass}></span>
                         </template>
@@ -256,7 +304,7 @@
 
               <template if:false={pageRows.length}>
                 <tr>
-                  <td colspan="7" class="ih-empty">
+                  <td colspan="8" class="ih-empty">
                     No executions match your filters.
                   </td>
                 </tr>
@@ -352,6 +400,16 @@
               onclick={handleExportSelected}
             ></lightning-button>
 
+            <lightning-button
+              label="Delete Execution"
+              variant="destructive-text"
+              icon-name="utility:delete"
+              icon-position="left"
+              data-id={selectedRow.id}
+              onclick={handleDeleteExecution}
+              disabled={isDeleteSelectedDisabled}
+            ></lightning-button>
+
             <lightning-button-icon
               icon-name="utility:close"
               alternative-text="Close"
@@ -373,6 +431,10 @@
                 <div class="ih-view-row">
                   <dt>Status</dt>
                   <dd>{selectedRow.statusLabel}</dd>
+                </div>
+                <div class="ih-view-row">
+                  <dt>Phase</dt>
+                  <dd>{selectedRow.phaseText}</dd>
                 </div>
                 <div class="ih-view-row">
                   <dt>Started</dt>
@@ -399,6 +461,14 @@
                 <div class="ih-view-row">
                   <dt>Failed</dt>
                   <dd>{selectedRow.failed}</dd>
+                </div>
+                <div class="ih-view-row">
+                  <dt>Success</dt>
+                  <dd>{selectedRow.success}</dd>
+                </div>
+                <div class="ih-view-row">
+                  <dt>Remaining</dt>
+                  <dd>{selectedRow.remaining}</dd>
                 </div>
                 <div class="ih-view-row">
                   <dt>Records summary</dt>

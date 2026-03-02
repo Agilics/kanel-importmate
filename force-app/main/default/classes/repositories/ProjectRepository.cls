@@ -26,13 +26,17 @@ public static ImportProject__c saveProject(ImportProject__c project) {
 
   // Récupère un projet par ID
   public static ImportProject__c getProjectById(String projectId) {
+    if (String.isBlank(projectId)) {
+      return null;
+    }
     if (SecurityUtils.isAccessible(ImportProject__c.SObjectType)) {
-      return [
+      List<ImportProject__c> projects = [
         SELECT Id, Name, Description__c, TargetObject__c, CreatedDate
         FROM ImportProject__c 
         WHERE Id = :projectId  
         LIMIT 1
       ];
+      return projects.isEmpty() ? null : projects[0];
     }
     return null;
   }
@@ -100,11 +104,11 @@ public static ImportProject__c saveProject(ImportProject__c project) {
         SELECT Id, Name, Description__c, TargetObject__c, IsActive__c,
                CreatedDate, LastModifiedDate,
                (SELECT Id, Status__c, TotalRecords__c, ProcessedRecords__c, 
-                       FailedRecords__c, StartTime__c, EndTime__c, Type__c,
+                       FailedRecords__c, StartTime__c, EndTime__c, Type__c, Phase__c,
                        CreatedDate, LastModifiedDate
                 FROM ImportExecutions__r WHERE Type__c = 'Import'
                 ORDER BY CreatedDate DESC
-                LIMIT 1)
+                LIMIT 50)
         FROM ImportProject__c
         ORDER BY LastModifiedDate DESC
         LIMIT :limitor

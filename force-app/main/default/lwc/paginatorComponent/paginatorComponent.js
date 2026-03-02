@@ -1,4 +1,6 @@
 import { LightningElement, api } from 'lwc';
+import SHOWING_ENTRIES from '@salesforce/label/c.DataTable_Showing_Entries';
+
 
 export default class PaginatorComponent extends LightningElement {
     @api items = [];
@@ -127,7 +129,10 @@ export default class PaginatorComponent extends LightningElement {
 
     @api
     get paginationInfoMessage() {
-        return `Showing ${this.showingOnPage} of ${this.totalEntries} results`;
+        return SHOWING_ENTRIES
+            .replace('{0}', this.showingFrom)
+            .replace('{1}', this.showingTo)
+            .replace('{2}', this.totalEntries);
     }
     
     get paginationWrapperClass() {

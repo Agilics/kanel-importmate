@@ -17,8 +17,7 @@ import {
 } from './constants';
 
 /**
-* Main component for the ImportMate application
-* Handles project workflow navigation and state management
+* @description main ImportMate component
 */
 export default class MainComponent extends LightningElement {
   // UI state
@@ -28,7 +27,7 @@ export default class MainComponent extends LightningElement {
   isLoading = false;
   activePage = PAGES.DASHBOARD;
   
-  //Navigation and unsaved changes tracking
+  //unsaved changes
   hasUnsavedChanges = false;
   beforeUnloadHandler = null;
 
@@ -66,7 +65,7 @@ export default class MainComponent extends LightningElement {
     this.removeBeforeUnloadHandler();
   }
 
-  //Sets up the beforeunload event handler to warn users when closing the page
+  //warn on page close
   setupBeforeUnloadHandler() {
     this.beforeUnloadHandler = (event) => {
       if (this.hasUnsavedChanges) {
@@ -80,7 +79,7 @@ export default class MainComponent extends LightningElement {
     window.addEventListener('beforeunload', this.beforeUnloadHandler);
   }
 
-  //Removes the beforeunload event handler
+  //cleanup handler
   removeBeforeUnloadHandler() {
     if (this.beforeUnloadHandler) {
       window.removeEventListener('beforeunload', this.beforeUnloadHandler);
@@ -88,12 +87,12 @@ export default class MainComponent extends LightningElement {
     }
   }
 
-  //Marks that there are unsaved changes
+  //set unsaved
   markAsUnsaved() {
     this.hasUnsavedChanges = true;
   }
 
-  //Marks that all changes are saved
+  //clear unsaved
   markAsSaved() {
     this.hasUnsavedChanges = false;
   }
@@ -220,8 +219,24 @@ export default class MainComponent extends LightningElement {
   }
 
   handleCsvLoaded(event) {
-      this.csvData = event.detail?.csvData || event.detail || {};
-      //Mark as unsaved when CSV is loaded
+      const detail = event.detail || {};
+      
+      //full dataset
+      if (detail.allRows && detail.columns) {
+          this.csvData = {
+              allRows: detail.allRows,
+              rows: detail.allRows,
+              columns: detail.columns,
+              rawCsvText: detail.rawCsvText || '',
+              totalRowCount: detail.totalRowCount || detail.allRows.length
+          };
+      } else if (detail.csvData) {
+          this.csvData = detail.csvData;
+      } else {
+          this.csvData = detail;
+      }
+      
+      //mark unsaved
       this.markAsUnsaved(); 
       console.log(
           'csvData loaded in mainComponent:',
@@ -332,9 +347,22 @@ export default class MainComponent extends LightningElement {
       if (event?.detail?.csvData) {
           this.csvData = event.detail.csvData;
       } else if (event?.detail?.allRows && event?.detail?.columns) {
+          //allRows available
           this.csvData = {
               allRows: event.detail.allRows,
-              columns: event.detail.columns
+              rows: event.detail.allRows,
+              columns: event.detail.columns,
+              rawCsvText: event.detail.rawCsvText || '',
+              totalRowCount: event.detail.totalRowCount
+          };
+      } else if (event?.detail?.rows && event?.detail?.columns) {
+          //fallback to rows
+          this.csvData = {
+              allRows: event.detail.rows,
+              rows: event.detail.rows,
+              columns: event.detail.columns,
+              rawCsvText: event.detail.rawCsvText || '',
+              totalRowCount: event.detail.totalRowCount || event.detail.rows.length
           };
       }
 

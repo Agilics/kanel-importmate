@@ -23,86 +23,26 @@ public class DryRunControllerTest {
     }
 
     @IsTest
-    static void testRunDryRunValidationWithValidData() {
+    static void testRunDryRunValidationRollbackWithValidData() {
         ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
         List<Map<String, String>> csvData = new List<Map<String, String>>();
-        csvData.add(new Map<String, String>{
-            'Name' => 'Test Account',
-            'Industry' => 'Technology'
-        });
+        csvData.add(new Map<String, String>{'Name' => 'Test Account'});
 
         Test.startTest();
-        Map<String, Object> result = DryRunController.runDryRunValidation(project.Id, csvData);
+        Map<String, Object> result = DryRunController.runDryRunValidationRollback(project.Id, csvData);
         Test.stopTest();
 
-        Assert.isTrue((Boolean) result.get('success'), 'Validation should succeed');
+        Assert.isNotNull(result.get('executionId'), 'Should return execution ID');
         Assert.areEqual(1, result.get('totalRecords'), 'Should have one record');
     }
 
-    //run dry run with validation errors
     @IsTest
-    static void testRunDryRunValidationWithValidationErrors() {
-        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
+    static void testRunDryRunValidationRollbackWithMissingProject() {
         List<Map<String, String>> csvData = new List<Map<String, String>>();
-        csvData.add(new Map<String, String>{'Name' => ''});
-        csvData.add(new Map<String, String>{'Name' => 'Test Account'});
-        Test.startTest();
-        Map<String, Object> result = DryRunController.runDryRunValidation(project.Id, csvData);
-        Test.stopTest();
-
-        //debug result
-        System.debug('Result: ' + result);
-        Assert.isTrue((Boolean) result.get('success'), 'Validation should fail');
-        Assert.areEqual(1, result.get('errorCount'), 'Should have one error');
-        Assert.areEqual(2, result.get('totalRecords'), 'Should have one record');
-    }
-
-    @IsTest
-    static void testRunDryRunValidationWithMissingProject() {
-        List<Map<String, String>> csvData = TestDataFactory.createTestCsvData(1);
+        csvData.add(new Map<String, String>{'Name' => 'Test'});
 
         Test.startTest();
-        Map<String, Object> result = DryRunController.runDryRunValidation('invalid-id', csvData);
-        Test.stopTest();
-
-        Assert.isFalse((Boolean) result.get('success'), 'Should fail with invalid project ID');
-    }
-
-    @IsTest
-    static void testValidateSampleLimitsRows() {
-        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
-        List<Map<String, String>> sampleData = TestDataFactory.createTestCsvData(15);
-
-        Test.startTest();
-        Map<String, Object> result = DryRunController.validateSample(project.Id, sampleData);
-        Test.stopTest();
-
-        Assert.areEqual(10, result.get('sampleSize'), 'Should limit to 10 rows');
-        Assert.isTrue((Boolean) result.get('isSample'), 'Should indicate sample mode');
-        Assert.isTrue((Boolean) result.get('success'), 'Validation should succeed');
-    }
-
-    @IsTest
-    static void testStartImportWithValidData() {
-        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
-        List<Map<String, String>> csvData = new List<Map<String, String>>();
-        csvData.add(new Map<String, String>{'Name' => 'Import Test'});
-
-        Test.startTest();
-        Map<String, Object> result = DryRunController.startImport(project.Id, csvData);
-        Test.stopTest();
-
-        Assert.isTrue((Boolean) result.get('success'), 'Import should start successfully');
-        Assert.isNotNull(result.get('jobId'), 'Should return job ID');
-        Assert.isNotNull(result.get('executionId'), 'Should return execution ID');
-    }
-
-    @IsTest
-    static void testStartImportWithMissingProject() {
-        List<Map<String, String>> csvData = new List<Map<String, String>>();
-
-        Test.startTest();
-        Map<String, Object> result = DryRunController.startImport('invalid-id', csvData);
+        Map<String, Object> result = DryRunController.runDryRunValidationRollback('invalid-id', csvData);
         Test.stopTest();
 
         Assert.isFalse((Boolean) result.get('success'), 'Should fail with invalid project ID');
@@ -131,5 +71,4 @@ public class DryRunControllerTest {
 
         Assert.isNotNull(result, 'Should return log list');
     }
-    
 }

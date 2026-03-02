@@ -1,17 +1,25 @@
 import { LightningElement, track, api } from 'lwc';
-import runDryRunValidation from '@salesforce/apex/DryRunController.runDryRunValidation';
-import validateSample from '@salesforce/apex/DryRunController.validateSample';
+import runDryRunValidationRollback from '@salesforce/apex/DryRunController.runDryRunValidationRollback';
 import getProjectDetails from '@salesforce/apex/DryRunController.getProjectDetails';
-import getExecutionDetails from '@salesforce/apex/DryRunController.getExecutionDetails';
-import getImportLogs from '@salesforce/apex/DryRunController.getImportLogs';
+import startClientStaging from '@salesforce/apex/BatchExecutionController.startClientStaging';
+import appendClientStagingRows from '@salesforce/apex/BatchExecutionController.appendClientStagingRows';
+import finishClientStaging from '@salesforce/apex/BatchExecutionController.finishClientStaging';
+import getExecutionDetails from '@salesforce/apex/BatchExecutionController.getExecutionDetails';
+import getImportLogs from '@salesforce/apex/BatchExecutionController.getImportLogs';
+import cancelExecution from '@salesforce/apex/BatchExecutionController.cancelExecution';
+import retryExecution from '@salesforce/apex/BatchExecutionController.retryExecution';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { subscribe, unsubscribe, onError } from 'lightning/empApi';
 import { parseCsvData } from 'c/utility';
 
 const SS_SETTINGS_KEY = 'IM_dryRunValidatorSettings_v1';
-
+const SS_RUN_STATE_PREFIX = 'IM_dryRunValidatorRun_v1';
+const SS_RUN_STATE_LAST_KEY = 'IM_dryRunValidatorRun_last_v1';
+const MAX_UI_ISSUES = 5000;
+const MAX_SYNC_SAMPLE_ROWS = 200;
+const STAGING_CHUNK_SIZE = 200;
 export default class DryRunValidator extends LightningElement {
-  @api projectId = '';
+  _projectId = '';
   @api csvData = null;
 
   @track projectDetails = null;
@@ -32,11 +40,15 @@ export default class DryRunValidator extends LightningElement {
 
   // Real-time progress (EMP)
   @track importStatus = null;
+  @track importPhase = '';
   @track importProgress = 0;
   @track importMessage = '';
   @track currentExecutionId = null;
   @track isAsyncValidation = false;
   @track initialTotalRecords = 0;
+  @track backendTotalRecords = 0;
+  @track backendProcessedRecords = 0;
+  @track backendFailedRecords = 0;
 
   // ===== NEW: Settings / Extended validation =====
   @track isSettingsOpen = false;
@@ -59,11 +71,26 @@ export default class DryRunValidator extends LightningElement {
 
   subscription = null;
   channelName = '/event/ImportStatusEvent__e';
+  pollingTimer = null;
+  isRestoringState = false;
+
+  @api
+  get projectId() {
+    return this._projectId;
+  }
+
+  set projectId(value) {
+    const nextProjectId = (value || '').trim();
+    if (nextProjectId === this._projectId) return;
+    this._projectId = nextProjectId;
+    this.tryRestoreRunState();
+  }
 
   connectedCallback() {
     this.registerErrorListener();
     this.handleSubscribe();
     this.restoreSettings();
+    this.tryRestoreRunState();
 
     if (!this.validationResults) {
       this.setDefaultState();
@@ -71,7 +98,9 @@ export default class DryRunValidator extends LightningElement {
   }
 
   disconnectedCallback() {
+    this.persistRunState();
     this.handleUnsubscribe();
+    this.stopExecutionPolling();
   }
 
   /** =========================
@@ -94,6 +123,147 @@ export default class DryRunValidator extends LightningElement {
       sessionStorage.setItem(SS_SETTINGS_KEY, JSON.stringify(this.settings));
     } catch (e) {
       // ignore
+    }
+  }
+
+  getRunStateStorageKey(projectId) {
+    return `${SS_RUN_STATE_PREFIX}_${projectId || 'no_project'}`;
+  }
+
+  persistRunState() {
+    if (!this.currentExecutionId) return;
+
+    const runState = {
+      projectId: (this.projectId || '').trim(),
+      executionId: this.currentExecutionId,
+      importStatus: this.importStatus || null,
+      importPhase: this.importPhase || null,
+      importProgress: Number(this.importProgress || 0),
+      initialTotalRecords: Number(this.initialTotalRecords || 0),
+      backendTotalRecords: Number(this.backendTotalRecords || 0),
+      backendProcessedRecords: Number(this.backendProcessedRecords || 0),
+      backendFailedRecords: Number(this.backendFailedRecords || 0),
+      isAsyncValidation: Boolean(this.isAsyncValidation),
+      savedAt: Date.now()
+    };
+
+    try {
+      const key = this.getRunStateStorageKey(runState.projectId);
+      sessionStorage.setItem(key, JSON.stringify(runState));
+      sessionStorage.setItem(SS_RUN_STATE_LAST_KEY, JSON.stringify(runState));
+    } catch (e) {
+    }
+  }
+
+  clearRunState() {
+    const currentProjectId = (this.projectId || '').trim();
+    try {
+      sessionStorage.removeItem(this.getRunStateStorageKey(currentProjectId));
+
+      const raw = sessionStorage.getItem(SS_RUN_STATE_LAST_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (!parsed?.projectId || parsed.projectId === currentProjectId) {
+          sessionStorage.removeItem(SS_RUN_STATE_LAST_KEY);
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  async tryRestoreRunState() {
+    if (this.isRestoringState || this.currentExecutionId) return;
+
+    const currentProjectId = (this.projectId || '').trim();
+    let state = null;
+
+    try {
+      if (currentProjectId) {
+        const projectRaw = sessionStorage.getItem(this.getRunStateStorageKey(currentProjectId));
+        if (projectRaw) {
+          state = JSON.parse(projectRaw);
+        }
+      }
+
+      if (!state) {
+        const lastRaw = sessionStorage.getItem(SS_RUN_STATE_LAST_KEY);
+        if (lastRaw) {
+          const lastState = JSON.parse(lastRaw);
+          const matchesCurrentProject =
+            !currentProjectId || !lastState?.projectId || lastState.projectId === currentProjectId;
+          if (matchesCurrentProject) {
+            state = lastState;
+          }
+        }
+      }
+    } catch (e) {
+      state = null;
+    }
+
+    if (!state?.executionId) return;
+
+    this.isRestoringState = true;
+    this.currentExecutionId = state.executionId;
+    this.importStatus = state.importStatus || this.importStatus;
+    this.importPhase = state.importPhase || this.importPhase;
+    this.importProgress = Number(state.importProgress || 0);
+    this.initialTotalRecords = Number(state.initialTotalRecords || 0);
+    this.backendTotalRecords = Number(state.backendTotalRecords || 0);
+    this.backendProcessedRecords = Number(state.backendProcessedRecords || 0);
+    this.backendFailedRecords = Number(state.backendFailedRecords || 0);
+    this.isAsyncValidation = Boolean(state.isAsyncValidation);
+
+    try {
+      await this.restoreExecutionFromServer(state.executionId);
+    } finally {
+      this.isRestoringState = false;
+    }
+  }
+
+  async restoreExecutionFromServer(executionId) {
+    if (!executionId) return;
+
+    try {
+      const details = await getExecutionDetails({ executionId });
+      if (!details?.success) return;
+
+      const currentProjectId = (this.projectId || '').trim();
+      const executionProjectId = (details.projectId || '').trim();
+      if (currentProjectId && executionProjectId && currentProjectId !== executionProjectId) {
+        return;
+      }
+
+      const total = Number(details.totalRecords || this.initialTotalRecords || 0);
+      const processed = Number(details.processedRecords || 0);
+      const failed = Number(details.failedRecords || 0);
+      const progress = total > 0 ? Math.min(100, Math.round((processed * 100) / total)) : 0;
+
+      this.backendTotalRecords = total;
+      this.backendProcessedRecords = processed;
+      this.backendFailedRecords = failed;
+      this.importStatus = details.status || this.importStatus;
+      this.importPhase = details.phase || this.importPhase;
+      this.importProgress = progress;
+      this.initialTotalRecords = this.initialTotalRecords || total;
+
+      const status = (details.status || '').toLowerCase();
+      const isDone = status === 'completed' || status === 'failed' || status === 'cancelled';
+      if (isDone) {
+        this.isLoading = false;
+        this.stopExecutionPolling();
+        if (status === 'completed' || status === 'failed') {
+          await this.loadValidationResults(executionId);
+        }
+      } else {
+        this.isAsyncValidation = true;
+        this.startExecutionPolling(executionId);
+      }
+
+      this.persistRunState();
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error('Restore state error:', e);
     }
   }
 
@@ -260,7 +430,7 @@ export default class DryRunValidator extends LightningElement {
   }
 
   get errorsCount() {
-    return this.validationErrors.length;
+    return this.validationResults?.errorCount || this.validationErrors.length;
   }
 
   get warningsCount() {
@@ -269,6 +439,12 @@ export default class DryRunValidator extends LightningElement {
 
   get issuesCount() {
     return this.errorsCount + this.warningsCount;
+  }
+  get displayedIssuesCount() {
+    return this.filteredIssues.length;
+  }
+  get hasPartialIssuesLoaded() {
+    return this.issuesCount > this.displayedIssuesCount;
   }
 
   get hasIssues() {
@@ -528,14 +704,33 @@ export default class DryRunValidator extends LightningElement {
   }
 
   get isImportCompleted() {
-    return (this.importProgress || 0) >= 100 || this.importStatus === 'Completed';
+    return this.importStatus === 'Completed';
   }
 
   get isImportFailed() {
     return this.importStatus === 'Failed';
   }
+  get isImportCancelled() {
+    return this.importStatus === 'Cancelled';
+  }
+  get isStagingPhase() {
+    const phase = (this.importPhase || this.importStatus || '').toLowerCase();
+    return phase === 'staging';
+  }
+  get processingLabel() {
+    return this.isStagingPhase ? 'Uploaded' : 'Processing';
+  }
+  get remainingLabel() {
+    return this.isStagingPhase ? 'To Upload' : 'Remaining';
+  }
+  get canRetryValidation() {
+    return Boolean(this.currentExecutionId) && (this.isImportFailed || this.isImportCancelled) && !this.isLoading;
+  }
 
   get importProgressPercentage() {
+    if (this.backendTotalRecords > 0) {
+      return Math.min(100, Math.round((this.backendProcessedRecords / this.backendTotalRecords) * 100));
+    }
     return Math.round(this.importProgress || 0);
   }
 
@@ -546,7 +741,7 @@ export default class DryRunValidator extends LightningElement {
   }
 
   get totalRecords() {
-    return this.validationResults?.totalRecords || 0;
+    return this.backendTotalRecords || this.validationResults?.totalRecords || 0;
   }
 
   get totalRecordsToProcess() {
@@ -554,7 +749,7 @@ export default class DryRunValidator extends LightningElement {
   }
 
   get failedRecordsCount() {
-    return this.validationResults?.errorCount || 0;
+    return this.backendFailedRecords || this.validationResults?.errorCount || 0;
   }
 
   get uniqueErrorLines() {
@@ -600,7 +795,9 @@ export default class DryRunValidator extends LightningElement {
   }
 
   get processedCount() {
-    if (this.isImportCompleted) return this.totalRecordsToProcess;
+    if (this.backendProcessedRecords > 0 || this.isImportCompleted || this.isImportFailed || this.isImportCancelled) {
+      return this.backendProcessedRecords;
+    }
     if (!this.importProgress || this.totalRecordsToProcess === 0) return 0;
     return Math.round((this.importProgressPercentage / 100) * this.totalRecordsToProcess);
   }
@@ -617,17 +814,24 @@ export default class DryRunValidator extends LightningElement {
   }
 
   get processingCount() {
-    if (this.isImportCompleted || this.isImportFailed) return 0;
+    if (this.isImportCompleted || this.isImportFailed || this.isImportCancelled) return 0;
+    if (this.isStagingPhase) return this.processedCount;
     return Math.max(0, this.totalRecordsToProcess - this.processedCount - this.failedCount);
   }
 
   get remainingCount() {
-    if (this.isImportCompleted || this.isImportFailed) return 0;
-    return Math.max(0, this.totalRecordsToProcess - this.processedCount);
+    if (this.isImportCompleted || this.isImportCancelled) return 0;
+    if (this.isStagingPhase) {
+      return Math.max(0, this.totalRecordsToProcess - this.processedCount);
+    }
+    return Math.max(0, this.totalRecordsToProcess - this.processedCount - this.failedCount);
   }
 
   get processingPercentage() {
     if (this.totalRecordsToProcess === 0) return 0;
+    if (this.isStagingPhase) {
+      return Math.round((this.processedCount / this.totalRecordsToProcess) * 100);
+    }
     return Math.round((this.processingCount / this.totalRecordsToProcess) * 100);
   }
 
@@ -646,74 +850,171 @@ export default class DryRunValidator extends LightningElement {
     const executionId = payload.ExecutionId__c;
 
     if (this.currentExecutionId && executionId === this.currentExecutionId) {
+      const previousStatus = this.importStatus;
+      const previousProgress = this.importProgress || 0;
       const newProgress = payload.Progress__c || 0;
       const newStatus = payload.Status__c;
 
       this.importStatus = newStatus;
+      this.importPhase = payload.Phase__c || this.importPhase;
       this.importProgress = newProgress;
       this.importMessage = payload.Message__c || '';
 
       const isComplete = newProgress >= 100 || newStatus === 'Completed';
       const isFailed = newStatus === 'Failed';
+      const isCancelled = newStatus === 'Cancelled';
 
-      if (isComplete && !this.wasAlreadyCompleted) {
+      if (isComplete && !(previousProgress >= 100 || previousStatus === 'Completed')) {
         this.isLoading = false;
+        this.stopExecutionPolling();
         if (this.isAsyncValidation) {
           this.loadValidationResults(executionId);
           this.showToast('Success', this.importMessage || 'Validation completed', 'success');
           this.isAsyncValidation = false;
         }
-      } else if (isFailed && !this.wasAlreadyFailed) {
+      } else if (isFailed && previousStatus !== 'Failed') {
         this.isLoading = false;
+        this.stopExecutionPolling();
         if (this.isAsyncValidation) {
+          this.loadValidationResults(executionId);
           this.showToast('Error', this.importMessage || 'Validation failed', 'error');
           this.isAsyncValidation = false;
         }
+      } else if (isCancelled && previousStatus !== 'Cancelled') {
+        this.isLoading = false;
+        this.stopExecutionPolling();
+        this.showToast('Info', this.importMessage || 'Validation cancelled', 'info');
+        this.isAsyncValidation = false;
       }
     }
   }
 
-  get wasAlreadyCompleted() {
-    return (this.importProgress || 0) >= 100 || this.importStatus === 'Completed';
+  startExecutionPolling(executionId) {
+    this.stopExecutionPolling();
+    this.pollExecutionStatus(executionId);
+    this.pollingTimer = window.setInterval(() => {
+      this.pollExecutionStatus(executionId);
+    }, 3000);
   }
 
-  get wasAlreadyFailed() {
-    return this.importStatus === 'Failed';
+  stopExecutionPolling() {
+    if (this.pollingTimer) {
+      window.clearInterval(this.pollingTimer);
+      this.pollingTimer = null;
+    }
+  }
+
+  async pollExecutionStatus(executionId) {
+    if (!executionId) return;
+
+    try {
+      const details = await getExecutionDetails({ executionId });
+      if (!details?.success) return;
+
+      const total = Number(details.totalRecords || this.initialTotalRecords || 0);
+      const processed = Number(details.processedRecords || 0);
+      const failed = Number(details.failedRecords || 0);
+      const progress = total > 0 ? Math.min(100, Math.round((processed * 100) / total)) : 0;
+
+      this.backendTotalRecords = total;
+      this.backendProcessedRecords = processed;
+      this.backendFailedRecords = failed;
+      this.importStatus = details.status || this.importStatus;
+      this.importPhase = details.phase || this.importPhase;
+      this.importProgress = progress;
+      const remaining = Math.max(0, total - processed - failed);
+      this.importMessage = `Phase: ${details.phase || 'N/A'} - Processed: ${processed}, Failed: ${failed}, Remaining: ${remaining}`;
+      this.persistRunState();
+
+      const status = (details.status || '').toLowerCase();
+      const isDone = status === 'completed' || status === 'failed' || status === 'cancelled';
+      if (isDone) {
+        this.stopExecutionPolling();
+        this.isLoading = false;
+        if (this.isAsyncValidation) {
+          if (status === 'completed' || status === 'failed') {
+            await this.loadValidationResults(executionId);
+          }
+          this.isAsyncValidation = false;
+        }
+      }
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error('Polling error:', e);
+    }
   }
 
   async loadValidationResults(executionId) {
     if (!executionId) return;
 
     try {
-      const logs = await getImportLogs({ executionId });
-      const projectDetails = await getProjectDetails({ projectId: this.projectId });
+      const logsData = await this.loadAllImportLogs(executionId);
+      let projectDetails = null;
+      const currentProjectId = (this.projectId || '').trim();
+      if (currentProjectId) {
+        projectDetails = await getProjectDetails({ projectId: currentProjectId });
+      }
 
       let executionDetails;
       try {
         executionDetails = await getExecutionDetails({ executionId });
+        this.backendTotalRecords = Number(executionDetails?.totalRecords || this.backendTotalRecords || 0);
+        this.backendProcessedRecords = Number(executionDetails?.processedRecords || this.backendProcessedRecords || 0);
+        this.backendFailedRecords = Number(executionDetails?.failedRecords || this.backendFailedRecords || 0);
       } catch (e) {
         executionDetails = null;
       }
 
+      const logs = Array.isArray(logsData?.logs) ? logsData.logs : [];
+
       const result = {
         success: true,
         executionId,
-        totalRecords: executionDetails?.totalRecords || this.initialTotalRecords || 0,
-        errorCount: executionDetails?.failedRecords || logs.length,
+        totalRecords: executionDetails?.totalRecords || this.backendTotalRecords || this.initialTotalRecords || 0,
+        errorCount: executionDetails?.failedRecords || this.backendFailedRecords || logs.length,
         validRecords:
-          (executionDetails?.totalRecords || this.initialTotalRecords || 0) -
-          (executionDetails?.failedRecords || logs.length),
+          (executionDetails?.totalRecords || this.backendTotalRecords || this.initialTotalRecords || 0) -
+          (executionDetails?.failedRecords || this.backendFailedRecords || logs.length),
         validationErrors: logs || [],
         projectName: projectDetails?.name,
         targetObject: projectDetails?.targetObject
       };
 
       this.applyValidationResults(result);
+      if (logsData?.truncated) {
+        this.importMessage = `Showing first ${logs.length} issues out of ${logsData.totalCount} total.`;
+      }
+      this.persistRunState();
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Error loading validation results:', error);
       this.showToast('Warning', 'Could not load validation details', 'warning');
     }
+  }
+
+  async loadAllImportLogs(executionId) {
+    const pageSize = 200;
+    let pageNumber = 1;
+    let hasMore = true;
+    let totalCount = 0;
+    const allLogs = [];
+
+    while (hasMore && allLogs.length < MAX_UI_ISSUES) {
+      const pageResult = await getImportLogs({ executionId, pageNumber, pageSize });
+      const pageLogs = Array.isArray(pageResult?.logs) ? pageResult.logs : [];
+
+      totalCount = Number(pageResult?.totalCount || totalCount || 0);
+      allLogs.push(...pageLogs);
+
+      hasMore = Boolean(pageResult?.hasMore) && pageLogs.length > 0;
+      pageNumber += 1;
+    }
+
+    return {
+      logs: allLogs.slice(0, MAX_UI_ISSUES),
+      totalCount,
+      truncated: totalCount > MAX_UI_ISSUES
+    };
   }
 
   /** =========================
@@ -732,6 +1033,8 @@ export default class DryRunValidator extends LightningElement {
   }
 
   clearResults() {
+    this.stopExecutionPolling();
+    this.clearRunState();
     this.validationResults = null;
     this.validationExecuted = false;
     this.searchTerm = '';
@@ -742,9 +1045,14 @@ export default class DryRunValidator extends LightningElement {
     this.selectedErrors = new Set(this.selectedErrors);
 
     this.importStatus = null;
+    this.importPhase = '';
     this.importProgress = 0;
     this.importMessage = '';
     this.currentExecutionId = null;
+    this.initialTotalRecords = 0;
+    this.backendTotalRecords = 0;
+    this.backendProcessedRecords = 0;
+    this.backendFailedRecords = 0;
 
     this.warningResults = [];
     this.activeIssueTab = 'errors';
@@ -778,7 +1086,8 @@ export default class DryRunValidator extends LightningElement {
   }
 
   async runValidation(isSample = false) {
-    if (!this.projectId || !this.hasCsvData) {
+    const currentProjectId = (this.projectId || '').trim();
+    if (!currentProjectId || !this.hasCsvData) {
       this.showToast('Error', 'Please enter project ID and CSV data', 'error');
       return;
     }
@@ -807,26 +1116,51 @@ export default class DryRunValidator extends LightningElement {
       }
 
       const asyncThreshold = Number(this.settings?.asyncThreshold) || 200;
-      const isLargeDataset = !isSample && parsedData.length > asyncThreshold;
+      let isLargeDataset = parsedData.length > asyncThreshold;
 
       let result;
+      let usedAsyncFlow = false;
+      let runTotalRows = parsedData.length;
       if (isSample) {
         const sampleSize = Number(this.settings?.sampleSize) || 50;
         const sample = this.takeSample(parsedData, sampleSize);
-        result = await validateSample({ projectId: this.projectId, sampleData: sample });
+        runTotalRows = sample.length;
+        isLargeDataset = runTotalRows > asyncThreshold;
+        const useAsyncForSample = sample.length > MAX_SYNC_SAMPLE_ROWS;
+
+        if (useAsyncForSample) {
+          this.initialTotalRecords = runTotalRows;
+          this.showToast(
+            'Info',
+            `Sample size is ${sample.length}. Switching automatically to async batch validation.`,
+            'info'
+          );
+          result = await this.runClientStagingValidation(currentProjectId, sample, true);
+          usedAsyncFlow = true;
+        } else {
+          result = await runDryRunValidationRollback({ projectId: currentProjectId, csvData: sample });
+        }
       } else {
-        result = await runDryRunValidation({ projectId: this.projectId, csvData: parsedData });
+        this.initialTotalRecords = runTotalRows;
+        result = await this.runClientStagingValidation(currentProjectId, parsedData, false);
+        usedAsyncFlow = true;
       }
 
       if (result?.success) {
-        if (isLargeDataset) {
-          this.initialTotalRecords = parsedData.length;
+        if (usedAsyncFlow) {
+          this.initialTotalRecords = runTotalRows;
           this.currentExecutionId = result.executionId;
           this.isAsyncValidation = true;
           this.importStatus = 'InProgress';
+          this.importPhase = 'Validating';
           this.importProgress = 0;
           this.importMessage = 'Validation in progress...';
-          this.showToast('Info', `Validation started for ${parsedData.length} rows. Please wait...`, 'info');
+          this.persistRunState();
+          this.showToast('Info', `Validation started for ${runTotalRows} rows. Please wait...`, 'info');
+          this.startExecutionPolling(result.executionId);
+          if (!isLargeDataset) {
+            this.pollExecutionStatus(result.executionId);
+          }
         } else {
           this.applyValidationResults(result);
           const msg = isSample
@@ -840,7 +1174,7 @@ export default class DryRunValidator extends LightningElement {
         this.isLoading = false;
       }
     } catch (error) {
-      this.showToast('Error', 'Validation error: ' + (error.body?.message || error.message), 'error');
+      this.showToast('Error', 'Validation error: ' + this.getErrorMessage(error), 'error');
       // eslint-disable-next-line no-console
       console.error('Validation error:', error);
       this.isLoading = false;
@@ -865,9 +1199,9 @@ export default class DryRunValidator extends LightningElement {
 
     // object formats
     if (typeof csvData === 'object') {
-      // values format
+      //values or plain objects
       if (Array.isArray(csvData.columns) && Array.isArray(csvData.allRows)) {
-        const rows = this.transformFromValuesFormat(csvData.allRows, csvData.columns);
+        const rows = this.transformRowsWithColumns(csvData.allRows, csvData.columns);
         if (rows.length) return rows;
       }
 
@@ -884,6 +1218,19 @@ export default class DryRunValidator extends LightningElement {
     }
 
     return [];
+  }
+
+  transformRowsWithColumns(rows, columns) {
+    if (!Array.isArray(rows) || !rows.length || !Array.isArray(columns) || !columns.length) return [];
+
+    const firstRow = rows[0];
+    const hasValuesFormat = Array.isArray(firstRow?.values);
+
+    if (hasValuesFormat) {
+      return this.transformFromValuesFormat(rows, columns);
+    }
+
+    return this.transformFromPlainObjects(rows, columns);
   }
 
   transformFromValuesFormat(allRows, columns) {
@@ -912,6 +1259,81 @@ export default class DryRunValidator extends LightningElement {
       Object.keys(r || {}).forEach((k) => (out[k] = String(r?.[k] ?? '')));
       return out;
     });
+  }
+
+  async runClientStagingValidation(projectId, rows, isSample = false) {
+    const rowCount = Array.isArray(rows) ? rows.length : 0;
+    this.initialTotalRecords = rowCount;
+    this.importStatus = 'Staging';
+    this.importPhase = 'Staging';
+    this.importProgress = 0;
+    this.importMessage = `Uploading rows: 0/${rowCount}`;
+    const session = await startClientStaging({
+      projectId,
+      dryRun: true,
+      totalRows: rowCount
+    });
+
+    if (!session?.success || !session?.executionId) {
+      throw new Error(session?.error || 'Unable to start staging session.');
+    }
+
+    const executionId = session.executionId;
+    let nextStartLine = Number(session.nextStartLine || 2);
+    const startIndex = Math.max(0, nextStartLine - 2);
+    const resumed = Boolean(session.resumed);
+
+    if (resumed && startIndex > 0) {
+      this.importStatus = 'Staging';
+      this.importPhase = 'Staging';
+      this.importProgress = rowCount > 0 ? Math.round((startIndex * 100) / rowCount) : 0;
+      this.importMessage = `Resuming upload: ${startIndex}/${rowCount}`;
+    }
+
+    for (let i = startIndex; i < rowCount; i += STAGING_CHUNK_SIZE) {
+      const chunk = rows.slice(i, i + STAGING_CHUNK_SIZE);
+      const appendResult = await appendClientStagingRows({
+        executionId,
+        rows: chunk,
+        startLine: nextStartLine
+      });
+
+      if (!appendResult?.success) {
+        throw new Error(appendResult?.error || 'Unable to append staging rows.');
+      }
+
+      nextStartLine = Number(appendResult.nextStartLine || (nextStartLine + chunk.length));
+      const uploaded = Number(appendResult.uploadedRows || Math.min(rowCount, i + chunk.length));
+      this.importStatus = 'Staging';
+      this.importPhase = 'Staging';
+      this.importProgress = rowCount > 0 ? Math.round((uploaded * 100) / rowCount) : 0;
+      this.importMessage = `Uploading rows: ${uploaded}/${rowCount}`;
+    }
+
+    const finishResult = await finishClientStaging({ executionId });
+    if (!finishResult?.success) {
+      throw new Error(finishResult?.error || 'Unable to finish staging.');
+    }
+
+    if (isSample) {
+      this.showToast('Info', `Sample uploaded (${rowCount} rows). Batch validation started.`, 'info');
+    }
+
+    return finishResult;
+  }
+
+  getErrorMessage(error) {
+    if (!error) return 'Unknown error';
+    if (typeof error === 'string') return error;
+    if (Array.isArray(error?.body) && error.body.length > 0) {
+      return error.body[0]?.message || 'Unknown error';
+    }
+    if (error?.body?.output?.errors?.length) {
+      return error.body.output.errors[0]?.message || 'Unknown error';
+    }
+    if (error?.body?.message) return error.body.message;
+    if (error?.message) return error.message;
+    return 'Unknown error';
   }
 
   /** =========================
@@ -951,7 +1373,57 @@ export default class DryRunValidator extends LightningElement {
   }
 
   handleCancelValidation() {
-    this.showToast('Info', 'Cancel is not implemented yet', 'info');
+    if (!this.currentExecutionId || !this.isImportInProgress) {
+      return;
+    }
+
+    cancelExecution({ executionId: this.currentExecutionId })
+      .then((result) => {
+        if (result?.success) {
+          this.importStatus = result.status || 'Cancelled';
+          this.importPhase = this.importPhase || 'Cancelled';
+          this.importMessage = 'Cancellation requested.';
+          this.persistRunState();
+          this.stopExecutionPolling();
+          this.isLoading = false;
+          this.isAsyncValidation = false;
+          this.showToast('Info', 'Validation cancelled', 'info');
+          return;
+        }
+        this.showToast('Error', 'Unable to cancel validation', 'error');
+      })
+      .catch((error) => {
+        this.showToast('Error', 'Cancel error: ' + (error.body?.message || error.message), 'error');
+      });
+  }
+
+  handleRetryValidation() {
+    if (!this.currentExecutionId || !this.canRetryValidation) {
+      return;
+    }
+
+    this.isLoading = true;
+    this.importStatus = 'InProgress';
+    this.importPhase = 'Validating';
+    this.importProgress = 0;
+    this.importMessage = 'Retry started...';
+    this.persistRunState();
+
+    retryExecution({ executionId: this.currentExecutionId })
+      .then((result) => {
+        if (result?.success) {
+          this.isAsyncValidation = true;
+          this.startExecutionPolling(this.currentExecutionId);
+          this.showToast('Info', 'Validation retry started', 'info');
+          return;
+        }
+        this.isLoading = false;
+        this.showToast('Error', 'Unable to retry validation', 'error');
+      })
+      .catch((error) => {
+        this.isLoading = false;
+        this.showToast('Error', 'Retry error: ' + (error.body?.message || error.message), 'error');
+      });
   }
 
   handleEditError() {

@@ -1,10 +1,28 @@
 public with sharing class DryRunController {
+    //max rows for sync rollback
+    private static final Integer MAX_SYNC_ROLLBACK_ROWS = 200;
+
+    private static void safeLogException(Exception e) {
+        try {
+            ErrorLogService.logException(e);
+        } catch (Exception logEx) {
+            System.debug(LoggingLevel.ERROR, 'DryRunController logging failed: ' + logEx.getMessage());
+        }
+    }
 
     @AuraEnabled
-    public static Map<String, Object> runDryRunValidation(String projectId, List<Map<String, String>> csvData) {
+    public static Map<String, Object> runDryRunValidationRollback(String projectId, List<Map<String, String>> csvData) {
         Map<String, Object> result = new Map<String, Object>();
 
         try {
+            Integer inputSize = csvData == null ? 0 : csvData.size();
+            if (inputSize > MAX_SYNC_ROLLBACK_ROWS) {
+                throw new AuraHandledException(
+                    'Rollback validation supports up to ' + MAX_SYNC_ROLLBACK_ROWS +
+                    ' rows. Use async batch validation for larger datasets.'
+                );
+            }
+
             ImportProject__c project = ProjectService.getProjectById(projectId);
             if (project == null) {
                 throw new AuraHandledException('Project not found: ' + projectId);
@@ -15,33 +33,65 @@ public with sharing class DryRunController {
                 throw new AuraHandledException('No field mappings found for project');
             }
 
-            result = ExecutionService.dryRunValidation(projectId, csvData);
-            ImportExecution__c execution = ExecutionRepository.getImportExecutionById(result.get('executionId').toString());
+            ImportExecution__c execution = ExecutionRepository.createImportExecution(
+                projectId,
+                Constants.EXECUTION_STATUS_IN_PROGRESS,
+                Constants.EXECUTION_TYPE_VALIDATION
+            );
 
-            List<ImportLog__c> validationErrors = new List<ImportLog__c>();
-            if (csvData != null && csvData.size() <= 200) {
-                validationErrors = ImportLogService.getLogsByExecutionId(result.get('executionId').toString());
+            Map<String, List<TransformationRule__c>> rulesByMappingId =
+                TransformationRepository.getRulesByProjectIdGroupedByMapping(projectId);
+
+            List<SObject> recordsToValidate = buildRecordsForRollbackValidation(
+                csvData,
+                mappings,
+                project.TargetObject__c,
+                rulesByMappingId
+            );
+
+            Object validationRunObj =
+                RollbackValidationService.validateAndRollback(execution.Id, recordsToValidate, 1);
+            Map<String, Object> validationRun = (Map<String, Object>) JSON.deserializeUntyped(
+                JSON.serialize(validationRunObj)
+            );
+
+            List<ImportLog__c> validationErrors = ImportLogService.getLogsByExecutionId(execution.Id);
+            Map<String, Integer> errorSummary = ExecutionService.getValidationSummary(execution.Id);
+
+            Set<Integer> uniqueFailedLines = new Set<Integer>();
+            for (ImportLog__c log : validationErrors) {
+                if (log.LineNumber__c != null) {
+                    uniqueFailedLines.add(Integer.valueOf(log.LineNumber__c));
+                }
             }
 
-            Map<String, Integer> errorSummary = ExecutionService.getValidationSummary(result.get('executionId').toString());
+            execution.TotalRecords__c = recordsToValidate.size();
+            execution.FailedRecords__c = uniqueFailedLines.size();
+            execution.ProcessedRecords__c = Math.max(0, recordsToValidate.size() - uniqueFailedLines.size());
+            execution.Status__c = uniqueFailedLines.isEmpty()
+                ? Constants.EXECUTION_STATUS_COMPLETED
+                : Constants.EXECUTION_STATUS_FAILED;
+            execution.EndTime__c = Datetime.now();
+            ExecutionRepository.updateImportExecution(execution);
 
-            result.put('success', true);
+            result.put('success', validationRun.containsKey('success') ? validationRun.get('success') : true);
+            result.put('executionId', execution.Id);
             result.put('totalRecords', execution.TotalRecords__c != null ? Integer.valueOf(execution.TotalRecords__c) : 0);
             result.put('errorCount', execution.FailedRecords__c != null ? Integer.valueOf(execution.FailedRecords__c) : 0);
             result.put('errorSummary', errorSummary);
             result.put('validationErrors', formatErrorsForUI(validationErrors));
             result.put('projectName', project.Name);
             result.put('targetObject', project.TargetObject__c);
-
+            result.put('message', validationRun.containsKey('message') ? validationRun.get('message') : null);
         } catch (Exception e) {
             result.put('success', false);
             result.put('error', e.getMessage());
-            ErrorLogService.logException(e);
+            safeLogException(e);
         }
 
         return result;
     }
-    
+
     private static List<Map<String, Object>> formatErrorsForUI(List<ImportLog__c> errors) {
         List<Map<String, Object>> formattedErrors = new List<Map<String, Object>>();
 
@@ -58,6 +108,51 @@ public with sharing class DryRunController {
         }
 
         return formattedErrors;
+    }
+
+    private static List<SObject> buildRecordsForRollbackValidation(List<Map<String, String>> csvData,
+        List<FieldMapping__c> mappings,String targetObject,Map<String, List<TransformationRule__c>> rulesByMappingId) {
+        List<SObject> records = new List<SObject>();
+        if (String.isBlank(targetObject) || csvData == null || csvData.isEmpty()) {
+            return records;
+        }
+
+        Schema.SObjectType targetType = ObjectMetadataService.getGlobalDescribeMap().get(targetObject);
+        if (targetType == null) {
+            return records;
+        }
+
+        for (Map<String, String> row : csvData) {
+            SObject record = targetType.newSObject();
+            Map<String, String> transformedRow = TransformationService.applyTransformationsForRow(row, mappings, rulesByMappingId);
+
+            for (FieldMapping__c mapping : mappings) {
+                String sourceValue = ImportUtils.getValueFromRow(row, mapping.SourceColumn__c);
+                String transformedValue = getProcessedValue(
+                    transformedRow,
+                    mapping.TargetField__c,
+                    mapping.SourceColumn__c,
+                    sourceValue
+                );
+
+                if (String.isBlank(transformedValue)) continue;
+                Object converted = ImportUtils.convertValueToFieldType(transformedValue, targetObject, mapping.TargetField__c);
+                record.put(mapping.TargetField__c, converted);
+            }
+            records.add(record);
+        }
+        return records;
+    }
+
+    private static String getProcessedValue(Map<String, String> transformedRow, String targetField, String sourceColumn, String originalValue) {
+        String transformedValue = transformedRow.get(targetField);
+        if (transformedValue == null) {
+            transformedValue = transformedRow.get(sourceColumn);
+        }
+        if (transformedValue == null) {
+            transformedValue = originalValue;
+        }
+        return transformedValue;
     }
     
     @AuraEnabled(cacheable=true)
@@ -78,73 +173,12 @@ public with sharing class DryRunController {
             }
         } catch (Exception e) {
             result.put('error', e.getMessage());
-            ErrorLogService.logException(e);
+            safeLogException(e);
         }
 
         return result;
     }
     
-    @AuraEnabled
-    public static Map<String, Object> validateSample(String projectId, List<Map<String, String>> sampleData) {
-        Map<String, Object> result = new Map<String, Object>();
-
-        try {
-            List<Map<String, String>> limitedData = sampleData;
-            if (sampleData.size() > 10) {
-                limitedData = new List<Map<String, String>>();
-                for (Integer i = 0; i < 10; i++) {
-                    limitedData.add(sampleData[i]);
-                }
-            }
-
-            Map<String, Object> dryRunResult = runDryRunValidation(projectId, limitedData);
-
-            result.put('success', true);
-            result.put('sampleSize', limitedData.size());
-            result.put('isSample', true);
-            result.putAll(dryRunResult);
-
-        } catch (Exception e) {
-            result.put('success', false);
-            result.put('error', e.getMessage());
-            ErrorLogService.logException(e);
-        }
-
-        return result;
-    }
-
-    @AuraEnabled
-    public static Map<String, Object> startImport(String projectId, List<Map<String, String>> csvData) {
-        Map<String, Object> result = new Map<String, Object>();
-
-        try {
-            ImportProject__c project = ProjectService.getProjectById(projectId);
-            if (project == null) {
-                throw new AuraHandledException('Project not found: ' + projectId);
-            }
-
-            List<FieldMapping__c> mappings = FieldMappingService.getAllMappingsByProject(projectId);
-            if (mappings.isEmpty()) {
-                throw new AuraHandledException('No field mappings found for project');
-            }
-
-            Map<String, String> importResult = ExecutionService.startImport(projectId, csvData);
-
-            result.put('success', true);
-            result.put('jobId', importResult.get('jobId'));
-            result.put('executionId', importResult.get('executionId'));
-            result.put('message', 'Import started successfully. Job ID: ' + importResult.get('jobId'));
-            result.put('totalRecords', csvData.size());
-
-        } catch (Exception e) {
-            result.put('success', false);
-            result.put('error', e.getMessage());
-            ErrorLogService.logException(e);
-        }
-
-        return result;
-    }
-
     @AuraEnabled(cacheable=false)
     public static Map<String, Object> getExecutionDetails(String executionId) {
         Map<String, Object> result = new Map<String, Object>();
@@ -158,6 +192,11 @@ public with sharing class DryRunController {
                 result.put('totalRecords', execution.TotalRecords__c);
                 result.put('processedRecords', execution.ProcessedRecords__c);
                 result.put('failedRecords', execution.FailedRecords__c);
+                result.put('phase', execution.Phase__c);
+                result.put('apexJobId', execution.ApexJobId__c);
+                result.put('logLimitReached', execution.LogLimitReached__c);
+                result.put('retryCount', execution.RetryCount__c);
+                result.put('maxRetries', execution.MaxRetries__c);
                 result.put('startTime', execution.StartTime__c);
                 result.put('endTime', execution.EndTime__c);
                 result.put('success', true);
@@ -166,7 +205,7 @@ public with sharing class DryRunController {
                 result.put('error', 'Execution not found');
             }
         } catch (Exception e) {
-            ErrorLogService.logException(e);
+            safeLogException(e);
             result.put('success', false);
             result.put('error', e.getMessage());
         }
@@ -194,7 +233,7 @@ public with sharing class DryRunController {
 
             return formattedLogs;
         } catch (Exception e) {
-            ErrorLogService.logException(e);
+            safeLogException(e);
             throw new AuraHandledException('Error retrieving logs: ' + e.getMessage());
         }
     }

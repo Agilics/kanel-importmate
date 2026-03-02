@@ -37,6 +37,7 @@ public with sharing class ExecutionRepository {
         if (SecurityUtils.isAccessible(ImportExecution__c.SObjectType)) {
             try {
                 return [SELECT Id, Status__c, Type__c, Project__c, StartTime__c, EndTime__c, TotalRecords__c, ProcessedRecords__c, FailedRecords__c
+                        , Phase__c, ApexJobId__c, LogLimitReached__c, RetryCount__c, MaxRetries__c
                         FROM ImportExecution__c
                         WHERE Id = :executionId
                         LIMIT 1];

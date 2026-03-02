@@ -23,22 +23,22 @@
         <div class="projects-section">
             <div class="section-header">
                 <div class="section-title-wrapper">
-                    <h2 class="section-title">Projects</h2>
-                    <p class="section-subtitle">Manage your data import projects</p>
+                    <h2 class="section-title">{sections.title}</h2>
+                    <p class="section-subtitle">{sections.detailsTitle}</p>
                 </div>
                 <div class="section-actions">
                     <div class="search-box">
                         <lightning-icon icon-name="utility:search" size="x-small" class="search-icon"></lightning-icon>
                         <input 
                             type="text" 
-                            placeholder="Search projects..." 
+                            placeholder={placeholder} 
                             class="search-input"
                             onchange={handleSearch}
                         />
                     </div>
                     <button class="btn-new-project" onclick={handleNewProject}>
                         <lightning-icon icon-name="utility:add" size="x-small"></lightning-icon>
-                        New Project
+                        {buttonLabel.newProject}
                     </button>
                 </div>
             </div>
@@ -48,7 +48,7 @@
                 <template for:each={filterTabs} for:item="tab">
                     <button 
                         key={tab.value} 
-                        class={tab.active} 
+                        class={tab.className} 
                         data-value={tab.value}
                         onclick={handleFilterChange}>
                         {tab.label}
@@ -85,7 +85,7 @@
                         <template if:false={error}>
                             <button class="btn-new-project" onclick={handleNewProject}>
                                 <lightning-icon icon-name="utility:add" size="x-small"></lightning-icon>
-                                Create Your First Project
+                               {buttonLabel.createFirstProject}
                             </button>
                         </template>
                     </div>

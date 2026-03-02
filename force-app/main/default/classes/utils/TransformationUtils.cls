@@ -10,22 +10,20 @@
  *
 **/
 public with sharing class TransformationUtils {
+    private static final Map<String, ITransformationRule> TRANSFORMER_BY_TYPE = new Map<String, ITransformationRule>{
+        'BooleanTransformation' => new BooleanTransformation(),
+        'EmailMask' => new EmailMaskTransformation(),
+        'LowercaseTransformation' => new LowerCaseTransformation(),
+        'UppercaseTransformation' => new UpperCaseTransformation(),
+        'Concatenation' => new ConcatenationTransformation(),
+        'PhoneMask' => new PhoneMaskTransformation()
+    };
 
     public static ITransformationRule getTransformer(TransformationRule__c rule) {
-        if (rule.RuleType__c == 'BooleanTransformation') {
-            return new BooleanTransformation();
-        } else if (rule.RuleType__c == 'EmailMask') {
-            return new EmailMaskTransformation();
-        }else if(rule.RuleType__c == 'LowercaseTransformation'){
-            return new LowerCaseTransformation();
-        }else if(rule.RuleType__c == 'UppercaseTransformation'){
-            return new UpperCaseTransformation();
-        }else if(rule.RuleType__c == 'Concatenation') {
-            return new ConcatenationTransformation();
-        }else if(rule.RuleType__c =='PhoneMask'){
-            return new PhoneMaskTransformation();
+        if (rule == null || String.isBlank(rule.RuleType__c)) {
+            return null;
         }
-        return null;
+        return TRANSFORMER_BY_TYPE.get(rule.RuleType__c);
     }
 
     public static TransformationRule__c buildTransformationRule(String projectId, String mappingId, String ruleType, String parameters, String sourceFields, String targetValue) {

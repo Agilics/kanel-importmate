@@ -31,6 +31,9 @@ public class ImportProjectController {
   //Rechercher  par l'id  un projet importé
   @AuraEnabled(cacheable=true)
   public static ImportProject__c searchProjetById(String id) {
+    if (String.isBlank(id)) {
+      return null;
+    }
     return ProjectService.getProjectById(id);
   }
 

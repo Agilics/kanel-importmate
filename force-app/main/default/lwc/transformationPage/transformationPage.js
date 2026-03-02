@@ -21,7 +21,7 @@ const DEFAULT_PAGE_SIZE = 4;
 export default class TransformationPage extends LightningElement {
   isWarningBadge = true;
   @api projectId; 
-  @wire(searchProjetById, { projectId: "$projectId" }) selectedProject; 
+  @wire(searchProjetById, { id: "$projectId" }) selectedProject; 
   @track transformationsByMappingId = [];
   wiredTransformationResults =[]; // données affichées
   _wiredResult; //  résultat du @wire (OBLIGATOIRE pour refreshApex)
@@ -313,7 +313,7 @@ export default class TransformationPage extends LightningElement {
         message: "Are you sure you want to delete this transformation? This action cannot be undone.",
         variant: "header",
         label: "Delete Transformation", 
-        theme:'warning'
+        theme:'alt-inverse'
       }); 
       
       // Abort  deletion if user click on cancel
