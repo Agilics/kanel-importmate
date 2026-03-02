@@ -613,4 +613,352 @@
         <label>Aucune erreur trouvée. Import terminé avec succès !</label>
     </customLabels>
 
+
+     <!-- HEADER -->
+    <customLabels>
+        <name>IH_Title</name>
+        <label>Historique des importations</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Subtitle</name>
+        <label>Consultez et gérez toutes les exécutions de vos projets d'importation</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_ExportReport</name>
+        <label>Exporter le rapport</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_NewImportProject</name>
+        <label>Nouveau projet d'importation</label>
+    </customLabels>
+
+    <!-- FILTERS -->
+    <customLabels>
+        <name>IH_Filter_Status</name>
+        <label>Statut</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Filter_DateRange</name>
+        <label>Période</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Filter_Project</name>
+        <label>Projet</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Filter_TargetObject</name>
+        <label>Objet cible</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_ApplyFilters</name>
+        <label>Appliquer les filtres</label>
+    </customLabels>
+
+    <!-- STATUS OPTIONS -->
+    <customLabels>
+        <name>IH_Status_All</name>
+        <label>Tous les statuts</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Status_Completed</name>
+        <label>Terminé</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Status_Running</name>
+        <label>En cours</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Status_Failed</name>
+        <label>Échoué</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Status_Cancelled</name>
+        <label>Annulé</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Status_Draft</name>
+        <label>Brouillon</label>
+    </customLabels>
+
+    <!-- DATE RANGE OPTIONS -->
+    <customLabels>
+        <name>IH_Date_Last7</name>
+        <label>7 derniers jours</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Date_Last30</name>
+        <label>30 derniers jours</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Date_Last90</name>
+        <label>90 derniers jours</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Date_AllTime</name>
+        <label>Toute la période</label>
+    </customLabels>
+
+    <!-- PROJECT / TARGET OPTIONS -->
+    <customLabels>
+        <name>IH_AllProjects</name>
+        <label>Tous les projets</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_AllObjects</name>
+        <label>Tous les objets</label>
+    </customLabels>
+
+    <!-- KPI CARDS -->
+    <customLabels>
+        <name>IH_KPI_TotalExecutions</name>
+        <label>Total des exécutions</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_KPI_SuccessRate</name>
+        <label>Taux de réussite</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_KPI_RecordsProcessed</name>
+        <label>Enregistrements traités</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_KPI_AvgDuration</name>
+        <label>Durée moyenne</label>
+    </customLabels>
+
+    <!-- TABLE -->
+    <customLabels>
+        <name>IH_Table_Title</name>
+        <label>Historique des exécutions</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Table_SearchPlaceholder</name>
+        <label>Rechercher des exécutions...</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Table_ColProject</name>
+        <label>Projet</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Table_ColStatus</name>
+        <label>Statut</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Table_ColTargetObject</name>
+        <label>Objet cible</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Table_ColRecords</name>
+        <label>Enregistrements</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Table_ColDuration</name>
+        <label>Durée</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Table_ColStarted</name>
+        <label>Démarré</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Table_ColActions</name>
+        <label>Actions</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Table_Empty</name>
+        <label>Aucune exécution ne correspond à vos filtres.</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Table_Showing</name>
+        <label>Affichage de {0} à {1} sur {2} résultats</label>
+    </customLabels>
+
+    <!-- ACTIONS -->
+    <customLabels>
+        <name>IH_Action_View</name>
+        <label>Voir</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Action_Monitor</name>
+        <label>Surveiller</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Action_Debug</name>
+        <label>Déboguer</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Action_DeleteSelected</name>
+        <label>Supprimer la sélection ({0})</label>
+    </customLabels>
+
+    <!-- MODALS -->
+    <customLabels>
+        <name>IH_Modal_CreateTitle</name>
+        <label>Créer un nouveau projet d'importation</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Modal_ExportExecution</name>
+        <label>Exporter l'exécution</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Modal_DeleteExecution</name>
+        <label>Supprimer l'exécution</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Modal_ExecutionDetails</name>
+        <label>Détails de l'exécution</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Modal_Records</name>
+        <label>Enregistrements</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Detail_TargetObject</name>
+        <label>Objet cible</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Detail_Status</name>
+        <label>Statut</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Detail_Phase</name>
+        <label>Phase</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Detail_Started</name>
+        <label>Démarré le</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Detail_Duration</name>
+        <label>Durée</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Detail_Processed</name>
+        <label>Traités</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Detail_Total</name>
+        <label>Total</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Detail_Failed</name>
+        <label>Échoués</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Detail_Success</name>
+        <label>Réussis</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Detail_Remaining</name>
+        <label>Restants</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Detail_RecordsSummary</name>
+        <label>Résumé des enregistrements</label>
+    </customLabels>
+
+    <!-- TOAST / ERROR MESSAGES -->
+    <customLabels>
+        <name>IH_Toast_ErrorLoadingHistory</name>
+        <label>Erreur lors du chargement de l'historique</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Toast_SelectAtLeastOne</name>
+        <label>Sélectionnez au moins une exécution.</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Confirm_DeleteMultiple</name>
+        <label>Supprimer {0} élément(s) d'historique et les journaux associés ?</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Toast_ErrorDeleteSelected</name>
+        <label>Impossible de supprimer les exécutions sélectionnées.</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Toast_CannotDeleteRunning</name>
+        <label>Impossible de supprimer une exécution en cours.</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Confirm_DeleteSingle</name>
+        <label>Supprimer cet historique d'exécution et les journaux associés ?</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Toast_DeleteSuccess</name>
+        <label>Historique d'exécution supprimé.</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Toast_ErrorDeleteSingle</name>
+        <label>Impossible de supprimer l'historique d'exécution.</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Toast_NothingToExport</name>
+        <label>Rien à exporter.</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Toast_NoExecutionSelected</name>
+        <label>Aucune exécution sélectionnée à exporter.</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Toast_ProjectCreated</name>
+        <label>Projet créé</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Toast_ProjectCreatedMsg</name>
+        <label>Projet {0} créé avec succès</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Toast_ErrorExportCsv</name>
+        <label>Impossible d'exporter le fichier CSV.</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Toast_ExecutionIdMissing</name>
+        <label>L'identifiant d'exécution est manquant.</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Toast_ErrorLoadDetails</name>
+        <label>Impossible de charger les détails de l'exécution.</label>
+    </customLabels>
+
+    <!-- RELATIVE TIME -->
+    <customLabels>
+        <name>IH_Time_JustNow</name>
+        <label>À l'instant</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Time_1MinuteAgo</name>
+        <label>Il y a 1 minute</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Time_XMinutesAgo</name>
+        <label>Il y a {0} minutes</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Time_1HourAgo</name>
+        <label>Il y a 1 heure</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Time_XHoursAgo</name>
+        <label>Il y a {0} heures</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Time_1DayAgo</name>
+        <label>Il y a 1 jour</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Time_XDaysAgo</name>
+        <label>Il y a {0} jours</label>
+    </customLabels>
+
+    <!-- PHASE PREFIX -->
+    <customLabels>
+        <name>IH_PhasePrefix</name>
+        <label>Phase : </label>
+    </customLabels>
+    <customLabels>
+        <name>IH_PhaseNA</name>
+        <label>Phase : N/A</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_ExecutionLabel</name>
+        <label>Exécution n°</label>
+    </customLabels>
 </Translations>
