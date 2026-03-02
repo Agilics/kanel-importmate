@@ -960,75 +960,75 @@
         <value>Close</value>
     </labels>
 
-     <!-- STEPS  sidebar--> 
-    <labels>
-        <fullName>SideBar_Step_ProjectSetup</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Step 1 - Project Setup</shortDescription>
-        <value>Project Setup</value>
-    </labels>
+    <!-- STEPS sidebar --> 
+<labels>
+    <fullName>SideBar_Step_ProjectSetup</fullName>
+    <language>en_US</language>
+    <protected>false</protected>
+    <shortDescription>Step 1 - Project Setup</shortDescription>
+    <value>Project Setup</value>
+</labels>
 
-    <labels>
-        <fullName>SideBar_Step_DataSource</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Step 2 - Data Source selection</shortDescription>
-        <value>Data Source</value>
-    </labels>
+<labels>
+    <fullName>SideBar_Step_DataSource</fullName>
+    <language>en_US</language>
+    <protected>false</protected>
+    <shortDescription>Step 2 - Data Source selection</shortDescription>
+    <value>Data Source</value>
+</labels>
 
-    <labels>
-        <fullName>SideBar_Step_FieldMapping</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Step 3 - Field Mapping configuration</shortDescription>
-        <value>Field Mapping</value>
-    </labels>
+<labels>
+    <fullName>SideBar_Step_FieldMapping</fullName>
+    <language>en_US</language>
+    <protected>false</protected>
+    <shortDescription>Step 3 - Field Mapping configuration</shortDescription>
+    <value>Field Mapping</value>
+</labels>
 
-    <labels>
-        <fullName>SideBar_Step_Transformations</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Step 4 - Data Transformations</shortDescription>
-        <value>Transformations</value>
-    </labels>
+<labels>
+    <fullName>SideBar_Step_Transformations</fullName>
+    <language>en_US</language>
+    <protected>false</protected>
+    <shortDescription>Step 4 - Data Transformations</shortDescription>
+    <value>Transformations</value>
+</labels>
 
-    <labels>
-        <fullName>SideBar_Step_Validation</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Step 5 - Validation (Dry Run)</shortDescription>
-        <value>Validation</value>
-    </labels>
+<labels>
+    <fullName>SideBar_Step_Validation</fullName>
+    <language>en_US</language>
+    <protected>false</protected>
+    <shortDescription>Step 5 - Validation (Dry Run)</shortDescription>
+    <value>Validation</value>
+</labels>
 
-    <labels>
-        <fullName>SideBar_Step_Execution</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Step 6 - Execution</shortDescription>
-        <value>Execution</value>
-    </labels>
- 
-    <!--Quick Actions -->
-    <labels>
-        <fullName>SideBar_QuickAction_Recent_Project</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Recent button label</shortDescription>
-        <value>Recent Projects</value>
-    </labels>
-    <labels>
-        <fullName>SideBar_QuickAction_Analytics</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Analytics  button label</shortDescription>
-        <value>Analytics</value>
-    </labels>
-    <labels>
-        <fullName>SideBar_QuickAction_Execution</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Execution History button label</shortDescription>
-        <value>Execution History</value>
-    </labels>
+<labels>
+    <fullName>SideBar_Step_Execution</fullName>
+    <language>en_US</language>
+    <protected>false</protected>
+    <shortDescription>Step 6 - Execution</shortDescription>
+    <value>Execution</value>
+</labels>
+
+<!--Quick Actions -->
+<labels>
+    <fullName>SideBar_QuickAction_Recent_Project</fullName>
+    <language>en_US</language>
+    <protected>false</protected>
+    <shortDescription>Recent button label</shortDescription>
+    <value>Recent Projects</value>
+</labels>
+<labels>
+    <fullName>SideBar_QuickAction_Analytics</fullName>
+    <language>en_US</language>
+    <protected>false</protected>
+    <shortDescription>Analytics  button label</shortDescription>
+    <value>Analytics</value>
+</labels>
+<labels>
+    <fullName>SideBar_QuickAction_Execution</fullName>
+    <language>en_US</language>
+    <protected>false</protected>
+    <shortDescription>Execution History button label</shortDescription>
+    <value>Execution History</value>
+</labels>
 </CustomLabels>
