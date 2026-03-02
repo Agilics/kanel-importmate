@@ -2,6 +2,7 @@
 <CustomLabels xmlns="http://soap.sforce.com/2006/04/metadata">
 
     <!-- import recent projects -->
+
     <labels>
         <fullName>ProjectRecent_Name</fullName>
         <categories>Project Recent</categories>
@@ -92,6 +93,7 @@
     </labels>
 
     <!-- DASHBOARD - FILTER TABS -->
+
     <labels>
         <fullName>Dashboard_FilterTab_Title</fullName>
         <categories>Dashboard Filter projects</categories>
@@ -150,6 +152,7 @@
     </labels>
 
     <!-- DASHBOARD - STATS -->
+
     <labels>
         <fullName>Dashboard_Stat_TotalProjects</fullName>
         <categories>Dashboard Stat</categories>
@@ -184,6 +187,7 @@
     </labels>
 
     <!-- DASHBOARD - NO PROJECT MESSAGES -->
+
     <labels>
         <fullName>Dashboard_No_Project_Message</fullName>
         <categories>Dashboard Project Message</categories>
@@ -202,6 +206,7 @@
     </labels>
 
     <!-- DASHBOARD - ALERT MESSAGES -->
+
     <labels>
         <fullName>Dashboard_Delete_Confirm_Header</fullName>
         <categories>Dashboard Project Dialogue Confirm Header</categories>
@@ -227,44 +232,773 @@
         <value>Project deleted successfully.</value>
     </labels>
 
+    <!-- Etiquette des noms de boutons -->
+
+    <labels>
+        <fullName>Dashboard_Button_New_Project</fullName>
+        <categories>Dashboard Button</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for new project button</shortDescription>
+        <value>New Project</value>
+    </labels>
+    <labels>
+        <fullName>Dashboard_Button_Create_First_Project</fullName>
+        <categories>Dashboard Button</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for Create Your First Project</shortDescription>
+        <value>Create Your First Project</value>
+    </labels>
+
+    <!-- Détails de projets -->
+
+    <labels>
+        <fullName>ProjectCard_Meta_Target</fullName>
+        <categories>ProjectCard Meta</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for target object meta item</shortDescription>
+        <value>Target:</value>
+    </labels>
+    <labels>
+        <fullName>ProjectCard_Meta_Records</fullName>
+        <categories>ProjectCard Meta</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for records count meta item</shortDescription>
+        <value>Records:</value>
+    </labels>
+    <labels>
+        <fullName>ProjectCard_Meta_Modified</fullName>
+        <categories>ProjectCard Meta</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for last modified date meta item</shortDescription>
+        <value>Modified:</value>
+    </labels>
+    <labels>
+        <fullName>ProjectCard_Progress_Label</fullName>
+        <categories>ProjectCard Progress</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for progress bar section</shortDescription>
+        <value>Progress</value>
+    </labels>
+    <labels>
+        <fullName>ProjectCard_No_Description</fullName>
+        <categories>ProjectCard text</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>No Description text</shortDescription>
+        <value>No Description</value>
+    </labels>
+
+    <!-- main -->
+
+    <labels>
+        <fullName>ALL_FIELDS_REQUIRED</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>All fields validation message</shortDescription>
+        <value>All fields are required</value>
+    </labels>
+    <labels>
+        <fullName>PROJECT_EXISTS</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Duplicate project message</shortDescription>
+        <value>A project with this name and target object already exists</value>
+    </labels>
+    <labels>
+        <fullName>PROJECT_CREATED</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Project created success message</shortDescription>
+        <value>Project created successfully with ID: {0}</value>
+    </labels>
+    <labels>
+        <fullName>ERROR_OCCURRED</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Generic error message</shortDescription>
+        <value>An error occurred</value>
+    </labels>
+    <labels>
+        <fullName>SELECT_PROJECT_FIRST</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Select project message</shortDescription>
+        <value>Please select or create a project first</value>
+    </labels>
+    <labels>
+        <fullName>CREATE_PROJECT_FIRST</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Create project first message</shortDescription>
+        <value>Please create a project first</value>
+    </labels>
+    <labels>
+        <fullName>IMPORT_STARTED</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Import started message</shortDescription>
+        <value>Import started in {0} mode with batch size {1}</value>
+    </labels>
+    <labels>
+        <fullName>LOGS_COMING_SOON</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Logs feature placeholder</shortDescription>
+        <value>Logs feature coming soon</value>
+    </labels>
+    <labels>
+        <fullName>SETTINGS_COMING_SOON</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Settings feature placeholder</shortDescription>
+        <value>Settings feature coming soon</value>
+    </labels>
+    <labels>
+        <fullName>VIEW_LOGS</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>View logs action</shortDescription>
+        <value>Viewing logs</value>
+    </labels>
+    <labels>
+        <fullName>EXPORT_COMING_SOON</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Export feature placeholder</shortDescription>
+        <value>Export feature coming soon</value>
+    </labels>
+    <labels>
+        <fullName>ANALYTICS_COMING_SOON</fullName>
+        <categories>Main</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Analytics feature placeholder</shortDescription>
+        <value>Analytics feature coming soon</value>
+    </labels>
+    <labels>
+        <fullName>SEARCH_PROJECTS_FEATURE</fullName>
+        <categories>Main</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Search projects feature</shortDescription>
+        <value>Search projects feature</value>
+    </labels>
+    <labels>
+        <fullName>UNSAVED_CHANGES_WARNING</fullName>
+        <categories>Main</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Unsaved changes warning</shortDescription>
+        <value>You have unsaved changes. Are you sure you want to leave?</value>
+    </labels>
+
+    <!-- DataSource -->
+
+    <labels>
+        <fullName>DataSource_Title</fullName>
+        <categories>DataSource</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DataSource_Title</shortDescription>
+        <value>Choose Data Source</value>
+    </labels>
+    <labels>
+        <fullName>DataSource_Subtitle</fullName>
+        <categories>DataSource</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DataSource_Subtitle</shortDescription>
+        <value>Select how you want to import your data into Salesforce</value>
+    </labels>
+    <labels>
+        <fullName>DataSource_FileUpload_Title</fullName>
+        <categories>DataSource</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DataSource_FileUpload_Title</shortDescription>
+        <value>File Upload</value>
+    </labels>
+    <labels>
+        <fullName>DataSource_FileUpload_Description</fullName>
+        <categories>DataSource</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DataSource_FileUpload_Description</shortDescription>
+        <value>Import from CSV or Excel files</value>
+    </labels>
+    <labels>
+        <fullName>DataSource_FileUpload_Feature1</fullName>
+        <categories>DataSource</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DataSource_FileUpload_Feature1</shortDescription>
+        <value>Support for CSV and Excel formats</value>
+    </labels>
+    <labels>
+        <fullName>DataSource_FileUpload_Feature2</fullName>
+        <categories>DataSource</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DataSource_FileUpload_Feature2</shortDescription>
+        <value>Automatic delimiter detection</value>
+    </labels>
+    <labels>
+        <fullName>DataSource_FileUpload_Feature3</fullName>
+        <categories>DataSource</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DataSource_FileUpload_Feature3</shortDescription>
+        <value>File preview and validation</value>
+    </labels>
+    <labels>
+        <fullName>DataSource_FileUpload_Button</fullName>
+        <categories>DataSource</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DataSource_FileUpload_Button</shortDescription>
+        <value>Choose File Upload</value>
+    </labels>
+    <labels>
+        <fullName>DataSource_SalesforceQuery_Title</fullName>
+        <categories>DataSource</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DataSource_SalesforceQuery_Title</shortDescription>
+        <value>Salesforce Query</value>
+    </labels>
+    <labels>
+        <fullName>DataSource_SalesforceQuery_Description</fullName>
+        <categories>DataSource</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DataSource_SalesforceQuery_Description</shortDescription>
+        <value>Import from Salesforce using SOQL</value>
+    </labels>
+    <labels>
+        <fullName>DataSource_SalesforceQuery_Feature1</fullName>
+        <categories>DataSource</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DataSource_SalesforceQuery_Feature1</shortDescription>
+        <value>Visual query builder interface</value>
+    </labels>
+    <labels>
+        <fullName>DataSource_SalesforceQuery_Feature2</fullName>
+        <categories>DataSource</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DataSource_SalesforceQuery_Feature2</shortDescription>
+        <value>Real-time query validation</value>
+    </labels>
+    <labels>
+        <fullName>DataSource_SalesforceQuery_Feature3</fullName>
+        <categories>DataSource</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DataSource_SalesforceQuery_Feature3</shortDescription>
+        <value>Preview query results</value>
+    </labels>
+    <labels>
+        <fullName>DataSource_SalesforceQuery_Button</fullName>
+        <categories>DataSource</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DataSource_SalesforceQuery_Button</shortDescription>
+        <value>Choose Query Builder</value>
+    </labels>
+    <labels>
+        <fullName>DataSource_Back_Button</fullName>
+        <categories>DataSource</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DataSource_Back_Button</shortDescription>
+        <value>Back</value>
+    </labels>
+
+    <!-- CsvUploader -->
+
+    <labels>
+        <fullName>CsvUploader_PageTitle</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Titre de la page</shortDescription>
+        <value>CSV Data Import &amp; Display</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_PageSubtitle</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_PageSubtitle</shortDescription>
+        <value>Upload your CSV file and preview the data</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_ImportSettings_Button</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_ImportSettings_Button</shortDescription>
+        <value>Import Settings</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Card_Title</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Card_Title</shortDescription>
+        <value>File Upload</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Card_Subtitle</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Card_Subtitle</shortDescription>
+        <value>Upload your CSV file to import data</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Dropzone_Text</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Dropzone_Text</shortDescription>
+        <value>Drop your CSV file here</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Dropzone_Browse</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Dropzone_Browse</shortDescription>
+        <value>or browse files</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Dropzone_Hint</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Dropzone_Hint</shortDescription>
+        <value>Supports CSV files up to 50MB</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Loading_Text</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Loading_Text</shortDescription>
+        <value>Loading…</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Table_Title</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Table_Title</shortDescription>
+        <value>Imported Data</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Search_Placeholder</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Search_Placeholder</shortDescription>
+        <value>Search data...</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Filters_Button</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Filters_Button</shortDescription>
+        <value>Filters</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Table_Actions</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Table_Actions</shortDescription>
+        <value>Actions</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Table_Edit_Tooltip</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Table_Edit_Tooltip</shortDescription>
+        <value>Edit</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Table_Preview_Tooltip</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Table_Preview_Tooltip</shortDescription>
+        <value>Preview</value>
+    </labels>
+    <labels>
+        <fullName>DataTable_Showing_Entries</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Pagination informations</shortDescription>
+        <value>Showing {0} to {1} of {2} entries</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Pagination_Previous</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Pagination_Previous</shortDescription>
+        <value>Previous</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Pagination_Next</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Pagination_Next</shortDescription>
+        <value>Next</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Back_Button</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Back_Button</shortDescription>
+        <value>Back to Data Source</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_ContinueMapping_Button</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_ContinueMapping_Button</shortDescription>
+        <value>Continue to Mapping</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Filters_Title</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Filters_Title</shortDescription>
+        <value>Filters</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Filters_Column</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Filters_Column</shortDescription>
+        <value>Column</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Filters_ColumnDefault</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Filters_ColumnDefault</shortDescription>
+        <value>-- choose --</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Filters_Operator</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Filters_Operator</shortDescription>
+        <value>Operator</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Filters_OpContains</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Filters_OpContains</shortDescription>
+        <value>contains</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Filters_OpEquals</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Filters_OpEquals</shortDescription>
+        <value>equals</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Filters_OpStarts</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Filters_OpStarts</shortDescription>
+        <value>starts with</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Filters_Value</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Filters_Value</shortDescription>
+        <value>Value</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Filters_Clear</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Filters_Clear</shortDescription>
+        <value>Clear</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Settings_Title</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Settings_Title</shortDescription>
+        <value>Import Settings</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Settings_RowsPerPage</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Settings_RowsPerPage</shortDescription>
+        <value>Rows per page</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Settings_PreviewLimit</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Settings_PreviewLimit</shortDescription>
+        <value>Preview limit (large files)</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Preview_Title</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Preview_Title</shortDescription>
+        <value>Row Preview</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Edit_Title</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Edit_Title</shortDescription>
+        <value>Edit Row</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Cancel</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Cancel</shortDescription>
+        <value>Cancel</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Apply</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Apply</shortDescription>
+        <value>Apply</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Close</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Close</shortDescription>
+        <value>Close</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Save</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Save</shortDescription>
+        <value>Save</value>
+    </labels>
+
+    <!-- ProjectForm -->
+
+    <labels>
+        <fullName>ProjectForm_Title</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Title for project information section</shortDescription>
+        <value>New Project</value>
+    </labels>
+    <labels>
+        <fullName>ProjectForm_Subtitle</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SubTitle for project information section</shortDescription>
+        <value>Set up your data import project with target object and configuration</value>
+    </labels>
+    <labels>
+        <fullName>ProjectForm_Info_Section_Label</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Section Project Information</shortDescription>
+        <value>Project Information</value>
+    </labels>
+    <labels>
+        <fullName>ProjectForm_Name</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for Project Name field</shortDescription>
+        <value>Project Name</value>
+    </labels>
+    <labels>
+        <fullName>ProjectForm_Helper_Name</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for helper name</shortDescription>
+        <value>Choose a clear, descriptive name for easy identification</value>
+    </labels>
+    <labels>
+        <fullName>ImportProject_Name_Placeholder</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Placeholder for import project name</shortDescription>
+        <value>Enter a descriptive project name (e.g., Q4 Contact Import)</value>
+    </labels>
+    <labels>
+        <fullName>ProjectForm_Description</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for Description field</shortDescription>
+        <value>Description</value>
+    </labels>
+    <labels>
+        <fullName>ProjectForm_Helper_Description</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for helper description</shortDescription>
+        <value>Provide details about data source, business purpose, and expected outcomes</value>
+    </labels>
+    <labels>
+        <fullName>ImportProject_Description_Placeholder</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Placeholder for import project description</shortDescription>
+        <value>Describe the purpose and scope of this import project...</value>
+    </labels>
+    <labels>
+        <fullName>ProjectForm_Target_Section_Label</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Section title Target Object Configuration</shortDescription>
+        <value>Target Object Configuration</value>
+    </labels>
+    <labels>
+        <fullName>ProjectForm_Target_Object</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for Target Object field</shortDescription>
+        <value>Target Salesforce Object</value>
+    </labels>
+    <labels>
+        <fullName>ProjectForm_Helper_Target_Object</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for helper Target Object field</shortDescription>
+        <value>Select the Salesforce object where data will be imported</value>
+    </labels>
+    <labels>
+        <fullName>ProjectForm_Save_Button</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for save button</shortDescription>
+        <value>Save &amp; Continue to Data Source</value>
+    </labels>
+    <labels>
+        <fullName>ProjectForm_Cancel_Button</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for exit button</shortDescription>
+        <value>Cancel</value>
+    </labels>
+
+    <!-- SelectProject -->
+
+    <labels>
+        <fullName>SelectProject_Card_Title</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Card title for select project</shortDescription>
+        <value>Import projects Informations</value>
+    </labels>
+    <labels>
+        <fullName>SelectProject_No_Project</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Message for no project found</shortDescription>
+        <value>No project import yet, please add</value>
+    </labels>
+    <labels>
+        <fullName>SelectProject_Select_Button</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Button to select project</shortDescription>
+        <value>Select</value>
+    </labels>
+    <labels>
+        <fullName>SelectProject_Close_Button</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Button to close modal</shortDescription>
+        <value>Close</value>
+    </labels>
+
+
     <!-- STEPS sidebar --> 
     <labels>
-        <fullName>SideBar_Step_ProjectSetup</fullName>
+        <fullName>SideBare_Step_ProjectSetup</fullName>
         <language>en_US</language>
         <protected>false</protected>
         <shortDescription>Step 1 - Project Setup</shortDescription>
         <value>Project Setup</value>
     </labels>
     <labels>
-        <fullName>SideBar_Step_DataSource</fullName>
+        <fullName>SideBare_Step_DataSource</fullName>
         <language>en_US</language>
         <protected>false</protected>
         <shortDescription>Step 2 - Data Source selection</shortDescription>
         <value>Data Source</value>
     </labels>
     <labels>
-        <fullName>SideBar_Step_FieldMapping</fullName>
+        <fullName>SideBare_Step_FieldMapping</fullName>
         <language>en_US</language>
         <protected>false</protected>
         <shortDescription>Step 3 - Field Mapping configuration</shortDescription>
         <value>Field Mapping</value>
     </labels>
     <labels>
-        <fullName>SideBar_Step_Transformations</fullName>
+        <fullName>SideBare_Step_Transformations</fullName>
         <language>en_US</language>
         <protected>false</protected>
         <shortDescription>Step 4 - Data Transformations</shortDescription>
         <value>Transformations</value>
     </labels>
     <labels>
-        <fullName>SideBar_Step_Validation</fullName>
+        <fullName>SideBare_Step_Validation</fullName>
         <language>en_US</language>
         <protected>false</protected>
         <shortDescription>Step 5 - Validation (Dry Run)</shortDescription>
         <value>Validation</value>
     </labels>
     <labels>
-        <fullName>SideBar_Step_Execution</fullName>
+        <fullName>SideBare_Step_Execution</fullName>
         <language>en_US</language>
         <protected>false</protected>
         <shortDescription>Step 6 - Execution</shortDescription>
@@ -273,21 +1007,21 @@
 
     <!-- Quick Actions -->
     <labels>
-        <fullName>SideBar_QuickAction_Recent_Project</fullName>
+        <fullName>SideBare_QuickAction_Recent_Project</fullName>
         <language>en_US</language>
         <protected>false</protected>
         <shortDescription>Recent button label</shortDescription>
         <value>Recent Projects</value>
     </labels>
     <labels>
-        <fullName>SideBar_QuickAction_Analytics</fullName>
+        <fullName>SideBare_QuickAction_Analytics</fullName>
         <language>en_US</language>
         <protected>false</protected>
         <shortDescription>Analytics button label</shortDescription>
         <value>Analytics</value>
     </labels>
     <labels>
-        <fullName>SideBar_QuickAction_Execution</fullName>
+        <fullName>SideBare_QuickAction_Execution</fullName>
         <language>en_US</language>
         <protected>false</protected>
         <shortDescription>Execution History button label</shortDescription>

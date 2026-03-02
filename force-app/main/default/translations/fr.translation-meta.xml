@@ -1,52 +1,52 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Translations xmlns="http://soap.sforce.com/2006/04/metadata">
  
-    <!-- SIDEBAR - STEPS -->
+    <!-- SideBare - STEPS -->
 
     <customLabels>
-        <name>SideBar_Step_ProjectSetup</name>
+        <name>SideBare_Step_ProjectSetup</name>
         <label>Configuration du projet</label>
     </customLabels>
 
     <customLabels>
-        <name>SideBar_Step_DataSource</name>
+        <name>SideBare_Step_DataSource</name>
         <label>Source de données</label>
     </customLabels>
 
     <customLabels>
-        <name>SideBar_Step_FieldMapping</name>
+        <name>SideBare_Step_FieldMapping</name>
         <label>Mapping des champs</label>
     </customLabels>
 
     <customLabels>
-        <name>SideBar_Step_Transformations</name>
+        <name>SideBare_Step_Transformations</name>
         <label>Transformations</label>
     </customLabels>
 
     <customLabels>
-        <name>SideBar_Step_Validation</name>
+        <name>SideBare_Step_Validation</name>
         <label>Validation</label>
     </customLabels>
 
     <customLabels>
-        <name>SideBar_Step_Execution</name>
+        <name>SideBare_Step_Execution</name>
         <label>Exécution</label>
     </customLabels>
 
-    <!-- SIDEBAR - QUICK ACTIONS -->
+    <!-- SideBare - QUICK ACTIONS -->
 
     <customLabels>
-        <name>SideBar_QuickAction_Recent_Project</name>
+        <name>SideBare_QuickAction_Recent_Project</name>
         <label>Projets récents</label>
     </customLabels>
 
     <customLabels>
-        <name>SideBar_QuickAction_Analytics</name>
+        <name>SideBare_QuickAction_Analytics</name>
         <label>Analytique</label>
     </customLabels>
 
     <customLabels>
-        <name>SideBar_QuickAction_Execution</name>
+        <name>SideBare_QuickAction_Execution</name>
         <label>Historique des exécutions</label>
     </customLabels>
     <!-- Page Title & Subtitle -->

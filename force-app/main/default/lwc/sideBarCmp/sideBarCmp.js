@@ -1,16 +1,16 @@
 import { LightningElement, api } from 'lwc';
 // STEP LABELS
-import STEP_PROJECT_SETUP from '@salesforce/label/c.SideBar_Step_ProjectSetup';
-import STEP_DATA_SOURCE from '@salesforce/label/c.SideBar_Step_DataSource';
-import STEP_FIELD_MAPPING from '@salesforce/label/c.SideBar_Step_FieldMapping';
-import STEP_TRANSFORMATIONS from '@salesforce/label/c.SideBar_Step_Transformations';
-import STEP_VALIDATION from '@salesforce/label/c.SideBar_Step_Validation';
-import STEP_EXECUTION from '@salesforce/label/c.SideBar_Step_Execution';
+import STEP_PROJECT_SETUP from '@salesforce/label/c.SideBare_Step_ProjectSetup';
+import STEP_DATA_SOURCE from '@salesforce/label/c.SideBare_Step_DataSource';
+import STEP_FIELD_MAPPING from '@salesforce/label/c.SideBare_Step_FieldMapping';
+import STEP_TRANSFORMATIONS from '@salesforce/label/c.SideBare_Step_Transformations';
+import STEP_VALIDATION from '@salesforce/label/c.SideBare_Step_Validation';
+import STEP_EXECUTION from '@salesforce/label/c.SideBare_Step_Execution';
 
 // QUICK ACTIONS
-import QUICK_ACTION_RECENT_PROJECT from '@salesforce/label/c.SideBar_QuickAction_Recent_Project';
-import QUICK_ACTION_ANALYTICS from '@salesforce/label/c.SideBar_QuickAction_Analytics';
-import QUICK_ACTION_EXECUTION_HISTORY from '@salesforce/label/c.SideBar_QuickAction_Execution';
+import QUICK_ACTION_RECENT_PROJECT from '@salesforce/label/c.SideBare_QuickAction_Recent_Project';
+import QUICK_ACTION_ANALYTICS from '@salesforce/label/c.SideBare_QuickAction_Analytics';
+import QUICK_ACTION_EXECUTION_HISTORY from '@salesforce/label/c.SideBare_QuickAction_Execution';
 
 export default class SideBarCmp extends LightningElement {
     @api currentStep = 1;
