@@ -1,3 +1,4 @@
+import  EditProject_Modal_Title from '@salesforce/label/c.EditProject_Modal_Title';
 // Step constants
 export const STEPS = {
   //DASHBOARD: 0,
@@ -67,6 +68,8 @@ export const PROJECT_FIELD_NAMES = {
     "TargetObject__c"
   ]
 };
+
+export const PROJECT_MODAL_EDIT_TITLE =EditProject_Modal_Title;
 
 // Recent projects limit
 export const RECENT_PROJECTS_LIMIT = 3;

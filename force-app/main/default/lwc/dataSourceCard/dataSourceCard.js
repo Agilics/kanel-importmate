@@ -1,4 +1,14 @@
+/**
+ * @Last Modification Date : 02-23-2026
+ * @Last Modification By    : Mouhamed NIANG
+ * @Modification: Add custom labels
+ */
 import { api,LightningElement } from 'lwc';
+
+//IMPORT Custom Labels
+import FILE_UPLOAD_BUTTON     from '@salesforce/label/c.DataSource_FileUpload_Button';
+import QUERY_BUTTON           from '@salesforce/label/c.DataSource_SalesforceQuery_Button';
+
 
 export default class DataSourceCard extends LightningElement {
     @api title = "";
@@ -24,10 +34,11 @@ export default class DataSourceCard extends LightningElement {
       return this.isUpload ? "btn btn-upload" : "btn btn-query";
     }
   
-    //attribuer un texte au bouton
+    //attribuer un texte au bouton Texte du bouton via custom labels 
     get textButton() {
-      return this.isUpload ? "Choose File Upload" : "Choose Query Builder";
+        return this.isUpload ? FILE_UPLOAD_BUTTON : QUERY_BUTTON;
     }
+
   
     //attribuer la  couleur de fonds avec une classe css au contour de l'icône suivant le type de carte
     get boxIconClass() {

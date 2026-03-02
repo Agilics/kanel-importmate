@@ -3,15 +3,47 @@ import getDashboardData from '@salesforce/apex/DashboardController.getDashboardD
 import deleteProject from '@salesforce/apex/DashboardController.deleteProject';
 import { refreshApex } from '@salesforce/apex';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { navigateToPage } from 'c/utility'
+import LightningConfirm from "lightning/confirm";
+// import labels for tab filters
+import Dashboard_Filter_All_Project from '@salesforce/label/c.Dashboard_FilterTab_All_Projects';
+import Dashboard_Filter_Active from '@salesforce/label/c.Dashboard_FilterTab_Active';
+import Dashboard_Filter_Completed from '@salesforce/label/c.Dashboard_FilterTab_Completed'; 
+import Dashboard_Filter_Scheduled from '@salesforce/label/c.Dashboard_FilterTab_Scheduled';
+
+import Dashboard_Input_Search_Placeholder from '@salesforce/label/c.Dashboard_Input_Search_Projects_Placeholder';
+import Dashboard_FilterTab_Title from '@salesforce/label/c.Dashboard_FilterTab_Title';
+import Dashboard_Project_Details_Title from '@salesforce/label/c.Dashboard_FilterTab_Subtitle';
+
+import Dashboard_Delete_Confirm_Header from '@salesforce/label/c.Dashboard_Delete_Confirm_Header'; 
+
+//import labels for toast messages & dialog confirmation
+import Dashboard_Delete_Confirm from '@salesforce/label/c.Dashboard_Confirm_Delete_Message';
+import Dashboard_Delete_Success from '@salesforce/label/c.Dashboard_Delete_Success_Message';
+ 
+// Label for no projects message
+import Dashboard_No_Projects from '@salesforce/label/c.Dashboard_No_Project_Message';
+import Dashboard_No_Project_Error_Message from '@salesforce/label/c.Dashboard_No_Project_Error_Message';
+
+// Card Key Metrics labels
+import Dashboard_Stat_Total_Projects from '@salesforce/label/c.Dashboard_Stat_TotalProjects';
+import Dashboard_Stat_Records_Imported from '@salesforce/label/c.Dashboard_Stat_RecordImported';
+import Dashboard_Stat_Success_Rate from '@salesforce/label/c.Dashboard_Stat_SuccessRate';
+import Dashboard_Stat_Active_Projects from '@salesforce/label/c.Dashboard_Stat_ActiveProject';
+
+// label for buttons
+
+import Dashboard_Button_New_Project from '@salesforce/label/c.Dashboard_Button_New_Project';
+import Dashboard_Button_Create_First_Project from '@salesforce/label/c.Dashboard_Button_Create_First_Project';
 
 export default class DashboardCmp extends LightningElement {
     @track stats = [];
 
     @track filterTabs = [
-        { label: 'All Projects', value: 'all', active: true, className: 'filter-tab active' },
-        { label: 'Active', value: 'active', active: false, className: 'filter-tab' },
-        { label: 'Completed', value: 'completed', active: false, className: 'filter-tab' },
-        { label: 'Scheduled', value: 'scheduled', active: false, className: 'filter-tab' }
+        { label: Dashboard_Filter_All_Project, value: 'all', active: true },
+        { label: Dashboard_Filter_Active, value: 'active', active: false },
+        { label: Dashboard_Filter_Completed, value: 'completed', active: false },
+        { label: Dashboard_Filter_Scheduled, value: 'scheduled', active: false }
     ];
 
     @track projects = [];
@@ -20,6 +52,18 @@ export default class DashboardCmp extends LightningElement {
     @track error;
     searchTerm = '';
     wiredDashboardResult;
+
+    buttonLabel = {
+        newProject: Dashboard_Button_New_Project,
+        createFirstProject: Dashboard_Button_Create_First_Project
+    };
+
+    sections ={
+        title: Dashboard_FilterTab_Title,
+        detailsTitle: Dashboard_Project_Details_Title
+    }
+
+    placeholder = Dashboard_Input_Search_Placeholder;
 
     @wire(getDashboardData, { limitor: 50 })
     wiredDashboard(result) {
@@ -218,7 +262,15 @@ export default class DashboardCmp extends LightningElement {
     async handleProjectDelete(event) {
         const projectId = event.detail;
 
-        if (!confirm('Are you sure you want to delete this project? This action cannot be undone.')) {
+
+        const isConfirm = await LightningConfirm.open({
+            message: "Are you sure you want to delete this project ? This action cannot be undone.",
+            variant: "header",
+            label: "Delete import project", 
+            theme:'alt-inverse'
+        }); 
+
+        if (!isConfirm) {
             return;
         }
 

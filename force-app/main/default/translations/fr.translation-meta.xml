@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Translations xmlns="http://soap.sforce.com/2006/04/metadata">
+     <!--project create form-->
+    <customLabels>
+        <label>Nom du Projet</label>
+        <name>ProjectForm_Name</name>
+    </customLabels>
+    <customLabels>
+        <label>Description</label>
+        <name>ProjectForm_Description</name>
+    </customLabels>
+    <customLabels>
+        <label>Objet Salesforce Cible</label>
+        <name>ProjectForm_Target_Object</name>
+    </customLabels>
+    <customLabels>
+        <label>Informations sur le projet</label>
+        <name>ProjectForm_Info_Section_Label</name>
+    </customLabels>
+    <customLabels>
+        <label>Configuration de l'objet cible</label>
+        <name>ProjectForm_Target_Section_Label</name>
+    </customLabels>
+    <customLabels>
+        <label>Choisissez un nom clair et descriptif pour une identification facile</label>
+        <name>ProjectForm_Helper_Name</name>
+    </customLabels>
+    <customLabels>
+        <label>Fournissez des détails sur la source des données, l'objectif commercial et les résultats attendus</label>
+        <name>ProjectForm_Helper_Description</name>
+    </customLabels>
+    <customLabels>
+        <label>Sélectionnez l'objet Salesforce où les données seront importées</label>
+        <name>ProjectForm_Helper_Target_Object</name>       
+    </customLabels>
+
+    <customLabels>
+        <label>Nouveau Projet</label>
+        <name>ProjectForm_Title</name>
+    </customLabels>
+    <customLabels>
+        <label>Configurez votre projet d'importation de données avec l'objet cible et la configuration</label>
+        <name>ProjectForm_Subtitle</name>
+    </customLabels>
+
+    <customLabels>
+        <label>Enregistrer et continuer avec la source de données</label>
+        <name>ProjectForm_Save_Button</name>
+    </customLabels>
+    <customLabels>
+        <label>Annuler</label>
+        <name>ProjectForm_Cancel_Button</name>      
+    </customLabels>
+   <customLabels>
+        <label>Décrivez l’objectif et le périmètre de ce projet d’import...</label>
+        <name>ImportProject_Description_Placeholder</name>
+    </customLabels>
+    <customLabels>
+        <label>Saisissez un nom de projet descriptif (ex. : Import des contacts T4)</label>
+        <name>ImportProject_Name_Placeholder</name>
+    </customLabels>
+
+    <!-- Page Title & Subtitle -->
+    <customLabels>
+        <name>DataSource_Title</name>
+        <label>Choisir une source de données</label>
+    </customLabels>
+    <customLabels>
+        <name>DataSource_Subtitle</name>
+        <label>Sélectionnez comment vous souhaitez importer vos données dans Salesforce</label>
+    </customLabels>
+
+    <!-- File Upload Card -->
+    <customLabels>
+        <name>DataSource_FileUpload_Title</name>
+        <label>Importation de fichier</label>
+    </customLabels>
+    <customLabels>
+        <name>DataSource_FileUpload_Description</name>
+        <label>Importer depuis des fichiers CSV ou Excel</label>
+    </customLabels>
+    <customLabels>
+        <name>DataSource_FileUpload_Feature1</name>
+        <label>Prise en charge des formats CSV et Excel</label>
+    </customLabels>
+    <customLabels>
+        <name>DataSource_FileUpload_Feature2</name>
+        <label>Détection automatique du délimiteur</label>
+    </customLabels>
+    <customLabels>
+        <name>DataSource_FileUpload_Feature3</name>
+        <label>Prévisualisation et validation du fichier</label>
+    </customLabels>
+    <customLabels>
+        <name>DataSource_FileUpload_Button</name>
+        <label>Choisir l'importation de fichier</label>
+    </customLabels>
+
+    <!-- Salesforce Query Card -->
+    <customLabels>
+        <name>DataSource_SalesforceQuery_Title</name>
+        <label>Requête Salesforce</label>
+    </customLabels>
+    <customLabels>
+        <name>DataSource_SalesforceQuery_Description</name>
+        <label>Importer depuis Salesforce via SOQL</label>
+    </customLabels>
+    <customLabels>
+        <name>DataSource_SalesforceQuery_Feature1</name>
+        <label>Interface visuelle de création de requêtes</label>
+    </customLabels>
+    <customLabels>
+        <name>DataSource_SalesforceQuery_Feature2</name>
+        <label>Validation de requête en temps réel</label>
+    </customLabels>
+    <customLabels>
+        <name>DataSource_SalesforceQuery_Feature3</name>
+        <label>Prévisualisation des résultats de la requête</label>
+    </customLabels>
+    <customLabels>
+        <name>DataSource_SalesforceQuery_Button</name>
+        <label>Choisir le constructeur de requêtes</label>
+    </customLabels>
+
+    <!-- Navigation -->
+    <customLabels>
+        <name>DataSource_Back_Button</name>
+        <label>Retour</label>
+    </customLabels>
+
+
+    <customLabels>
+        <name>EditProject_Modal_Title</name>
+        <label>Modification du projet importé</label>
+    </customLabels>
+
+    
+</Translations>

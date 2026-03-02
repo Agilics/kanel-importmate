@@ -313,7 +313,7 @@ export default class TransformationPage extends LightningElement {
         message: "Are you sure you want to delete this transformation? This action cannot be undone.",
         variant: "header",
         label: "Delete Transformation", 
-        theme:'warning'
+        theme:'alt-inverse'
       }); 
       
       // Abort  deletion if user click on cancel

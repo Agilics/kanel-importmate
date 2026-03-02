@@ -15,7 +15,8 @@ import {
   PAGES,
   QUICK_ACTIONS,
   TOAST_VARIANTS,
-  PROJECT_FIELD_NAMES
+  PROJECT_FIELD_NAMES, 
+  PROJECT_MODAL_EDIT_TITLE 
 } from './constants';
 
 /**
@@ -47,10 +48,15 @@ export default class MainComponent extends LightningElement {
   targetObject = '';
   currentProject;
 
+  //edit modal
+  modal_edit_title = PROJECT_MODAL_EDIT_TITLE; 
+
   // Stepper configuration
   currentStep = STEPS.PROJECT_SETUP;
   baseSteps = STEP_CONFIG;
   @track showProjectForm = false; 
+
+  @track showEditProjectModal = false;
 
   //Wire config
   recentProjectsLimit = RECENT_PROJECTS_LIMIT;
@@ -483,22 +489,23 @@ export default class MainComponent extends LightningElement {
       this.updateUIForStep(this.currentStep);
   }
 
-    async handleEditProject(event) {
-        this.showEditProjectModal = true;
-        const projectId = event.detail; 
-       
+  //ouverture du modal de modification de projet importé
+    async handleEditProject(event) {        
         try {
+            const projectId = event.detail; 
             this.isLoading = true;
             const project = await searchProjetById({id:projectId} );  
-             console.log(project);
+             console.log(JSON.stringify(project));
             this.currentProject = project;
-            this.projectName = project.Name || '';
-            this.description = project.Description__c || '';
-            this.targetObject = project.TargetObject__c || ''; 
-            this.showProjectForm = true; 
+            this.projectName = project.Name ;
+            this.description = project.Description__c;
+            this.targetObject = project.TargetObject__c; 
+             this.showEditProjectModal = true;
+            this.showProjectForm = true;        
         } catch (err) {
             this.showToast(TOAST_VARIANTS.ERROR, err?.body?.message || MESSAGES.ERROR_OCCURRED, TOAST_VARIANTS.ERROR);
         } finally {
+            
             this.isLoading = false; 
         }
     }
@@ -534,6 +541,7 @@ export default class MainComponent extends LightningElement {
         
             this.showToast(TOAST_VARIANTS.SUCCESS, 'Project updated successfully', TOAST_VARIANTS.SUCCESS);
             this.closeForm();
+            this.showEditProjectModal = false; 
             this.resetProjectForm();
 
         } catch (err) {

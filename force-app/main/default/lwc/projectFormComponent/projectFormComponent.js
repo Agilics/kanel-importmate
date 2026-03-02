@@ -1,15 +1,28 @@
 /**
  * 
- * @Last Modification Date: 30-12-2025
- * @Modification: changement composant c-project-form-component du méthode projectnamechange -> namechange
- * Changement composant c-project-form du méthode targetobjectchange -> targetchange
+ * @Last Modification Date: 02-16-2025
+ * @Modification: 
+ * -   ajout I18n
  */
 import { LightningElement, api, track } from "lwc";
-
 //import methods from Controller
 import getCompatibleSObjects from "@salesforce/apex/ImportProjectController.getCompatibleSObjects";
+// Import des labels
+import projectInfoLabel from "@salesforce/label/c.ProjectForm_Title";
+import projectDetailsLabel from "@salesforce/label/c.ProjectForm_Subtitle";
+import targetObjectInfoLabel from "@salesforce/label/c.ProjectForm_Target_Section_Label";
+import projectNameLabel from "@salesforce/label/c.ProjectForm_Name";
+import descriptionLabel from "@salesforce/label/c.ProjectForm_Description"; 
+import projectInfoSectionLabel from "@salesforce/label/c.ProjectForm_Info_Section_Label";
+import targetObjectLabel from "@salesforce/label/c.ProjectForm_Target_Object";
+//helper text labels
+import helperNameLabel from "@salesforce/label/c.ProjectForm_Helper_Name";
+import helperDescriptionLabel from "@salesforce/label/c.ProjectForm_Helper_Description";
+import helpertargetObjectLabel from "@salesforce/label/c.ProjectForm_Helper_Target_Object";
 
-
+//placeholder
+import NAME_PLACEHOLDER from '@salesforce/label/c.ImportProject_Name_Placeholder';
+import DESCRIPTION_PLACEHOLDER from '@salesforce/label/c.ImportProject_Description_Placeholder';
 export default class ProjectFormComponent extends LightningElement {
   @api projectName = "";
   @api description = "";
@@ -18,6 +31,24 @@ export default class ProjectFormComponent extends LightningElement {
   @api project;
   @api currentStep;
   @api openModal = false; //affichage modal pour une modification
+
+  label = { 
+    projectDetailsLabel,
+    projectInfoSectionLabel,
+    projectNameLabel,
+    descriptionLabel,
+    targetObjectLabel,
+    projectInfoLabel,
+    projectDetailsLabel,
+    targetObjectInfoLabel,
+    helperNameLabel,
+    helperDescriptionLabel,
+    helpertargetObjectLabel,
+ 
+  };
+
+  descriptionPlaceholder = DESCRIPTION_PLACEHOLDER;
+  projectNamePlaceholder = NAME_PLACEHOLDER;
 
   // Permet au parent de définir des valeurs initiales dans le champs target object
   connectedCallback() {

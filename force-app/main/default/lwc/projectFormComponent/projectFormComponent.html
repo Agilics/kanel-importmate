@@ -10,79 +10,100 @@
    <div class={containerClass}>
       <!-- Header : création seulement -->
       <template if:false={openModal}>
-         <div class="header">
-            <lightning-icon icon-name="utility:add" alternative-text="Add" class="plus-icons margin-icon"></lightning-icon>
-            <div class="text-header">
-               <h1>New Project</h1>
-               <p class="subtitle">Set up your data import project with target object and configuration</p>
+        <div class="header">
+          <lightning-icon icon-name="utility:add" alternative-text="Add" class="plus-icons margin-icon"></lightning-icon>
+
+          <div class="text-header">
+            <h1>{label.projectInfoLabel}</h1>
+            <p class="subtitle">
+              {label.projectDetailsLabel}
+            </p>
+          </div>
+        </div>
+    </template>
+    <!-- Card container -->
+    <section class={contentClass} >
+      <div class="project-info">
+         <!-- Section header : création seulement -->
+          <template if:false={openModal}>
+              <!-- Project Information -->
+            <div class="section-header">
+              <lightning-icon icon-name="utility:info" alternative-text="Info"
+                class="icon-colors"></lightning-icon>
+              <h2>{label.projectInfoSectionLabel}</h2>
             </div>
-         </div>
+          </template>
+      <div class="form-group">
+        <label class="custom-label name-label" for="project-name">
+          {label.projectNameLabel}<span class="required">*</span>
+        </label>
+        <lightning-input id="project-name" class="rounded-input" style="width: 100%" type="text"
+          placeholder= {projectNamePlaceholder} value={projectName}
+          onchange={handleProjectNameChange}></lightning-input>
+      </div>
+      <p class="help-text">
+        {label.helperNameLabel}
+      </p>
+
+      <!--Description textarea -->
+      <label class="custom-label mb-1 description-label" name="description">
+        {label.descriptionLabel}
+      </label>
+      <lightning-textarea class="input-field rounded-input" name="description" style="margin-top: -1.6rem; "
+        placeholder={descriptionPlaceholder} value={description}
+        onchange={handleDescriptionChange}></lightning-textarea>
+      <p class="help-text">
+        {label.helperDescriptionLabel}
+      </p>
+    
+      </div>
+    
+       <!-- Divider : création seulement -->
+      <template if:false={openModal}>
+        <hr class="divider" />
       </template>
-      <section class={contentClass}>
-         <div class="project-info">
-            <!-- Section header : création seulement -->
+
+      <!-- Target Object Configuration -->
+       <div class="target-object-config">
+          <!-- Section header : création seulement -->
             <template if:false={openModal}>
-               <div class="section-header">
-                  <lightning-icon icon-name="utility:info" alternative-text="Info" class="icon-colors"></lightning-icon>
-                  <h2>Project Information</h2>
-               </div>
+              <div class="section-header">
+                <lightning-icon icon-name="utility:campaign" alternative-text="Campaign"
+                  class="icon-colors "></lightning-icon>
+                <h2>{label.targetObjectInfoLabel}</h2>
+              </div>
             </template>
-            <div class="form-group">
-               <label class="custom-label name-label" for="project-name">
-               Project Name <span class="required">*</span>
-               </label>
-               <lightning-input
-                  id="project-name"
-                  class="rounded-input"
-                  style="width: 100%"
-                  type="text"
-                  value={projectName}
-                  placeholder="Enter a descriptive project name"
-                  onchange={handleProjectNameChange}>
-               </lightning-input>
-               <p class="help-text">Choose a clear, descriptive name for easy identification</p>
-            </div>
-            <label class="custom-label mb-1 description-label">Description</label>
-            <lightning-textarea
-               class="input-field rounded-input"
-               style="margin-top: -1.6rem;"
-               value={description}
-               placeholder="Describe the purpose and scope of this import project..."
-               onchange={handleDescriptionChange}>
-            </lightning-textarea>
-            <p class="help-text">Provide details about data source, business purpose, and expected outcomes</p>
-         </div>
-         <!-- Divider : création seulement -->
-         <template if:false={openModal}>
-            <hr class="divider" />
-         </template>
-         <div class="target-object-config">
-            <!-- Section header : création seulement -->
-            <template if:false={openModal}>
-               <div class="section-header">
-                  <lightning-icon icon-name="utility:campaign" alternative-text="Campaign" class="icon-colors"></lightning-icon>
-                  <h2>Target Object Configuration</h2>
-               </div>
-            </template>
-            <div class="form-grid">
-               <div class="form-item">
-                  <label class="custom-label target-label">
-                  Target Salesforce Object <span class="required">*</span>
-                  </label>
-                  <lightning-combobox
-                     value={targetObject}
-                     options={options}
-                     class="rounded-input"
-                     onchange={handleTargetObjectChange}>
-                  </lightning-combobox>
-                  <p class="help-text">Select the Salesforce object where data will be imported</p>
-               </div>
-            </div>
-         </div>
-         <c-project-form-footer-component
-            onsave={handleCreateProject}
-            oncancel={handleCancel}>
-         </c-project-form-footer-component>
-      </section>
-   </div>
+  
+        <div class="form-grid">
+          <div class="form-item">
+            <label class="custom-label target-label" for="project-name">
+              {label.targetObjectLabel} <span class="required">*</span>
+            </label>
+            <lightning-combobox value={targetObject} options={options} class="rounded-input"
+              onchange={handleTargetObjectChange}></lightning-combobox>
+            <p class="help-text">
+              {label.helpertargetObjectLabel}
+            </p>
+          </div>
+          <!--Import Operation-->
+          <div class="form-item">
+            <!--
+            <lightning-combobox
+              label="Import Operation"
+              value={importOperation}
+              options={importOptions}
+              required
+              onchange={handleImportOperationChange}
+            ></lightning-combobox>
+            <p class="help-text">Choose how the data should be processed</p>
+          -->
+          </div>
+        </div>
+       </div>
+        
+      <!-- Footer -->
+        <c-project-form-footer-component onsave={handleCreateProject}
+          oncancel={handleCancel}></c-project-form-footer-component>
+    </section>
+  </div>
 </template>
