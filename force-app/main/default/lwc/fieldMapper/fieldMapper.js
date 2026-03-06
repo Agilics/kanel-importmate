@@ -1114,7 +1114,12 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
 
   //check if there are mappings for the selected project
   get  isContinueButtonDisabled() {
-     return !this.selectedProjectId || !this.projectHasMappings || this.checkingMappings;
+     const hasLocalMappings = Array.isArray(this.mappings) && this.mappings.length > 0;
+    return (
+      !this.selectedProjectId ||
+      (!hasLocalMappings && !this.projectHasMappings) ||
+      this.checkingMappings
+    );
   }
 
   /** ===== Settings Modal for preview ===== */

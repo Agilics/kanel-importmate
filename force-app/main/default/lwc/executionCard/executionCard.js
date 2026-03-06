@@ -96,7 +96,7 @@ export default class ExecutionCard extends LightningElement {
     
     //Mise à jour du champs de la date d'éxécution (Start)
     handleNextRunChange(event) {
-        const date = new Date(event.target.value);
+        const date = event.target.value;
          this.dispatchEvent(
             new CustomEvent(
                 "nextrunchange",

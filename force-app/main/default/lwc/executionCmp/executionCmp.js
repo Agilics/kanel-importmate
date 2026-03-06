@@ -1,3 +1,7 @@
+/**
+ * @Last Modification Date: 03/03/2026
+ * @Last Modification By: Mouhamed
+ */
 import { LightningElement, api, track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import startClientStaging from '@salesforce/apex/BatchExecutionController.startClientStaging';
@@ -9,6 +13,8 @@ import getImportLogs from '@salesforce/apex/BatchExecutionController.getImportLo
 import cancelExecution from '@salesforce/apex/BatchExecutionController.cancelExecution';
 import { parseCsvData } from 'c/utility';
 import { subscribe, unsubscribe, onError } from 'lightning/empApi';
+import addSchedule from '@salesforce/apex/ScheduleController.addSchedule';
+
 
 const STAGING_CHUNK_SIZE = 200;
 const POLLING_INTERVAL_MS = 3000;
@@ -35,11 +41,43 @@ export default class ExecutionCmp extends LightningElement {
   @track totalErrors = 0;
 
   @track showImportResults = false;
+  @track frequency='Weekly';
+  @track nextRun  ;
+  @track executionMode;
+  @track batchSize;
+  @track sendEmailNotification;
+
 
   subscription = null;
   channelName = '/event/ImportStatusEvent__e';
   pollingTimer = null;
   isRestoringState = false;
+
+  // Initialisation de next run 
+  initializeNextRun() {
+      const now = new Date();
+      now.setHours(now.getHours() + 1);
+      this.nextRun = this.formatDateTimeForInput(now);
+  }
+
+
+  // Formatage
+  formatDateTimeForInput(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      return `${year}-${month}-${day}T${hours}:${minutes}`;
+  }
+   
+  //configuration card  ScheduleExecution 
+  showScheduledExecution = true;
+  hideScheduledExecution = false; 
+  // schedule | Immediate  cards form  style 
+  get formGroup(){return 'form-group';}
+
+  get formLabel(){return 'form-label';}
 
   @api
   get projectId() {
@@ -56,6 +94,7 @@ export default class ExecutionCmp extends LightningElement {
   }
 
   connectedCallback() {
+    this.initializeNextRun();
     this.registerErrorListener();
     this.handleSubscribe();
     this.tryRestoreExecutionState();
@@ -189,7 +228,45 @@ export default class ExecutionCmp extends LightningElement {
     }
   }
 
-  handleScheduleImport() {}
+  // Conversion pour Apex next run
+  convertInputToDate(inputValue) {
+      return new Date(inputValue);
+  }
+
+  async handleScheduleImport() {
+      try {
+        this.isLoading = true;
+        const nextRunDate = this.convertInputToDate(this.nextRun);
+         await addSchedule({
+                frequency: this.frequency,
+                nextRun: nextRunDate,
+                projectId: this.projectId
+        }); 
+          
+      // Rafraîchir les données de la liste de schedules
+      console.log(this.refs.scheduledList); 
+      const scheduledComponent = this.template.querySelector('c-scheduled-schedules');
+      await scheduledComponent.refreshSchedules();
+     // await this.refs.scheduledList.refreshSchedules();
+      
+      this.showToast(
+        'Success', 
+        'Schedule created successfully', 
+        'success'
+      );
+      
+    } catch (error) {
+      console.error('Error refreshing schedules:', error);
+            
+      this.showToast(
+        'Error', 
+        'Failed to refresh schedules', 
+         'error'
+      );
+    } finally {
+      this.isLoading = false;
+    }
+  }
 
   async handleCancelImport() {
     if (!this.canCancelImport) {
@@ -401,6 +478,27 @@ export default class ExecutionCmp extends LightningElement {
       unsubscribe(this.subscription, () => {});
       this.subscription = null;
     }
+  }
+
+  //add schedule changes handler
+  handleFrequencyChange(event) {
+      this.frequency = event.detail.value;
+  }
+
+  handleNextRunChange(event) {
+      this.nextRun = event.detail.value;
+  }
+
+  handleModeChange(event) {
+      this.executionMode = event.detail.value;
+  }
+
+  handleBatchSizeChange(event) {
+      this.batchSize = event.detail.value;
+  }
+
+  handleSendNotificationChange(event) {
+      this.sendEmailNotification = event.detail;
   }
 
   handlePlatformEvent(response) {

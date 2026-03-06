@@ -41,7 +41,7 @@ public with sharing class ScheduleControllerTest {
             nextRun,
             project.Id
         );
-        System.schedule('TestJob_' + System.currentTimeMillis(), cron, new ScheduleJob());
+        System.schedule('TestJob_' + System.currentTimeMillis(), cron, new ScheduleJob(scheduleId));
 
         Test.stopTest();
         

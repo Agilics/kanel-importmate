@@ -3,6 +3,7 @@ import { refreshApex } from '@salesforce/apex';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
  import deleteSchedule from "@salesforce/apex/ScheduleController.deleteSchedule";
 import getSchedulesWithExecutionsByIdProject from "@salesforce/apex/ScheduleController.getSchedulesWithExecutionsByIdProject";
+import LightningConfirm from 'lightning/confirm';
 
 export default class ScheduledSchedules extends LightningElement {
     @api projectId;
@@ -58,7 +59,7 @@ export default class ScheduledSchedules extends LightningElement {
                         ? this.formatDateTime(lastExecution.StartTime__c) 
                         : 'Never',
                     subtitle: this.formatNextRun(sch.Frequency__c ,sch.NextRun__c ),
-                    statusLabel: lastExecution?.Status__c || 'Pending',
+                    statusLabel: lastExecution?.Status__c  || 'Pending',
                     badgeStatusClass: this.getBadgeStatusClass(status) ,
                     iconClass: this.getIconClass(status),
                     boxIconClass: this.getBoxIconClass(status),
@@ -100,7 +101,7 @@ export default class ScheduledSchedules extends LightningElement {
 
     /**
      * Gérer l'ajout d'une planification (callback du modal)
-     */
+     
     async handleAddSchedule(event) {
         try {
             this.isLoading = true;
@@ -128,7 +129,7 @@ export default class ScheduledSchedules extends LightningElement {
         } finally {
             this.isLoading = false;
         }
-    }
+    }*/
 
     /**
      * Fermer le modal sans sauvegarder
@@ -174,8 +175,12 @@ export default class ScheduledSchedules extends LightningElement {
             const scheduleId = event.currentTarget.dataset.id; 
            const ruleId = event.detail; 
            console.log(' Delete schedule:', scheduleId);
-            /*eslint no-alert: "error"*/
-            const isConfirm = confirm('Are you sure you want to delete this schedule? This action cannot be undone.');
+                
+            const isConfirm = await LightningConfirm.open({
+                message: 'Are you sure you want to delete this schedule? This action cannot be undone.',
+                label: 'Confirm deletion schedule?',
+                theme: 'alt-inverse',
+            });
             // Confirm deletion
             if (!isConfirm) {
                 return;
@@ -198,6 +203,10 @@ export default class ScheduledSchedules extends LightningElement {
                 variant: 'error'
             }));
        }
+    }
+
+    @api async refreshSchedules(){
+        await refreshApex(this.wiredSchedulesResult); 
     }
 
     
@@ -322,7 +331,7 @@ export default class ScheduledSchedules extends LightningElement {
         const statusMap = {
             Pending: 'pending-status',
             InProgress: 'progress-status',
-            Completed: 'success-status',
+            Completed: 'slds-theme_success',
             Failed: 'failed-status',
             Suspended: 'pending-status'
         };
