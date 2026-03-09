@@ -1,0 +1,413 @@
+<template>
+  <div class="is-shell">
+
+    <!-- HEADER -->
+    <div class="is-header">
+      <div class="is-header-left">
+        <div class="is-header-icon">
+          <lightning-icon icon-name="utility:chart" size="small" alternative-text="Stats"></lightning-icon>
+        </div>
+        <div>
+          <h1 class="is-title">{label.title}</h1>
+          <p class="is-subtitle">{label.subtitle}</p>
+        </div>
+      </div>
+      <div class="is-header-right">
+        <lightning-combobox
+          value={selectedPeriod}
+          options={periodOptions}
+          variant="label-hidden"
+          class="is-period-select"
+          onchange={handlePeriodChange}
+        ></lightning-combobox>
+        <lightning-button
+          label={label.refresh}
+          variant="neutral"
+          icon-name="utility:refresh"
+          icon-position="left"
+          onclick={handleRefresh}
+          disabled={isLoading}
+        ></lightning-button>
+      </div>
+    </div>
+
+    <template if:true={isLoading}>
+      <div class="is-loading-overlay">
+        <lightning-spinner alternative-text={label.loading} size="medium"></lightning-spinner>
+        <p class="is-loading-text">{label.loading}</p>
+      </div>
+    </template>
+
+    <template if:false={isLoading}>
+
+      <!-- KPI ROW -->
+      <section class="is-kpi-row">
+
+        <article class="is-kpi-card is-kpi-primary">
+          <div class="is-kpi-inner">
+            <div class="is-kpi-icon-wrap is-kpi-icon-blue">
+              <lightning-icon icon-name="utility:apex" size="x-small" alternative-text="Total"></lightning-icon>
+            </div>
+            <div class="is-kpi-body">
+              <span class="is-kpi-label">{label.kpiTotal}</span>
+              <span class="is-kpi-value">{kpis.total}</span>
+              <template if:true={kpis.trendLabel}>
+                <span class="is-kpi-trend">{kpis.trendLabel}</span>
+              </template>
+            </div>
+          </div>
+        </article>
+
+        <article class="is-kpi-card">
+          <div class="is-kpi-inner">
+            <div class="is-kpi-icon-wrap is-kpi-icon-green">
+              <lightning-icon icon-name="utility:check" size="x-small" alternative-text="Rate"></lightning-icon>
+            </div>
+            <div class="is-kpi-body">
+              <span class="is-kpi-label">{label.kpiSuccessRate}</span>
+              <span class="is-kpi-value is-kpi-green">{kpis.successRate}</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="is-kpi-card">
+          <div class="is-kpi-inner">
+            <div class="is-kpi-icon-wrap is-kpi-icon-purple">
+              <lightning-icon icon-name="utility:database" size="x-small" alternative-text="Records"></lightning-icon>
+            </div>
+            <div class="is-kpi-body">
+              <span class="is-kpi-label">{label.kpiRecords}</span>
+              <span class="is-kpi-value">{kpis.totalRecords}</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="is-kpi-card">
+          <div class="is-kpi-inner">
+            <div class="is-kpi-icon-wrap is-kpi-icon-teal">
+              <lightning-icon icon-name="utility:clock" size="x-small" alternative-text="Duration"></lightning-icon>
+            </div>
+            <div class="is-kpi-body">
+              <span class="is-kpi-label">{label.kpiAvgDuration}</span>
+              <span class="is-kpi-value">{kpis.avgDuration}</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="is-kpi-card">
+          <div class="is-kpi-inner">
+            <div class="is-kpi-icon-wrap is-kpi-icon-red">
+              <lightning-icon icon-name="utility:error" size="x-small" alternative-text="Failed"></lightning-icon>
+            </div>
+            <div class="is-kpi-body">
+              <span class="is-kpi-label">{label.kpiFailed}</span>
+              <span class="is-kpi-value is-kpi-red">{kpis.failed}</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="is-kpi-card">
+          <div class="is-kpi-inner">
+            <div class="is-kpi-icon-wrap is-kpi-icon-blue-light">
+              <lightning-icon icon-name="utility:sync" size="x-small" alternative-text="Running"></lightning-icon>
+            </div>
+            <div class="is-kpi-body">
+              <span class="is-kpi-label">{label.kpiRunning}</span>
+              <span class="is-kpi-value is-kpi-blue">{kpis.running}</span>
+            </div>
+          </div>
+        </article>
+
+      </section>
+
+      <!-- TABS -->
+      <div class="is-tabs">
+        <button class={tabOverviewClass} data-tab="overview" onclick={handleTabChange}>Vue d&apos;ensemble</button>
+        <button class={tabTrendsClass}   data-tab="trends"   onclick={handleTabChange}>Tendances</button>
+        <button class={tabProjectsClass} data-tab="projects" onclick={handleTabChange}>Par projet</button>
+      </div>
+
+      <!-- TAB: OVERVIEW -->
+      <template if:true={tabOverviewActive}>
+        <div class="is-grid-2">
+
+          <div class="is-chart-card">
+            <div class="is-chart-header">
+              <h3 class="is-chart-title">{label.chartStatus}</h3>
+              <span class="is-chart-badge">{kpis.total} total</span>
+            </div>
+            <div class="is-donut-area">
+              <div class="is-donut-wrap">
+                <svg viewBox="0 0 120 120" class="is-donut-svg">
+                  <circle cx="60" cy="60" r="50" fill="none" stroke="#f1f5f9" stroke-width="14"/>
+                  <template for:each={statusDonutSlices} for:item="slice">
+                    <circle
+                      key={slice.id}
+                      cx="60" cy="60" r="50"
+                      fill="none"
+                      stroke={slice.color}
+                      stroke-width="14"
+                      stroke-dasharray={slice.dasharray}
+                      stroke-dashoffset={slice.offset}
+                      style={slice.rotateStyle}
+                      stroke-linecap="round"
+                    />
+                  </template>
+                </svg>
+                <div class="is-donut-center">
+                  <span class="is-donut-total">{kpis.total}</span>
+                  <span class="is-donut-label">exec.</span>
+                </div>
+              </div>
+              <ul class="is-legend">
+                <template for:each={statusLegend} for:item="item">
+                  <li key={item.id} class="is-legend-item">
+                    <span class="is-legend-dot" style={item.dotStyle}></span>
+                    <span class="is-legend-name">{item.label}</span>
+                    <span class="is-legend-count">{item.count}</span>
+                    <span class="is-legend-pct">{item.pct}%</span>
+                  </li>
+                </template>
+              </ul>
+            </div>
+          </div>
+
+          <div class="is-chart-card is-gauge-card">
+            <div class="is-chart-header">
+              <h3 class="is-chart-title">{label.kpiSuccessRate}</h3>
+            </div>
+            <div class="is-gauge-body">
+              <div class="is-gauge-wrap">
+                <svg viewBox="0 0 120 68" class="is-gauge-svg">
+                  <path d="M 10,62 A 50,50 0 0,1 110,62" fill="none" stroke="#f1f5f9" stroke-width="12" stroke-linecap="round"/>
+                  <path d="M 10,62 A 50,50 0 0,1 110,62" fill="none" stroke={successRateColor} stroke-width="12" stroke-linecap="round" stroke-dasharray="157" stroke-dashoffset={gaugeOffset} class="is-gauge-arc"/>
+                </svg>
+                <div class="is-gauge-value" style={gaugeValueStyle}>{kpis.successRate}</div>
+              </div>
+              <div class="is-gauge-bands">
+                <span>0%</span>
+                <span>50%</span>
+                <span>100%</span>
+              </div>
+              <div class="is-gauge-thresholds">
+                <div class="is-threshold"><span class="is-threshold-dot is-dot-bad"></span><span>&lt; 70%</span></div>
+                <div class="is-threshold"><span class="is-threshold-dot is-dot-ok"></span><span>70-90%</span></div>
+                <div class="is-threshold"><span class="is-threshold-dot is-dot-good"></span><span>&gt; 90%</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="is-chart-card is-chart-full">
+            <div class="is-chart-header">
+              <h3 class="is-chart-title">{label.chartVolume}</h3>
+              <span class="is-chart-badge">{selectedPeriodLabel}</span>
+            </div>
+            <template if:true={hasVolumeData}>
+              <div class="is-bar-chart-h">
+                <template for:each={volumeBars} for:item="bar">
+                  <div key={bar.id} class="is-vol-col">
+                    <div class="is-vol-bar-wrap">
+                      <div class="is-vol-bar" style={bar.barStyle}></div>
+                    </div>
+                    <span class="is-vol-label">{bar.label}</span>
+                  </div>
+                </template>
+              </div>
+            </template>
+            <template if:false={hasVolumeData}>
+              <p class="is-no-data">{label.noData}</p>
+            </template>
+          </div>
+
+          <div class="is-chart-card is-chart-full">
+            <div class="is-chart-header">
+              <h3 class="is-chart-title">{label.chartObjects}</h3>
+            </div>
+            <template if:true={hasObjectData}>
+              <div class="is-hbar-list">
+                <template for:each={objectBars} for:item="bar">
+                  <div key={bar.id} class="is-hbar-row">
+                    <span class="is-hbar-label">{bar.label}</span>
+                    <div class="is-hbar-track">
+                      <div class="is-hbar-fill" style={bar.fillStyle}></div>
+                    </div>
+                    <span class="is-hbar-value">{bar.text}</span>
+                  </div>
+                </template>
+              </div>
+            </template>
+            <template if:false={hasObjectData}>
+              <p class="is-no-data">{label.noData}</p>
+            </template>
+          </div>
+
+        </div>
+      </template>
+
+      <!-- TAB: TENDANCES -->
+      <template if:true={tabTrendsActive}>
+        <div class="is-grid-1">
+
+          <div class="is-chart-card">
+            <div class="is-chart-header">
+              <h3 class="is-chart-title">{label.chartSuccess}</h3>
+              <span class="is-chart-badge">{trendSummaryLabel}</span>
+            </div>
+            <template if:true={hasTrendData}>
+              <template for:each={successTrendPoints} for:item="chart">
+                <div key={chart.linePath} class="is-trend-wrap">
+                  <svg viewBox="0 0 400 140" class="is-trend-svg" preserveAspectRatio="none">
+                    <defs>
+                      <linearGradient id="trendGradBlue" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.18"/>
+                        <stop offset="100%" stop-color="#3b82f6" stop-opacity="0"/>
+                      </linearGradient>
+                    </defs>
+                    <line x1="0" y1="14"  x2="400" y2="14"  stroke="#f1f5f9" stroke-width="1"/>
+                    <line x1="0" y1="42"  x2="400" y2="42"  stroke="#f1f5f9" stroke-width="1"/>
+                    <line x1="0" y1="70"  x2="400" y2="70"  stroke="#f1f5f9" stroke-width="1"/>
+                    <line x1="0" y1="98"  x2="400" y2="98"  stroke="#f1f5f9" stroke-width="1"/>
+                    <line x1="0" y1="126" x2="400" y2="126" stroke="#f1f5f9" stroke-width="1"/>
+                    <path d={chart.fillPath} fill="url(#trendGradBlue)"/>
+                    <path d={chart.linePath} fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>
+                    <template for:each={chart.points} for:item="pt">
+                      <circle key={pt.day} cx={pt.x} cy={pt.y} r="3.5" fill="#ffffff" stroke="#3b82f6" stroke-width="2"/>
+                    </template>
+                  </svg>
+                  <div class="is-trend-y-labels">
+                    <span>100%</span>
+                    <span>75%</span>
+                    <span>50%</span>
+                    <span>25%</span>
+                    <span>0%</span>
+                  </div>
+                </div>
+              </template>
+              <div class="is-trend-stats">
+                <div class="is-trend-stat">
+                  <span class="is-trend-stat-label">Taux min.</span>
+                  <span class="is-trend-stat-val">{trendMin}</span>
+                </div>
+                <div class="is-trend-stat">
+                  <span class="is-trend-stat-label">Taux max.</span>
+                  <span class="is-trend-stat-val">{trendMax}</span>
+                </div>
+                <div class="is-trend-stat">
+                  <span class="is-trend-stat-label">Taux moyen</span>
+                  <span class="is-trend-stat-val">{trendAvg}</span>
+                </div>
+                <div class="is-trend-stat">
+                  <span class="is-trend-stat-label">Jours</span>
+                  <span class="is-trend-stat-val">{trendPointCount}</span>
+                </div>
+              </div>
+            </template>
+            <template if:false={hasTrendData}>
+              <p class="is-no-data">{label.noData}</p>
+            </template>
+          </div>
+
+          <div class="is-chart-card">
+            <div class="is-chart-header">
+              <h3 class="is-chart-title">{label.chartDuration}</h3>
+              <span class="is-chart-badge">Top 8</span>
+            </div>
+            <template if:true={hasDurationData}>
+              <div class="is-hbar-list">
+                <template for:each={durationBars} for:item="bar">
+                  <div key={bar.id} class="is-hbar-row">
+                    <span class="is-hbar-label">{bar.label}</span>
+                    <div class="is-hbar-track">
+                      <div class="is-hbar-fill" style={bar.fillStyle}></div>
+                    </div>
+                    <span class="is-hbar-value">{bar.text}</span>
+                  </div>
+                </template>
+              </div>
+            </template>
+            <template if:false={hasDurationData}>
+              <p class="is-no-data">{label.noData}</p>
+            </template>
+          </div>
+
+        </div>
+      </template>
+
+      <!-- TAB: PAR PROJET -->
+      <template if:true={tabProjectsActive}>
+        <div class="is-grid-1">
+
+          <div class="is-chart-card">
+            <div class="is-chart-header">
+              <h3 class="is-chart-title">{label.chartTopProjects}</h3>
+              <span class="is-chart-badge">Top 10</span>
+            </div>
+            <template if:true={hasTopProjects}>
+              <div class="is-proj-table-wrap">
+                <table class="is-proj-table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>{label.tableProject}</th>
+                      <th>{label.tableExecutions}</th>
+                      <th>{label.tableRecords}</th>
+                      <th>{label.tableSuccess}</th>
+                      <th>{label.tableAvgDur}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <template for:each={topProjects} for:item="p">
+                      <tr key={p.id}>
+                        <td class="is-proj-rank">{p.rank}</td>
+                        <td class="is-proj-name">{p.project}</td>
+                        <td>{p.count}</td>
+                        <td>{p.records}</td>
+                        <td>
+                          <div class="is-rate-cell">
+                            <div class="is-rate-bar-track">
+                              <div class="is-rate-bar-fill" style={p.rateFillStyle}></div>
+                            </div>
+                            <span class={p.rateClass}>{p.rate}</span>
+                          </div>
+                        </td>
+                        <td>{p.avgDur}</td>
+                      </tr>
+                    </template>
+                  </tbody>
+                </table>
+              </div>
+            </template>
+            <template if:false={hasTopProjects}>
+              <p class="is-no-data">{label.noData}</p>
+            </template>
+          </div>
+
+          <div class="is-chart-card">
+            <div class="is-chart-header">
+              <h3 class="is-chart-title">Executions par projet</h3>
+              <span class="is-chart-badge">Top 10</span>
+            </div>
+            <template if:true={hasTopProjects}>
+              <div class="is-hbar-list">
+                <template for:each={projectExecBars} for:item="bar">
+                  <div key={bar.id} class="is-hbar-row">
+                    <span class="is-hbar-label">{bar.label}</span>
+                    <div class="is-hbar-track">
+                      <div class="is-hbar-fill" style={bar.fillStyle}></div>
+                    </div>
+                    <span class="is-hbar-value">{bar.text}</span>
+                  </div>
+                </template>
+              </div>
+            </template>
+            <template if:false={hasTopProjects}>
+              <p class="is-no-data">{label.noData}</p>
+            </template>
+          </div>
+
+        </div>
+      </template>
+
+    </template>
+  </div>
+</template>
