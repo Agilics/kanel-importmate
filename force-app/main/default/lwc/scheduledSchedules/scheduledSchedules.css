@@ -218,6 +218,7 @@
     opacity: 1;
     left: 860.28px;
     border-radius: 8px;
+    gap: 1.75rem;
 }
 .btn-primary{
     background: #1E40AF;
@@ -237,4 +238,99 @@
   justify-content: space-between;
   gap: 1rem; /* espace horizontal entre les éléments */
   flex-wrap: wrap; /* permet de passer sur deux lignes si l’écran est petit */
+}
+.edit-td { padding: 0 !important; }
+
+.edit-panel {
+    border: 2px solid #0176d3;
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 4px 0;
+    animation: slideDown .2s ease;
+}
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.edit-header {
+    background: linear-gradient(135deg, #0176d3 0%, #014486 100%);
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.edit-header-left  { display: flex; align-items: center; gap: 10px; }
+.edit-header-icon  {
+    width: 30px; height: 30px;
+    background: rgba(255,255,255,.15);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+}
+.edit-header-title { color: #fff; font-size: 13px; font-weight: 600; }
+.edit-header-sub   { color: rgba(255,255,255,.65); font-size: 11px; margin-top: 2px; }
+.edit-close {
+    width: 28px; height: 28px;
+    background: rgba(255,255,255,.15);
+    border: none; border-radius: 7px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .15s;
+}
+.edit-close:hover { background: rgba(255,255,255,.28); }
+
+.edit-body {
+    padding: 18px 20px;
+    background: #fff;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+.field-group { display: flex; flex-direction: column; gap: 4px; }
+.full-width  { grid-column: 1 / -1; }
+.field-label {
+    font-size: 11px; font-weight: 600; color: #6b7280;
+    text-transform: uppercase; letter-spacing: .5px;
+    margin-bottom: 6px;
+}
+
+.freq-chips { display: flex; gap: 8px; }
+.freq-chip {
+    flex: 1; padding: 8px 0;
+    border-radius: 8px; border: 1.5px solid #e5e7eb;
+    background: #fafbfc; font-size: 13px; font-weight: 500; color: #6b7280;
+    cursor: pointer; text-align: center; transition: all .15s;
+}
+.freq-chip:hover  { border-color: #93c5fd; color: #1d4ed8; background: #eff6ff; }
+.freq-chip.active {
+    border-color: #0176d3; background: #e8f4fd;
+    color: #0176d3; font-weight: 700;
+}
+
+.edit-info-bar {
+    margin: 0 20px 14px;
+    padding: 9px 14px;
+    background: #eff6ff; border-left: 3px solid #3b82f6; border-radius: 8px;
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12px; color: #1d4ed8;
+}
+
+.edit-footer {
+    padding: 14px 20px;
+    background: #f8f9fb;
+    border-top: 1px solid #f0f2f5;
+    display: flex; align-items: center; justify-content: space-between;
+}
+.edit-footer-id      { font-size: 11px; color: #9ca3af; font-family: monospace; }
+.edit-footer-actions { display: flex; gap: 8px; }
+
+/*Add the class name below to the lightning-icon element.*/
+.icon-white{ 
+ --slds-c-icon-color-foreground-default: #ffffff;
+}
+
+.mr-2{
+   margin-right: 0.72rem;
+}
+.primary-icon{
+   --slds-c-icon-color-foreground-default: #0176d3;
 }

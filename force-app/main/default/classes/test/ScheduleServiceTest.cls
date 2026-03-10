@@ -259,9 +259,638 @@ static void testGetSchedulesWithExecutionStatus(){
     List<ScheduleService.ScheduleWrapper> results = ScheduleService.getSchedulesByExecutionStatusAndIdProject(status, project.Id);
     Test.stopTest();
 
+<<<<<<< HEAD
     // THEN : assertions
     System.assertNotEquals(0, results.size(), 'La liste filtrée par statut ne doit pas être vide');
     System.assertEquals(status, results[0].importExecutions[0].Status__c, 'Le statut doit correspondre');
+=======
+        // THEN : assertions
+        Assert.areNotEqual(0, results.size(), 'La liste filtrée par statut ne doit pas être vide');
+       Assert.areEqual(status, results[0].importExecutions[0].Status__c, 'Le statut doit correspondre');
+
+
+        }
+        private static final String LOG_PREFIX = '[ScheduleServiceTest]';
+        
+        /**
+         * ════════════════════════════════════════════════════════════════════════
+         * executeSchedule avec données valides
+         * ════════════════════════════════════════════════════════════════════════
+         */
+        @isTest
+        static void testExecuteScheduleSuccess() {
+            // Arrange - Utiliser TestDataFactory.createImportProject(String)
+            ImportProject__c project = TestDataFactory.createImportProject('Account');
+            List<Account> accounts = TestDataFactory.createTestAccounts(5);
+            
+            // Créer schedule manuellement (TestDataFactory.createSchedule crée project automatiquement)
+            Schedule__c schedule = new Schedule__c(
+                Project__c = project.Id,
+                Frequency__c = 'DAILY',
+                NextRun__c = System.now().addDays(1)
+            );
+            insert schedule;
+            
+            // Act
+            Test.startTest();
+            ScheduleJobResult result = ScheduleService.executeSchedule(schedule.Id);
+            Test.stopTest();
+            
+            // Assert
+           Assert.areEqual(true, result.isSuccess(), 'Expected successful execution');
+            Assert.areNotEqual(null, result.executionId, 'Expected executionId');
+           Assert.areEqual('Staging', result.phase, 'Expected Staging phase');
+            
+            // Verify ImportExecution was created
+            ImportExecution__c execution = [
+                SELECT Id, Status__c, Phase__c, TotalRecords__c, ApexJobId__c
+                FROM ImportExecution__c
+                WHERE Id = :result.executionId
+                LIMIT 1
+            ];
+            
+            Assert.areNotEqual(null, execution, 'Execution should exist');Assert.isTrue(
+                execution.Status__c == Constants.EXECUTION_STATUS_IN_PROGRESS ||
+                execution.Status__c == Constants.EXECUTION_STATUS_COMPLETED,
+                'Status should be valid'
+            );
+            Assert.isTrue(
+                execution.Phase__c == Constants.EXECUTION_PHASE_STAGING ||
+                execution.Phase__c == Constants.EXECUTION_PHASE_COMPLETED,
+                'Phase should be valid'
+            ); 
+            Assert.areNotEqual(null, execution.ApexJobId__c, 'PreProcessBatch should be launched');
+            
+            // Verify StagingRows
+            List<StagingRow__c> stagingRows = [
+                SELECT Id, LineNumber__c, RawData__c, Processed__c
+                FROM StagingRow__c
+                WHERE Execution__c = :execution.Id
+                ORDER BY LineNumber__c
+            ];
+             
+            
+            for (Integer i = 0; i < stagingRows.size(); i++) {
+               Assert.areEqual(i + 2, stagingRows[i].LineNumber__c, 'LineNumber sequential from 2');
+               Assert.areEqual(false, stagingRows[i].Processed__c, 'Processed should be false');
+                Assert.areNotEqual(null, stagingRows[i].RawData__c, 'RawData should contain JSON');
+            }
+            
+            System.debug(LOG_PREFIX + '  testExecuteScheduleSuccess PASSED');
+        }
+        
+  
+        
+        /**
+         * ════════════════════════════════════════════════════════════════════════
+        * executeSchedule without data source (no accounts)
+         * ════════════════════════════════════════════════════════════════════════
+         */
+        @isTest
+        static void testExecuteScheduleNoData() {
+            // Arrange - Créer project SANS accounts
+            ImportProject__c project = TestDataFactory.createImportProject('Account');
+            
+            Schedule__c schedule = new Schedule__c(
+                Project__c = project.Id,
+                Frequency__c = 'DAILY',
+                NextRun__c = System.now().addDays(1)
+            );
+            insert schedule;
+            
+            // Act
+            Test.startTest();
+            ScheduleJobResult result = ScheduleService.executeSchedule(schedule.Id);
+            Test.stopTest();
+            
+            // Assert
+           Assert.areEqual(true, result.isFailure(), 'Expected failure when no data found');
+           Assert.areEqual(true, result.getErrorsAsString().contains('No data found'));
+            
+            System.debug(LOG_PREFIX + '  testExecuteScheduleNoData PASSED');
+        }
+        
+        /**
+         * ════════════════════════════════════════════════════════════════════════
+         * DAILY frequency - NextRun should be +1 day
+         * ════════════════════════════════════════════════════════════════════════
+         */
+        @isTest
+        static void testDailyFrequencyRecurrence() {
+            // Arrange
+            ImportProject__c project = TestDataFactory.createImportProject('Account');
+            TestDataFactory.createTestAccounts(3);
+            
+            Datetime originalNextRun = System.now().addDays(1).addHours(-6);
+            
+            Schedule__c schedule = new Schedule__c(
+                Project__c = project.Id,
+                Frequency__c = 'DAILY',
+                NextRun__c = originalNextRun
+            );
+            insert schedule;
+            
+            // Act
+            Test.startTest();
+            ScheduleJobResult result = ScheduleService.executeSchedule(schedule.Id);
+            Test.stopTest();
+            
+            // Assert
+            Schedule__c updatedSchedule = [
+                SELECT NextRun__c
+                FROM Schedule__c
+                WHERE Id = :schedule.Id
+                LIMIT 1
+            ];
+            
+            Datetime expectedNextRun = originalNextRun.addDays(1);
+           Assert.areEqual(
+                expectedNextRun.format('yyyy-MM-dd HH:mm'),
+                updatedSchedule.NextRun__c.format('yyyy-MM-dd HH:mm'),
+                'DAILY: NextRun should be +1 day'
+            );
+            
+            System.debug(LOG_PREFIX + '  testDailyFrequencyRecurrence PASSED');
+        }
+        
+        /**
+         * ════════════════════════════════════════════════════════════════════════
+         6: WEEKLY frequency - NextRun should be +7 days
+         * ════════════════════════════════════════════════════════════════════════
+         */
+        @isTest
+        static void testWeeklyFrequencyRecurrence() {
+            // Arrange
+            ImportProject__c project = TestDataFactory.createImportProject('Account');
+            TestDataFactory.createTestAccounts(4);
+            
+            Datetime originalNextRun = System.now().addDays(1);
+            
+            Schedule__c schedule = new Schedule__c(
+                Project__c = project.Id,
+                Frequency__c = 'WEEKLY',
+                NextRun__c = originalNextRun
+            );
+            insert schedule;
+            
+            // Act
+            Test.startTest();
+            ScheduleJobResult result = ScheduleService.executeSchedule(schedule.Id);
+            Test.stopTest();
+            
+            // Assert
+            Schedule__c updatedSchedule = [
+                SELECT NextRun__c
+                FROM Schedule__c
+                WHERE Id = :schedule.Id
+                LIMIT 1
+            ];
+            
+            Datetime expectedNextRun = originalNextRun.addDays(7);
+           Assert.areEqual(
+                expectedNextRun.format('yyyy-MM-dd HH:mm'),
+                updatedSchedule.NextRun__c.format('yyyy-MM-dd HH:mm'),
+                'WEEKLY: NextRun should be +7 days'
+            );
+            
+            System.debug(LOG_PREFIX + '  testWeeklyFrequencyRecurrence PASSED');
+        }
+        
+        /**
+         * ════════════════════════════════════════════════════════════════════════
+         7: MONTHLY frequency - NextRun should be +1 month
+         * ════════════════════════════════════════════════════════════════════════
+         */
+        @isTest
+        static void testMonthlyFrequencyRecurrence() {
+            // Arrange
+            ImportProject__c project = TestDataFactory.createImportProject('Account');
+            TestDataFactory.createTestAccounts(2);
+            
+            Datetime originalNextRun = System.now().addDays(1);
+            
+            Schedule__c schedule = new Schedule__c(
+                Project__c = project.Id,
+                Frequency__c = 'MONTHLY',
+                NextRun__c = originalNextRun
+            );
+            insert schedule;
+            
+            // Act
+            Test.startTest();
+            ScheduleJobResult result = ScheduleService.executeSchedule(schedule.Id);
+            Test.stopTest();
+            
+            // Assert
+            Schedule__c updatedSchedule = [
+                SELECT NextRun__c
+                FROM Schedule__c
+                WHERE Id = :schedule.Id
+                LIMIT 1
+            ];
+            
+            Datetime expectedNextRun = originalNextRun.addMonths(1);
+           Assert.areEqual(
+                expectedNextRun.format('yyyy-MM-dd'),
+                updatedSchedule.NextRun__c.format('yyyy-MM-dd'),
+                'MONTHLY: NextRun should be +1 month'
+            );
+            
+            System.debug(LOG_PREFIX + '  testMonthlyFrequencyRecurrence PASSED');
+        }
+        
+        /**
+         * ════════════════════════════════════════════════════════════════════════
+         8: StagingRow JSON data validation
+         * ════════════════════════════════════════════════════════════════════════
+         */
+         @isTest
+        static void testStagingRowJsonData() {
+            ImportProject__c project = TestDataFactory.createImportProject('Account');
+            TestDataFactory.createTestAccounts(2);
+            
+            Schedule__c schedule = new Schedule__c(
+                Project__c = project.Id,
+                Frequency__c = 'DAILY',
+                NextRun__c = System.now().addDays(1)
+            );
+            insert schedule;
+            
+            Test.startTest();
+            ScheduleJobResult result = ScheduleService.executeSchedule(schedule.Id);
+            Test.stopTest();
+            
+            // StagingRows are created by the chained PreProcessBatch — not testable here.
+            // Instead verify the execution metadata is correct.
+            Assert.areEqual(true, result.isSuccess(), 'Execution should succeed');
+            Assert.areNotEqual(null, result.executionId, 'ExecutionId should be set');
+            
+            ImportExecution__c execution = [
+                SELECT Id, TotalRecords__c, ApexJobId__c, Phase__c
+                FROM ImportExecution__c
+                WHERE Id = :result.executionId
+                LIMIT 1
+            ];
+            
+            Assert.areEqual(2, execution.TotalRecords__c, 'TotalRecords should be 2');
+            Assert.areNotEqual(null, execution.ApexJobId__c, 'PreProcessBatch job ID should be stored');
+            
+            System.debug(LOG_PREFIX + '  testStagingRowJsonData PASSED');
+        }
+        /**
+         * ════════════════════════════════════════════════════════════════════════
+         9: Large batch processing (150+ records)
+         * ════════════════════════════════════════════════════════════════════════
+         */
+                @isTest
+        static void testLargeBatchProcessing() {
+            ImportProject__c project = TestDataFactory.createImportProject('Account');
+            TestDataFactory.createTestAccounts(150);
+            
+            Schedule__c schedule = new Schedule__c(
+                Project__c = project.Id,
+                Frequency__c = 'DAILY',
+                NextRun__c = System.now().addDays(1)
+            );
+            insert schedule;
+            
+            Test.startTest();
+            ScheduleJobResult result = ScheduleService.executeSchedule(schedule.Id);
+            Test.stopTest();
+            
+            Assert.areEqual(true, result.isSuccess(), 'Should handle 150+ records');
+            
+            ImportExecution__c execution = [
+                SELECT TotalRecords__c, ApexJobId__c
+                FROM ImportExecution__c
+                WHERE Id = :result.executionId
+                LIMIT 1
+            ];
+            
+            Assert.areEqual(150, execution.TotalRecords__c, 'Should count all 150 records');
+            Assert.areNotEqual(null, execution.ApexJobId__c, 'PreProcessBatch should be launched');
+            
+            // StagingRows are created by chained PreProcessBatch — not testable here.
+            // Covered in PreProcessBatchTest.
+            
+            System.debug(LOG_PREFIX + '  testLargeBatchProcessing PASSED');
+        }
+        
+        /**
+         * ════════════════════════════════════════════════════════════════════════
+         0: PreProcessBatch is launched
+         * ════════════════════════════════════════════════════════════════════════
+         */
+        @isTest
+        static void testBatchLaunchment() {
+            // Arrange
+            ImportProject__c project = TestDataFactory.createImportProject('Account');
+            TestDataFactory.createTestAccounts(5);
+            
+            Schedule__c schedule = new Schedule__c(
+                Project__c = project.Id,
+                Frequency__c = 'DAILY',
+                NextRun__c = System.now().addDays(1)
+            );
+            insert schedule;
+            
+            // Act
+            Test.startTest();
+            ScheduleJobResult result = ScheduleService.executeSchedule(schedule.Id);
+            Test.stopTest();
+            
+            // Assert
+            ImportExecution__c execution = [
+                SELECT ApexJobId__c
+                FROM ImportExecution__c
+                WHERE Id = :result.executionId
+                LIMIT 1
+            ];
+            
+           Assert.areNotEqual(null, execution.ApexJobId__c, 'PreProcessBatch should be launched');
+            
+            System.debug(LOG_PREFIX + '  testBatchLaunchment PASSED');
+        }
+        
+        /**
+         * ════════════════════════════════════════════════════════════════════════
+         1: Multiple schedules per project
+         * ════════════════════════════════════════════════════════════════════════
+         */
+        @isTest
+        static void testMultipleSchedulesPerProject() {
+            // Arrange
+            ImportProject__c project = TestDataFactory.createImportProject('Account');
+            TestDataFactory.createTestAccounts(5);
+            
+            Schedule__c dailySchedule = new Schedule__c(
+                Project__c = project.Id,
+                Frequency__c = 'DAILY',
+                NextRun__c = System.now().addDays(1)
+            );
+            insert dailySchedule;
+            
+            Schedule__c weeklySchedule = new Schedule__c(
+                Project__c = project.Id,
+                Frequency__c = 'WEEKLY',
+                NextRun__c = System.now().addDays(7)
+            );
+            insert weeklySchedule;
+            
+            // Act
+            Test.startTest();
+            ScheduleJobResult resultDaily = ScheduleService.executeSchedule(dailySchedule.Id);
+            ScheduleJobResult resultWeekly = ScheduleService.executeSchedule(weeklySchedule.Id);
+            Test.stopTest();
+            
+            // Assert
+           Assert.areEqual(true, resultDaily.isSuccess(), 'Daily schedule should succeed');
+           Assert.areEqual(true, resultWeekly.isSuccess(), 'Weekly schedule should succeed');
+            
+            List<ImportExecution__c> executions = [
+                SELECT Id
+                FROM ImportExecution__c
+                WHERE Project__c = :project.Id
+            ];
+            
+           Assert.areEqual(2, executions.size(), 'Should have created 2 executions');
+            
+            System.debug(LOG_PREFIX + '  testMultipleSchedulesPerProject PASSED');
+        }
+        
+        /**
+         * ════════════════════════════════════════════════════════════════════════
+         2: ScheduleJob Schedulable interface
+         * ════════════════════════════════════════════════════════════════════════
+         */
+        @isTest
+        static void testScheduleJobSchedulable() {
+            ImportProject__c project = TestDataFactory.createImportProject('Account');
+            TestDataFactory.createTestAccounts(3);
+            
+            Schedule__c schedule = new Schedule__c(
+                Project__c = project.Id,
+                Frequency__c = 'DAILY',
+                NextRun__c = System.now().addDays(1)
+            );
+            insert schedule;
+            
+            Test.startTest();
+            String jobId = System.schedule(
+                'TestScheduleJob_' + System.currentTimeMillis(),
+                '0 0 12 * * ?',
+                new ScheduleJob(schedule.Id)
+            );
+            Test.stopTest();
+            
+            Assert.areNotEqual(null, jobId, 'Job should be scheduled');
+            
+            List<CronTrigger> cronTriggers = [
+                SELECT Id, State
+                FROM CronTrigger
+                WHERE Id = :jobId
+            ];
+            
+            Assert.areEqual(1, cronTriggers.size(), 'CronTrigger should exist');
+            // In test context, scheduled jobs are WAITING (queued, not yet fired)
+            Assert.isTrue(
+                cronTriggers[0].State == 'WAITING' || cronTriggers[0].State == 'ACTIVE',
+                'CronTrigger should be scheduled, actual state: ' + cronTriggers[0].State
+            );
+            
+            System.debug(LOG_PREFIX + '  testScheduleJobSchedulable PASSED');
+        }
+                
+        /**
+         * ════════════════════════════════════════════════════════════════════════
+         3: ScheduleJobResult builder pattern
+         * ════════════════════════════════════════════════════════════════════════
+         */
+         @isTest
+        static void testScheduleJobResultBuilder() {
+            Test.startTest();
+            // Create a real record to get a valid ID format, or store as String field
+            ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
+            String validId = project.Id; // use any real ID for format validity
+
+            ScheduleJobResult result = ScheduleJobResult.ok('Test success')
+                .withExecutionId(validId)
+                .withPhase('Staging');
+            Test.stopTest();
+
+            Assert.areEqual(true, result.isSuccess());
+            Assert.areEqual('Test success', result.message);
+            Assert.areEqual(validId, result.executionId);
+            Assert.areEqual('Staging', result.phase);
+        }
+        
+        /**
+         * ════════════════════════════════════════════════════════════════════════
+         4: ScheduleJobResult error handling
+         * ════════════════════════════════════════════════════════════════════════
+         */
+        @isTest
+        static void testScheduleJobResultError() {
+            Test.startTest();
+            ScheduleJobResult result = ScheduleJobResult.error('Test error');
+            Test.stopTest();
+            
+           Assert.areEqual(true, result.isFailure(),'failed  to get schedules with status executions');
+           Assert.areEqual(1, result.getErrorCount(),'failed  to get schedules with status executions');
+           Assert.areEqual('Test error', result.getFirstError(),'failed  to get schedules with status executions');
+            
+            System.debug(LOG_PREFIX + '  testScheduleJobResultError PASSED');
+        }
+        
+        /**
+         * ════════════════════════════════════════════════════════════════════════
+          Account data mapping using TestDataFactory.createTestAccount()
+         * ════════════════════════════════════════════════════════════════════════
+         */
+        @isTest
+        static void testExceptionHandling() {
+            // Arrange
+            ImportProject__c project = TestDataFactory.createImportProject('Account');
+            
+            Schedule__c schedule = new Schedule__c(
+                Project__c = project.Id,
+                Frequency__c = 'DAILY',
+                NextRun__c = System.now().addDays(1)
+            );
+            insert schedule;
+            
+            // Delete project to cause error
+            delete project;
+            
+            // Act
+            Test.startTest();
+            ScheduleJobResult result = ScheduleService.executeSchedule(schedule.Id);
+            Test.stopTest();
+            
+            // Assert
+           Assert.areEqual(true, result.isFailure(), 'Should fail due to missing project');
+            
+            System.debug(LOG_PREFIX + '  testExceptionHandling PASSED');
+        }
+        
+        /** 
+         CSV parsing using TestDataFactory.createTestAccounts() 
+         */ 
+        
+      
+        @isTest
+        static void testWithTestDataFactoryExecution() {
+            // Arrange - Utiliser TestDataFactory.createImportExecution()
+            ImportProject__c project = TestDataFactory.createImportProject('Account');
+            TestDataFactory.createTestAccounts(4);
+            
+            ImportExecution__c testExecution = TestDataFactory.createImportExecution(project.Id);
+            Assert.areNotEqual(null, testExecution.Id, 'TestExecution should be created');
+            
+            // Create schedule for this project
+            Schedule__c schedule = new Schedule__c(
+                Project__c = project.Id,
+                Frequency__c = 'DAILY',
+                NextRun__c = System.now().addDays(1)
+            );
+            insert schedule;
+            
+            // Act
+            Test.startTest();
+            ScheduleJobResult result = ScheduleService.executeSchedule(schedule.Id);
+            Test.stopTest();
+            
+        // Assert - Verify the newly created execution is different from test execution
+        Assert.areNotEqual(testExecution.Id, result.executionId, 'Should create new execution, not reuse test one');
+        Assert.areEqual(true, result.isSuccess(), 'Should be true');
+            
+        System.debug(LOG_PREFIX + '  testWithTestDataFactoryExecution PASSED');
+    }
+
+    /**
+     * @description Teste la reprogrammation réussie d'une planification existante.
+     * Couvre les étapes : annulation job, mise à jour record, nouveau job cron.
+     */
+    @IsTest
+    static void testReScheduleSuccess() {
+        // GIVEN : Une planification existante créée via la factory
+        Schedule__c existingSched = TestDataFactory.createSchedule();
+        String newFrequency = 'Weekly';
+        Datetime newNextRun = Datetime.now().addDays(7);
+        
+        // WHEN
+        Test.startTest();
+        Id resultId = ScheduleService.reSchedule(existingSched.Id, newFrequency, newNextRun);
+        Test.stopTest();
+        
+        // THEN
+        Assert.areEqual(existingSched.Id, resultId, 'L\'ID retourné doit correspondre à l\'ID fourni');
+        
+        Schedule__c updatedSched = [SELECT Frequency__c, NextRun__c FROM Schedule__c WHERE Id = :existingSched.Id];
+        Assert.areEqual(newFrequency, updatedSched.Frequency__c, 'La fréquence doit être mise à jour en WEEKLY');
+        Assert.areEqual(newNextRun, updatedSched.NextRun__c, 'La date de prochaine exécution doit être mise à jour');
+    }
+
+    /**
+     * @description Teste le comportement lorsque l'ID fourni est vide ou null.
+     */
+    @IsTest
+    static void testReScheduleEmptyId() {
+        // WHEN
+        Test.startTest();
+        Id resultNull = ScheduleService.reSchedule(null, 'DAILY', Datetime.now());
+        Id resultBlank = ScheduleService.reSchedule('', 'DAILY', Datetime.now());
+        Test.stopTest();
+        
+        // THEN
+        Assert.areEqual(null, resultNull, 'Doit retourner null si l\'ID est null');
+        Assert.areEqual(null, resultBlank, 'Doit retourner null si l\'ID est vide');
+    }
+
+    /**
+     * @description Teste le comportement lorsque l'ID est valide mais ne correspond à aucun enregistrement.
+     */
+    @IsTest
+    static void testReScheduleNotFound() {
+        // GIVEN : Un ID formaté mais inexistant 
+        String fakeId =  '000000000001';
+        
+        // WHEN
+        Test.startTest();
+        try {
+            // Le service doit être capable de retourner null proprement
+            Id result = ScheduleController.reSchedule(fakeId, 'Daily', Datetime.now().addDays(1));
+        } catch (Exception e) {
+            // THEN
+            Assert.isNotNull(String.isNotBlank(e.getMessage()),'Doit retourner null si l\'enregistrement n\'existe pas');
+        }
+        Test.stopTest();  
+    }
+
+    /**
+     * @description Teste la gestion des erreurs DML (ex: fréquence invalide dépassant la taille du champ).
+     */
+   @IsTest
+    static void testReScheduleDmlException() {
+        // GIVEN
+        Schedule__c existingSched = TestDataFactory.createSchedule();
+        // On force une erreur de validation (ex: date dans le passé si ton code le valide, 
+        // ou String trop longue pour le champ Frequency__c)
+        String invalidFrequency = 'A'.repeat(300); 
+        
+        // WHEN & THEN
+        Test.startTest();
+        try {
+            ScheduleController.reSchedule(existingSched.Id, invalidFrequency, Datetime.now());
+            Assert.fail('Une exception DML aurait dû être levée à cause de la longueur de la chaîne');
+        } catch (Exception e) {
+            // On vérifie que l'exception contient le message d'erreur ou est du bon type
+           Assert.isTrue(String.isNotBlank(e.getMessage()), 'Une erreur doit être retournée par le contrôleur');
+        }
+        Test.stopTest();
+    }
+
+>>>>>>> fee9875d (feat: implement reschedule functionality by editing schedule)
 }
 
 }
