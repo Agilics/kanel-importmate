@@ -1,71 +1,964 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Translations xmlns="http://soap.sforce.com/2006/04/metadata">
-    <!-- Page Title & Subtitle -->
+
+    <!-- ===== IM_DRY - DryRunValidator ===== -->
     <customLabels>
-        <name>DataSource_Title</name>
-        <label>Choisir une source de données</label>
+        <name>IM_DRY_Title</name>
+        <label>Validation des données</label>
     </customLabels>
     <customLabels>
-        <name>DataSource_Subtitle</name>
-        <label>Sélectionnez comment vous souhaitez importer vos données dans Salesforce</label>
+        <name>IM_DRY_Subtitle</name>
+        <label>Examinez et corrigez les erreurs avant l&apos;import</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Status_WithErrors</name>
+        <label>Validation terminée avec des erreurs</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Status_Success</name>
+        <label>Validation terminée avec succès</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Btn_Settings</name>
+        <label>Paramètres de validation</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Btn_RunValidation</name>
+        <label>Lancer la validation</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Btn_ExportReport</name>
+        <label>Exporter le rapport</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Btn_CancelValidation</name>
+        <label>Annuler la validation</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Btn_RetryValidation</name>
+        <label>Relancer la validation</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Btn_Back</name>
+        <label>Retour au mapping &amp; transformations</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Btn_Skip</name>
+        <label>Ignorer &amp; continuer</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Btn_Proceed</name>
+        <label>Passer à l&apos;exécution</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Btn_Close</name>
+        <label>Fermer</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Settings_Title</name>
+        <label>Paramètres de validation</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Settings_Mode</name>
+        <label>Mode</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Settings_ModeLabel</name>
+        <label>Mode de validation</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Settings_SampleSize</name>
+        <label>Taille de l&apos;échantillon</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Settings_SampleHelp</name>
+        <label>La taille de l&apos;échantillon s&apos;applique uniquement en mode échantillon.</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Settings_Performance</name>
+        <label>Performance</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Settings_AsyncThreshold</name>
+        <label>Seuil asynchrone (lignes)</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Settings_PageSize</name>
+        <label>Taille de page du tableau</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Settings_PerformanceHelp</name>
+        <label>Si le nombre de lignes dépasse le seuil, la validation passe en mode asynchrone.</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Settings_Behavior</name>
+        <label>Comportement</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Settings_IncludeWarnings</name>
+        <label>Inclure les avertissements dans le rapport</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Settings_StopOnError</name>
+        <label>Arrêter si la vérification client trouve des lignes invalides</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Settings_DefaultTab</name>
+        <label>Onglet par défaut après validation</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Settings_BehaviorHelp</name>
+        <label>L&apos;affichage des avertissements dépend du bouton Inclure les avertissements.</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Progress_Title</name>
+        <label>Progression de la validation</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Progress_InProgress</name>
+        <label>Validation en cours</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Progress_Completed</name>
+        <label>Terminée</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Progress_Failed</name>
+        <label>Échouée</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Progress_Cancelled</name>
+        <label>Annulée</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Progress_Validated</name>
+        <label>Validés</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Progress_FailedStat</name>
+        <label>Échoués</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Progress_ExecutionId</name>
+        <label>ID d&apos;exécution :</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Report_Title</name>
+        <label>Rapport de validation</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Tab_Errors</name>
+        <label>Erreurs</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Tab_Warnings</name>
+        <label>Avertissements</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Tab_AllIssues</name>
+        <label>Tous les problèmes</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Search_Placeholder</name>
+        <label>Rechercher un problème...</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Filter_AllTypes</name>
+        <label>Tous les types</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Col_Level</name>
+        <label>NIVEAU</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Col_Row</name>
+        <label>LIGNE</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Col_Field</name>
+        <label>CHAMP</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Col_Type</name>
+        <label>TYPE</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Col_Message</name>
+        <label>MESSAGE</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Col_Actions</name>
+        <label>ACTIONS</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_NoIssues_Message</name>
+        <label>Aucun problème ne correspond à vos filtres.</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_NoErrors_Message</name>
+        <label>Aucun problème détecté ! Les données sont prêtes pour l&apos;import.</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Pagination_Showing</name>
+        <label>Affichage</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Pagination_To</name>
+        <label>à</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Pagination_Of</name>
+        <label>sur</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Pagination_Issues</name>
+        <label>problème(s)</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Pagination_Previous</name>
+        <label>Précédent</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Pagination_Next</name>
+        <label>Suivant</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Mode_Full</name>
+        <label>Validation complète (toutes les lignes)</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_DRY_Mode_Sample</name>
+        <label>Validation par échantillon (sous-ensemble)</label>
     </customLabels>
 
-    <!-- File Upload Card -->
+    <!-- ===== IM_TR - Transformation ===== -->
     <customLabels>
-        <name>DataSource_FileUpload_Title</name>
-        <label>Importation de fichier</label>
+        <name>IM_TR_Title</name>
+        <label>Règles de transformation</label>
     </customLabels>
     <customLabels>
-        <name>DataSource_FileUpload_Description</name>
-        <label>Importer depuis des fichiers CSV ou Excel</label>
+        <name>IM_TR_Subtitle</name>
+        <label>Gérez vos règles de transformation de données</label>
     </customLabels>
     <customLabels>
-        <name>DataSource_FileUpload_Feature1</name>
-        <label>Prise en charge des formats CSV et Excel</label>
+        <name>IM_TR_NoRule</name>
+        <label>Aucune règle de transformation définie</label>
     </customLabels>
     <customLabels>
-        <name>DataSource_FileUpload_Feature2</name>
-        <label>Détection automatique du délimiteur</label>
+        <name>IM_TR_BackToMapping</name>
+        <label>Retour au mapping</label>
     </customLabels>
     <customLabels>
-        <name>DataSource_FileUpload_Feature3</name>
-        <label>Prévisualisation et validation du fichier</label>
+        <name>IM_TR_SaveAsTemplate</name>
+        <label>Sauvegarder comme modèle</label>
     </customLabels>
     <customLabels>
-        <name>DataSource_FileUpload_Button</name>
-        <label>Choisir l'importation de fichier</label>
+        <name>IM_TR_ContinueToValidation</name>
+        <label>Continuer vers la validation</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_SourceColumn</name>
+        <label>Colonne source</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_TargetField</name>
+        <label>Champ cible</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_UnknownField</name>
+        <label>Champ inconnu</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Error_Title</name>
+        <label>Erreur</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Warning_Title</name>
+        <label>Avertissement</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_DeleteSuccess_Title</name>
+        <label>Succès</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_DeleteSuccess_Message</name>
+        <label>Règle supprimée avec succès</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_DeleteConfirm_Label</name>
+        <label>Confirmer la suppression</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_DeleteConfirm_Message</name>
+        <label>Êtes-vous sûr de vouloir supprimer cette règle ?</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Error_CreateRule</name>
+        <label>Erreur lors de la création de la règle</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Error_DeleteRule</name>
+        <label>Erreur lors de la suppression de la règle</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Modal_AddRule</name>
+        <label>Ajouter une règle</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Modal_EditRule</name>
+        <label>Modifier la règle</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Modal_SectionMapping</name>
+        <label>Mapping</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Modal_SectionRules</name>
+        <label>Règles</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Modal_RuleType</name>
+        <label>Type de règle</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Modal_SelectOption</name>
+        <label>Sélectionner une option</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Modal_SourceFields</name>
+        <label>Champs source</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Modal_SourceLabel</name>
+        <label>Source disponible</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Modal_SelectedLabel</name>
+        <label>Sélectionnés</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Modal_SelectFieldsHelp</name>
+        <label>Sélectionnez les champs à inclure</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Modal_On</name>
+        <label>Sur</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Modal_Separator</name>
+        <label>Séparateur</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Modal_ChooseBoolean</name>
+        <label>Choisir la valeur booléenne</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Modal_BooleanValue</name>
+        <label>Valeur booléenne</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Modal_Yes</name>
+        <label>Oui</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Modal_No</name>
+        <label>Non</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Modal_Cancel</name>
+        <label>Annuler</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Modal_SaveRule</name>
+        <label>Sauvegarder la règle</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Modal_UpdateRule</name>
+        <label>Mettre à jour la règle</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Picklist_BooleanTransformation</name>
+        <label>Transformation booléenne</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Picklist_Concatenation</name>
+        <label>Concaténation</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Picklist_EmailMask</name>
+        <label>Masque email</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Picklist_PhoneMask</name>
+        <label>Masque téléphone</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Picklist_LowercaseTransformation</name>
+        <label>Conversion minuscules</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Picklist_UppercaseTransformation</name>
+        <label>Conversion majuscules</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Sep_Tab</name>
+        <label>Tabulation</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Sep_Comma</name>
+        <label>Virgule</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Sep_Space</name>
+        <label>Espace</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Sep_SemiComma</name>
+        <label>Point-virgule</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Sep_NewLine</name>
+        <label>Nouvelle ligne</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Tab_AllFields</name>
+        <label>Tous les champs</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Tab_Boolean</name>
+        <label>Transformation booléenne</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Tab_Case</name>
+        <label>Transformation de casse</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_TR_Tab_Mask</name>
+        <label>Masquage de données</label>
     </customLabels>
 
-    <!-- Salesforce Query Card -->
+    <!-- ===== IM_EX - ExecutionCmp ===== -->
     <customLabels>
-        <name>DataSource_SalesforceQuery_Title</name>
-        <label>Requête Salesforce</label>
+        <name>IM_EX_Title</name>
+        <label>Exécution de l&apos;import</label>
     </customLabels>
     <customLabels>
-        <name>DataSource_SalesforceQuery_Description</name>
-        <label>Importer depuis Salesforce via SOQL</label>
+        <name>IM_EX_Subtitle</name>
+        <label>Lancez votre import ou planifiez des exécutions récurrentes</label>
     </customLabels>
     <customLabels>
-        <name>DataSource_SalesforceQuery_Feature1</name>
-        <label>Interface visuelle de création de requêtes</label>
+        <name>IM_EX_Btn_ExportLogs</name>
+        <label>Exporter les logs</label>
     </customLabels>
     <customLabels>
-        <name>DataSource_SalesforceQuery_Feature2</name>
-        <label>Validation de requête en temps réel</label>
+        <name>IM_EX_Btn_ScheduleImport</name>
+        <label>Planifier l&apos;import</label>
     </customLabels>
     <customLabels>
-        <name>DataSource_SalesforceQuery_Feature3</name>
-        <label>Prévisualisation des résultats de la requête</label>
+        <name>IM_EX_Btn_StartImport</name>
+        <label>Lancer l&apos;import</label>
     </customLabels>
     <customLabels>
-        <name>DataSource_SalesforceQuery_Button</name>
-        <label>Choisir le constructeur de requêtes</label>
+        <name>IM_EX_Btn_CancelImport</name>
+        <label>Annuler l&apos;import</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_EX_Btn_BackToValidation</name>
+        <label>Retour à la validation</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_EX_Progress_Title</name>
+        <label>Statut d&apos;exécution de l&apos;import</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_EX_Status_Completed</name>
+        <label>Terminé</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_EX_Status_Cancelled</name>
+        <label>Annulé</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_EX_Status_Failed</name>
+        <label>Échoué</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_EX_Status_InProgress</name>
+        <label>En cours</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_EX_Status_Pending</name>
+        <label>En attente</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_EX_Detail_ExecutionId</name>
+        <label>ID d&apos;exécution :</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_EX_Detail_Status</name>
+        <label>Statut :</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_EX_Detail_TotalRecords</name>
+        <label>Total des enregistrements :</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_EX_Detail_Processed</name>
+        <label>Traités :</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_EX_Detail_Successful</name>
+        <label>Réussis :</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_EX_Detail_Failed</name>
+        <label>Échoués :</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_EX_Processing_Message</name>
+        <label>Traitement de votre import en cours... Veuillez patienter.</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_EX_Failed_Title</name>
+        <label>L&apos;import a échoué. Vous pouvez encore exporter les logs.</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_EX_Failed_Subtitle</name>
+        <label>L&apos;export utilise l&apos;ID d&apos;exécution pour récupérer les logs depuis Apex.</label>
     </customLabels>
 
-    <!-- Navigation -->
+    <!-- ===== IM_IR - ImportResults ===== -->
     <customLabels>
-        <name>DataSource_Back_Button</name>
-        <label>Retour</label>
+        <name>IM_IR_Title</name>
+        <label>Résultats de l&apos;import</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_IR_Loading</name>
+        <label>Chargement des résultats de l&apos;import...</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_IR_Search_Placeholder</name>
+        <label>Rechercher des erreurs...</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_IR_Filter_AllTypes</name>
+        <label>Tous les types d&apos;erreur</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_IR_Summary_TotalErrors</name>
+        <label>Total des erreurs trouvées :</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_IR_Summary_FailedLines</name>
+        <label>Lignes en échec :</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_IR_Summary_Filtered</name>
+        <label>Filtrés :</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_IR_Col_Row</name>
+        <label>LIGNE</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_IR_Col_Field</name>
+        <label>CHAMP</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_IR_Col_ErrorType</name>
+        <label>TYPE D&apos;ERREUR</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_IR_Col_Message</name>
+        <label>MESSAGE</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_IR_Col_CurrentValue</name>
+        <label>VALEUR ACTUELLE</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_IR_NoMatch</name>
+        <label>Aucune erreur ne correspond à vos filtres.</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_IR_NoErrors</name>
+        <label>Aucune erreur trouvée.</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_IR_Pagination_Showing</name>
+        <label>Affichage</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_IR_Pagination_To</name>
+        <label>à</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_IR_Pagination_Of</name>
+        <label>sur</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_IR_Pagination_Errors</name>
+        <label>erreur(s)</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_IR_Pagination_Previous</name>
+        <label>Précédent</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_IR_Pagination_Next</name>
+        <label>Suivant</label>
+    </customLabels>
+    <customLabels>
+        <name>IM_IR_Success</name>
+        <label>Aucune erreur trouvée. Import terminé avec succès !</label>
     </customLabels>
 
+
+     <!-- HEADER -->
+    <customLabels>
+        <name>IH_Title</name>
+        <label>Historique des importations</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Subtitle</name>
+        <label>Consultez et gérez toutes les exécutions de vos projets d'importation</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_ExportReport</name>
+        <label>Exporter le rapport</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_NewImportProject</name>
+        <label>Nouveau projet d'importation</label>
+    </customLabels>
+
+    <!-- FILTERS -->
+    <customLabels>
+        <name>IH_Filter_Status</name>
+        <label>Statut</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Filter_DateRange</name>
+        <label>Période</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Filter_Project</name>
+        <label>Projet</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Filter_TargetObject</name>
+        <label>Objet cible</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_ApplyFilters</name>
+        <label>Appliquer les filtres</label>
+    </customLabels>
+
+    <!-- STATUS OPTIONS -->
+    <customLabels>
+        <name>IH_Status_All</name>
+        <label>Tous les statuts</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Status_Completed</name>
+        <label>Terminé</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Status_Running</name>
+        <label>En cours</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Status_Failed</name>
+        <label>Échoué</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Status_Cancelled</name>
+        <label>Annulé</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Status_Draft</name>
+        <label>Brouillon</label>
+    </customLabels>
+
+    <!-- DATE RANGE OPTIONS -->
+    <customLabels>
+        <name>IH_Date_Last7</name>
+        <label>7 derniers jours</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Date_Last30</name>
+        <label>30 derniers jours</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Date_Last90</name>
+        <label>90 derniers jours</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Date_AllTime</name>
+        <label>Toute la période</label>
+    </customLabels>
+
+    <!-- PROJECT / TARGET OPTIONS -->
+    <customLabels>
+        <name>IH_AllProjects</name>
+        <label>Tous les projets</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_AllObjects</name>
+        <label>Tous les objets</label>
+    </customLabels>
+
+    <!-- KPI CARDS -->
+    <customLabels>
+        <name>IH_KPI_TotalExecutions</name>
+        <label>Total des exécutions</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_KPI_SuccessRate</name>
+        <label>Taux de réussite</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_KPI_RecordsProcessed</name>
+        <label>Enregistrements traités</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_KPI_AvgDuration</name>
+        <label>Durée moyenne</label>
+    </customLabels>
+
+    <!-- TABLE -->
+    <customLabels>
+        <name>IH_Table_Title</name>
+        <label>Historique des exécutions</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Table_SearchPlaceholder</name>
+        <label>Rechercher des exécutions...</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Table_ColProject</name>
+        <label>Projet</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Table_ColStatus</name>
+        <label>Statut</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Table_ColTargetObject</name>
+        <label>Objet cible</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Table_ColRecords</name>
+        <label>Enregistrements</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Table_ColDuration</name>
+        <label>Durée</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Table_ColStarted</name>
+        <label>Démarré</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Table_ColActions</name>
+        <label>Actions</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Table_Empty</name>
+        <label>Aucune exécution ne correspond à vos filtres.</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Table_Showing</name>
+        <label>Affichage de {0} à {1} sur {2} résultats</label>
+    </customLabels>
+
+    <!-- ACTIONS -->
+    <customLabels>
+        <name>IH_Action_View</name>
+        <label>Voir</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Action_Monitor</name>
+        <label>Surveiller</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Action_Debug</name>
+        <label>Déboguer</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Action_DeleteSelected</name>
+        <label>Supprimer la sélection ({0})</label>
+    </customLabels>
+
+    <!-- MODALS -->
+    <customLabels>
+        <name>IH_Modal_CreateTitle</name>
+        <label>Créer un nouveau projet d'importation</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Modal_ExportExecution</name>
+        <label>Exporter l'exécution</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Modal_DeleteExecution</name>
+        <label>Supprimer l'exécution</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Modal_ExecutionDetails</name>
+        <label>Détails de l'exécution</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Modal_Records</name>
+        <label>Enregistrements</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Detail_TargetObject</name>
+        <label>Objet cible</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Detail_Status</name>
+        <label>Statut</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Detail_Phase</name>
+        <label>Phase</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Detail_Started</name>
+        <label>Démarré le</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Detail_Duration</name>
+        <label>Durée</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Detail_Processed</name>
+        <label>Traités</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Detail_Total</name>
+        <label>Total</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Detail_Failed</name>
+        <label>Échoués</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Detail_Success</name>
+        <label>Réussis</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Detail_Remaining</name>
+        <label>Restants</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Detail_RecordsSummary</name>
+        <label>Résumé des enregistrements</label>
+    </customLabels>
+
+    <!-- TOAST / ERROR MESSAGES -->
+    <customLabels>
+        <name>IH_Toast_ErrorLoadingHistory</name>
+        <label>Erreur lors du chargement de l'historique</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Toast_SelectAtLeastOne</name>
+        <label>Sélectionnez au moins une exécution.</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Confirm_DeleteMultiple</name>
+        <label>Supprimer {0} élément(s) d'historique et les journaux associés ?</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Toast_ErrorDeleteSelected</name>
+        <label>Impossible de supprimer les exécutions sélectionnées.</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Toast_CannotDeleteRunning</name>
+        <label>Impossible de supprimer une exécution en cours.</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Confirm_DeleteSingle</name>
+        <label>Supprimer cet historique d'exécution et les journaux associés ?</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Toast_DeleteSuccess</name>
+        <label>Historique d'exécution supprimé.</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Toast_ErrorDeleteSingle</name>
+        <label>Impossible de supprimer l'historique d'exécution.</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Toast_NothingToExport</name>
+        <label>Rien à exporter.</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Toast_NoExecutionSelected</name>
+        <label>Aucune exécution sélectionnée à exporter.</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Toast_ProjectCreated</name>
+        <label>Projet créé</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Toast_ProjectCreatedMsg</name>
+        <label>Projet {0} créé avec succès</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Toast_ErrorExportCsv</name>
+        <label>Impossible d'exporter le fichier CSV.</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Toast_ExecutionIdMissing</name>
+        <label>L'identifiant d'exécution est manquant.</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Toast_ErrorLoadDetails</name>
+        <label>Impossible de charger les détails de l'exécution.</label>
+    </customLabels>
+
+    <!-- RELATIVE TIME -->
+    <customLabels>
+        <name>IH_Time_JustNow</name>
+        <label>À l'instant</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Time_1MinuteAgo</name>
+        <label>Il y a 1 minute</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Time_XMinutesAgo</name>
+        <label>Il y a {0} minutes</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Time_1HourAgo</name>
+        <label>Il y a 1 heure</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Time_XHoursAgo</name>
+        <label>Il y a {0} heures</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Time_1DayAgo</name>
+        <label>Il y a 1 jour</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_Time_XDaysAgo</name>
+        <label>Il y a {0} jours</label>
+    </customLabels>
+
+    <!-- PHASE PREFIX -->
+    <customLabels>
+        <name>IH_PhasePrefix</name>
+        <label>Phase : </label>
+    </customLabels>
+    <customLabels>
+        <name>IH_PhaseNA</name>
+        <label>Phase : N/A</label>
+    </customLabels>
+    <customLabels>
+        <name>IH_ExecutionLabel</name>
+        <label>Exécution n°</label>
+    </customLabels>
 </Translations>

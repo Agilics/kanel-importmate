@@ -1,16 +1,20 @@
 import { LightningElement, api } from "lwc";
+import LABEL_TAB_ALL from '@salesforce/label/c.IM_TR_Tab_AllFields';
+import LABEL_TAB_BOOLEAN from '@salesforce/label/c.IM_TR_Tab_Boolean';
+import LABEL_TAB_CASE from '@salesforce/label/c.IM_TR_Tab_Case';
+import LABEL_TAB_MASK from '@salesforce/label/c.IM_TR_Tab_Mask';
 
 export default class TransformationFieldTabs extends LightningElement {
+
   tabs = [
-    { label: "All Fields", value: "all", id: 1 },
-    { label: "Boolean Transformation", value: "boolean", id: 2 },
-    { label: "Case Transformation", value: "case", id: 3 },
-    { label: "Data Masking", value: "mask", id: 4 }
+    { label: LABEL_TAB_ALL, value: "all", id: 1 },
+    { label: LABEL_TAB_BOOLEAN, value: "boolean", id: 2 },
+    { label: LABEL_TAB_CASE, value: "case", id: 3 },
+    { label: LABEL_TAB_MASK, value: "mask", id: 4 }
   ];
 
   @api activeTab = "all";
 
-  // Getter qui calcule les classes pour chaque onglet
   get computedTabs() {
     return this.tabs.map((tab) => ({
       ...tab,
@@ -18,16 +22,12 @@ export default class TransformationFieldTabs extends LightningElement {
     }));
   }
 
-  // Gestion du changement d'onglet
- handleTransformationChange(event) {
+  handleTransformationChange(event) {
     const value = event.target.dataset.value;
-    // Le parent met à jour son state  du composant fieldTransformationTabs via le binding 
     this.dispatchEvent(
-        new CustomEvent("movetransformation",
-          {
-            detail: {activetab: value}
-          }
-        )
-      );
+      new CustomEvent("movetransformation", {
+        detail: { activetab: value }
+      })
+    );
   }
 }
