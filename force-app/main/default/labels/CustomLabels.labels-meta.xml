@@ -1,175 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomLabels xmlns="http://soap.sforce.com/2006/04/metadata">
     <labels>
-        <fullName>IM_FieldMapper_Title</fullName>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>IM_FieldMapper_Title</shortDescription>
-        <value>IM_FieldMapper_Title</value>
-    </labels>
-    <labels>
-        <fullName>IM_Soql_AddCondition</fullName>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>Add Condition</shortDescription>
-        <value>Add Condition</value>
-    </labels>
-    <labels>
-        <fullName>IM_Soql_Clear</fullName>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>Clear</shortDescription>
-        <value>Clear</value>
-    </labels>
-    <labels>
-        <fullName>IM_Soql_ConditionBuilder</fullName>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>Condition Builder</shortDescription>
-        <value>Condition Builder</value>
-    </labels>
-    <labels>
-        <fullName>IM_Soql_ContinueToMapping</fullName>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>Continue to Field Mapping</shortDescription>
-        <value>Continue to Field Mapping</value>
-    </labels>
-    <labels>
-        <fullName>IM_Soql_CopyError</fullName>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>Clipboard not available</shortDescription>
-        <value>Clipboard not available</value>
-    </labels>
-    <labels>
-        <fullName>IM_Soql_CopyQuery</fullName>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>Copy Query</shortDescription>
-        <value>Copy Query</value>
-    </labels>
-    <labels>
-        <fullName>IM_Soql_CopySuccess</fullName>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>Query copied to clipboard</shortDescription>
-        <value>Query copied to clipboard</value>
-    </labels>
-    <labels>
-        <fullName>IM_Soql_Direction</fullName>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>Direction</shortDescription>
-        <value>Direction</value>
-    </labels>
-    <labels>
-        <fullName>IM_Soql_Export</fullName>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>Export</shortDescription>
-        <value>Export</value>
-    </labels>
-    <labels>
-        <fullName>IM_Soql_FoundRecords</fullName>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>found {0} records</shortDescription>
-        <value>found {0} records</value>
-    </labels>
-    <labels>
-        <fullName>IM_Soql_GeneratedQuery</fullName>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>Generated SOQL Query</shortDescription>
-        <value>Generated SOQL Query</value>
-    </labels>
-    <labels>
-        <fullName>IM_Soql_NoRows</fullName>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>No records found</shortDescription>
-        <value>No records found</value>
-    </labels>
-    <labels>
-        <fullName>IM_Soql_Offset</fullName>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>Offset</shortDescription>
-        <value>Offset</value>
-    </labels>
-    <labels>
-        <fullName>IM_Soql_OrderBy</fullName>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>Order By</shortDescription>
-        <value>Order By</value>
-    </labels>
-    <labels>
-        <fullName>IM_Soql_PreviewResults</fullName>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>Preview Results</shortDescription>
-        <value>Preview Results</value>
-    </labels>
-    <labels>
-        <fullName>IM_Soql_QueryResultsPreview</fullName>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>Query Results Preview</shortDescription>
-        <value>Query Results Preview</value>
-    </labels>
-    <labels>
-        <fullName>IM_Soql_QuerySettings</fullName>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>Query Settings</shortDescription>
-        <value>Query Settings</value>
-    </labels>
-    <labels>
-        <fullName>IM_Soql_RecordLimit</fullName>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>Record Limit</shortDescription>
-        <value>Record Limit</value>
-    </labels>
-    <labels>
-        <fullName>IM_Soql_SelectAll</fullName>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>Select all</shortDescription>
-        <value>Select all</value>
-    </labels>
-    <labels>
-        <fullName>IM_Soql_SelectFields</fullName>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>Select Fields</shortDescription>
-        <value>Select Fields</value>
-    </labels>
-    <labels>
-        <fullName>IM_Soql_SelectedObject</fullName>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>Selected Object</shortDescription>
-        <value>Selected Object</value>
-    </labels>
-    <labels>
-        <fullName>IM_Soql_Title</fullName>
-        <categories>ImportMate</categories>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>SOQL Builder - Title</shortDescription>
-        <value>SOQL Builder</value>
-    </labels>
-    <labels>
-        <fullName>IM_Soql_ValidateQuery</fullName>
-        <language>en_US</language>
-        <protected>true</protected>
-        <shortDescription>Validate Query</shortDescription>
-        <value>Validate Query</value>
-    </labels>
-    <labels>
         <fullName>IM_FM_Apply</fullName>
         <language>en_US</language>
         <protected>true</protected>
@@ -427,5 +258,3060 @@
         <protected>true</protected>
         <shortDescription>Use as lookup</shortDescription>
         <value>Use as lookup</value>
+    </labels>
+    <labels>
+        <fullName>IM_FieldMapper_Title</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>IM_FieldMapper_Title</shortDescription>
+        <value>IM_FieldMapper_Title</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_AddCondition</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Add Condition</shortDescription>
+        <value>Add Condition</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_Clear</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Clear</shortDescription>
+        <value>Clear</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_ConditionBuilder</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Condition Builder</shortDescription>
+        <value>Condition Builder</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_ContinueToMapping</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Continue to Field Mapping</shortDescription>
+        <value>Continue to Field Mapping</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_CopyError</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Clipboard not available</shortDescription>
+        <value>Clipboard not available</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_CopyQuery</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Copy Query</shortDescription>
+        <value>Copy Query</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_CopySuccess</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Query copied to clipboard</shortDescription>
+        <value>Query copied to clipboard</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_Direction</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Direction</shortDescription>
+        <value>Direction</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_Export</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Export</shortDescription>
+        <value>Export</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_FoundRecords</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>found {0} records</shortDescription>
+        <value>found {0} records</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_GeneratedQuery</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Generated SOQL Query</shortDescription>
+        <value>Generated SOQL Query</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_NoRows</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>No records found</shortDescription>
+        <value>No records found</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_Offset</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Offset</shortDescription>
+        <value>Offset</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_OrderBy</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Order By</shortDescription>
+        <value>Order By</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_PreviewResults</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Preview Results</shortDescription>
+        <value>Preview Results</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_QueryResultsPreview</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Query Results Preview</shortDescription>
+        <value>Query Results Preview</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_QuerySettings</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Query Settings</shortDescription>
+        <value>Query Settings</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_RecordLimit</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Record Limit</shortDescription>
+        <value>Record Limit</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_SelectAll</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Select all</shortDescription>
+        <value>Select all</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_SelectFields</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Select Fields</shortDescription>
+        <value>Select Fields</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_SelectedObject</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Selected Object</shortDescription>
+        <value>Selected Object</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_Title</fullName>
+        <categories>ImportMate</categories>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>SOQL Builder - Title</shortDescription>
+        <value>SOQL Builder</value>
+    </labels>
+    <labels>
+        <fullName>IM_Soql_ValidateQuery</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Validate Query</shortDescription>
+        <value>Validate Query</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Actions</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Actions</shortDescription>
+        <value>Actions</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_AddRule</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Add Rule</shortDescription>
+        <value>Add Rule</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_AvailableMappings</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Available Mappings</shortDescription>
+        <value>Mappings disponibles</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_BackToMapping</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Back to Mapping</shortDescription>
+        <value>Back to Mapping</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_ContinueToValidation</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Continue to Validation</shortDescription>
+        <value>Continue to Validation</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_DeleteConfirm_Label</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Delete Transformation</shortDescription>
+        <value>Delete Transformation</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_DeleteConfirm_Message</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Are you sure you want to delete this transformation? This action cannot be undon</shortDescription>
+        <value>Are you sure you want to delete this transformation? This action cannot be undone.</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_DeleteSuccess_Message</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Transformation deleted successfully</shortDescription>
+        <value>Transformation deleted successfully</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_DeleteSuccess_Title</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Success</shortDescription>
+        <value>Success</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Error_CreateRule</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Error creating rule</shortDescription>
+        <value>Error creating rule</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Error_DeleteRule</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Error deleting rule</shortDescription>
+        <value>Error deleting rule</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Error_Title</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Error</shortDescription>
+        <value>Error</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_LookupDetails</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Lookup Details</shortDescription>
+        <value>Lookup Details</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_MappingsCount</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>{0} mappings</shortDescription>
+        <value>{0} mappings</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Modal_AddRule</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Add New Rule</shortDescription>
+        <value>Add New Rule</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Modal_BooleanValue</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Boolean Value</shortDescription>
+        <value>Boolean Value</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Modal_Cancel</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Cancel</shortDescription>
+        <value>Cancel</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Modal_ChooseBoolean</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Choose the boolean value</shortDescription>
+        <value>Choose the boolean value</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Modal_EditRule</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Edit Rule</shortDescription>
+        <value>Edit Rule</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Modal_No</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>No</shortDescription>
+        <value>No</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Modal_On</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>on</shortDescription>
+        <value>on</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Modal_RuleType</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Rule Type</shortDescription>
+        <value>Rule Type</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Modal_SaveRule</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Save rule</shortDescription>
+        <value>Save rule</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Modal_SectionMapping</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Mapping</shortDescription>
+        <value>Mapping</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Modal_SectionRules</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Rules</shortDescription>
+        <value>Rules</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Modal_SelectFieldsHelp</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Select 1 to a maximum of 3 fields.</shortDescription>
+        <value>Select 1 to a maximum of 3 fields.</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Modal_SelectOption</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Select an option</shortDescription>
+        <value>Select an option</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Modal_SelectedLabel</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Selected Fields</shortDescription>
+        <value>Selected Fields</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Modal_Separator</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Separator</shortDescription>
+        <value>Separator</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Modal_SourceFields</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Source Fields</shortDescription>
+        <value>Source Fields</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Modal_SourceLabel</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Available Fields</shortDescription>
+        <value>Champs disponibles</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Modal_UpdateRule</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Update rule</shortDescription>
+        <value>Update rule</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Modal_Yes</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Yes</shortDescription>
+        <value>Yes</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Next</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Next</shortDescription>
+        <value>Next</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_NoRule</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>No transformation added yet</shortDescription>
+        <value>No transformation added yet</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Picklist_BooleanTransformation</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Boolean Transformation</shortDescription>
+        <value>Boolean Transformation</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Picklist_Concatenation</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Concatenation</shortDescription>
+        <value>Concatenation</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Picklist_EmailMask</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Email Validation &amp; Format</shortDescription>
+        <value>Email Validation &amp; Format</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Picklist_LowercaseTransformation</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Lowercase Conversion</shortDescription>
+        <value>Lowercase Conversion</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Picklist_PhoneMask</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Phone Number Formatting</shortDescription>
+        <value>Phone Number Formatting</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Picklist_UppercaseTransformation</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Uppercase Conversion</shortDescription>
+        <value>Uppercase Conversion</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Previous</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Previous</shortDescription>
+        <value>Previous</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_RuleTitle_Boolean</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Boolean Transformation</shortDescription>
+        <value>Boolean Transformation</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_RuleTitle_Concatenation</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Field Concatenation</shortDescription>
+        <value>Field Concatenation</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_RuleTitle_EmailMask</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Email Validation &amp; Format</shortDescription>
+        <value>Email Validation &amp; Format</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_RuleTitle_Lowercase</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Lowercase Conversion</shortDescription>
+        <value>Lowercase Conversion</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_RuleTitle_PhoneMask</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Phone Number Formatting</shortDescription>
+        <value>Phone Number Formatting</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_RuleTitle_Uppercase</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Uppercase Conversion</shortDescription>
+        <value>Uppercase Conversion</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_SaveAsTemplate</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Save as Template</shortDescription>
+        <value>Save as Template</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_SearchMappings</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Search mappings...</shortDescription>
+        <value>Search mappings...</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Sep_Comma</fullName>
+        <categories>IM_TR</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Separator option - Comma</shortDescription>
+        <value>Comma</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Sep_NewLine</fullName>
+        <categories>IM_TR</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Separator option - New line</shortDescription>
+        <value>New line</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Sep_SemiComma</fullName>
+        <categories>IM_TR</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Separator option - Semi Comma</shortDescription>
+        <value>Semi Comma</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Sep_Space</fullName>
+        <categories>IM_TR</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Separator option - Space</shortDescription>
+        <value>Space</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Sep_Tab</fullName>
+        <categories>IM_TR</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Separator option - Tab</shortDescription>
+        <value>Tab</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_ShowingEntries</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Showing {0} to {1} of {2} entries</shortDescription>
+        <value>Showing {0} to {1} of {2} entries</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_SourceColumn</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Source Column</shortDescription>
+        <value>Source Column</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Subtitle</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Set up your data import project</shortDescription>
+        <value>Set up your data import project</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Tab_AllFields</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>All Fields</shortDescription>
+        <value>All Fields</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Tab_Boolean</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Boolean Transformation</shortDescription>
+        <value>Boolean Transformation</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Tab_Case</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Case Transformation</shortDescription>
+        <value>Case Transformation</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Tab_Mask</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Data Masking</shortDescription>
+        <value>Data Masking</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_TargetField</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Target Field</shortDescription>
+        <value>Target Field</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Title</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Data Transformations</shortDescription>
+        <value>Data Transformations</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Type</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Type</shortDescription>
+        <value>Type</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_UnknownField</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Unknown Field</shortDescription>
+        <value>Unknown Field</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Version</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Version</shortDescription>
+        <value>Version</value>
+    </labels>
+    <labels>
+        <fullName>IM_TR_Warning_Title</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Warning</shortDescription>
+        <value>Warning</value>
+    </labels>
+
+
+    
+    <!-- import recent projects -->
+
+    <labels>
+        <fullName>ProjectRecent_Name</fullName>
+        <categories>Project Recent</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Project name label</shortDescription>
+        <value>Project Name</value>
+    </labels>
+    <labels>
+        <fullName>ProjectRecent_Description</fullName>
+        <categories>Project Recent</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Project description label</shortDescription>
+        <value>Description</value>
+    </labels>
+    <labels>
+        <fullName>ProjectRecent_Target_Object</fullName>
+        <categories>Project Recent</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Target Salesforce object label</shortDescription>
+        <value>Target Salesforce Object</value>
+    </labels>
+    <labels>
+        <fullName>ProjectRecent_Title</fullName>
+        <categories>Project Recent</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Create new project title</shortDescription>
+        <value>Create New Project</value>
+    </labels>
+    <labels>
+        <fullName>ProjectRecent_Use_Existing</fullName>
+        <categories>Project Recent</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Use existing project card title</shortDescription>
+        <value>Use Existing Project</value>
+    </labels>
+    <labels>
+        <fullName>ProjectRecent_Use_Existing_Description</fullName>
+        <categories>Project Recent</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Description for using an existing project</shortDescription>
+        <value>Continue with a previously created project. Reuse your field mappings and settings.</value>
+    </labels>
+    <labels>
+        <fullName>ProjectRecent_Recent_Projects</fullName>
+        <categories>Project Recent</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Recent projects section title</shortDescription>
+        <value>Recent Projects</value>
+    </labels>
+    <labels>
+        <fullName>ProjectRecent_No_Project</fullName>
+        <categories>Project Recent</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>No project message</shortDescription>
+        <value>No project import yet, please add</value>
+    </labels>
+    <labels>
+        <fullName>ProjectRecent_Select_Project</fullName>
+        <categories>Project Recent</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Select project button</shortDescription>
+        <value>Select this project</value>
+    </labels>
+    <labels>
+        <fullName>ProjectRecent_Target_SObject</fullName>
+        <categories>Project Recent</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Target object label in project list</shortDescription>
+        <value>Target SObject :</value>
+    </labels>
+    <labels>
+        <fullName>ProjectRecent_Created_Label</fullName>
+        <categories>Project Recent</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Created date label</shortDescription>
+        <value>Created :</value>
+    </labels>
+
+    <!-- DASHBOARD - FILTER TABS -->
+
+    <labels>
+        <fullName>Dashboard_FilterTab_Title</fullName>
+        <categories>Dashboard Filter projects</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Title for tab filter section</shortDescription>
+        <value>Projects</value>
+    </labels>
+    <labels>
+        <fullName>Dashboard_FilterTab_Subtitle</fullName>
+        <categories>Dashboard Filter projects</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SubTitle for tab filter section</shortDescription>
+        <value>Manage your data import projects</value>
+    </labels>
+    <labels>
+        <fullName>Dashboard_Input_Search_Projects_Placeholder</fullName>
+        <categories>Dashboard Filter projects</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Input search project by keyword</shortDescription>
+        <value>Search projects...</value>
+    </labels>
+    <labels>
+        <fullName>Dashboard_FilterTab_All_Projects</fullName>
+        <categories>Dashboard Filter projects</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Tab filter for all projects</shortDescription>
+        <value>All Projects</value>
+    </labels>
+    <labels>
+        <fullName>Dashboard_FilterTab_Active</fullName>
+        <categories>Dashboard Filter project</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Tab filter for active project</shortDescription>
+        <value>Active</value>
+    </labels>
+    <labels>
+        <fullName>Dashboard_FilterTab_Completed</fullName>
+        <categories>Dashboard Filter project</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Tab filter for completed project</shortDescription>
+        <value>Completed</value>
+    </labels>
+    <labels>
+        <fullName>Dashboard_FilterTab_Scheduled</fullName>
+        <categories>Dashboard Filters project</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Tab filter for project scheduled</shortDescription>
+        <value>Scheduled</value>
+    </labels>
+
+    <!-- DASHBOARD - STATS -->
+
+    <labels>
+        <fullName>Dashboard_Stat_TotalProjects</fullName>
+        <categories>Dashboard Stat</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Stat label for total project</shortDescription>
+        <value>Total Projects</value>
+    </labels>
+    <labels>
+        <fullName>Dashboard_Stat_RecordImported</fullName>
+        <categories>Dashboard Stat</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Stat label for record imported</shortDescription>
+        <value>Record Imported</value>
+    </labels>
+    <labels>
+        <fullName>Dashboard_Stat_SuccessRate</fullName>
+        <categories>Dashboard Stat</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Stat label for success rate</shortDescription>
+        <value>Success Rate</value>
+    </labels>
+    <labels>
+        <fullName>Dashboard_Stat_ActiveProject</fullName>
+        <categories>Dashboard Stat</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Stat label for active project</shortDescription>
+        <value>Active Projects</value>
+    </labels>
+
+    <!-- DASHBOARD - NO PROJECT MESSAGES -->
+
+    <labels>
+        <fullName>Dashboard_No_Project_Message</fullName>
+        <categories>Dashboard Project Message</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>No project found message</shortDescription>
+        <value>No projects found. Create your first project to get started.</value>
+    </labels>
+    <labels>
+        <fullName>Dashboard_No_Project_Error_Message</fullName>
+        <categories>Dashboard Project Message</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Error loading projects message</shortDescription>
+        <value>Error loading projects. Please try again.</value>
+    </labels>
+
+    <!-- DASHBOARD - ALERT MESSAGES -->
+
+    <labels>
+        <fullName>Dashboard_Delete_Confirm_Header</fullName>
+        <categories>Dashboard Project Dialogue Confirm Header</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Header for confirm dialogue on project delete</shortDescription>
+        <value>Confirm Deletion</value>
+    </labels>
+    <labels>
+        <fullName>Dashboard_Confirm_Delete_Message</fullName>
+        <categories>Dashboard Project Alert Message</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Alert message for project deletion</shortDescription>
+        <value>Are you sure you want to delete this project? This action cannot be undone.</value>
+    </labels>
+    <labels>
+        <fullName>Dashboard_Delete_Success_Message</fullName>
+        <categories>Dashboard Project Alert Message</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Success message for project deletion</shortDescription>
+        <value>Project deleted successfully.</value>
+    </labels>
+
+    <!-- Etiquette des noms de boutons -->
+
+    <labels>
+        <fullName>Dashboard_Button_New_Project</fullName>
+        <categories>Dashboard Button</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for new project button</shortDescription>
+        <value>New Project</value>
+    </labels>
+    <labels>
+        <fullName>Dashboard_Button_Create_First_Project</fullName>
+        <categories>Dashboard Button</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for Create Your First Project</shortDescription>
+        <value>Create Your First Project</value>
+    </labels>
+
+    <!-- Détails de projets -->
+
+    <labels>
+        <fullName>ProjectCard_Meta_Target</fullName>
+        <categories>ProjectCard Meta</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for target object meta item</shortDescription>
+        <value>Target:</value>
+    </labels>
+    <labels>
+        <fullName>ProjectCard_Meta_Records</fullName>
+        <categories>ProjectCard Meta</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for records count meta item</shortDescription>
+        <value>Records:</value>
+    </labels>
+    <labels>
+        <fullName>ProjectCard_Meta_Modified</fullName>
+        <categories>ProjectCard Meta</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for last modified date meta item</shortDescription>
+        <value>Modified:</value>
+    </labels>
+    <labels>
+        <fullName>ProjectCard_Progress_Label</fullName>
+        <categories>ProjectCard Progress</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for progress bar section</shortDescription>
+        <value>Progress</value>
+    </labels>
+    <labels>
+        <fullName>ProjectCard_No_Description</fullName>
+        <categories>ProjectCard text</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>No Description text</shortDescription>
+        <value>No Description</value>
+    </labels>
+
+    <!-- main -->
+
+    <labels>
+        <fullName>ALL_FIELDS_REQUIRED</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>All fields validation message</shortDescription>
+        <value>All fields are required</value>
+    </labels>
+    <labels>
+        <fullName>PROJECT_EXISTS</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Duplicate project message</shortDescription>
+        <value>A project with this name and target object already exists</value>
+    </labels>
+    <labels>
+        <fullName>PROJECT_CREATED</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Project created success message</shortDescription>
+        <value>Project created successfully with ID: {0}</value>
+    </labels>
+    <labels>
+        <fullName>ERROR_OCCURRED</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Generic error message</shortDescription>
+        <value>An error occurred</value>
+    </labels>
+    <labels>
+        <fullName>SELECT_PROJECT_FIRST</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Select project message</shortDescription>
+        <value>Please select or create a project first</value>
+    </labels>
+    <labels>
+        <fullName>CREATE_PROJECT_FIRST</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Create project first message</shortDescription>
+        <value>Please create a project first</value>
+    </labels>
+    <labels>
+        <fullName>IMPORT_STARTED</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Import started message</shortDescription>
+        <value>Import started in {0} mode with batch size {1}</value>
+    </labels>
+    <labels>
+        <fullName>LOGS_COMING_SOON</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Logs feature placeholder</shortDescription>
+        <value>Logs feature coming soon</value>
+    </labels>
+    <labels>
+        <fullName>SETTINGS_COMING_SOON</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Settings feature placeholder</shortDescription>
+        <value>Settings feature coming soon</value>
+    </labels>
+    <labels>
+        <fullName>VIEW_LOGS</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>View logs action</shortDescription>
+        <value>Viewing logs</value>
+    </labels>
+    <labels>
+        <fullName>EXPORT_COMING_SOON</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Export feature placeholder</shortDescription>
+        <value>Export feature coming soon</value>
+    </labels>
+    <labels>
+        <fullName>ANALYTICS_COMING_SOON</fullName>
+        <categories>Main</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Analytics feature placeholder</shortDescription>
+        <value>Analytics feature coming soon</value>
+    </labels>
+    <labels>
+        <fullName>SEARCH_PROJECTS_FEATURE</fullName>
+        <categories>Main</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Search projects feature</shortDescription>
+        <value>Search projects feature</value>
+    </labels>
+    <labels>
+        <fullName>UNSAVED_CHANGES_WARNING</fullName>
+        <categories>Main</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Unsaved changes warning</shortDescription>
+        <value>You have unsaved changes. Are you sure you want to leave?</value>
+    </labels>
+
+    <!-- DataSource -->
+
+    <labels>
+        <fullName>DataSource_Title</fullName>
+        <categories>DataSource</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DataSource_Title</shortDescription>
+        <value>Choose Data Source</value>
+    </labels>
+    <labels>
+        <fullName>DataSource_Subtitle</fullName>
+        <categories>DataSource</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DataSource_Subtitle</shortDescription>
+        <value>Select how you want to import your data into Salesforce</value>
+    </labels>
+    <labels>
+        <fullName>DataSource_FileUpload_Title</fullName>
+        <categories>DataSource</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DataSource_FileUpload_Title</shortDescription>
+        <value>File Upload</value>
+    </labels>
+    <labels>
+        <fullName>DataSource_FileUpload_Description</fullName>
+        <categories>DataSource</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DataSource_FileUpload_Description</shortDescription>
+        <value>Import from CSV or Excel files</value>
+    </labels>
+    <labels>
+        <fullName>DataSource_FileUpload_Feature1</fullName>
+        <categories>DataSource</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DataSource_FileUpload_Feature1</shortDescription>
+        <value>Support for CSV and Excel formats</value>
+    </labels>
+    <labels>
+        <fullName>DataSource_FileUpload_Feature2</fullName>
+        <categories>DataSource</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DataSource_FileUpload_Feature2</shortDescription>
+        <value>Automatic delimiter detection</value>
+    </labels>
+    <labels>
+        <fullName>DataSource_FileUpload_Feature3</fullName>
+        <categories>DataSource</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DataSource_FileUpload_Feature3</shortDescription>
+        <value>File preview and validation</value>
+    </labels>
+    <labels>
+        <fullName>DataSource_FileUpload_Button</fullName>
+        <categories>DataSource</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DataSource_FileUpload_Button</shortDescription>
+        <value>Choose File Upload</value>
+    </labels>
+    <labels>
+        <fullName>DataSource_SalesforceQuery_Title</fullName>
+        <categories>DataSource</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DataSource_SalesforceQuery_Title</shortDescription>
+        <value>Salesforce Query</value>
+    </labels>
+    <labels>
+        <fullName>DataSource_SalesforceQuery_Description</fullName>
+        <categories>DataSource</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DataSource_SalesforceQuery_Description</shortDescription>
+        <value>Import from Salesforce using SOQL</value>
+    </labels>
+    <labels>
+        <fullName>DataSource_SalesforceQuery_Feature1</fullName>
+        <categories>DataSource</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DataSource_SalesforceQuery_Feature1</shortDescription>
+        <value>Visual query builder interface</value>
+    </labels>
+    <labels>
+        <fullName>DataSource_SalesforceQuery_Feature2</fullName>
+        <categories>DataSource</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DataSource_SalesforceQuery_Feature2</shortDescription>
+        <value>Real-time query validation</value>
+    </labels>
+    <labels>
+        <fullName>DataSource_SalesforceQuery_Feature3</fullName>
+        <categories>DataSource</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DataSource_SalesforceQuery_Feature3</shortDescription>
+        <value>Preview query results</value>
+    </labels>
+    <labels>
+        <fullName>DataSource_SalesforceQuery_Button</fullName>
+        <categories>DataSource</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DataSource_SalesforceQuery_Button</shortDescription>
+        <value>Choose Query Builder</value>
+    </labels>
+    <labels>
+        <fullName>DataSource_Back_Button</fullName>
+        <categories>DataSource</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DataSource_Back_Button</shortDescription>
+        <value>Back</value>
+    </labels>
+
+    <!-- CsvUploader -->
+
+    <labels>
+        <fullName>CsvUploader_PageTitle</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Titre de la page</shortDescription>
+        <value>CSV Data Import &amp; Display</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_PageSubtitle</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_PageSubtitle</shortDescription>
+        <value>Upload your CSV file and preview the data</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_ImportSettings_Button</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_ImportSettings_Button</shortDescription>
+        <value>Import Settings</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Card_Title</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Card_Title</shortDescription>
+        <value>File Upload</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Card_Subtitle</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Card_Subtitle</shortDescription>
+        <value>Upload your CSV file to import data</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Dropzone_Text</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Dropzone_Text</shortDescription>
+        <value>Drop your CSV file here</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Dropzone_Browse</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Dropzone_Browse</shortDescription>
+        <value>or browse files</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Dropzone_Hint</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Dropzone_Hint</shortDescription>
+        <value>Supports CSV files up to 50MB</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Loading_Text</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Loading_Text</shortDescription>
+        <value>Loading…</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Table_Title</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Table_Title</shortDescription>
+        <value>Imported Data</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Search_Placeholder</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Search_Placeholder</shortDescription>
+        <value>Search data...</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Filters_Button</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Filters_Button</shortDescription>
+        <value>Filters</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Table_Actions</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Table_Actions</shortDescription>
+        <value>Actions</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Table_Edit_Tooltip</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Table_Edit_Tooltip</shortDescription>
+        <value>Edit</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Table_Preview_Tooltip</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Table_Preview_Tooltip</shortDescription>
+        <value>Preview</value>
+    </labels>
+    <labels>
+        <fullName>DataTable_Showing_Entries</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Pagination informations</shortDescription>
+        <value>Showing {0} to {1} of {2} entries</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Pagination_Previous</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Pagination_Previous</shortDescription>
+        <value>Previous</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Pagination_Next</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Pagination_Next</shortDescription>
+        <value>Next</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Back_Button</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Back_Button</shortDescription>
+        <value>Back to Data Source</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_ContinueMapping_Button</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_ContinueMapping_Button</shortDescription>
+        <value>Continue to Mapping</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Filters_Title</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Filters_Title</shortDescription>
+        <value>Filters</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Filters_Column</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Filters_Column</shortDescription>
+        <value>Column</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Filters_ColumnDefault</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Filters_ColumnDefault</shortDescription>
+        <value>-- choose --</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Filters_Operator</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Filters_Operator</shortDescription>
+        <value>Operator</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Filters_OpContains</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Filters_OpContains</shortDescription>
+        <value>contains</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Filters_OpEquals</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Filters_OpEquals</shortDescription>
+        <value>equals</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Filters_OpStarts</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Filters_OpStarts</shortDescription>
+        <value>starts with</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Filters_Value</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Filters_Value</shortDescription>
+        <value>Value</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Filters_Clear</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Filters_Clear</shortDescription>
+        <value>Clear</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Settings_Title</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Settings_Title</shortDescription>
+        <value>Import Settings</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Settings_RowsPerPage</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Settings_RowsPerPage</shortDescription>
+        <value>Rows per page</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Settings_PreviewLimit</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Settings_PreviewLimit</shortDescription>
+        <value>Preview limit (large files)</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Preview_Title</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Preview_Title</shortDescription>
+        <value>Row Preview</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Edit_Title</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Edit_Title</shortDescription>
+        <value>Edit Row</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Cancel</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Cancel</shortDescription>
+        <value>Cancel</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Apply</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Apply</shortDescription>
+        <value>Apply</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Close</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Close</shortDescription>
+        <value>Close</value>
+    </labels>
+    <labels>
+        <fullName>CsvUploader_Modal_Save</fullName>
+        <categories>CsvUploader</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>CsvUploader_Modal_Save</shortDescription>
+        <value>Save</value>
+    </labels>
+
+    <!-- ProjectForm -->
+
+    <labels>
+        <fullName>ProjectForm_Title</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Title for project information section</shortDescription>
+        <value>New Project</value>
+    </labels>
+    <labels>
+        <fullName>ProjectForm_Subtitle</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SubTitle for project information section</shortDescription>
+        <value>Set up your data import project with target object and configuration</value>
+    </labels>
+    <labels>
+        <fullName>ProjectForm_Info_Section_Label</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Section Project Information</shortDescription>
+        <value>Project Information</value>
+    </labels>
+    <labels>
+        <fullName>ProjectForm_Name</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for Project Name field</shortDescription>
+        <value>Project Name</value>
+    </labels>
+    <labels>
+        <fullName>ProjectForm_Helper_Name</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for helper name</shortDescription>
+        <value>Choose a clear, descriptive name for easy identification</value>
+    </labels>
+    <labels>
+        <fullName>ImportProject_Name_Placeholder</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Placeholder for import project name</shortDescription>
+        <value>Enter a descriptive project name (e.g., Q4 Contact Import)</value>
+    </labels>
+    <labels>
+        <fullName>ProjectForm_Description</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for Description field</shortDescription>
+        <value>Description</value>
+    </labels>
+    <labels> 
+        <fullName>ProjectForm_Helper_Description</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for helper description</shortDescription>
+        <value>Provide details about data source, business purpose, and expected outcomes</value>
+    </labels>
+    <labels>
+        <fullName>ImportProject_Description_Placeholder</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Placeholder for import project description</shortDescription>
+        <value>Describe the purpose and scope of this import project...</value>
+    </labels>
+    <labels>
+        <fullName>ProjectForm_Target_Section_Label</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Section title Target Object Configuration</shortDescription>
+        <value>Target Object Configuration</value>
+    </labels>
+    <labels>
+        <fullName>ProjectForm_Target_Object</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for Target Object field</shortDescription>
+        <value>Target Salesforce Object</value>
+    </labels>
+    <labels>
+        <fullName>ProjectForm_Helper_Target_Object</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for helper Target Object field</shortDescription>
+        <value>Select the Salesforce object where data will be imported</value>
+    </labels>
+    <labels>
+        <fullName>ProjectForm_Save_Button</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for save button</shortDescription>
+        <value>Save &amp; Continue to Data Source</value>
+    </labels>
+    <labels>
+        <fullName>ProjectForm_Cancel_Button</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label for exit button</shortDescription>
+        <value>Cancel</value>
+    </labels>
+
+    <!-- SelectProject -->
+
+    <labels>
+        <fullName>SelectProject_Card_Title</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Card title for select project</shortDescription>
+        <value>Import projects Informations</value>
+    </labels>
+    <labels>
+        <fullName>SelectProject_No_Project</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Message for no project found</shortDescription>
+        <value>No project import yet, please add</value>
+    </labels>
+    <labels>
+        <fullName>SelectProject_Select_Button</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Button to select project</shortDescription>
+        <value>Select</value>
+    </labels>
+    <labels>
+        <fullName>SelectProject_Close_Button</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Button to close modal</shortDescription>
+        <value>Close</value>
+    </labels>
+ <labels>
+        <fullName>IM_DRY_Title</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Page Title</shortDescription>
+        <value>Data Validation</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Subtitle</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Page Subtitle</shortDescription>
+        <value>Review and fix data issues before import</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Status_WithErrors</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Status with errors</shortDescription>
+        <value>Validation completed with errors</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Status_Success</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Status success</shortDescription>
+        <value>Validation completed successfully</value>
+    </labels>
+
+    <!-- Buttons -->
+    <labels>
+        <fullName>IM_DRY_Btn_Settings</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Button Settings</shortDescription>
+        <value>Validation Settings</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Btn_RunValidation</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Button Run Validation</shortDescription>
+        <value>Run Validation</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Btn_ExportReport</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Button Export Report</shortDescription>
+        <value>Export Report</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Btn_CancelValidation</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Button Cancel Validation</shortDescription>
+        <value>Cancel Validation</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Btn_RetryValidation</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Button Retry Validation</shortDescription>
+        <value>Retry Validation</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Btn_Back</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Button Back</shortDescription>
+        <value>Back to Mapping &amp; Transformations</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Btn_Skip</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Button Skip</shortDescription>
+        <value>Skip &amp; Continue</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Btn_Proceed</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Button Proceed</shortDescription>
+        <value>Proceed to Execution</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Btn_Close</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Button Close</shortDescription>
+        <value>Close</value>
+    </labels>
+
+    <!-- Settings Modal -->
+    <labels>
+        <fullName>IM_DRY_Settings_Title</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Settings Modal Title</shortDescription>
+        <value>Validation Settings</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Settings_Mode</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Settings Mode section</shortDescription>
+        <value>Mode</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Settings_ModeLabel</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Settings Validation mode label</shortDescription>
+        <value>Validation mode</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Settings_SampleSize</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Settings Sample size</shortDescription>
+        <value>Sample size</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Settings_SampleHelp</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Settings Sample help text</shortDescription>
+        <value>Sample size is used only when mode = Sample validation.</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Settings_Performance</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Settings Performance section</shortDescription>
+        <value>Performance</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Settings_AsyncThreshold</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Settings Async threshold</shortDescription>
+        <value>Async threshold (rows)</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Settings_PageSize</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Settings Table page size</shortDescription>
+        <value>Table page size</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Settings_PerformanceHelp</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Settings Performance help text</shortDescription>
+        <value>If total rows exceed the threshold, validation switches to async mode.</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Settings_Behavior</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Settings Behavior section</shortDescription>
+        <value>Behavior</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Settings_IncludeWarnings</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Settings Include warnings</shortDescription>
+        <value>Include warnings in the report</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Settings_StopOnError</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Settings Stop on error</shortDescription>
+        <value>Stop early if client precheck finds invalid rows</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Settings_DefaultTab</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Settings Default tab</shortDescription>
+        <value>Default tab after validation</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Settings_BehaviorHelp</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Settings Behavior help text</shortDescription>
+        <value>Warnings display depends on the Include warnings toggle.</value>
+    </labels>
+
+    <!-- Progress -->
+    <labels>
+        <fullName>IM_DRY_Progress_Title</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Progress Title</shortDescription>
+        <value>Validation Progress</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Progress_InProgress</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Progress In Progress</shortDescription>
+        <value>Validation in progress</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Progress_Completed</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Progress Completed</shortDescription>
+        <value>Completed</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Progress_Failed</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Progress Failed</shortDescription>
+        <value>Failed</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Progress_Cancelled</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Progress Cancelled</shortDescription>
+        <value>Cancelled</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Progress_Validated</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Stat Validated</shortDescription>
+        <value>Validated</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Progress_FailedStat</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Stat Failed</shortDescription>
+        <value>Failed</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Progress_ExecutionId</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Execution ID label</shortDescription>
+        <value>Execution ID:</value>
+    </labels>
+
+    <!-- Report / Table -->
+    <labels>
+        <fullName>IM_DRY_Report_Title</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Report Title</shortDescription>
+        <value>Validation Report</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Tab_Errors</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Tab Errors</shortDescription>
+        <value>Errors</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Tab_Warnings</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Tab Warnings</shortDescription>
+        <value>Warnings</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Tab_AllIssues</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Tab All Issues</shortDescription>
+        <value>All Issues</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Search_Placeholder</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Search placeholder</shortDescription>
+        <value>Search issues...</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Filter_AllTypes</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Filter All Types</shortDescription>
+        <value>All Types</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Col_Level</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Column Level</shortDescription>
+        <value>LEVEL</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Col_Row</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Column Row</shortDescription>
+        <value>ROW</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Col_Field</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Column Field</shortDescription>
+        <value>FIELD</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Col_Type</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Column Type</shortDescription>
+        <value>TYPE</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Col_Message</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Column Message</shortDescription>
+        <value>MESSAGE</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Col_Actions</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Column Actions</shortDescription>
+        <value>ACTIONS</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_NoIssues_Message</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - No issues message</shortDescription>
+        <value>No issues match your current filters.</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_NoErrors_Message</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - No errors success message</shortDescription>
+        <value>No validation issues detected! Data is ready for import.</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Pagination_Showing</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Pagination showing text</shortDescription>
+        <value>Showing</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Pagination_To</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Pagination to</shortDescription>
+        <value>to</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Pagination_Of</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Pagination of</shortDescription>
+        <value>of</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Pagination_Issues</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Pagination issues</shortDescription>
+        <value>issue(s)</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Pagination_Previous</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Pagination Previous</shortDescription>
+        <value>Previous</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Pagination_Next</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Pagination Next</shortDescription>
+        <value>Next</value>
+    </labels>
+
+    <!-- Mode options -->
+    <labels>
+        <fullName>IM_DRY_Mode_Full</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Mode Full</shortDescription>
+        <value>Full validation (all rows)</value>
+    </labels>
+    <labels>
+        <fullName>IM_DRY_Mode_Sample</fullName>
+        <categories>IM_DRY</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>DryRun - Mode Sample</shortDescription>
+        <value>Sample validation (subset)</value>
+    </labels>
+
+     <labels>
+        <fullName>IM_EX_Title</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_EX_Title</shortDescription>
+        <value>Import Execution</value>
+    </labels>
+    <labels>
+        <fullName>IM_EX_Subtitle</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_EX_Subtitle</shortDescription>
+        <value>Execute your import or schedule for recurring runs</value>
+    </labels>
+    <labels>
+        <fullName>IM_EX_Btn_ExportLogs</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_EX_Btn_ExportLogs</shortDescription>
+        <value>Export Logs</value>
+    </labels>
+    <labels>
+        <fullName>IM_EX_Btn_ScheduleImport</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_EX_Btn_ScheduleImport</shortDescription>
+        <value>Schedule Import</value>
+    </labels>
+    <labels>
+        <fullName>IM_EX_Btn_StartImport</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_EX_Btn_StartImport</shortDescription>
+        <value>Start Import</value>
+    </labels>
+    <labels>
+        <fullName>IM_EX_Btn_CancelImport</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_EX_Btn_CancelImport</shortDescription>
+        <value>Cancel Import</value>
+    </labels>
+    <labels>
+        <fullName>IM_EX_Btn_BackToValidation</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_EX_Btn_BackToValidation</shortDescription>
+        <value>Back to Validation</value>
+    </labels>
+    <labels>
+        <fullName>IM_EX_Progress_Title</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_EX_Progress_Title</shortDescription>
+        <value>Import Execution Status</value>
+    </labels>
+    <labels>
+        <fullName>IM_EX_Status_Completed</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_EX_Status_Completed</shortDescription>
+        <value>Completed</value>
+    </labels>
+    <labels>
+        <fullName>IM_EX_Status_Cancelled</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_EX_Status_Cancelled</shortDescription>
+        <value>Cancelled</value>
+    </labels>
+    <labels>
+        <fullName>IM_EX_Status_Failed</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_EX_Status_Failed</shortDescription>
+        <value>Failed</value>
+    </labels>
+    <labels>
+        <fullName>IM_EX_Status_InProgress</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_EX_Status_InProgress</shortDescription>
+        <value>In Progress</value>
+    </labels>
+    <labels>
+        <fullName>IM_EX_Status_Pending</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_EX_Status_Pending</shortDescription>
+        <value>Pending</value>
+    </labels>
+    <labels>
+        <fullName>IM_EX_Detail_ExecutionId</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_EX_Detail_ExecutionId</shortDescription>
+        <value>Execution ID:</value>
+    </labels>
+    <labels> 
+        <fullName>IM_EX_Detail_Status</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_EX_Detail_Status</shortDescription>
+        <value>Status:</value>
+    </labels>
+    <labels>
+        <fullName>IM_EX_Detail_TotalRecords</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_EX_Detail_TotalRecords</shortDescription>
+        <value>Total Records:</value>
+    </labels>
+    <labels>
+        <fullName>IM_EX_Detail_Processed</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_EX_Detail_Processed</shortDescription>
+        <value>Processed:</value>
+    </labels>
+    <labels>
+        <fullName>IM_EX_Detail_Successful</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_EX_Detail_Successful</shortDescription>
+        <value>Successful:</value>
+    </labels>
+    <labels>
+        <fullName>IM_EX_Detail_Failed</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_EX_Detail_Failed</shortDescription>
+        <value>Failed:</value>
+    </labels>
+    <labels>
+        <fullName>IM_EX_Processing_Message</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_EX_Processing_Message</shortDescription>
+        <value>Processing your import... Please wait.</value>
+    </labels>
+    <labels>
+        <fullName>IM_EX_Failed_Title</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_EX_Failed_Title</shortDescription>
+        <value>Import failed. You can still export logs.</value>
+    </labels>
+    <labels>
+        <fullName>IM_EX_Failed_Subtitle</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_EX_Failed_Subtitle</shortDescription>
+        <value>Export uses the execution id to fetch logs from Apex.</value>
+    </labels>
+
+
+    <labels>
+        <fullName>IM_IR_Title</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_IR_Title</shortDescription>
+        <value>Import Results</value>
+    </labels>
+    <labels>
+        <fullName>IM_IR_Loading</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_IR_Loading</shortDescription>
+        <value>Loading import results...</value>
+    </labels>
+    <labels>
+        <fullName>IM_IR_Search_Placeholder</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_IR_Search_Placeholder</shortDescription>
+        <value>Search errors...</value>
+    </labels>
+    <labels>
+        <fullName>IM_IR_Filter_AllTypes</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_IR_Filter_AllTypes</shortDescription>
+        <value>All Error Types</value>
+    </labels>
+    <labels>
+        <fullName>IM_IR_Summary_TotalErrors</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_IR_Summary_TotalErrors</shortDescription>
+        <value>Total Errors Found:</value>
+    </labels>
+    <labels>
+        <fullName>IM_IR_Summary_FailedLines</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_IR_Summary_FailedLines</shortDescription>
+        <value>Failed Lines:</value>
+    </labels>
+    <labels>
+        <fullName>IM_IR_Summary_Filtered</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_IR_Summary_Filtered</shortDescription>
+        <value>Filtered:</value>
+    </labels>
+    <labels>
+        <fullName>IM_IR_Col_Row</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_IR_Col_Row</shortDescription>
+        <value>ROW</value>
+    </labels>
+    <labels>
+        <fullName>IM_IR_Col_Field</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_IR_Col_Field</shortDescription>
+        <value>FIELD</value>
+    </labels>
+    <labels>
+        <fullName>IM_IR_Col_ErrorType</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_IR_Col_ErrorType</shortDescription>
+        <value>ERROR TYPE</value>
+    </labels>
+    <labels>
+        <fullName>IM_IR_Col_Message</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_IR_Col_Message</shortDescription>
+        <value>MESSAGE</value>
+    </labels>
+    <labels>
+        <fullName>IM_IR_Col_CurrentValue</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_IR_Col_CurrentValue</shortDescription>
+        <value>CURRENT VALUE</value>
+    </labels>
+    <labels>
+        <fullName>IM_IR_NoMatch</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_IR_NoMatch</shortDescription>
+        <value>No errors match your current filters.</value>
+    </labels>
+    <labels>
+        <fullName>IM_IR_NoErrors</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_IR_NoErrors</shortDescription>
+        <value>No errors found.</value>
+    </labels>
+    <labels>
+        <fullName>IM_IR_Pagination_Showing</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_IR_Pagination_Showing</shortDescription>
+        <value>Showing</value>
+    </labels>
+    <labels>
+        <fullName>IM_IR_Pagination_To</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_IR_Pagination_To</shortDescription>
+        <value>to</value>
+    </labels>
+    <labels>
+        <fullName>IM_IR_Pagination_Of</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_IR_Pagination_Of</shortDescription>
+        <value>of</value>
+    </labels>
+    <labels>
+        <fullName>IM_IR_Pagination_Errors</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_IR_Pagination_Errors</shortDescription>
+        <value>errors</value>
+    </labels>
+    <labels>
+        <fullName>IM_IR_Pagination_Previous</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_IR_Pagination_Previous</shortDescription>
+        <value>Previous</value>
+    </labels>
+    <labels>
+        <fullName>IM_IR_Pagination_Next</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_IR_Pagination_Next</shortDescription>
+        <value>Next</value>
+    </labels>
+    <labels>
+        <fullName>IM_IR_Success</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IM_IR_Success</shortDescription>
+        <value>No errors found. Import completed successfully!</value>
+    </labels>
+
+
+    
+    <!-- HEADER -->
+    <labels>
+        <fullName>IH_Title</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Title</shortDescription>
+        <value>Import History</value>
+    </labels>
+    <labels>
+        <fullName>IH_Subtitle</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Subtitle</shortDescription>
+        <value>View and manage all your import project executions</value>
+    </labels>
+    <labels>
+        <fullName>IH_ExportReport</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_ExportReport</shortDescription>
+        <value>Export Report</value>
+    </labels>
+    <labels>
+        <fullName>IH_NewImportProject</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_NewImportProject</shortDescription>
+        <value>New Import Project</value>
+    </labels>
+
+    <!-- FILTERS -->
+    <labels>
+        <fullName>IH_Filter_Status</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Filter_Status</shortDescription>
+        <value>Status</value>
+    </labels>
+    <labels>
+        <fullName>IH_Filter_DateRange</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Filter_DateRange</shortDescription>
+        <value>Date Range</value>
+    </labels>
+    <labels>
+        <fullName>IH_Filter_Project</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Filter_Project</shortDescription>
+        <value>Project</value>
+    </labels>
+    <labels>
+        <fullName>IH_Filter_TargetObject</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Filter_TargetObject</shortDescription>
+        <value>Target Object</value>
+    </labels>
+    <labels>
+        <fullName>IH_ApplyFilters</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_ApplyFilters</shortDescription>
+        <value>Apply Filters</value>
+    </labels>
+
+    <!-- STATUS OPTIONS -->
+    <labels>
+        <fullName>IH_Status_All</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Status_All</shortDescription>
+        <value>All Statuses</value>
+    </labels>
+    <labels>
+        <fullName>IH_Status_Completed</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Status_Completed</shortDescription>
+        <value>Completed</value>
+    </labels>
+    <labels>
+        <fullName>IH_Status_Running</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Status_Running</shortDescription>
+        <value>Running</value>
+    </labels>
+    <labels>
+        <fullName>IH_Status_Failed</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Status_Failed</shortDescription>
+        <value>Failed</value>
+    </labels>
+    <labels>
+        <fullName>IH_Status_Cancelled</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Status_Cancelled</shortDescription>
+        <value>Cancelled</value>
+    </labels>
+    <labels>
+        <fullName>IH_Status_Draft</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Status_Draft</shortDescription>
+        <value>Draft</value>
+    </labels>
+
+    <!-- DATE RANGE OPTIONS -->
+    <labels>
+        <fullName>IH_Date_Last7</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Date_Last7</shortDescription>
+        <value>Last 7 days</value>
+    </labels>
+    <labels>
+        <fullName>IH_Date_Last30</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Date_Last30</shortDescription>
+        <value>Last 30 days</value>
+    </labels>
+    <labels>
+        <fullName>IH_Date_Last90</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Date_Last90</shortDescription>
+        <value>Last 90 days</value>
+    </labels>
+    <labels>
+        <fullName>IH_Date_AllTime</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Date_AllTime</shortDescription>
+        <value>All time</value>
+    </labels>
+
+    <!-- PROJECT / TARGET OPTIONS -->
+    <labels>
+        <fullName>IH_AllProjects</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_AllProjects</shortDescription>
+        <value>All Projects</value>
+    </labels>
+    <labels>
+        <fullName>IH_AllObjects</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_AllObjects</shortDescription>
+        <value>All Objects</value>
+    </labels>
+
+    <!-- KPI CARDS -->
+    <labels>
+        <fullName>IH_KPI_TotalExecutions</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_KPI_TotalExecutions</shortDescription>
+        <value>Total Executions</value>
+    </labels>
+    <labels>
+        <fullName>IH_KPI_SuccessRate</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_KPI_SuccessRate</shortDescription>
+        <value>Success Rate</value>
+    </labels>
+    <labels>
+        <fullName>IH_KPI_RecordsProcessed</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_KPI_RecordsProcessed</shortDescription>
+        <value>Records Processed</value>
+    </labels>
+    <labels>
+        <fullName>IH_KPI_AvgDuration</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_KPI_AvgDuration</shortDescription>
+        <value>Avg. Duration</value>
+    </labels>
+
+    <!-- TABLE -->
+    <labels>
+        <fullName>IH_Table_Title</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Table_Title</shortDescription>
+        <value>Execution History</value>
+    </labels>
+    <labels>
+        <fullName>IH_Table_SearchPlaceholder</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Table_SearchPlaceholder</shortDescription>
+        <value>Search executions...</value>
+    </labels>
+    <labels>
+        <fullName>IH_Table_ColProject</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Table_ColProject</shortDescription>
+        <value>Project</value>
+    </labels>
+    <labels>
+        <fullName>IH_Table_ColStatus</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Table_ColStatus</shortDescription>
+        <value>Status</value>
+    </labels>
+    <labels>
+        <fullName>IH_Table_ColTargetObject</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Table_ColTargetObject</shortDescription>
+        <value>Target Object</value>
+    </labels>
+    <labels>
+        <fullName>IH_Table_ColRecords</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Table_ColRecords</shortDescription>
+        <value>Records</value>
+    </labels>
+    <labels>
+        <fullName>IH_Table_ColDuration</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Table_ColDuration</shortDescription>
+        <value>Duration</value>
+    </labels>
+    <labels>
+        <fullName>IH_Table_ColStarted</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Table_ColStarted</shortDescription>
+        <value>Started</value>
+    </labels>
+    <labels>
+        <fullName>IH_Table_ColActions</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Table_ColActions</shortDescription>
+        <value>Actions</value>
+    </labels>
+    <labels>
+        <fullName>IH_Table_Empty</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Table_Empty</shortDescription>
+        <value>No executions match your filters.</value>
+    </labels>
+    <labels>
+        <fullName>IH_Table_Showing</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Table_Showing</shortDescription>
+        <value>Showing {0} to {1} of {2} results</value>
+    </labels>
+
+    <!-- ACTIONS -->
+    <labels>
+        <fullName>IH_Action_View</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Action_View</shortDescription>
+        <value>View</value>
+    </labels>
+    <labels>
+        <fullName>IH_Action_Monitor</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Action_Monitor</shortDescription>
+        <value>Monitor</value>
+    </labels>
+    <labels>
+        <fullName>IH_Action_Debug</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Action_Debug</shortDescription>
+        <value>Debug</value>
+    </labels>
+    <labels>
+        <fullName>IH_Action_DeleteSelected</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Action_DeleteSelected</shortDescription>
+        <value>Delete Selected ({0})</value>
+    </labels>
+
+    <!-- MODALS -->
+    <labels>
+        <fullName>IH_Modal_CreateTitle</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Modal_CreateTitle</shortDescription>
+        <value>Create New Import Project</value>
+    </labels>
+    <labels>
+        <fullName>IH_Modal_ExportExecution</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Modal_ExportExecution</shortDescription>
+        <value>Export Execution</value>
+    </labels>
+    <labels>
+        <fullName>IH_Modal_DeleteExecution</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Modal_DeleteExecution</shortDescription>
+        <value>Delete Execution</value>
+    </labels>
+    <labels>
+        <fullName>IH_Modal_ExecutionDetails</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Modal_ExecutionDetails</shortDescription>
+        <value>Execution details</value>
+    </labels>
+    <labels>
+        <fullName>IH_Modal_Records</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Modal_Records</shortDescription>
+        <value>Records</value>
+    </labels>
+    <labels>
+        <fullName>IH_Detail_TargetObject</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Detail_TargetObject</shortDescription>
+        <value>Target object</value>
+    </labels>
+    <labels>
+        <fullName>IH_Detail_Status</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Detail_Status</shortDescription>
+        <value>Status</value>
+    </labels>
+    <labels>
+        <fullName>IH_Detail_Phase</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Detail_Phase</shortDescription>
+        <value>Phase</value>
+    </labels>
+    <labels>
+        <fullName>IH_Detail_Started</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Detail_Started</shortDescription>
+        <value>Started</value>
+    </labels>
+    <labels>
+        <fullName>IH_Detail_Duration</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Detail_Duration</shortDescription>
+        <value>Duration</value>
+    </labels>
+    <labels>
+        <fullName>IH_Detail_Processed</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Detail_Processed</shortDescription>
+        <value>Processed</value>
+    </labels>
+    <labels>
+        <fullName>IH_Detail_Total</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Detail_Total</shortDescription>
+        <value>Total</value>
+    </labels>
+    <labels>
+        <fullName>IH_Detail_Failed</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Detail_Failed</shortDescription>
+        <value>Failed</value>
+    </labels>
+    <labels>
+        <fullName>IH_Detail_Success</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Detail_Success</shortDescription>
+        <value>Success</value>
+    </labels>
+    <labels>
+        <fullName>IH_Detail_Remaining</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Detail_Remaining</shortDescription>
+        <value>Remaining</value>
+    </labels>
+    <labels>
+        <fullName>IH_Detail_RecordsSummary</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Detail_RecordsSummary</shortDescription>
+        <value>Records summary</value>
+    </labels>
+
+    <!-- TOAST / ERROR MESSAGES -->
+    <labels>
+        <fullName>IH_Toast_ErrorLoadingHistory</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Toast_ErrorLoadingHistory</shortDescription>
+        <value>Error loading import history</value>
+    </labels>
+    <labels>
+        <fullName>IH_Toast_SelectAtLeastOne</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Toast_SelectAtLeastOne</shortDescription>
+        <value>Select at least one execution.</value>
+    </labels>
+    <labels>
+        <fullName>IH_Confirm_DeleteMultiple</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Confirm_DeleteMultiple</shortDescription>
+        <value>Delete {0} execution history item(s) and related logs?</value>
+    </labels>
+    <labels>
+        <fullName>IH_Toast_ErrorDeleteSelected</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Toast_ErrorDeleteSelected</shortDescription>
+        <value>Unable to delete selected executions.</value>
+    </labels>
+    <labels>
+        <fullName>IH_Toast_CannotDeleteRunning</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Toast_CannotDeleteRunning</shortDescription>
+        <value>Cannot delete an execution that is running.</value>
+    </labels>
+    <labels>
+        <fullName>IH_Confirm_DeleteSingle</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Confirm_DeleteSingle</shortDescription>
+        <value>Delete this execution history and related logs?</value>
+    </labels>
+    <labels>
+        <fullName>IH_Toast_DeleteSuccess</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Toast_DeleteSuccess</shortDescription>
+        <value>Execution history deleted.</value>
+    </labels>
+    <labels>
+        <fullName>IH_Toast_ErrorDeleteSingle</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Toast_ErrorDeleteSingle</shortDescription>
+        <value>Unable to delete execution history.</value>
+    </labels>
+    <labels>
+        <fullName>IH_Toast_NothingToExport</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Toast_NothingToExport</shortDescription>
+        <value>Nothing to export.</value>
+    </labels>
+    <labels>
+        <fullName>IH_Toast_NoExecutionSelected</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Toast_NoExecutionSelected</shortDescription>
+        <value>No execution selected to export.</value>
+    </labels>
+    <labels>
+        <fullName>IH_Toast_ProjectCreated</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Toast_ProjectCreated</shortDescription>
+        <value>Project created</value>
+    </labels>
+    <labels>
+        <fullName>IH_Toast_ProjectCreatedMsg</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Toast_ProjectCreatedMsg</shortDescription>
+        <value>Project {0} created successfully</value>
+    </labels>
+    <labels>
+        <fullName>IH_Toast_ErrorExportCsv</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Toast_ErrorExportCsv</shortDescription>
+        <value>Unable to export CSV.</value>
+    </labels>
+    <labels>
+        <fullName>IH_Toast_ExecutionIdMissing</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Toast_ExecutionIdMissing</shortDescription>
+        <value>Execution ID is missing.</value>
+    </labels>
+    <labels>
+        <fullName>IH_Toast_ErrorLoadDetails</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Toast_ErrorLoadDetails</shortDescription>
+        <value>Unable to load execution details.</value>
+    </labels>
+
+    <!-- RELATIVE TIME -->
+    <labels>
+        <fullName>IH_Time_JustNow</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Time_JustNow</shortDescription>
+        <value>Just now</value>
+    </labels>
+    <labels>
+        <fullName>IH_Time_1MinuteAgo</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Time_1MinuteAgo</shortDescription>
+        <value>1 minute ago</value>
+    </labels>
+    <labels>
+        <fullName>IH_Time_XMinutesAgo</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Time_XMinutesAgo</shortDescription>
+        <value>{0} minutes ago</value>
+    </labels>
+    <labels>
+        <fullName>IH_Time_1HourAgo</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Time_1HourAgo</shortDescription>
+        <value>1 hour ago</value>
+    </labels>
+    <labels>
+        <fullName>IH_Time_XHoursAgo</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Time_XHoursAgo</shortDescription>
+        <value>{0} hours ago</value>
+    </labels>
+    <labels>
+        <fullName>IH_Time_1DayAgo</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Time_1DayAgo</shortDescription>
+        <value>1 day ago</value>
+    </labels>
+    <labels>
+        <fullName>IH_Time_XDaysAgo</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_Time_XDaysAgo</shortDescription>
+        <value>{0} days ago</value>
+    </labels>
+
+    <!-- PHASE PREFIX -->
+    <labels>
+        <fullName>IH_PhasePrefix</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_PhasePrefix</shortDescription>
+        <value>Phase: </value>
+    </labels>
+    <labels>
+        <fullName>IH_PhaseNA</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_PhaseNA</shortDescription>
+        <value>Phase: N/A</value>
+    </labels>
+    <labels>
+        <fullName>IH_ExecutionLabel</fullName>
+        <categories>ImportHistory</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>IH_ExecutionLabel</shortDescription>
+        <value>Execution #</value>
     </labels>
 </CustomLabels>

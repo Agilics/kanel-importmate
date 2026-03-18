@@ -2,6 +2,8 @@ public with sharing class ValidationUtils {
 
     private static Map<String, Schema.DisplayType> fieldTypeCache = new Map<String, Schema.DisplayType>();
     private static Map<String, Boolean> fieldNullableCache = new Map<String, Boolean>();
+    private static Map<String, Map<String, Boolean>> objectFieldNullableCache = new Map<String, Map<String, Boolean>>();
+    private static Map<String, ValidationType> validationTypeCache = new Map<String, ValidationType>();
 
     public class ValidationResult {
         public Boolean isValid { get; set; }
@@ -42,12 +44,32 @@ public with sharing class ValidationUtils {
     
 
     public static ValidationResult validateEmail(String email, String fieldName) {
-        String emailPattern = '^[a-zA-Z0-9._\\|%-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$';
-        if (Pattern.matches(emailPattern, email) || String.isBlank(email)) {
+        if (String.isBlank(email)) {
             return new ValidationResult(true);
         }
-        return new ValidationResult(false, 'Invalid email format: ' + email, Constants.INVALID_EMAIL_FORMAT,
-            new Map<String, Object>{ 'fieldName' => fieldName, 'email' => email });
+
+        String v = email.trim();
+        if (v.length() > 320) {
+            return new ValidationResult(false, 'Invalid email format: ' + email, Constants.INVALID_EMAIL_FORMAT,
+                new Map<String, Object>{ 'fieldName' => fieldName, 'email' => email });
+        }
+
+        Integer atPos = v.indexOf('@');
+        Integer lastAtPos = v.lastIndexOf('@');
+        if (atPos <= 0 || atPos != lastAtPos || atPos >= v.length() - 3) {
+            return new ValidationResult(false, 'Invalid email format: ' + email, Constants.INVALID_EMAIL_FORMAT,
+                new Map<String, Object>{ 'fieldName' => fieldName, 'email' => email });
+        }
+
+        String localPart = v.substring(0, atPos);
+        String domainPart = v.substring(atPos + 1);
+        Integer dotPos = domainPart.lastIndexOf('.');
+        if (String.isBlank(localPart) || dotPos <= 0 || dotPos >= domainPart.length() - 2) {
+            return new ValidationResult(false, 'Invalid email format: ' + email, Constants.INVALID_EMAIL_FORMAT,
+                new Map<String, Object>{ 'fieldName' => fieldName, 'email' => email });
+        }
+
+        return new ValidationResult(true);
     }
     
     //Date validation
@@ -77,7 +99,7 @@ public with sharing class ValidationUtils {
             } catch (Exception e2) {
                 //Check if it looks like a date format but is invalid (e.g., invalid month/day)
                 String errorMessage = 'Invalid datetime format: ' + datetimeValue;
-                if (Pattern.matches('\\d{4}-\\d{2}-\\d{2}.*', datetimeValue)) {
+                if (looksLikeDatePrefix(datetimeValue)) {
                     errorMessage += '. Expected format: YYYY-MM-DD or YYYY-MM-DD HH:MM:SS';
                 } else {
                     errorMessage += '. Expected format: YYYY-MM-DD HH:MM:SS or YYYY-MM-DD';
@@ -127,6 +149,11 @@ public with sharing class ValidationUtils {
         }
         return new ValidationResult(false, 'Invalid boolean format: ' + value, Constants.INVALID_BOOLEAN_FORMAT,
             new Map<String, Object>{ 'fieldName' => fieldName, 'value' => value });
+    }
+
+    private static Boolean looksLikeDatePrefix(String value) {
+        if (String.isBlank(value) || value.length() < 10) return false;
+        return value.substring(4, 5) == '-' && value.substring(7, 8) == '-';
     }
     
     //Required field validation
@@ -285,19 +312,18 @@ public with sharing class ValidationUtils {
      */
     public static ValidationType getValidationTypeForField(String fieldName, String objectName) {
         try {
-            Schema.DescribeSObjectResult describeResult = Schema.describeSObjects(new List<String>{objectName})[0];
-            Map<String, Schema.SObjectField> fieldsMap = describeResult.fields.getMap();
-            
-            if (!fieldsMap.containsKey(fieldName)) {
-                return ValidationType.FIELD_SIZE;
+            String cacheKey = objectName + '.' + fieldName;
+            if (validationTypeCache.containsKey(cacheKey)) {
+                return validationTypeCache.get(cacheKey);
             }
-            
-            Schema.DescribeFieldResult fieldDescribe = fieldsMap.get(fieldName).getDescribe();
-            Schema.DisplayType fieldType = fieldDescribe.getType();
-            
-            //Map Salesforce types to our validation types
-            return mapSalesforceTypeToValidationType(fieldType);
-            
+
+            Schema.DisplayType fieldType = ObjectMetadataService.getFieldType(objectName, fieldName);
+            ValidationType vt = fieldType == null
+                ? ValidationType.FIELD_SIZE
+                : mapSalesforceTypeToValidationType(fieldType);
+
+            validationTypeCache.put(cacheKey, vt);
+            return vt;
         } catch (Exception e) {
             ErrorLogService.logException(e);
             return ValidationType.FIELD_SIZE;
@@ -387,14 +413,25 @@ public with sharing class ValidationUtils {
     }
     
     public static Boolean getCachedFieldNullable(String objectName, String fieldName) {
-        String key = objectName + '.' + fieldName;
+        String normalizedField = fieldName.toLowerCase();
+        String key = objectName + '.' + normalizedField;
         if (!fieldNullableCache.containsKey(key)) {
             try {
-                Schema.DescribeSObjectResult describeResult = Schema.describeSObjects(new List<String>{objectName})[0];
-                Map<String, Schema.SObjectField> fieldsMap = describeResult.fields.getMap();
-                
-                if (fieldsMap.containsKey(fieldName)) {
-                    fieldNullableCache.put(key, fieldsMap.get(fieldName).getDescribe().isNillable());
+                if (!objectFieldNullableCache.containsKey(objectName)) {
+                    Map<String, Boolean> nullableByField = new Map<String, Boolean>();
+                    Map<String, Schema.SObjectField> fieldsMap = ObjectMetadataService.getGlobalDescribeMap()
+                        .get(objectName)
+                        .getDescribe()
+                        .fields
+                        .getMap();
+                    for (String apiName : fieldsMap.keySet()) {
+                        nullableByField.put(apiName.toLowerCase(), fieldsMap.get(apiName).getDescribe().isNillable());
+                    }
+                    objectFieldNullableCache.put(objectName, nullableByField);
+                }
+
+                if (objectFieldNullableCache.get(objectName).containsKey(normalizedField)) {
+                    fieldNullableCache.put(key, objectFieldNullableCache.get(objectName).get(normalizedField));
                 } else {
                     fieldNullableCache.put(key, true);
                 }
@@ -413,6 +450,8 @@ public with sharing class ValidationUtils {
     public static void clearCache() {
         fieldTypeCache.clear();
         fieldNullableCache.clear();
+        objectFieldNullableCache.clear();
+        validationTypeCache.clear();
     }
     
     
