@@ -89,3 +89,4 @@ export const PROJECT_FIELD_NAMES = {
 
 // Recent projects limit
 export const RECENT_PROJECTS_LIMIT = 3;
+export const PROJECT_MODAL_EDIT_TITLE =EditProject_Modal_Title;

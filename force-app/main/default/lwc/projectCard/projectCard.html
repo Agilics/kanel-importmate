@@ -7,23 +7,11 @@
                 <span class={statusClass}>{status}</span>
             </div>
             <div class="card-header-right">
-                <lightning-button-icon
-                    icon-name="utility:edit"
-                    alternative-text="Edit"
-                    title="Edit Project"
-                    size="small"
-                    variant="bare"
-                    onclick={handleEditClick}
-                    class="action-icon">
+                <lightning-button-icon icon-name="utility:edit" alternative-text="Edit" title="Edit Project"
+                    size="small" variant="bare" onclick={handleEditClick} class="action-icon">
                 </lightning-button-icon>
-                <lightning-button-icon
-                    icon-name="utility:delete"
-                    alternative-text="Delete"
-                    title="Delete Project"
-                    size="small"
-                    variant="bare"
-                    onclick={handleDeleteClick}
-                    class="action-icon">
+                <lightning-button-icon icon-name="utility:delete" alternative-text="Delete" title="Delete Project"
+                    size="small" variant="bare" onclick={handleDeleteClick} class="action-icon">
                 </lightning-button-icon>
             </div>
         </div>
@@ -31,7 +19,7 @@
         <!-- Card Body -->
         <div class="card-body">
             <p class="project-description">{description}</p>
-            
+
             <div class="project-meta">
                 <div class="meta-item">
                     <lightning-icon icon-name="standard:account" size="x-small"></lightning-icon>

@@ -5,7 +5,7 @@
  * @last modified on  : 10-20-2025
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
  **/
-public class ImportProjectController {
+public with sharing class  ImportProjectController {
   //Récuperer une variable de nombre (limitor) de   projets récements importés
   @AuraEnabled(cacheable=true)
   public static List<ImportProject__c> getRecentsProjects(Integer limitor) {
@@ -53,5 +53,11 @@ public class ImportProjectController {
     @AuraEnabled(cacheable=true)
     public static List<String> getCompatibleSObjects() {
       return ObjectMetadataService.getCompatibleSObjects();
+    }
+
+    //mise à jour d'un projet importé
+    @AuraEnabled 
+    public static void updateProject(String projectId,String name,String description,String targetObject) {
+       ProjectService.updateProject(projectId, name, description, targetObject);
     }
 }
