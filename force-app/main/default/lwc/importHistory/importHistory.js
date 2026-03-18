@@ -5,6 +5,101 @@ import deleteExecutionHistory from '@salesforce/apex/DashboardController.deleteE
 import deleteExecutionHistories from '@salesforce/apex/DashboardController.deleteExecutionHistories';
 import { subscribe, unsubscribe, onError } from 'lightning/empApi';
 
+// ─── Custom Labels ─────────────────────────────────────────────────────────────
+import LBL_TITLE                   from '@salesforce/label/c.IH_Title';
+import LBL_SUBTITLE                from '@salesforce/label/c.IH_Subtitle';
+import LBL_EXPORT_REPORT           from '@salesforce/label/c.IH_ExportReport';
+import LBL_NEW_IMPORT_PROJECT      from '@salesforce/label/c.IH_NewImportProject';
+
+import LBL_FILTER_STATUS           from '@salesforce/label/c.IH_Filter_Status';
+import LBL_FILTER_DATE_RANGE       from '@salesforce/label/c.IH_Filter_DateRange';
+import LBL_FILTER_PROJECT          from '@salesforce/label/c.IH_Filter_Project';
+import LBL_FILTER_TARGET_OBJECT    from '@salesforce/label/c.IH_Filter_TargetObject';
+import LBL_APPLY_FILTERS           from '@salesforce/label/c.IH_ApplyFilters';
+
+import LBL_STATUS_ALL              from '@salesforce/label/c.IH_Status_All';
+import LBL_STATUS_COMPLETED        from '@salesforce/label/c.IH_Status_Completed';
+import LBL_STATUS_RUNNING          from '@salesforce/label/c.IH_Status_Running';
+import LBL_STATUS_FAILED           from '@salesforce/label/c.IH_Status_Failed';
+import LBL_STATUS_CANCELLED        from '@salesforce/label/c.IH_Status_Cancelled';
+import LBL_STATUS_DRAFT            from '@salesforce/label/c.IH_Status_Draft';
+
+import LBL_DATE_LAST7              from '@salesforce/label/c.IH_Date_Last7';
+import LBL_DATE_LAST30             from '@salesforce/label/c.IH_Date_Last30';
+import LBL_DATE_LAST90             from '@salesforce/label/c.IH_Date_Last90';
+import LBL_DATE_ALL_TIME           from '@salesforce/label/c.IH_Date_AllTime';
+
+import LBL_ALL_PROJECTS            from '@salesforce/label/c.IH_AllProjects';
+import LBL_ALL_OBJECTS             from '@salesforce/label/c.IH_AllObjects';
+
+import LBL_KPI_TOTAL_EXECUTIONS    from '@salesforce/label/c.IH_KPI_TotalExecutions';
+import LBL_KPI_SUCCESS_RATE        from '@salesforce/label/c.IH_KPI_SuccessRate';
+import LBL_KPI_RECORDS_PROCESSED   from '@salesforce/label/c.IH_KPI_RecordsProcessed';
+import LBL_KPI_AVG_DURATION        from '@salesforce/label/c.IH_KPI_AvgDuration';
+
+import LBL_TABLE_TITLE             from '@salesforce/label/c.IH_Table_Title';
+import LBL_TABLE_SEARCH            from '@salesforce/label/c.IH_Table_SearchPlaceholder';
+import LBL_TABLE_COL_PROJECT       from '@salesforce/label/c.IH_Table_ColProject';
+import LBL_TABLE_COL_STATUS        from '@salesforce/label/c.IH_Table_ColStatus';
+import LBL_TABLE_COL_TARGET        from '@salesforce/label/c.IH_Table_ColTargetObject';
+import LBL_TABLE_COL_RECORDS       from '@salesforce/label/c.IH_Table_ColRecords';
+import LBL_TABLE_COL_DURATION      from '@salesforce/label/c.IH_Table_ColDuration';
+import LBL_TABLE_COL_STARTED       from '@salesforce/label/c.IH_Table_ColStarted';
+import LBL_TABLE_COL_ACTIONS       from '@salesforce/label/c.IH_Table_ColActions';
+import LBL_TABLE_EMPTY             from '@salesforce/label/c.IH_Table_Empty';
+import LBL_TABLE_SHOWING           from '@salesforce/label/c.IH_Table_Showing';
+
+import LBL_ACTION_VIEW             from '@salesforce/label/c.IH_Action_View';
+import LBL_ACTION_MONITOR          from '@salesforce/label/c.IH_Action_Monitor';
+import LBL_ACTION_DEBUG            from '@salesforce/label/c.IH_Action_Debug';
+import LBL_ACTION_DELETE_SELECTED  from '@salesforce/label/c.IH_Action_DeleteSelected';
+
+import LBL_MODAL_CREATE_TITLE      from '@salesforce/label/c.IH_Modal_CreateTitle';
+import LBL_MODAL_EXPORT_EXEC       from '@salesforce/label/c.IH_Modal_ExportExecution';
+import LBL_MODAL_DELETE_EXEC       from '@salesforce/label/c.IH_Modal_DeleteExecution';
+import LBL_MODAL_EXEC_DETAILS      from '@salesforce/label/c.IH_Modal_ExecutionDetails';
+import LBL_MODAL_RECORDS           from '@salesforce/label/c.IH_Modal_Records';
+import LBL_DETAIL_TARGET_OBJECT    from '@salesforce/label/c.IH_Detail_TargetObject';
+import LBL_DETAIL_STATUS           from '@salesforce/label/c.IH_Detail_Status';
+import LBL_DETAIL_PHASE            from '@salesforce/label/c.IH_Detail_Phase';
+import LBL_DETAIL_STARTED          from '@salesforce/label/c.IH_Detail_Started';
+import LBL_DETAIL_DURATION         from '@salesforce/label/c.IH_Detail_Duration';
+import LBL_DETAIL_PROCESSED        from '@salesforce/label/c.IH_Detail_Processed';
+import LBL_DETAIL_TOTAL            from '@salesforce/label/c.IH_Detail_Total';
+import LBL_DETAIL_FAILED           from '@salesforce/label/c.IH_Detail_Failed';
+import LBL_DETAIL_SUCCESS          from '@salesforce/label/c.IH_Detail_Success';
+import LBL_DETAIL_REMAINING        from '@salesforce/label/c.IH_Detail_Remaining';
+import LBL_DETAIL_RECORDS_SUMMARY  from '@salesforce/label/c.IH_Detail_RecordsSummary';
+
+import LBL_TOAST_ERROR_LOADING     from '@salesforce/label/c.IH_Toast_ErrorLoadingHistory';
+import LBL_TOAST_SELECT_ONE        from '@salesforce/label/c.IH_Toast_SelectAtLeastOne';
+import LBL_CONFIRM_DELETE_MULTI    from '@salesforce/label/c.IH_Confirm_DeleteMultiple';
+import LBL_TOAST_ERR_DEL_SELECTED  from '@salesforce/label/c.IH_Toast_ErrorDeleteSelected';
+import LBL_TOAST_CANNOT_DEL_RUN    from '@salesforce/label/c.IH_Toast_CannotDeleteRunning';
+import LBL_CONFIRM_DELETE_SINGLE   from '@salesforce/label/c.IH_Confirm_DeleteSingle';
+import LBL_TOAST_DELETE_SUCCESS    from '@salesforce/label/c.IH_Toast_DeleteSuccess';
+import LBL_TOAST_ERR_DEL_SINGLE    from '@salesforce/label/c.IH_Toast_ErrorDeleteSingle';
+import LBL_TOAST_NOTHING_EXPORT    from '@salesforce/label/c.IH_Toast_NothingToExport';
+import LBL_TOAST_NO_EXEC_SELECTED  from '@salesforce/label/c.IH_Toast_NoExecutionSelected';
+import LBL_TOAST_PROJECT_CREATED   from '@salesforce/label/c.IH_Toast_ProjectCreated';
+import LBL_TOAST_PROJECT_CREATED_MSG from '@salesforce/label/c.IH_Toast_ProjectCreatedMsg';
+import LBL_TOAST_ERR_EXPORT_CSV    from '@salesforce/label/c.IH_Toast_ErrorExportCsv';
+import LBL_TOAST_EXEC_ID_MISSING   from '@salesforce/label/c.IH_Toast_ExecutionIdMissing';
+import LBL_TOAST_ERR_LOAD_DETAILS  from '@salesforce/label/c.IH_Toast_ErrorLoadDetails';
+
+import LBL_TIME_JUST_NOW           from '@salesforce/label/c.IH_Time_JustNow';
+import LBL_TIME_1MIN_AGO           from '@salesforce/label/c.IH_Time_1MinuteAgo';
+import LBL_TIME_X_MIN_AGO          from '@salesforce/label/c.IH_Time_XMinutesAgo';
+import LBL_TIME_1HOUR_AGO          from '@salesforce/label/c.IH_Time_1HourAgo';
+import LBL_TIME_X_HOURS_AGO        from '@salesforce/label/c.IH_Time_XHoursAgo';
+import LBL_TIME_1DAY_AGO           from '@salesforce/label/c.IH_Time_1DayAgo';
+import LBL_TIME_X_DAYS_AGO         from '@salesforce/label/c.IH_Time_XDaysAgo';
+
+import LBL_PHASE_PREFIX            from '@salesforce/label/c.IH_PhasePrefix';
+import LBL_PHASE_NA                from '@salesforce/label/c.IH_PhaseNA';
+import LBL_EXECUTION_LABEL         from '@salesforce/label/c.IH_ExecutionLabel';
+// ────────────────────────────────────────────────────────────────────────────────
+
 const PAGE_SIZE = 5;
 const POLLING_FALLBACK_INTERVAL_MS = 30000;
 const EVENT_REFRESH_DEBOUNCE_MS = 800;
@@ -19,31 +114,78 @@ export default class ImportHistory extends LightningElement {
   @track selectedRow = null;
   @track selectedExecutionIds = [];
 
- 
+  // ─── Expose labels to the template ──────────────────────────────────────────
+  label = {
+    title:              LBL_TITLE,
+    subtitle:           LBL_SUBTITLE,
+    exportReport:       LBL_EXPORT_REPORT,
+    newImportProject:   LBL_NEW_IMPORT_PROJECT,
+    filterStatus:       LBL_FILTER_STATUS,
+    filterDateRange:    LBL_FILTER_DATE_RANGE,
+    filterProject:      LBL_FILTER_PROJECT,
+    filterTargetObject: LBL_FILTER_TARGET_OBJECT,
+    applyFilters:       LBL_APPLY_FILTERS,
+    kpiTotalExecutions: LBL_KPI_TOTAL_EXECUTIONS,
+    kpiSuccessRate:     LBL_KPI_SUCCESS_RATE,
+    kpiRecordsProcessed:LBL_KPI_RECORDS_PROCESSED,
+    kpiAvgDuration:     LBL_KPI_AVG_DURATION,
+    tableTitle:         LBL_TABLE_TITLE,
+    tableSearch:        LBL_TABLE_SEARCH,
+    tableColProject:    LBL_TABLE_COL_PROJECT,
+    tableColStatus:     LBL_TABLE_COL_STATUS,
+    tableColTarget:     LBL_TABLE_COL_TARGET,
+    tableColRecords:    LBL_TABLE_COL_RECORDS,
+    tableColDuration:   LBL_TABLE_COL_DURATION,
+    tableColStarted:    LBL_TABLE_COL_STARTED,
+    tableColActions:    LBL_TABLE_COL_ACTIONS,
+    tableEmpty:         LBL_TABLE_EMPTY,
+    modalCreateTitle:   LBL_MODAL_CREATE_TITLE,
+    modalExportExec:    LBL_MODAL_EXPORT_EXEC,
+    modalDeleteExec:    LBL_MODAL_DELETE_EXEC,
+    modalExecDetails:   LBL_MODAL_EXEC_DETAILS,
+    modalRecords:       LBL_MODAL_RECORDS,
+    detailTargetObject: LBL_DETAIL_TARGET_OBJECT,
+    detailStatus:       LBL_DETAIL_STATUS,
+    detailPhase:        LBL_DETAIL_PHASE,
+    detailStarted:      LBL_DETAIL_STARTED,
+    detailDuration:     LBL_DETAIL_DURATION,
+    detailProcessed:    LBL_DETAIL_PROCESSED,
+    detailTotal:        LBL_DETAIL_TOTAL,
+    detailFailed:       LBL_DETAIL_FAILED,
+    detailSuccess:      LBL_DETAIL_SUCCESS,
+    detailRemaining:    LBL_DETAIL_REMAINING,
+    detailRecordsSummary: LBL_DETAIL_RECORDS_SUMMARY
+  };
+  // ────────────────────────────────────────────────────────────────────────────
+
   statusFilter = 'all';
   dateRangeFilter = 'all';
   projectFilter = 'all';
   targetFilter = 'all';
   searchTerm = '';
-  statusOptions = [
-    { label: 'All Statuses', value: 'all' },
-    { label: 'Completed', value: 'Completed' },
-    { label: 'Running', value: 'Running' },
-    { label: 'Failed', value: 'Failed' },
-    { label: 'Cancelled', value: 'Cancelled' },
-    { label: 'Draft', value: 'Draft' }
-  ];
 
-  dateRangeOptions = [
-    { label: 'Last 7 days', value: '7' },
-    { label: 'Last 30 days', value: '30' },
-    { label: 'Last 90 days', value: '90' },
-    { label: 'All time', value: 'all' }
-  ];
+  get statusOptions() {
+    return [
+      { label: LBL_STATUS_ALL,       value: 'all' },
+      { label: LBL_STATUS_COMPLETED, value: 'Completed' },
+      { label: LBL_STATUS_RUNNING,   value: 'Running' },
+      { label: LBL_STATUS_FAILED,    value: 'Failed' },
+      { label: LBL_STATUS_CANCELLED, value: 'Cancelled' },
+      { label: LBL_STATUS_DRAFT,     value: 'Draft' }
+    ];
+  }
 
-  projectOptions = [{ label: 'All Projects', value: 'all' }];
-  targetOptions = [{ label: 'All Objects', value: 'all' }];
+  get dateRangeOptions() {
+    return [
+      { label: LBL_DATE_LAST7,    value: '7' },
+      { label: LBL_DATE_LAST30,   value: '30' },
+      { label: LBL_DATE_LAST90,   value: '90' },
+      { label: LBL_DATE_ALL_TIME, value: 'all' }
+    ];
+  }
 
+  projectOptions = [{ label: LBL_ALL_PROJECTS, value: 'all' }];
+  targetOptions  = [{ label: LBL_ALL_OBJECTS,  value: 'all' }];
 
   currentPage = 1;
   pageSize = PAGE_SIZE;
@@ -81,14 +223,13 @@ export default class ImportHistory extends LightningElement {
       const result = await getExecutionHistoryLive({ limitor: 5000 });
       this.executions = Array.isArray(result) ? result : [];
       this.syncSelectedExecutionIds();
-
       this.computeKpis();
       this.buildFilterOptions();
       this.applyFilters();
     } catch (e) {
       this.showToast(
         'Error',
-        e?.body?.message || e?.message || 'Error loading import history',
+        e?.body?.message || e?.message || LBL_TOAST_ERROR_LOADING,
         'error'
       );
     } finally {
@@ -253,7 +394,7 @@ export default class ImportHistory extends LightningElement {
         remaining,
         durationMs,
         startedAt: execution.StartTime__c || execution.CreatedDate || null,
-        executionLabel: `Execution #${execution.Name || execution.Id}`
+        executionLabel: `${LBL_EXECUTION_LABEL}${execution.Name || execution.Id}`
       });
     });
 
@@ -270,7 +411,6 @@ export default class ImportHistory extends LightningElement {
     return (status || '').toLowerCase() === 'running';
   }
 
-
   buildFilterOptions() {
     const projectSet = new Set();
     const targetSet = new Set();
@@ -281,12 +421,12 @@ export default class ImportHistory extends LightningElement {
     });
 
     this.projectOptions = [
-      { label: 'All Projects', value: 'all' },
+      { label: LBL_ALL_PROJECTS, value: 'all' },
       ...Array.from(projectSet).map((name) => ({ label: name, value: name }))
     ];
 
     this.targetOptions = [
-      { label: 'All Objects', value: 'all' },
+      { label: LBL_ALL_OBJECTS, value: 'all' },
       ...Array.from(targetSet).map((obj) => ({ label: obj, value: obj }))
     ];
   }
@@ -383,24 +523,35 @@ export default class ImportHistory extends LightningElement {
 
     this.pageRows = slice.map((r) => {
       const statusLower = (r.status || '').toLowerCase();
-      let statusLabel = r.status || 'Draft';
-      let actionLabel = 'View';
+      let statusLabel = r.status || LBL_STATUS_DRAFT;
+      let actionLabel = LBL_ACTION_VIEW;
       let statusClass = 'ih-status-pill ih-status-draft';
       let showStatusDot = false;
       let statusDotClass = '';
 
       if (statusLower === 'completed') {
+        statusLabel = LBL_STATUS_COMPLETED;
         statusClass = 'ih-status-pill ih-status-success';
       } else if (statusLower === 'running') {
+        statusLabel = LBL_STATUS_RUNNING;
         statusClass = 'ih-status-pill ih-status-running';
-        actionLabel = 'Monitor';
+        actionLabel = LBL_ACTION_MONITOR;
         showStatusDot = true;
         statusDotClass = 'ih-status-dot ih-status-dot-running';
-      } else if (statusLower === 'failed' || statusLower === 'cancelled') {
+      } else if (statusLower === 'failed') {
+        statusLabel = LBL_STATUS_FAILED;
         statusClass = 'ih-status-pill ih-status-failed';
-        actionLabel = 'Debug';
+        actionLabel = LBL_ACTION_DEBUG;
         showStatusDot = true;
         statusDotClass = 'ih-status-dot ih-status-dot-failed';
+      } else if (statusLower === 'cancelled') {
+        statusLabel = LBL_STATUS_CANCELLED;
+        statusClass = 'ih-status-pill ih-status-failed';
+        actionLabel = LBL_ACTION_DEBUG;
+        showStatusDot = true;
+        statusDotClass = 'ih-status-dot ih-status-dot-failed';
+      } else if (statusLower === 'draft') {
+        statusLabel = LBL_STATUS_DRAFT;
       }
 
       const recordsText = this.buildRecordsText(
@@ -410,7 +561,9 @@ export default class ImportHistory extends LightningElement {
         r.remaining
       );
 
-      const phaseText = r.phase ? `Phase: ${r.phase}` : 'Phase: N/A';
+      const phaseText = r.phase
+        ? `${LBL_PHASE_PREFIX}${r.phase}`
+        : LBL_PHASE_NA;
 
       const nameLower = (r.projectName || '').toLowerCase();
       const targetLower = (r.targetObject || '').toLowerCase();
@@ -459,7 +612,6 @@ export default class ImportHistory extends LightningElement {
     });
   }
 
-
   get totalRows() {
     return this.filteredRows.length;
   }
@@ -475,6 +627,13 @@ export default class ImportHistory extends LightningElement {
 
   get lastRowIndex() {
     return Math.min(this.currentPage * this.pageSize, this.totalRows);
+  }
+
+  get showingText() {
+    return LBL_TABLE_SHOWING
+      .replace('{0}', this.firstRowIndex)
+      .replace('{1}', this.lastRowIndex)
+      .replace('{2}', this.totalRows);
   }
 
   get isPreviousDisabled() {
@@ -495,7 +654,7 @@ export default class ImportHistory extends LightningElement {
   }
 
   get deleteSelectedLabel() {
-    return `Delete Selected (${this.selectedCount})`;
+    return LBL_ACTION_DELETE_SELECTED.replace('{0}', this.selectedCount);
   }
 
   get isBulkDeleteDisabled() {
@@ -534,7 +693,7 @@ export default class ImportHistory extends LightningElement {
     const row = (this.pageRows || []).find((r) => r.id === id);
 
     if (!row) {
-      this.showToast('Error', 'Unable to load execution details.', 'error');
+      this.showToast('Error', LBL_TOAST_ERR_LOAD_DETAILS, 'error');
       return;
     }
 
@@ -578,12 +737,12 @@ export default class ImportHistory extends LightningElement {
   async handleDeleteSelected() {
     const executionIds = [...this.selectedExecutionIds];
     if (!executionIds.length) {
-      this.showToast('Info', 'Select at least one execution.', 'info');
+      this.showToast('Info', LBL_TOAST_SELECT_ONE, 'info');
       return;
     }
 
     const confirmed = window.confirm(
-      `Delete ${executionIds.length} execution history item(s) and related logs?`
+      LBL_CONFIRM_DELETE_MULTI.replace('{0}', executionIds.length)
     );
     if (!confirmed) {
       return;
@@ -599,18 +758,10 @@ export default class ImportHistory extends LightningElement {
       const failedCount = Number(result?.failedCount || 0);
 
       let message = `${deletedCount} deleted`;
-      if (skippedRunningCount > 0) {
-        message += `, ${skippedRunningCount} running`;
-      }
-      if (skippedNotFoundCount > 0) {
-        message += `, ${skippedNotFoundCount} not found`;
-      }
-      if (skippedStagingCount > 0) {
-        message += `, ${skippedStagingCount} staging blocked`;
-      }
-      if (failedCount > 0) {
-        message += `, ${failedCount} failed`;
-      }
+      if (skippedRunningCount > 0) message += `, ${skippedRunningCount} running`;
+      if (skippedNotFoundCount > 0) message += `, ${skippedNotFoundCount} not found`;
+      if (skippedStagingCount > 0) message += `, ${skippedStagingCount} staging blocked`;
+      if (failedCount > 0) message += `, ${failedCount} failed`;
 
       if (deletedCount > 0) {
         this.showToast('Success', message, 'success');
@@ -627,7 +778,7 @@ export default class ImportHistory extends LightningElement {
     } catch (e) {
       this.showToast(
         'Error',
-        e?.body?.message || e?.message || 'Unable to delete selected executions.',
+        e?.body?.message || e?.message || LBL_TOAST_ERR_DEL_SELECTED,
         'error'
       );
     } finally {
@@ -638,18 +789,18 @@ export default class ImportHistory extends LightningElement {
   async handleDeleteExecution(event) {
     const executionId = event.currentTarget?.dataset?.id;
     if (!executionId) {
-      this.showToast('Error', 'Execution ID is missing.', 'error');
+      this.showToast('Error', LBL_TOAST_EXEC_ID_MISSING, 'error');
       return;
     }
 
     const row = (this.filteredRows || []).find((r) => r.id === executionId);
     const status = (row?.status || '').toLowerCase();
     if (status === 'running') {
-      this.showToast('Warning', 'Cannot delete an execution that is running.', 'warning');
+      this.showToast('Warning', LBL_TOAST_CANNOT_DEL_RUN, 'warning');
       return;
     }
 
-    const confirmed = window.confirm('Delete this execution history and related logs?');
+    const confirmed = window.confirm(LBL_CONFIRM_DELETE_SINGLE);
     if (!confirmed) {
       return;
     }
@@ -663,12 +814,12 @@ export default class ImportHistory extends LightningElement {
         this.closeViewModal();
       }
 
-      this.showToast('Success', 'Execution history deleted.', 'success');
+      this.showToast('Success', LBL_TOAST_DELETE_SUCCESS, 'success');
       await this.loadData();
     } catch (e) {
       this.showToast(
         'Error',
-        e?.body?.message || e?.message || 'Unable to delete execution history.',
+        e?.body?.message || e?.message || LBL_TOAST_ERR_DEL_SINGLE,
         'error'
       );
     } finally {
@@ -689,8 +840,8 @@ export default class ImportHistory extends LightningElement {
     this.showCreateModal = false;
 
     this.showToast(
-      'Project created',
-      `Project ${proj?.Name || proj?.Id || ''} created successfully`,
+      LBL_TOAST_PROJECT_CREATED,
+      LBL_TOAST_PROJECT_CREATED_MSG.replace('{0}', proj?.Name || proj?.Id || ''),
       'success'
     );
 
@@ -699,19 +850,13 @@ export default class ImportHistory extends LightningElement {
 
   handleExport() {
     if (!this.filteredRows.length) {
-      this.showToast('Info', 'Nothing to export.', 'info');
+      this.showToast('Info', LBL_TOAST_NOTHING_EXPORT, 'info');
       return;
     }
 
     const header = [
-      'Project',
-      'Target Object',
-      'Status',
-      'Processed',
-      'Total',
-      'Failed',
-      'Started',
-      'Duration'
+      'Project', 'Target Object', 'Status',
+      'Processed', 'Total', 'Failed', 'Started', 'Duration'
     ];
 
     const rows = this.filteredRows.map((r) => [
@@ -731,21 +876,14 @@ export default class ImportHistory extends LightningElement {
 
   handleExportSelected() {
     if (!this.selectedRow) {
-      this.showToast('Info', 'No execution selected to export.', 'info');
+      this.showToast('Info', LBL_TOAST_NO_EXEC_SELECTED, 'info');
       return;
     }
 
     const r = this.selectedRow;
-
     const header = [
-      'Project',
-      'Target Object',
-      'Status',
-      'Processed',
-      'Total',
-      'Failed',
-      'Started',
-      'Duration'
+      'Project', 'Target Object', 'Status',
+      'Processed', 'Total', 'Failed', 'Started', 'Duration'
     ];
 
     const row = [
@@ -767,22 +905,16 @@ export default class ImportHistory extends LightningElement {
   downloadCsv(csv, fileName) {
     try {
       const csvContent = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
-
       const link = document.createElement('a');
       link.href = csvContent;
       link.download = fileName || 'export.csv';
       link.target = '_self';
       link.style.display = 'none';
-
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
     } catch (e) {
-      this.showToast(
-        'Error',
-        e?.message || 'Unable to export CSV.',
-        'error'
-      );
+      this.showToast('Error', e?.message || LBL_TOAST_ERR_EXPORT_CSV, 'error');
     }
   }
 
@@ -856,15 +988,14 @@ export default class ImportHistory extends LightningElement {
     const diffHour = Math.floor(diffMin / 60);
     const diffDay = Math.floor(diffHour / 24);
 
-    if (diffDay >= 2) return `${diffDay} days ago`;
-    if (diffDay === 1) return `1 day ago`;
-    if (diffHour >= 2) return `${diffHour} hours ago`;
-    if (diffHour === 1) return `1 hour ago`;
-    if (diffMin >= 2) return `${diffMin} minutes ago`;
-    if (diffMin === 1) return `1 minute ago`;
-    return `Just now`;
-}
-
+    if (diffDay >= 2) return LBL_TIME_X_DAYS_AGO.replace('{0}', diffDay);
+    if (diffDay === 1) return LBL_TIME_1DAY_AGO;
+    if (diffHour >= 2) return LBL_TIME_X_HOURS_AGO.replace('{0}', diffHour);
+    if (diffHour === 1) return LBL_TIME_1HOUR_AGO;
+    if (diffMin >= 2) return LBL_TIME_X_MIN_AGO.replace('{0}', diffMin);
+    if (diffMin === 1) return LBL_TIME_1MIN_AGO;
+    return LBL_TIME_JUST_NOW;
+  }
 
   formatNumber(num) {
     const n = num || 0;
@@ -875,11 +1006,7 @@ export default class ImportHistory extends LightningElement {
 
   showToast(title, message, variant) {
     this.dispatchEvent(
-      new ShowToastEvent({
-        title,
-        message,
-        variant
-      })
+      new ShowToastEvent({ title, message, variant })
     );
   }
 }

@@ -1,9 +1,7 @@
 <!--
-  @description       : 
-  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
-  @group             : 
-  @last modified on  : 02-04-2026
-  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+  @description       : TransformationMapperList - HTML template with Custom Labels integration
+  @author            : Mouhamed NIANG
+  @last modified on  : 02-24-2026
 -->
 <template>
   <div>
@@ -13,7 +11,6 @@
         <div class="slds-align_absolute-center" style="padding: 2rem;">
           <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
         </div>
-        <p class="slds-align_absolute-center slds-m-top_small" style="color: #666;">Loading mappings...</p>
       </div>
     </template>
 
@@ -21,7 +18,7 @@
     <template if:true={error}>
       <div class="card">
         <div class="slds-box slds-theme_error slds-m-bottom_small">
-          <strong>Error:</strong>
+          <strong>{labels.errorTitle}:</strong>
           <span class="slds-m-left_x-small">{error}</span>
         </div>
       </div>
@@ -32,7 +29,7 @@
       <div class="card">
         <div class="toolbar">
           <div class="toolbar__left">
-            <div class="card__title">Available Mappings</div>
+            <div class="card__title">{labels.availableMappings}</div>
             <span class="badge badge--green">{badgeText}</span>
           </div>
           <div class="toolbar__right">
@@ -45,7 +42,7 @@
               <input
                 class="search__input"
                 type="search"
-                placeholder="Search mappings..."
+                placeholder={labels.searchMappings}
                 value={searchTerm}
                 oninput={handleSearchChange}
               />
@@ -64,7 +61,7 @@
                       data-field="sourceColumn"
                       onclick={handleHeaderClick}
                     >
-                      <span>Source Column</span>
+                      <span>{labels.sourceColumn}</span>
                       <template if:true={sortFields.sourceColumn.isSorted}>
                         <span class="sort-caret">
                           <template if:true={sortFields.sourceColumn.sortAsc}>▲</template>
@@ -79,7 +76,7 @@
                       data-field="targetField"
                       onclick={handleHeaderClick}
                     >
-                      <span>Target Field</span>
+                      <span>{labels.targetField}</span>
                       <template if:true={sortFields.targetField.isSorted}>
                         <span class="sort-caret">
                           <template if:true={sortFields.targetField.sortAsc}>▲</template>
@@ -88,10 +85,10 @@
                       </template>
                     </button>
                   </th>
-                  <th>Version</th>
-                  <th>Type</th>
-                  <th>Lookup Details</th>
-                  <th class="col-actions">Actions</th>
+                  <th>{labels.version}</th>
+                  <th>{labels.type}</th>
+                  <th>{labels.lookupDetails}</th>
+                  <th class="col-actions">{labels.actions}</th>
                 </tr>
               </thead>
 
@@ -133,7 +130,7 @@
                           class="custom-icon-output"
                           size="x-small"
                         ></lightning-icon>
-                        <label>Add Rule</label>
+                        <label>{labels.addRule}</label>
                       </button>
                     </td>
                   </tr>
@@ -145,7 +142,7 @@
           <!-- Pagination -->
           <div class="table-footer">
             <div class="table-footer__left">
-              Showing {showingFrom} to {showingTo} of {totalEntries} entries
+              {showingEntriesText}
             </div>
             <div class="table-footer__right pager">
               <button
@@ -154,11 +151,8 @@
                 onclick={gotoPrev}
                 disabled={isFirstPage}
               >
-                <lightning-icon
-                  icon-name="utility:chevronleft"
-                  size="xx-small"
-                ></lightning-icon>
-                <span class="slds-m-left_xx-small">Previous</span>
+                <lightning-icon icon-name="utility:chevronleft" size="xx-small"></lightning-icon>
+                <span class="slds-m-left_xx-small">{labels.previous}</span>
               </button>
 
               <template for:each={pageNumbers} for:item="p">
@@ -168,10 +162,7 @@
                   </template>
                   <template if:false={p.isEllipsis}>
                     <template if:true={p.isActive}>
-                      <button
-                        type="button"
-                        class="pager__page pager__page--active"
-                      >
+                      <button type="button" class="pager__page pager__page--active">
                         {p.label}
                       </button>
                     </template>
@@ -195,11 +186,8 @@
                 onclick={gotoNext}
                 disabled={isLastPage}
               >
-                <span class="slds-m-right_xx-small">Next</span>
-                <lightning-icon
-                  icon-name="utility:chevronright"
-                  size="xx-small"
-                ></lightning-icon>
+                <span class="slds-m-right_xx-small">{labels.next}</span>
+                <lightning-icon icon-name="utility:chevronright" size="xx-small"></lightning-icon>
               </button>
             </div>
           </div>
@@ -211,20 +199,13 @@
     <template if:true={isEmpty}>
       <div class="card">
         <div class="slds-align_absolute-center" style="padding: 3rem 1rem;">
-          <lightning-icon
-            icon-name="utility:table"
-            size="large"
-            variant="base"
-          ></lightning-icon>
-          <div style="diplay:flex;padding: 0 1rem;">
-              <h3 class="slds-text-heading_medium slds-m-top_medium">
-                No Mappings Found
-              </h3>
-              <p class="slds-text-color_weak slds-m-top_x-small">
-                Create field mappings to configure transformations
-              </p>
+          <lightning-icon icon-name="utility:table" size="large" variant="base"></lightning-icon>
+          <div style="display:flex; padding: 0 1rem;">
+            <h3 class="slds-text-heading_medium slds-m-top_medium">No Mappings Found</h3>
+            <p class="slds-text-color_weak slds-m-top_x-small">
+              Create field mappings to configure transformations
+            </p>
           </div>
-       
         </div>
       </div>
     </template>
