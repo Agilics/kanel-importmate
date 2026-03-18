@@ -1,13 +1,28 @@
 /**
- * @author      : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @author      : Mouhamed NIANG
  * @created     : 13/01/2026 
- * @last modified : Mouhamed NIANG
+ * @last modified : NDEYE KHADY NIANG
+ * @Modification : Integrated Custom Labels for i18n support
  */
 import { LightningElement, api, wire, track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-// Import your Apex method to get mappings
 import getAllMappingsByProjectId from '@salesforce/apex/FieldMappingController.getAllMappingsByProjectId';
 
+// ===== Custom Labels =====
+import LABEL_AVAILABLE_MAPPINGS from '@salesforce/label/c.IM_TR_AvailableMappings';
+import LABEL_SEARCH_MAPPINGS from '@salesforce/label/c.IM_TR_SearchMappings';
+import LABEL_SOURCE_COLUMN from '@salesforce/label/c.IM_TR_SourceColumn';
+import LABEL_TARGET_FIELD from '@salesforce/label/c.IM_TR_TargetField';
+import LABEL_VERSION from '@salesforce/label/c.IM_TR_Version';
+import LABEL_TYPE from '@salesforce/label/c.IM_TR_Type';
+import LABEL_LOOKUP_DETAILS from '@salesforce/label/c.IM_TR_LookupDetails';
+import LABEL_ACTIONS from '@salesforce/label/c.IM_TR_Actions';
+import LABEL_ADD_RULE from '@salesforce/label/c.IM_TR_AddRule';
+import LABEL_PREVIOUS from '@salesforce/label/c.IM_TR_Previous';
+import LABEL_NEXT from '@salesforce/label/c.IM_TR_Next';
+import LABEL_SHOWING_ENTRIES from '@salesforce/label/c.IM_TR_ShowingEntries';
+import LABEL_MAPPINGS_COUNT from '@salesforce/label/c.IM_TR_MappingsCount';
+import LABEL_ERROR_TITLE from '@salesforce/label/c.IM_TR_Error_Title';
 
 const DEFAULT_PAGE_SIZE = 3;
 
@@ -28,69 +43,54 @@ export default class TransformationMapperList extends LightningElement {
     // ===== Pagination =====
     pageIndex = 1;
     pageSize = DEFAULT_PAGE_SIZE;
-    
-    // ===== Lifecycle =====
-     
-    // ===== Data Loading =====
 
-      //récupérer toutes les champs de mapping par l'id  
-   @wire(getAllMappingsByProjectId, { projectId: '$projectId' })
-     wiredMappings({ data, error }) {
-         if (data) {
-             this.allMappings = data.map(m => ({
-                 sourceColumn: m.sourceColumn,
-                 targetField:m.targetField,
-                 version:m.version,
-                 lookupMatchField:m.lookupMatchField,
-                 lookupObject:m.lookupObject,
-                 isLookup: m.isLookup === true,
-                 id:m.id
-             })); 
-             console.log(JSON.stringify(this.allMappings));
-         } else if (error) {
-             this.toastErr('Impossible de charger les mappings');
-         }
+    // ===== Expose labels to template =====
+    labels = {
+        availableMappings: LABEL_AVAILABLE_MAPPINGS,
+        searchMappings: LABEL_SEARCH_MAPPINGS,
+        sourceColumn: LABEL_SOURCE_COLUMN,
+        targetField: LABEL_TARGET_FIELD,
+        version: LABEL_VERSION,
+        type: LABEL_TYPE,
+        lookupDetails: LABEL_LOOKUP_DETAILS,
+        actions: LABEL_ACTIONS,
+        addRule: LABEL_ADD_RULE,
+        previous: LABEL_PREVIOUS,
+        next: LABEL_NEXT,
+        errorTitle: LABEL_ERROR_TITLE,
+    };
+    
+    // ===== Data Loading =====
+    @wire(getAllMappingsByProjectId, { projectId: '$projectId' })
+    wiredMappings({ data, error }) {
+        if (data) {
+            this.allMappings = data.map(m => ({
+                sourceColumn: m.sourceColumn,
+                targetField: m.targetField,
+                version: m.version,
+                lookupMatchField: m.lookupMatchField,
+                lookupObject: m.lookupObject,
+                isLookup: m.isLookup === true,
+                id: m.id
+            })); 
+        } else if (error) {
+            this.showToast(LABEL_ERROR_TITLE, 'Impossible de charger les mappings', 'error');
+        }
     }
 
-  
-   
-    
- 
-
-    /*async loadMappings() {
-        this.isLoading = true;
-        this.error = '';
-        
-        try {
-            // TODO: Uncomment and use your actual Apex method
-            // const result = await getMappings({ projectId: this.projectId });
-            // this.allMappings = result || [];
-             
-            
-        } catch (error) {
-            this.error = this.extractErrorMessage(error);
-            this.showToast('Error', this.error, 'error');
-        } finally {
-            this.isLoading = false;
-        }
-    }*/ 
-    
-   
-    
     // ===== Computed Properties =====
     get hasMappings() {
-        console.log(this.allMappings);
-         return  this.allMappings.length > 0;
-;
+        return this.allMappings.length > 0;
     }
     
     get isEmpty() {
-        return   this.allMappings.length === 0;
+        return this.allMappings.length === 0;
     }
     
     get badgeText() {
         const count = this.filteredMappings.length;
-        return `${count} ${count === 1 ? 'mapping' : 'mappings'}`;
+        // Utilise le label "{0} mappings" en remplaçant le placeholder
+        return LABEL_MAPPINGS_COUNT.replace('{0}', count);
     }
     
     get sortFields() {
@@ -110,7 +110,6 @@ export default class TransformationMapperList extends LightningElement {
     get filteredMappings() {
         let mappings = [...this.allMappings];
         
-        // Search filter
         const q = (this.searchTerm || '').toLowerCase().trim();
         if (q) {
             mappings = mappings.filter(m => 
@@ -126,14 +125,11 @@ export default class TransformationMapperList extends LightningElement {
             );
         }
         
-        // Sorting
         if (this.sortBy) {
             mappings.sort((a, b) => {
                 const aVal = (a[this.sortBy] || '').toString().toLowerCase();
                 const bVal = (b[this.sortBy] || '').toString().toLowerCase();
-                
                 if (aVal === bVal) return 0;
-                
                 const comparison = aVal > bVal ? 1 : -1;
                 return this.sortAsc ? comparison : -comparison;
             });
@@ -171,6 +167,14 @@ export default class TransformationMapperList extends LightningElement {
     
     get totalEntries() {
         return this.filteredMappings.length;
+    }
+
+    // "Showing {0} to {1} of {2} entries"
+    get showingEntriesText() {
+        return LABEL_SHOWING_ENTRIES
+            .replace('{0}', this.showingFrom)
+            .replace('{1}', this.showingTo)
+            .replace('{2}', this.totalEntries);
     }
     
     get pageNumbers() {
@@ -229,7 +233,6 @@ export default class TransformationMapperList extends LightningElement {
             this.sortBy = field;
             this.sortAsc = true;
         }
-        
         this.pageIndex = 1;
     }
     
@@ -237,11 +240,9 @@ export default class TransformationMapperList extends LightningElement {
         const mappingId = event.currentTarget?.dataset?.mappingId;
         if (!mappingId) return;
         
-        // Find the mapping object
         const mapping = this.allMappings.find(m => m.id === mappingId);
         
         if (mapping) {
-            // Dispatch event with mapping details
             this.dispatchEvent(new CustomEvent('addtransformation', {
                 detail: {
                     mappingId: mappingId,
@@ -251,7 +252,6 @@ export default class TransformationMapperList extends LightningElement {
                 bubbles: true,
                 composed: true
             }));
-             
         }
     }
     
@@ -272,21 +272,16 @@ export default class TransformationMapperList extends LightningElement {
     
     // ===== Pagination Actions =====
     gotoPrev() {
-        if (!this.isFirstPage) {
-            this.pageIndex -= 1;
-        }
+        if (!this.isFirstPage) this.pageIndex -= 1;
     }
     
     gotoNext() {
-        if (!this.isLastPage) {
-            this.pageIndex += 1;
-        }
+        if (!this.isLastPage) this.pageIndex += 1;
     }
     
     gotoPage(event) {
         const page = event.currentTarget?.dataset?.page;
         if (!page) return;
-        
         const num = Number(page);
         if (!Number.isNaN(num)) {
             this.pageIndex = Math.min(Math.max(num, 1), this.totalPages);
@@ -294,22 +289,7 @@ export default class TransformationMapperList extends LightningElement {
     }
     
     // ===== Utilities =====
-    extractErrorMessage(error) {
-        if (error?.body?.message) {
-            return error.body.message;
-        } else if (error?.message) {
-            return error.message;
-        } else if (typeof error === 'string') {
-            return error;
-        }
-        return 'An unknown error occurred';
-    }
-    
     showToast(title, message, variant) {
-        this.dispatchEvent(new ShowToastEvent({
-            title: title,
-            message: message,
-            variant: variant
-        }));
+        this.dispatchEvent(new ShowToastEvent({ title, message, variant }));
     }
 }

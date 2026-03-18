@@ -35,17 +35,17 @@
             <div class="project-meta">
                 <div class="meta-item">
                     <lightning-icon icon-name="standard:account" size="x-small"></lightning-icon>
-                    <span class="meta-label">Target:</span>
+                    <span class="meta-label">{labels.target}</span>
                     <span class="meta-value">{targetObject}</span>
                 </div>
                 <div class="meta-item">
                     <lightning-icon icon-name="standard:record" size="x-small"></lightning-icon>
-                    <span class="meta-label">Records:</span>
+                    <span class="meta-label">{labels.records}</span>
                     <span class="meta-value">{recordCount}</span>
                 </div>
                 <div class="meta-item">
                     <lightning-icon icon-name="standard:date_time" size="x-small"></lightning-icon>
-                    <span class="meta-label">Modified:</span>
+                    <span class="meta-label">{labels.lastModified}</span>
                     <span class="meta-value">{lastModifiedDate}</span>
                 </div>
             </div>
@@ -54,7 +54,7 @@
             <template if:true={hasProgress}>
                 <div class="progress-section">
                     <div class="progress-header">
-                        <span class="progress-label">Progress</span>
+                        <span class="progress-label">{labels.progress}</span>
                         <span class="progress-percentage">{progressPercentage}%</span>
                     </div>
                     <div class="progress-bar">

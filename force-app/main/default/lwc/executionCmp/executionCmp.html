@@ -3,40 +3,40 @@
     <div class="page-header">
       <div class="header-content">
         <div class="header-left">
-          <h1 class="header-title">Import Execution</h1>
-          <p class="header-subtitle">Execute your import or schedule for recurring runs</p>
+          <h1 class="header-title">{labels.title}</h1>
+          <p class="header-subtitle">{labels.subtitle}</p>
         </div>
 
         <div class="header-actions">
           <lightning-button
-            label="Export Logs"
+            label={labels.btnExportLogs}
             variant="neutral"
             onclick={handleExportLogsCsv}
             disabled={isExportLogsDisabled}
             icon-name="utility:download"
             icon-position="left"
-            class="export-button"
-          ></lightning-button>
+            class="export-button">
+          </lightning-button>
 
           <lightning-button
-            label="Schedule Import"
+            label={labels.btnSchedule}
             variant="neutral"
             onclick={handleScheduleImport}
             disabled={isScheduleImportDisabled}
             icon-name="utility:event"
             icon-position="left"
-            class="schedule-button"
-          ></lightning-button>
+            class="schedule-button">
+          </lightning-button>
 
           <lightning-button
-            label="Start Import"
+            label={labels.btnStart}
             variant="brand"
             onclick={handleStartImport}
             disabled={isStartImportDisabled}
             icon-name="utility:play"
             icon-position="left"
-            class="start-button"
-          ></lightning-button>
+            class="start-button">
+          </lightning-button>
         </div>
       </div>
     </div>
@@ -46,11 +46,21 @@
         <div class="progress-header">
           <div class="progress-header-left">
             <lightning-icon icon-name={importStatusIconName} size="small" class={statusIconClass}></lightning-icon>
-            <h2 class="progress-title">Import Execution Status</h2>
+            <h2 class="progress-title">{labels.progressTitle}</h2>
           </div>
 
           <div class="progress-header-right">
             <span class={importStatusClass}>{formattedImportStatus}</span>
+            <template if:true={canCancelImport}>
+              <lightning-button
+                label={labels.btnCancel}
+                variant="destructive-text"
+                onclick={handleCancelImport}
+                icon-name="utility:close"
+                icon-position="left"
+                class="slds-m-left_small">
+              </lightning-button>
+            </template>
           </div>
         </div>
 
@@ -70,33 +80,33 @@
           <template if:true={currentExecutionId}>
             <div class="execution-details">
               <div class="detail-item">
-                <span class="detail-label">Execution ID:</span>
+                <span class="detail-label">{labels.detailExecutionId}</span>
                 <span class="detail-value">{currentExecutionId}</span>
               </div>
 
               <div class="detail-item">
-                <span class="detail-label">Status:</span>
+                <span class="detail-label">{labels.detailStatus}</span>
                 <span class="detail-value">{formattedImportStatus}</span>
               </div>
 
               <template if:true={showImportResults}>
                 <div class="detail-item">
-                  <span class="detail-label">Total Records:</span>
+                  <span class="detail-label">{labels.detailTotal}</span>
                   <span class="detail-value">{totalRecords}</span>
                 </div>
 
                 <div class="detail-item">
-                  <span class="detail-label">Processed:</span>
+                  <span class="detail-label">{labels.detailProcessed}</span>
                   <span class="detail-value">{processedRecords}</span>
                 </div>
 
                 <div class="detail-item">
-                  <span class="detail-label">Successful:</span>
+                  <span class="detail-label">{labels.detailSuccessful}</span>
                   <span class="detail-value success-value">{successfulRecords}</span>
                 </div>
 
                 <div class="detail-item">
-                  <span class="detail-label">Failed:</span>
+                  <span class="detail-label">{labels.detailFailed}</span>
                   <span class="detail-value error-value">{failedRecords}</span>
                 </div>
               </template>
@@ -105,7 +115,7 @@
 
           <template if:true={isImportInProgress}>
             <div class="spinner-container">
-              <p class="spinner-text">Processing your import... Please wait.</p>
+              <p class="spinner-text">{labels.processingMsg}</p>
             </div>
           </template>
 
@@ -113,8 +123,8 @@
             <div class="error-message">
               <lightning-icon icon-name="utility:error" size="small" variant="error"></lightning-icon>
               <div>
-                <p class="msg-title">Import failed. You can still export logs.</p>
-                <p class="msg-sub">Export uses the execution id to fetch logs from Apex.</p>
+                <p class="msg-title">{labels.failedTitle}</p>
+                <p class="msg-sub">{labels.failedSubtitle}</p>
               </div>
             </div>
           </template>
@@ -123,17 +133,21 @@
     </template>
 
     <template if:true={showImportResults}>
-      <c-import-results execution-id={currentExecutionId} total-errors={totalErrors} failed-records={failedRecords}></c-import-results>
+      <c-import-results
+        execution-id={currentExecutionId}
+        total-errors={totalErrors}
+        failed-records={failedRecords}>
+      </c-import-results>
     </template>
 
     <div class="navigation-buttons">
       <lightning-button
-        label="Back to Validation"
+        label={labels.btnBack}
         onclick={handlePreviousStep}
         variant="neutral"
         icon-name="utility:left"
-        icon-position="left"
-      ></lightning-button>
+        icon-position="left">
+      </lightning-button>
     </div>
   </div>
 </template>

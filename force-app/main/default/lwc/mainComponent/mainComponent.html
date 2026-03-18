@@ -94,16 +94,14 @@
 
               <!-- Step 3 & 4: Field Mapping & Transformations -->
               <template if:true={isMappingAndTransformation}>
-               <c-field-mapper
-                preselected-project-id={currentProject.Id}
-                preselected-target-object={mappingTargetObject}
-                source-columns-csv={mappingHeadersCsv}
-                csv-rows={mappingSampleRows}
-                total-row-count={mappingTotalRowCount}
-                onprevious={handleBackToStep}
-                oncontinue={handleContinueFromFieldMapper}
-              ></c-field-mapper>
-
+                <c-field-mapper
+                  preselected-project-id={currentProject.Id}
+                  preselected-target-object={mappingTargetObject}
+                  source-columns-csv={mappingHeadersCsv}
+                  csv-data={csvData}
+                  onprevious={handleBackToStep}
+                  oncontinue={handleContinueFromFieldMapper}
+                ></c-field-mapper>
 
               </template>
 
