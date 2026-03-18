@@ -16,14 +16,19 @@ import {
   PROJECT_FIELD_NAMES
 } from './constants';
 
-const FM_SAMPLE_MAX = 200; 
-
+/**
+* @description main ImportMate component
+*/
 export default class MainComponent extends LightningElement {
   // UI state
   showCreatorSection = false;
   showDashboard = true;
   isLoading = false;
   activePage = PAGES.DASHBOARD;
+  
+  //unsaved changes
+  hasUnsavedChanges = false;
+  beforeUnloadHandler = null;
 
   // Mapping data
   mappingHeadersCsv = '';
@@ -48,11 +53,33 @@ export default class MainComponent extends LightningElement {
   @wire(getRecentsProjects, { limitor: '$recentProjectsLimit' })
   importProjects;
 
- 
-  get mappingSampleRows() {
-    const all = this.csvData?.allRows;
-    if (Array.isArray(all) && all.length) {
-      return all.slice(0, FM_SAMPLE_MAX);
+  connectedCallback() {
+    this.setupBeforeUnloadHandler();
+  }
+
+  disconnectedCallback() {
+    this.removeBeforeUnloadHandler();
+  }
+
+  //warn on page close
+  setupBeforeUnloadHandler() {
+    this.beforeUnloadHandler = (event) => {
+      if (this.hasUnsavedChanges) {
+        const message = 'You have unsaved changes. Are you sure you want to leave?';
+        event.preventDefault();
+        event.returnValue = message;
+        return message;
+      }
+    };
+    
+    window.addEventListener('beforeunload', this.beforeUnloadHandler);
+  }
+
+  //cleanup handler
+  removeBeforeUnloadHandler() {
+    if (this.beforeUnloadHandler) {
+      window.removeEventListener('beforeunload', this.beforeUnloadHandler);
+      this.beforeUnloadHandler = null;
     }
     const rows = this.csvData?.rows; 
     if (Array.isArray(rows) && rows.length) {
@@ -61,17 +88,14 @@ export default class MainComponent extends LightningElement {
     return [];
   }
 
-  get currentProjectTargetObject() {
-  return this.getTargetObjectFromProject(this.currentProject || {});
-}
+  //set unsaved
+  markAsUnsaved() {
+    this.hasUnsavedChanges = true;
+  }
 
-
-  get mappingTotalRowCount() {
-    const all = this.csvData?.allRows;
-    if (Array.isArray(all)) return all.length;
-    const rows = this.csvData?.rows;
-    if (Array.isArray(rows)) return rows.length;
-    return 0;
+  //clear unsaved
+  markAsSaved() {
+    this.hasUnsavedChanges = false;
   }
 
   get steps() {
@@ -166,12 +190,31 @@ export default class MainComponent extends LightningElement {
   }
 
   handleCsvLoaded(event) {
-    // accepte plusieurs formats venant du CsvUploader
-    this.csvData = event.detail?.csvData || event.detail || {};
-    console.log(
-      'csvData loaded in mainComponent:',
-      this.csvData?.allRows ? `Object with ${this.csvData.allRows.length} rows` : JSON.stringify(this.csvData)
-    );
+      const detail = event.detail || {};
+      
+      //full dataset
+      if (detail.allRows && detail.columns) {
+          this.csvData = {
+              allRows: detail.allRows,
+              rows: detail.allRows,
+              columns: detail.columns,
+              rawCsvText: detail.rawCsvText || '',
+              totalRowCount: detail.totalRowCount || detail.allRows.length
+          };
+      } else if (detail.csvData) {
+          this.csvData = detail.csvData;
+      } else {
+          this.csvData = detail;
+      }
+      
+      //mark unsaved
+      this.markAsUnsaved(); 
+      console.log(
+          'csvData loaded in mainComponent:',
+          this.csvData?.allRows ?
+          `Object with ${this.csvData.allRows.length} rows` :
+          JSON.stringify(this.csvData)
+      );
   }
 
   handlePreviousStep() {
@@ -260,19 +303,27 @@ handleStartMapping(event) {
 
   this.mappingHeadersCsv = headersCsv;
 
-  // normalisation du payload venant de CsvUploader
-  if (event?.detail?.rows && event?.detail?.columns) {
-    this.csvData = {
-      allRows: event.detail.rows,      
-      columns: event.detail.columns
-    };
-  } else if (event?.detail?.csvData) {
-    this.csvData = event.detail.csvData;
-  } else if (event?.detail?.allRows && event?.detail?.columns) {
-    this.csvData = { allRows: event.detail.allRows, columns: event.detail.columns };
-  } else {
-    this.csvData = this.csvData || {};
-  }
+      if (event?.detail?.csvData) {
+          this.csvData = event.detail.csvData;
+      } else if (event?.detail?.allRows && event?.detail?.columns) {
+          //allRows available
+          this.csvData = {
+              allRows: event.detail.allRows,
+              rows: event.detail.allRows,
+              columns: event.detail.columns,
+              rawCsvText: event.detail.rawCsvText || '',
+              totalRowCount: event.detail.totalRowCount
+          };
+      } else if (event?.detail?.rows && event?.detail?.columns) {
+          //fallback to rows
+          this.csvData = {
+              allRows: event.detail.rows,
+              rows: event.detail.rows,
+              columns: event.detail.columns,
+              rawCsvText: event.detail.rawCsvText || '',
+              totalRowCount: event.detail.totalRowCount || event.detail.rows.length
+          };
+      }
 
   const project = this.currentProject || {};
   this.mappingTargetObject = this.getTargetObjectFromProject(project);

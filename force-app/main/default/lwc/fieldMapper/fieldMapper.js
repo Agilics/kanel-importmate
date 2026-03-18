@@ -24,12 +24,25 @@ function microtaskDebounce(fn) {
   };
 }
 
-const SS_ROWS_KEY = 'IM_csvRows';
-const SS_COLS_KEY = 'IM_sourceColumnsCsv';
-
 export default class FieldMapper extends NavigationMixin(LightningElement) {
+  _csvData = null;
   _csvRows = [];
   _sourceColumnsCsv = '';
+  @api
+  get csvData() {
+    return this._csvData;
+  }
+  set csvData(v) {
+    this._csvData = v;
+    console.log('[FieldMapper] csvData setter received', {
+      hasData: !!v,
+      allRowsCount: Array.isArray(v?.allRows) ? v.allRows.length : 0,
+      rowsCount: Array.isArray(v?.rows) ? v.rows.length : 0,
+      columnsCount: Array.isArray(v?.columns) ? v.columns.length : 0,
+      totalRowCount: v?.totalRowCount
+    });
+    this.parseCsvData(v);
+  }
 
   @api totalRowCount;
 
@@ -38,7 +51,7 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
   get csvRows() {
     return this._csvRows;
   }
-  set csvRows(v) {
+  set csvRows(v) {  
     this._csvRows = Array.isArray(v) ? v : [];
     this.initMappings();
     this.rebuildInitialColumns();
@@ -65,6 +78,51 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
   @api currentStep = '';
   @api sourceLabel = '';
 
+  // CSV data from mainComponent
+  
+  parseCsvData(v) {
+    console.log('[FieldMapper] parseCsvData called', {
+      payloadType: typeof v,
+      hasAllRows: Array.isArray(v?.allRows),
+      hasRows: Array.isArray(v?.rows),
+      hasColumns: Array.isArray(v?.columns)
+    });
+    if (v && typeof v === 'object') {
+      // Handle allRows format (full dataset)
+      if (Array.isArray(v.allRows) && v.allRows.length > 0) {
+        this.csvRows = v.allRows;
+        if (Array.isArray(v.columns) && v.columns.length > 0) {
+          this.sourceColumnsCsv = v.columns.join(',');
+        } else if (v.allRows[0]) {
+          this.sourceColumnsCsv = Object.keys(v.allRows[0]).join(',');
+        }
+        if (v.totalRowCount) this.totalRowCount = v.totalRowCount;
+        console.log('[FieldMapper] parseCsvData used allRows', {
+          parsedRows: this._csvRows.length,
+          sourceColumns: this.initialSourceColumns.length,
+          totalRowCount: this.totalRowCount
+        });
+      }
+      // Handle rows format (fallback)
+      else if (Array.isArray(v.rows) && v.rows.length > 0) {
+        this.csvRows = v.rows;
+        if (Array.isArray(v.columns) && v.columns.length > 0) {
+          this.sourceColumnsCsv = v.columns.join(',');
+        } else if (v.rows[0]) {
+          this.sourceColumnsCsv = Object.keys(v.rows[0]).join(',');
+        }
+        if (v.totalRowCount) this.totalRowCount = v.totalRowCount;
+        console.log('[FieldMapper] parseCsvData used rows fallback', {
+          parsedRows: this._csvRows.length,
+          sourceColumns: this.initialSourceColumns.length,
+          totalRowCount: this.totalRowCount
+        });
+      } else {
+        console.warn('[FieldMapper] parseCsvData no usable rows found in payload');
+      }
+    }
+  }
+
   /** ===== Preselect plumbing ===== */
   _preselectedProjectId = '';
   _preselectedTargetObject = '';
@@ -90,6 +148,8 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
 
   /** ===== Derived labels ===== */
   get rowCountLabel() {
+    console.log('totalRowCount: ', this.totalRowCount);
+    
     const n = this.totalRowCount;
     if (typeof n === 'number' && Number.isFinite(n) && n >= 0) return n;
     return Array.isArray(this._csvRows) ? this._csvRows.length : 0;
@@ -494,24 +554,10 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
     this.notifySidebar();
   }
 
-  ensureCsvSamplesFromSession() {
+  ensureCsvIsSet() {
+    //CSV data is passed via event-driven props
     if (Array.isArray(this._csvRows) && this._csvRows.length) return;
-    try {
-      const rowsStr = window.sessionStorage.getItem(SS_ROWS_KEY);
-      const colsStr = window.sessionStorage.getItem(SS_COLS_KEY);
-      const rows = rowsStr ? JSON.parse(rowsStr) : [];
-
-      if (Array.isArray(rows) && rows.length) {
-        this._csvRows = rows;
-        if (!this._sourceColumnsCsv && colsStr) this._sourceColumnsCsv = (colsStr || '').trim();
-
-        this.rebuildInitialColumns();
-        this.availableSourceColumns = [...(this.initialSourceColumns || [])];
-        this._refreshPreviewDebounced();
-      }
-    } catch (e) {
-      console.error('[FieldMapper] ensureCsvSamplesFromSession error', e);
-    }
+    if (Array.isArray(this.initialSourceColumns) && this.initialSourceColumns.length) return;
   }
 
   rebuildClientPreview() {
@@ -545,7 +591,36 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
     this.dispatchEvent(new ShowToastEvent({ title, message, variant }));
   }
 
-  /** ===== Lookup ===== */
+  handleVersionChange(e) {
+    this.versionInput = e.target.value;
+    (this.mappings || []).forEach((m) => {
+      if (m) m.version = this.versionInput;
+    });
+    this.updateMappedSources();
+  }
+
+  async handleProjectChange(e) {
+    const selectedId = e.detail?.value || e.target.value;
+    this.selectedProjectId = selectedId;
+    const project = (this.projects || []).find((p) => p.id === selectedId);
+    this.selectedTargetObject = project ? project.targetObject : '';
+    if (project) this.projects = [project];
+
+    this.mappings = [];
+    this.availableSourceColumns = [...this.initialSourceColumns];
+
+    await this.loadTargetFields();
+    this.ensureCsvIsSet();
+    this.updateMappedSources();
+
+    //vérifie s'il existe des mappings pour le projet sélectionné
+    await this.checkProjectMappings();
+
+    // Charger mapping existant s'il y en a
+    await this.applySavedMappings({ silent: true });
+  }
+
+  /** ===== Lookup controls ===== */
   async handleLookupObjectChange(e) {
     const sourceColumn = e.target.dataset.source;
     const lookupObject = e.detail?.value || e.target.value;
@@ -883,14 +958,15 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
 
   connectedCallback() {
     this.versionInput = this.version || '1.0';
+    console.log('[FieldMapper] connectedCallback start', {
+      hasBufferedCsvData: !!this._csvData
+    });
+    this.parseCsvData(this._csvData);
 
     this.rebuildInitialColumns();
     this.availableSourceColumns = [...(this.initialSourceColumns || [])];
 
-    this.ensureCsvSamplesFromSession();
-    this.rebuildInitialColumns();
-    this.availableSourceColumns = [...(this.initialSourceColumns || [])];
-
+    this.ensureCsvIsSet();
     this.initMappings();
 
     if (this._preselectedTargetObject && !this.selectedTargetObject) {
@@ -900,5 +976,10 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
 
     this.loadProjects();
     this.loadAvailableObjects();
+    console.log('[FieldMapper] connectedCallback end', {
+      csvRows: this._csvRows.length,
+      sourceColumns: this.initialSourceColumns.length
+    });
   }
 }
+

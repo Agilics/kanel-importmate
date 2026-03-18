@@ -1,129 +1,143 @@
 <!--
-   @description       : 
-   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
-   @group             : 
-   @last modified on  : 02-04-2026
-   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
-   -->
+   @description       : TransformationSaveModal with Custom Labels
+   @author            : Mouhamed NIANG
+   @last modified on  : 02-24-2026
+-->
 <template>
    <lightning-modal-header label={modalLabel}></lightning-modal-header>
    <lightning-modal-body>
       <div class="slds-form slds-form_stacked">
 
          <div class="section-header">
-             <lightning-icon 
+            <lightning-icon 
                icon-name='utility:data_mapping' 
-               alternative-text='calculated_insights' class="primary-icon" size='medium'
-               title='calculated_insights'>
+               alternative-text='mapping' class="primary-icon" size='medium'>
             </lightning-icon>
-            <h2>Mapping</h2>
+            <h2>{labels.sectionMapping}</h2>
          </div>
-         
 
-         <!-- Sélection du mapping -->
          <div class="form-row">
             <div class="form-control">
-            <label class="slds-form-element__label" for="sourceColumn">
-               Source Column<abbr class="slds-required" title="required">*</abbr>
+               <label class="slds-form-element__label" for="sourceColumnInput">
+                  {labels.sourceColumn}<abbr class="slds-required" title="required">*</abbr>
                </label>
-            <lightning-input  id="sourceColumn" type="text" value={source} disabled></lightning-input>
-            </div>
-            <div class="form-control">
-                <label class="slds-form-element__label" for="targetField">
-                  Target Field<abbr class="slds-required" title="required">*</abbr>
-                  </label>
-               <lightning-input  id="targetField" type="text" value={target} disabled></lightning-input>
+               <div class="slds-form-element__control">
+                  <input id="sourceColumnInput" type="text" class="slds-input" value={source} disabled />
                </div>
             </div>
-
-         <!-- rule section-->
-          <div class="section-header">
-             <lightning-icon
-               icon-name='utility:formula'
-               alternative-text='utility:formula' class="primary-icon" size='medium'
-               title='utility:formula'>
-            </lightning-icon>
-            <h2>Rules</h2>
+            <div class="form-control">
+               <label class="slds-form-element__label" for="targetFieldInput">
+                  {labels.targetField}<abbr class="slds-required" title="required">*</abbr>
+               </label>
+               <div class="slds-form-element__control">
+                  <input id="targetFieldInput" type="text" class="slds-input" value={target} disabled />
+               </div>
+            </div>
          </div>
+
+         <div class="section-header">
+            <lightning-icon
+               icon-name='utility:formula'
+               alternative-text='rules' class="primary-icon" size='medium'>
+            </lightning-icon>
+            <h2>{labels.sectionRules}</h2>
+         </div>
+
          <div class="slds-form-element">
             <label class="slds-form-element__label" for="ruleType">
-            Rule Type <abbr class="slds-required" title="required">*</abbr>
+               {labels.ruleType} <abbr class="slds-required" title="required">*</abbr>
             </label>
             <div class="slds-form-element__control">
-               <lightning-combobox id="ruleType" name="ruleType" value={ruleType} options={ruleTypeOptions}
-                  onchange={handleRuleTypeChange} class="rounded-input">
+               <lightning-combobox
+                  id="ruleType"
+                  label=""
+                  name="ruleType"
+                  value={ruleType}
+                  options={ruleTypeOptions}
+                  placeholder={labels.selectOption}
+                  onchange={handleRuleTypeChange}
+                  class="rounded-input">
                </lightning-combobox>
             </div>
          </div>
-         <!-- Champs pour la concaténation -->
+
          <template if:true={showConcatenationFields}>
             <div class="slds-form-element slds-m-bottom_medium">
                <label class="slds-form-element__label" for="sourceFields">
-               Source Fields <abbr class="slds-required" title="required">*</abbr>
+                  {labels.sourceFields} <abbr class="slds-required" title="required">*</abbr>
                </label>
                <div class="slds-form-element__control">
-                  <lightning-dual-listbox id="sourceFields" name="sourceFields" label="Champs sources"
-                     source-label="Source Fields" selected-label="Target Fields"
-                     options={targetFieldOptions} value={preSelectedColumns}  onchange={handleTargetFieldsChange}
-                     max="3" class="rounded-input">
+                  <lightning-dual-listbox
+                     id="sourceFields"
+                     name="sourceFields"
+                     label=""
+                     source-label={labels.sourceLabel}
+                     selected-label={labels.selectedLabel}
+                     options={targetFieldOptions}
+                     value={preSelectedColumns}
+                     onchange={handleTargetFieldsChange}
+                     max="3"
+                     class="rounded-input">
                   </lightning-dual-listbox>
                </div>
                <div class="slds-form-element__help">
-                  Select 1 to a maximum of 3 fields. {selectedFieldsCount} on 3 selected
+                  {labels.selectFieldsHelp} {selectedFieldsCount} {labels.onLabel} 3 {labels.selectedLabel}
                </div>
             </div>
             <div class="slds-form-element slds-m-bottom_medium">
                <label class="slds-form-element__label" for="separator">
-               Separator
+                  {labels.separator}
                </label>
                <div class="slds-form-element__control">
-                  <lightning-combobox id="separator" name="separator" class="rounded-input"  value={separator} options={separatorOptions}
+                  <lightning-combobox
+                     id="separator"
+                     label=""
+                     name="separator"
+                     class="rounded-input"
+                     value={separator}
+                     options={separatorOptions}
+                     placeholder={labels.selectOption}
                      onchange={handleSeparatorChange}>
                   </lightning-combobox>
                </div>
             </div>
          </template>
 
-         
-         <!-- boolean transformation -->
-          <template if:true={isBooleanTransformation}>
+         <template if:true={isBooleanTransformation}>
             <div class="slds-form-element slds-m-bottom_medium">
                <div class="slds-form-element__control">
-                      <label class="slds-form-element__label" for="sourceFields">
-                        Choose the boolean value <abbr class="slds-required" title="required">*</abbr>
-                     </label>
-                  <lightning-input  
+                  <label class="slds-form-element__label">
+                     {labels.chooseBooleanValue} <abbr class="slds-required" title="required">*</abbr>
+                  </label>
+                  <lightning-input
                      class="rounded-input"
                      onchange={handleBooleanValueChange}
-                     type="toggle"  
-                     label='Boolean Value'
-                     message-toggle-active= 'Yes'
-                     message-toggle-inactive = 'No'
+                     type="toggle"
+                     label={labels.booleanValueLabel}
+                     message-toggle-active={labels.yes}
+                     message-toggle-inactive={labels.no}
                      checked={booleanValue}>
-                  </lightning-input> 
+                  </lightning-input>
                </div>
             </div>
-         
-          </template>
+         </template>
 
-         
       </div>
    </lightning-modal-body>
    <lightning-modal-footer>
       <div class="btns">
-         <button aria-label="Cancel transformation rule creation" onclick={handleCancel}
-            class="btn btn-secondary">
-            <label>Cancel</label>
+         <button aria-label="Cancel" onclick={handleCancel} class="btn btn-secondary">
+            <label>{labels.cancel}</label>
          </button>
-         
-         <template if:true={isEdit}>
+         <!-- isEdit (pas _isEdit) est accessible dans le template -->
+         <template if:true={isEditMode}>
             <button class="btn btn-primary" onclick={handleUpdateRule}>
-               <label>Update rule</label>
+               <label>{labels.updateRule}</label>
             </button>
          </template>
-         <template if:false={isEdit}>
+         <template if:false={isEditMode}>
             <button class="btn btn-primary" onclick={handleSaveTransformation}>
-               <label>Save rule</label>
+               <label>{labels.saveRule}</label>
             </button>
          </template>
       </div>

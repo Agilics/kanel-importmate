@@ -1,60 +1,42 @@
 body {
   font-family: "Inter";
 }
+
 .tab-container {
   display: flex;
-  flex-wrap: wrap;
-  padding: 0;
+  flex-wrap: nowrap;
+  align-items: center;
+  padding: 4px;
   border: 1px solid #e2e8f0;
   margin-bottom: 1.5rem;
-  width: 612;
-  height: 46;
   border-radius: 8px;
-  border-width: 1px;
-  opacity: 1;
-  top: 124px;
-  left: 32px;
-  width: 612px;
-  height: 46px;
-  border-radius: 8px;
-  border-width: 1px;
-  opacity: 1;
-  top: 124px;
-  left: 32px;
-  background: #ffffff; 
+  background: #ffffff;
+  width: 100%;
+  height: auto;
+  min-height: 46px;
+  overflow-x: auto;
+  gap: 4px;
 }
 
 .tab {
-  display: inline-block;
-  padding: 0.75rem 1.15rem;
-  margin: 4.4px 11px;
-  border-radius: 8px;
-  border-width: 1px;
-  margin-right: 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 14px;
+  height: 36px;
+  white-space: nowrap;
+  flex-shrink: 0;
   background-color: transparent;
   color: #4b5563;
   font-weight: 500;
+  font-size: 14px;
+  font-family: "Inter";
+  line-height: 100%;
   text-align: center;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
   border: 1px solid transparent;
   border-radius: 6px;
-  opacity: 1;
-  top: 5px;
-  left: 5px;
-  font-weight: 500;
-  font-style: Medium;
-  font-size: 14px;
-  line-height: 100%;
-  letter-spacing: 0%;
-  text-align: center; 
-  font-family: "Inter"; 
-  height: 36px;
-  border-radius: 6px;
-  
-  opacity: 1;
-  top: 5px;
-  left: 5px;
 }
 
 .tab:hover {
@@ -64,7 +46,7 @@ body {
 }
 
 .tab.active {
-  background-color: #1e40af; /* Couleur Salesforce standard */
+  background-color: #1e40af;
   color: #fff;
   border-color: #005fb2;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);

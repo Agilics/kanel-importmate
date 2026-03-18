@@ -98,6 +98,33 @@ public with sharing class TransformationService {
         }
     }
 
+    public static Map<String, String> applyTransformationsFromRules(Map<String, String> row, List<TransformationRule__c> orderedRules) {
+        try {
+            Map<String, String> transformedRow = row.clone();
+            if (orderedRules == null || orderedRules.isEmpty()) {
+                return transformedRow;
+            }
+
+            for (TransformationRule__c rule : orderedRules) {
+                ITransformationRule transformer = TransformationUtils.getTransformer(rule);
+                if (transformer != null && transformer.validate(transformedRow, rule)) {
+                    transformedRow.put(rule.FieldMapping__r.TargetField__c, transformer.apply(transformedRow, rule));
+                }
+            }
+            return transformedRow;
+        } catch (Exception e) {
+            Map<String, Object> context = new Map<String, Object>{
+                'rulesCount' => orderedRules == null ? 0 : orderedRules.size(),
+                'originalError' => e.getMessage()
+            };
+            throw new TransformationException(
+                'Error applying transformations from rules: ' + e.getMessage(),
+                Constants.ERROR_CODE_TRANSFORMATION,
+                context
+            );
+        }
+    }
+
  
   
     //Générer un aperçu 
