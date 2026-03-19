@@ -2,11 +2,11 @@
   <div class="page">
     <!-- LEFT COLUMN -->
     <aside class="left">
-      <h2 class="panel-title">SOQL Query Builder</h2>
+      <h2 class="panel-title">{labels.IM_Soql_Title}</h2>
 
       <!-- Selected Object (read-only, from projectTargetObject) -->
       <div class="card">
-        <div class="section-title">Selected Object</div>
+        <div class="section-title">{labels.IM_Soql_SelectedObject}</div>
         <lightning-input
           type="text"
           value={selectedObject}
@@ -18,13 +18,14 @@
       <!-- Select Fields -->
       <div class="card">
         <div class="section-title row">
-          <span>Select Fields</span>
+          <span>{labels.IM_Soql_SelectFields}</span>
           <span class="muted actions-inline">
-            <a onclick={selectAll}>Select all</a>
+            <a onclick={selectAll}>{labels.IM_Soql_SelectAll}</a>
             <span class="sep">|</span>
-            <a onclick={clearAll}>Clear</a>
+            <a onclick={clearAll}>{labels.IM_Soql_Clear}</a>
           </span>
         </div>
+
         <div class="fields-list">
           <template for:each={fieldsMeta} for:item="f">
             <label class="field-item" key={f.apiName}>
@@ -43,58 +44,41 @@
 
       <!-- Query Settings -->
       <div class="card">
-        <div class="section-title">Query Settings</div>
+        <div class="section-title">{labels.IM_Soql_QuerySettings}</div>
 
         <lightning-input
           type="number"
-          label="Record Limit"
+          label={labels.IM_Soql_RecordLimit}
           value={limitRows}
           onchange={handleLimitChange}
         ></lightning-input>
 
         <lightning-combobox
-          label="Order By"
+          label={labels.IM_Soql_OrderBy}
           value={orderByField}
           options={orderByFieldOptions}
           onchange={handleOrderByChange}
         ></lightning-combobox>
 
         <lightning-combobox
-          label="Direction"
+          label={labels.IM_Soql_Direction}
           value={orderDirection}
           options={directionOptions}
           onchange={handleDirectionChange}
         ></lightning-combobox>
 
         <div class="btns-vertical">
-          <button
-            class="btn-validate"
-            onclick={handleValidate}
-            disabled={isLoading}
-          >
-            <lightning-icon
-              icon-name="utility:check"
-              size="x-small"
-              class="btn-icon"
-            ></lightning-icon>
-            Validate Query
+          <button class="btn-validate" onclick={handleValidate} disabled={isLoading}>
+            <lightning-icon icon-name="utility:check" size="x-small" class="btn-icon"></lightning-icon>
+            {labels.IM_Soql_ValidateQuery}
           </button>
-          <button
-            class="btn-preview"
-            onclick={handlePreview}
-            disabled={isLoading}
-          >
-            <lightning-icon
-              icon-name="utility:preview"
-              size="x-small"
-              class="btn-icon"
-            ></lightning-icon>
-            Preview Results
+
+          <button class="btn-preview" onclick={handlePreview} disabled={isLoading}>
+            <lightning-icon icon-name="utility:preview" size="x-small" class="btn-icon"></lightning-icon>
+            {labels.IM_Soql_PreviewResults}
           </button>
         </div>
       </div>
-
-     
     </aside>
 
     <!-- CENTER COLUMN -->
@@ -102,14 +86,10 @@
       <!-- Condition Builder -->
       <div class="card card-fixed">
         <div class="title-row">
-          <h3 class="section-title big">Condition Builder</h3>
+          <h3 class="section-title big">{labels.IM_Soql_ConditionBuilder}</h3>
           <button class="btn-add-condition" onclick={addCondition}>
-            <lightning-icon
-              icon-name="utility:add"
-              size="x-small"
-              class="btn-icon-right"
-            ></lightning-icon>
-            Add Condition
+            <lightning-icon icon-name="utility:add" size="x-small" class="btn-icon-right"></lightning-icon>
+            {labels.IM_Soql_AddCondition}
           </button>
         </div>
 
@@ -167,11 +147,11 @@
       <!-- Generated SOQL Query -->
       <div class="card card-fixed">
         <div class="title-row">
-          <h3 class="section-title big">Generated SOQL Query</h3>
+          <h3 class="section-title big">{labels.IM_Soql_GeneratedQuery}</h3>
           <div class="title-actions">
             <lightning-button-icon
               icon-name="utility:copy"
-              alternative-text="Copy Query"
+              alternative-text={labels.IM_Soql_CopyQuery}
               class="copy-icon"
               onclick={copySoql}
             ></lightning-button-icon>
@@ -190,13 +170,13 @@
       <!-- Query Results Preview -->
       <div class="card card-fixed">
         <div class="title-row">
-          <h3 class="section-title big">Query Results Preview</h3>
+          <h3 class="section-title big">{labels.IM_Soql_QueryResultsPreview}</h3>
           <div class="meta">
             <template if:true={hasRows}>
               <span class="found">
-                found <strong>{foundCountText}</strong> records
+                {foundRecordsLabel}
               </span>
-              <a class="export" onclick={exportCsv}>Export</a>
+              <a class="export" onclick={exportCsv}>{labels.IM_Soql_Export}</a>
             </template>
           </div>
         </div>
@@ -234,17 +214,9 @@
             <span class="muted">{foundCountText}</span>
           </div>
 
-          <button
-            class="btn-continue"
-            onclick={handleContinue}
-            disabled={isContinueDisabled}
-          >
-            <lightning-icon
-              icon-name="utility:forward"
-              size="x-small"
-              class="btn-icon"
-            ></lightning-icon>
-            Continue to Field Mapping
+          <button class="btn-continue" onclick={handleContinue} disabled={isContinueDisabled}>
+            <lightning-icon icon-name="utility:forward" size="x-small" class="btn-icon"></lightning-icon>
+            {labels.IM_Soql_ContinueToMapping}
           </button>
         </div>
       </div>
