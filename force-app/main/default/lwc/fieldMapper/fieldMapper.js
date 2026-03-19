@@ -196,9 +196,9 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
   }
 
   get sourceTitle() {
-    if (this.sourceLabel) return `${LABEL_SOURCE_DATA} (${this.sourceLabel})`;
-    if (this.selectedTargetObject) return `${LABEL_SOURCE_DATA} (${this.selectedTargetObject})`;
-    return LABEL_SOURCE_DATA;
+    if (this.sourceLabel) return `Source Data (${this.sourceLabel})`;
+    if (this.selectedTargetObject) return `Source Data (${this.selectedTargetObject})`;
+    return 'Source Data';
   }
 
   get currentProjectName() {
@@ -256,7 +256,7 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
     ).length;
   }
 
-  /** ===== Continue enabled logic ===== */
+  /** ===== Continue enabled logic (FIX) ===== */
   get hasValidMappings() {
     return (this.mappings || []).some((m) => m?.sourceColumn && m?.targetField);
   }
@@ -314,12 +314,6 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
       const status = !m ? 'unmapped' : m.isLookup ? 'transform' : 'mapped';
       const examples = this._examplesForSource(name, 2);
       const subtitle = examples.length ? `Text \u2022 ${examples.join(', ')}…` : 'Text \u2022';
-
-      const pillLabel = status === 'mapped'
-        ? LABEL_MAPPED
-        : status === 'transform'
-          ? LABEL_TRANSFORM
-          : LABEL_UNMAPPED;
 
       return {
         name,
@@ -710,7 +704,7 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
       const current = this.currentLookupCount;
       if (current >= 3) {
         e.target.checked = false;
-        this.toast(LABEL_LIMIT_TITLE, LABEL_LIMIT_BODY, 'warning');
+        this.toast('Limit reached', 'You can configure at most 3 lookup fields in this mapping.', 'warning');
         return;
       }
     }
@@ -839,11 +833,11 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
   /** ===== Save / load ===== */
   async handleSave() {
     try {
-      if (!this.selectedProjectId) throw new Error(LABEL_SELECT_PROJECT);
+      if (!this.selectedProjectId) throw new Error('Please select a Project before saving.');
 
       const lookupCount = this.currentLookupCount;
       if (lookupCount > 3) {
-        this.toast(LABEL_LIMIT_TITLE, LABEL_LIMIT_BODY, 'warning');
+        this.toast('Limit reached', 'You can configure at most 3 lookup fields in this mapping.', 'warning');
         return;
       }
 
@@ -863,17 +857,17 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
           lookupMatchField: m.lookupMatchField || ''
         }));
 
-      if (!payload.length) throw new Error(LABEL_NO_VALID_ROWS);
+      if (!payload.length) throw new Error('No valid mapping rows to save.');
 
       await saveMappingsJson({
         targetObjectApiName: this.selectedTargetObject,
         rowsJson: JSON.stringify(payload)
       });
 
-      this.toast(LABEL_SAVE_OK_TITLE, LABEL_SAVE_OK_BODY, 'success');
+      this.toast('Success', 'Mappings saved.', 'success');
     } catch (error) {
-      const msg = error?.body?.message || error?.message || LABEL_SAVE_ERROR_BODY;
-      this.toast(LABEL_SAVE_ERROR_TITLE, msg, 'error');
+      const msg = error?.body?.message || error?.message || 'Failed to save mappings.';
+      this.toast('Error', msg, 'error');
     }
   }
 
@@ -894,10 +888,7 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
       });
 
       const rows = Array.isArray(saved) ? saved : [];
-      if (!rows.length) {
-        if (!silent) this.toast(LABEL_LOADED_TITLE, LABEL_NO_SAVED, 'info');
-        return;
-      }
+      if (!rows.length) return;
 
       const effectiveVersion = this.versionInput || '1.0';
       this.versionInput = effectiveVersion;
@@ -922,9 +913,9 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
       this.updateMappedSources();
       this._refreshPreviewDebounced();
 
-      if (!silent) this.toast(LABEL_LOADED_TITLE, LABEL_LOADED_BODY, 'success');
+      if (!silent) this.toast('Loaded', 'Existing mappings loaded.', 'success');
     } catch (e) {
-      if (!silent) this.toast(LABEL_SAVE_ERROR_TITLE, e?.body?.message || LABEL_SAVE_ERROR_BODY, 'error');
+      if (!silent) this.toast('Error', e?.body?.message || 'Failed to load saved mappings.', 'error');
     }
   }
 
@@ -939,9 +930,10 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
     this.dispatchEvent(new CustomEvent('previous', { bubbles: true, composed: true }));
   }
 
+  /** CONTINUE EVENT FIXED */
   handleContinueClick() {
     if (this.isContinueButtonDisabled) {
-      this.toast('Info', LABEL_DROP_HINT, 'info');
+      this.toast('Info', 'Add at least one valid mapping before continuing.', 'info');
       return;
     }
 
@@ -991,8 +983,8 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
             title: 'Mapping Summary',
             data: {
               totalFields: { label: 'Total Fields', value: this.summaryTotalFields },
-              mappedFieldsCount: { label: LABEL_MAPPED, value: this.summaryMappedCount },
-              unmappedFieldsCount: { label: LABEL_UNMAPPED, value: this.summaryUnmappedCount },
+              mappedFieldsCount: { label: 'Mapped', value: this.summaryMappedCount },
+              unmappedFieldsCount: { label: 'Unmapped', value: this.summaryUnmappedCount },
               withTransformationsCount: { label: 'With Transformations', value: this.summaryWithTransformCount }
             }
           },

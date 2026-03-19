@@ -14,10 +14,10 @@
         </div>
 
         <div class="fm-actions">
-          <lightning-button label={label_AutoMap} class="ghost" onclick={handleAutoMapClick}></lightning-button>
-          <lightning-button label={label_ClearAll} onclick={handleClearAllClick}></lightning-button>
-          <lightning-button label={label_SaveMapping} onclick={handleSaveMapping}></lightning-button>
-          <lightning-button label={label_Back} onclick={handleBackClick}></lightning-button>
+          <lightning-button label="Auto-Map" class="ghost" onclick={handleAutoMapClick}></lightning-button>
+          <lightning-button label="Clear All" onclick={handleClearAllClick}></lightning-button>
+          <lightning-button label="Save Mapping" onclick={handleSaveMapping}></lightning-button>
+          <lightning-button label="Back" onclick={handleBackClick}></lightning-button>
           <lightning-button
             variant="brand"
             label={label_Continue}
@@ -71,7 +71,7 @@
             </div>
 
             <span class="set" onclick={openSettings}>
-              <span class="set-label">{label_Configure}</span>
+              <span class="set-label">Configure</span>
             </span>
           </div>
 
@@ -154,8 +154,7 @@
 
       <!-- Preview -->
       <div class="fm-preview slds-p-horizontal_medium slds-p-bottom_large">
-        <div class="prev-title">{label_PreviewTitle}</div>
-        <div class="prev-subtitle">{label_PreviewSubtitle}</div>
+        <div class="prev-title">Data Preview</div>
         <div class="table-wrap">
           <table class="prev-table">
             <thead>
@@ -180,7 +179,7 @@
 
               <template if:false={hasClientPreview}>
                 <tr>
-                  <td colspan={previewColspan} class="muted">{label_NoPreview}</td>
+                  <td colspan={previewColspan} class="muted">No preview available.</td>
                 </tr>
               </template>
             </tbody>
@@ -192,7 +191,7 @@
     <!-- Settings modal -->
     <template if:true={showSettingsModal}>
       <section class="fm-modal-backdrop" role="presentation">
-        <div class="fm-modal" role="dialog" aria-modal="true" aria-label={label_PreviewSettings}>
+        <div class="fm-modal" role="dialog" aria-modal="true" aria-label="Preview settings">
           <header class="fm-modal__header">
             <h2>{label_PreviewSettings}</h2>
           </header>
@@ -207,8 +206,8 @@
             ></lightning-input>
           </div>
           <footer class="fm-modal__footer">
-            <lightning-button label={label_Cancel} onclick={handleSettingsCancel}></lightning-button>
-            <lightning-button variant="brand" label={label_Apply} onclick={handleSettingsApply}></lightning-button>
+            <lightning-button label="Cancel" onclick={handleSettingsCancel}></lightning-button>
+            <lightning-button variant="brand" label="Apply" onclick={handleSettingsApply}></lightning-button>
           </footer>
         </div>
       </section>
