@@ -9,7 +9,6 @@
     <!-- OBJECT PERMISSIONS                           -->
     <!-- ============================================ -->
 
-    <!-- ImportProject__c -->
     <objectPermissions>
         <allowCreate>true</allowCreate>
         <allowDelete>true</allowDelete>
@@ -20,7 +19,6 @@
         <viewAllRecords>true</viewAllRecords>
     </objectPermissions>
 
-    <!-- ErrorLog__c -->
     <objectPermissions>
         <allowCreate>true</allowCreate>
         <allowDelete>true</allowDelete>
@@ -31,7 +29,6 @@
         <viewAllRecords>true</viewAllRecords>
     </objectPermissions>
 
-    <!-- FieldMapping__c -->
     <objectPermissions>
         <allowCreate>true</allowCreate>
         <allowDelete>true</allowDelete>
@@ -42,7 +39,6 @@
         <viewAllRecords>true</viewAllRecords>
     </objectPermissions>
 
-    <!-- ImportExecution__c -->
     <objectPermissions>
         <allowCreate>true</allowCreate>
         <allowDelete>true</allowDelete>
@@ -53,7 +49,6 @@
         <viewAllRecords>true</viewAllRecords>
     </objectPermissions>
 
-    <!-- ImportLog__c -->
     <objectPermissions>
         <allowCreate>true</allowCreate>
         <allowDelete>true</allowDelete>
@@ -64,7 +59,6 @@
         <viewAllRecords>true</viewAllRecords>
     </objectPermissions>
 
-    <!-- Schedule__c -->
     <objectPermissions>
         <allowCreate>true</allowCreate>
         <allowDelete>true</allowDelete>
@@ -75,7 +69,6 @@
         <viewAllRecords>true</viewAllRecords>
     </objectPermissions>
 
-    <!-- TransformationRule__c -->
     <objectPermissions>
         <allowCreate>true</allowCreate>
         <allowDelete>true</allowDelete>
@@ -86,94 +79,68 @@
         <viewAllRecords>true</viewAllRecords>
     </objectPermissions>
 
-
-    <!-- StagingRow__c-->
-
-    <objectPermissions>
-        <allowCreate>true</allowCreate>
-        <allowDelete>true</allowDelete>
-        <allowEdit>true</allowEdit>
-        <allowRead>true</allowRead>
-        <modifyAllRecords>false</modifyAllRecords>
-        <object>StagingRow__c</object>
-        <viewAllRecords>true</viewAllRecords>
-    </objectPermissions>
-
-
     <!-- ============================================ -->
-    <!-- FIELD PERMISSIONS - ImportProject__c          -->
+    <!-- FIELD PERMISSIONS - ImportProject__c         -->
     <!-- ============================================ -->
+
     <fieldPermissions>
         <editable>true</editable>
         <field>ImportProject__c.Description__c</field>
         <readable>true</readable>
     </fieldPermissions>
+
     <fieldPermissions>
         <editable>true</editable>
         <field>ImportProject__c.isActive__c</field>
         <readable>true</readable>
     </fieldPermissions>
 
-
-
-
-        <!-- ============================================ -->
-    <!-- FIELD PERMISSIONS - StagingRow__c               -->
     <!-- ============================================ -->
-<fieldPermissions>
-        <editable>true</editable>
-        <field>StagingRow__c.LineNumber__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>StagingRow__c.RawData__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>StagingRow__c.Processed__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    
+    <!-- FIELD PERMISSIONS - ErrorLog__c              -->
     <!-- ============================================ -->
-    <!-- FIELD PERMISSIONS - ErrorLog__c               -->
-    <!-- ============================================ -->
+
     <fieldPermissions>
         <editable>true</editable>
         <field>ErrorLog__c.ColumnName__c</field>
         <readable>true</readable>
     </fieldPermissions>
+
     <fieldPermissions>
         <editable>true</editable>
         <field>ErrorLog__c.ErrorMessage__c</field>
         <readable>true</readable>
     </fieldPermissions>
+
     <fieldPermissions>
         <editable>true</editable>
         <field>ErrorLog__c.ErrorType__c</field>
         <readable>true</readable>
     </fieldPermissions>
+
     <fieldPermissions>
         <editable>true</editable>
         <field>ErrorLog__c.FieldApiName__c</field>
         <readable>true</readable>
     </fieldPermissions>
+
     <fieldPermissions>
         <editable>true</editable>
         <field>ErrorLog__c.LineNumber__c</field>
         <readable>true</readable>
     </fieldPermissions>
+
     <fieldPermissions>
         <editable>true</editable>
         <field>ErrorLog__c.Message__c</field>
         <readable>true</readable>
     </fieldPermissions>
+
     <fieldPermissions>
         <editable>true</editable>
         <field>ErrorLog__c.StackTrace__c</field>
         <readable>true</readable>
     </fieldPermissions>
+
     <fieldPermissions>
         <editable>true</editable>
         <field>ErrorLog__c.Timestamp__c</field>
@@ -181,62 +148,21 @@
     </fieldPermissions>
 
     <!-- ============================================ -->
-    <!-- FIELD PERMISSIONS - FieldMapping__c           -->
+    <!-- FIELD PERMISSIONS - ImportExecution__c       -->
     <!-- ============================================ -->
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>FieldMapping__c.ColumnName__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>FieldMapping__c.FieldApiName__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>FieldMapping__c.IsLookup__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>FieldMapping__c.LookupMatchField__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>FieldMapping__c.LookupObject__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>FieldMapping__c.SourceColumn__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>FieldMapping__c.TargetField__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>FieldMapping__c.Version__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
 
-    <!-- ============================================ -->
-    <!-- FIELD PERMISSIONS - ImportExecution__c        -->
-    <!-- ============================================ -->
     <fieldPermissions>
         <editable>true</editable>
         <field>ImportExecution__c.EndTime__c</field>
         <readable>true</readable>
     </fieldPermissions>
+
     <fieldPermissions>
         <editable>true</editable>
         <field>ImportExecution__c.ApexJobId__c</field>
         <readable>true</readable>
     </fieldPermissions>
+
     <fieldPermissions>
         <editable>true</editable>
         <field>ImportExecution__c.FailedRecords__c</field>
@@ -252,136 +178,46 @@
         <field>ImportExecution__c.MaxRetries__c</field>
         <readable>true</readable>
     </fieldPermissions>
+
     <fieldPermissions>
         <editable>true</editable>
         <field>ImportExecution__c.Phase__c</field>
         <readable>true</readable>
     </fieldPermissions>
+
     <fieldPermissions>
         <editable>true</editable>
         <field>ImportExecution__c.ProcessedRecords__c</field>
         <readable>true</readable>
     </fieldPermissions>
+
     <fieldPermissions>
         <editable>true</editable>
         <field>ImportExecution__c.RetryCount__c</field>
         <readable>true</readable>
     </fieldPermissions>
+
     <fieldPermissions>
         <editable>true</editable>
         <field>ImportExecution__c.StartTime__c</field>
         <readable>true</readable>
     </fieldPermissions>
+
     <fieldPermissions>
         <editable>true</editable>
         <field>ImportExecution__c.Status__c</field>
         <readable>true</readable>
     </fieldPermissions>
+
     <fieldPermissions>
         <editable>true</editable>
         <field>ImportExecution__c.TotalRecords__c</field>
         <readable>true</readable>
     </fieldPermissions>
+
     <fieldPermissions>
         <editable>true</editable>
         <field>ImportExecution__c.Type__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-
-    <!-- ============================================ -->
-    <!-- FIELD PERMISSIONS - ImportLog__c              -->
-    <!-- ============================================ -->
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>ImportLog__c.ColumnName__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>ImportLog__c.Details__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>ImportLog__c.ErrorMessage__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>ImportLog__c.ErrorType__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>ImportLog__c.FieldApiName__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>ImportLog__c.LineNumber__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>ImportLog__c.Severity__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>ImportLog__c.Status__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-
-    <!-- ============================================ -->
-    <!-- FIELD PERMISSIONS - Schedule__c               -->
-    <!-- ============================================ -->
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>Schedule__c.Frequency__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>Schedule__c.NextRun__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>Schedule__c.Project__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-
-    <!-- ============================================ -->
-    <!-- FIELD PERMISSIONS - TransformationRule__c     -->
-    <!-- ============================================ -->
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TransformationRule__c.Order__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TransformationRule__c.Parameters__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TransformationRule__c.Project__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TransformationRule__c.RuleType__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TransformationRule__c.SourceFields__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>TransformationRule__c.TargetValue__c</field>
         <readable>true</readable>
     </fieldPermissions>
 
@@ -628,4 +464,3 @@
 
 
 </PermissionSet>
-
