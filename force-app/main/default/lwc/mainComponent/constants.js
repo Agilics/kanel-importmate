@@ -12,6 +12,7 @@ import EXPORT_COMING_SOON      from '@salesforce/label/c.EXPORT_COMING_SOON';
 import ANALYTICS_COMING_SOON   from '@salesforce/label/c.ANALYTICS_COMING_SOON';
 import SEARCH_PROJECTS_FEATURE from '@salesforce/label/c.SEARCH_PROJECTS_FEATURE';
 import UNSAVED_CHANGES_WARNING from '@salesforce/label/c.UNSAVED_CHANGES_WARNING';
+import EditProject_Modal_Title from '@salesforce/label/c.EditProject_Modal_Title';
 
 // Step constants
 export const STEPS = {

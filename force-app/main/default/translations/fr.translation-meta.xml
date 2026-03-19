@@ -1312,6 +1312,10 @@
 
     <!-- ===== ProjectForm ===== -->
     <customLabels>
+        <name>EditProject_Modal_Title</name>
+        <label>Modifier projet importé</label>
+    </customLabels>
+    <customLabels>
         <name>ProjectForm_Title</name>
         <label>Nouveau Projet</label>
     </customLabels>
