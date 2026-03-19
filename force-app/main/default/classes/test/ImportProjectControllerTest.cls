@@ -100,4 +100,52 @@ public with sharing class ImportProjectControllerTest {
         //then
         System.assertEquals(expected, hasProject, 'Failed to found the project ');
     }
+
+     //Tester la mise à jour d'un projet importé
+  @isTest
+  private static void testForUpdateProject() {
+    String expectedName = 'Lead Import';
+    String expectedDescription = 'Describe Lead import';
+    String expectedTargetObject = 'Lead';
+
+    //Exécution du  teste
+    Test.startTest();
+    ImportProject__c save = new ImportProject__c(
+      Name = 'Contact Import',
+      TargetObject__c = 'Lead',
+      Description__c = 'This is a lead import'
+    );
+
+    //Persistance des données de testes
+    Database.SaveResult results = Database.insert(save);
+    String projectId = results.getId();
+    System.debug('Record with Id ' + projectId + ' was inserted successfully.');
+
+    // Mise à jour des données
+    ImportProjectController.updateProject(
+      projectId,
+      expectedName,
+      expectedDescription,
+      expectedTargetObject
+    );
+
+    //Récupération du projet importé par l'ID
+    ImportProject__c actualProject = ImportProjectController.searchProjetById(projectId);
+    Test.stopTest();
+
+    // ------ Assertion pour vérifier si l'objet est vide -------
+    Assert.isNotNull(
+      actualProject,
+      'L\'objet des projets importés'
+    );
+
+    //Assertions pour vérifier les champs nom et descriptions
+    Assert.areEqual (expectedName, actualProject.Name,'Failed to update');
+    Assert.areEqual (expectedTargetObject, actualProject.TargetObject__c,'Failed to update');
+    Assert.areEqual (
+      expectedDescription,
+      actualProject.Description__c,
+      'Failed to update'
+    );
+  }
 }

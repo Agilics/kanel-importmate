@@ -1,39 +1,44 @@
 <!--
-  @description       : 
+  @description       : Project FORM component hosting inputs from project form
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
   @group             : 
-  @last modified on  : 02-16-2026
-  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+  @last modified on  : 02-25-2026
+  @last modified by  mouhamed niang
+  @Last Modification : refactoring du formulaire en responsive design
 -->
 <template>
-  <div class="main-content"  >
-     <!-- Header -->
-    <div class="header">
-      <lightning-icon icon-name="utility:add" alternative-text="Add" class="plus-icons margin-icon"></lightning-icon>
+   <div class={containerClass}>
+      <!-- Header : création seulement -->
+      <template if:false={openModal}>
+        <div class="header">
+          <lightning-icon icon-name="utility:add" alternative-text="Add" class="plus-icons margin-icon"></lightning-icon>
 
-      <div class="text-header">
-        <h1>{label.projectInfoLabel}</h1>
-        <p class="subtitle">
-          {label.projectDetailsLabel}
-        </p>
-      </div>
-    </div>
-
+          <div class="text-header">
+            <h1>{label.projectInfoLabel}</h1>
+            <p class="subtitle">
+              {label.projectDetailsLabel}
+            </p>
+          </div>
+        </div>
+    </template>
     <!-- Card container -->
-    <section class="card" >
+    <section class={contentClass} >
       <div class="project-info">
-          <!-- Project Information -->
-      <div class="section-header">
-        <lightning-icon icon-name="utility:info" alternative-text="Info"
-          class="icon-colors"></lightning-icon>
-        <h2>{label.projectInfoSectionLabel}</h2>
-      </div>
+         <!-- Section header : création seulement -->
+          <template if:false={openModal}>
+              <!-- Project Information -->
+            <div class="section-header">
+              <lightning-icon icon-name="utility:info" alternative-text="Info"
+                class="icon-colors"></lightning-icon>
+              <h2>{label.projectInfoSectionLabel}</h2>
+            </div>
+          </template>
       <div class="form-group">
         <label class="custom-label name-label" for="project-name">
           {label.projectNameLabel}<span class="required">*</span>
         </label>
         <lightning-input id="project-name" class="rounded-input" style="width: 100%" type="text"
-          placeholder= {projectNamePlaceholder}
+          placeholder= {projectNamePlaceholder} value={projectName}
           onchange={handleProjectNameChange}></lightning-input>
       </div>
       <p class="help-text">
@@ -45,7 +50,7 @@
         {label.descriptionLabel}
       </label>
       <lightning-textarea class="input-field rounded-input" name="description" style="margin-top: -1.6rem; "
-        placeholder={descriptionPlaceholder}
+        placeholder={descriptionPlaceholder} value={description}
         onchange={handleDescriptionChange}></lightning-textarea>
       <p class="help-text">
         {label.helperDescriptionLabel}
@@ -53,15 +58,21 @@
     
       </div>
     
-      <hr class="divider" />
+       <!-- Divider : création seulement -->
+      <template if:false={openModal}>
+        <hr class="divider" />
+      </template>
 
       <!-- Target Object Configuration -->
        <div class="target-object-config">
-        <div class="section-header">
-          <lightning-icon icon-name="utility:campaign" alternative-text="Campaign"
-            class="icon-colors "></lightning-icon>
-          <h2>{label.targetObjectInfoLabel}</h2>
-        </div>
+          <!-- Section header : création seulement -->
+            <template if:false={openModal}>
+              <div class="section-header">
+                <lightning-icon icon-name="utility:campaign" alternative-text="Campaign"
+                  class="icon-colors "></lightning-icon>
+                <h2>{label.targetObjectInfoLabel}</h2>
+              </div>
+            </template>
   
         <div class="form-grid">
           <div class="form-item">

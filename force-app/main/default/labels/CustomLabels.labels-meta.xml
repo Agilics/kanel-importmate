@@ -1163,7 +1163,14 @@
     </labels>
 
     <!-- Détails de projets -->
-
+    <labels>
+        <fullName>ProjectCard_Status_Draft</fullName>
+        <categories>ProjectCard Meta Status</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Status project</shortDescription>
+        <value>Draft</value>
+    </labels>
     <labels>
         <fullName>ProjectCard_Meta_Target</fullName>
         <categories>ProjectCard Meta</categories>
@@ -2642,7 +2649,6 @@
     </labels>
 
 
-    
     <!-- HEADER -->
     <labels>
         <fullName>IH_Title</fullName>
@@ -3313,5 +3319,13 @@
         <protected>false</protected>
         <shortDescription>IH_ExecutionLabel</shortDescription>
         <value>Execution #</value>
+    </labels>
+    <labels>
+        <fullName>EditProject_Modal_Title</fullName>
+        <categories>Project Modal</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Modal's Title</shortDescription>
+        <value>Edit Import Project </value>
     </labels>
 </CustomLabels>

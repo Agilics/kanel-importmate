@@ -4,6 +4,8 @@ import {ShowToastEvent} from 'lightning/platformShowToastEvent';
 import doesProjectExist from '@salesforce/apex/ImportProjectController.doesProjectExist';
 import saveProject from '@salesforce/apex/ImportProjectController.saveProject';
 import getRecentsProjects from '@salesforce/apex/ImportProjectController.getRecentsProjects';
+import updateProject from '@salesforce/apex/ImportProjectController.updateProject';
+import searchProjetById from '@salesforce/apex/ImportProjectController.searchProjetById';
 
 import {
   STEPS,
@@ -13,7 +15,8 @@ import {
   PAGES,
   QUICK_ACTIONS,
   TOAST_VARIANTS,
-  PROJECT_FIELD_NAMES
+  PROJECT_FIELD_NAMES, 
+  PROJECT_MODAL_EDIT_TITLE 
 } from './constants';
 
 /**
@@ -43,7 +46,11 @@ export default class MainComponent extends LightningElement {
   projectName = '';
   description = '';
   targetObject = '';
-  currentProject;
+    currentProject;
+    
+    //edit modal
+  modal_edit_title = PROJECT_MODAL_EDIT_TITLE; 
+
 
   // Stepper configuration
   currentStep = STEPS.PROJECT_SETUP;
@@ -180,6 +187,7 @@ export default class MainComponent extends LightningElement {
           });
 
           this.currentProject = result;
+            this.refreshDashboard(); //refresh dashboard
           this.markAsSaved();
           this.showToast(
               TOAST_VARIANTS.SUCCESS,
@@ -199,6 +207,14 @@ export default class MainComponent extends LightningElement {
           this.isLoading = false;
       }
   }
+
+  
+    refreshDashboard() {
+        const dashboard = this.template.querySelector('c-dashboard-cmp');
+        if (dashboard) {
+            dashboard.refreshDashboard(); // appel méthode @api sur DashboardCmp
+        }
+    }
 
   validateProjectFields() {
       return this.projectName && this.targetObject;
@@ -475,6 +491,76 @@ export default class MainComponent extends LightningElement {
       this.updateUIForStep(this.currentStep);
   }
 
+   //ouverture du modal de modification de projet importé
+   //ouverture du modal de modification de projet importé
+    async handleEditProject(event) {        
+        try {
+            const projectId = event.detail; 
+            this.isLoading = true;
+            const project = await searchProjetById({id:projectId} );  
+             console.log(JSON.stringify(project));
+            this.currentProject = project;
+            this.projectName = project.Name ;
+            this.description = project.Description__c;
+            this.targetObject = project.TargetObject__c; 
+             this.showEditProjectModal = true;
+            this.showProjectForm = true;        
+        } catch (err) {
+            this.showToast(TOAST_VARIANTS.ERROR, err?.body?.message || MESSAGES.ERROR_OCCURRED, TOAST_VARIANTS.ERROR);
+        } finally {
+            
+            this.isLoading = false; 
+        }
+    }
+    
+  
+   async handleUpdateProject() {
+        this.isLoading = true;
+
+        if (!this.validateProjectFields()) {
+            this.showToast(TOAST_VARIANTS.WARNING, MESSAGES.ALL_FIELDS_REQUIRED, TOAST_VARIANTS.WARNING);
+            this.isLoading = false;
+            return;
+        }
+
+        try {
+            console.log(
+                this.currentProject.Id,
+                 this.projectName,
+               this.description,
+                this.targetObject
+            )
+            await updateProject({
+                projectId: this.currentProject.Id,   
+                name: this.projectName,
+                description: this.description,
+                targetObject: this.targetObject
+            });
+
+            // Rafraîchir le projet courant
+            this.refreshDashboard();
+           this.currentProject = await searchProjetById({ id: this.currentProject.Id });
+        
+            this.showToast(TOAST_VARIANTS.SUCCESS, 'Project updated successfully', TOAST_VARIANTS.SUCCESS);
+            this.closeForm();
+            this.showEditProjectModal = false; 
+            this.resetProjectForm();
+
+        } catch (err) {
+            console.log(err?.body?.message );
+            this.showToast(TOAST_VARIANTS.ERROR, err?.body?.message || MESSAGES.ERROR_OCCURRED, TOAST_VARIANTS.ERROR);
+        } finally {
+            this.isLoading = false;
+        }
+    }
+
+    refreshDashboard() {
+        const dashboard = this.template.querySelector('c-dashboard-cmp');
+        if (dashboard) {
+            dashboard.refreshDashboard(); // appel méthode @api sur DashboardCmp
+        }
+    }
+
   handleQuickAction(event) {
       const actionName = event.detail;
 
@@ -531,6 +617,8 @@ export default class MainComponent extends LightningElement {
           this.showCreatorSection = false;
           this.showExecutionHistory = false;
           this.selectedDataSource = null;
+          // Rafraîchir après que le DOM soit mis à jour
+        Promise.resolve().then(() => this.refreshDashboard());
       } else if (stepNumber === STEPS.DATA_SOURCE) {
           this.selectedDataSource = null;
           this.showDashboard = false;
