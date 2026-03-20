@@ -14,12 +14,6 @@ public with sharing class ScheduleController {
        return  ScheduleService.schedule(frequency,nextRun, projectId);
     }
 
-    //mettre à jour et reporter une planfication
-    @AuraEnabled
-    public static Id reSchedule(String scheduleId, String frequency, Datetime nextRun){
-      return  ScheduleService.reSchedule(scheduleId,frequency,nextRun);
-    }
-
     //récupèrer les SObjets compatibles
      @AuraEnabled(cacheable=true)
     public static List<String> getCompatibleSObjects() {

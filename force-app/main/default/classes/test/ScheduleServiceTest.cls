@@ -768,8 +768,10 @@ public with sharing class ScheduleServiceTest {
             System.debug(LOG_PREFIX + '  testExceptionHandling PASSED');
         }
         
-        /** 
-         CSV parsing using TestDataFactory.createTestAccounts() 
+        /**
+         * ════════════════════════════════════════════════════════════════════════
+         CSV parsing using TestDataFactory.createTestAccounts()
+         * ════════════════════════════════════════════════════════════════════════
          */ 
         
       
@@ -801,88 +803,4 @@ public with sharing class ScheduleServiceTest {
             
         System.debug(LOG_PREFIX + '  testWithTestDataFactoryExecution PASSED');
     }
-
-    /**
-     * @description Teste la reprogrammation réussie d'une planification existante.
-     * Couvre les étapes : annulation job, mise à jour record, nouveau job cron.
-     */
-    @IsTest
-    static void testReScheduleSuccess() {
-        // GIVEN : Une planification existante créée via la factory
-        Schedule__c existingSched = TestDataFactory.createSchedule();
-        String newFrequency = 'Weekly';
-        Datetime newNextRun = Datetime.now().addDays(7);
-        
-        // WHEN
-        Test.startTest();
-        Id resultId = ScheduleService.reSchedule(existingSched.Id, newFrequency, newNextRun);
-        Test.stopTest();
-        
-        // THEN
-        Assert.areEqual(existingSched.Id, resultId, 'L\'ID retourné doit correspondre à l\'ID fourni');
-        
-        Schedule__c updatedSched = [SELECT Frequency__c, NextRun__c FROM Schedule__c WHERE Id = :existingSched.Id];
-        Assert.areEqual(newFrequency, updatedSched.Frequency__c, 'La fréquence doit être mise à jour en WEEKLY');
-        Assert.areEqual(newNextRun, updatedSched.NextRun__c, 'La date de prochaine exécution doit être mise à jour');
-    }
-
-    /**
-     * @description Teste le comportement lorsque l'ID fourni est vide ou null.
-     */
-    @IsTest
-    static void testReScheduleEmptyId() {
-        // WHEN
-        Test.startTest();
-        Id resultNull = ScheduleService.reSchedule(null, 'DAILY', Datetime.now());
-        Id resultBlank = ScheduleService.reSchedule('', 'DAILY', Datetime.now());
-        Test.stopTest();
-        
-        // THEN
-        Assert.areEqual(null, resultNull, 'Doit retourner null si l\'ID est null');
-        Assert.areEqual(null, resultBlank, 'Doit retourner null si l\'ID est vide');
-    }
-
-    /**
-     * @description Teste le comportement lorsque l'ID est valide mais ne correspond à aucun enregistrement.
-     */
-    @IsTest
-    static void testReScheduleNotFound() {
-        // GIVEN : Un ID formaté mais inexistant 
-        String fakeId =  '000000000001';
-        
-        // WHEN
-        Test.startTest();
-        try {
-            // Le service doit être capable de retourner null proprement
-            Id result = ScheduleController.reSchedule(fakeId, 'Daily', Datetime.now().addDays(1));
-        } catch (Exception e) {
-            // THEN
-            Assert.isNotNull(String.isNotBlank(e.getMessage()),'Doit retourner null si l\'enregistrement n\'existe pas');
-        }
-        Test.stopTest();  
-    }
-
-    /**
-     * @description Teste la gestion des erreurs DML (ex: fréquence invalide dépassant la taille du champ).
-     */
-   @IsTest
-    static void testReScheduleDmlException() {
-        // GIVEN
-        Schedule__c existingSched = TestDataFactory.createSchedule();
-        // On force une erreur de validation (ex: date dans le passé si ton code le valide, 
-        // ou String trop longue pour le champ Frequency__c)
-        String invalidFrequency = 'A'.repeat(300); 
-        
-        // WHEN & THEN
-        Test.startTest();
-        try {
-            ScheduleController.reSchedule(existingSched.Id, invalidFrequency, Datetime.now());
-            Assert.fail('Une exception DML aurait dû être levée à cause de la longueur de la chaîne');
-        } catch (Exception e) {
-            // On vérifie que l'exception contient le message d'erreur ou est du bon type
-           Assert.isTrue(String.isNotBlank(e.getMessage()), 'Une erreur doit être retournée par le contrôleur');
-        }
-        Test.stopTest();
-    }
-
 }

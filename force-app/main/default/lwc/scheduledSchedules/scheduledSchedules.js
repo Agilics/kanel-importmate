@@ -1,8 +1,7 @@
 import { LightningElement, wire, api, track } from 'lwc';
 import { refreshApex } from '@salesforce/apex';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import deleteSchedule from "@salesforce/apex/ScheduleController.deleteSchedule";
-import reSchedule from '@salesforce/apex/ScheduleController.reSchedule';
+ import deleteSchedule from "@salesforce/apex/ScheduleController.deleteSchedule";
 import getSchedulesWithExecutionsByIdProject from "@salesforce/apex/ScheduleController.getSchedulesWithExecutionsByIdProject";
 import LightningConfirm from 'lightning/confirm';
 
@@ -13,36 +12,10 @@ export default class ScheduledSchedules extends LightningElement {
     @track error;
     @track showAddScheduleModal = false;
     
-    // INLINE EDIT Properties
-    @track isEditingScheduleId = null;
-    @track editingData = {};
-    
-    @track editFrequency = '';
-    @track editNextRun = '';  
-
-    @track editingErrors = {};
-   // Remplacer la propriété statique frequencyOptions par ce getter
-    get frequencyOptions() {
-        return [
-            { label: 'Daily',   value: 'Daily'   },
-            { label: 'Weekly',  value: 'Weekly'  },
-            { label: 'Monthly', value: 'Monthly' }
-        ].map(opt => ({
-            ...opt,
-            chipClass: this.editFrequency === opt.value
-                ? 'freq-chip active'
-                : 'freq-chip'
-        }));
-    }
-    
-    handleFrequencyChipClick(event) {
-        this.editFrequency  = event.currentTarget.dataset.value;
-        this.frequencyError = '';
-        console.log('[handleFrequencyChipClick]', this.editFrequency);
-    }
     wiredSchedulesResult;
 
-    // COMPUTED PROPERTIES 
+
+   // COMPUTED PROPERTIES 
     get hasSchedules() {
         return Array.isArray(this.scheduledInfos) && this.scheduledInfos.length > 0;
     }
@@ -52,33 +25,9 @@ export default class ScheduledSchedules extends LightningElement {
         if (this.error) return 'Error loading schedules. Please try again.';
         return 'No schedules found. Create a schedule to get started.';
     }
-
-   get isSaveDisabled() {
-        return this.isLoading || !this.editFrequency || !this.editNextRun;
-    }
-    //LIFECYCLE HOOKS - S'assurer que l'état est nettoyé 
-
-    connectedCallback() {
-        console.log('[ScheduledSchedules] connectedCallback');
-        
-        //  S'assurer que tout est nettoyé au démarrage
-        this.isEditingScheduleId = null;
-        this.editingData = {};
-        this.editingErrors = {};
-        
-        console.log('[ScheduledSchedules]  Initial state cleaned');
-    }
-
-    disconnectedCallback() {
-        console.log('[ScheduledSchedules] disconnectedCallback');
-        
-        //  Nettoyer quand le composant est détaché
-        this.isEditingScheduleId = null;
-        this.editingData = {};
-        this.editingErrors = {};
-    }
-
+ 
     // WIRE SERVICE - Chargement des données 
+    scheduleDatas = [];
     @wire(getSchedulesWithExecutionsByIdProject, { idProject: '$projectId' })
     wiredSchedules(result) {
         this.wiredSchedulesResult = result;
@@ -88,50 +37,51 @@ export default class ScheduledSchedules extends LightningElement {
             console.log('📦 Raw API Response:', JSON.stringify(data, null, 2));
             
             this.scheduledInfos = data.flatMap(wrapper => {
-                const executions = wrapper.importExecutions || [];
-                
-                // On itère sur les schedules du wrapper
-                return (wrapper.schedules || []).map(sch => {
-                    // Dernière exécution
-                    const lastExecution = executions.length > 0 ? executions[0] : null;
-                    const status = lastExecution?.Status__c;
-                    const isRunning = status === 'InProgress'; 
-                    return {
-                        id: sch.Id,
-                        scheduleId: sch.Id,
-                        projectId: sch.Project__c,
-                        schedule: sch,
-                        executions: executions,
-                        lastExecution: lastExecution,
-                        title: this.buildTitle(sch),
-                        frequency: sch.Frequency__c || 'N/A',
-                        nextRun: sch.NextRun__c ? this.formatDateTime(sch.NextRun__c) : '—',
-                        lastExecutionDate: lastExecution?.StartTime__c 
-                            ? this.formatDateTime(lastExecution.StartTime__c) 
-                            : 'Never',
-                        subtitle: this.formatNextRun(sch.Frequency__c, sch.NextRun__c),
-                        statusLabel: lastExecution?.Status__c || 'Pending',
-                        badgeStatusClass: this.getBadgeStatusClass(status),
-                        iconClass: this.getIconClass(status),
-                        boxIconClass: this.getBoxIconClass(status),
-                        iconActionName: isRunning ? 'utility:pause' : 'utility:play',
-                        iconStatusName: this.getStatusIcon(status),
-                        targetObject: sch.Project__r?.TargetObject__c || 'N/A',
-                        projectName: sch.Project__r?.Name || 'Unknown Project'
-                    };
-                });
+            const executions = wrapper.importExecutions || [];
+            
+            // On itère sur les schedules du wrapper
+            return (wrapper.schedules || []).map(sch => {
+                // Dernière exécution
+                const lastExecution = executions.length > 0 ? executions[0] : null;
+                const status = lastExecution?.Status__c;
+                const isRunning = status === 'InProgress'; 
+                return {
+                    id: sch.Id,
+                    scheduleId: sch.Id,
+                    projectId: sch.Project__c,
+                    schedule: sch,
+                    executions: executions,
+                    lastExecution: lastExecution,
+                    title: this.buildTitle(sch),
+                    frequency: sch.Frequency__c || 'N/A',
+                    nextRun: sch.NextRun__c ? this.formatDateTime(sch.NextRun__c) : '—',
+                    lastExecutionDate: lastExecution?.StartTime__c 
+                        ? this.formatDateTime(lastExecution.StartTime__c) 
+                        : 'Never',
+                    subtitle: this.formatNextRun(sch.Frequency__c ,sch.NextRun__c ),
+                    statusLabel: lastExecution?.Status__c  || 'Pending',
+                    badgeStatusClass: this.getBadgeStatusClass(status) ,
+                    iconClass: this.getIconClass(status),
+                    boxIconClass: this.getBoxIconClass(status),
+                    iconActionName: isRunning ? 'utility:pause' : 'utility:play',
+                    iconStatusName: this.getStatusIcon(status),
+                    targetObject: sch.Project__r?.TargetObject__c || 'N/A',
+                    projectName: sch.Project__r?.Name || 'Unknown Project'
+                };
             });
+        });
 
-            console.log('✅ Processed schedules:', this.scheduledInfos.length);
-            this.error = undefined;
-            this.isLoading = false;
+        console.log('✅ Processed schedules:', this.scheduledInfos.length);
+        this.error = undefined;
+        this.isLoading = false;
+    
 
         } else if (error) {
             this.scheduledInfos = [];
             this.error = error;
             this.isLoading = false;
             
-            console.error('❌ Error loading schedules:', JSON.stringify(error, null, 2));
+            console.error('❌Error loading schedules:', JSON.stringify(error, null, 2));
             
             this.showToast(
                 'Error', 
@@ -140,265 +90,138 @@ export default class ScheduledSchedules extends LightningElement {
             );
         }
     } 
- 
-    //  INLINE EDIT HANDLERS
+
+    // EVENT HANDLERS - Actions utilisateur 
+    /**
+     * Ouvrir le modal d'ajout de planification
+     */
+    openAddScheduleModal() {
+        this.showAddScheduleModal = true;
+    }
 
     /**
-     * Vérifier si un schedule est en mode édition
-     */
-    isEditing(scheduleId) {
-        const isEditingThisOne = this.isEditingScheduleId === scheduleId;
-        
-        // LOG: Pour debugging
-        if (isEditingThisOne) {
-            console.log('[ScheduledSchedules] ✏️ EDITING MODE ACTIVE:', {
-                scheduleId,
-                isEditingScheduleId: this.isEditingScheduleId,
-                match: isEditingThisOne
-            });
-        }
-        
-        return isEditingThisOne;
-    } 
-
-    /**
-     * Ouvrir le formulaire d'édition
-     */
+     * Gérer l'ajout d'une planification (callback du modal)
      
-  
-
-    // Getter qui ajoute isBeingEdited à chaque schedule
-    get scheduledInfosWithEditState() {
-        return this.scheduledInfos.map(s => ({
-            ...s,
-            isBeingEdited: s.id === this.isEditingScheduleId
-        }));
-    }
-
-    handleEditClick(event) { 
-        const scheduleId = event.currentTarget.dataset.id;
-        const scheduleInfo = this.scheduledInfos.find(s => s.id === scheduleId);
-
-        if (!scheduleInfo) return;
-
-        const sch = scheduleInfo.schedule;
-        this.isEditingScheduleId = scheduleId;
-
-        // FIX 2: Assigner des primitifs directement, pas dans un objet
-        this.editFrequency = sch.Frequency__c || '';
-        // FIX 3: lightning-input type="datetime" attend une valeur ISO complète
-        this.editNextRun = sch.NextRun__c || '';
-
-        this.frequencyError = '';
-        this.nextRunError = '';
-
-        console.log('[handleEditClick] editFrequency:', this.editFrequency);
-        console.log('[handleEditClick] editNextRun:', this.editNextRun);
-    }
-
-    handleFrequencyChange(event) {
-        // lightning-combobox → event.detail.value
-        this.editFrequency = event.detail.value;
-        this.frequencyError = '';
-        console.log('[handleFrequencyChange]', this.editFrequency);
-    }
-
-    handleNextRunChange(event) {
-        // lightning-input type="datetime" → event.detail.value = ISO string "2026-03-13T13:56:00.000Z"
-        this.editNextRun = event.detail.value;
-        this.nextRunError = '';
-        console.log('[handleNextRunChange]', this.editNextRun);
-    }
-
-    async handleSaveEdit() {
-        //if (!this._validateForm()) return;
-
-        this.isLoading = true;
-        try { 
-            console.log('[handleSaveEdit] nextRun envoyé à Apex:', this.editNextRun);
-
-            await reSchedule({
-                scheduleId: this.isEditingScheduleId,
-                frequency: this.editFrequency,
-                nextRun: this.editNextRun   
-            })
-            .catch(error => alert('Error updating schedule', error.body.message));
-
-            this.showToast('Success', `Schedule updated: ${this.editFrequency}`, 'success');
-            this._clearEditState();
+    async handleAddSchedule(event) {
+        try {
+            this.isLoading = true;
+            
+            // Rafraîchir les données
             await refreshApex(this.wiredSchedulesResult);
-
+            
+            // Fermer le modal
+            this.showAddScheduleModal = false;
+            
+            this.showToast(
+                'Success', 
+                'Schedule created successfully', 
+                'success'
+            );
+            
         } catch (error) {
-            console.error('[handleSaveEdit] ERROR:', error);
-            this.showToast('Error', error?.body?.message || error?.message || 'Error updating schedule', 'error');
+            console.error('Error refreshing schedules:', error);
+            
+            this.showToast(
+                'Error', 
+                'Failed to refresh schedules', 
+                'error'
+            );
         } finally {
             this.isLoading = false;
         }
-    }
-
-    _validateForm() {
-        this.frequencyError = '';
-        this.nextRunError = '';
-
-        if (!this.editFrequency) {
-            this.frequencyError = 'Frequency is required';
-        }
-
-        if (!this.editNextRun) {
-            this.nextRunError = 'Next run date is required';
-        } else {
-            const d = new Date(this.editNextRun);
-            if (isNaN(d.getTime())) {
-                this.nextRunError = 'Invalid date format';
-            } else if (d <= new Date()) {
-                this.nextRunError = 'Schedule date must be in the future';
-            }
-        }
-
-        return !this.frequencyError && !this.nextRunError;
-    }
-
-    _clearEditState() {
-        this.isEditingScheduleId = null;
-        this.editFrequency = '';
-        this.editNextRun = '';
-        this.frequencyError = '';
-        this.nextRunError = ''; 
-    }
-    /**
-     * Annuler l'édition
-     */
-    handleCancelEdit() {
-        console.log('[ScheduledSchedules] handleCancelEdit');
-        
-        //  Réinitialiser COMPLÈTEMENT
-        this._clearEditState();
-        
-        console.log('[ScheduledSchedules]  Edit state reset completely');
-        
-        this.showToast('Info', 'Edit cancelled', 'info');
-    }
-
-   
+    }*/
 
     /**
-     * Effacer une erreur
+     * Fermer le modal sans sauvegarder
      */
-    clearError(fieldName) {
-        if (this.editingErrors[fieldName]) {
-            delete this.editingErrors[fieldName];
-        }
+    handleCloseModal() {
+        this.showAddScheduleModal = false;
     }
-
-    /**
-     * Convertir datetime-local input en Date
-     */
-    convertInputToDate(inputValue) {
-        if (!inputValue) return null;
-        return new Date(inputValue);
-    }
-
-     
-
-    /**
-     * Vérifier si on a une erreur pour un champ
-     */
-    hasError(fieldName) {
-        return Boolean(this.editingErrors[fieldName]);
-    }
-
-    /**
-     * Obtenir le message d'erreur pour un champ
-     */
-    getError(fieldName) {
-        return this.editingErrors[fieldName] || '';
-    }
-
-    // ════════════════════════════════════════════════════════════════════════
-    // EVENT HANDLERS - Actions utilisateur (existantes)
-    // ════════════════════════════════════════════════════════════════════════
 
     /**
      * Jouer/Reprendre une planification
      */
     handlePlaySchedule(event) {
         const scheduleId = event.currentTarget.dataset.id;
-        console.log('▶ Play schedule:', scheduleId);
+        console.log('▶Play schedule:', scheduleId);
+        
+        // TODO: Implémenter la logique de reprise
         this.showToast('Info', 'Play functionality coming soon', 'info');
     }
 
     /**
-     * Supprimer une planification
+     * Mettre en pause une planification
      */
+    async handlePauseSchedule(event) {
+        const scheduleId = event.currentTarget.dataset.id;
+        console.log(' Pause schedule:', scheduleId);
+        
+        // TODO: Implémenter la logique de pause
+        this.showToast('Info', 'Pause functionality coming soon', 'info');
+    }
+
+    // Modifier une planification  
+    async handleEditSchedule(event) {
+        const scheduleId = event.currentTarget.dataset.id;
+        console.log(' Edit schedule:', scheduleId);
+        
+        // TODO: Implémenter la logique de modification
+        this.showToast('Info', 'Edit functionality coming soon', 'info');
+    }
+
+    // Supprimer une planification
     async handleDeleteSchedule(event) {
-        try {
+       try {
             const scheduleId = event.currentTarget.dataset.id; 
-            console.log('🗑 Delete schedule:', scheduleId);
+           const ruleId = event.detail; 
+           console.log(' Delete schedule:', scheduleId);
                 
             const isConfirm = await LightningConfirm.open({
                 message: 'Are you sure you want to delete this schedule? This action cannot be undone.',
                 label: 'Confirm deletion schedule?',
                 theme: 'alt-inverse',
             });
-
+            // Confirm deletion
             if (!isConfirm) {
                 return;
             }
            
-            await deleteSchedule({ scheduleId: scheduleId }); 
-            await refreshApex(this.wiredSchedulesResult);
+           await deleteSchedule({ scheduleId: scheduleId }); 
+           await refreshApex(this.wiredSchedulesResult); //refresh the data
 
-            this.showToast(
-                'Success',
-                'Schedule deleted successfully',
-                'success'
-            );
-
-        } catch (error) {
+           // Show success toast
+            this.dispatchEvent(new ShowToastEvent({
+                title: 'Success',
+                message: 'Schedule deleted successfully',
+                variant: 'success'
+            }));
+       } catch (error) {
             console.error('Error deleting schedule:', error);
-            this.showToast(
-                'Error',
-                error?.body?.message || 'Error deleting schedule',
-                'error'
-            );
-        }
+            this.dispatchEvent(new ShowToastEvent({
+                title: 'Error',
+                message: error.body?.message || 'Error deleting schedule',
+                variant: 'error'
+            }));
+       }
     }
 
-    /**
-     * Rafraîchir les schedules (API publique pour ExecutionCmp)
-     */
     @api async refreshSchedules(){
-        console.log('[ScheduledSchedules] refreshSchedules() START');
-        
-        try {
-            // ✅ IMPORTANT: Fermer le mode edit avant de rafraîchir
-            this.isEditingScheduleId = null;
-            this.editingData = {};
-            this.editingErrors = {};
-            
-            console.log('[ScheduledSchedules] ✅ Edit mode cleared');
-            
-            // Rafraîchir les données
-            await refreshApex(this.wiredSchedulesResult);
-            
-            console.log('[ScheduledSchedules] ✅ Data refreshed');
-            
-        } catch (error) {
-            console.error('[ScheduledSchedules] ❌ Error in refreshSchedules():', error);
-            throw error;
-        }
+        await refreshApex(this.wiredSchedulesResult); 
     }
 
-    // ════════════════════════════════════════════════════════════════════════
-    // UTILITY METHODS
-    // ════════════════════════════════════════════════════════════════════════
-
+    
+    /**
+     * Construire le titre de la carte schedule
+     */
     buildTitle(schedule) {
         const frequency = schedule.Frequency__c || 'Unknown';
         const targetObject = schedule.Project__r?.TargetObject__c || 'N/A';
         return `${frequency} • ${targetObject}`;
     }
 
+    /**
+     * Formater une date ISO en format lisible
+     */
     formatDateTime(isoString) {
         if (!isoString) return '—';
         
@@ -420,19 +243,23 @@ export default class ScheduledSchedules extends LightningElement {
         }
     }
 
-    getBoxIconClass(status) {
+    //Obtenir le style CSS du Box icon
+    getBoxIconClass(status){
         switch (status) {
             case 'Completed':
                 return 'box-icon is-centered box-icon-complete';
             case 'Failed':
-                return 'box-icon is-centered box-icon-failed';
+                return 'box-icon is-centered box-icon-failed  ';
             case 'InProgress':
                 return 'box-icon is-centered progress-status'; 
             default:
-                return 'box-icon is-centered box-icon-no-completed';
+                return 'box-icon is-centered box-icon-no-completed ';
         }
     }
-
+     /**
+     * Format subtitle
+     * Traduit une fréquence ou une expression Cron en texte naturel
+     */
     formatNextRun(frequency, nextRunDate) {
         if (!frequency || !nextRunDate) {
             return 'Not scheduled';
@@ -440,7 +267,10 @@ export default class ScheduledSchedules extends LightningElement {
 
         const date = new Date(nextRunDate);
 
+        // Jour de la semaine réel
         const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
+
+        // Date complète lisible
         const fullDate = date.toLocaleDateString('en-US', {
             weekday: 'long',
             day: '2-digit',
@@ -448,6 +278,7 @@ export default class ScheduledSchedules extends LightningElement {
             year: 'numeric'
         });
 
+        // Heure format US AM/PM
         const timeString = date.toLocaleTimeString('en-US', {
             hour: 'numeric',
             minute: '2-digit',
@@ -455,20 +286,28 @@ export default class ScheduledSchedules extends LightningElement {
         });
 
         switch (frequency) {
-            case 'DAILY':
             case 'Daily':
                 return `Daily at ${timeString}`;
-            case 'WEEKLY':
+
             case 'Weekly':
                 return `Weekly on ${dayName} at ${timeString}`;
-            case 'MONTHLY':
+
             case 'Monthly':
                 return `Monthly on ${fullDate} at ${timeString}`;
+
+            case 'Weekdays':
+                return `Every weekday at ${timeString}`;
+
             default:
                 return `${fullDate} at ${timeString}`;
         }
     }
 
+    
+
+    /**
+     * Obtenir la classe CSS de l'icône
+     */
     getIconClass(status) {
         switch (status) {
             case 'Completed':
@@ -482,6 +321,10 @@ export default class ScheduledSchedules extends LightningElement {
         }
     }
 
+
+    /**
+     * Obtenir la classe CSS du badge de statut
+     */
     getBadgeStatusClass(status) {
         const baseClass = 'status-badge';
 
@@ -498,28 +341,38 @@ export default class ScheduledSchedules extends LightningElement {
         return `${baseClass} ${variantClass}`;
     }
 
+
+    /**
+     * Obtenir l'icône du statut
+     */
     getStatusIcon(status) {
         const icons = {
             'Pending': 'utility:hourglass',
             'InProgress': 'utility:spinner',
             'Completed': 'utility:success',
-            'Suspended': 'utility:pause_alt',
+            'Suspended':'utility:pause_alt',
             'Failed': 'utility:error'
         };
         return icons[status] || 'utility:info';
     }
 
+    /**
+     * Extraire le message d'erreur d'un objet erreur Salesforce
+     */
     getErrorMessage(error) {
         if (!error) return 'Unknown error';
         
+        // Erreur AuraHandledException
         if (error.body && error.body.message) {
             return error.body.message;
         }
         
+        // Erreur avec pageErrors
         if (error.body && error.body.pageErrors && error.body.pageErrors.length > 0) {
             return error.body.pageErrors[0].message;
         }
         
+        // Erreur avec fieldErrors
         if (error.body && error.body.fieldErrors) {
             const fieldErrors = Object.values(error.body.fieldErrors).flat();
             if (fieldErrors.length > 0) {
@@ -527,18 +380,23 @@ export default class ScheduledSchedules extends LightningElement {
             }
         }
         
+        // Erreur string
         if (error.message) {
             return error.message;
         }
         
+        // Fallback
         return JSON.stringify(error);
     }
 
+    /**
+     * Afficher un toast notification
+     */
     showToast(title, message, variant) {
         const event = new ShowToastEvent({
             title: title,
             message: message,
-            variant: variant
+            variant: variant // success, error, warning, info
         });
         this.dispatchEvent(event);
     }
