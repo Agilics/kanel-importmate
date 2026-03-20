@@ -33,7 +33,7 @@
         <name>CsvUploader_Dropzone_Browse</name>
     </customLabels>
     <customLabels>
-        <label>Fichiers CSV jusqu&apos;à 50 Mo acceptés</label>
+        <label>Fichiers CSV jusqu'à 50 Mo acceptés</label>
         <name>CsvUploader_Dropzone_Hint</name>
     </customLabels>
     <customLabels>
@@ -45,7 +45,7 @@
         <name>CsvUploader_Filters_Button</name>
     </customLabels>
     <customLabels>
-        <label>Paramètres d&apos;importation</label>
+        <label>Paramètres d'importation</label>
         <name>CsvUploader_ImportSettings_Button</name>
     </customLabels>
     <customLabels>
@@ -121,7 +121,7 @@
         <name>CsvUploader_Modal_Settings_RowsPerPage</name>
     </customLabels>
     <customLabels>
-        <label>Paramètres d&apos;importation</label>
+        <label>Paramètres d'importation</label>
         <name>CsvUploader_Modal_Settings_Title</name>
     </customLabels>
     <customLabels>
@@ -197,7 +197,7 @@
         <name>Dashboard_FilterTab_Scheduled</name>
     </customLabels>
     <customLabels>
-        <label>Gérez vos projets d&apos;importation de données</label>
+        <label>Gérez vos projets d'importation de données</label>
         <name>Dashboard_FilterTab_Subtitle</name>
     </customLabels>
     <customLabels>
@@ -337,11 +337,11 @@
         <name>IH_ApplyFilters</name>
     </customLabels>
     <customLabels>
-        <label>Supprimer {0} élément(s) d&apos;historique et les journaux associés ?</label>
+        <label>Supprimer {0} élément(s) d'historique et les journaux associés ?</label>
         <name>IH_Confirm_DeleteMultiple</name>
     </customLabels>
     <customLabels>
-        <label>Supprimer cet historique d&apos;exécution et les journaux associés ?</label>
+        <label>Supprimer cet historique d'exécution et les journaux associés ?</label>
         <name>IH_Confirm_DeleteSingle</name>
     </customLabels>
     <customLabels>
@@ -445,19 +445,19 @@
         <name>IH_KPI_TotalExecutions</name>
     </customLabels>
     <customLabels>
-        <label>Créer un nouveau projet d&apos;importation</label>
+        <label>Créer un nouveau projet d'importation</label>
         <name>IH_Modal_CreateTitle</name>
     </customLabels>
     <customLabels>
-        <label>Supprimer l&apos;exécution</label>
+        <label>Supprimer l'exécution</label>
         <name>IH_Modal_DeleteExecution</name>
     </customLabels>
     <customLabels>
-        <label>Détails de l&apos;exécution</label>
+        <label>Détails de l'exécution</label>
         <name>IH_Modal_ExecutionDetails</name>
     </customLabels>
     <customLabels>
-        <label>Exporter l&apos;exécution</label>
+        <label>Exporter l'exécution</label>
         <name>IH_Modal_ExportExecution</name>
     </customLabels>
     <customLabels>
@@ -465,7 +465,7 @@
         <name>IH_Modal_Records</name>
     </customLabels>
     <customLabels>
-        <label>Nouveau projet d&apos;importation</label>
+        <label>Nouveau projet d'importation</label>
         <name>IH_NewImportProject</name>
     </customLabels>
     <customLabels>
@@ -501,7 +501,7 @@
         <name>IH_Status_Running</name>
     </customLabels>
     <customLabels>
-        <label>Consultez et gérez toutes les exécutions de vos projets d&apos;importation</label>
+        <label>Consultez et gérez toutes les exécutions de vos projets d'importation</label>
         <name>IH_Subtitle</name>
     </customLabels>
     <customLabels>
@@ -561,7 +561,7 @@
         <name>IH_Time_1MinuteAgo</name>
     </customLabels>
     <customLabels>
-        <label>À l&apos;instant</label>
+        <label>À l'instant</label>
         <name>IH_Time_JustNow</name>
     </customLabels>
     <customLabels>
@@ -585,7 +585,7 @@
         <name>IH_Toast_CannotDeleteRunning</name>
     </customLabels>
     <customLabels>
-        <label>Historique d&apos;exécution supprimé.</label>
+        <label>Historique d'exécution supprimé.</label>
         <name>IH_Toast_DeleteSuccess</name>
     </customLabels>
     <customLabels>
@@ -593,23 +593,23 @@
         <name>IH_Toast_ErrorDeleteSelected</name>
     </customLabels>
     <customLabels>
-        <label>Impossible de supprimer l&apos;historique d&apos;exécution.</label>
+        <label>Impossible de supprimer l'historique d'exécution.</label>
         <name>IH_Toast_ErrorDeleteSingle</name>
     </customLabels>
     <customLabels>
-        <label>Impossible d&apos;exporter le fichier CSV.</label>
+        <label>Impossible d'exporter le fichier CSV.</label>
         <name>IH_Toast_ErrorExportCsv</name>
     </customLabels>
     <customLabels>
-        <label>Impossible de charger les détails de l&apos;exécution.</label>
+        <label>Impossible de charger les détails de l'exécution.</label>
         <name>IH_Toast_ErrorLoadDetails</name>
     </customLabels>
     <customLabels>
-        <label>Erreur lors du chargement de l&apos;historique</label>
+        <label>Erreur lors du chargement de l'historique</label>
         <name>IH_Toast_ErrorLoadingHistory</name>
     </customLabels>
     <customLabels>
-        <label>L&apos;identifiant d&apos;exécution est manquant.</label>
+        <label>L'identifiant d'exécution est manquant.</label>
         <name>IH_Toast_ExecutionIdMissing</name>
     </customLabels>
     <customLabels>
@@ -653,7 +653,7 @@
         <name>IM_DRY_Btn_ExportReport</name>
     </customLabels>
     <customLabels>
-        <label>Passer à l&apos;exécution</label>
+        <label>Passer à l'exécution</label>
         <name>IM_DRY_Btn_Proceed</name>
     </customLabels>
     <customLabels>
@@ -709,7 +709,7 @@
         <name>IM_DRY_Mode_Sample</name>
     </customLabels>
     <customLabels>
-        <label>Aucun problème détecté ! Les données sont prêtes pour l&apos;import.</label>
+        <label>Aucun problème détecté ! Les données sont prêtes pour l'import.</label>
         <name>IM_DRY_NoErrors_Message</name>
     </customLabels>
     <customLabels>
@@ -749,7 +749,7 @@
         <name>IM_DRY_Progress_Completed</name>
     </customLabels>
     <customLabels>
-        <label>ID d&apos;exécution :</label>
+        <label>ID d'exécution :</label>
         <name>IM_DRY_Progress_ExecutionId</name>
     </customLabels>
     <customLabels>
@@ -789,7 +789,7 @@
         <name>IM_DRY_Settings_Behavior</name>
     </customLabels>
     <customLabels>
-        <label>L&apos;affichage des avertissements dépend du bouton Inclure les avertissements.</label>
+        <label>L'affichage des avertissements dépend du bouton Inclure les avertissements.</label>
         <name>IM_DRY_Settings_BehaviorHelp</name>
     </customLabels>
     <customLabels>
@@ -821,11 +821,11 @@
         <name>IM_DRY_Settings_PerformanceHelp</name>
     </customLabels>
     <customLabels>
-        <label>La taille de l&apos;échantillon s&apos;applique uniquement en mode échantillon.</label>
+        <label>La taille de l'échantillon s'applique uniquement en mode échantillon.</label>
         <name>IM_DRY_Settings_SampleHelp</name>
     </customLabels>
     <customLabels>
-        <label>Taille de l&apos;échantillon</label>
+        <label>Taille de l'échantillon</label>
         <name>IM_DRY_Settings_SampleSize</name>
     </customLabels>
     <customLabels>
@@ -845,7 +845,7 @@
         <name>IM_DRY_Status_WithErrors</name>
     </customLabels>
     <customLabels>
-        <label>Examinez et corrigez les erreurs avant l&apos;import</label>
+        <label>Examinez et corrigez les erreurs avant l'import</label>
         <name>IM_DRY_Subtitle</name>
     </customLabels>
     <customLabels>
@@ -869,7 +869,7 @@
         <name>IM_EX_Btn_BackToValidation</name>
     </customLabels>
     <customLabels>
-        <label>Annuler l&apos;import</label>
+        <label>Annuler l'import</label>
         <name>IM_EX_Btn_CancelImport</name>
     </customLabels>
     <customLabels>
@@ -877,15 +877,15 @@
         <name>IM_EX_Btn_ExportLogs</name>
     </customLabels>
     <customLabels>
-        <label>Planifier l&apos;import</label>
+        <label>Planifier l'import</label>
         <name>IM_EX_Btn_ScheduleImport</name>
     </customLabels>
     <customLabels>
-        <label>Lancer l&apos;import</label>
+        <label>Lancer l'import</label>
         <name>IM_EX_Btn_StartImport</name>
     </customLabels>
     <customLabels>
-        <label>ID d&apos;exécution :</label>
+        <label>ID d'exécution :</label>
         <name>IM_EX_Detail_ExecutionId</name>
     </customLabels>
     <customLabels>
@@ -909,11 +909,11 @@
         <name>IM_EX_Detail_TotalRecords</name>
     </customLabels>
     <customLabels>
-        <label>L&apos;export utilise l&apos;ID d&apos;exécution pour récupérer les logs depuis Apex.</label>
+        <label>L'export utilise l'ID d'exécution pour récupérer les logs depuis Apex.</label>
         <name>IM_EX_Failed_Subtitle</name>
     </customLabels>
     <customLabels>
-        <label>L&apos;import a échoué. Vous pouvez encore exporter les logs.</label>
+        <label>L'import a échoué. Vous pouvez encore exporter les logs.</label>
         <name>IM_EX_Failed_Title</name>
     </customLabels>
     <customLabels>
@@ -921,7 +921,7 @@
         <name>IM_EX_Processing_Message</name>
     </customLabels>
     <customLabels>
-        <label>Statut d&apos;exécution de l&apos;import</label>
+        <label>Statut d'exécution de l'import</label>
         <name>IM_EX_Progress_Title</name>
     </customLabels>
     <customLabels>
@@ -949,7 +949,7 @@
         <name>IM_EX_Subtitle</name>
     </customLabels>
     <customLabels>
-        <label>Exécution de l&apos;import</label>
+        <label>Exécution de l'import</label>
         <name>IM_EX_Title</name>
     </customLabels>
     <customLabels>
@@ -1109,7 +1109,7 @@
         <name>IM_IR_Col_CurrentValue</name>
     </customLabels>
     <customLabels>
-        <label>TYPE D&apos;ERREUR</label>
+        <label>TYPE D'ERREUR</label>
         <name>IM_IR_Col_ErrorType</name>
     </customLabels>
     <customLabels>
@@ -1125,11 +1125,11 @@
         <name>IM_IR_Col_Row</name>
     </customLabels>
     <customLabels>
-        <label>Tous les types d&apos;erreur</label>
+        <label>Tous les types d'erreur</label>
         <name>IM_IR_Filter_AllTypes</name>
     </customLabels>
     <customLabels>
-        <label>Chargement des résultats de l&apos;import...</label>
+        <label>Chargement des résultats de l'import...</label>
         <name>IM_IR_Loading</name>
     </customLabels>
     <customLabels>
@@ -1185,7 +1185,7 @@
         <name>IM_IR_Summary_TotalErrors</name>
     </customLabels>
     <customLabels>
-        <label>Résultats de l&apos;import</label>
+        <label>Résultats de l'import</label>
         <name>IM_IR_Title</name>
     </customLabels>
     <customLabels>
@@ -1553,7 +1553,7 @@
         <name>IM_TR_Warning_Title</name>
     </customLabels>
     <customLabels>
-        <label>Décrivez l&apos;objectif et le périmètre de ce projet d&apos;import...</label>
+        <label>Décrivez l'objectif et le périmètre de ce projet d'import...</label>
         <name>ImportProject_Description_Placeholder</name>
     </customLabels>
     <customLabels>
@@ -1605,7 +1605,7 @@
         <name>ProjectForm_Description</name>
     </customLabels>
     <customLabels>
-        <label>Fournissez des détails sur la source des données, l&apos;objectif commercial et les résultats attendus</label>
+        <label>Fournissez des détails sur la source des données, l'objectif commercial et les résultats attendus</label>
         <name>ProjectForm_Helper_Description</name>
     </customLabels>
     <customLabels>
@@ -1613,7 +1613,7 @@
         <name>ProjectForm_Helper_Name</name>
     </customLabels>
     <customLabels>
-        <label>Sélectionnez l&apos;objet Salesforce où les données seront importées</label>
+        <label>Sélectionnez l'objet Salesforce où les données seront importées</label>
         <name>ProjectForm_Helper_Target_Object</name>
     </customLabels>
     <customLabels>
@@ -1629,7 +1629,7 @@
         <name>ProjectForm_Save_Button</name>
     </customLabels>
     <customLabels>
-        <label>Configurez votre projet d&apos;importation de données avec l&apos;objet cible et la configuration</label>
+        <label>Configurez votre projet d'importation de données avec l'objet cible et la configuration</label>
         <name>ProjectForm_Subtitle</name>
     </customLabels>
     <customLabels>
@@ -1637,7 +1637,7 @@
         <name>ProjectForm_Target_Object</name>
     </customLabels>
     <customLabels>
-        <label>Configuration de l&apos;objet cible</label>
+        <label>Configuration de l'objet cible</label>
         <name>ProjectForm_Target_Section_Label</name>
     </customLabels>
     <customLabels>
@@ -1760,143 +1760,4 @@
         <label>Affichage des logs</label>
         <name>VIEW_LOGS</name>
     </customLabels>
-    <customTabs>
-        <label><!-- DART --></label>
-        <name>DART</name>
-    </customTabs>
-    <quickActions>
-        <label><!-- LogACall --></label>
-        <name>LogACall</name>
-    </quickActions>
-    <quickActions>
-        <label><!-- NewAccount --></label>
-        <name>NewAccount</name>
-    </quickActions>
-    <quickActions>
-        <label><!-- NewCase --></label>
-        <name>NewCase</name>
-    </quickActions>
-    <quickActions>
-        <label><!-- NewContact --></label>
-        <name>NewContact</name>
-    </quickActions>
-    <quickActions>
-        <label><!-- NewEvent --></label>
-        <name>NewEvent</name>
-    </quickActions>
-    <quickActions>
-        <label><!-- NewGroup --></label>
-        <name>NewGroup</name>
-    </quickActions>
-    <quickActions>
-        <label><!-- NewLead --></label>
-        <name>NewLead</name>
-    </quickActions>
-    <quickActions>
-        <label><!-- NewNote --></label>
-        <name>NewNote</name>
-    </quickActions>
-    <quickActions>
-        <label><!-- NewOpportunity --></label>
-        <name>NewOpportunity</name>
-    </quickActions>
-    <quickActions>
-        <label><!-- NewTask --></label>
-        <name>NewTask</name>
-    </quickActions>
-    <quickActions>
-        <label><!-- SendEmail --></label>
-        <name>SendEmail</name>
-    </quickActions>
-    <reportTypes>
-        <description><!-- Journaux d’exécution d’orchestrations Spring &apos;24 --></description>
-        <label><!-- Journaux d’exécution d’orchestrations Spring &apos;24 --></label>
-        <name>flow_orchestration_log_ootb_crt_two_four_eight</name>
-        <sections>
-            <label><!-- Journaux d&apos;exécution d&apos;orchestration --></label>
-            <name>Journaux d&apos;exécution d&apos;orchestration</name>
-        </sections>
-    </reportTypes>
-    <reportTypes>
-        <description><!-- Orchestration Runs --></description>
-        <label><!-- Orchestration Runs --></label>
-        <name>flow_orchestration_run_crt</name>
-        <sections>
-            <label><!-- Orchestration Runs --></label>
-            <name>Orchestration Runs</name>
-        </sections>
-    </reportTypes>
-    <reportTypes>
-        <description><!-- Exécutions d’orchestration Spring &apos;24 --></description>
-        <label><!-- Exécutions d’orchestration Spring &apos;24 --></label>
-        <name>flow_orchestration_run_ootb_crt_two_four_eight</name>
-        <sections>
-            <label><!-- Exécutions d&apos;orchestration --></label>
-            <name>Exécutions d&apos;orchestration</name>
-        </sections>
-    </reportTypes>
-    <reportTypes>
-        <description><!-- Exécutions de phases d’orchestration Spring &apos;24 --></description>
-        <label><!-- Exécutions de phases d’orchestration Spring &apos;24 --></label>
-        <name>flow_orchestration_stage_run_ootb_crt_two_four_eight</name>
-        <sections>
-            <label><!-- Exécutions de phase d&apos;orchestration --></label>
-            <name>Exécutions de phase d&apos;orchestration</name>
-        </sections>
-    </reportTypes>
-    <reportTypes>
-        <description><!-- Exécutions d’étape d’orchestration Spring &apos;24 --></description>
-        <label><!-- Exécutions d’étape d’orchestration Spring &apos;24 --></label>
-        <name>flow_orchestration_step_run_ootb_crt_two_four_eight</name>
-        <sections>
-            <label><!-- Exécutions d&apos;étape d&apos;orchestration --></label>
-            <name>Exécutions d&apos;étape d&apos;orchestration</name>
-        </sections>
-    </reportTypes>
-    <reportTypes>
-        <description><!-- Éléments de travail d’orchestration Spring &apos;24 --></description>
-        <label><!-- Éléments de travail d’orchestration Spring &apos;24 --></label>
-        <name>flow_orchestration_work_item_ootb_crt_two_four_eight</name>
-        <sections>
-            <columns>
-                <label><!-- Exécution d’étape d’orchestration :Label --></label>
-                <name>Exécution d’étape d’orchestration :Label</name>
-            </columns>
-            <columns>
-                <label><!-- Exécution d’étape d’orchestration :Name --></label>
-                <name>Exécution d’étape d’orchestration :Name</name>
-            </columns>
-            <columns>
-                <label><!-- Exécution d’étape d’orchestration :Status --></label>
-                <name>Exécution d’étape d’orchestration :Status</name>
-            </columns>
-            <label><!-- Exécutions d&apos;étape d&apos;orchestration --></label>
-            <name>Exécutions d&apos;étape d&apos;orchestration</name>
-        </sections>
-        <sections>
-            <columns>
-                <label><!-- AttribuéeGroupe ou file d’attente --></label>
-                <name>AttribuéeGroupe ou file d’attente</name>
-            </columns>
-            <columns>
-                <label><!-- AttribuéeUser --></label>
-                <name>AttribuéeUser</name>
-            </columns>
-            <label><!-- Éléments de travail de l&apos;orchestration --></label>
-            <name>Éléments de travail de l&apos;orchestration</name>
-        </sections>
-    </reportTypes>
-    <reportTypes>
-        <description><!-- Screen Flows --></description>
-        <label><!-- Screen Flows --></label>
-        <name>screen_flows_prebuilt_crt</name>
-        <sections>
-            <label><!-- Flow Interview Log Entries --></label>
-            <name>Flow Interview Log Entries</name>
-        </sections>
-        <sections>
-            <label><!-- Flow Interview Logs --></label>
-            <name>Flow Interview Logs</name>
-        </sections>
-    </reportTypes>
 </Translations>
