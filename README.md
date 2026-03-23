@@ -192,7 +192,6 @@ Authentification par JWT vers les orgs Salesforce.
 | Formatter | Prettier + `prettier-plugin-apex` |
 | Git hooks | Husky + lint-staged (format + lint au commit) |
 | CI/CD | GitHub Actions |
-| Export | Librairie `xlsx` pour l'export Excel des logs et rapports |
 
 ---
 
