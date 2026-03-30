@@ -30,7 +30,7 @@ public with sharing class ScheduleJobTest {
             String jobId = System.schedule(
                 'ScheduledApexTest',
                 CRON_EXP,
-                new ScheduleJob()
+                new ScheduleJob(scheduleIds[0])
             ); 
         Test.stopTest();
 

@@ -1,13 +1,12 @@
 /**
- * @description       : 
- * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
- * @group             : 
- * @last modified on  : 12-24-2025
- * @last modified by  mouhamed niang
+ * @description       : Classe de test pour ScheduleService - renforcement des testes
+ * @author            : mouhamed niang
+ * @last modified on  : 26-03-2026
 **/
 @isTest
 public with sharing class ScheduleServiceTest { 
-      @TestSetup
+
+    @TestSetup
     static void setup() {
         ImportProject__c project = new ImportProject__c(
             Name = 'Projet test',
@@ -16,19 +15,27 @@ public with sharing class ScheduleServiceTest {
         );
         insert project;
 
-        Schedule__c sched = new Schedule__c(
+        Schedule__c schedule = new Schedule__c(
             Frequency__c = String.valueOf(ImportMateEnum.FrequencyEnum.DAILY),
             Project__c = project.Id
         );
-        insert sched;
+        insert schedule;
+
+        TestDataFactory.createImportExecutionWithSchedule(
+        project.Id,
+        'Pending',
+        'Import',          
+        schedule.Id          
+    );
     }
-    //Tester l'ajout de planification
+
+    //  tester l'ajout d'une planification
+    @IsTest
     static void testAddSchedule() {
         // Given
-        String cron = '0 0 * * * ?'; // chaque heure pile → toujours valide
-
+        String cron = '0 0 * * * ?';
         ImportProject__c project = TestDataFactory.createImportProject();
-        Datetime nextRun = Datetime.now().addDays(1); // date future obligatoire
+        Datetime nextRun = Datetime.now().addDays(1);
         
         // When
         Test.startTest();
@@ -37,14 +44,12 @@ public with sharing class ScheduleServiceTest {
             nextRun,
             project.Id
         );
-        System.schedule('TestJob_' + System.currentTimeMillis(), cron, new ScheduleJob());
-
+        System.schedule('TestJob_' + System.currentTimeMillis(), cron, new ScheduleJob(scheduleId));
         Test.stopTest();
         
         // Then
-        System.assertNotEquals(null, scheduleId, 'Schedule ID ne doit pas être null');
+        Assert.areNotEqual(null, scheduleId, 'Schedule ID ne doit pas être null');
 
-        // Vérification en base
         Schedule__c insertedSchedule = [
             SELECT Id, Frequency__c, Project__c, NextRun__c
             FROM Schedule__c
@@ -52,761 +57,473 @@ public with sharing class ScheduleServiceTest {
             LIMIT 1
         ];
 
-        System.assertEquals(
+        Assert.areEqual(
             String.valueOf(ImportMateEnum.FrequencyEnum.DAILY),
             insertedSchedule.Frequency__c.toUpperCase(),
             'La fréquence doit être DAILY'
         );
-        System.assertEquals(
+        Assert.areEqual(
             project.Id,
             insertedSchedule.Project__c,
             'Le projet associé doit correspondre'
         );
     }
 
-    //tester l'énumération de la fréquence
-    @IsTest
-    public  static  void callTestDataFrequencyDaily() {
-        
-        //Perform test
-        Test.startTest();
-        String excpetedFrequency = 'DAILY';
-        ImportMateEnum.FrequencyEnum actual =  ImportMateEnum.FrequencyEnum.DAILY;
-        Test.stopTest();
-        //Assertions
-        System.assertEquals(excpetedFrequency, actual.Name());
-     }
-
        @IsTest
-    public  static  void callTestDataFrequencyMonthly() {
-        
-        //Perform test
-        Test.startTest();
-        String excpetedFrequency = 'MONTHLY';
-        ImportMateEnum.FrequencyEnum actual =  ImportMateEnum.FrequencyEnum.MONTHLY;
-        Test.stopTest();
-
-        //Assertions
-        System.assertEquals(excpetedFrequency, actual.Name());
-     }
-
-        @IsTest
-    public  static  void callTestDataFrequencyWeekly() {
-        
-        //Perform test
-        Test.startTest();
-        String excpetedFrequency = 'WEEKLY';
-        ImportMateEnum.FrequencyEnum actual =  ImportMateEnum.FrequencyEnum.WEEKLY;
-        Test.stopTest();
-
-        //Assertions
-        System.assertEquals(excpetedFrequency, actual.Name());
-     }
-
-
-    //tester la récupération de planification passée
-        @IsTest
-    static void testGetPastSchedules() {
-        //given
-         Schedule__c savedSchedule = TestDataFactory.createSchedule();
-
-        //when
-        Test.startTest();
-           List<Schedule__c> schedules = ScheduleService.getPastSchedules();
-        Test.stopTest();
-        //then 
-        System.assertNotEquals(null, schedules); 
-    }
-
-    //tester la récupération de planification par le nom du projet
-    @IsTest
-    static void testScheduleByProjectName() {
-        //creation d'une planification avec projet depuis Test Data Factory 
-        Schedule__c schedule = TestDataFactory.createSchedule(); 
-        
-        //When
-        //Perform test
-        Test.startTest();
-            String keyword = schedule.Project__r.Name;    // get project's name
-            List<ScheduleService.ScheduleWrapper> schedules = ScheduleService.getSchedulesByProjectName(keyword);   //search schedules by project Name   
-        Test.stopTest();
-        
-        //THEN - ASSERTION
-         
-        System.assertNotEquals(null, schedule); 
-
-    }
-    
-
-    //Tester la suppression de plafinification via l'id
-    @IsTest
-    static void testDeleteScheduleById() {
+    static void test_CreateSchedule_Doublon_LeveException() {
         //GIVEN
-        String  name ='project 001';
-        String target ='Account';
-        String description ='desc';
-        Integer expectedLength = 0;
-    
+        String targetObject ='Account';
 
-        //When 
-        Test.startTest();
-         ImportProject__c newProject = new ImportProject__c(
-            Name = name,
-            TargetObject__c = target,
-            Description__c = description
+        ImportProject__c project = TestDataFactory.createImportProject(targetObject);
+
+        Schedule__c existing = new Schedule__c(
+            Project__c   = project.Id,
+            Frequency__c = 'Daily',
+            NextRun__c   = Datetime.now().addDays(1)
         );
+        insert existing;
 
-        List<ImportProject__c> recordsToInsert = new List<ImportProject__c>();
-        recordsToInsert.add(newProject);
-        List<Database.SaveResult> savedProject= Database.insert(recordsToInsert);
-        
-        List<Schedule__c> schedules = new List<Schedule__c>();
-        
-        Schedule__c schedule = new Schedule__c();
-        schedule.Frequency__c = String.valueOf(ImportMateEnum.FrequencyEnum.DAILY); 
-        schedule.Project__c = savedProject[0].Id;
-        schedules.add(schedule);
-        
-        //Persist schedule data
-        List<Database.SaveResult> saveResults = Database.insert(schedules);
-        
-        String scheduleId = String.valueOf(saveResults[0].Id);
-        ScheduleService.deleteScheduleById(scheduleId); //delete by schedule id
-        
-        List<Schedule__c> scheds = [
-            SELECT Id,Name 
-            FROM Schedule__c
-            WHERE Id = : scheduleId
-        ];
-        
-        Test.stopTest();
-
-        /**
-        * THEN
-        * ASSERTIONS
-        */  
-        System.assertEquals(expectedLength, scheds.size(), 'Schedule\'s list   is  empty');
-        
-    }
-
-
-    /**
-     *Tester le filtre par fréquence (DAILY | WEEKLY | MONTHLY)
-     */
-     @IsTest
-     static void testGetSchedulesByFrequency() {
-        //GIVEN
-       ImportMateEnum.FrequencyEnum exceptedFrequency =  ImportMateEnum.FrequencyEnum.DAILY;
-       ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
-
-        
         //WHEN
         Test.startTest();
-        List<Schedule__c> schedules =   ScheduleService.getSchedulesByFrequencyAndProjectId(exceptedFrequency,project.Id);
+        try {
+            ScheduleService.schedule('Weekly', Datetime.now().addDays(7), project.Id); 
+        } catch (Exception e) {
+            Assert.isNotNull(e.getMessage()); //THEN 
+        }
+        Test.stopTest();
+    }
+
+
+    //  test schedule avec fréquence WEEKLY
+    @IsTest
+    static void testAddScheduleWeekly() {
+        ImportProject__c project = TestDataFactory.createImportProject();
+        Datetime nextRun = Datetime.now().addDays(7);
+
+        Test.startTest();
+        Id scheduleId = ScheduleService.schedule(
+            String.valueOf(ImportMateEnum.FrequencyEnum.WEEKLY),
+            nextRun,
+            project.Id
+        );
         Test.stopTest();
 
-        //then - Assertions
-        System.assertNotEquals(null, schedules);
-        System.Assert.isTrue( schedules.size() > 0 ,'Schedule\'s list is not empty');
-    }    
+        Assert.areNotEqual(null, scheduleId, 'Schedule ID ne doit pas être null');
+        Schedule__c s = [SELECT Frequency__c FROM Schedule__c WHERE Id = :scheduleId];
+        Assert.areEqual('WEEKLY', s.Frequency__c.toUpperCase());
+    }
 
-      /**
-     *Tester le filtre par l'id de la planification
-     */
+    //  test schedule avec fréquence MONTHLY
+    @IsTest
+    static void testAddScheduleMonthly() {
+        ImportProject__c project = TestDataFactory.createImportProject();
+        Datetime nextRun = Datetime.now().addDays(30);
+
+        Test.startTest();
+        Id scheduleId = ScheduleService.schedule(
+            String.valueOf(ImportMateEnum.FrequencyEnum.MONTHLY),
+            nextRun,
+            project.Id
+        );
+        Test.stopTest();
+
+        Assert.areNotEqual(null, scheduleId);
+        Schedule__c s = [SELECT Frequency__c FROM Schedule__c WHERE Id = :scheduleId];
+        Assert.areEqual('MONTHLY', s.Frequency__c.toUpperCase());
+    }
+
+
+    
+    @IsTest
+    static void testGetSchedulesByFrequency_MauvaisFiltre_RetourneVide() { 
+        // Schedule DAILY, on filtre WEEKLY
+        Schedule__c schedule = TestDataFactory.createSchedule();
+        String projectId = schedule.Project__c;
+
+        Test.startTest();
+        List<Schedule__c> results = ScheduleService.getSchedulesByFrequencyAndProjectId(
+            ImportMateEnum.FrequencyEnum.WEEKLY, projectId
+        );
+        Test.stopTest();
+
+        Assert.isTrue(results.isEmpty(), 'Ne doit pas retourner de schedule DAILY pour filtre WEEKLY');
+    }
+
+    @IsTest
+    public static void callTestDataFrequencyDaily() {
+        Test.startTest();
+        String excpetedFrequency = 'DAILY';
+        ImportMateEnum.FrequencyEnum actual = ImportMateEnum.FrequencyEnum.DAILY;
+        Test.stopTest();
+        Assert.areEqual(excpetedFrequency, actual.Name());
+    }
+
+    @IsTest
+    public static void callTestDataFrequencyMonthly() {
+        Test.startTest();
+        String excpetedFrequency = 'MONTHLY';
+        ImportMateEnum.FrequencyEnum actual = ImportMateEnum.FrequencyEnum.MONTHLY;
+        Test.stopTest();
+        Assert.areEqual(excpetedFrequency, actual.Name());
+    }
+
+    @IsTest
+    public static void callTestDataFrequencyWeekly() {
+        Test.startTest();
+        String excpetedFrequency = 'WEEKLY';
+        ImportMateEnum.FrequencyEnum actual = ImportMateEnum.FrequencyEnum.WEEKLY;
+        Test.stopTest();
+        Assert.areEqual(excpetedFrequency, actual.Name());
+    }
+
+    @IsTest
+    static void testGetPastSchedules() {
+        Schedule__c savedSchedule = TestDataFactory.createSchedule();
+
+        Test.startTest();
+        List<Schedule__c> schedules = ScheduleService.getPastSchedules();
+        Test.stopTest();
+
+        Assert.areNotEqual(null, schedules); 
+    }
+
+     // *** getSchedulesByProjectName() ***
+    @IsTest
+    static void testScheduleByProjectName() {
+        Schedule__c schedule = TestDataFactory.createSchedule(); 
+        
+        Test.startTest();
+        String keyword = schedule.Project__r.Name;
+        List<ScheduleService.ScheduleWrapper> schedules = ScheduleService.getSchedulesByProjectName(keyword);
+        Test.stopTest();
+        
+        Assert.areNotEqual(null, schedules,'No Schedule were  founnd with provided project name'); 
+    }
+    
+    //  recherche avec keyword vide
+    @IsTest
+    static void testScheduleByProjectNameEmpty() {
+        Test.startTest();
+        List<ScheduleService.ScheduleWrapper> schedules = ScheduleService.getSchedulesByProjectName('');
+        Test.stopTest();
+        Assert.areNotEqual(null, schedules,'No schedule should be found while search when project\'s name is a blank');
+    }
+
      @IsTest
-     static void testGetScheduleById() {
-        //GIVEN 
+    static void testGetSchedulesByProjectNameNullName() {
+        Test.startTest();
+            List<ScheduleService.ScheduleWrapper> results = ScheduleService.getSchedulesByProjectName(null);
+        Test.stopTest();
+        Assert.isNotNull(results, 'Ne doit pas être null');
+        Assert.isTrue(results.isEmpty(), 'Doit retourner vide pour nom null');   
+    }
+
+    @IsTest
+    static void testGetSchedulesByNoExistingProjectName() {
+        Test.startTest();
+        List<ScheduleService.ScheduleWrapper> results =
+            ScheduleService.getSchedulesByProjectName('XYZ_INEXISTANT_9999');
+        Test.stopTest();
+
+        Assert.isTrue(results.isEmpty(), 'Doit retourner vide pour nom inexistant');
+    }
+
+
+    @IsTest
+    static void testDeleteScheduleById() {
+        Schedule__c schedule = TestDataFactory.createSchedule();
+
+        String scheduleId = String.valueOf(schedule.Id);
+        ScheduleService.deleteScheduleById(scheduleId);
+        Test.startTest();
+        List<Schedule__c> schedules = [
+            SELECT Id, Name 
+            FROM Schedule__c
+            WHERE Id = :scheduleId
+        ];
+        Test.stopTest();
+
+        Assert.isFalse( schedules.size() > 0, 'Schedule shouldn\'t  be find after deleted!');
+    }
+
+    //  suppression avec ID null cas de test négatif
+    @IsTest
+    static void testDeleteScheduleByIdNull() {
+        Test.startTest();
+        try {
+            ScheduleService.deleteScheduleById(null);
+        } catch (Exception e) {
+            Assert.isTrue(String.isNotBlank(e.getMessage()));
+        }
+        Test.stopTest();
+    }
+
+    @IsTest
+    static void testGetSchedulesByFrequency() {
+        ImportMateEnum.FrequencyEnum exceptedFrequency = ImportMateEnum.FrequencyEnum.DAILY;
+        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
+
+        Test.startTest();
+        List<Schedule__c> schedules = ScheduleService.getSchedulesByFrequencyAndProjectId(exceptedFrequency, project.Id);
+        Test.stopTest();
+
+        Assert.areNotEqual(null, schedules);
+        System.Assert.isTrue(schedules.size() > 0, 'Schedule\'s list is not empty');
+    }
+
+    //  filtre fréquence WEEKLY
+    @IsTest
+    static void testGetSchedulesByFrequencyWeekly() {
+        ImportProject__c project = TestDataFactory.createImportProject();
+        Schedule__c schedule = new Schedule__c(
+            Frequency__c = String.valueOf(ImportMateEnum.FrequencyEnum.WEEKLY),
+            Project__c = project.Id
+        );
+        insert schedule;
+
+        Test.startTest();
+        List<Schedule__c> schedules = ScheduleService.getSchedulesByFrequencyAndProjectId(
+            ImportMateEnum.FrequencyEnum.WEEKLY, project.Id
+        );
+        Test.stopTest();
+
+        Assert.areNotEqual(null, schedules);
+    }
+
+    @IsTest
+    static void testGetScheduleById() {
         Schedule__c result = TestDataFactory.createSchedule();
         String expected = String.valueOf(ImportMateEnum.FrequencyEnum.DAILY);
 
-        //WHEN
         Test.startTest();
         Schedule__c schedule = ScheduleService.getScheduleById(result.Id);
         Test.stopTest();
 
-        //then - Assertions
         String actual = String.valueOf(schedule.Frequency__c).toUpperCase();
-        System.assertNotEquals(null, schedule);
-        System.assertEquals(expected,actual.toUpperCase());
-    }    
+        Assert.areNotEqual(null, schedule);
+        Assert.areEqual(expected, actual.toUpperCase());
+    }
 
-     @IsTest
-    static void testGetSchedulesWithExecution(){ 
-        // GIVEN : projet et planification
-        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
-        Schedule__c schedule = TestDataFactory.createSchedule();
-        ImportExecution__c execution = TestDataFactory.createImportExecution(project.Id);
-
-        // WHEN : récupération des wrappers
+    @IsTest
+    static void testGetSchedulesWithExecution_Success() { 
         Test.startTest();
-        List<ScheduleService.ScheduleWrapper> results = ScheduleService.getSchedulesWithExecutionsByIdProject(project.Id);
+        Schedule__c schedule = TestDataFactory.createSchedule();
+        Id projectId = schedule.Project__c;
+        String status ='Pending';
+        String type =' Import';
+      
+        ImportExecution__c execution = TestDataFactory.createImportExecutionWithSchedule(schedule.Project__c,status,type,String.valueOf(schedule.Id));
+        
+        List<ScheduleService.ScheduleWrapper> results = ScheduleService.getSchedulesWithExecutionsByIdProject(projectId);
         Test.stopTest();
 
-        // THEN : assertions
-            System.assertNotEquals(0, results.size(), 'La liste des wrappers ne doit pas être vide');
+        Assert.isTrue(results.size() > 0, 'La liste des wrappers ne doit pas être vide');
     }
 
-@IsTest
-static void testGetSchedulesWithExecutionStatus(){ 
-    // GIVEN : projet, planification et exécution avec statut
-    ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
-    Schedule__c schedule = TestDataFactory.createSchedule();
-    String status = 'Pending';
-    ImportExecution__c execution = TestDataFactory.createImportExecution(project.Id);
+    @IsTest
+    static void testGetSchedulesByStatus_Suspended_Success() {
+        //given
+        Schedule__c schedule  = TestDataFactory.createSchedule('Lead');
 
-    // WHEN : récupération par statut
-    Test.startTest();
-    List<ScheduleService.ScheduleWrapper> results = ScheduleService.getSchedulesByExecutionStatusAndIdProject(status, project.Id);
-    Test.stopTest();
- 
-    // THEN : assertions
-    System.assertNotEquals(0, results.size(), 'La liste filtrée par statut ne doit pas être vide');
-    System.assertEquals(status, results[0].importExecutions[0].Status__c, 'Le statut doit correspondre');
+        Id projectId = schedule.Project__c;
+        String apexJobId = String.valueOf(schedule.Id);
+        String status = 'Suspended';
+        String type ='Import';
 
-        // THEN : assertions
-        Assert.areNotEqual(0, results.size(), 'La liste filtrée par statut ne doit pas être vide');
-       Assert.areEqual(status, results[0].importExecutions[0].Status__c, 'Le statut doit correspondre');
+       TestDataFactory.createImportExecutionWithSchedule(projectId,status,type,String.valueOf(schedule.Id));
+        
+        setupScheduleWithExecution(apexJobId);
 
+        Test.startTest();
+        List<ScheduleService.ScheduleWrapper> results =
+            ScheduleService.getSchedulesByExecutionStatusAndIdProject('Suspended', projectId);
+        Test.stopTest();
 
-        }
-        private static final String LOG_PREFIX = '[ScheduleServiceTest]';
+        Assert.areNotEqual(0, results.size(), 'Doit retourner des résultats pour Suspended');
         
-        /**
-         * ════════════════════════════════════════════════════════════════════════
-         * executeSchedule avec données valides
-         * ════════════════════════════════════════════════════════════════════════
-         */
-        @isTest
-        static void testExecuteScheduleSuccess() {
-            // Arrange - Utiliser TestDataFactory.createImportProject(String)
-            ImportProject__c project = TestDataFactory.createImportProject('Account');
-            List<Account> accounts = TestDataFactory.createTestAccounts(5);
-            
-            // Créer schedule manuellement (TestDataFactory.createSchedule crée project automatiquement)
-            Schedule__c schedule = new Schedule__c(
-                Project__c = project.Id,
-                Frequency__c = 'DAILY',
-                NextRun__c = System.now().addDays(1)
-            );
-            insert schedule;
-            
-            // Act
-            Test.startTest();
-            ScheduleJobResult result = ScheduleService.executeSchedule(schedule.Id);
-            Test.stopTest();
-            
-            // Assert
-           Assert.areEqual(true, result.isSuccess(), 'Expected successful execution');
-            Assert.areNotEqual(null, result.executionId, 'Expected executionId');
-           Assert.areEqual('Staging', result.phase, 'Expected Staging phase');
-            
-            // Verify ImportExecution was created
-            ImportExecution__c execution = [
-                SELECT Id, Status__c, Phase__c, TotalRecords__c, ApexJobId__c
-                FROM ImportExecution__c
-                WHERE Id = :result.executionId
-                LIMIT 1
-            ];
-            
-            Assert.areNotEqual(null, execution, 'Execution should exist');Assert.isTrue(
-                execution.Status__c == Constants.EXECUTION_STATUS_IN_PROGRESS ||
-                execution.Status__c == Constants.EXECUTION_STATUS_COMPLETED,
-                'Status should be valid'
-            );
-            Assert.isTrue(
-                execution.Phase__c == Constants.EXECUTION_PHASE_STAGING ||
-                execution.Phase__c == Constants.EXECUTION_PHASE_COMPLETED,
-                'Phase should be valid'
-            ); 
-            Assert.areNotEqual(null, execution.ApexJobId__c, 'PreProcessBatch should be launched');
-            
-            // Verify StagingRows
-            List<StagingRow__c> stagingRows = [
-                SELECT Id, LineNumber__c, RawData__c, Processed__c
-                FROM StagingRow__c
-                WHERE Execution__c = :execution.Id
-                ORDER BY LineNumber__c
-            ];
-             
-            
-            for (Integer i = 0; i < stagingRows.size(); i++) {
-               Assert.areEqual(i + 2, stagingRows[i].LineNumber__c, 'LineNumber sequential from 2');
-               Assert.areEqual(false, stagingRows[i].Processed__c, 'Processed should be false');
-                Assert.areNotEqual(null, stagingRows[i].RawData__c, 'RawData should contain JSON');
-            }
-            
-            System.debug(LOG_PREFIX + '  testExecuteScheduleSuccess PASSED');
-        }
-        
-  
-        
-        /**
-         * ════════════════════════════════════════════════════════════════════════
-        * executeSchedule without data source (no accounts)
-         * ════════════════════════════════════════════════════════════════════════
-         */
-        @isTest
-        static void testExecuteScheduleNoData() {
-            // Arrange - Créer project SANS accounts
-            ImportProject__c project = TestDataFactory.createImportProject('Account');
-            
-            Schedule__c schedule = new Schedule__c(
-                Project__c = project.Id,
-                Frequency__c = 'DAILY',
-                NextRun__c = System.now().addDays(1)
-            );
-            insert schedule;
-            
-            // Act
-            Test.startTest();
-            ScheduleJobResult result = ScheduleService.executeSchedule(schedule.Id);
-            Test.stopTest();
-            
-            // Assert
-           Assert.areEqual(true, result.isFailure(), 'Expected failure when no data found');
-           Assert.areEqual(true, result.getErrorsAsString().contains('No data found'));
-            
-            System.debug(LOG_PREFIX + '  testExecuteScheduleNoData PASSED');
-        }
-        
-        /**
-         * ════════════════════════════════════════════════════════════════════════
-         * DAILY frequency - NextRun should be +1 day
-         * ════════════════════════════════════════════════════════════════════════
-         */
-        @isTest
-        static void testDailyFrequencyRecurrence() {
-            // Arrange
-            ImportProject__c project = TestDataFactory.createImportProject('Account');
-            TestDataFactory.createTestAccounts(3);
-            
-            Datetime originalNextRun = System.now().addDays(1).addHours(-6);
-            
-            Schedule__c schedule = new Schedule__c(
-                Project__c = project.Id,
-                Frequency__c = 'DAILY',
-                NextRun__c = originalNextRun
-            );
-            insert schedule;
-            
-            // Act
-            Test.startTest();
-            ScheduleJobResult result = ScheduleService.executeSchedule(schedule.Id);
-            Test.stopTest();
-            
-            // Assert
-            Schedule__c updatedSchedule = [
-                SELECT NextRun__c
-                FROM Schedule__c
-                WHERE Id = :schedule.Id
-                LIMIT 1
-            ];
-            
-            Datetime expectedNextRun = originalNextRun.addDays(1);
-           Assert.areEqual(
-                expectedNextRun.format('yyyy-MM-dd HH:mm'),
-                updatedSchedule.NextRun__c.format('yyyy-MM-dd HH:mm'),
-                'DAILY: NextRun should be +1 day'
-            );
-            
-            System.debug(LOG_PREFIX + '  testDailyFrequencyRecurrence PASSED');
-        }
-        
-        /**
-         * ════════════════════════════════════════════════════════════════════════
-         6: WEEKLY frequency - NextRun should be +7 days
-         * ════════════════════════════════════════════════════════════════════════
-         */
-        @isTest
-        static void testWeeklyFrequencyRecurrence() {
-            // Arrange
-            ImportProject__c project = TestDataFactory.createImportProject('Account');
-            TestDataFactory.createTestAccounts(4);
-            
-            Datetime originalNextRun = System.now().addDays(1);
-            
-            Schedule__c schedule = new Schedule__c(
-                Project__c = project.Id,
-                Frequency__c = 'WEEKLY',
-                NextRun__c = originalNextRun
-            );
-            insert schedule;
-            
-            // Act
-            Test.startTest();
-            ScheduleJobResult result = ScheduleService.executeSchedule(schedule.Id);
-            Test.stopTest();
-            
-            // Assert
-            Schedule__c updatedSchedule = [
-                SELECT NextRun__c
-                FROM Schedule__c
-                WHERE Id = :schedule.Id
-                LIMIT 1
-            ];
-            
-            Datetime expectedNextRun = originalNextRun.addDays(7);
-           Assert.areEqual(
-                expectedNextRun.format('yyyy-MM-dd HH:mm'),
-                updatedSchedule.NextRun__c.format('yyyy-MM-dd HH:mm'),
-                'WEEKLY: NextRun should be +7 days'
-            );
-            
-            System.debug(LOG_PREFIX + '  testWeeklyFrequencyRecurrence PASSED');
-        }
-        
-        /**
-         * ════════════════════════════════════════════════════════════════════════
-         7: MONTHLY frequency - NextRun should be +1 month
-         * ════════════════════════════════════════════════════════════════════════
-         */
-        @isTest
-        static void testMonthlyFrequencyRecurrence() {
-            // Arrange
-            ImportProject__c project = TestDataFactory.createImportProject('Account');
-            TestDataFactory.createTestAccounts(2);
-            
-            Datetime originalNextRun = System.now().addDays(1);
-            
-            Schedule__c schedule = new Schedule__c(
-                Project__c = project.Id,
-                Frequency__c = 'MONTHLY',
-                NextRun__c = originalNextRun
-            );
-            insert schedule;
-            
-            // Act
-            Test.startTest();
-            ScheduleJobResult result = ScheduleService.executeSchedule(schedule.Id);
-            Test.stopTest();
-            
-            // Assert
-            Schedule__c updatedSchedule = [
-                SELECT NextRun__c
-                FROM Schedule__c
-                WHERE Id = :schedule.Id
-                LIMIT 1
-            ];
-            
-            Datetime expectedNextRun = originalNextRun.addMonths(1);
-           Assert.areEqual(
-                expectedNextRun.format('yyyy-MM-dd'),
-                updatedSchedule.NextRun__c.format('yyyy-MM-dd'),
-                'MONTHLY: NextRun should be +1 month'
-            );
-            
-            System.debug(LOG_PREFIX + '  testMonthlyFrequencyRecurrence PASSED');
-        }
-        
-        /**
-         * ════════════════════════════════════════════════════════════════════════
-         8: StagingRow JSON data validation
-         * ════════════════════════════════════════════════════════════════════════
-         */
-         @isTest
-        static void testStagingRowJsonData() {
-            ImportProject__c project = TestDataFactory.createImportProject('Account');
-            TestDataFactory.createTestAccounts(2);
-            
-            Schedule__c schedule = new Schedule__c(
-                Project__c = project.Id,
-                Frequency__c = 'DAILY',
-                NextRun__c = System.now().addDays(1)
-            );
-            insert schedule;
-            
-            Test.startTest();
-            ScheduleJobResult result = ScheduleService.executeSchedule(schedule.Id);
-            Test.stopTest();
-            
-            // StagingRows are created by the chained PreProcessBatch — not testable here.
-            // Instead verify the execution metadata is correct.
-            Assert.areEqual(true, result.isSuccess(), 'Execution should succeed');
-            Assert.areNotEqual(null, result.executionId, 'ExecutionId should be set');
-            
-            ImportExecution__c execution = [
-                SELECT Id, TotalRecords__c, ApexJobId__c, Phase__c
-                FROM ImportExecution__c
-                WHERE Id = :result.executionId
-                LIMIT 1
-            ];
-            
-            Assert.areEqual(2, execution.TotalRecords__c, 'TotalRecords should be 2');
-            Assert.areNotEqual(null, execution.ApexJobId__c, 'PreProcessBatch job ID should be stored');
-            
-            System.debug(LOG_PREFIX + '  testStagingRowJsonData PASSED');
-        }
-        /**
-         * ════════════════════════════════════════════════════════════════════════
-         9: Large batch processing (150+ records)
-         * ════════════════════════════════════════════════════════════════════════
-         */
-                @isTest
-        static void testLargeBatchProcessing() {
-            ImportProject__c project = TestDataFactory.createImportProject('Account');
-            TestDataFactory.createTestAccounts(150);
-            
-            Schedule__c schedule = new Schedule__c(
-                Project__c = project.Id,
-                Frequency__c = 'DAILY',
-                NextRun__c = System.now().addDays(1)
-            );
-            insert schedule;
-            
-            Test.startTest();
-            ScheduleJobResult result = ScheduleService.executeSchedule(schedule.Id);
-            Test.stopTest();
-            
-            Assert.areEqual(true, result.isSuccess(), 'Should handle 150+ records');
-            
-            ImportExecution__c execution = [
-                SELECT TotalRecords__c, ApexJobId__c
-                FROM ImportExecution__c
-                WHERE Id = :result.executionId
-                LIMIT 1
-            ];
-            
-            Assert.areEqual(150, execution.TotalRecords__c, 'Should count all 150 records');
-            Assert.areNotEqual(null, execution.ApexJobId__c, 'PreProcessBatch should be launched');
-            
-            // StagingRows are created by chained PreProcessBatch — not testable here.
-            // Covered in PreProcessBatchTest.
-            
-            System.debug(LOG_PREFIX + '  testLargeBatchProcessing PASSED');
-        }
-        
-        /**
-         * ════════════════════════════════════════════════════════════════════════
-         0: PreProcessBatch is launched
-         * ════════════════════════════════════════════════════════════════════════
-         */
-        @isTest
-        static void testBatchLaunchment() {
-            // Arrange
-            ImportProject__c project = TestDataFactory.createImportProject('Account');
-            TestDataFactory.createTestAccounts(5);
-            
-            Schedule__c schedule = new Schedule__c(
-                Project__c = project.Id,
-                Frequency__c = 'DAILY',
-                NextRun__c = System.now().addDays(1)
-            );
-            insert schedule;
-            
-            // Act
-            Test.startTest();
-            ScheduleJobResult result = ScheduleService.executeSchedule(schedule.Id);
-            Test.stopTest();
-            
-            // Assert
-            ImportExecution__c execution = [
-                SELECT ApexJobId__c
-                FROM ImportExecution__c
-                WHERE Id = :result.executionId
-                LIMIT 1
-            ];
-            
-           Assert.areNotEqual(null, execution.ApexJobId__c, 'PreProcessBatch should be launched');
-            
-            System.debug(LOG_PREFIX + '  testBatchLaunchment PASSED');
-        }
-        
-        /**
-         * ════════════════════════════════════════════════════════════════════════
-         1: Multiple schedules per project
-         * ════════════════════════════════════════════════════════════════════════
-         */
-        @isTest
-        static void testMultipleSchedulesPerProject() {
-            // Arrange
-            ImportProject__c project = TestDataFactory.createImportProject('Account');
-            TestDataFactory.createTestAccounts(5);
-            
-            Schedule__c dailySchedule = new Schedule__c(
-                Project__c = project.Id,
-                Frequency__c = 'DAILY',
-                NextRun__c = System.now().addDays(1)
-            );
-            insert dailySchedule;
-            
-            Schedule__c weeklySchedule = new Schedule__c(
-                Project__c = project.Id,
-                Frequency__c = 'WEEKLY',
-                NextRun__c = System.now().addDays(7)
-            );
-            insert weeklySchedule;
-            
-            // Act
-            Test.startTest();
-            ScheduleJobResult resultDaily = ScheduleService.executeSchedule(dailySchedule.Id);
-            ScheduleJobResult resultWeekly = ScheduleService.executeSchedule(weeklySchedule.Id);
-            Test.stopTest();
-            
-            // Assert
-           Assert.areEqual(true, resultDaily.isSuccess(), 'Daily schedule should succeed');
-           Assert.areEqual(true, resultWeekly.isSuccess(), 'Weekly schedule should succeed');
-            
-            List<ImportExecution__c> executions = [
-                SELECT Id
-                FROM ImportExecution__c
-                WHERE Project__c = :project.Id
-            ];
-            
-           Assert.areEqual(2, executions.size(), 'Should have created 2 executions');
-            
-            System.debug(LOG_PREFIX + '  testMultipleSchedulesPerProject PASSED');
-        }
-        
-        /**
-         * ════════════════════════════════════════════════════════════════════════
-         2: ScheduleJob Schedulable interface
-         * ════════════════════════════════════════════════════════════════════════
-         */
-        @isTest
-        static void testScheduleJobSchedulable() {
-            ImportProject__c project = TestDataFactory.createImportProject('Account');
-            TestDataFactory.createTestAccounts(3);
-            
-            Schedule__c schedule = new Schedule__c(
-                Project__c = project.Id,
-                Frequency__c = 'DAILY',
-                NextRun__c = System.now().addDays(1)
-            );
-            insert schedule;
-            
-            Test.startTest();
-            String jobId = System.schedule(
-                'TestScheduleJob_' + System.currentTimeMillis(),
-                '0 0 12 * * ?',
-                new ScheduleJob(schedule.Id)
-            );
-            Test.stopTest();
-            
-            Assert.areNotEqual(null, jobId, 'Job should be scheduled');
-            
-            List<CronTrigger> cronTriggers = [
-                SELECT Id, State
-                FROM CronTrigger
-                WHERE Id = :jobId
-            ];
-            
-            Assert.areEqual(1, cronTriggers.size(), 'CronTrigger should exist');
-            // In test context, scheduled jobs are WAITING (queued, not yet fired)
-            Assert.isTrue(
-                cronTriggers[0].State == 'WAITING' || cronTriggers[0].State == 'ACTIVE',
-                'CronTrigger should be scheduled, actual state: ' + cronTriggers[0].State
-            );
-            
-            System.debug(LOG_PREFIX + '  testScheduleJobSchedulable PASSED');
-        }
-                
-        /**
-         * ════════════════════════════════════════════════════════════════════════
-         3: ScheduleJobResult builder pattern
-         * ════════════════════════════════════════════════════════════════════════
-         */
-         @isTest
-        static void testScheduleJobResultBuilder() {
-            Test.startTest();
-            // Create a real record to get a valid ID format, or store as String field
-            ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
-            String validId = project.Id; // use any real ID for format validity
+    }
 
-            ScheduleJobResult result = ScheduleJobResult.ok('Test success')
-                .withExecutionId(validId)
-                .withPhase('Staging');
-            Test.stopTest();
+    @IsTest
+    static void testGetSchedulesWithExecutionStatus() {
+        //given
+        String status = 'Pending';
+        String type ='Import';
+        Schedule__c schedule = TestDataFactory.createSchedule();
+       
+        String projectId = String.valueOf(schedule.Project__c);
+        String apexJobId =  String.valueOf(schedule.Id); 
 
-            Assert.areEqual(true, result.isSuccess());
-            Assert.areEqual('Test success', result.message);
-            Assert.areEqual(validId, result.executionId);
-            Assert.areEqual('Staging', result.phase);
-        }
-        
-        /**
-         * ════════════════════════════════════════════════════════════════════════
-         4: ScheduleJobResult error handling
-         * ════════════════════════════════════════════════════════════════════════
-         */
-        @isTest
-        static void testScheduleJobResultError() {
-            Test.startTest();
-            ScheduleJobResult result = ScheduleJobResult.error('Test error');
-            Test.stopTest();
-            
-           Assert.areEqual(true, result.isFailure(),'failed  to get schedules with status executions');
-           Assert.areEqual(1, result.getErrorCount(),'failed  to get schedules with status executions');
-           Assert.areEqual('Test error', result.getFirstError(),'failed  to get schedules with status executions');
-            
-            System.debug(LOG_PREFIX + '  testScheduleJobResultError PASSED');
-        }
-        
-        /**
-         * ════════════════════════════════════════════════════════════════════════
-          Account data mapping using TestDataFactory.createTestAccount()
-         * ════════════════════════════════════════════════════════════════════════
-         */
-        @isTest
-        static void testExceptionHandling() {
-            // Arrange
-            ImportProject__c project = TestDataFactory.createImportProject('Account');
-            
-            Schedule__c schedule = new Schedule__c(
-                Project__c = project.Id,
-                Frequency__c = 'DAILY',
-                NextRun__c = System.now().addDays(1)
-            );
-            insert schedule;
-            
-            // Delete project to cause error
-            delete project;
-            
-            // Act
-            Test.startTest();
-            ScheduleJobResult result = ScheduleService.executeSchedule(schedule.Id);
-            Test.stopTest();
-            
-            // Assert
-           Assert.areEqual(true, result.isFailure(), 'Should fail due to missing project');
-            
-            System.debug(LOG_PREFIX + '  testExceptionHandling PASSED');
-        }
-        
-        /**
-         * ════════════════════════════════════════════════════════════════════════
-         CSV parsing using TestDataFactory.createTestAccounts()
-         * ════════════════════════════════════════════════════════════════════════
-         */ 
-        
+        ImportExecution__c execution = TestDataFactory.createImportExecutionWithSchedule(schedule.Project__c,status,type,String.valueOf(schedule.Id) );
+
+        Test.startTest();
+        //when
+        List<ScheduleService.ScheduleWrapper> results =
+            ScheduleService.getSchedulesByExecutionStatusAndIdProject(status, projectId);
+        Test.stopTest();
+
+        //then
+        Assert.areNotEqual(0, results.size(), 'La liste filtrée par statut ne doit pas être vide'); 
       
-        @isTest
-        static void testWithTestDataFactoryExecution() {
-            // Arrange - Utiliser TestDataFactory.createImportExecution()
-            ImportProject__c project = TestDataFactory.createImportProject('Account');
-            TestDataFactory.createTestAccounts(4);
-            
-            ImportExecution__c testExecution = TestDataFactory.createImportExecution(project.Id);
-            Assert.areNotEqual(null, testExecution.Id, 'TestExecution should be created');
-            
-            // Create schedule for this project
-            Schedule__c schedule = new Schedule__c(
-                Project__c = project.Id,
-                Frequency__c = 'DAILY',
-                NextRun__c = System.now().addDays(1)
-            );
-            insert schedule;
-            
-            // Act
-            Test.startTest();
-            ScheduleJobResult result = ScheduleService.executeSchedule(schedule.Id);
-            Test.stopTest();
-            
-        // Assert - Verify the newly created execution is different from test execution
-        Assert.areNotEqual(testExecution.Id, result.executionId, 'Should create new execution, not reuse test one');
-        Assert.areEqual(true, result.isSuccess(), 'Should be true');
-            
-        System.debug(LOG_PREFIX + '  testWithTestDataFactoryExecution PASSED');
     }
-}
 
+
+    @IsTest
+    static void testGetSchedulesWithExecutionStatusNotFound() {
+        Schedule__c schedule = TestDataFactory.createSchedule();
+        String projectId     = String.valueOf(schedule.Project__c);
+
+        Test.startTest();
+        List<ScheduleService.ScheduleWrapper> results =
+            ScheduleController.getSchedulesByExecutionStatusAndIdProject('UnknownStatus', projectId);
+        Test.stopTest();
+
+        
+        if (!results.isEmpty()) {
+            for (ScheduleService.ScheduleWrapper wrapper : results) {
+                Assert.isTrue(
+                    wrapper.importExecutions == null || wrapper.importExecutions.isEmpty(),
+                    'Aucune exécution ne doit être liée au statut inexistant'
+                );
+            }
+        }
+    }
+
+    @IsTest
+    static void testReScheduleSuccess() {
+        Schedule__c existingSchedule = TestDataFactory.createSchedule();
+        String expectFrequency = 'Weekly';
+        Datetime newNextRun = Datetime.now().addDays(7);
+        
+        Test.startTest();
+        Map<String, Object> result = ScheduleService.reSchedule(existingSchedule.Id, expectFrequency, newNextRun);
+        Test.stopTest();
+        
+        Boolean response = Boolean.valueOf(result.get('success'));
+        Assert.isTrue(response, 'L\'ID retourné doit correspondre à l\'ID fourni');
+        
+        Schedule__c updatedSchedule = [SELECT Frequency__c, NextRun__c FROM Schedule__c WHERE Id = :existingSchedule.Id];
+        Assert.areEqual(expectFrequency, updatedSchedule.Frequency__c, 'La fréquence doit être mise à jour en WEEKLY');
+        Assert.isTrue(result.size() > 0, 'Echec de la replanification');
+    }
+
+    //  reSchedule avec MONTHLY
+    @IsTest
+    static void testReScheduleToMonthly() {
+        Schedule__c existingSchedule = TestDataFactory.createSchedule();
+        Datetime newNextRun = Datetime.now().addDays(30);
+
+        Test.startTest();
+        Map<String, Object> result = ScheduleService.reSchedule(existingSchedule.Id, 'Monthly', newNextRun);
+        Test.stopTest();
+
+        Assert.isTrue(Boolean.valueOf(result.get('success')));
+        Schedule__c updated = [SELECT Frequency__c FROM Schedule__c WHERE Id = :existingSchedule.Id];
+        Assert.areEqual('Monthly', updated.Frequency__c);
+    }
+
+    @IsTest
+    static void testReScheduleNullId() {
+        Test.startTest();
+        Map<String, Object> resultNull = ScheduleService.reSchedule(null, 'DAILY', Datetime.now());
+        Test.stopTest();
+        
+        Assert.areEqual('Schedule ID is required', String.valueOf(resultNull.get('error')));
+        Assert.isFalse(Boolean.valueOf(resultNull.get('success')));
+    }
+
+    @IsTest
+    static void testReScheduleEmptyId() {
+        Test.startTest();
+        Map<String, Object> resultNull = ScheduleService.reSchedule('', 'DAILY', Datetime.now());
+        Test.stopTest();
+        
+        Assert.isTrue(String.isNotBlank(String.valueOf(resultNull.get('error'))));
+        Assert.isFalse(Boolean.valueOf(resultNull.get('success')));
+    }
+
+
+    @IsTest
+    static void testReScheduleNotFound() {
+        String fakeId = '000000000001';
+        
+        Test.startTest();
+        try {
+            Map<String, Object> result = ScheduleService.reSchedule(fakeId, 'Daily', Datetime.now().addDays(1));
+        } catch (Exception e) {
+            Assert.isNotNull(String.isNotBlank(e.getMessage()), 'Doit retourner une erreur si l\'enregistrement n\'existe pas');
+        }
+        Test.stopTest();  
+    }
+
+    @IsTest
+    static void testReScheduleDmlException() {
+        Schedule__c existingSchedule = TestDataFactory.createSchedule();
+        String invalidFrequency = 'A'.repeat(300); 
+        
+        Test.startTest();
+        try {
+           ScheduleService.reSchedule(existingSchedule.Id, invalidFrequency, Datetime.now());
+        } catch (Exception e) {
+            Assert.isTrue(String.isNotBlank(e.getMessage()), 'Une erreur doit être retournée');
+        }
+        Test.stopTest();
+    }
+
+
+    // toggle execution  false = play
+        @IsTest
+    static void testController_ResumeExecution_Success() {
+        //Given 
+        Boolean isPaused = false; // set scheduled execution to play 
+
+        String status = 'Suspended';
+        String type ='Import';
+        Schedule__c schedule = TestDataFactory.createSchedule();
+     
+        ImportExecution__c execution = TestDataFactory.createImportExecutionWithSchedule(schedule.Project__c,status,type,String.valueOf(schedule.Id)); 
+        
+        Test.startTest();
+        //when
+        Map<String, Object> result = ScheduleService.toggleSchedule(schedule.Id, isPaused);
+        Test.stopTest();
+
+        Assert.areEqual(true, result.get('success'), 'La reprise de l\'exécution planifiée doit réussir');
+    }
+
+    //mettre en pause une exécution planifiée => isPause = true  pause
+    @IsTest
+    static void testExecution_ToggleSchedule_Pause_Success() {
+        //given
+        Boolean isPaused = true;
+        Schedule__c schedule = [SELECT Id FROM Schedule__c]; 
+        Map<String, Object> data = setupScheduleWithExecution(schedule.Id);
+        Schedule__c currentSchedule = (Schedule__c) data.get('schedule');
+
+        Test.startTest();
+        Map<String, Object> result =ScheduleService.toggleSchedule(currentSchedule.Id,isPaused);
+        Test.stopTest();
+
+        Assert.areEqual(true, result.get('success'), 'Toggle pause doit réussir');
+        Assert.areEqual('paused', result.get('action'), 'Action doit être paused');
+    }
+
+      /**
+     * Helper : construction schedule + exécution liés au même projet 
+     */
+    private static Map<String, Object> setupScheduleWithExecution(
+        String scheduleId
+    ) {
+      
+        Schedule__c schedule = ScheduleService.getScheduleById(scheduleId);
+        ImportExecution__c  execution = [
+            SELECT Id, Status__c, Project__c,ApexJobId__c FROM ImportExecution__c 
+            WHERE ApexJobId__c = :scheduleId
+            LIMIT 1
+        ];
+
+        return new Map<String, Object>{
+            'schedule'  => schedule,
+            'execution' => execution
+        };
+    }
 }

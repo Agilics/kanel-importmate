@@ -8,36 +8,69 @@
         </div>
 
         <div class="header-actions">
-          <lightning-button
-            label={labels.btnExportLogs}
-            variant="neutral"
+          <button 
             onclick={handleExportLogsCsv}
-            disabled={isExportLogsDisabled}
-            icon-name="utility:download"
-            icon-position="left"
-            class="export-button">
-          </lightning-button>
+            disabled={isExportLogsDisabled} 
+             class="btn btn-secondary export-button"
+          >
+          <lightning-icon icon-name="utility:download" class="icon secondary-icon"
+            size='small' title='download'>
+          </lightning-icon>
+          <label>{labels.btnExportLogs}</label>
+          </button>
 
-          <lightning-button
-            label={labels.btnSchedule}
-            variant="neutral"
+          <button  
             onclick={handleScheduleImport}
-            disabled={isScheduleImportDisabled}
-            icon-name="utility:event"
-            icon-position="left"
-            class="schedule-button">
-          </lightning-button>
+            disabled={isScheduleImportDisabled} 
+            class="btn btn-secondary schedule-button">
+            <lightning-icon icon-name="utility:event" class="icon secondary-icon"
+            alternative-text='lightning_component' size='small' title='import schedule'>
+            </lightning-icon>
+            <label>{labels.btnSchedule}</label>
+          </button>
 
-          <lightning-button
-            label={labels.btnStart}
-            variant="brand"
+          <button 
             onclick={handleStartImport}
-            disabled={isStartImportDisabled}
-            icon-name="utility:play"
-            icon-position="left"
-            class="start-button">
-          </lightning-button>
+            disabled={isStartImportDisabled} 
+            class="btn btn-primary start-button"
+          >
+           <lightning-icon icon-name="utility:play" class="icon primary-icon"
+            alternative-text='lightning_component' size='x-small' title='start import'>
+            </lightning-icon>
+          <label>{labels.btnStart}</label>
+        </button>
         </div>
+      </div>
+    </div>
+
+    <!-- Page cards Scheduled | Immediate Execution -->
+    <div class="execution-grid "> 
+      <!-- Immediate Execution Card -->
+      <div class="execution-card">
+        <c-execution-card    
+          batch-size={batchSize}
+          batch-size-options={batchSizeOptions}
+          onbatchsizechange={handleBatchSizeChange}
+          execution-mode={executionMode}
+          mode-options={executionModeOptions}
+          show-scheduled-card={hideScheduledExecution}  
+          onmodechange={handleExecutionModeChange} 
+          onsendnotification={handleEmailNotificationChange}>
+        </c-execution-card>
+      </div>
+
+      <!-- Scheduled Execution -->
+      <div class="execution-card">
+        <c-execution-card  
+            selected-frequency={frequency}
+            next-run={nextRun}
+            show-scheduled-card={showScheduledExecution}
+            onfrequencychange={handleFrequencyChange}
+            onnextrunchange={handleNextRunChange}
+            onmodechange={handleModeChange}
+            onbatchsizechange={handleBatchSizeChange}
+            onsendnotification={handleSendNotificationChange}>
+        </c-execution-card>
       </div>
     </div>
 
@@ -52,14 +85,10 @@
           <div class="progress-header-right">
             <span class={importStatusClass}>{formattedImportStatus}</span>
             <template if:true={canCancelImport}>
-              <lightning-button
-                label={labels.btnCancel}
-                variant="destructive-text"
-                onclick={handleCancelImport}
-                icon-name="utility:close"
-                icon-position="left"
-                class="slds-m-left_small">
-              </lightning-button>
+              <button onclick={handleCancelImport} class="slds-m-left_small btn btn-accent">
+                <lightning-icon icon-name="utility:close" size="small"></lightning-icon>
+                 {labels.btnCancel}
+              </button>
             </template>
           </div>
         </div>
@@ -140,14 +169,18 @@
       </c-import-results>
     </template>
 
+        <!-- Active Schedules Section -->
+    <c-scheduled-schedules  
+      lwc:ref="scheduledList"
+      project-id={projectId}>
+    </c-scheduled-schedules> 
+
     <div class="navigation-buttons">
-      <lightning-button
-        label={labels.btnBack}
-        onclick={handlePreviousStep}
-        variant="neutral"
-        icon-name="utility:left"
-        icon-position="left">
-      </lightning-button>
+      <button onclick={handlePreviousStep} class="btn btn-accent">
+        <lightning-icon class="secondary-icon" size="x-small" icon-name="utility:left">
+        </lightning-icon>
+        <label>{labels.btnBack}</label>
+      </button>
     </div>
   </div>
 </template>

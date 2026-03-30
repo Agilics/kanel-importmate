@@ -2,8 +2,8 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 10-22-2025
- * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @last modified on  : 26-03-2026
+ * @last modified by  : Mouhamed NIANG
 **/
 @isTest
 public class TestDataFactory {
@@ -34,7 +34,7 @@ public class TestDataFactory {
         return project;
     }
 
-    public static ImportProject__c createImportProject(String targetObject) {
+     public static ImportProject__c createImportProject(String targetObject) {
         ImportProject__c project = new ImportProject__c(
             Name = 'Test Project',
             TargetObject__c=targetObject,
@@ -44,43 +44,23 @@ public class TestDataFactory {
         return project;
     }
 
-    public static Schedule__c createSchedule() {
-        ImportProject__c project = createImportProject();
-        Schedule__c schedule = new Schedule__c( 
-            Frequency__c = 'DAILY',
-            Project__c = project.Id,
-            NextRun__c = Datetime.now().addDays(1)
-        );
-        insert schedule;
-        return schedule;
-    }
- 
-    public static ImportProject__c createImportProjectWithTargetObject(String targetObject) {
-        ImportProject__c project = new ImportProject__c(
-            Name = 'Test Project',
-            Description__c = 'Test Description',
-            TargetObject__c = targetObject
-        );
-        insert project;
-        return project;
-    }
-
     public static ImportExecution__c createImportExecution() {
         ImportProject__c project = createImportProject();
         return createImportExecution(project.Id);
     }
-
+    
     public static ImportExecution__c createImportExecution(Id projectId) {
         ImportExecution__c execution = new ImportExecution__c(
             Status__c = 'Pending',
-            Type__c = 'Validation',
             StartTime__c = System.now(),
+            Type__c  = 'Import',
             EndTime__c = System.now(),
             Project__c = projectId
         );
         insert execution;
         return execution;
     }
+
 
     public static ImportExecution__c createImportExecution(Id projectId, String type) {
         ImportExecution__c execution = new ImportExecution__c(
@@ -93,6 +73,77 @@ public class TestDataFactory {
         insert execution;
         return execution;
     }
+
+
+    /**
+     * Vérifier qu'une valeur est bien une valeur picklist valide pour Type__c
+     * Valeurs valides: Insert, Upsert, Delete, Import, Validation
+     */
+    private static Boolean isValidExecutionType(String type) {
+        if (String.isBlank(type)) return false;
+        Set<String> validTypes = new Set<String>{
+            'Insert', 'Upsert', 'Delete', 'Import', 'Validation'
+        };
+        return validTypes.contains(type);
+    }
+    public static ImportProject__c createImportProjectWithTargetObject(String targetObject) {
+        ImportProject__c project = new ImportProject__c(
+            Name = 'Test Project',
+            TargetObject__c=targetObject,
+            Description__c = 'Test Description'
+        );
+        insert project;
+        return project;
+    }
+
+    
+    public static ImportExecution__c createImportExecutionWithSchedule(
+        Id projectId,
+        String status,
+        String type,
+        Id apexJobId
+    ) {
+        String safeType = isValidExecutionType(type) ? type : 'Import';
+
+         ImportExecution__c execution = new ImportExecution__c(
+            Project__c          = projectId,
+            Status__c           = status,
+            Type__c             = type,        
+            ApexJobId__c        = String.valueOf(apexJobId), 
+            StartTime__c        = Datetime.now(),
+            TotalRecords__c     = 0,
+            ProcessedRecords__c = 0,
+            FailedRecords__c    = 0
+        );
+        insert  execution;
+        return execution;
+    }
+    
+
+
+    public static Schedule__c createSchedule() {
+        ImportProject__c project = createImportProject();
+        Schedule__c schedule = new Schedule__c( 
+            Frequency__c = 'DAILY',
+            Project__c = project.Id,
+            NextRun__c = Datetime.now().addDays(1)
+        );
+        insert schedule;
+        return schedule;
+    }
+ 
+    public static Schedule__c createSchedule(String targetObject) {
+        ImportProject__c project =createImportProjectWithTargetObject(targetObject);
+        Schedule__c schedule = new Schedule__c( 
+            Frequency__c = 'DAILY',
+            Project__c = project.Id,
+            NextRun__c = Datetime.now().addDays(1)
+        );
+        insert schedule;
+        return schedule;
+    }
+
+  
 
     public static List<ImportLog__c> createImportLogs(Id executionId, Integer count) {
         List<ImportLog__c> logs = new List<ImportLog__c>();
@@ -447,8 +498,13 @@ public class TestDataFactory {
         ImportProject__c project = createImportProject();
         testData.put('project', project);
         
+        // create schedule
+        Schedule__c schedule = createSchedule();
+        
         // Create execution
-        ImportExecution__c execution = createImportExecution(project.Id);
+        ImportExecution__c execution = createImportExecutionWithSchedule(project.Id,'Pending','Import',schedule.Id);
+      
+        
         testData.put('execution', execution);
         
         // Create field mappings

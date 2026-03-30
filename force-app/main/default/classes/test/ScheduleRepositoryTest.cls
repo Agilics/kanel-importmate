@@ -2,7 +2,7 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 12-29-2025
+ * @last modified on  : 24-03-2026
  * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 **/
 @isTest
@@ -49,7 +49,7 @@ public with sharing class ScheduleRepositoryTest {
 
         //WHEN
         Test.startTest();
-            List<Schedule__c> results = ScheduleRepository.getSchedulesByIdProject(Project.Id);
+            List<Schedule__c> results = ScheduleRepository.getSchedulesByprojectId(String.valueOf(Project.Id));
         Test.stopTest();
 
         //Then - Assertions
@@ -154,7 +154,7 @@ public with sharing class ScheduleRepositoryTest {
 
             ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
       
-            List<ScheduleService.ScheduleWrapper> results = ScheduleRepository.getSchedulesWithExecutionsByIdProject(project.id);
+            List<ScheduleService.ScheduleWrapper> results = ScheduleRepository.getSchedulesWithExecutionsByprojectId(project.id);
 
             Test.stopTest();
 
@@ -178,7 +178,7 @@ public with sharing class ScheduleRepositoryTest {
             Schedule__c schedule = TestDataFactory.createSchedule(); 
 
          
-            List<ScheduleService.ScheduleWrapper> results = ScheduleRepository.getSchedulesByExecutionStatusAndIdProject(status ,project.id);
+            List<ScheduleService.ScheduleWrapper> results = ScheduleRepository.getSchedulesByExecutionStatusAndprojectId(status, String.valueOf(project.id));
                 
             Test.stopTest();
 
@@ -187,4 +187,18 @@ public with sharing class ScheduleRepositoryTest {
           //  Assert.areEqual(status,results[0].importExecutions[0].Status__c,'Should not be false ');
             
     }
+ 
+    @isTest
+    static void testGetExecutionsByProject_WithStatus() {
+        ImportProject__c proj = [SELECT Id FROM ImportProject__c LIMIT 1];
+        
+        Test.startTest();
+        // Cas nominal : Filtrer par statut 'Completed'
+         List<ScheduleService.ScheduleWrapper> result = 
+            ScheduleRepository.getSchedulesWithExecutionsByprojectId(proj.Id);
+        Test.stopTest();
+
+        Assert.isTrue(result.size()> 0,'Scheduled linked should not be empty'); 
+    }
+
 }

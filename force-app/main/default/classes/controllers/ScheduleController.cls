@@ -2,8 +2,9 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 11-07-2025
- * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @last modified on  : 23-03-2026
+ * @last modified by  : Mouhamed 
+ * @Modification: 
 **/
   
 public with sharing class ScheduleController {
@@ -11,26 +12,40 @@ public with sharing class ScheduleController {
     //création d'une nouvelle planification
     @AuraEnabled
     public static Id addSchedule(String frequency,Datetime nextRun,String projectId){ 
-       return  ScheduleService.schedule(frequency,nextRun, projectId);
+        try {
+          return  ScheduleService.schedule(frequency,nextRun, projectId);
+        } catch (Exception e) {
+          ErrorLogService.logException(e);
+      throw  toAuraException(e.getMessage(),e);
+        }
     }
 
     //récupèrer les SObjets compatibles
      @AuraEnabled(cacheable=true)
     public static List<String> getCompatibleSObjects() {
-      return ObjectMetadataService.getCompatibleSObjects();
+      try {
+        return ObjectMetadataService.getCompatibleSObjects();
+      } catch (Exception e) {
+        throw new SchedulingException('Error loading objects: ' + e.getMessage());
+      }
     }
 
   //récupèrer le champs d'un objet 
     @AuraEnabled(cacheable=true)
     public static Map<String, String> getObjectFields(String objectName) {
-      Map<String, String> retVal = new Map<String, String>();
+        try {
+          Map<String, String> retVal = new Map<String, String>();
       Map<String, Schema.SObjectField> fieldMap = ObjectMetadataService.getFieldsForObject(
         objectName
       );
       for (String fieldName : fieldMap.keySet()) {
         retVal.put(fieldName, fieldMap.get(fieldName).getDescribe().getLabel());
       }
-      return retVal;
+        return retVal;
+        } catch (Exception e) {
+            ErrorLogService.logException(e);
+      throw  toAuraException(e.getMessage(),e);
+        }
     }
 
     //Récupére les valeurs du picklist
@@ -45,22 +60,37 @@ public with sharing class ScheduleController {
 
 
 
-   // récupérer la planification par l'id
+    // récupérer la planification par l'id
     @AuraEnabled(cacheable = true)
     public static Schedule__c  getScheduleById(Id id){
-        return ScheduleService.getScheduleById(id);
+        try {
+          return ScheduleService.getScheduleById(id);
+        } catch (Exception e) {
+          ErrorLogService.logException(e);
+      throw  toAuraException(e.getMessage(),e);
+        }
     }
 
     //récupèrer les planifications par la fréquence (DAILY  | WEEKLY | MONTHLY)
     @AuraEnabled(cacheable = true)
     public static List<Schedule__c> getSchedulesByFrequencyAndProjectId(ImportMateEnum.FrequencyEnum  frequence,String idProject){
+      try {
         return ScheduleService.getSchedulesByFrequencyAndProjectId(frequence,idProject);
+      } catch (Exception e) {
+        ErrorLogService.logException(e);
+      throw  toAuraException(e.getMessage(),e);
+      }
     }
 
     // récupérer la planification par le nom du projet
     @AuraEnabled(cacheable = true)
     public static List<ScheduleService.ScheduleWrapper> getSchedulesByProjectName(String name){
+      try {
         return ScheduleService.getSchedulesByProjectName(name);
+      } catch (Exception e) {
+        ErrorLogService.logException(e);
+      throw  toAuraException(e.getMessage(),e);
+      }  
     }
     
     /**
@@ -68,7 +98,23 @@ public with sharing class ScheduleController {
      */
     @AuraEnabled(cacheable = true)
     public static List<ScheduleService.ScheduleWrapper> getSchedulesWithExecutionsByIdProject(Id idProject){
+       try {
        return   ScheduleService.getSchedulesWithExecutionsByIdProject(idProject);
+       } catch (Exception e) {
+        ErrorLogService.logException(e);
+      throw  toAuraException(e.getMessage(),e);
+       }
+    }
+    
+     //mettre à jour et reporter une planfication
+    @AuraEnabled
+    public static Map<String,Object> reSchedule(String scheduleId, String frequency, Datetime nextRun){
+      try {
+        return  ScheduleService.reSchedule(scheduleId,frequency,nextRun);
+      } catch (Exception e) {
+        ErrorLogService.logException(e);
+        throw  toAuraException(e.getMessage(),e);
+      }
     }
     
     /**
@@ -76,14 +122,43 @@ public with sharing class ScheduleController {
     */
     @AuraEnabled(cacheable=true)
     public static List<ScheduleService.ScheduleWrapper> getSchedulesByExecutionStatusAndIdProject(String status,String idProject){
-      return ScheduleService.getSchedulesByExecutionStatusAndIdProject(status,idProject);
+        try {
+           return ScheduleService.getSchedulesByExecutionStatusAndIdProject(status,idProject);
+        } catch (Exception e) {
+          ErrorLogService.logException(e);
+         throw  toAuraException(e.getMessage(),e);
+        }
     }
 
     //supprimer planification par l'id
     @AuraEnabled
-    public static void deleteSchedule(Id scheduleId) {
-        ScheduleService.deleteScheduleById(scheduleId);
+    public static void deleteSchedule(String scheduleId) {
+        try {
+          ScheduleService.deleteScheduleById(scheduleId);
+        } catch (Exception e) {
+          ErrorLogService.logException(e);
+          throw  toAuraException(e.getMessage(),e);
+        }
     }
 
+    // reprendre / susprendre une planification d'exécution
+    @AuraEnabled
+     public static Map<String, Object> toggleSchedule(String scheduleId, Boolean isPause){
+      try {
+      return ScheduleService.toggleSchedule(scheduleId,isPause);   
+        
+      } catch (Exception e) {
+        throw  toAuraException(e.getMessage(),e);
+      }
+  }
 
+  // *** Helpers for throw execptions ***
+    private static AuraHandledException toAuraException(String msg, Exception e) {
+        if (e instanceof ExecutionException) {
+            return new AuraHandledException(e.getMessage());
+        }
+
+        ErrorLogService.logException(e);
+        return new AuraHandledException(msg + e.getMessage());
+    }
 }

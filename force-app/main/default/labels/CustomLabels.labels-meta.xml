@@ -1231,6 +1231,198 @@
         <shortDescription>Create project first message</shortDescription>
         <value>Please create a project first</value>
     </labels>
+     <!-- Immediate Execution Section -->
+    <labels>
+        <fullName>Import_ImmediateExecution</fullName>
+        <categories>Import</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Immediate Execution</shortDescription>
+        <value>Immediate Execution</value>
+    </labels>
+    <labels>
+        <fullName>Import_RunImportNow</fullName>
+        <categories>Import</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Run the import now</shortDescription>
+        <value>Run the import now</value>
+    </labels>
+    <labels>
+        <fullName>Import_CancelEditMessage</fullName>
+        <categories>Import</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Toast Message for cancelling edit</shortDescription>
+        <value>Edit cancelled</value>
+    </labels>
+    <labels>
+        <fullName>Import_RescheduleButton</fullName>
+        <categories>Import</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label button for  edit a schedule </shortDescription>
+        <value>Reschedule</value>
+    </labels>
+
+    <!-- Scheduled Execution Section -->
+    <labels>
+        <fullName>Import_ScheduledExecution</fullName>
+        <categories>Import</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Scheduled Execution</shortDescription>
+        <value>Scheduled Execution</value>
+    </labels>
+    
+    <labels>
+        <fullName>Import_SetUpRecurringImports</fullName>
+        <categories>Import</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Set up recurring imports</shortDescription>
+        <value>Set up recurring imports</value>
+    </labels>
+
+    <!-- Common Labels -->
+    <labels>
+        <fullName>Import_ExecutionMode</fullName>
+        <categories>Import</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Execution Mode</shortDescription>
+        <value>Execution Mode</value>
+    </labels>
+    
+    <labels>
+        <fullName>Import_BatchSize</fullName>
+        <categories>Import</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Batch Size</shortDescription>
+        <value>Batch Size</value>
+    </labels>
+    
+    <labels>
+        <fullName>Import_SendEmailNotificationsOnComplete</fullName>
+        <categories>Import</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Send email notifications on complete</shortDescription>
+        <value>Send email notifications on complete</value>
+    </labels>
+    
+    <labels>
+        <fullName>Import_Frequency</fullName>
+        <categories>Import</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Frequency</shortDescription>
+        <value>Frequency</value>
+    </labels>
+    
+    <labels>
+        <fullName>Import_StartDateAndTime</fullName>
+        <categories>Import</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Start Date &amp; Time</shortDescription>
+        <value>Start Date &amp; Time</value>
+    </labels>
+    
+    <labels>
+        <fullName>Import_Date</fullName>
+        <categories>Import</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Date</shortDescription>
+        <value>Date</value>
+    </labels>
+    
+    <labels>
+        <fullName>Import_Time</fullName>
+        <categories>Import</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Time</shortDescription>
+        <value>Time</value>
+    </labels>
+    
+    <labels>
+        <fullName>Import_ActiveSchedules</fullName>
+        <categories>Import</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Active Schedules</shortDescription>
+        <value>Active Schedules</value>
+    </labels>
+    
+    <labels>
+        <fullName>Import_NoSchedulesFound</fullName>
+        <categories>Import</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>No schedules found</shortDescription>
+        <value>No schedules found. Create a schedule to get started.</value>
+    </labels>
+    <labels>
+        <fullName>Import_SucessCreatedSchedulesMessage</fullName>
+        <categories>Import</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Message </shortDescription>
+        <value>Schedule created successfully</value>
+    </labels>
+    <labels>
+        <fullName>Import_DeleteScheduleDialogMessage</fullName>
+        <categories>Dialog Confirm</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Message </shortDescription>
+        <value>Are you sure you want to delete this schedule? This action cannot be undone.</value>
+    </labels>
+     <labels>
+        <fullName>Import_DeleteScheduleDialogTitle</fullName>
+        <categories>Dialog Confirm</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Message </shortDescription>
+        <value>Confirm deletion schedule?</value>
+    </labels>
+    <labels>
+        <fullName>Import_DeleteScheduleToastMessage</fullName>
+        <categories>Toast Message</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription> Success Toast Message for successfully  deleting schedule</shortDescription>
+        <value>Schedule deleted successfully</value>
+    </labels>
+    <labels>
+        <fullName>Import_UpdateScheduleToastMessage</fullName>
+        <categories>Toast Message</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription> Success Toast Message for successfully  deleting schedule</shortDescription>
+        <value>Schedule with ID {0} Updated  successfully</value>
+    </labels>
+    <labels>
+        <fullName>Import_SelectAnOption</fullName>
+        <categories>Import</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Select an option</shortDescription>
+        <value>Select an option</value>
+    </labels>
+    
+    <labels>
+        <fullName>Import_ScheduledImportsNote</fullName>
+        <categories>Import</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Scheduled imports note</shortDescription>
+        <value>Scheduled imports will use the same data source and transformations configured in previous steps.</value>
+    </labels>
+
     <labels>
         <fullName>IMPORT_STARTED</fullName>
         <language>en_US</language>
@@ -1764,6 +1956,7 @@
         <value>Description</value>
     </labels>
     <labels>
+    <labels>
         <fullName>ProjectForm_Helper_Description</fullName>
         <language>en_US</language>
         <protected>false</protected>
@@ -1840,6 +2033,7 @@
         <shortDescription>Button to close modal</shortDescription>
         <value>Close</value>
     </labels>
+    <labels>
     <labels>
         <fullName>IM_DRY_Title</fullName>
         <categories>IM_DRY</categories>
@@ -2394,6 +2588,7 @@
         <shortDescription>IM_EX_Detail_ExecutionId</shortDescription>
         <value>Execution ID:</value>
     </labels>
+    <labels>
     <labels>
         <fullName>IM_EX_Detail_Status</fullName>
         <language>en_US</language>

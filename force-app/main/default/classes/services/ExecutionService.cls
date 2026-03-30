@@ -14,4 +14,27 @@ public with sharing class ExecutionService {
         }
         return summary;
     }
+
+    // update Import Execution 
+    /*public static void updateImportExecution(
+        String executionId,
+        String status,
+        String phase,
+        String type,
+        Integer totalRecords
+        ) {
+        if (SecurityUtils.isUpdateable(ImportExecution__c.SObjectType)) {
+            //fetch ImportExecution by executionId
+            ImportExecution__c execution = ExecutionRepository.getImportExecutionById(executionId);
+
+            execution.Status__c = EXECUTION_STATUS_IN_PROGRESS;
+            execution.Phase__c = phase;
+            execution.Type__c = type;
+            execution.TotalRecords__c = totalRecords;
+            
+            //update execution
+            ExecutionRepository.updateImportExecution(execution);
+
+        }
+    }*/
 }

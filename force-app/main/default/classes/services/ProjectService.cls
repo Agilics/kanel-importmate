@@ -8,7 +8,7 @@
 public with sharing class ProjectService {
   // Crée un nouveau projet
   public static ImportProject__c createProject(String name,String description,String targetObject) {
-    /* try {  */
+     try {  
      ImportProject__c project = new ImportProject__c(
         Name = name,
         Description__c = description,
@@ -16,10 +16,10 @@ public with sharing class ProjectService {
       );
       
       return ProjectRepository.saveProject(project);
-    /* } catch (ApplicationException e) {
+     } catch (ApplicationException e) {
       ErrorLogService.logException(e);
-      throw e;
-    } */
+      throw new ImportException(e.getMessage());
+    } 
    
   }
 
@@ -103,7 +103,12 @@ public with sharing class ProjectService {
   
   // Valide l'objet cible Salesforce
   public static Boolean validateTargetObject(String targetObject) {
-    return Schema.getGlobalDescribe().containsKey(targetObject);
+    try {
+      return Schema.getGlobalDescribe().containsKey(targetObject);
+    } catch (Exception e) {
+       ErrorLogService.logException(e);
+      throw new ImportException(e.getMessage());
+    }
   }
 
   // Récupère les projets avec leurs statistiques d'exécution

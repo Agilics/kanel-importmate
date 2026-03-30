@@ -1,3 +1,7 @@
+/**
+ * @Last Modification Date: 03/03/2026
+ * @Last Modification By: Mouhamed
+ */
 import { LightningElement, api, track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import startClientStaging from '@salesforce/apex/BatchExecutionController.startClientStaging';
@@ -9,6 +13,8 @@ import getImportLogs from '@salesforce/apex/BatchExecutionController.getImportLo
 import cancelExecution from '@salesforce/apex/BatchExecutionController.cancelExecution';
 import { parseCsvData } from 'c/utility';
 import { subscribe, unsubscribe, onError } from 'lightning/empApi';
+import addSchedule from '@salesforce/apex/ScheduleController.addSchedule';
+
 
 // ===== Custom Labels =====
 import LABEL_TITLE from '@salesforce/label/c.IM_EX_Title';
@@ -33,6 +39,7 @@ import LABEL_DETAIL_FAILED from '@salesforce/label/c.IM_EX_Detail_Failed';
 import LABEL_PROCESSING_MSG from '@salesforce/label/c.IM_EX_Processing_Message';
 import LABEL_FAILED_TITLE from '@salesforce/label/c.IM_EX_Failed_Title';
 import LABEL_FAILED_SUBTITLE from '@salesforce/label/c.IM_EX_Failed_Subtitle';
+import Import_SucessCreatedSchedulesMessage from '@salesforce/label/c.Import_SucessCreatedSchedulesMessage';
 
 const STAGING_CHUNK_SIZE = 200;
 const POLLING_INTERVAL_MS = 3000;
@@ -59,6 +66,12 @@ export default class ExecutionCmp extends LightningElement {
   @track totalErrors = 0;
 
   @track showImportResults = false;
+  @track frequency='Weekly';
+  @track nextRun  ;
+  @track executionMode;
+  @track batchSize;
+  @track sendEmailNotification;
+
 
   subscription = null;
   channelName = '/event/ImportStatusEvent__e';
@@ -88,6 +101,32 @@ export default class ExecutionCmp extends LightningElement {
     };
   }
 
+  // Initialisation de next run 
+  initializeNextRun() {
+      const now = new Date();
+      now.setHours(now.getHours() + 1);
+      this.nextRun = this.formatDateTimeForInput(now);
+  }
+
+
+  // Formatage
+  formatDateTimeForInput(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      return `${year}-${month}-${day}T${hours}:${minutes}`;
+  }
+   
+  //configuration card  ScheduleExecution 
+  showScheduledExecution = true;
+  hideScheduledExecution = false; 
+  // schedule | Immediate  cards form  style 
+  get formGroup(){return 'form-group';}
+
+  get formLabel(){return 'form-label';}
+
   @api
   get projectId() {
     return this._projectId;
@@ -101,6 +140,7 @@ export default class ExecutionCmp extends LightningElement {
   }
 
   connectedCallback() {
+    this.initializeNextRun();
     this.registerErrorListener();
     this.handleSubscribe();
     this.tryRestoreExecutionState();
@@ -198,8 +238,47 @@ export default class ExecutionCmp extends LightningElement {
     }
   }
 
-  handleScheduleImport() {}
+  // Conversion pour  next run en format Date
+  convertInputToDate(inputValue) {
+      return new Date(inputValue);
+  }
 
+  
+  //planifier une exécution
+  async handleScheduleImport() {
+    try {
+        this.isLoading = true;
+
+        const nextRunDate = this.convertInputToDate(this.nextRun);
+        await addSchedule({
+            frequency: this.frequency,
+            nextRun: nextRunDate,
+            projectId: this.projectId
+        });
+
+        // Notifier le parent via un événement — ne pas appeler directement
+        // le composant enfant depuis un sibling
+        this.dispatchEvent(new CustomEvent('schedulecreated'));
+
+        // Refresh en sécurité : seulement si le composant est dans ce template
+        const scheduledComponent = this.template.querySelector('c-scheduled-schedules');
+        if (scheduledComponent) {
+            await scheduledComponent.refreshSchedules();
+        }
+
+        this.showToast('Success', Import_SucessCreatedSchedulesMessage, 'success');
+
+    } catch (error) {
+        // Distinguer l'erreur Apex de l'erreur JS locale
+        const message = error?.body?.message || error?.message || 'Failed to create schedule';
+        console.error('Error in handleScheduleImport:', error);
+        this.showToast('Error', message, 'error');
+    } finally {
+        this.isLoading = false;
+    }
+}
+
+  //annuler importation d'exécution
   async handleCancelImport() {
     if (!this.canCancelImport) return;
     try {
@@ -226,7 +305,9 @@ export default class ExecutionCmp extends LightningElement {
   handlePreviousStep() { this.dispatchEvent(new CustomEvent('previous')); }
 
   getRunStateStorageKey(projectId) { return `${SS_RUN_STATE_PREFIX}_${projectId || 'no_project'}`; }
+ 
 
+  //persistance des données dans le stockage de la session
   persistRunState() {
     if (!this.currentExecutionId) return;
     const runState = {
@@ -249,6 +330,7 @@ export default class ExecutionCmp extends LightningElement {
     } catch (e) { /* ignore */ }
   }
 
+  // 
   clearRunState() {
     const currentProjectId = (this.projectId || '').trim();
     try {
@@ -260,6 +342,7 @@ export default class ExecutionCmp extends LightningElement {
     } catch (e) { /* ignore */ }
   }
 
+  //
   async tryRestoreExecutionState() {
     if (this.isRestoringState || this.currentExecutionId) return;
     const currentProjectId = (this.projectId || '').trim();
@@ -343,6 +426,27 @@ export default class ExecutionCmp extends LightningElement {
 
   handleUnsubscribe() {
     if (this.subscription) { unsubscribe(this.subscription, () => {}); this.subscription = null; }
+  }
+
+  //add schedule changes handler
+  handleFrequencyChange(event) {
+      this.frequency = event.detail.value;
+  }
+
+  handleNextRunChange(event) {
+      this.nextRun = event.detail.value;
+  }
+
+  handleModeChange(event) {
+      this.executionMode = event.detail.value;
+  }
+
+  handleBatchSizeChange(event) {
+      this.batchSize = event.detail.value;
+  }
+
+  handleSendNotificationChange(event) {
+      this.sendEmailNotification = event.detail;
   }
 
   handlePlatformEvent(response) {
