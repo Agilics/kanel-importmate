@@ -1,3 +1,7 @@
+/**
+ * @LastModification: 30/03/2026
+ * @Modified by : Mouhamed NIANG
+ */
 import { LightningElement, api } from 'lwc';
 // STEP LABELS
 import STEP_PROJECT_SETUP from '@salesforce/label/c.SideBar_Step_ProjectSetup';
@@ -70,5 +74,11 @@ export default class SideBarCmp extends LightningElement {
 
     navigateToProjectPage() {
         this.dispatchEvent(new CustomEvent('navigateproject'));
+    }
+
+    get labels() {
+        return {
+            title: TITLE_SECTION
+        };
     }
 }

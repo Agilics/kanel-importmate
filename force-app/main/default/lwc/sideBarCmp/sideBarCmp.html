@@ -1,3 +1,7 @@
+<!--
+    @Last Modification : 30/03/2026
+    @Modification : Mouhamed NIANG
+-->
 <template>
     <div class="sidebar-container">
         <!-- Project Header -->
@@ -34,7 +38,7 @@
 
             <!-- Quick Actions -->
             <div class="quick-actions-section">
-                <h3 class="quick-actions-title">{TITLE_SECTION}</h3>
+                <h3 class="quick-actions-title">{labels.title}</h3>
                 <div class="quick-actions-list">
                     <template for:each={quickActions} for:item="action">
                         <button key={action.label} class="quick-action-btn" onclick={handleQuickAction}
