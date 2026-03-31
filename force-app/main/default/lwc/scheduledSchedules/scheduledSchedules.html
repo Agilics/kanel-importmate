@@ -38,7 +38,7 @@
                                     </td>
                                     <td class="actions">
                                         
-                                        <template if:true={schedule.isNotCompleted}>
+                                        <template if:false={schedule.isNotCompleted}>
                                             <lightning-icon icon-name={schedule.iconActionName} onclick={handleToggleStatus}
                                                 data-id={schedule.id} data-running={schedule.isRunning} size="xx-small"
                                                 alternative-text="Toggle Status" title="Toggle Status" class="action-icon">
