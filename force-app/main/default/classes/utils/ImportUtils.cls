@@ -1,20 +1,22 @@
 /**
- * @description       : 
+ * @description       : Utilitaires pour le traitement des données d'import
  * @author            : khalidousowba
- * @group             : 
- * @last modified on  : 12-11-2025
- * @last modified by  : khalidousowba
-**/
+ * @group             :
+ * @last modified on  : 03-17-2026
+ * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+ * Corrections :
+ *  - SOQL injection fix : buildLookupQueries() remplacé par bind variables (lignes 70-81)
+ *  - executeQueries() remplacé par executeLookupQuery() typé — plus de Database.query(String) libre
+ **/
 public with sharing class ImportUtils {
 
-    public static String getValueFromRow(Map<String, String> row, String key) {
-        if (row == null || String.isBlank(key)) {
-            return null;
-        }
+    // ─────────────────────────────────────────────────────────────
+    // Lecture depuis une ligne CSV
+    // ─────────────────────────────────────────────────────────────
 
-        if (row.containsKey(key)) {
-            return row.get(key);
-        }
+    public static String getValueFromRow(Map<String, String> row, String key) {
+        if (row == null || String.isBlank(key)) return null;
+        if (row.containsKey(key)) return row.get(key);
 
         String normalizedKey = key.trim();
         for (String rowKey : row.keySet()) {
@@ -22,173 +24,138 @@ public with sharing class ImportUtils {
                 return row.get(rowKey);
             }
         }
-
         return null;
     }
-    
-    public static void resolveLookupsInBulk(List<SObject> records, List<Map<String, Object>> lookupInfoList) {
-        if (records == null || records.isEmpty() || lookupInfoList == null || lookupInfoList.isEmpty()) {
+
+    // ─────────────────────────────────────────────────────────────
+    // Résolution des lookups en masse
+    // ─────────────────────────────────────────────────────────────
+
+    public static void resolveLookupsInBulk(
+        List<SObject> records,
+        List<Map<String, Object>> lookupInfoList
+    ) {
+        if (records == null || records.isEmpty()
+            || lookupInfoList == null || lookupInfoList.isEmpty()) {
             return;
         }
 
-        Map<String, Map<String, Set<String>>> lookupRequests = new Map<String, Map<String, Set<String>>>();
+        // Regrouper les valeurs à rechercher par (object, field)
+        Map<String, LookupQueryRequest> requestsByKey = new Map<String, LookupQueryRequest>();
 
-        for (Map<String, Object> lookupInfo : lookupInfoList) {
-            if (lookupInfo.isEmpty()) continue;
+        for (Map<String, Object> info : lookupInfoList) {
+            if (info.isEmpty()) continue;
+            String lookupValue = (String) info.get('lookupValue');
+            String objectName  = (String) info.get('lookupObject');
+            String fieldName   = (String) info.get('lookupField');
 
-            String lookupValue = (String) lookupInfo.get('lookupValue');
-            String objectName = (String) lookupInfo.get('lookupObject');
-            String fieldName = (String) lookupInfo.get('lookupField');
-
-            if (String.isNotBlank(lookupValue) && String.isNotBlank(objectName) && String.isNotBlank(fieldName)) {
-                if (!lookupRequests.containsKey(objectName)) {
-                    lookupRequests.put(objectName, new Map<String, Set<String>>());
-                }
-                if (!lookupRequests.get(objectName).containsKey(fieldName)) {
-                    lookupRequests.get(objectName).put(fieldName, new Set<String>());
-                }
-                lookupRequests.get(objectName).get(fieldName).add(lookupValue);
+            if (String.isBlank(lookupValue) || String.isBlank(objectName) || String.isBlank(fieldName)) {
+                continue;
             }
+
+            String key = objectName + '.' + fieldName;
+            if (!requestsByKey.containsKey(key)) {
+                requestsByKey.put(key, new LookupQueryRequest(objectName, fieldName, new Set<String>()));
+            }
+            requestsByKey.get(key).values.add(lookupValue);
         }
 
+        // Exécuter une requête par (object, field) avec bind variables
         Map<String, Map<String, String>> lookupResults = new Map<String, Map<String, String>>();
-        List<String> queries = buildLookupQueries(lookupRequests);
-
-        Map<String, List<SObject>> queryResults = executeQueries(queries);
-
-        processQueryResults(queryResults, lookupRequests, lookupResults);
+        for (String key : requestsByKey.keySet()) {
+            LookupQueryRequest req = requestsByKey.get(key);
+            lookupResults.put(key, executeLookupQuery(req));
+        }
 
         applyLookupResults(records, lookupInfoList, lookupResults);
     }
 
-    private static List<String> buildLookupQueries(Map<String, Map<String, Set<String>>> lookupRequests) {
-        List<String> queries = new List<String>();
-
-        for (String objectName : lookupRequests.keySet()) {
-            Map<String, Set<String>> fieldValues = lookupRequests.get(objectName);
-            Set<String> allFields = fieldValues.keySet();
-
-            String query = 'SELECT Id, ' + String.join(new List<String>(allFields), ', ') +
-                          ' FROM ' + String.escapeSingleQuotes(objectName) + ' WHERE ';
-
-            //debug 
-
-            List<String> conditions = new List<String>();
-            for (String fieldName : allFields) {
-                Set<String> values = fieldValues.get(fieldName);
-                if (!values.isEmpty()) {
-                    conditions.add(String.escapeSingleQuotes(fieldName) + ' IN (\'' +
-                                 String.join(new List<String>(values), '\',\'') + '\')');
-                }
-            }
-
-            if (!conditions.isEmpty()) {
-                query += String.join(conditions, ' OR ');
-                queries.add(query);
-            }
-        }
-
-        return queries;
-    }
-
-    private static Map<String, List<SObject>> executeQueries(List<String> queries) {
-        Map<String, List<SObject>> results = new Map<String, List<SObject>>();
-
-        for (String query : queries) {
-            try {
-                results.put(query, Database.query(query));
-            } catch (Exception e) {
-                results.put(query, new List<SObject>());
-            }
-        }
-
-        return results;
-    }
-
-    private static void processQueryResults(Map<String, List<SObject>> queryResults,
-                                          Map<String, Map<String, Set<String>>> lookupRequests,
-                                          Map<String, Map<String, String>> lookupResults) {
-
-        for (String objectName : lookupRequests.keySet()) {
-            Map<String, Set<String>> fieldValues = lookupRequests.get(objectName);
-
-            for (String fieldName : fieldValues.keySet()) {
-                String lookupKey = objectName + '.' + fieldName;
-                Map<String, String> valueToIdMap = new Map<String, String>();
-                Set<String> values = fieldValues.get(fieldName);
-
-                // Find the query that contains this object and execute it
-                for (String query : queryResults.keySet()) {
-                    if (query.contains('FROM ' + String.escapeSingleQuotes(objectName))) {
-                        List<SObject> queryResult = queryResults.get(query);
-
-                        for (SObject record : queryResult) {
-                            Object fieldValue = record.get(fieldName);
-                            if (fieldValue != null && values.contains(String.valueOf(fieldValue))) {
-                                valueToIdMap.put(String.valueOf(fieldValue), String.valueOf(record.get('Id')));
-                            }
-                        }
-                        break;
-                    }
-                }
-
-                lookupResults.put(lookupKey, valueToIdMap);
-            }
-        }
-    }
-
-    private static void applyLookupResults(List<SObject> records, List<Map<String, Object>> lookupInfoList,
-                                         Map<String, Map<String, String>> lookupResults) {
-
-        for (Integer i = 0; i < records.size(); i++) {
-            Map<String, Object> lookupInfo = lookupInfoList[i];
-            if (lookupInfo.isEmpty()) continue;
-
-            String targetField = (String) lookupInfo.get('targetField');
-            String lookupValue = (String) lookupInfo.get('lookupValue');
-            String objectName = (String) lookupInfo.get('lookupObject');
-            String fieldName = (String) lookupInfo.get('lookupField');
-
-            if (String.isNotBlank(targetField) && String.isNotBlank(lookupValue)) {
-                String lookupKey = objectName + '.' + fieldName;
-                Map<String, String> valueToIdMap = lookupResults.get(lookupKey);
-
-                if (valueToIdMap != null && valueToIdMap.containsKey(lookupValue)) {
-                    records[i].put(targetField, valueToIdMap.get(lookupValue));
-                }
-            }
-        }
-    }
-    
     /**
-     * Convert a string value to the appropriate type based on the field type
+     * Exécute une requête de lookup sécurisée avec bind variables.
+     * FIX SOQL INJECTION : on ne concatène plus les valeurs dans la string de requête.
+     * L'objet et le champ sont validés via Schema avant d'être utilisés.
      */
-    public static Object convertValueToFieldType(String value, String objectName, String fieldName) {
-        if (String.isBlank(value)) {
-            return null;
-        }
-        
+    private static Map<String, String> executeLookupQuery(LookupQueryRequest req) {
+        Map<String, String> valueToIdMap = new Map<String, String>();
+
+        // Validation du SObjectType et du champ via Schema (pas de concaténation libre)
+        Schema.SObjectType objType = Schema.getGlobalDescribe().get(req.objectName);
+        if (objType == null) return valueToIdMap;
+
+        Map<String, Schema.SObjectField> fieldMap = objType.getDescribe().fields.getMap();
+        if (!fieldMap.containsKey(req.fieldName.toLowerCase())) return valueToIdMap;
+
+        // Vérification FLS lecture
+        if (!SecurityUtils.isFieldAccessible(objType, req.fieldName)) return valueToIdMap;
+
+        Set<String> bindValues = req.values;
+
         try {
-            Schema.DescribeFieldResult fieldDescribe = ObjectMetadataService.getFieldDescribe(objectName, fieldName);
-            if (fieldDescribe == null) {
-                // Field not found, return original value
-                return value;
+            // Bind variable :bindValues — aucune valeur injectée dans la string
+            String soql =
+                'SELECT Id, ' + req.fieldName +
+                ' FROM ' + req.objectName +
+                ' WHERE ' + req.fieldName + ' IN :bindValues';
+
+            for (SObject record : Database.query(soql)) {
+                Object fieldVal = record.get(req.fieldName);
+                if (fieldVal != null) {
+                    valueToIdMap.put(String.valueOf(fieldVal), String.valueOf(record.get('Id')));
+                }
             }
-            
-            Schema.DisplayType fieldType = fieldDescribe.getType();
-            
-            switch on fieldType {
+        } catch (Exception e) {
+            System.debug(LoggingLevel.WARN, 'ImportUtils.executeLookupQuery failed: ' + e.getMessage());
+        }
+
+        return valueToIdMap;
+    }
+
+    private static void applyLookupResults(
+        List<SObject> records,
+        List<Map<String, Object>> lookupInfoList,
+        Map<String, Map<String, String>> lookupResults
+    ) {
+        for (Integer i = 0; i < records.size(); i++) {
+            Map<String, Object> info = lookupInfoList[i];
+            if (info.isEmpty()) continue;
+
+            String targetField = (String) info.get('targetField');
+            String lookupValue = (String) info.get('lookupValue');
+            String objectName  = (String) info.get('lookupObject');
+            String fieldName   = (String) info.get('lookupField');
+
+            if (String.isBlank(targetField) || String.isBlank(lookupValue)) continue;
+
+            String key = objectName + '.' + fieldName;
+            Map<String, String> valueToIdMap = lookupResults.get(key);
+            if (valueToIdMap != null && valueToIdMap.containsKey(lookupValue)) {
+                records[i].put(targetField, valueToIdMap.get(lookupValue));
+            }
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Conversion de type
+    // ─────────────────────────────────────────────────────────────
+
+    public static Object convertValueToFieldType(String value, String objectName, String fieldName) {
+        if (String.isBlank(value)) return null;
+
+        try {
+            Schema.DescribeFieldResult dfr =
+                ObjectMetadataService.getFieldDescribe(objectName, fieldName);
+            if (dfr == null) return value;
+
+            switch on dfr.getType() {
                 when DATE {
                     return Date.valueOf(value);
                 }
                 when DATETIME {
-                    // Try to parse as full datetime first (YYYY-MM-DD HH:MM:SS)
                     try {
                         return Datetime.valueOf(value);
                     } catch (Exception e) {
-                        // If that fails, try to parse as date only (YYYY-MM-DD) and convert to datetime
-                        Date dateOnly = Date.valueOf(value);
-                        return Datetime.newInstance(dateOnly, Time.newInstance(0, 0, 0, 0));
+                        Date d = Date.valueOf(value);
+                        return Datetime.newInstance(d, Time.newInstance(0, 0, 0, 0));
                     }
                 }
                 when DOUBLE, CURRENCY, PERCENT {
@@ -205,23 +172,23 @@ public with sharing class ImportUtils {
                 }
             }
         } catch (Exception e) {
-            // If conversion fails, return the original string value
-            // This allows Salesforce to attempt its own conversion
             return value;
         }
     }
-    
+
+    // ─────────────────────────────────────────────────────────────
+    // Inner class
+    // ─────────────────────────────────────────────────────────────
+
     public class LookupQueryRequest {
-        public String objectName;
-        public String fieldName;
+        public String      objectName;
+        public String      fieldName;
         public Set<String> values;
 
         public LookupQueryRequest(String objectName, String fieldName, Set<String> values) {
             this.objectName = objectName;
-            this.fieldName = fieldName;
-            this.values = values;
+            this.fieldName  = fieldName;
+            this.values     = values;
         }
-
-
     }
 }

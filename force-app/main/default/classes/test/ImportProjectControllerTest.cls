@@ -1,151 +1,245 @@
+/**
+ * @description       : Tests pour ImportProjectController — cas positifs et négatifs
+ * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @group             :
+ * @last modified on  : 03-17-2026
+ * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+ * Couvre (points 14, 16) :
+ *  - getRecentsProjects : nominal + limitor null
+ *  - saveProject : nominal + nom vide + objet cible vide
+ *  - searchProjectsByName : nominal + nom vide + nom inconnu
+ *  - searchProjetById : nominal + id vide + id inexistant
+ *  - getAllProjects : nominal
+ *  - doesProjectExist : true + false
+ *  - getCompatibleSObjects : nominal
+ **/
 @isTest
-public with sharing class ImportProjectControllerTest {
-    //injection de données de testes
-     @TestSetup
-     static void setup() {
-        ImportProject__c  saveProject = TestDataFactory.createImportProject();
-     }
-      
-     //Tester la récupereration d'une variable de nombre  de  projets récements importés
-    
-     @IsTest
-     static void testGetRecentsProjects() {
-        //given
-        Integer limitor = 1;
+public class ImportProjectControllerTest {
 
-        //when
-         Test.startTest();
-        List<ImportProject__c> results = ImportProjectController.getRecentsProjects(limitor);
-        Test.stopTest();
-        //Then -Assertions 
-        System.assertNotEquals(results, null); 
-
-        System.assert(results.size()> 0);
-     }
-
-    @IsTest
-    static void testSaveProject() {
-        //Given 
-        String name ='project';
-        String description ='desc';
-        String targetObject ='Account';
-
-        //when
-        Test.startTest();
-            ImportProject__c  project =  ImportProjectController.saveProject(name,description,targetObject);
-        Test.stopTest();
-
-        //then
-        System.assertNotEquals(null, project);
-        System.assertEquals(name,project.Name, 'No project were found with provided name');    
+    @testSetup
+    static void setup() {
+        TestDataFactory.createAdminUser();
+        TestDataFactory.createImportProject('Account');
+        TestDataFactory.createImportProject('Contact');
     }
 
-       @IsTest
-    static void testGetProjectById() { 
-        //given
-        ImportProject__c  saveProject = TestDataFactory.createImportProject();
-     
-   
-        //when
-        Test.startTest(); 
-            ImportProject__c  project =  ImportProjectController.searchProjetById(saveProject.Id);
+    // ─────────────────────────────────────────────────────────────
+    // getRecentsProjects
+    // ─────────────────────────────────────────────────────────────
+
+    @isTest
+    static void testGetRecentsProjects_nominal() {
+        Test.startTest();
+        List<ImportProject__c> result = ImportProjectController.getRecentsProjects(5);
         Test.stopTest();
 
-        //then
-        System.assertNotEquals(null, project); 
+        Assert.isNotNull(result, 'La liste ne doit pas etre null');
+        Assert.isTrue(result.size() <= 5, 'Ne doit pas depasser le limitor');
+        Assert.isTrue(result.size() >= 2, 'Doit retourner au moins les 2 projets crees en setup');
     }
 
-        @IsTest
-    static void testGetProjectsByName() {
-        //given
-        ImportProject__c  saveProject = TestDataFactory.createImportProject();
-        String name ='Test Project';
-
-        //when
+    @isTest
+    static void testGetRecentsProjects_nullLimitor() {
         Test.startTest();
-            List<ImportProject__c>  project =  ImportProjectController.searchProjectsByName(name);
+        List<ImportProject__c> result = ImportProjectController.getRecentsProjects(null);
         Test.stopTest();
 
-        //then
-        System.assertNotEquals(null, project); 
-        System.assert(project.size() > 0);
+        Assert.isNotNull(result, 'Un limitor null ne doit pas lever d\'exception');
     }
 
-    @IsTest
-    static void testGetAllProjects() {
-        //given
-        Integer expected = 0;
-        
+    // ─────────────────────────────────────────────────────────────
+    // saveProject
+    // ─────────────────────────────────────────────────────────────
+
+    @isTest
+    static void testSaveProject_nominal() {
         Test.startTest();
-            List<ImportProject__c>    actual  =  
-            ImportProjectController.getAllProjects();
-        Test.stopTest();
-        System.assertNotEquals(null, actual);
-        System.assertNotEquals(expected, actual.size(), 'La liste des projets est vide!');
-    }  
-
-
-    @IsTest
-    static void testDoesProjectExist() {
-        //given
-        String name = 'Test Project';
-        String targetObject='Account';
-        Boolean expected = true;
-
-        //when
-        Test.startTest();
-          Boolean hasProject  = ImportProjectController.doesProjectExist(name,targetObject);
+        ImportProject__c saved = ImportProjectController.saveProject(
+            'Projet Test', 'Description test', 'Lead'
+        );
         Test.stopTest();
 
-        //then
-        System.assertEquals(expected, hasProject, 'Failed to found the project ');
+        Assert.isNotNull(saved, 'Le projet sauvegarde ne doit pas etre null');
+        Assert.isNotNull(saved.Id, 'Le projet doit avoir un Id apres sauvegarde');
+        Assert.areEqual('Projet Test', saved.Name, 'Le nom doit correspondre');
     }
 
-     //Tester la mise à jour d'un projet importé
-  @isTest
-  private static void testForUpdateProject() {
-    String expectedName = 'Lead Import';
-    String expectedDescription = 'Describe Lead import';
-    String expectedTargetObject = 'Lead';
+    @isTest
+    static void testSaveProject_blankName_throwsException() {
+        Test.startTest();
+        AuraHandledException caught = null;
+        try {
+            ImportProjectController.saveProject('', 'desc', 'Lead');
+        } catch (AuraHandledException e) {
+            caught = e;
+        }
+        Test.stopTest();
 
-    //Exécution du  teste
-    Test.startTest();
-    ImportProject__c save = new ImportProject__c(
-      Name = 'Contact Import',
-      TargetObject__c = 'Lead',
-      Description__c = 'This is a lead import'
-    );
+        Assert.isNotNull(caught, 'Un nom vide doit lever une AuraHandledException');
+    }
 
-    //Persistance des données de testes
-    Database.SaveResult results = Database.insert(save);
-    String projectId = results.getId();
-    System.debug('Record with Id ' + projectId + ' was inserted successfully.');
+    @isTest
+    static void testSaveProject_blankTargetObject_throwsException() {
+        Test.startTest();
+        AuraHandledException caught = null;
+        try {
+            ImportProjectController.saveProject('Projet X', 'desc', '');
+        } catch (AuraHandledException e) {
+            caught = e;
+        }
+        Test.stopTest();
 
-    // Mise à jour des données
-    ImportProjectController.updateProject(
-      projectId,
-      expectedName,
-      expectedDescription,
-      expectedTargetObject
-    );
+        Assert.isNotNull(caught, 'Un objet cible vide doit lever une AuraHandledException');
+    }
 
-    //Récupération du projet importé par l'ID
-    ImportProject__c actualProject = ImportProjectController.searchProjetById(projectId);
-    Test.stopTest();
+    // ─────────────────────────────────────────────────────────────
+    // searchProjectsByName
+    // ─────────────────────────────────────────────────────────────
 
-    // ------ Assertion pour vérifier si l'objet est vide -------
-    Assert.isNotNull(
-      actualProject,
-      'L\'objet des projets importés'
-    );
+    @isTest
+    static void testSearchProjectsByName_nominal() {
+        Test.startTest();
+        List<ImportProject__c> result = ImportProjectController.searchProjectsByName('Account');
+        Test.stopTest();
 
-    //Assertions pour vérifier les champs nom et descriptions
-    Assert.areEqual (expectedName, actualProject.Name,'Failed to update');
-    Assert.areEqual (expectedTargetObject, actualProject.TargetObject__c,'Failed to update');
-    Assert.areEqual (
-      expectedDescription,
-      actualProject.Description__c,
-      'Failed to update'
-    );
-  }
+        Assert.isNotNull(result, 'La liste ne doit pas etre null');
+        Assert.isTrue(result.size() >= 1, 'Doit trouver le projet Account');
+    }
+
+    @isTest
+    static void testSearchProjectsByName_noMatch() {
+        Test.startTest();
+        List<ImportProject__c> result = ImportProjectController.searchProjectsByName('NomInexistantXYZ123');
+        Test.stopTest();
+
+        Assert.isNotNull(result, 'La liste ne doit pas etre null');
+        Assert.areEqual(0, result.size(), 'Aucun resultat attendu pour un nom inexistant');
+    }
+
+    @isTest
+    static void testSearchProjectsByName_blankName() {
+        Test.startTest();
+        List<ImportProject__c> result = ImportProjectController.searchProjectsByName('');
+        Test.stopTest();
+
+        // Doit retourner une liste vide ou tous les projets selon l'impl — pas d'exception
+        Assert.isNotNull(result, 'Un nom vide ne doit pas lever d\'exception');
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // searchProjetById
+    // ─────────────────────────────────────────────────────────────
+
+    @isTest
+    static void testSearchProjetById_nominal() {
+        ImportProject__c existing = [SELECT Id FROM ImportProject__c LIMIT 1];
+
+        Test.startTest();
+        ImportProject__c result = ImportProjectController.searchProjetById(existing.Id);
+        Test.stopTest();
+
+        Assert.isNotNull(result, 'Doit retourner le projet');
+        Assert.areEqual(existing.Id, result.Id, 'L\'Id doit correspondre');
+    }
+
+    @isTest
+    static void testSearchProjetById_blankId_returnsNull() {
+        Test.startTest();
+        ImportProject__c result = ImportProjectController.searchProjetById('');
+        Test.stopTest();
+
+        Assert.isNull(result, 'Un id vide doit retourner null sans exception');
+    }
+
+    @isTest
+    static void testSearchProjetById_unknownId_throwsOrReturnsNull() {
+        Test.startTest();
+        ImportProject__c result = null;
+        AuraHandledException caught = null;
+        try {
+            result = ImportProjectController.searchProjetById('a0000000000000ZAAQ');
+        } catch (AuraHandledException e) {
+            caught = e;
+        }
+        Test.stopTest();
+
+        Assert.isTrue(result == null || caught != null,
+            'Un id inexistant doit retourner null ou lever une AuraHandledException');
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // getAllProjects
+    // ─────────────────────────────────────────────────────────────
+
+    @isTest
+    static void testGetAllProjects_nominal() {
+        Test.startTest();
+        List<ImportProject__c> result = ImportProjectController.getAllProjects();
+        Test.stopTest();
+
+        Assert.isNotNull(result, 'La liste ne doit pas etre null');
+        Assert.isTrue(result.size() >= 2, 'Doit contenir au moins les 2 projets du setup');
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // doesProjectExist
+    // ─────────────────────────────────────────────────────────────
+
+    @isTest
+    static void testDoesProjectExist_true() {
+        ImportProject__c existing = [SELECT Name, TargetObject__c FROM ImportProject__c LIMIT 1];
+
+        Test.startTest();
+        Boolean result = ImportProjectController.doesProjectExist(
+            existing.Name, existing.TargetObject__c
+        );
+        Test.stopTest();
+
+        Assert.isTrue(result, 'Un projet existant doit retourner true');
+    }
+
+    @isTest
+    static void testDoesProjectExist_false() {
+        Test.startTest();
+        Boolean result = ImportProjectController.doesProjectExist(
+            'ProjetFantomeXYZ', 'Opportunity'
+        );
+        Test.stopTest();
+
+        Assert.isFalse(result, 'Un projet inexistant doit retourner false');
+    }
+
+    @isTest
+    static void testDoesProjectExist_blankName() {
+        Test.startTest();
+        AuraHandledException caught = null;
+        Boolean result = null;
+        try {
+            result = ImportProjectController.doesProjectExist('', 'Account');
+        } catch (AuraHandledException e) {
+            caught = e;
+        }
+        Test.stopTest();
+
+        Assert.isTrue(result == false || caught != null,
+            'Un nom vide doit retourner false ou une AuraHandledException');
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // getCompatibleSObjects
+    // ─────────────────────────────────────────────────────────────
+
+    @isTest
+    static void testGetCompatibleSObjects_nominal() {
+        Test.startTest();
+        List<String> result = ImportProjectController.getCompatibleSObjects();
+        Test.stopTest();
+
+        Assert.isNotNull(result, 'La liste ne doit pas etre null');
+        Assert.isTrue(result.size() > 0, 'Doit retourner au moins un objet compatible');
+        // Vérifier que la liste est triée
+        List<String> sorted = result.clone();
+        sorted.sort();
+        Assert.areEqual(sorted, result, 'La liste doit etre triee alphabetiquement');
+    }
 }

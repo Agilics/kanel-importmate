@@ -1,0 +1,19 @@
+{
+  "folders": [
+    {
+      "path": "c:/Users/testk/Documents/kanel-importmate"
+    }
+  ],
+  "settings": {
+    "eslint.workingDirectories": [
+      "c:/Users/testk/Documents/kanel-importmate"
+    ],
+    "eslint.validate": [
+      "javascript",
+      "typescript"
+    ],
+    "eslint.options": {
+      "overrideConfigFile": "c:\\Users\\testk\\Documents\\kanel-importmate\\.eslintrc.json"
+    }
+  }
+}

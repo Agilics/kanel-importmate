@@ -1,22 +1,30 @@
+/**
+ * @description       : Repository pour les opérations sur ErrorLog__c
+ * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @group             :
+ * @last modified on  : 03-17-2026
+ * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+ * Modifications :
+ *  - FLS checkCreateable ajouté avant insert (point 5)
+ *  - Protection anti-récursion conservée
+ **/
 public with sharing class ErrorLogRepository {
+
     private static Boolean isInErrorLogging = false;
-    
-    /**
-     * Saves error logs to the database with recursion protection
-     * @param errors List of error logs to save
-     */
+
     public static void saveErrorLogs(List<ErrorLog__c> errors) {
-        if (!errors.isEmpty() && SecurityUtils.isCreateable(Schema.ErrorLog__c.SObjectType) && !isInErrorLogging) {
-            isInErrorLogging = true;
-            try {
-                insert errors;
-            } catch (DmlException e) {
-                // Prevent infinite recursion by not logging the error if we're already in error logging
-                System.debug(LoggingLevel.ERROR, 'Failed to log error: ' + e.getMessage());
-            } finally {
-                isInErrorLogging = false;
-            }
+        if (errors == null || errors.isEmpty() || isInErrorLogging) return;
+
+        // FLS — vérifié hors du bloc try pour ne pas masquer l'erreur de permission
+        if (!SecurityUtils.isCreateable(ErrorLog__c.SObjectType)) return;
+
+        isInErrorLogging = true;
+        try {
+            insert errors;
+        } catch (DmlException e) {
+            System.debug(LoggingLevel.ERROR, 'Failed to log error: ' + e.getMessage());
+        } finally {
+            isInErrorLogging = false;
         }
     }
-  
 }

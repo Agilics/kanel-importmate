@@ -7,6 +7,7 @@ private class QueryBuilderControllerTest {
         insert a;
         return a.Id;
     }
+
     // fetchObjects / fetchFields
     @IsTest
     static void fetchObjects_retourne_liste_sans_exception() {
@@ -34,12 +35,13 @@ private class QueryBuilderControllerTest {
             for (String api : champs) {
                 System.assertEquals(false, String.isBlank(api), 'Nom de champ vide inattendu');
             }
-            // deepClone() est réservé aux SObject -> cloner une List<String> ainsi :
-            List<String> copie = new List<String>(champs); // ou champs.clone()
+
+            List<String> copie = new List<String>(champs);
             copie.sort();
             System.assertEquals(copie, champs, 'La liste des champs doit être triée');
         }
     }
+
     // API simple (3 paramètres)
     @IsTest
     static void buildAndRunQuery_3params_retourne_un_resultat() {
@@ -80,12 +82,15 @@ private class QueryBuilderControllerTest {
         Test.stopTest();
 
         System.assertEquals(1, rows.size(), 'Une ligne attendue');
-        System.assertEquals('ParentCo', (String) rows[0].get('Parent__Name'),
-            'Parent__Name doit être aplati depuis Parent.Name');
+        System.assertEquals(
+            'ParentCo',
+            (String) rows[0].get('Parent__Name'),
+            'Parent__Name doit être aplati depuis Parent.Name'
+        );
         System.assert(rows[0].containsKey('Id'), 'La clé Id doit être présente');
     }
 
-    // API avancée - 8 paramètres 
+    // API avancée - 8 paramètres
     @IsTest
     static void buildAndRunQueryEx_8params_compat_ok() {
         Id parentId = makeAccount('ParentTwo', null);
@@ -105,31 +110,35 @@ private class QueryBuilderControllerTest {
         Test.stopTest();
 
         System.assertEquals(1, rows.size(), 'Une ligne attendue');
-        System.assertEquals('ParentTwo', (String) rows[0].get('Parent__Name'),
-            'Parent__Name doit correspondre');
+        System.assertEquals(
+            'ParentTwo',
+            (String) rows[0].get('Parent__Name'),
+            'Parent__Name doit correspondre'
+        );
     }
 
     @IsTest
-    static void listerObjets_et_listerChamps_retournent_listes_valides_et_utilisables() {
-        // Un seul couple start/stop dans la méthode
+    static void fetchObjects_et_fetchFields_retournent_listes_valides_et_utilisables() {
         Test.startTest();
-        List<String> objets = QueryBuilderController.listerObjets();
+        List<String> objets = QueryBuilderController.fetchObjects();
         String obj = 'Account';
-        List<String> champs = QueryBuilderController.listerChamps(obj);
+        List<String> champs = QueryBuilderController.fetchFields(obj);
         Test.stopTest();
 
-        System.assertNotEquals(null, objets, 'listerObjets() ne doit pas renvoyer null');
-        System.assertNotEquals(null, champs, 'listerChamps() ne doit pas renvoyer null');
+        System.assertNotEquals(null, objets, 'fetchObjects() ne doit pas renvoyer null');
+        System.assertNotEquals(null, champs, 'fetchFields() ne doit pas renvoyer null');
 
-        // Si non vide, vérifier que chaque champ renvoyé existe bien dans le schéma de l’objet
         if (!champs.isEmpty()) {
             Map<String, Schema.SObjectType> gd = Schema.getGlobalDescribe();
             System.assertEquals(true, gd.containsKey(obj), 'Objet introuvable dans le schéma: ' + obj);
             Map<String, Schema.SObjectField> fmap = gd.get(obj).getDescribe().fields.getMap();
 
             for (String api : champs) {
-                System.assertEquals(true, fmap.containsKey(api),
-                    'Champ renvoyé par l’alias mais absent du schéma: ' + api);
+                System.assertEquals(
+                    true,
+                    fmap.containsKey(api),
+                    'Champ renvoyé mais absent du schéma: ' + api
+                );
             }
         }
     }
