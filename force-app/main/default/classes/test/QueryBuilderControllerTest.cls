@@ -1,9 +1,9 @@
 /**
  * @description       : Tests QueryBuilderController — cas nominaux + cas négatifs
- * @author            : NDEYE KHADY NIANG
+ * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             :
  * @last modified on  : 03-31-2026
- * @last modified by  : NDEYE KHADY NIANG
+ * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
  **/
 @IsTest
 private class QueryBuilderControllerTest {
