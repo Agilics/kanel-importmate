@@ -101,16 +101,17 @@ public with sharing class  ImportProjectController {
       } catch (Exception e) {
         ErrorLogService.logException(e);
         throw toAuraException('Unable to update Import Project: ' + e.getMessage(), e);
+
       }
     }
 
-    // *** Helpers for throw execptions ***
-    private static AuraHandledException toAuraException(String msg, Exception e) {
-        if (e instanceof ExecutionException) {
-            return new AuraHandledException(e.getMessage());
-        }
-
-        ErrorLogService.logException(e);
-        return new AuraHandledException(msg + e.getMessage());
+  // gestion & lever d'exceptions 
+  private static AuraHandledException toAuraException(String msg, Exception e) {
+    if (e instanceof ExecutionException) {
+      return new AuraHandledException(e.getMessage());
     }
+
+    ErrorLogService.logException(e);
+    return new AuraHandledException(msg + e.getMessage());
+  }
 }

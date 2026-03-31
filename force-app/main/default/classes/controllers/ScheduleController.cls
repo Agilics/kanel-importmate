@@ -4,7 +4,6 @@
  * @group             : 
  * @last modified on  : 23-03-2026
  * @last modified by  : Mouhamed 
- * @Modification: 
 **/
   
 public with sharing class ScheduleController {
@@ -15,8 +14,7 @@ public with sharing class ScheduleController {
         try {
           return  ScheduleService.schedule(frequency,nextRun, projectId);
         } catch (Exception e) {
-          ErrorLogService.logException(e);
-      throw  toAuraException(e.getMessage(),e);
+          throw new SchedulingException(e.getMessage());
         }
     }
 
@@ -43,8 +41,7 @@ public with sharing class ScheduleController {
       }
         return retVal;
         } catch (Exception e) {
-            ErrorLogService.logException(e);
-      throw  toAuraException(e.getMessage(),e);
+            throw new SchedulingException(e.getMessage());
         }
     }
 
@@ -66,8 +63,7 @@ public with sharing class ScheduleController {
         try {
           return ScheduleService.getScheduleById(id);
         } catch (Exception e) {
-          ErrorLogService.logException(e);
-      throw  toAuraException(e.getMessage(),e);
+          throw new SchedulingException(e.getMessage());
         }
     }
 
@@ -77,8 +73,7 @@ public with sharing class ScheduleController {
       try {
         return ScheduleService.getSchedulesByFrequencyAndProjectId(frequence,idProject);
       } catch (Exception e) {
-        ErrorLogService.logException(e);
-      throw  toAuraException(e.getMessage(),e);
+        throw new SchedulingException(e.getMessage());
       }
     }
 
@@ -88,8 +83,7 @@ public with sharing class ScheduleController {
       try {
         return ScheduleService.getSchedulesByProjectName(name);
       } catch (Exception e) {
-        ErrorLogService.logException(e);
-      throw  toAuraException(e.getMessage(),e);
+        throw new SchedulingException(e.getMessage());
       }  
     }
     
@@ -101,8 +95,7 @@ public with sharing class ScheduleController {
        try {
        return   ScheduleService.getSchedulesWithExecutionsByIdProject(idProject);
        } catch (Exception e) {
-        ErrorLogService.logException(e);
-      throw  toAuraException(e.getMessage(),e);
+        throw new SchedulingException(e.getMessage());
        }
     }
     
@@ -112,8 +105,7 @@ public with sharing class ScheduleController {
       try {
         return  ScheduleService.reSchedule(scheduleId,frequency,nextRun);
       } catch (Exception e) {
-        ErrorLogService.logException(e);
-        throw  toAuraException(e.getMessage(),e);
+        throw new SchedulingException(e.getMessage());
       }
     }
     
@@ -124,9 +116,9 @@ public with sharing class ScheduleController {
     public static List<ScheduleService.ScheduleWrapper> getSchedulesByExecutionStatusAndIdProject(String status,String idProject){
         try {
            return ScheduleService.getSchedulesByExecutionStatusAndIdProject(status,idProject);
+  
         } catch (Exception e) {
-          ErrorLogService.logException(e);
-         throw  toAuraException(e.getMessage(),e);
+          throw new SchedulingException(e.getMessage());
         }
     }
 
@@ -136,8 +128,7 @@ public with sharing class ScheduleController {
         try {
           ScheduleService.deleteScheduleById(scheduleId);
         } catch (Exception e) {
-          ErrorLogService.logException(e);
-          throw  toAuraException(e.getMessage(),e);
+         throw new SchedulingException(e.getMessage()); 
         }
     }
 
@@ -148,17 +139,7 @@ public with sharing class ScheduleController {
       return ScheduleService.toggleSchedule(scheduleId,isPause);   
         
       } catch (Exception e) {
-        throw  toAuraException(e.getMessage(),e);
+        throw new SchedulingException(e.getMessage());
       }
   }
-
-  // *** Helpers for throw execptions ***
-    private static AuraHandledException toAuraException(String msg, Exception e) {
-        if (e instanceof ExecutionException) {
-            return new AuraHandledException(e.getMessage());
-        }
-
-        ErrorLogService.logException(e);
-        return new AuraHandledException(msg + e.getMessage());
-    }
 }

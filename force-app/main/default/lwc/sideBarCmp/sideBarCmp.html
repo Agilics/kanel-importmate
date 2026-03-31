@@ -5,16 +5,12 @@
             <div class="project-header">
                 <h2 class="project-name">
                     {projectName}
-                    <lightning-button-icon 
-                        icon-name="utility:edit" 
-                        alternative-text="Edit Project"
-                        size="x-small"
-                        variant="bare"
-                        class="edit-icon" onclick={navigateToProjectPage}>
+                    <lightning-button-icon icon-name="utility:edit" alternative-text="Edit Project" size="x-small"
+                        variant="bare" class="edit-icon" onclick={navigateToProjectPage}>
                     </lightning-button-icon>
                 </h2>
             </div>
-        </template>    
+        </template>
         <!-- Steps -->
         <div class="sidebar-content">
             <nav class="workflow-nav">
@@ -23,7 +19,8 @@
                         <div class="step-indicator">
                             <template if:true={step.isCompleted}>
                                 <span class="step-number">
-                                    <lightning-icon icon-name="utility:check" size="xx-small" alternative-text="Completed"></lightning-icon>
+                                    <lightning-icon icon-name="utility:check" size="xx-small"
+                                        alternative-text="Completed"></lightning-icon>
                                 </span>
                             </template>
                             <template if:false={step.isCompleted}>
@@ -37,10 +34,11 @@
 
             <!-- Quick Actions -->
             <div class="quick-actions-section">
-                <h3 class="quick-actions-title">Quick Actions</h3>
+                <h3 class="quick-actions-title">{TITLE_SECTION}</h3>
                 <div class="quick-actions-list">
                     <template for:each={quickActions} for:item="action">
-                        <button key={action.label} class="quick-action-btn" onclick={handleQuickAction} data-action={action.label}>
+                        <button key={action.label} class="quick-action-btn" onclick={handleQuickAction}
+                            data-action={action.label}>
                             <lightning-icon icon-name={action.icon} size="x-small" class="action-icon"></lightning-icon>
                             <span class="action-label">{action.label}</span>
                         </button>

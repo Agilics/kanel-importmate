@@ -1,5 +1,5 @@
 /**
- * @description       : Classe de test pour ScheduleService - renforcement des testes
+ * @description       : Classe de test pour ScheduleService - couverture améliorée
  * @author            : mouhamed niang
  * @last modified on  : 26-03-2026
 **/
@@ -367,6 +367,8 @@ public with sharing class ScheduleServiceTest {
     }
 
 
+
+// Dans ScheduleControllerTest
     @IsTest
     static void testGetSchedulesWithExecutionStatusNotFound() {
         Schedule__c schedule = TestDataFactory.createSchedule();
