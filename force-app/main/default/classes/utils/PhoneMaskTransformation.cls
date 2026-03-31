@@ -103,4 +103,3 @@ public with sharing class PhoneMaskTransformation implements ITransformationRule
     }
 
 }
-

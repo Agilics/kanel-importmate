@@ -909,11 +909,6 @@
         <shortDescription>Warning</shortDescription>
         <value>Warning</value>
     </labels>
-
-
-    
-    <!-- import recent projects -->
-
     <labels>
         <fullName>ProjectRecent_Name</fullName>
         <categories>Project Recent</categories>
@@ -1002,9 +997,6 @@
         <shortDescription>Created date label</shortDescription>
         <value>Created :</value>
     </labels>
-
-    <!-- DASHBOARD - FILTER TABS -->
-
     <labels>
         <fullName>Dashboard_FilterTab_Title</fullName>
         <categories>Dashboard Filter projects</categories>
@@ -1061,9 +1053,6 @@
         <shortDescription>Tab filter for project scheduled</shortDescription>
         <value>Scheduled</value>
     </labels>
-
-    <!-- DASHBOARD - STATS -->
-
     <labels>
         <fullName>Dashboard_Stat_TotalProjects</fullName>
         <categories>Dashboard Stat</categories>
@@ -1096,9 +1085,6 @@
         <shortDescription>Stat label for active project</shortDescription>
         <value>Active Projects</value>
     </labels>
-
-    <!-- DASHBOARD - NO PROJECT MESSAGES -->
-
     <labels>
         <fullName>Dashboard_No_Project_Message</fullName>
         <categories>Dashboard Project Message</categories>
@@ -1115,9 +1101,6 @@
         <shortDescription>Error loading projects message</shortDescription>
         <value>Error loading projects. Please try again.</value>
     </labels>
-
-    <!-- DASHBOARD - ALERT MESSAGES -->
-
     <labels>
         <fullName>Dashboard_Delete_Confirm_Header</fullName>
         <categories>Dashboard Project Dialogue Confirm Header</categories>
@@ -1142,9 +1125,6 @@
         <shortDescription>Success message for project deletion</shortDescription>
         <value>Project deleted successfully.</value>
     </labels>
-
-    <!-- Etiquette des noms de boutons -->
-
     <labels>
         <fullName>Dashboard_Button_New_Project</fullName>
         <categories>Dashboard Button</categories>
@@ -1161,8 +1141,6 @@
         <shortDescription>Label for Create Your First Project</shortDescription>
         <value>Create Your First Project</value>
     </labels>
-
-    <!-- Détails de projets -->
     <labels>
         <fullName>ProjectCard_Status_Draft</fullName>
         <categories>ProjectCard Meta Status</categories>
@@ -1211,9 +1189,6 @@
         <shortDescription>No Description text</shortDescription>
         <value>No Description</value>
     </labels>
-
-    <!-- main -->
-
     <labels>
         <fullName>ALL_FIELDS_REQUIRED</fullName>
         <language>en_US</language>
@@ -1315,9 +1290,6 @@
         <shortDescription>Unsaved changes warning</shortDescription>
         <value>You have unsaved changes. Are you sure you want to leave?</value>
     </labels>
-
-    <!-- DataSource -->
-
     <labels>
         <fullName>DataSource_Title</fullName>
         <categories>DataSource</categories>
@@ -1438,9 +1410,6 @@
         <shortDescription>DataSource_Back_Button</shortDescription>
         <value>Back</value>
     </labels>
-
-    <!-- CsvUploader -->
-
     <labels>
         <fullName>CsvUploader_PageTitle</fullName>
         <categories>CsvUploader</categories>
@@ -1745,9 +1714,6 @@
         <shortDescription>CsvUploader_Modal_Save</shortDescription>
         <value>Save</value>
     </labels>
-
-    <!-- ProjectForm -->
-
     <labels>
         <fullName>ProjectForm_Title</fullName>
         <language>en_US</language>
@@ -1797,7 +1763,7 @@
         <shortDescription>Label for Description field</shortDescription>
         <value>Description</value>
     </labels>
-    <labels> 
+    <labels>
         <fullName>ProjectForm_Helper_Description</fullName>
         <language>en_US</language>
         <protected>false</protected>
@@ -1846,9 +1812,6 @@
         <shortDescription>Label for exit button</shortDescription>
         <value>Cancel</value>
     </labels>
-
-    <!-- SelectProject -->
-
     <labels>
         <fullName>SelectProject_Card_Title</fullName>
         <language>en_US</language>
@@ -1877,7 +1840,7 @@
         <shortDescription>Button to close modal</shortDescription>
         <value>Close</value>
     </labels>
- <labels>
+    <labels>
         <fullName>IM_DRY_Title</fullName>
         <categories>IM_DRY</categories>
         <language>en_US</language>
@@ -1909,8 +1872,6 @@
         <shortDescription>DryRun - Status success</shortDescription>
         <value>Validation completed successfully</value>
     </labels>
-
-    <!-- Buttons -->
     <labels>
         <fullName>IM_DRY_Btn_Settings</fullName>
         <categories>IM_DRY</categories>
@@ -1983,8 +1944,6 @@
         <shortDescription>DryRun - Button Close</shortDescription>
         <value>Close</value>
     </labels>
-
-    <!-- Settings Modal -->
     <labels>
         <fullName>IM_DRY_Settings_Title</fullName>
         <categories>IM_DRY</categories>
@@ -2097,8 +2056,6 @@
         <shortDescription>DryRun - Settings Behavior help text</shortDescription>
         <value>Warnings display depends on the Include warnings toggle.</value>
     </labels>
-
-    <!-- Progress -->
     <labels>
         <fullName>IM_DRY_Progress_Title</fullName>
         <categories>IM_DRY</categories>
@@ -2163,8 +2120,6 @@
         <shortDescription>DryRun - Execution ID label</shortDescription>
         <value>Execution ID:</value>
     </labels>
-
-    <!-- Report / Table -->
     <labels>
         <fullName>IM_DRY_Report_Title</fullName>
         <categories>IM_DRY</categories>
@@ -2325,8 +2280,6 @@
         <shortDescription>DryRun - Pagination Next</shortDescription>
         <value>Next</value>
     </labels>
-
-    <!-- Mode options -->
     <labels>
         <fullName>IM_DRY_Mode_Full</fullName>
         <categories>IM_DRY</categories>
@@ -2343,8 +2296,7 @@
         <shortDescription>DryRun - Mode Sample</shortDescription>
         <value>Sample validation (subset)</value>
     </labels>
-
-     <labels>
+    <labels>
         <fullName>IM_EX_Title</fullName>
         <language>en_US</language>
         <protected>false</protected>
@@ -2442,7 +2394,7 @@
         <shortDescription>IM_EX_Detail_ExecutionId</shortDescription>
         <value>Execution ID:</value>
     </labels>
-    <labels> 
+    <labels>
         <fullName>IM_EX_Detail_Status</fullName>
         <language>en_US</language>
         <protected>false</protected>
@@ -2498,8 +2450,6 @@
         <shortDescription>IM_EX_Failed_Subtitle</shortDescription>
         <value>Export uses the execution id to fetch logs from Apex.</value>
     </labels>
-
-
     <labels>
         <fullName>IM_IR_Title</fullName>
         <language>en_US</language>
@@ -2647,9 +2597,6 @@
         <shortDescription>IM_IR_Success</shortDescription>
         <value>No errors found. Import completed successfully!</value>
     </labels>
-
-
-    <!-- HEADER -->
     <labels>
         <fullName>IH_Title</fullName>
         <categories>ImportHistory</categories>
@@ -2682,8 +2629,6 @@
         <shortDescription>IH_NewImportProject</shortDescription>
         <value>New Import Project</value>
     </labels>
-
-    <!-- FILTERS -->
     <labels>
         <fullName>IH_Filter_Status</fullName>
         <categories>ImportHistory</categories>
@@ -2724,8 +2669,6 @@
         <shortDescription>IH_ApplyFilters</shortDescription>
         <value>Apply Filters</value>
     </labels>
-
-    <!-- STATUS OPTIONS -->
     <labels>
         <fullName>IH_Status_All</fullName>
         <categories>ImportHistory</categories>
@@ -2774,8 +2717,6 @@
         <shortDescription>IH_Status_Draft</shortDescription>
         <value>Draft</value>
     </labels>
-
-    <!-- DATE RANGE OPTIONS -->
     <labels>
         <fullName>IH_Date_Last7</fullName>
         <categories>ImportHistory</categories>
@@ -2808,8 +2749,6 @@
         <shortDescription>IH_Date_AllTime</shortDescription>
         <value>All time</value>
     </labels>
-
-    <!-- PROJECT / TARGET OPTIONS -->
     <labels>
         <fullName>IH_AllProjects</fullName>
         <categories>ImportHistory</categories>
@@ -2826,8 +2765,6 @@
         <shortDescription>IH_AllObjects</shortDescription>
         <value>All Objects</value>
     </labels>
-
-    <!-- KPI CARDS -->
     <labels>
         <fullName>IH_KPI_TotalExecutions</fullName>
         <categories>ImportHistory</categories>
@@ -2860,8 +2797,6 @@
         <shortDescription>IH_KPI_AvgDuration</shortDescription>
         <value>Avg. Duration</value>
     </labels>
-
-    <!-- TABLE -->
     <labels>
         <fullName>IH_Table_Title</fullName>
         <categories>ImportHistory</categories>
@@ -2950,8 +2885,6 @@
         <shortDescription>IH_Table_Showing</shortDescription>
         <value>Showing {0} to {1} of {2} results</value>
     </labels>
-
-    <!-- ACTIONS -->
     <labels>
         <fullName>IH_Action_View</fullName>
         <categories>ImportHistory</categories>
@@ -2984,8 +2917,6 @@
         <shortDescription>IH_Action_DeleteSelected</shortDescription>
         <value>Delete Selected ({0})</value>
     </labels>
-
-    <!-- MODALS -->
     <labels>
         <fullName>IH_Modal_CreateTitle</fullName>
         <categories>ImportHistory</categories>
@@ -3114,8 +3045,6 @@
         <shortDescription>IH_Detail_RecordsSummary</shortDescription>
         <value>Records summary</value>
     </labels>
-
-    <!-- TOAST / ERROR MESSAGES -->
     <labels>
         <fullName>IH_Toast_ErrorLoadingHistory</fullName>
         <categories>ImportHistory</categories>
@@ -3236,8 +3165,6 @@
         <shortDescription>IH_Toast_ErrorLoadDetails</shortDescription>
         <value>Unable to load execution details.</value>
     </labels>
-
-    <!-- RELATIVE TIME -->
     <labels>
         <fullName>IH_Time_JustNow</fullName>
         <categories>ImportHistory</categories>
@@ -3294,15 +3221,13 @@
         <shortDescription>IH_Time_XDaysAgo</shortDescription>
         <value>{0} days ago</value>
     </labels>
-
-    <!-- PHASE PREFIX -->
     <labels>
         <fullName>IH_PhasePrefix</fullName>
         <categories>ImportHistory</categories>
         <language>en_US</language>
         <protected>false</protected>
         <shortDescription>IH_PhasePrefix</shortDescription>
-        <value>Phase: </value>
+        <value>Phase:</value>
     </labels>
     <labels>
         <fullName>IH_PhaseNA</fullName>
@@ -3325,7 +3250,70 @@
         <categories>Project Modal</categories>
         <language>en_US</language>
         <protected>false</protected>
-        <shortDescription>Modal's Title</shortDescription>
-        <value>Edit Import Project </value>
+        <shortDescription>Modal&apos;s Title</shortDescription>
+        <value>Edit Import Project</value>
+    </labels>
+    <labels>
+        <fullName>SideBar_QuickAction_Analytics</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Analytics  button label</shortDescription>
+        <value>Analytics</value>
+    </labels>
+    <labels>
+        <fullName>SideBar_QuickAction_Execution</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Execution History button label</shortDescription>
+        <value>Execution History</value>
+    </labels>
+    <labels>
+        <fullName>SideBar_QuickAction_Recent_Project</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Recent button label</shortDescription>
+        <value>Recent Projects</value>
+    </labels>
+    <labels>
+        <fullName>SideBar_Step_DataSource</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Step 2 - Data Source selection</shortDescription>
+        <value>Data Source</value>
+    </labels>
+    <labels>
+        <fullName>SideBar_Step_Execution</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Step 6 - Execution</shortDescription>
+        <value>Execution</value>
+    </labels>
+    <labels>
+        <fullName>SideBar_Step_FieldMapping</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Step 3 - Field Mapping configuration</shortDescription>
+        <value>Field Mapping</value>
+    </labels>
+    <labels>
+        <fullName>SideBar_Step_ProjectSetup</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Step 1 - Project Setup</shortDescription>
+        <value>Project Setup</value>
+    </labels>
+    <labels>
+        <fullName>SideBar_Step_Transformations</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Step 4 - Data Transformations</shortDescription>
+        <value>Transformations</value>
+    </labels>
+    <labels>
+        <fullName>SideBar_Step_Validation</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Step 5 - Validation (Dry Run)</shortDescription>
+        <value>Validation</value>
     </labels>
 </CustomLabels>
