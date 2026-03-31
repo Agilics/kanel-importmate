@@ -485,5 +485,3 @@ public with sharing class ImportBatch implements Database.Batchable<SObject>, Da
         return row;
     }
 }
-
-

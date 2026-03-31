@@ -1232,4 +1232,3 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
     });
   }
 }
-

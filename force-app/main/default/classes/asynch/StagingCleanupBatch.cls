@@ -23,5 +23,3 @@ public with sharing class StagingCleanupBatch implements Database.Batchable<SObj
     public void finish(Database.BatchableContext bc) {
     }
 }
-
-
