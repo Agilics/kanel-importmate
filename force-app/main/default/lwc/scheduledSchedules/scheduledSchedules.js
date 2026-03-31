@@ -1,3 +1,8 @@
+/**
+ * @LastModification: 31-03-2026
+ * @Modification: Programmation et gestion planification
+ * @Modified by: Mouhamed
+ */
 import { LightningElement, wire, api, track } from 'lwc';
 import { refreshApex } from '@salesforce/apex';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
@@ -18,8 +23,32 @@ import Import_NoSchedulesFound from '@salesforce/label/c.Import_NoSchedulesFound
 import Import_DeleteScheduleDialogTitle from '@salesforce/label/c.Import_DeleteScheduleDialogTitle';
 import Import_DeleteScheduleDialogMessage from '@salesforce/label/c.Import_DeleteScheduleDialogMessage';
 import Import_DeleteScheduleToastMessage from '@salesforce/label/c.Import_DeleteScheduleToastMessage';
+import STATUS_COMPLETED from '@salesforce/label/c.ProjectCard_Status_Completed';
+import STATUS_FAILED from '@salesforce/label/c.ProjectCard_Status_Failed';
+import STATUS_IN_PROGRESS from '@salesforce/label/c.ProjectCard_Status_InProgress';
+import STATUS_PENDING from '@salesforce/label/c.ProjectCard_Status_Pending';
+import STATUS_CANCELLED from '@salesforce/label/c.ProjectCard_Status_Cancelled';
+import  STATUS_SUSPENDED  from '@salesforce/label/c.ProjectCard_Status_Suspended'; 
+import Import_Frequency_Daily from '@salesforce/label/c.Import_Frequency_Daily';
+import Import_Frequency_Weekly from '@salesforce/label/c.Import_Frequency_Weekly';
+import Import_Frequency_Monthly from '@salesforce/label/c.Import_Frequency_Monthly';
+import Import_Schedule_At from '@salesforce/label/c.Import_Schedule_At'; 
+import Import_Schedule_NotScheduled from '@salesforce/label/c.Import_Schedule_NotScheduled';
+import Import_Schedule_DailyAt from '@salesforce/label/c.Import_Schedule_DailyAt';
+import Import_Schedule_WeeklyOn from '@salesforce/label/c.Import_Schedule_WeeklyOn';
+import Import_Schedule_MonthlyOn from '@salesforce/label/c.Import_Schedule_MonthlyOn';
+import Import_Schedule_Edit_Title from '@salesforce/label/c.Import_Schedule_Edit_Title';
+import Import_Frequency from '@salesforce/label/c.Import_Frequency';
+import Import_Schedule_Edit_Info_Bar from '@salesforce/label/c.Import_Schedule_Edit_Info_Bar';
 
-
+const STATUS_LABELS = { 
+    Completed: STATUS_COMPLETED,
+    Failed: STATUS_FAILED,
+    InProgress: STATUS_IN_PROGRESS,
+    Cancelled: STATUS_CANCELLED,
+    Pending: STATUS_PENDING,
+    Suspended: STATUS_SUSPENDED
+};
 export default class ScheduledSchedules extends LightningElement {
     @api projectId;
     @track scheduledInfos = [];
@@ -38,21 +67,22 @@ export default class ScheduledSchedules extends LightningElement {
 
     get frequencyOptions() {
         return [
-            { label: 'Daily',   value: 'Daily'   },
-            { label: 'Weekly',  value: 'Weekly'  },
-            { label: 'Monthly', value: 'Monthly' }
+            { label: Import_Frequency_Daily,   value: 'Daily'   },
+            { label: Import_Frequency_Weekly,  value: 'Weekly'  },
+            { label: Import_Frequency_Monthly, value: 'Monthly' }
         ].map(opt => ({
             ...opt,
-            chipClass: this.editFrequency === opt.value
-                ? 'freq-chip active'
-                : 'freq-chip'
+            chipClass: this.editFrequency === opt.value ? 'freq-chip active' : 'freq-chip'
         }));
     }
 
     get labels() {
         return {
             title: Import_ActiveSchedules, 
-            labelRescheduleBtn:Import_RescheduleButton,
+            labelRescheduleBtn: Import_RescheduleButton,
+            editTitle: Import_Schedule_Edit_Title,
+            labelFrequency: Import_Frequency,
+            editInfoBar: Import_Schedule_Edit_Info_Bar
         }
     }
     
@@ -113,9 +143,9 @@ export default class ScheduledSchedules extends LightningElement {
            
 
            this.scheduledInfos = data.flatMap(wrapper => {
-        const executions = wrapper.importExecutions || [];
+            const executions = wrapper.importExecutions || [];
 
-        return (wrapper.schedules || []).map(sch => {
+            return (wrapper.schedules || []).map(sch => {   
 
                 const specificExecutions = executions
                     .filter(exec => exec.ApexJobId__c === sch.Id)
@@ -130,7 +160,7 @@ export default class ScheduledSchedules extends LightningElement {
                     projectId       : sch.Project__c,
                     schedule        : sch,
                     executions      : executions,
-                    lastExecution   : lastExecution,
+                    lastExecution   : STATUS_LABELS[lastExecution],
                     title           : this.buildTitle(sch),
                     frequency       : sch.Frequency__c || 'N/A',
                     nextRun         : sch.NextRun__c ? this.formatDateTime(sch.NextRun__c) : '—',
@@ -138,7 +168,7 @@ export default class ScheduledSchedules extends LightningElement {
                                         ? this.formatDateTime(lastExecution.StartTime__c)
                                         : 'Never',
                     subtitle        : this.formatNextRun(sch.Frequency__c, sch.NextRun__c),
-                    statusLabel     : this.getFormattedExecutionStatus(lastExecution?.Status__c),
+                    statusLabel     : STATUS_LABELS[this.getFormattedExecutionStatus(lastExecution?.Status__c)],
                     badgeStatusClass: this.getBadgeStatusClass(status),
                     iconClass       : this.getIconClass(status),
                     boxIconClass    : this.getBoxIconClass(status),
@@ -146,7 +176,7 @@ export default class ScheduledSchedules extends LightningElement {
                     iconStatusName  : this.getStatusIcon(status),
                     targetObject    : sch.Project__r?.TargetObject__c || 'N/A',
                     projectName: sch.Project__r?.Name || 'Unknown Project',
-                    isNotCompleted:this.isNotExecutionCompleted(status)
+                    isNotCompleted:this.isNotExecutionCompleted(status) // hide play  if Execution completed
                 };
         });
     });
@@ -510,39 +540,33 @@ export default class ScheduledSchedules extends LightningElement {
 
     //formattage de la date de la prochaine exécution
     formatNextRun(frequency, nextRunDate) {
-        if (!frequency || !nextRunDate) return 'Not scheduled';
+      if (!frequency || !nextRunDate) return Import_Schedule_NotScheduled;
 
         const date = new Date(nextRunDate); 
 
         const dayName = new Intl.DateTimeFormat(LOCALE, { weekday: 'long' }).format(date);
-
         const fullDate = new Intl.DateTimeFormat(LOCALE, {
-            weekday: 'long',
-            day    : '2-digit',
-            month  : 'long',
-            year   : 'numeric'
+            weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'
         }).format(date);
-
         const timeString = new Intl.DateTimeFormat(LOCALE, {
-            hour  : 'numeric',
-            minute: '2-digit',
-            hour12: true
+            hour: 'numeric', minute: '2-digit'
         }).format(date);
 
         switch (frequency) {
             case 'DAILY':
             case 'Daily':
-                return `Daily at ${timeString}`;
+                return `${Import_Schedule_DailyAt} ${timeString}`;
             case 'WEEKLY':
             case 'Weekly':
-                return `Weekly on ${dayName} at ${timeString}`;
+                return `${Import_Schedule_WeeklyOn} ${dayName} ${Import_Schedule_At} ${timeString}`;
             case 'MONTHLY':
             case 'Monthly':
-                return `Monthly on ${fullDate} at ${timeString}`;
+                return `${Import_Schedule_MonthlyOn} ${fullDate} ${Import_Schedule_At} ${timeString}`;
             default:
-                return `${fullDate} at ${timeString}`;
+                return `${fullDate} ${Import_Schedule_At} ${timeString}`;
         }
     }
+    
     
     
     getIconClass(status) {

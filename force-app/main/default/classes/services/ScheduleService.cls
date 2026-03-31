@@ -1,16 +1,14 @@
 /**
  * @description : Service for Schedule__c - logique métier complète
  * @author      : mouhamed niang
- * @modified    : 26-03-2026
+ * @modified    : 31-03-2026
+ * @Modified: Remove shadowing filter
  */
 public with sharing class ScheduleService {
 
     private static final String LOG_PREFIX = '[ScheduleService]';
-
    
     // WRAPPER
-   
-
     public class ScheduleWrapper {
         @AuraEnabled public ImportProject__c         project;
         @AuraEnabled public List<Schedule__c>        schedules        { get; set; }
@@ -354,16 +352,6 @@ public with sharing class ScheduleService {
         }
     }
 
-    public static List<Schedule__c> getSchedulesByFrequencyAndProjectId(
-        ImportMateEnum.FrequencyEnum frequence, String idProject
-    ) {
-        try {
-            if (!SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType)) return new List<Schedule__c>();
-            return ScheduleRepository.getSchedulesByFrequencyAndProjectId(frequence, idProject);
-        } catch (Exception e) {
-            throw new ApplicationException(e.getMessage());
-        }
-    }
 
     public static List<ScheduleWrapper> getSchedulesByProjectName(String name) {
         try {

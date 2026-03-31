@@ -1312,6 +1312,14 @@
         <value>Frequency</value>
     </labels>
     <labels>
+        <fullName>Import_Schedule_Edit_Info_Bar</fullName>
+        <categories>Import</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>info bar message</shortDescription>
+        <value>Schedule date must be in the future. The existing Cron job will be replaced.</value>
+    </labels>
+    <labels>
         <fullName>Import_StartDateAndTime</fullName>
         <categories>Import</categories>
         <language>en_US</language>
@@ -3549,4 +3557,68 @@
         <shortDescription>Import status - Success</shortDescription>
         <value>Success</value>
     </labels>
+    <labels>
+        <fullName>Import_Frequency_Daily</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Frequency option - Daily</shortDescription>
+        <value>Daily</value>
+    </labels>
+    <labels>
+        <fullName>Import_Frequency_Weekly</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Frequency option - Weekly</shortDescription>
+        <value>Weekly</value>
+    </labels>
+    <labels>
+        <fullName>Import_Frequency_Monthly</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Frequency option - Monthly</shortDescription>
+        <value>Monthly</value>
+    </labels>
+    <labels>
+        <fullName>Import_Schedule_At</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Preposition "at" for time</shortDescription>
+        <value>at</value>
+    </labels>
+    <labels>
+        <fullName>Import_Schedule_NotScheduled</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Not scheduled message</shortDescription>
+        <value>Not scheduled</value>
+    </labels>
+    <labels>
+        <fullName>Import_Schedule_Edit_Title</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Edit Schedule</shortDescription>
+        <value>Edit Schedule</value>
+    </labels>
+    <labels>
+        <fullName>Import_Schedule_DailyAt</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Daily at ...</shortDescription>
+        <value>Daily at</value>
+    </labels>
+    <labels>
+        <fullName>Import_Schedule_WeeklyOn</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Weekly on ...</shortDescription>
+        <value>Weekly on</value>
+    </labels>
+    <labels>
+        <fullName>Import_Schedule_MonthlyOn</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Monthly on ...</shortDescription>
+        <value>Monthly on</value>
+    </labels>
+    
 </CustomLabels>

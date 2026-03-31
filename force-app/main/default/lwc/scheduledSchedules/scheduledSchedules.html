@@ -69,7 +69,7 @@
                                                         </lightning-icon>
                                                     </div>
                                                     <div>
-                                                        <div class="edit-header-title">Edit Schedule</div>
+                                                        <div class="edit-header-title">{labels.editTitle}</div>
                                                         <div class="edit-header-sub">{schedule.title}</div>
                                                     </div>
                                                 </div>
@@ -86,7 +86,7 @@
 
                                                 <!-- Frequency chips -->
                                                 <div class="field-group full-width">
-                                                    <label class="field-label">Frequency</label>
+                                                    <label class="field-label">{labels.labelFrequency}</label>
                                                     <div class="freq-chips">
                                                         <template for:each={frequencyOptions} for:item="opt">
                                                             <button key={opt.value} class={opt.chipClass}
@@ -119,7 +119,7 @@
                                                 <lightning-icon icon-name="utility:info" size="x-small"
                                                     class="primary-icon">
                                                 </lightning-icon>
-                                                <span>Schedule date must be in the future. The existing Cron job will be replaced.</span>
+                                                <span>{labels.editInfoBar}</span>
                                             </div>
 
                                             <!-- Footer -->

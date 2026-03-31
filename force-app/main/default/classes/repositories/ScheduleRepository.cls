@@ -1,7 +1,8 @@
 /**
  * @description : Repository for Schedule__c - toutes les opérations SOQL/DML
  * @author      : mouhamed niang
- * @Lastmodified    : 23-03-2026
+ * @Lastmodified    : 31-03-2026
+ * @Modification : Remove Shadowing filter
  */
 public with sharing class ScheduleRepository {
 
@@ -123,32 +124,6 @@ public with sharing class ScheduleRepository {
                 SELECT Id, Project__c, Frequency__c, NextRun__c
                 FROM Schedule__c
                 WHERE NextRun__c <= :now
-                ORDER BY NextRun__c ASC
-            ];
-        } catch (Exception e) {
-            ErrorLogService.logException(e);
-            throw new ApplicationException(e.getMessage());
-        }
-    }
-
-    /**
-     * Récupérer les schedules par fréquence et projet
-     */
-    public static List<Schedule__c> getSchedulesByFrequencyAndProjectId(
-        ImportMateEnum.FrequencyEnum frequence,
-        String projectId
-    ) {
-        if (!SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType)) {
-            return new List<Schedule__c>();
-        }
-        if (frequence == null || String.isBlank(projectId)) return new List<Schedule__c>();
-        try {
-            String frequencyValue = String.valueOf(frequence);
-            return [
-                SELECT Id, Name, Frequency__c, NextRun__c, Project__c
-                FROM Schedule__c
-                WHERE Frequency__c = :frequencyValue
-                AND   Project__c   = :projectId
                 ORDER BY NextRun__c ASC
             ];
         } catch (Exception e) {

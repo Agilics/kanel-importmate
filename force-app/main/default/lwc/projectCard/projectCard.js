@@ -1,3 +1,7 @@
+/**
+ * @Last Modification :31-03-2026
+ * @Modified : Ajout traduction statut d'exécution du projet 
+ */
 import { LightningElement, api } from 'lwc';
 import { navigateToPage } from 'c/utility';
 import LOCALE from '@salesforce/i18n/lang';
@@ -70,13 +74,14 @@ export default class ProjectCard extends LightningElement {
         return lastExecution?.TotalRecords__c || 0;
     }
 
-    get status() {
-        return STATUS_LABELS[this.statusRaw] || ProjectCard_Status_Draft;
+    //étiquette status traduit affiché 
+    get statusLabel() {
+        return STATUS_LABELS[this.status] || ProjectCard_Status_Draft;
     }
 
-    get statusRaw() {
+    get status() {
         // Récupérer le statut depuis la dernière exécution
-         const lastExecution = this.getLastExecution();
+        const lastExecution = this.getLastExecution();
         return lastExecution?.Status__c || 'Draft';
     }
 

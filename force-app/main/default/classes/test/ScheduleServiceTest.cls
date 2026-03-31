@@ -134,21 +134,7 @@ public with sharing class ScheduleServiceTest {
 
 
     
-    @IsTest
-    static void testGetSchedulesByFrequency_MauvaisFiltre_RetourneVide() { 
-        // Schedule DAILY, on filtre WEEKLY
-        Schedule__c schedule = TestDataFactory.createSchedule();
-        String projectId = schedule.Project__c;
-
-        Test.startTest();
-        List<Schedule__c> results = ScheduleService.getSchedulesByFrequencyAndProjectId(
-            ImportMateEnum.FrequencyEnum.WEEKLY, projectId
-        );
-        Test.stopTest();
-
-        Assert.isTrue(results.isEmpty(), 'Ne doit pas retourner de schedule DAILY pour filtre WEEKLY');
-    }
-
+    
     @IsTest
     public static void callTestDataFrequencyDaily() {
         Test.startTest();
@@ -258,38 +244,8 @@ public with sharing class ScheduleServiceTest {
         Test.stopTest();
     }
 
-    @IsTest
-    static void testGetSchedulesByFrequency() {
-        ImportMateEnum.FrequencyEnum exceptedFrequency = ImportMateEnum.FrequencyEnum.DAILY;
-        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
-
-        Test.startTest();
-        List<Schedule__c> schedules = ScheduleService.getSchedulesByFrequencyAndProjectId(exceptedFrequency, project.Id);
-        Test.stopTest();
-
-        Assert.areNotEqual(null, schedules);
-        System.Assert.isTrue(schedules.size() > 0, 'Schedule\'s list is not empty');
-    }
-
-    //  filtre fréquence WEEKLY
-    @IsTest
-    static void testGetSchedulesByFrequencyWeekly() {
-        ImportProject__c project = TestDataFactory.createImportProject();
-        Schedule__c schedule = new Schedule__c(
-            Frequency__c = String.valueOf(ImportMateEnum.FrequencyEnum.WEEKLY),
-            Project__c = project.Id
-        );
-        insert schedule;
-
-        Test.startTest();
-        List<Schedule__c> schedules = ScheduleService.getSchedulesByFrequencyAndProjectId(
-            ImportMateEnum.FrequencyEnum.WEEKLY, project.Id
-        );
-        Test.stopTest();
-
-        Assert.areNotEqual(null, schedules);
-    }
-
+    
+   
     @IsTest
     static void testGetScheduleById() {
         Schedule__c result = TestDataFactory.createSchedule();

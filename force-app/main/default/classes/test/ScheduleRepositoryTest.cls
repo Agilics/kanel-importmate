@@ -2,8 +2,8 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 24-03-2026
- * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @last modified on  : 30-03-2026
+ * @last modified by  : Remove shadow filter teste
 **/
 @isTest
 public with sharing class ScheduleRepositoryTest {
@@ -73,26 +73,35 @@ public with sharing class ScheduleRepositoryTest {
      }
 
       //Tester la suppression de tâches par le nom de la planification
-    
-     
-    //Tester la récupération de planification par la fréquence(DAILY | WEEKLY | MONTHLY)
-     @IsTest
-     static void testGetScheduleByFrequency() {
-        //GIVEN
-         Schedule__c savedSchedule = TestDataFactory.createSchedule();
-        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
-
-        ImportMateEnum.FrequencyEnum expectedFrequence = ImportMateEnum.FrequencyEnum.DAILY;
-
-        //When 
+    //  suppression avec ID null cas de test négatif
+    @IsTest
+    static void testDeleteScheduleByIdNull() {
         Test.startTest();
-        List<Schedule__c> result =  ScheduleRepository.getSchedulesByFrequencyAndProjectId(expectedFrequence, project.Id);        
+        try {
+            ScheduleService.deleteScheduleById(null);
+        } catch (Exception e) {
+            Assert.isTrue(String.isNotBlank(e.getMessage()));
+        }
+        Test.stopTest();
+    }
+
+     static void testDeleteScheduleById() {
+        Schedule__c schedule = TestDataFactory.createSchedule();
+
+        String scheduleId = String.valueOf(schedule.Id);
+        ScheduleRepository.deleteScheduleById(scheduleId);
+        Test.startTest();
+        List<Schedule__c> schedules = [
+            SELECT Id, Name 
+            FROM Schedule__c
+            WHERE Id = :scheduleId
+        ];
         Test.stopTest();
 
-        //Then - Assertions
-        Assert.isNotNull(result, 'find a schedule success');     
-     }
-
+        Assert.isFalse( schedules.size() > 0, 'Schedule shouldn\'t  be find after deleted!');
+    }
+     
+    
 
     //Tester la récupération de planification par le nom du projet
     @IsTest

@@ -193,20 +193,7 @@ public with sharing class ScheduleControllerTest {
         System.assertEquals(expectedLength, schedules.size(), 'Schedule\'s list is empty');
     }
 
-   
-    @IsTest
-    static void testGetSchedulesByFrequency() {
-        ImportMateEnum.FrequencyEnum exceptedFrequency = ImportMateEnum.FrequencyEnum.DAILY;
-        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
-
-        Test.startTest();
-        List<Schedule__c> schedules = 
-            ScheduleController.getSchedulesByFrequencyAndProjectId(exceptedFrequency, project.Id);
-        Test.stopTest();
-
-        System.assertNotEquals(null, schedules);
-        System.Assert.isTrue(schedules.size() > 0, 'Schedule\'s list is not empty');
-    }
+    
 
     @IsTest
     static void testGetScheduleById() {
@@ -380,19 +367,7 @@ public with sharing class ScheduleControllerTest {
         Assert.areNotEqual(null, results);
     }
 
-    //  test getSchedulesByFrequencyAndProjectId depuis le controller
-    @IsTest
-    static void testGetSchedulesByFrequencyFromController() {
-        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
-
-        Test.startTest();
-        List<Schedule__c> results = ScheduleController.getSchedulesByFrequencyAndProjectId(
-            ImportMateEnum.FrequencyEnum.DAILY, project.Id
-        );
-        Test.stopTest();
-
-        Assert.areNotEqual(null, results);
-    }
+   
 
     @isTest
     static void testGetCompatibleSObject(){

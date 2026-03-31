@@ -2,8 +2,9 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 23-03-2026
+ * @last modified on  : 31-03-2026
  * @last modified by  : Mouhamed 
+ * @Description : Remove shadowing Filter
 **/
   
 public with sharing class ScheduleController {
@@ -67,15 +68,6 @@ public with sharing class ScheduleController {
         }
     }
 
-    //récupèrer les planifications par la fréquence (DAILY  | WEEKLY | MONTHLY)
-    @AuraEnabled(cacheable = true)
-    public static List<Schedule__c> getSchedulesByFrequencyAndProjectId(ImportMateEnum.FrequencyEnum  frequence,String idProject){
-      try {
-        return ScheduleService.getSchedulesByFrequencyAndProjectId(frequence,idProject);
-      } catch (Exception e) {
-        throw new SchedulingException(e.getMessage());
-      }
-    }
 
     // récupérer la planification par le nom du projet
     @AuraEnabled(cacheable = true)

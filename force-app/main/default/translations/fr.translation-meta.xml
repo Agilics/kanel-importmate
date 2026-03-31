@@ -1787,4 +1787,40 @@
     <label>Succès</label>
     <name>ProjectCard_Status_Success</name>
 </customLabels>
+    <customLabels>
+        <label>Quotidienne</label>
+        <name>Import_Frequency_Daily</name>
+    </customLabels>
+    <customLabels>
+        <label>Hebdomadaire</label>
+        <name>Import_Frequency_Weekly</name>
+    </customLabels>
+    <customLabels>
+        <label>Mensuelle</label>
+        <name>Import_Frequency_Monthly</name>
+    </customLabels>
+    <customLabels>
+        <label>à</label>
+        <name>Import_Schedule_At</name>
+    </customLabels> 
+     <customLabels>
+        <label>Modification planification d'exécution</label>
+        <name>Import_Schedule_Edit_Title</name>
+    </customLabels> 
+    <customLabels>
+        <label>Non planifiée</label>
+        <name>Import_Schedule_NotScheduled</name>
+    </customLabels>
+    <customLabels>
+        <label>Quotidienne à</label>
+        <name>Import_Schedule_DailyAt</name>
+    </customLabels>
+    <customLabels>
+        <label>Hebdomadaire le</label>
+        <name>Import_Schedule_WeeklyOn</name>
+    </customLabels>
+    <customLabels>
+        <label>Mensuelle le</label>
+        <name>Import_Schedule_MonthlyOn</name>
+    </customLabels>
 </Translations>
