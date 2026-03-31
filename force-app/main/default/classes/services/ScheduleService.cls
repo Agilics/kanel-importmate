@@ -3,7 +3,7 @@
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             :
  * @last modified on  : 03-31-2026
- * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @last modified by  : NDEYE KHADY NIANG
  * Corrections :
  *  - Opérateur === remplacé par == dans runDueSchedules() (Apex ne supporte pas ===)
  *  - FLS checks via SecurityUtils (point 5)

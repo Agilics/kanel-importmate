@@ -3,7 +3,7 @@
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             :
  * @last modified on  : 03-31-2026
- * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @last modified by  : NDEYE KHADY NIANG
  * Modifications :
  *  - Ajout méthode doesTransformationExist pour gérer la duplication des règles de transformation.
  *  - initCause(e) ajouté sur tous les re-throw pour préserver les stack traces
