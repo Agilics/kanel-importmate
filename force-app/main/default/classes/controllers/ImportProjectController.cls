@@ -1,63 +1,112 @@
 /**
- * @description       :
+ * @description       : Controller AuraEnabled pour la gestion des projets d'import
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             :
- * @last modified on  : 10-20-2025
- * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @last modified on  : 03-17-2026
+ * @last modified by  : NDEYE KHADY NIANG
  **/
-public with sharing class  ImportProjectController {
-  //Récuperer une variable de nombre (limitor) de   projets récements importés
-  @AuraEnabled(cacheable=true)
-  public static List<ImportProject__c> getRecentsProjects(Integer limitor) {
-    return ProjectService.getRecentsProjets(limitor);
-  }
+public with sharing class ImportProjectController {
 
-  //Enregistrer un projet importé
-  @AuraEnabled
-  public static ImportProject__c saveProject(
-    String name,
-    String description,
-    String targetObject
-  ) {
-    return ProjectService.createProject(name, description, targetObject);
-  }
+    // ─────────────────────────────────────────────────────────────
+    // Méthodes AuraEnabled
+    // ─────────────────────────────────────────────────────────────
 
-  //Rechercher  par nom la liste des projets importés
-  @AuraEnabled(cacheable=true)
-  public static List<ImportProject__c> searchProjectsByName(String name) {
-    return ProjectService.getProjectsByName(name);
-  }
-
-  //Rechercher  par l'id  un projet importé
-  @AuraEnabled(cacheable=true)
-  public static ImportProject__c searchProjetById(String id) {
-    if (String.isBlank(id)) {
-      return null;
+    @AuraEnabled(cacheable=true)
+    public static List<ImportProject__c> getRecentsProjects(Integer limitor) {
+        try {
+            return ProjectService.getRecentsProjets(limitor);
+        } catch (Exception e) {
+            throw toAuraException('Unable to fetch recent projects: ', e);
+        }
     }
-    return ProjectService.getProjectById(id);
-  }
 
-  //récupérer la liste  de tous les projets
-  @AuraEnabled(cacheable=true)
-  public static List<ImportProject__c> getAllProjects() {
-    return ProjectService.getAllProjects();
-  }
+    @AuraEnabled
+    public static ImportProject__c saveProject(
+        String name,
+        String description,
+        String targetObject
+    ) {
+        try {
+            return ProjectService.createProject(name, description, targetObject);
+        } catch (Exception e) {
+            throw toAuraException('Unable to save project: ', e);
+        }
+    }
 
-  //Vérifie l'existance du projet via son nom et l'objet ciblé
-  @AuraEnabled(cacheable=true)
-  public static Boolean doesProjectExist(String name,String targetObject){
-    return ProjectService.doesProjectExist(name,targetObject);
-  }
+    @AuraEnabled(cacheable=true)
+    public static List<ImportProject__c> searchProjectsByName(String name) {
+        try {
+            return ProjectService.getProjectsByName(name);
+        } catch (Exception e) {
+            throw toAuraException('Unable to search projects by name: ', e);
+        }
+    }
 
-   //récupèrer les SObjets compatibles
+    @AuraEnabled(cacheable=true)
+    public static ImportProject__c searchProjetById(String id) {
+        try {
+            if (String.isBlank(id)) {
+                return null;
+            }
+            return ProjectService.getProjectById(id);
+        } catch (Exception e) {
+            throw toAuraException('Unable to fetch project by id: ', e);
+        }
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static List<ImportProject__c> getAllProjects() {
+        try {
+            return ProjectService.getAllProjects();
+        } catch (Exception e) {
+            throw toAuraException('Unable to fetch all projects: ', e);
+        }
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static Boolean doesProjectExist(String name, String targetObject) {
+        try {
+            return ProjectService.doesProjectExist(name, targetObject);
+        } catch (Exception e) {
+            throw toAuraException('Unable to check project existence: ', e);
+        }
+    }
+
     @AuraEnabled(cacheable=true)
     public static List<String> getCompatibleSObjects() {
-      return ObjectMetadataService.getCompatibleSObjects();
+        try {
+            return ObjectMetadataService.getCompatibleSObjects();
+        } catch (Exception e) {
+            throw toAuraException('Unable to fetch compatible SObjects: ', e);
+        }
     }
 
-    //mise à jour d'un projet importé
-    @AuraEnabled 
-    public static void updateProject(String projectId,String name,String description,String targetObject) {
-       ProjectService.updateProject(projectId, name, description, targetObject);
+    @AuraEnabled
+    public static ImportProject__c updateProject(
+        String projectId,
+        String name,
+        String description,
+        String targetObject
+    ) {
+        try {
+            ProjectService.updateProject(projectId, name, description, targetObject);
+            return ProjectService.getProjectById(projectId);
+        } catch (Exception e) {
+            throw toAuraException('Unable to update project: ', e);
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // Helper privé
+    // ─────────────────────────────────────────────────────────────
+
+    private static AuraHandledException toAuraException(String msg, Exception e) {
+        if (e instanceof ApplicationException) {
+            return new AuraHandledException(e.getMessage());
+        }
+        ErrorLogService.logException(e);
+        AuraHandledException aura = new AuraHandledException(msg + e.getMessage());
+        aura.initCause(e);
+        return aura;
     }
 }

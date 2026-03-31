@@ -1,5 +1,16 @@
+/**
+ * @description       : Controller AuraEnabled pour l'exécution des imports par batch
+ * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @group             :
+ * @last modified on  : 03-17-2026
+ * @last modified by  : NDEYE KHADY NIANG
+ **/
 public with sharing class BatchExecutionController {
-    //Start client-side staging session.
+
+    // ─────────────────────────────────────────────────────────────
+    // Méthodes AuraEnabled
+    // ─────────────────────────────────────────────────────────────
+
     @AuraEnabled
     public static Map<String, Object> startClientStaging(Id projectId, Boolean dryRun, Integer totalRows) {
         try {
@@ -9,7 +20,6 @@ public with sharing class BatchExecutionController {
         }
     }
 
-    //Append one client chunk into staging.
     @AuraEnabled
     public static Map<String, Object> appendClientStagingRows(Id executionId, List<Map<String, String>> rows, Integer startLine) {
         try {
@@ -19,7 +29,6 @@ public with sharing class BatchExecutionController {
         }
     }
 
-    //Finish staging and launch preprocess batch.
     @AuraEnabled
     public static Map<String, Object> finishClientStaging(Id executionId) {
         try {
@@ -29,7 +38,6 @@ public with sharing class BatchExecutionController {
         }
     }
 
-    //Return current staging upload state for resume.
     @AuraEnabled(cacheable=false)
     public static Map<String, Object> getClientStagingState(Id executionId) {
         try {
@@ -39,7 +47,6 @@ public with sharing class BatchExecutionController {
         }
     }
 
-    //Return live counters for UI polling.
     @AuraEnabled(cacheable=false)
     public static Map<String, Object> getExecutionDetails(Id executionId) {
         try {
@@ -49,7 +56,6 @@ public with sharing class BatchExecutionController {
         }
     }
 
-    //Return last import execution for one project.
     @AuraEnabled(cacheable=false)
     public static Map<String, Object> getLatestProjectExecution(Id projectId) {
         try {
@@ -59,7 +65,6 @@ public with sharing class BatchExecutionController {
         }
     }
 
-    //Mark current execution as cancelled.
     @AuraEnabled
     public static Map<String, Object> cancelExecution(Id executionId) {
         try {
@@ -69,7 +74,6 @@ public with sharing class BatchExecutionController {
         }
     }
 
-    //Retry processing for not processed rows.
     @AuraEnabled
     public static Map<String, Object> retryExecution(Id executionId) {
         try {
@@ -79,7 +83,6 @@ public with sharing class BatchExecutionController {
         }
     }
 
-    //Return paginated logs for one execution.
     @AuraEnabled(cacheable=false)
     public static Map<String, Object> getImportLogs(Id executionId, Integer pageNumber, Integer pageSize) {
         try {
@@ -89,12 +92,27 @@ public with sharing class BatchExecutionController {
         }
     }
 
+    // ─────────────────────────────────────────────────────────────
+    // Helper privé — modèle réutilisable dans tous les controllers
+    // ─────────────────────────────────────────────────────────────
+
+    /**
+     * Convertit une exception en AuraHandledException.
+     * - Si c'est une ExecutionException (métier), on expose directement le message.
+     * - Sinon on log + on préserve la stack trace via initCause().
+     *
+     * MODÈLE À COPIER dans : FieldMappingController, ImportProjectController,
+     *   QueryBuilderController, ScheduleController, TransformationController, DryRunController
+     */
     private static AuraHandledException toAuraException(String msg, Exception e) {
         if (e instanceof ExecutionException) {
-            return new AuraHandledException(e.getMessage());
+            AuraHandledException aura = new AuraHandledException(e.getMessage());
+            aura.initCause(e);
+            return aura;
         }
-
         ErrorLogService.logException(e);
-        return new AuraHandledException(msg + e.getMessage());
+        AuraHandledException aura = new AuraHandledException(msg + e.getMessage());
+        aura.initCause(e);
+        return aura;
     }
 }
