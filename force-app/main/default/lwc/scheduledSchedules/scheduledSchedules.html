@@ -103,7 +103,7 @@
 
                                                 <!-- Next Run datetime (single field) -->
                                                 <div class="field-group full-width">
-                                                    <lightning-input type="datetime" label="Next Run"
+                                                    <lightning-input type="datetime" label={labels.labelNextRun}
                                                         value={editNextRun} onchange={handleNextRunChange}
                                                         message-when-value-missing="Next run date is required">
                                                     </lightning-input>
@@ -131,7 +131,7 @@
                                                         <lightning-icon class="mr-2" icon-name="utility:clear"
                                                             size="x-small">
                                                         </lightning-icon>
-                                                        Cancel
+                                                        {labels.cancelBtn}
                                                     </button>
                                                     <button class="btn btn-primary" onclick={handleSaveEdit}
                                                         disabled={isSaveDisabled}>

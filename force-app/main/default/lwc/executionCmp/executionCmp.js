@@ -1,6 +1,7 @@
 /**
- * @Last Modification Date: 03/03/2026
+ * @Last Modification Date: 01/04/2026
  * @Last Modification By: Mouhamed
+ * @Modification : add some custom labels  
  */
 import { LightningElement, api, track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
@@ -25,11 +26,11 @@ import LABEL_BTN_START from '@salesforce/label/c.IM_EX_Btn_StartImport';
 import LABEL_BTN_CANCEL from '@salesforce/label/c.IM_EX_Btn_CancelImport';
 import LABEL_BTN_BACK from '@salesforce/label/c.IM_EX_Btn_BackToValidation';
 import LABEL_PROGRESS_TITLE from '@salesforce/label/c.IM_EX_Progress_Title';
-import LABEL_STATUS_COMPLETED from '@salesforce/label/c.IM_EX_Status_Completed';
-import LABEL_STATUS_CANCELLED from '@salesforce/label/c.IM_EX_Status_Cancelled';
-import LABEL_STATUS_FAILED from '@salesforce/label/c.IM_EX_Status_Failed';
-import LABEL_STATUS_IN_PROGRESS from '@salesforce/label/c.IM_EX_Status_InProgress';
-import LABEL_STATUS_PENDING from '@salesforce/label/c.IM_EX_Status_Pending';
+import LABEL_STATUS_COMPLETED from '@salesforce/label/c.ProjectCard_Status_Completed';
+import LABEL_STATUS_CANCELLED from '@salesforce/label/c.ProjectCard_Status_Cancelled';
+import LABEL_STATUS_FAILED from '@salesforce/label/c.ProjectCard_Status_Failed';
+import LABEL_STATUS_IN_PROGRESS from '@salesforce/label/c.ProjectCard_Status_InProgress';
+import LABEL_STATUS_PENDING from '@salesforce/label/c.ProjectCard_Status_Pending';
 import LABEL_DETAIL_EXECUTION_ID from '@salesforce/label/c.IM_EX_Detail_ExecutionId';
 import LABEL_DETAIL_STATUS from '@salesforce/label/c.IM_EX_Detail_Status';
 import LABEL_DETAIL_TOTAL from '@salesforce/label/c.IM_EX_Detail_TotalRecords';

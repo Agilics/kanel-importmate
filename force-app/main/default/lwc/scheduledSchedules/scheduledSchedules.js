@@ -1,5 +1,5 @@
 /**
- * @LastModification: 31-03-2026
+ * @LastModification: 01-04-2026
  * @Modification: Programmation et gestion planification
  * @Modified by: Mouhamed
  */
@@ -40,6 +40,8 @@ import Import_Schedule_MonthlyOn from '@salesforce/label/c.Import_Schedule_Month
 import Import_Schedule_Edit_Title from '@salesforce/label/c.Import_Schedule_Edit_Title';
 import Import_Frequency from '@salesforce/label/c.Import_Frequency';
 import Import_Schedule_Edit_Info_Bar from '@salesforce/label/c.Import_Schedule_Edit_Info_Bar';
+import IM_EX_Btn_CancelImport from '@salesforce/label/c.IM_EX_Btn_CancelImport';
+import Import_NextRun from '@salesforce/label/c.Import_NextRun';
 
 const STATUS_LABELS = { 
     Completed: STATUS_COMPLETED,
@@ -82,7 +84,9 @@ export default class ScheduledSchedules extends LightningElement {
             labelRescheduleBtn: Import_RescheduleButton,
             editTitle: Import_Schedule_Edit_Title,
             labelFrequency: Import_Frequency,
-            editInfoBar: Import_Schedule_Edit_Info_Bar
+            editInfoBar: Import_Schedule_Edit_Info_Bar,
+            cancelBtn: IM_EX_Btn_CancelImport,
+            labelNextRun:Import_NextRun
         }
     }
     
@@ -175,7 +179,8 @@ export default class ScheduledSchedules extends LightningElement {
                     iconStatusName  : this.getStatusIcon(status),
                     targetObject    : sch.Project__r?.TargetObject__c || 'N/A',
                     projectName: sch.Project__r?.Name || 'Unknown Project',
-                    isNotCompleted:this.isNotExecutionCompleted(status) // hide play  if Execution completed
+                    isNotCompleted: this.isNotExecutionCompleted(status), // hide play  if Execution completed
+                    rawStatus: status
                 };
         });
     });
@@ -400,7 +405,7 @@ export default class ScheduledSchedules extends LightningElement {
 
         // Trouver l'état courant pour savoir si on pause ou reprend
         const entry      = this.scheduledInfos.find(s => s.id === scheduleId);
-        const isSuspended = entry?.statusLabel === 'Suspended';
+        const isSuspended = entry?.rawStatus  === 'Suspended';
         // isPause = true  => on met en pause (statut actif → suspendu)
         // isPause = false => on reprend     (suspendu → actif)
         const isPause    = !isSuspended;
