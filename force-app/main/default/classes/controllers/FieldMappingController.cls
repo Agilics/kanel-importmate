@@ -5,147 +5,112 @@
  * @last modified on  : 03-17-2026
  * @last modified by  : NDEYE KHADY NIANG
  **/
-public with sharing class FieldMappingController {
-
-    // ─────────────────────────────────────────────────────────────
-    // DTOs
-    // ─────────────────────────────────────────────────────────────
-
-    public class FieldInfoDTO {
-        @AuraEnabled public String apiName;
-        @AuraEnabled public String label;
+public with sharing class  ImportProjectController {
+  //Récuperer une variable de nombre (limitor) de   projets récements importés
+  @AuraEnabled(cacheable=true)
+  public static List<ImportProject__c> getRecentsProjects(Integer limitor) {
+    try {
+      return ProjectService.getRecentsProjets(limitor);
+    } catch (Exception e) {
+      ErrorLogService.logException(e);
+      throw  toAuraException(e.getMessage(),e);
     }
+  }
 
-    public class ProjectDTO {
-        @AuraEnabled public String id;
-        @AuraEnabled public String name;
-        @AuraEnabled public String targetObject;
+  //Enregistrer un projet importé
+  @AuraEnabled
+  public static ImportProject__c saveProject(
+    String name,
+    String description,
+    String targetObject
+  ) {
+    try {
+       return ProjectService.createProject(name, description, targetObject);
+    } catch (Exception e) {
+      ErrorLogService.logException(e);
+      throw  new ApplicationException(e.getMessage()); 
     }
+  }
 
-    public class ComparatorFieldInfo implements System.Comparator<FieldInfoDTO> {
-        public Integer compare(FieldInfoDTO left, FieldInfoDTO right) {
-            String l = (left  == null || left.label  == null) ? '' : left.label.toLowerCase();
-            String r = (right == null || right.label == null) ? '' : right.label.toLowerCase();
-            return l.compareTo(r);
-        }
+  //Rechercher  par nom la liste des projets importés
+  @AuraEnabled(cacheable=true)
+  public static List<ImportProject__c> searchProjectsByName(String name) {
+    try {
+      return ProjectService.getProjectsByName(name);
+    } catch (Exception e) {
+      ErrorLogService.logException(e);
+      throw  toAuraException(e.getMessage(),e);
     }
+  }
 
-    // ─────────────────────────────────────────────────────────────
-    // Méthodes AuraEnabled
-    // ─────────────────────────────────────────────────────────────
+  //Rechercher  par l'id  un projet importé
+  @AuraEnabled(cacheable=true)
+  public static ImportProject__c searchProjetById(String id) {
+   
+    try {
+      if (String.isBlank(id)) {
+        return null;
+      }
+      return ProjectService.getProjectById(id);
 
+    } catch (Exception e) {
+      ErrorLogService.logException(e);
+      throw  toAuraException(e.getMessage(),e);
+    }
+  }
+
+  //récupérer la liste  de tous les projets
+  @AuraEnabled(cacheable=true)
+  public static List<ImportProject__c> getAllProjects() {
+    try {
+      return ProjectService.getAllProjects();
+    } catch (Exception e) {
+      ErrorLogService.logException(e);
+      throw  toAuraException(e.getMessage(),e);
+    }
+  }
+
+  //Vérifie l'existance du projet via son nom et l'objet ciblé
+  @AuraEnabled(cacheable=true)
+  public static Boolean doesProjectExist(String name,String targetObject){
+    try {
+      return ProjectService.doesProjectExist(name,targetObject);
+    } catch (Exception e) {
+      ErrorLogService.logException(e);
+      throw  toAuraException('Unable to retrieve Import Project info'+e.getMessage(),e);
+    }
+  }
+
+   //récupèrer les SObjets compatibles
     @AuraEnabled(cacheable=true)
-    public static List<String> fetchObjects() {
-        try {
-            return ObjectMetadataService.getCompatibleSObjects();
-        } catch (Exception e) {
-            throw toAuraException('Unable to fetch objects: ', e);
-        }
-    }
-
-    @AuraEnabled(cacheable=true)
-    public static List<FieldInfoDTO> fetchFields(String objectApiName) {
-        try {
-            Map<String, Schema.SObjectField> fieldMap =
-                ObjectMetadataService.getFieldsForObject(objectApiName);
-
-            List<FieldInfoDTO> result = new List<FieldInfoDTO>();
-            for (String fieldApiName : fieldMap.keySet()) {
-                Schema.DescribeFieldResult dfr = fieldMap.get(fieldApiName).getDescribe();
-                if (dfr.isAccessible()) {
-                    FieldInfoDTO dto  = new FieldInfoDTO();
-                    dto.apiName       = fieldApiName;
-                    dto.label         = dfr.getLabel();
-                    result.add(dto);
-                }
-            }
-            result.sort(new ComparatorFieldInfo());
-            return result;
-        } catch (Exception e) {
-            throw toAuraException('Unable to fetch fields: ', e);
-        }
-    }
-
-    @AuraEnabled(cacheable=true)
-    public static List<FieldMappingRepository.FieldMappingDTO> getAllMappingsByProjectId(Id projectId) {
-        try {
-            return FieldMappingService.getAllMappingsByProject(projectId);
-        } catch (Exception e) {
-            throw toAuraException('Unable to fetch all mappings: ', e);
-        }
-    }
-
-    @AuraEnabled
-    public static List<FieldMapping__c> saveMappings(
-        String targetObjectApiName,
-        List<FieldMappingRepository.FieldMappingDTO> rows
-    ) {
-        try {
-            return FieldMappingService.saveMappings(targetObjectApiName, rows);
-        } catch (Exception e) {
-            throw toAuraException('Unable to save mappings: ', e);
-        }
-    }
-
-    @AuraEnabled(cacheable=true)
-    public static List<FieldMappingRepository.FieldMappingDTO> loadMappings(Id projectId, String version) {
-        try {
-            return FieldMappingService.getMappingsByProject(projectId, version);
-        } catch (Exception e) {
-            throw toAuraException('Unable to load mappings: ', e);
-        }
-    }
-
-    @AuraEnabled
-    public static List<FieldMapping__c> saveMappingsJson(
-        String targetObjectApiName,
-        String rowsJson
-    ) {
-        try {
-            List<FieldMappingRepository.FieldMappingDTO> parsed =
-                (List<FieldMappingRepository.FieldMappingDTO>)
-                JSON.deserialize(rowsJson, List<FieldMappingRepository.FieldMappingDTO>.class);
-            return FieldMappingService.saveMappings(targetObjectApiName, parsed);
-        } catch (Exception e) {
-            throw toAuraException('Unable to save mappings from JSON: ', e);
-        }
-    }
-
-    @AuraEnabled(cacheable=true)
-    public static List<ProjectDTO> fetchProjects() {
-        try {
-            List<ProjectDTO> result = new List<ProjectDTO>();
-            for (ImportProject__c p : [
-                SELECT Id, Name, TargetObject__c
-                FROM ImportProject__c
-                WITH SECURITY_ENFORCED
-                ORDER BY Name
-            ]) {
-                ProjectDTO dto   = new ProjectDTO();
-                dto.id           = p.Id;
-                dto.name         = p.Name;
-                dto.targetObject = p.TargetObject__c;
-                result.add(dto);
-            }
-            return result;
-        } catch (Exception e) {
-            throw toAuraException('Unable to fetch projects: ', e);
-        }
-    }
-
-    // ─────────────────────────────────────────────────────────────
-    // Helper privé
-    // ─────────────────────────────────────────────────────────────
-
-    private static AuraHandledException toAuraException(String msg, Exception e) {
-        if (e instanceof ApplicationException) {
-            AuraHandledException aura = new AuraHandledException(e.getMessage());
-            aura.initCause(e);
-            return aura;
-        }
+    public static List<String> getCompatibleSObjects() {
+      try { 
+        return ObjectMetadataService.getCompatibleSObjects();
+      } catch (Exception e) {
         ErrorLogService.logException(e);
-        AuraHandledException aura = new AuraHandledException(msg + e.getMessage());
-        aura.initCause(e);
-        return aura;
+        throw  toAuraException('Unable to retrieve Compatible SObject'+e.getMessage(),e);
+      }
     }
+
+    //mise à jour d'un projet importé
+    @AuraEnabled 
+    public static void updateProject(String projectId,String name,String description,String targetObject) {
+      try {
+        ProjectService.updateProject(projectId, name, description, targetObject);
+      } catch (Exception e) {
+        ErrorLogService.logException(e);
+        throw toAuraException('Unable to update Import Project: ' + e.getMessage(), e);
+
+      }
+    }
+
+  // gestion & lever d'exceptions 
+  private static AuraHandledException toAuraException(String msg, Exception e) {
+    if (e instanceof ExecutionException) {
+      return new AuraHandledException(e.getMessage());
+    }
+
+    ErrorLogService.logException(e);
+    return new AuraHandledException(msg + e.getMessage());
+  }
 }

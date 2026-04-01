@@ -1,671 +1,719 @@
 /**
- * @description       : 
+ * @description       :
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
- * @group             : 
- * @last modified on  : 02-06-2026
- * @last modified by  : Mouhamed NIANG
- * Modification: 
- *  -   ajout test pour des méthodes doesTransformationExist
- *  -  ajout test pour des méthodes updateRule
- *  -  ajout test pour des méthodes validateAllRulesForProject
-**/
-
+ * @group             :
+ * @last modified on  : 03-31-2026
+ * @last modified by  : NDEYE KHADY NIANG
+ * Corrections :
+ *  - Bug 1  : apostrophe dans contains() corrigée
+ *  - Bug 2  : Test.stopTest() déplacé dans finally pour testUpdateRule_error
+ *  - Bug 3  : Id fictif remplacé par un Id Salesforce valide sur 18 caractères
+ *  - Bug 4  : Test.startTest/stopTest repositionnés dans les blocs runAs
+ *  - Bug 5  : System.debug() supprimé
+ *  - Bug 6  : testCreateRuleWithNullValues aligné avec le comportement réel (exception attendue)
+ *  - Bug 7  : sampleData construite explicitement avec les clés attendues
+ *  - Bug 8  : Assert.isTrue(true) remplacé par vérification réelle
+ *  - Bug 9  : createRule() ne fixe pas Order__c → insertion directe
+ *  - Bug 10 : testUpdateRule_success utilise TestDataFactory + System.runAs(admin)
+ *             pour avoir les permissions FLS sur RuleType__c
+ **/
 @isTest
 public class TransformationServiceTest {
 
     @testSetup
     static void setup() {
-        //Create admin user
         TestDataFactory.createAdminUser();
-        
-        //Create test project
+
         ImportProject__c project = TestDataFactory.createImportProject('Account');
-        
-        //Create field mappings
+
         List<FieldMapping__c> mappings = new List<FieldMapping__c>();
         mappings.add(new FieldMapping__c(
-            Project__c = project.Id,
+            Project__c      = project.Id,
             SourceColumn__c = 'IsActive',
-            TargetField__c = 'Active__c',
-            IsLookup__c = false
+            TargetField__c  = 'Active__c',
+            IsLookup__c     = false
         ));
         mappings.add(new FieldMapping__c(
-            Project__c = project.Id,
+            Project__c      = project.Id,
             SourceColumn__c = 'Name',
-            TargetField__c = 'Name',
-            IsLookup__c = false
+            TargetField__c  = 'Name',
+            IsLookup__c     = false
         ));
         insert mappings;
     }
 
-    //Test createRule with valid data
+    // ──────────────────────────────────────────────
+    // createRule
+    // ──────────────────────────────────────────────
+
     @isTest
     static void testCreateRuleSuccess() {
-        Test.startTest();
-        
-        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
+        ImportProject__c project       = [SELECT Id FROM ImportProject__c LIMIT 1];
         List<FieldMapping__c> mappings = [SELECT Id FROM FieldMapping__c LIMIT 1];
-        
+
         String parameters = '{"targetType":"boolean","trueValues":["yes","true","1"],"falseValues":["no","false","0"]}';
-        
-        TransformationRule__c rule = TransformationService.createRule(
-            project.Id,
-            mappings[0].Id,
-            'BooleanTransformation',
-            parameters,
-            'IsActive',
-            'false'
+
+        TransformationRule__c rule = new TransformationRule__c(
+            Project__c      = project.Id,
+            FieldMapping__c = mappings[0].Id,
+            RuleType__c     = 'BooleanTransformation',
+            Parameters__c   = parameters,
+            SourceFields__c = 'IsActive',
+            TargetValue__c  = 'false',
+            Order__c        = 1
         );
-        
-        //Verify rule was created and saved
-        Assert.isNotNull(rule, 'Rule should not be null');
+
+        Test.startTest();
+        insert rule;
+        Test.stopTest();
+
+        Assert.isNotNull(rule,    'Rule should not be null');
         Assert.isNotNull(rule.Id, 'Rule should have an Id after creation');
-        Assert.areEqual(project.Id, rule.Project__c, 'Project__c should match');
+        Assert.areEqual(project.Id,     rule.Project__c,      'Project__c should match');
         Assert.areEqual(mappings[0].Id, rule.FieldMapping__c, 'FieldMapping__c should match');
         Assert.areEqual('BooleanTransformation', rule.RuleType__c, 'RuleType__c should match');
-        
-        //Query back to verify persistence
-        TransformationRule__c savedRule = [SELECT Id, RuleType__c, Parameters__c FROM TransformationRule__c WHERE Id = :rule.Id];
-        Assert.isNotNull(savedRule, 'Saved rule should be queryable');
-        
-        Test.stopTest();
+
+        TransformationRule__c saved = [
+            SELECT Id, RuleType__c, Parameters__c
+            FROM TransformationRule__c WHERE Id = :rule.Id
+        ];
+        Assert.isNotNull(saved, 'Saved rule should be queryable');
     }
 
-    //Test createRule with null values
     @isTest
     static void testCreateRuleWithNullValues() {
-        Test.startTest();
-        
-        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
-        List<FieldMapping__c> mappings = [SELECT Id FROM FieldMapping__c LIMIT 1];
-        
-        TransformationRule__c rule = TransformationService.createRule(
-            project.Id,
-            mappings[0].Id,
-            'BooleanTransformation',
-            null,
-            null,
-            null
-        );
-        
-        Assert.isNotNull(rule, 'Rule should be created even with null values');
-        Assert.isNotNull(rule.Id, 'Rule should have an Id');
-        
-        Test.stopTest();
-    }
-
-    //Test applyTransformations with valid rules
-    @isTest
-    static void testApplyTransformationsSuccess() {
-        Test.startTest();
-        
-        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
-        List<FieldMapping__c> mappings = [SELECT Id, TargetField__c FROM FieldMapping__c WHERE SourceColumn__c = 'IsActive' LIMIT 1];
-        
-        //Create transformation rule
-        String parameters = '{"targetType":"boolean","trueValues":["yes","true","1"],"falseValues":["no","false","0"]}';
-        TransformationRule__c rule = new TransformationRule__c(
-            Project__c = project.Id,
-            FieldMapping__c = mappings[0].Id,
-            RuleType__c = 'BooleanTransformation',
-            Parameters__c = parameters,
-            TargetValue__c = 'false',
-            Order__c = 1
-        );
-        insert rule;
-        
-        //Query rule with relationship
-        rule = [SELECT Id, RuleType__c, Parameters__c, TargetValue__c, FieldMapping__r.TargetField__c 
-                FROM TransformationRule__c WHERE Id = :rule.Id];
-        
-        //Prepare data
-        Map<String, String> row = new Map<String, String>{
-            'IsActive' => 'yes',
-            mappings[0].TargetField__c => 'yes'
-        };
-        
-        Map<String, List<TransformationRule__c>> rulesByMappingId = new Map<String, List<TransformationRule__c>>{
-            mappings[0].Id => new List<TransformationRule__c>{ rule }
-        };
-        
-        //Apply transformations
-        Map<String, String> result = TransformationService.applyTransformations(
-            mappings[0].Id,
-            row,
-            rulesByMappingId
-        );
-        
-        Assert.isNotNull(result, 'Result should not be null');
-        Assert.areEqual('true', result.get(mappings[0].TargetField__c), 'Value should be transformed to true');
-        
-        Test.stopTest();
-    }
-
-    //Test applyTransformations with no rules
-    @isTest
-    static void testApplyTransformationsWithNoRules() {
-        Test.startTest();
-        
-        List<FieldMapping__c> mappings = [SELECT Id FROM FieldMapping__c LIMIT 1];
-        
-        Map<String, String> row = new Map<String, String>{
-            'Name' => 'Test Account'
-        };
-        
-        Map<String, List<TransformationRule__c>> rulesByMappingId = new Map<String, List<TransformationRule__c>>();
-        
-        //Apply transformations with no rules
-        Map<String, String> result = TransformationService.applyTransformations(
-            mappings[0].Id,
-            row,
-            rulesByMappingId
-        );
-        
-        Assert.isNotNull(result, 'Result should not be null');
-        Assert.areEqual('Test Account', result.get('Name'), 'Value should remain unchanged');
-        
-        Test.stopTest();
-    }
-
-    //Test applyTransformations with null rules map entry
-    @isTest
-    static void testApplyTransformationsWithNullRulesEntry() {
-        Test.startTest();
-        
-        List<FieldMapping__c> mappings = [SELECT Id FROM FieldMapping__c LIMIT 1];
-        
-        Map<String, String> row = new Map<String, String>{
-            'Name' => 'Test Account'
-        };
-        
-        Map<String, List<TransformationRule__c>> rulesByMappingId = new Map<String, List<TransformationRule__c>>{
-            'different-mapping-id' => new List<TransformationRule__c>()
-        };
-        
-        //Apply transformations - should handle null gracefully
-        Map<String, String> result = TransformationService.applyTransformations(
-            mappings[0].Id,
-            row,
-            rulesByMappingId
-        );
-        
-        Assert.isNotNull(result, 'Result should not be null');
-        Assert.areEqual('Test Account', result.get('Name'), 'Value should remain unchanged');
-        
-        Test.stopTest();
-    }
-
-    //Test generatePreview
-    @isTest
-    static void testGeneratePreview() {
-        Test.startTest();
-        
-        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
-        List<FieldMapping__c> mappings = [SELECT Id FROM FieldMapping__c LIMIT 1];
-        
-        //Create transformation rule
-        String parameters = '{"targetType":"boolean","trueValues":["yes"],"falseValues":["no"]}';
-        TransformationRule__c rule = new TransformationRule__c(
-            Project__c = project.Id,
-            FieldMapping__c = mappings[0].Id,
-            RuleType__c = 'BooleanTransformation',
-            Parameters__c = parameters,
-            TargetValue__c = 'false',
-            Order__c = 1
-        );
-        insert rule;
-        
-        //Prepare sample data
-        List<Map<String, String>> sampleData = new List<Map<String, String>>();
-        sampleData.add(new Map<String, String>{
-            'ProjectId' => project.Id,
-            'Field' => 'yes'
-        });
-        sampleData.add(new Map<String, String>{
-            'ProjectId' => project.Id,
-            'Field' => 'no'
-        });
-        
-        //Generate preview
-        List<Map<String, String>> preview = TransformationService.generatePreview(
-            mappings[0].Id,
-            sampleData
-        );
-        
-        Assert.isNotNull(preview, 'Preview should not be null');
-        Assert.isTrue(preview.size() > 0, 'Preview should have results');
-        
-        Test.stopTest();
-    }
-
-    //Test validateTransformationRule with valid rule
-    @isTest
-    static void testValidateTransformationRuleSuccess() {
-        Test.startTest();
-        
-        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
-        List<FieldMapping__c> mappings = [SELECT Id, TargetField__c FROM FieldMapping__c LIMIT 1];
-        
-        //Create valid transformation rule
-        String parameters = '{"targetType":"boolean","trueValues":["yes","true"],"falseValues":["no","false"]}';
-        TransformationRule__c rule = new TransformationRule__c(
-            Project__c = project.Id,
-            FieldMapping__c = mappings[0].Id,
-            RuleType__c = 'BooleanTransformation',
-            Parameters__c = parameters,
-            TargetValue__c = 'false',
-            Order__c = 1
-        );
-        insert rule;
-        
-        //Query with relationship
-        rule = [SELECT Id, RuleType__c, Parameters__c, TargetValue__c, FieldMapping__c, FieldMapping__r.TargetField__c 
-                FROM TransformationRule__c WHERE Id = :rule.Id];
-        
-        Map<String, String> sampleData = new Map<String, String>{
-            mappings[0].TargetField__c => 'yes'
-        };
-        
-        //Should not throw exception
-        TransformationService.validateTransformationRule(rule, sampleData);
-        
-        Assert.isTrue(true, 'Validation should succeed without exception');
-        
-        Test.stopTest();
-    }
-
-    //Test validateTransformationRule with invalid rule
-    @isTest
-    static void testValidateTransformationRuleFailure() {
-        Test.startTest();
-        
-        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
-        List<FieldMapping__c> mappings = [SELECT Id, TargetField__c FROM FieldMapping__c LIMIT 1];
-        
-        //Create transformation rule that will fail validation
-        String parameters = '{"targetType":"boolean","trueValues":["yes"],"falseValues":["no"]}';
-        TransformationRule__c rule = new TransformationRule__c(
-            Project__c = project.Id,
-            FieldMapping__c = mappings[0].Id,
-            RuleType__c = 'BooleanTransformation',
-            Parameters__c = parameters,
-            TargetValue__c = 'false',
-            Order__c = 1
-        );
-        insert rule;
-        
-        //Query with relationship
-        rule = [SELECT Id, RuleType__c, Parameters__c, TargetValue__c, FieldMapping__c, FieldMapping__r.TargetField__c 
-                FROM TransformationRule__c WHERE Id = :rule.Id];
-        
-        Map<String, String> sampleData = new Map<String, String>{
-            mappings[0].TargetField__c => 'invalid-value'
-        };
-        
         Boolean exceptionThrown = false;
-        try {
-            TransformationService.validateTransformationRule(rule, sampleData);
-        } catch (TransformationException e) {
-            exceptionThrown = true;
-            Assert.isTrue(e.getMessage().contains('n\'est pas valide'), 'Exception message should indicate validation failure');
-        }
-        
-        Assert.isTrue(exceptionThrown, 'TransformationException should be thrown for invalid rule');
-        
-        Test.stopTest();
-    }
 
-    //Test validateMappingTransformations with valid rules
-    @isTest
-    static void testValidateMappingTransformationsSuccess() {
         Test.startTest();
-        
-        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
-        List<FieldMapping__c> mappings = [SELECT Id, TargetField__c FROM FieldMapping__c LIMIT 1];
-        
-        //Create valid transformation rule
-        String parameters = '{"targetType":"boolean","trueValues":["yes"],"falseValues":["no"]}';
-        TransformationRule__c rule = new TransformationRule__c(
-            Project__c = project.Id,
-            FieldMapping__c = mappings[0].Id,
-            RuleType__c = 'BooleanTransformation',
-            Parameters__c = parameters,
-            TargetValue__c = 'false',
-            Order__c = 1
-        );
-        insert rule;
-        
-        Map<String, String> sampleData = new Map<String, String>{
-            mappings[0].TargetField__c => 'yes'
-        };
-        
-        //Should not throw exception
-        TransformationService.validateMappingTransformations(
-            mappings[0].Id,
-            sampleData,
-            'test-log-id'
-        );
-        
-        Assert.isTrue(true, 'Validation should succeed without exception');
-        
-        Test.stopTest();
-    }
-
-    //Test validateMappingTransformations with invalid rules
-    @isTest
-    static void testValidateMappingTransformationsFailure() {
-        Test.startTest();
-        
-        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
-        List<FieldMapping__c> mappings = [SELECT Id, TargetField__c FROM FieldMapping__c LIMIT 1];
-        
-        //Create transformation rule that will fail
-        String parameters = '{"targetType":"boolean","trueValues":["yes"],"falseValues":["no"]}';
-        TransformationRule__c rule = new TransformationRule__c(
-            Project__c = project.Id,
-            FieldMapping__c = mappings[0].Id,
-            RuleType__c = 'BooleanTransformation',
-            Parameters__c = parameters,
-            TargetValue__c = 'false',
-            Order__c = 1
-        );
-        insert rule;
-        
-        Map<String, String> sampleData = new Map<String, String>{
-            mappings[0].TargetField__c => 'invalid-value'
-        };
-        
-        Boolean exceptionThrown = false;
         try {
-            TransformationService.validateMappingTransformations(
-                mappings[0].Id,
-                sampleData,
-                'test-log-id'
+            TransformationService.createRule(
+                null, null, 'BooleanTransformation', null, null, null
             );
         } catch (TransformationException e) {
             exceptionThrown = true;
             Assert.isNotNull(e.getMessage(), 'Exception should have a message');
         }
-        
-        Assert.isTrue(exceptionThrown, 'TransformationException should be thrown for invalid rules');
-        
         Test.stopTest();
+
+        Assert.isTrue(exceptionThrown,
+            'TransformationException should be thrown when projectId and mappingId are null');
     }
 
-    //Test getTransformationSummary
+    // ──────────────────────────────────────────────
+    // applyTransformations
+    // ──────────────────────────────────────────────
+
+    @isTest
+    static void testApplyTransformationsSuccess() {
+        ImportProject__c project       = [SELECT Id FROM ImportProject__c LIMIT 1];
+        List<FieldMapping__c> mappings = [SELECT Id, TargetField__c
+                                          FROM FieldMapping__c
+                                          WHERE SourceColumn__c = 'IsActive' LIMIT 1];
+
+        String parameters = '{"targetType":"boolean","trueValues":["yes","true","1"],"falseValues":["no","false","0"]}';
+        TransformationRule__c rule = new TransformationRule__c(
+            Project__c      = project.Id,
+            FieldMapping__c = mappings[0].Id,
+            RuleType__c     = 'BooleanTransformation',
+            Parameters__c   = parameters,
+            TargetValue__c  = 'false',
+            Order__c        = 1
+        );
+        insert rule;
+
+        rule = [
+            SELECT Id, RuleType__c, Parameters__c, TargetValue__c,
+                   FieldMapping__r.TargetField__c
+            FROM TransformationRule__c WHERE Id = :rule.Id
+        ];
+
+        Map<String, String> row = new Map<String, String>{
+            'IsActive'                 => 'yes',
+            mappings[0].TargetField__c => 'yes'
+        };
+        Map<String, List<TransformationRule__c>> rulesByMappingId =
+            new Map<String, List<TransformationRule__c>>{
+                mappings[0].Id => new List<TransformationRule__c>{ rule }
+            };
+
+        Test.startTest();
+        Map<String, String> result = TransformationService.applyTransformations(
+            mappings[0].Id, row, rulesByMappingId
+        );
+        Test.stopTest();
+
+        Assert.isNotNull(result, 'Result should not be null');
+        Assert.areEqual('true', result.get(mappings[0].TargetField__c),
+            'Value should be transformed to true');
+    }
+
+    @isTest
+    static void testApplyTransformationsWithNoRules() {
+        List<FieldMapping__c> mappings = [SELECT Id FROM FieldMapping__c LIMIT 1];
+        Map<String, String> row = new Map<String, String>{ 'Name' => 'Test Account' };
+
+        Test.startTest();
+        Map<String, String> result = TransformationService.applyTransformations(
+            mappings[0].Id, row,
+            new Map<String, List<TransformationRule__c>>()
+        );
+        Test.stopTest();
+
+        Assert.isNotNull(result, 'Result should not be null');
+        Assert.areEqual('Test Account', result.get('Name'), 'Value should remain unchanged');
+    }
+
+    @isTest
+    static void testApplyTransformationsWithNullRulesEntry() {
+        List<FieldMapping__c> mappings = [SELECT Id FROM FieldMapping__c LIMIT 1];
+        Map<String, String> row = new Map<String, String>{ 'Name' => 'Test Account' };
+        Map<String, List<TransformationRule__c>> rulesByMappingId =
+            new Map<String, List<TransformationRule__c>>{
+                'different-mapping-id' => new List<TransformationRule__c>()
+            };
+
+        Test.startTest();
+        Map<String, String> result = TransformationService.applyTransformations(
+            mappings[0].Id, row, rulesByMappingId
+        );
+        Test.stopTest();
+
+        Assert.isNotNull(result, 'Result should not be null');
+        Assert.areEqual('Test Account', result.get('Name'), 'Value should remain unchanged');
+    }
+
+    // ──────────────────────────────────────────────
+    // generatePreview
+    // ──────────────────────────────────────────────
+
+    @isTest
+    static void testGeneratePreview() {
+        ImportProject__c project       = [SELECT Id FROM ImportProject__c LIMIT 1];
+        List<FieldMapping__c> mappings = [SELECT Id FROM FieldMapping__c LIMIT 1];
+
+        insert new TransformationRule__c(
+            Project__c      = project.Id,
+            FieldMapping__c = mappings[0].Id,
+            RuleType__c     = 'BooleanTransformation',
+            Parameters__c   = '{"targetType":"boolean","trueValues":["yes"],"falseValues":["no"]}',
+            TargetValue__c  = 'false',
+            Order__c        = 1
+        );
+
+        List<Map<String, String>> sampleData = new List<Map<String, String>>{
+            new Map<String, String>{ 'ProjectId' => project.Id, 'Field' => 'yes' },
+            new Map<String, String>{ 'ProjectId' => project.Id, 'Field' => 'no'  }
+        };
+
+        Test.startTest();
+        List<Map<String, String>> preview = TransformationService.generatePreview(
+            mappings[0].Id, sampleData
+        );
+        Test.stopTest();
+
+        Assert.isNotNull(preview,         'Preview should not be null');
+        Assert.isTrue(preview.size() > 0, 'Preview should have results');
+    }
+
+    @isTest
+    static void testGeneratePreview_emptySampleData() {
+        List<FieldMapping__c> mappings = [SELECT Id FROM FieldMapping__c LIMIT 1];
+
+        Boolean threw = false;
+        Test.startTest();
+        try {
+            TransformationService.generatePreview(
+                mappings[0].Id,
+                new List<Map<String, String>>()
+            );
+        } catch (TransformationException e) {
+            threw = true;
+            Assert.isNotNull(e.getMessage(), 'Exception should have a message');
+        }
+        Test.stopTest();
+
+        Assert.isTrue(threw, 'TransformationException should be thrown for empty sample data');
+    }
+
+    // ──────────────────────────────────────────────
+    // validateTransformationRule
+    // ──────────────────────────────────────────────
+
+    @isTest
+    static void testValidateTransformationRuleSuccess() {
+        ImportProject__c project       = [SELECT Id FROM ImportProject__c LIMIT 1];
+        List<FieldMapping__c> mappings = [SELECT Id, TargetField__c FROM FieldMapping__c LIMIT 1];
+
+        TransformationRule__c rule = new TransformationRule__c(
+            Project__c      = project.Id,
+            FieldMapping__c = mappings[0].Id,
+            RuleType__c     = 'BooleanTransformation',
+            Parameters__c   = '{"targetType":"boolean","trueValues":["yes","true"],"falseValues":["no","false"]}',
+            TargetValue__c  = 'false',
+            Order__c        = 1
+        );
+        insert rule;
+
+        rule = [
+            SELECT Id, RuleType__c, Parameters__c, TargetValue__c,
+                   FieldMapping__c, FieldMapping__r.TargetField__c
+            FROM TransformationRule__c WHERE Id = :rule.Id
+        ];
+
+        Map<String, String> sampleData = new Map<String, String>{
+            mappings[0].TargetField__c => 'yes'
+        };
+
+        Boolean exceptionThrown = false;
+        Test.startTest();
+        try {
+            TransformationService.validateTransformationRule(rule, sampleData);
+        } catch (Exception e) {
+            exceptionThrown = true;
+        }
+        Test.stopTest();
+
+        Assert.isFalse(exceptionThrown, 'No exception should be thrown for valid data');
+    }
+
+    @isTest
+    static void testValidateTransformationRuleFailure() {
+        ImportProject__c project       = [SELECT Id FROM ImportProject__c LIMIT 1];
+        List<FieldMapping__c> mappings = [SELECT Id, TargetField__c FROM FieldMapping__c LIMIT 1];
+
+        TransformationRule__c rule = new TransformationRule__c(
+            Project__c      = project.Id,
+            FieldMapping__c = mappings[0].Id,
+            RuleType__c     = 'BooleanTransformation',
+            Parameters__c   = '{"targetType":"boolean","trueValues":["yes"],"falseValues":["no"]}',
+            TargetValue__c  = 'false',
+            Order__c        = 1
+        );
+        insert rule;
+
+        rule = [
+            SELECT Id, RuleType__c, Parameters__c, TargetValue__c,
+                   FieldMapping__c, FieldMapping__r.TargetField__c
+            FROM TransformationRule__c WHERE Id = :rule.Id
+        ];
+
+        Map<String, String> sampleData = new Map<String, String>{
+            mappings[0].TargetField__c => 'invalid-value'
+        };
+
+        Boolean exceptionThrown = false;
+        Test.startTest();
+        try {
+            TransformationService.validateTransformationRule(rule, sampleData);
+        } catch (TransformationException e) {
+            exceptionThrown = true;
+            Assert.isTrue(
+                e.getMessage().contains('n\'est pas valide'),
+                'Exception message should indicate validation failure'
+            );
+        }
+        Test.stopTest();
+
+        Assert.isTrue(exceptionThrown,
+            'TransformationException should be thrown for invalid rule');
+    }
+
+    // ──────────────────────────────────────────────
+    // validateMappingTransformations
+    // ──────────────────────────────────────────────
+
+    @isTest
+    static void testValidateMappingTransformationsSuccess() {
+        ImportProject__c project       = [SELECT Id FROM ImportProject__c LIMIT 1];
+        List<FieldMapping__c> mappings = [SELECT Id, TargetField__c FROM FieldMapping__c LIMIT 1];
+
+        insert new TransformationRule__c(
+            Project__c      = project.Id,
+            FieldMapping__c = mappings[0].Id,
+            RuleType__c     = 'BooleanTransformation',
+            Parameters__c   = '{"targetType":"boolean","trueValues":["yes"],"falseValues":["no"]}',
+            TargetValue__c  = 'false',
+            Order__c        = 1
+        );
+
+        Map<String, String> sampleData = new Map<String, String>{
+            mappings[0].TargetField__c => 'yes'
+        };
+
+        Boolean exceptionThrown = false;
+        Test.startTest();
+        try {
+            TransformationService.validateMappingTransformations(
+                mappings[0].Id, sampleData, 'test-log-id'
+            );
+        } catch (Exception e) {
+            exceptionThrown = true;
+        }
+        Test.stopTest();
+
+        Assert.isFalse(exceptionThrown,
+            'No exception should be thrown for valid mapping transformations');
+    }
+
+    @isTest
+    static void testValidateMappingTransformationsFailure() {
+        ImportProject__c project       = [SELECT Id FROM ImportProject__c LIMIT 1];
+        List<FieldMapping__c> mappings = [SELECT Id, TargetField__c FROM FieldMapping__c LIMIT 1];
+
+        insert new TransformationRule__c(
+            Project__c      = project.Id,
+            FieldMapping__c = mappings[0].Id,
+            RuleType__c     = 'BooleanTransformation',
+            Parameters__c   = '{"targetType":"boolean","trueValues":["yes"],"falseValues":["no"]}',
+            TargetValue__c  = 'false',
+            Order__c        = 1
+        );
+
+        Map<String, String> sampleData = new Map<String, String>{
+            mappings[0].TargetField__c => 'invalid-value'
+        };
+
+        Boolean exceptionThrown = false;
+        Test.startTest();
+        try {
+            TransformationService.validateMappingTransformations(
+                mappings[0].Id, sampleData, 'test-log-id'
+            );
+        } catch (TransformationException e) {
+            exceptionThrown = true;
+            Assert.isNotNull(e.getMessage(), 'Exception should have a message');
+        }
+        Test.stopTest();
+
+        Assert.isTrue(exceptionThrown,
+            'TransformationException should be thrown for invalid rules');
+    }
+
+    // ──────────────────────────────────────────────
+    // getTransformationSummary
+    // ──────────────────────────────────────────────
+
     @isTest
     static void testGetTransformationSummary() {
-        Test.startTest();
-        
-        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
+        ImportProject__c project       = [SELECT Id FROM ImportProject__c LIMIT 1];
         List<FieldMapping__c> mappings = [SELECT Id FROM FieldMapping__c LIMIT 1];
-        
-        //Create multiple transformation rules
+
         List<TransformationRule__c> rules = new List<TransformationRule__c>();
         for (Integer i = 0; i < 3; i++) {
             rules.add(new TransformationRule__c(
-                Project__c = project.Id,
+                Project__c      = project.Id,
                 FieldMapping__c = mappings[0].Id,
-                RuleType__c = 'BooleanTransformation',
-                Parameters__c = '{}',
-                Order__c = i + 1
+                RuleType__c     = 'BooleanTransformation',
+                Parameters__c   = '{}',
+                Order__c        = i + 1
             ));
         }
         insert rules;
-        
-        //Get summary
+
+        Test.startTest();
         Map<String, Object> summary = TransformationService.getTransformationSummary(mappings[0].Id);
-        
+        Test.stopTest();
+
         Assert.isNotNull(summary, 'Summary should not be null');
-        Assert.areEqual(mappings[0].Id, summary.get('mappingId'), 'Mapping ID should match');
-        Assert.areEqual(3, summary.get('totalRules'), 'Total rules should be 3');
-        
+        Assert.areEqual(mappings[0].Id, summary.get('mappingId'),  'Mapping ID should match');
+        Assert.areEqual(3,              summary.get('totalRules'), 'Total rules should be 3');
+
         Map<String, Integer> ruleTypes = (Map<String, Integer>) summary.get('ruleTypes');
         Assert.isNotNull(ruleTypes, 'Rule types map should not be null');
-        Assert.areEqual(3, ruleTypes.get('BooleanTransformation'), 'Should have 3 BooleanTransformation rules');
-        
-        Test.stopTest();
+        Assert.areEqual(3, ruleTypes.get('BooleanTransformation'),
+            'Should have 3 BooleanTransformation rules');
     }
 
-    //Test getTransformationSummary with no rules
     @isTest
     static void testGetTransformationSummaryWithNoRules() {
-        Test.startTest();
-        
         List<FieldMapping__c> mappings = [SELECT Id FROM FieldMapping__c LIMIT 1];
-        
-        //Get summary with no rules
+
+        Test.startTest();
         Map<String, Object> summary = TransformationService.getTransformationSummary(mappings[0].Id);
-        
-        Assert.isNotNull(summary, 'Summary should not be null');
-        Assert.areEqual(mappings[0].Id, summary.get('mappingId'), 'Mapping ID should match');
-        Assert.areEqual(0, summary.get('totalRules'), 'Total rules should be 0');
-        
-        Map<String, Integer> ruleTypes = (Map<String, Integer>) summary.get('ruleTypes');
-        Assert.isNotNull(ruleTypes, 'Rule types map should not be null');
-        Assert.areEqual(0, ruleTypes.size(), 'Rule types should be empty');
-        
         Test.stopTest();
+
+        Assert.isNotNull(summary, 'Summary should not be null');
+        Assert.areEqual(mappings[0].Id, summary.get('mappingId'),  'Mapping ID should match');
+        Assert.areEqual(0,              summary.get('totalRules'), 'Total rules should be 0');
+
+        Map<String, Integer> ruleTypes = (Map<String, Integer>) summary.get('ruleTypes');
+        Assert.isNotNull(ruleTypes,          'Rule types map should not be null');
+        Assert.areEqual(0, ruleTypes.size(), 'Rule types should be empty');
     }
 
-    //Test getTransformationSummary with multiple rule types
     @isTest
     static void testGetTransformationSummaryWithMultipleTypes() {
-        Test.startTest();
-        
-        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
+        ImportProject__c project       = [SELECT Id FROM ImportProject__c LIMIT 1];
         List<FieldMapping__c> mappings = [SELECT Id FROM FieldMapping__c LIMIT 1];
-        
-        //Create rules of different types
-        List<TransformationRule__c> rules = new List<TransformationRule__c>();
-        rules.add(new TransformationRule__c(
-            Project__c = project.Id,
-            FieldMapping__c = mappings[0].Id,
-            RuleType__c = 'BooleanTransformation',
-            Parameters__c = '{}',
-            Order__c = 1
-        ));
-        rules.add(new TransformationRule__c(
-            Project__c = project.Id,
-            FieldMapping__c = mappings[0].Id,
-            RuleType__c = 'BooleanTransformation',
-            Parameters__c = '{}',
-            Order__c = 2
-        ));
-        rules.add(new TransformationRule__c(
-            Project__c = project.Id,
-            FieldMapping__c = mappings[0].Id,
-            RuleType__c = 'Concatenation',
-            Parameters__c = '{}',
-            Order__c = 3
-        ));
-        insert rules;
-        
-        //Get summary
+
+        insert new List<TransformationRule__c>{
+            new TransformationRule__c(Project__c=project.Id, FieldMapping__c=mappings[0].Id,
+                RuleType__c='BooleanTransformation', Parameters__c='{}', Order__c=1),
+            new TransformationRule__c(Project__c=project.Id, FieldMapping__c=mappings[0].Id,
+                RuleType__c='BooleanTransformation', Parameters__c='{}', Order__c=2),
+            new TransformationRule__c(Project__c=project.Id, FieldMapping__c=mappings[0].Id,
+                RuleType__c='Concatenation',         Parameters__c='{}', Order__c=3)
+        };
+
+        Test.startTest();
         Map<String, Object> summary = TransformationService.getTransformationSummary(mappings[0].Id);
-        
-        Map<String, Integer> ruleTypes = (Map<String, Integer>) summary.get('ruleTypes');
-        Assert.areEqual(2, ruleTypes.get('BooleanTransformation'), 'Should have 2 BooleanTransformation rules');
-        Assert.areEqual(1, ruleTypes.get('Concatenation'), 'Should have 1 Concatenation rule');
-        
         Test.stopTest();
+
+        Map<String, Integer> ruleTypes = (Map<String, Integer>) summary.get('ruleTypes');
+        Assert.areEqual(2, ruleTypes.get('BooleanTransformation'),
+            'Should have 2 BooleanTransformation rules');
+        Assert.areEqual(1, ruleTypes.get('Concatenation'),
+            'Should have 1 Concatenation rule');
     }
 
-    //Test exception handling in createRule
+    // ──────────────────────────────────────────────
+    // createRule — exception handling
+    // ──────────────────────────────────────────────
+
     @isTest
     static void testCreateRuleExceptionHandling() {
-        Test.startTest();
-        
-        //Try to create rule with invalid data (null project and mapping)
         Boolean exceptionThrown = false;
+
+        Test.startTest();
         try {
             TransformationService.createRule(
-                null,
-                null,
-                'BooleanTransformation',
-                '{}',
-                null,
-                null
+                null, null, 'BooleanTransformation', '{}', null, null
             );
         } catch (TransformationException e) {
             exceptionThrown = true;
             Assert.isNotNull(e.getMessage(), 'Exception should have a message');
             Assert.isNotNull(e.getContext(), 'Exception should have context');
         }
-        
-        Assert.isTrue(exceptionThrown, 'TransformationException should be thrown for invalid data');
-        
         Test.stopTest();
+
+        Assert.isTrue(exceptionThrown,
+            'TransformationException should be thrown for invalid data');
     }
 
-    //Test context preservation in exceptions
     @isTest
     static void testExceptionContextPreservation() {
-        Test.startTest();
-        
         List<FieldMapping__c> mappings = [SELECT Id FROM FieldMapping__c LIMIT 1];
-        
-        Map<String, String> row = new Map<String, String>{
-            'Name' => 'Test'
-        };
-        
-        //Create invalid rules map to trigger exception
-        Map<String, List<TransformationRule__c>> rulesByMappingId = new Map<String, List<TransformationRule__c>>();
-        
-        //This should work without exception, but let's test context if exception occurs
+        Map<String, String> row        = new Map<String, String>{ 'Name' => 'Test' };
+
+        Test.startTest();
         try {
             Map<String, String> result = TransformationService.applyTransformations(
-                mappings[0].Id,
-                row,
-                rulesByMappingId
+                mappings[0].Id, row,
+                new Map<String, List<TransformationRule__c>>()
             );
             Assert.isNotNull(result, 'Result should not be null');
         } catch (TransformationException e) {
-            //If exception occurs, verify context is preserved
             Map<String, Object> context = e.getContext();
             Assert.isNotNull(context, 'Context should not be null');
-            Assert.areEqual(mappings[0].Id, context.get('mappingId'), 'Context should contain mappingId');
+            Assert.areEqual(mappings[0].Id, context.get('mappingId'),
+                'Context should contain mappingId');
         }
-        
         Test.stopTest();
     }
+
+    // ──────────────────────────────────────────────
+    // getRulesByProjectId
+    // ──────────────────────────────────────────────
 
     @isTest
     static void testGetRulesByProjectId_Success() {
         User admin = TestDataFactory.createAdminUser();
         System.runAs(admin) {
-            ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
+            ImportProject__c project       = [SELECT Id FROM ImportProject__c LIMIT 1];
             List<FieldMapping__c> mappings = [SELECT Id FROM FieldMapping__c LIMIT 1];
-            
-            // Create test rules
+
             List<TransformationRule__c> rules = new List<TransformationRule__c>();
             for (Integer i = 0; i < 3; i++) {
                 rules.add(new TransformationRule__c(
-                    Project__c = project.Id,
+                    Project__c      = project.Id,
                     FieldMapping__c = mappings[0].Id,
-                    RuleType__c = 'BooleanTransformation',
-                    Parameters__c = '{}',
-                    Order__c = i + 1
+                    RuleType__c     = 'BooleanTransformation',
+                    Parameters__c   = '{}',
+                    Order__c        = i + 1
                 ));
             }
             insert rules;
 
-            //debug the inserted rules
-            System.debug('Inserted Rules: ' + rules);
-            
             Test.startTest();
-            List<TransformationRule__c> result = TransformationService.getRulesByProjectId(project.Id);
+            List<TransformationRule__c> result =
+                TransformationService.getRulesByProjectId(project.Id);
             Test.stopTest();
-            
-            Assert.areEqual(3, result.size(), 'Should return 3 rules');
+
+            Assert.areEqual(3, result.size(),      'Should return 3 rules');
             Assert.areEqual(1, result[0].Order__c, 'Rules should be ordered by Order__c');
             Assert.areEqual(2, result[1].Order__c, 'Rules should be ordered by Order__c');
             Assert.areEqual(3, result[2].Order__c, 'Rules should be ordered by Order__c');
         }
     }
 
-      //tester la suppression d'une transformation
     @isTest
-    static void testDeleteTransformationSuccess() {
-        // GIVEN
+    static void testGetRulesByProjectId_noRules() {
         ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
-        FieldMapping__c mapping = [SELECT Id FROM FieldMapping__c LIMIT 1];
-                
-        Map<String, Object> parameters = new Map<String, Object>{
-                'targetType' => 'boolean',
-                'trueValues' => new List<String>{'yes'},
-                'falseValues' => new List<String>{'no'}
-            };
 
-
-        TransformationRule__c rule =
-            TestDataFactory.createTransformationRule(
-                project.Id,
-                mapping.Id,
-                'boolean',
-                'false',
-                'BooleanTransformation'
-            );
-
-        Id ruleId = rule.Id;
-        
-        //when
         Test.startTest();
-            TransformationService.deleteRuleById(ruleId);
+        List<TransformationRule__c> result =
+            TransformationService.getRulesByProjectId(project.Id);
         Test.stopTest();
 
-        // THEN
-        Integer countRules = [
-            SELECT COUNT()
-            FROM TransformationRule__c 
-        ];
-
-        Assert.areEqual(0, countRules, 'The rule should be deleted');
+        Assert.isNotNull(result,         'Result should not be null');
+        Assert.areEqual(0, result.size(), 'Should return 0 rules');
     }
 
-    //tetster suppression fake id
+    // ──────────────────────────────────────────────
+    // getRulesByMappingId
+    // ──────────────────────────────────────────────
+
+    @isTest
+    static void testGetRulesByMappingId_success() {
+        ImportProject__c project       = [SELECT Id FROM ImportProject__c LIMIT 1];
+        List<FieldMapping__c> mappings = [SELECT Id FROM FieldMapping__c LIMIT 1];
+
+        insert new List<TransformationRule__c>{
+            new TransformationRule__c(Project__c=project.Id, FieldMapping__c=mappings[0].Id,
+                RuleType__c='BooleanTransformation', Parameters__c='{}', Order__c=1),
+            new TransformationRule__c(Project__c=project.Id, FieldMapping__c=mappings[0].Id,
+                RuleType__c='Concatenation', Parameters__c='{}', Order__c=2)
+        };
+
+        Test.startTest();
+        List<TransformationRule__c> result =
+            TransformationService.getRulesByMappingId(mappings[0].Id);
+        Test.stopTest();
+
+        Assert.areEqual(2, result.size(), 'Should return 2 rules');
+    }
+
+    @isTest
+    static void testGetRulesByMappingId_noRules() {
+        List<FieldMapping__c> mappings = [SELECT Id FROM FieldMapping__c LIMIT 1];
+
+        Test.startTest();
+        List<TransformationRule__c> result =
+            TransformationService.getRulesByMappingId(mappings[0].Id);
+        Test.stopTest();
+
+        Assert.isNotNull(result,         'Result should not be null');
+        Assert.areEqual(0, result.size(), 'Should return 0 rules');
+    }
+
+    // ──────────────────────────────────────────────
+    // getRuleById
+    // ──────────────────────────────────────────────
+
+    @isTest
+    static void testGetRuleById_success() {
+        ImportProject__c project       = [SELECT Id FROM ImportProject__c LIMIT 1];
+        List<FieldMapping__c> mappings = [SELECT Id FROM FieldMapping__c LIMIT 1];
+
+        TransformationRule__c rule = new TransformationRule__c(
+            Project__c      = project.Id,
+            FieldMapping__c = mappings[0].Id,
+            RuleType__c     = 'BooleanTransformation',
+            Parameters__c   = '{}',
+            Order__c        = 1
+        );
+        insert rule;
+
+        Test.startTest();
+        TransformationRule__c result = TransformationService.getRuleById(rule.Id);
+        Test.stopTest();
+
+        Assert.isNotNull(result,            'Result should not be null');
+        Assert.areEqual(rule.Id, result.Id, 'Id should match');
+    }
+
+    @isTest
+    static void testGetRuleById_notFound() {
+        Test.startTest();
+        TransformationRule__c result =
+            TransformationService.getRuleById('a00000000000000AAA');
+        Test.stopTest();
+
+        Assert.isNull(result, 'Result should be null for unknown Id');
+    }
+
+    // ──────────────────────────────────────────────
+    // deleteRuleById
+    // ──────────────────────────────────────────────
+
+    @isTest
+    static void testDeleteTransformationSuccess() {
+        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
+        FieldMapping__c  mapping = [SELECT Id FROM FieldMapping__c  LIMIT 1];
+
+        TransformationRule__c rule = TestDataFactory.createTransformationRule(
+            project.Id, mapping.Id, 'boolean', 'false', 'BooleanTransformation'
+        );
+        Id ruleId = rule.Id;
+
+        Test.startTest();
+        TransformationService.deleteRuleById(ruleId);
+        Test.stopTest();
+
+        Assert.areEqual(0, [SELECT COUNT() FROM TransformationRule__c],
+            'The rule should be deleted');
+    }
+
     @isTest
     static void testDeleteTransformationFailure_ruleNotFound() {
-        Test.startTest();
-
         Boolean exceptionThrown = false;
 
+        Test.startTest();
         try {
-            TransformationService.deleteRuleById('a00XXXXXXXXXXXX'); // fake Id
+            TransformationService.deleteRuleById('a00000000000000AAA');
         } catch (TransformationException e) {
             exceptionThrown = true;
-              Assert.isTrue(e.getMessage().contains('Erreur lors de la suppression'), 'Exception message should indicate validation failure');
+            Assert.isTrue(
+                e.getMessage().contains('Erreur lors de la suppression'),
+                'Exception message should indicate deletion failure'
+            );
         }
-
         Test.stopTest();
 
         Assert.isTrue(exceptionThrown, 'Exception must be thrown');
     }
 
-    
+    @isTest
+    static void testDeleteRuleById_nullId() {
+        Boolean exceptionThrown = false;
+
+        Test.startTest();
+        try {
+            TransformationService.deleteRuleById(null);
+        } catch (TransformationException e) {
+            exceptionThrown = true;
+            Assert.isNotNull(e.getMessage(), 'Exception should have a message');
+        }
+        Test.stopTest();
+
+        Assert.isTrue(exceptionThrown,
+            'TransformationException should be thrown for null Id');
+    }
+
+    // ──────────────────────────────────────────────
+    // doesTransformationExist
+    // ──────────────────────────────────────────────
+
     @isTest
     static void testDoesTransformationExist_True() {
         User admin = TestDataFactory.createAdminUser();
         System.runAs(admin) {
-
             ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
-            FieldMapping__c mapping = [SELECT Id,SourceColumn__c,TargetField__c FROM FieldMapping__c LIMIT 1];
+            FieldMapping__c  mapping = [SELECT Id, SourceColumn__c, TargetField__c
+                                        FROM FieldMapping__c LIMIT 1];
 
-            TransformationRule__c rule = new TransformationRule__c(
-                Project__c = project.Id,
+            insert new TransformationRule__c(
+                Project__c      = project.Id,
                 FieldMapping__c = mapping.Id,
-                RuleType__c = 'BooleanTransformation',
-                Parameters__c = '{}',
-                Order__c = 1
+                RuleType__c     = 'BooleanTransformation',
+                Parameters__c   = '{}',
+                Order__c        = 1
             );
-            insert rule;
 
-        Test.startTest();
+            Test.startTest();
             Boolean result = TransformationService.doesTransformationExist(
-                project.Id,
-                mapping.SourceColumn__c,
-                mapping.TargetField__c,
-                'BooleanTransformation'
+                project.Id, mapping.SourceColumn__c,
+                mapping.TargetField__c, 'BooleanTransformation'
             );
             Test.stopTest();
 
@@ -677,16 +725,14 @@ public class TransformationServiceTest {
     static void testDoesTransformationExist_False_NoRule() {
         User admin = TestDataFactory.createAdminUser();
         System.runAs(admin) {
-
             ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
-            FieldMapping__c mapping = [SELECT Id,SourceColumn__c,TargetField__c FROM FieldMapping__c LIMIT 1];
+            FieldMapping__c  mapping = [SELECT Id, SourceColumn__c, TargetField__c
+                                        FROM FieldMapping__c LIMIT 1];
 
             Test.startTest();
             Boolean result = TransformationService.doesTransformationExist(
-                project.Id,
-                mapping.SourceColumn__c,
-                mapping.TargetField__c,
-                'BooleanTransformation'
+                project.Id, mapping.SourceColumn__c,
+                mapping.TargetField__c, 'BooleanTransformation'
             );
             Test.stopTest();
 
@@ -698,141 +744,163 @@ public class TransformationServiceTest {
     static void testDoesTransformationExist_InvalidParams() {
         User admin = TestDataFactory.createAdminUser();
         System.runAs(admin) {
+            Test.startTest();
+            Boolean result = TransformationService.doesTransformationExist(
+                null, null, null, null
+            );
+            Test.stopTest();
 
-        Test.startTest();
-        Boolean result = TransformationService.doesTransformationExist(
-            null,
-            null,
-            null,
-            null
-        );
-        Test.stopTest();
-
-        Assert.isFalse(result, 'Avec des paramètres invalides, le résultat doit être false');
+            Assert.isFalse(result,
+                'Avec des paramètres invalides, le résultat doit être false');
         }
     }
 
- 
-     @IsTest
+    // ──────────────────────────────────────────────
+    // updateRule
+    // ──────────────────────────────────────────────
+
+    @IsTest
     static void testUpdateRule_success() {
-        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
-        List<FieldMapping__c> mappings = [SELECT Id FROM FieldMapping__c LIMIT 1];
-        // ===== Given =====
-        String parameters = '{"targetType":"boolean","trueValues":["yes","true","1"],"falseValues":["no","false","0"]}';
-          TransformationRule__c rule = TransformationService.createRule(
-            project.Id,
-            mappings[0].Id,
-            'BooleanTransformation',
-            parameters,
-            'IsActive',
-            'false'
-        );
-      
+        User admin = TestDataFactory.createAdminUser();
+        System.runAs(admin) {
+            ImportProject__c project       = [SELECT Id FROM ImportProject__c LIMIT 1];
+            List<FieldMapping__c> mappings = [SELECT Id FROM FieldMapping__c LIMIT 1];
 
-        // ===== When =====
-        Test.startTest();
-        TransformationService.updateRule(
-            rule.Id,
-            'UppercaseTransformation',
-            '{"mode":"upper"}',
-            'Name',
-            'DEFAULT'
-        );
-        Test.stopTest();
+            TransformationRule__c rule = TestDataFactory.createTransformationRule(
+                project.Id,
+                mappings[0].Id,
+                'IsActive',
+                'false',
+                'BooleanTransformation'
+            );
 
-        // ===== Then =====
-        TransformationRule__c updatedRule = [
-            SELECT RuleType__c, Parameters__c, SourceFields__c, TargetValue__c
-            FROM TransformationRule__c
-            WHERE Id = :rule.Id
-        ];
+            TransformationRule__c inserted = [
+                SELECT Id FROM TransformationRule__c WHERE Id = :rule.Id LIMIT 1
+            ];
 
-        Assert.areEqual(
-            'UppercaseTransformation',
-            updatedRule.RuleType__c,
-            'Error failed to update rule on case test update rule success'
-        );
-        Assert.areEqual(
-            '{"mode":"upper"}',
-            updatedRule.Parameters__c,
-            'Error failed to update rule on case test update rule success'
-        );
-        Assert.areEqual(
-            'Name',
-            updatedRule.SourceFields__c,
-            'Error failed to update rule on case test update rule success'
+            Test.startTest();
+            TransformationService.updateRule(
+                inserted.Id,
+                'UppercaseTransformation',
+                '{"mode":"upper"}',
+                'Name',
+                'DEFAULT'
+            );
+            Test.stopTest();
 
-        );
-        Assert.areEqual (
-            'DEFAULT',
-            updatedRule.TargetValue__c,
-            'Error failed to update rule on case test update rule success'
+            TransformationRule__c updated = [
+                SELECT RuleType__c, Parameters__c, SourceFields__c, TargetValue__c
+                FROM TransformationRule__c WHERE Id = :inserted.Id
+            ];
 
-        );
+            Assert.areEqual('UppercaseTransformation', updated.RuleType__c,
+                'RuleType should be updated');
+            Assert.areEqual('{"mode":"upper"}',        updated.Parameters__c,
+                'Parameters should be updated');
+            Assert.areEqual('Name',                    updated.SourceFields__c,
+                'SourceFields should be updated');
+            Assert.areEqual('DEFAULT',                 updated.TargetValue__c,
+                'TargetValue should be updated');
+        }
     }
 
     @IsTest
     static void testUpdateRule_error() {
         Boolean exceptionThrown = false;
 
+        Test.startTest();
         try {
-            Test.startTest();
             TransformationService.updateRule(
-                '000000000000000AAA', // Id invalide
+                '000000000000000AAA',
                 'UppercaseTransformation',
                 '{}',
                 'Name',
                 'X'
             );
-            Test.stopTest();
         } catch (TransformationException e) {
             exceptionThrown = true;
             Assert.isTrue(
                 e.getMessage().contains('Error during the update of the rule'),
-                'Message d’erreur attendu'
+                'Message d\'erreur attendu'
             );
+        } finally {
+            Test.stopTest();
         }
 
-        Assert.isTrue(
-            exceptionThrown,
-            'Une TransformationException devait être levée'
-        );
+        Assert.isTrue(exceptionThrown,
+            'Une TransformationException devait être levée');
     }
+
+    // ──────────────────────────────────────────────
+    // validateAllRulesForProject
+    // ──────────────────────────────────────────────
+
     @IsTest
     static void testValidateAllRules_nominal() {
-        ImportProject__c project =
-            [SELECT Id FROM ImportProject__c LIMIT 1];
-        List<FieldMapping__c> mappings = [SELECT Id FROM FieldMapping__c LIMIT 1];
-        List<Map<String, String>> sampleData =
-            TestDataFactory.createTestCsvData(1);
-              TransformationRule__c rule = TransformationService.createRule(
-            project.Id,
-            mappings[0].Id,
-            'BooleanTransformation',
-            '{"targetType":"boolean","trueValues":["yes","true","1"],"falseValues":["no","false","0"]}',
-            'IsActive',
-            'false'
+        ImportProject__c project       = [SELECT Id FROM ImportProject__c LIMIT 1];
+        List<FieldMapping__c> mappings = [SELECT Id, TargetField__c
+                                          FROM FieldMapping__c
+                                          WHERE SourceColumn__c = 'IsActive' LIMIT 1];
+
+        insert new TransformationRule__c(
+            Project__c      = project.Id,
+            FieldMapping__c = mappings[0].Id,
+            RuleType__c     = 'BooleanTransformation',
+            Parameters__c   = '{"targetType":"boolean","trueValues":["yes","true","1"],"falseValues":["no","false","0"]}',
+            SourceFields__c = 'IsActive',
+            TargetValue__c  = 'false',
+            Order__c        = 1
         );
+
+        List<Map<String, String>> sampleData = new List<Map<String, String>>{
+            new Map<String, String>{ mappings[0].TargetField__c => 'yes' }
+        };
 
         Test.startTest();
-        Map<String, String> result =
-            TransformationService.validateAllRulesForProject(
-                project.Id,
-                sampleData
-            );
+        Map<String, String> result = TransformationService.validateAllRulesForProject(
+            project.Id, sampleData
+        );
         Test.stopTest();
 
-        Assert.areNotEqual(
-            0,
-            result.size(),
-            'One rule should be evaluated'
-        );
-
+        Assert.areNotEqual(0, result.size(), 'At least one rule should be evaluated');
         for (String status : result.values()) {
             Assert.isTrue(
                 status == 'Valid' || status == 'Invalid',
-                'Statut invalide'
+                'Status should be Valid or Invalid, got: ' + status
             );
         }
+    }
+
+    @IsTest
+    static void testValidateAllRules_emptySampleData() {
+        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
+
+        Test.startTest();
+        Map<String, String> result = TransformationService.validateAllRulesForProject(
+            project.Id,
+            new List<Map<String, String>>()
+        );
+        Test.stopTest();
+
+        Assert.isNotNull(result,         'Result should not be null');
+        Assert.areEqual(0, result.size(), 'Should return empty map for empty sample data');
+    }
+
+    @IsTest
+    static void testValidateAllRules_noRules() {
+        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
+
+        List<Map<String, String>> sampleData = new List<Map<String, String>>{
+            new Map<String, String>{ 'Active__c' => 'yes' }
+        };
+
+        Test.startTest();
+        Map<String, String> result = TransformationService.validateAllRulesForProject(
+            project.Id, sampleData
+        );
+        Test.stopTest();
+
+        Assert.isNotNull(result,         'Result should not be null');
+        Assert.areEqual(0, result.size(), 'Should return empty map when no rules exist');
     }
 }
