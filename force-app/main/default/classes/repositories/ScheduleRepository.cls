@@ -1,282 +1,363 @@
 /**
- * @description       :  all operations available on Schedule__c Object
- * @author            : mouhamed niang
- * @group             :  
- * @last modified on  : 20-01-2025
- * @last modified by  : mouhamed niang
- * Modifications : 
- *  - Mise à jour de la méthode de suppression  deleteScheduleById
-**/
+ * @description : Repository for Schedule__c - toutes les opérations SOQL/DML
+ * @author      : mouhamed niang
+ * @Lastmodified    : 31-03-2026
+ * @Modification : Remove Shadowing filter
+ */
 public with sharing class ScheduleRepository {
-    
-    // Enregistrement d'une nouvelle planification 
+
+  
+    // *** DML Operation *** 
+    /**
+     * Insérer ou mettre à jour un Schedule__c
+     */
     public static Schedule__c addSchedule(Schedule__c schedule) {
-        if(SecurityUtils.isCreateable(Schedule__c.SObjectType)){
-            try {
-                upsert schedule;
-                return schedule;
-            } catch (DmlException e) {
-                 //ErrorLogService.logException(e);
-                 throw new DmlException(e.getMessage());
-            }
+        if (!SecurityUtils.isCreateable(Schedule__c.SObjectType)) {
+            throw new ApplicationException('Insufficient permissions to create Schedule__c');
         }
-        return null;
-    }
-
-    // Suppression d'une planification par l'id
-    public static void deleteScheduleById(String scheduleId) {
         try {
-            // Trouver les jobs Apex liés
-            List<CronTrigger> triggers = [
-                SELECT Id, CronJobDetailId 
-                FROM CronTrigger 
-                WHERE CronJobDetail.Name = :('Schedule__c_' + scheduleId)
-            ];
-
-            for(CronTrigger ct : triggers){
-                System.abortJob(ct.Id);
-            }
-
-            delete [SELECT Id FROM Schedule__c WHERE Id = :scheduleId LIMIT 1]; //suppression
+            upsert schedule;
+            return schedule;
         } catch (DmlException e) {
             ErrorLogService.logException(e);
             throw new ApplicationException(e.getMessage());
         }
     }
 
-    // Récupérer toutes les planifications par l'identifiant du projet
-    public static List<Schedule__c> getSchedulesByIdProject(String idProject){
-        return  [
-                SELECT Id, Name, Frequency__c, NextRun__c, 
-                       Project__r.Name, Project__r.TargetObject__c, 
-                       Project__r.Description__c, Project__c
-                FROM Schedule__c
-                WHERE Project__c =:idProject
-                ORDER BY CreatedDate DESC
-            ];
-    }
-
-    // Récupérer toutes les planifications avec les données d'exécution via une jointure séparée
-    public static List<ScheduleService.ScheduleWrapper> getSchedulesWithExecutionsByIdProject(Id idProject) {
-        List<ScheduleService.ScheduleWrapper> results = new List<ScheduleService.ScheduleWrapper>();
-        
-        if (SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType) && SecurityUtils.isAccessible(Schema.ImportExecution__c.SObjectType)) {
-            try {
-                // Récupérer tous les schedules
-                List<Schedule__c> schedules = getSchedulesByIdProject(idProject);
-                
-                // Récupérer tous les ImportExecution liés aux projets de ces schedules
-                Set<Id> projectIds = new Set<Id>(); 
-                projectIds.add(idProject);
-                    
-
-                // Map des exécutions par projet
-                Map<Id, List<ImportExecution__c>> executionsByProject = getExecutionsByProject(projectIds);                
-                
-                // Créer les wrappers (Schedule & ImportExecution)
-                results = buildScheduleWrapper(schedules, executionsByProject);
-                return results;
-    
-            } catch (Exception e) {
-                ErrorLogService.logException(e);
-                throw new ApplicationException(e.getMessage());
-            }
+    /**
+     * Supprimer un Schedule__c et avorter ses CronTriggers associés
+     */
+    public static void deleteScheduleById(String scheduleId) {
+        if (String.isBlank(scheduleId)) {
+            throw new ApplicationException('Schedule ID cannot be blank');
         }
-        return results;
-    }
-
-    // Filtrer planifications par le statut d'exécution d'importation
-    public static List<ScheduleService.ScheduleWrapper> getSchedulesByExecutionStatusAndIdProject(String executionStatus , String idProject) {
-        List<ScheduleService.ScheduleWrapper> results = new List<ScheduleService.ScheduleWrapper>();
-        if (!SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType)) {
-           return results;
+        if (!SecurityUtils.isDeletable(Schedule__c.SObjectType)) {
+            throw new ApplicationException('Insufficient permissions to delete Schedule__c');
         }
         try {
-            // Récupérer tous les schedules
-            List<Schedule__c> schedules = getSchedulesByIdProject(idProject);
-            
-            // Récupérer tous les ImportExecution liés aux projets de ces schedules
-            Set<Id> projectIds = new Set<Id>();
-            projectIds.add(idProject);
-               
+            // Aborter les jobs Cron liés
+            List<CronTrigger> triggers = [
+                SELECT Id FROM CronTrigger
+                WHERE CronJobDetail.Name LIKE :('%' + scheduleId + '%')
+                LIMIT 100
+            ];
+            for (CronTrigger ct : triggers) {
+                System.abortJob(ct.Id);
+            }
 
-            // Map des exécutions par projet et statut d'exécution
-            Map<Id, List<ImportExecution__c>> executionsByProject = getExecutionsByProjectAndStatus(projectIds, executionStatus);                
-            
-            // Créer les wrappers (Schedule & ImportExecution)
-            results = buildScheduleWrapper(schedules, executionsByProject);
-            return results;
+            List<Schedule__c> toDelete = [
+                SELECT Id FROM Schedule__c WHERE Id = :scheduleId LIMIT 1
+            ];
+            if (!toDelete.isEmpty()) {
+                delete toDelete;
+            }
+        } catch (DmlException e) {
+            ErrorLogService.logException(e);
+            throw new ApplicationException(e.getMessage());
+        }
+    }
+
+  
+    // *** QUERIES SIMPLES ***
+
+    /**
+     * Récupérer un Schedule__c par son Id
+     */
+    public static Schedule__c getScheduleById(String scheduleId) {
+        if (!SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType)) return null;
+        if (String.isBlank(scheduleId)) return null;
+        try {
+            List<Schedule__c> results = [
+                SELECT Id, Name, Frequency__c, NextRun__c,
+                       Project__c,
+                       Project__r.Id,
+                       Project__r.Name,
+                       Project__r.TargetObject__c,
+                       Project__r.Description__c
+                FROM Schedule__c
+                WHERE Id = :scheduleId
+                LIMIT 1
+            ];
+            return results.isEmpty() ? null : results[0];
         } catch (Exception e) {
             ErrorLogService.logException(e);
             throw new ApplicationException(e.getMessage());
         }
     }
 
-      
     /**
-     * FIX: Méthodes manquantes pour résoudre erreur de compilation
-     * @description: Récupérer exécutions par projets (TOUS les statuts)
-     * @param projectIds Set d'Ids de projets
-     * @return Map<Id, List<ImportExecution__c>> Exécutions groupées par projet
+     * Récupérer tous les schedules d'un projet
      */
-    private static Map<Id, List<ImportExecution__c>> getExecutionsByProject(Set<Id> projectIds) {
-        return getExecutionsByProject(projectIds, null);
+    public static List<Schedule__c> getSchedulesByprojectId(String projectId) {
+        if (!SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType)) {
+            return new List<Schedule__c>();
+        }
+        if (String.isBlank(projectId)) return new List<Schedule__c>();
+        try {
+            return [
+                SELECT Id, Name, Frequency__c, NextRun__c,
+                       Project__c,
+                       Project__r.Id,
+                       Project__r.Name,
+                       Project__r.TargetObject__c,
+                       Project__r.Description__c
+                FROM Schedule__c
+                WHERE Project__c = :projectId
+                ORDER BY CreatedDate DESC
+            ];
+        } catch (Exception e) {
+            ErrorLogService.logException(e);
+            throw new ApplicationException(e.getMessage());
+        }
     }
 
     /**
-     * @description Récupérer exécutions par projets ET statut
-     * @param projectIds Set d'Ids de projets
-     * @param status Statut à filtrer
-     * @return Map<Id, List<ImportExecution__c>> Exécutions filtrées
+     * Récupérer les schedules dont NextRun__c est passé (à exécuter)
      */
-    private static Map<Id, List<ImportExecution__c>> getExecutionsByProjectAndStatus(
-        Set<Id> projectIds, 
-        String status
-    ) {
-        return getExecutionsByProject(projectIds, status);
-    }
-
     public static List<Schedule__c> getPastSchedules() {
-        if(SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType)){
-            try {
-                Datetime nowDate = System.now();
-                return [
-                    SELECT Id, Project__c, Frequency__c, NextRun__c
-                    FROM Schedule__c
-                    WHERE NextRun__c <= :nowDate
-                ];
-            } catch(ApplicationException e){
-                ErrorLogService.logException(e);
-                throw new ApplicationException(e.getMessage());
-            }
+        if (!SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType)) {
+            return new List<Schedule__c>();
         }
-        return new List<Schedule__c>();
+        try {
+            Datetime now = System.now();
+            return [
+                SELECT Id, Project__c, Frequency__c, NextRun__c
+                FROM Schedule__c
+                WHERE NextRun__c <= :now
+                ORDER BY NextRun__c ASC
+            ];
+        } catch (Exception e) {
+            ErrorLogService.logException(e);
+            throw new ApplicationException(e.getMessage());
+        }
     }
 
-    // Récupérer les planifications par le nom du projet
+   
+    // *** WRAPPERS ***
+
+    /**
+     * Récupérer les schedules avec leurs exécutions pour un projet
+     */
+    public static List<ScheduleService.ScheduleWrapper> getSchedulesWithExecutionsByprojectId(Id projectId) {
+        if (!SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType) ||
+            !SecurityUtils.isAccessible(Schema.ImportExecution__c.SObjectType)) {
+            return new List<ScheduleService.ScheduleWrapper>();
+        }
+        if (projectId == null) return new List<ScheduleService.ScheduleWrapper>();
+        try {
+            List<Schedule__c> schedules = getSchedulesByprojectId(projectId);
+            if (schedules.isEmpty()) return new List<ScheduleService.ScheduleWrapper>();
+
+            Map<Id, List<ImportExecution__c>> executionsByProject =
+                getExecutionsByProject(projectId, null);
+            return buildScheduleWrapper(schedules, executionsByProject);
+        } catch (Exception e) {
+            ErrorLogService.logException(e);
+            throw new ApplicationException(e.getMessage());
+        }
+    }
+
+    /**
+     * Récupérer les schedules filtrés par statut d'exécution pour un projet
+     */
+    public static List<ScheduleService.ScheduleWrapper> getSchedulesByExecutionStatusAndprojectId(
+        String executionStatus,
+        String projectId
+    ) {
+        if (!SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType) ||
+            !SecurityUtils.isAccessible(Schema.ImportExecution__c.SObjectType)) {
+            return new List<ScheduleService.ScheduleWrapper>();
+        }
+        if (String.isBlank(projectId)) return new List<ScheduleService.ScheduleWrapper>();
+        try {
+            List<Schedule__c> schedules = getSchedulesByprojectId(projectId);
+            if (schedules.isEmpty()) return new List<ScheduleService.ScheduleWrapper>();
+
+            List<ImportExecution__c> filteredExecutions = [
+                SELECT Id, Status__c, Type__c, Phase__c,
+                       StartTime__c, EndTime__c,
+                       TotalRecords__c, ProcessedRecords__c, FailedRecords__c,
+                       ApexJobId__c, RetryCount__c, MaxRetries__c,
+                       Project__c
+                FROM ImportExecution__c
+                WHERE Project__c = :projectId
+                AND   Status__c  = :executionStatus
+
+                ORDER BY StartTime__c DESC
+            ];
+
+            List<ScheduleService.ScheduleWrapper> wrappers = new List<ScheduleService.ScheduleWrapper>();
+            for (Schedule__c schedule : schedules) {
+                ScheduleService.ScheduleWrapper wrapper = new ScheduleService.ScheduleWrapper();
+                wrapper.project = new ImportProject__c(
+                    Id              = schedule.Project__c,
+                    Name            = schedule.Project__r.Name,
+                    TargetObject__c = schedule.Project__r.TargetObject__c
+                );
+                wrapper.schedules        = new List<Schedule__c>{ schedule };
+                wrapper.importExecutions = filteredExecutions;
+                wrappers.add(wrapper);
+            }
+            return wrappers;
+        } catch (Exception e) {
+            ErrorLogService.logException(e);
+            throw new ApplicationException(e.getMessage());
+        }
+    }
+
+    /**
+     * Récupérer les schedules par nom de projet (LIKE)
+     */
     public static List<ScheduleService.ScheduleWrapper> getSchedulesByProjectName(String projectName) {
-        List<ScheduleService.ScheduleWrapper> results = new List<ScheduleService.ScheduleWrapper>();
-        if(SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType)){
-            try {
-                // Filtrer planification par le nom du projet 
-                List<Schedule__c> schedules = [
-                    SELECT Id, NextRun__c, Name, Frequency__c,
-                    Project__r.Name,
-                    Project__r.Id, Project__r.TargetObject__c,
-                    Project__r.Description__c
-                    FROM Schedule__c
-                    WHERE Project__r.Name LIKE :('%' + projectName + '%')
-                    LIMIT 50
-                ];
-                
-                // Récupérer tous les ImportExecution liés aux projets de ces schedules
-                Set<Id> projectIds = new Set<Id>();
-                for (Schedule__c schedule : schedules) {
-                    if (schedule.Project__c != null) {
-                        projectIds.add(schedule.Project__c);
-                    }
-                }
-
-                // Map des exécutions par projet (tous statuts)
-                Map<Id, List<ImportExecution__c>> executionsByProject =getExecutionsByProject(projectIds,null);                
-                
-                // Créer les wrappers (Schedule & ImportExecution)
-                results = buildScheduleWrapper(schedules, executionsByProject);
-                return results;
-
-            } catch(ApplicationException e){
-                ErrorLogService.logException(e);
-                throw new ApplicationException(e.getMessage());
-            }
-        } 
-        return results; 
-    }
-
-    // Récupérer la plannification par l'id
-    public  static Schedule__c getScheduleById(String scheduleId) {
-          if(SecurityUtils.isCreateable(Schema.Schedule__c.SObjectType)){
-            try {
-                return [
-                    SELECT NextRun__c, Name, Id,Frequency__c 
-                    FROM Schedule__c
-                    WHERE Id =: scheduleId
-                    LIMIT 1
-                ];
-            }catch(ApplicationException e){
-                   //ErrorLogService.logException(e);
-                throw new ApplicationException(e.getMessage());
-            }
-          }
-          return null; 
-    }
-
-
-    // Récupérer les planifications par la fréquence et l'id du projet
-    public static List<Schedule__c> getSchedulesByFrequencyAndProjectId(ImportMateEnum.FrequencyEnum frequence, String idProject) {
-        if(SecurityUtils.isCreateable(Schema.Schedule__c.SObjectType)){ 
-            try {
-                String keyword = String.valueOf(frequence);
-                return [
-                    SELECT NextRun__c, Name, Id, Frequency__c 
-                    FROM Schedule__c
-                    WHERE Frequency__c = :keyword 
-                    AND Project__c = : idProject
-                ];
-            } catch(ApplicationException e){
-                ErrorLogService.logException(e);
-                throw new ApplicationException(e.getMessage());
-            }
+        if (!SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType)) {
+            return new List<ScheduleService.ScheduleWrapper>();
         }
-        return new List<Schedule__c>();
+        if (String.isBlank(projectName)) return new List<ScheduleService.ScheduleWrapper>();
+        try {
+            List<Schedule__c> schedules = [
+                SELECT Id, Name, Frequency__c, NextRun__c,
+                       Project__c,
+                       Project__r.Id,
+                       Project__r.Name,
+                       Project__r.TargetObject__c,
+                       Project__r.Description__c
+                FROM Schedule__c
+                WHERE Project__r.Name LIKE :('%' + projectName + '%')
+                ORDER BY CreatedDate DESC
+                LIMIT 50
+            ];
+            if (schedules.isEmpty()) return new List<ScheduleService.ScheduleWrapper>();
+
+            String projectId = String.valueOf(schedules[0].Project__c);
+            Map<Id, List<ImportExecution__c>> executionsByProject =
+                getExecutionsByProject(projectId, null);
+            return buildScheduleWrapper(schedules, executionsByProject);
+        } catch (Exception e) {
+            ErrorLogService.logException(e);
+            throw new ApplicationException(e.getMessage());
+        }
     }
 
+    
+    // *** CRON ***
 
-    // Créer les schedules wrappers
-    private static List<ScheduleService.ScheduleWrapper> buildScheduleWrapper(List<Schedule__c> schedules, Map<Id, List<ImportExecution__c>> executionsByProject) {
+    /**
+     * Trouver un CronTrigger actif par nom (contenant scheduleId)
+     */
+    public static List<CronTrigger> findCronTriggerByName(String scheduleId) {
+        if (String.isBlank(scheduleId)) return new List<CronTrigger>();
+        try {
+         
+            return [
+                SELECT Id, CronJobDetail.Name, State, NextFireTime, PreviousFireTime
+                FROM CronTrigger
+                WHERE CronJobDetail.Name LIKE :( '%'+ scheduleId +'%')
+                AND   State NOT IN ('COMPLETE', 'DELETED', 'ERROR')
+                ORDER BY CreatedDate DESC
+                LIMIT 1
+            ];
+        } catch (Exception e) {
+            ErrorLogService.logException(e);
+            throw new ApplicationException(e.getMessage());
+        }
+    }
+
+  
+    // EXECUTIONS LIÉES 
+
+    /**
+     * Trouver les exécutions d'un projet par statut
+     * (1 seul schedule actif par projet -> pas d'ambiguïté)
+     */
+    public static List<ImportExecution__c> findExecutionsBySchedule(
+        Id scheduleId,
+        List<String> statuses
+    ) {
+        if (scheduleId == null || statuses == null || statuses.isEmpty()) {
+            return new List<ImportExecution__c>();
+        }
+        try {
+            // Récupérer le projet du schedule pour la query
+            Schedule__c schedule = getScheduleById(String.valueOf(scheduleId));
+            if (schedule == null) return new List<ImportExecution__c>();
+
+            Id projectId = schedule.Project__c;
+            return [
+                SELECT Id, Status__c, StartTime__c, EndTime__c,
+                       ApexJobId__c, TotalRecords__c, ProcessedRecords__c,
+                       FailedRecords__c, Project__c
+                FROM ImportExecution__c
+                WHERE Project__c = :projectId
+                AND   Status__c  IN :statuses
+                ORDER BY StartTime__c DESC
+                LIMIT 1
+            ];
+        } catch (Exception e) {
+            ErrorLogService.logException(e);
+            throw new ApplicationException(e.getMessage());
+        }
+    }
+
+    
+    // PRIVATE HELPERS
+
+    /**
+     * Construire les wrappers Schedule + Executions
+     */
+    private static List<ScheduleService.ScheduleWrapper> buildScheduleWrapper(
+        List<Schedule__c> schedules,
+        Map<Id, List<ImportExecution__c>> executionsByProject
+    ) {
         List<ScheduleService.ScheduleWrapper> results = new List<ScheduleService.ScheduleWrapper>();
-        
+        if (!SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType) ||
+            !SecurityUtils.isAccessible(Schema.ImportExecution__c.SObjectType)) {
+            return results;
+        }
         for (Schedule__c schedule : schedules) {
             ScheduleService.ScheduleWrapper wrapper = new ScheduleService.ScheduleWrapper();
             wrapper.schedules = new List<Schedule__c>{ schedule };
-
-            if (schedule.Project__c != null && executionsByProject.containsKey(schedule.Project__c)) {
-                wrapper.importExecutions = executionsByProject.get(schedule.Project__c);
-            } else {
-                wrapper.importExecutions = new List<ImportExecution__c>();
-            }
+            wrapper.project   = schedule.Project__r;
+            wrapper.importExecutions = executionsByProject.containsKey(schedule.Project__c)
+                ? executionsByProject.get(schedule.Project__c)
+                : new List<ImportExecution__c>();
             results.add(wrapper);
         }
         return results;
     }
 
-    // Filtrer les éxécutions d'importations  (Mapper des executions par projet)
-     // Récupérer les executions liées à un projet, optionnellement filtrées par status 
-     private static Map<Id, List<ImportExecution__c>> getExecutionsByProject(Set<Id> projectIds, String status) {
-
-            Map<Id, List<ImportExecution__c>> result = new Map<Id, List<ImportExecution__c>>();
-
-            if (projectIds.isEmpty()) return result;
-
-
-            if (status != null) {
-                String request = ' AND Status__c = :status';
+    /**
+     * Récupérer les exécutions groupées par projet (avec filtre statut optionnel)
+     */
+    private static Map<Id, List<ImportExecution__c>> getExecutionsByProject(
+        Id projectId,
+        String status
+    ) {
+        Map<Id, List<ImportExecution__c>> result = new Map<Id, List<ImportExecution__c>>();
+        if (projectId == null) return result;
+        try {
+            String whereClause = 'WHERE Project__c = :projectId';
+            if (String.isNotBlank(status)) {
+                whereClause += ' AND Status__c = :status';
             }
-
-            String request = ' ORDER BY StartTime__c DESC';
-
             String query =
-                'SELECT Id, Status__c, StartTime__c, EndTime__c, ' +
-                'TotalRecords__c, ProcessedRecords__c, FailedRecords__c, Project__c ' +
-                'FROM ImportExecution__c WHERE Project__c IN :projectIds' + request;
+                'SELECT Id, Status__c, Type__c, Phase__c, StartTime__c, EndTime__c, ' +
+                'TotalRecords__c, ProcessedRecords__c, FailedRecords__c, ' +
+                'ApexJobId__c, Project__c ' +
+                'FROM ImportExecution__c ' +
+                whereClause +
+                ' ORDER BY StartTime__c DESC LIMIT 10000';
 
-            for (ImportExecution__c exec : Database.query(query)) {
+            List<ImportExecution__c> executions = Database.query(query);
+            for (ImportExecution__c exec : executions) {
                 if (!result.containsKey(exec.Project__c)) {
                     result.put(exec.Project__c, new List<ImportExecution__c>());
                 }
                 result.get(exec.Project__c).add(exec);
             }
-
             return result;
+        } catch (Exception e) {
+            ErrorLogService.logException(e);
+            throw new ApplicationException(e.getMessage());
+        }
     }
-
 }

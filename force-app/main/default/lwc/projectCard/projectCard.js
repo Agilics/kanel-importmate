@@ -1,3 +1,7 @@
+/**
+ * @Last Modification :31-03-2026
+ * @Modified : Ajout traduction statut d'exécution du projet 
+ */
 import { LightningElement, api } from 'lwc';
 import { navigateToPage } from 'c/utility';
 import LOCALE from '@salesforce/i18n/lang';
@@ -8,7 +12,23 @@ import Records_Label from '@salesforce/label/c.ProjectCard_Meta_Records';
 import LastModified_Label from '@salesforce/label/c.ProjectCard_Meta_Modified';
 import Progress_Label from '@salesforce/label/c.ProjectCard_Progress_Label';
 import No_Description_Text from '@salesforce/label/c.ProjectCard_No_Description';
-import ProjectCard_Status_Draft from '@salesforce/label/c.ProjectCard_Status_Draft';
+import ProjectCard_Status_Draft from '@salesforce/label/c.ProjectCard_Status_Draft'; 
+import STATUS_COMPLETED from '@salesforce/label/c.ProjectCard_Status_Completed';
+import STATUS_FAILED from '@salesforce/label/c.ProjectCard_Status_Failed';
+import STATUS_IN_PROGRESS from '@salesforce/label/c.ProjectCard_Status_InProgress';
+import STATUS_PENDING from '@salesforce/label/c.ProjectCard_Status_Pending';
+import STATUS_CANCELLED from '@salesforce/label/c.ProjectCard_Status_Cancelled';
+import  STATUS_SUSPENDED  from '@salesforce/label/c.ProjectCard_Status_Suspended';
+
+const STATUS_LABELS = {
+    Draft: ProjectCard_Status_Draft,
+    Completed: STATUS_COMPLETED,
+    Failed: STATUS_FAILED,
+    InProgress: STATUS_IN_PROGRESS,
+    Cancelled: STATUS_CANCELLED,
+    Pending: STATUS_PENDING,
+    Suspended: STATUS_SUSPENDED
+};
 
 export default class ProjectCard extends LightningElement {
     @api project;
@@ -21,6 +41,7 @@ export default class ProjectCard extends LightningElement {
             progress: Progress_Label,
         };
     }
+     
 
     get projectName() {
         return this.project?.Name || 'Unnamed Project';
@@ -53,10 +74,15 @@ export default class ProjectCard extends LightningElement {
         return lastExecution?.TotalRecords__c || 0;
     }
 
+    //étiquette status traduit affiché 
+    get statusLabel() {
+        return STATUS_LABELS[this.status] || ProjectCard_Status_Draft;
+    }
+
     get status() {
         // Récupérer le statut depuis la dernière exécution
         const lastExecution = this.getLastExecution();
-        return lastExecution?.Status__c || ProjectCard_Status_Draft;
+        return lastExecution?.Status__c || 'Draft';
     }
 
     getLastExecution() {

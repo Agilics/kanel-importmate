@@ -1,9 +1,27 @@
-import { LightningElement, api, track,wire } from 'lwc';
+/**
+ * @Last Modification: 25-03-2026
+ */
+import { LightningElement, api, wire } from 'lwc';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
-import SCHEDULE_OBJECT from "@salesforce/schema/Schedule__c";
-import { ShowToastEvent } from "lightning/platformShowToastEvent";
+import SCHEDULE_OBJECT from "@salesforce/schema/Schedule__c"; 
 import FREQUENCY_FIELD from "@salesforce/schema/Schedule__c.Frequency__c";
 import getPickListValues from "@salesforce/apex/ScheduleController.getPickListValues";
+
+//custom labels
+
+import LABEL_IMMEDIATE_EXECUTION from '@salesforce/label/c.Import_ImmediateExecution'; 
+import LABEL_INPUT_IMPORT_SCHEDULE_EXECUTION from '@salesforce/label/c.Import_ScheduledExecution';
+import LABEL_INPUT_IMPORT_SET_UP_RECURRING_IMPORTs from '@salesforce/label/c.Import_ExecutionMode';
+import LABEL_RUN_IMPORT_NOW from '@salesforce/label/c.Import_RunImportNow';
+import LABEL_SCHEDULED_EXECUTION from '@salesforce/label/c.Import_ScheduledExecution';
+import LABEL_SET_UP_RECURRING_IMPORTS from '@salesforce/label/c.Import_SetUpRecurringImports';
+import LABEL_EXECUTION_MODE from '@salesforce/label/c.Import_ExecutionMode';
+import LABEL_BATCH_SIZE from '@salesforce/label/c.Import_BatchSize';
+import LABEL_SEND_EMAIL_NOTIFICATIONS from '@salesforce/label/c.Import_SendEmailNotificationsOnComplete';
+import LABEL_FREQUENCY from '@salesforce/label/c.Import_Frequency';
+import LABEL_START_DATE_AND_TIME from '@salesforce/label/c.Import_StartDateAndTime';  
+import LABEL_SCHEDULED_IMPORTS_NOTE from '@salesforce/label/c.Import_ScheduledImportsNote';
 
 export default class ExecutionCard extends LightningElement {
     @api showScheduledCard ;
@@ -28,12 +46,27 @@ export default class ExecutionCard extends LightningElement {
     @api formGroup;
     @api formLabel;
 
+
     get titleCard (){ 
-        return this.showScheduledCard ?'Scheduled Execution':'Immediate Execution';
+        return this.showScheduledCard ? LABEL_SCHEDULED_EXECUTION:LABEL_IMMEDIATE_EXECUTION;
     }
 
     get subtitleCard (){
-        return this.showScheduledCard ? 'Set up recurring imports':'Run the import now';
+        return this.showScheduledCard ? LABEL_SET_UP_RECURRING_IMPORTS :LABEL_RUN_IMPORT_NOW ;
+    }
+
+    //labels
+    get labels() {
+        return {
+            LABEL_INPUT_IMPORT_SCHEDULE_EXECUTION,
+            LABEL_INPUT_IMPORT_SET_UP_RECURRING_IMPORTs,
+            labelExecutionMode: LABEL_EXECUTION_MODE,
+            labelBatchSize: LABEL_BATCH_SIZE,
+            labelSendEmail: LABEL_SEND_EMAIL_NOTIFICATIONS,
+            labelFrequency: LABEL_FREQUENCY,
+            labelStartDate: LABEL_START_DATE_AND_TIME, 
+            scheduledImportNote: LABEL_SCHEDULED_IMPORTS_NOTE
+        };
     }
 
     //Récupération des valeurs de la liste de sélection de Frequency__c(Daily | Weekly | Monthly)
@@ -96,7 +129,7 @@ export default class ExecutionCard extends LightningElement {
     
     //Mise à jour du champs de la date d'éxécution (Start)
     handleNextRunChange(event) {
-        const date = new Date(event.target.value);
+        const date = event.target.value;
          this.dispatchEvent(
             new CustomEvent(
                 "nextrunchange",
@@ -148,5 +181,15 @@ export default class ExecutionCard extends LightningElement {
         this.template.querySelectorAll(".form-control").forEach((input) => {
          input.value = "";
         });
+    }
+
+    //affichage toast mesage 
+    showToast(title, message, variant) {
+        const event = new ShowToastEvent({
+            title: title,
+            message: message,
+            variant: variant
+        });
+        this.dispatchEvent(event);
     }
 }

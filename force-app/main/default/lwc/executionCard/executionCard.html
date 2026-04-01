@@ -30,7 +30,7 @@
                <!-- execution mode -->
                <div class={formGroup}>
                   <label class={formLabel} for="mode">
-                  Execution Mode 
+                  {labels.labelExecutionMode}
                   </label>
                   <lightning-combobox 
                      value={executionMode} 
@@ -44,7 +44,7 @@
             <lightning-layout-item size="12" padding="around-small">
                <div class={formGroup}>
                   <label class={formLabel} for="batch-size">
-                  Batch Size
+                  {labels.labelBatchSize}
                   </label>
                   <lightning-combobox 
                         options={batchSizeOptions} 
@@ -59,7 +59,7 @@
             <lightning-layout-item size="12" padding="around-small">
                <lightning-input type="checkbox" checked={sendEmailNotification}
                      onchange={handleEmailNotificationChange} 
-                     label="Send email notifications on complete">
+                     label={labels.labelSendEmail}>
                </lightning-input>
             </lightning-layout-item>
          </lightning-layout>
@@ -74,7 +74,7 @@
                <!-- ComboBox for Select Frequency DAILY | WEEKLY | MONTHLY -->
                <div class={formGroup}>
                   <label class={formLabel} for="frequency">
-                  Frequency
+                  {labels.labelFrequency}
                   </label>
                   <lightning-combobox
                      class="frequency-combobox form-control "
@@ -89,7 +89,9 @@
             <!-- start date time-->
             <lightning-layout-item size="12"  padding="horizontal-small">
                <div >
-                  <label for="start-date" class={formLabel}>Start Date & Time</label>
+                  <label for="start-date" class={formLabel}>
+                     {labels.labelStartDate}
+                  </label>
                   <lightning-input
                      class="time-input form-control "
                      type="datetime" 
@@ -102,9 +104,8 @@
             </lightning-layout-item>
             <!-- footer -->  
             <lightning-layout-item size="12" padding="horizontal-small">
-               <div class="paragraph is-centered txt regular-text">
-                  Scheduled imports will use the same data source and<br/>
-                  transformations configured in previous steps.
+               <div class="paragraph  txt regular-text">
+                  {labels.scheduledImportNote}
                </div>
             </lightning-layout-item>
          </lightning-layout>

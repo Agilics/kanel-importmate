@@ -2,8 +2,9 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 10-23-2025
- * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @last modified on  : 30-03-2026
+ * @last modified by  : Mouhamed 
+ * @modification : renforcement des assertions de testes
 **/
 public with sharing class ConcatenationTransformation implements ITransformationRule {
     /**

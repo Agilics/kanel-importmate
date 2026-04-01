@@ -104,7 +104,7 @@ lightning-combobox {
   height: 72px;
   border-radius: 8px; 
   opacity: 1; 
-  padding: 0 10px 5px ; 
+  padding: 0.75rem 1.25rem ; 
 }
 
 /* Responsive breakpoints */

@@ -1,3 +1,7 @@
+/**
+ * @LastModification: 30/03/2026
+ * @Modified by : Mouhamed NIANG
+ */
 import { LightningElement, api } from 'lwc';
 // STEP LABELS
 import STEP_PROJECT_SETUP from '@salesforce/label/c.SideBar_Step_ProjectSetup';
@@ -8,6 +12,7 @@ import STEP_VALIDATION from '@salesforce/label/c.SideBar_Step_Validation';
 import STEP_EXECUTION from '@salesforce/label/c.SideBar_Step_Execution';
 
 // QUICK ACTIONS
+import TITLE_SECTION from '@salesforce/label/c.SideBar_QuickAction_Title';
 import QUICK_ACTION_RECENT_PROJECT from '@salesforce/label/c.SideBar_QuickAction_Recent_Project';
 import QUICK_ACTION_ANALYTICS from '@salesforce/label/c.SideBar_QuickAction_Analytics';
 import QUICK_ACTION_EXECUTION_HISTORY from '@salesforce/label/c.SideBar_QuickAction_Execution';
@@ -69,5 +74,11 @@ export default class SideBarCmp extends LightningElement {
 
     navigateToProjectPage() {
         this.dispatchEvent(new CustomEvent('navigateproject'));
+    }
+
+    get labels() {
+        return {
+            title: TITLE_SECTION
+        };
     }
 }

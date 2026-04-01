@@ -1,104 +1,162 @@
 <!--
-  @description       : 
-  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
-  @group             : 
-  @last modified on  : 01-20-2026
-  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+  @description: c-scheduled-schedules avec INLINE EDIT
+  @author: mouhamed niang
+  @last modified: 26-03-2026
 -->
 <template>
     <div class="card" aria-label="list of schedules with status">
         <div class="spaced-content head-card" aria-label="header">
-            <h2 class="card-title">Active Schedules</h2>
-            <button class="btn btn-primary" onclick={openAddScheduleModal} title="Add Schedule">
-                <lightning-icon icon-name="utility:add" 
-                                class="primary-icon icon"
-                                alternative-text="Add Schedule" size="xx-small">
-                </lightning-icon>
-                <label>Add Schedule</label>
-            </button>
+            <h2 class="card-title">{labels.title}</h2>
         </div>
 
         <div class="footer-separator"></div>
 
-        <!--  Afficher le tableau SI hasSchedules est true -->
         <template if:true={hasSchedules}>
             <div class="schedules-container">
                 <table role="grid" aria-label="Schedule Project Table">
                     <tbody>
-                        <template for:each={scheduledInfos} for:item="schedule">
+                        <template for:each={scheduledInfosWithEditState} for:item="schedule">
                             <tr key={schedule.id}>
-                                <td>
-                                    <div class=" project-cell">
-                                        <div class={schedule.boxIconClass} aria-label="box icon">
-                                            <lightning-icon
-                                                icon-name={schedule.iconStatusName} 
-                                                size="small"
-                                                class={schedule.iconClass}>
-                                            </lightning-icon> 
-                                        </div>
-                                        <div class="project-info">
-                                            <div class="project-name">{schedule.title}</div>
-                                            <div class="project-sub">{schedule.subtitle}</div>
-                                        </div>
-                                    </div>
-                                </td> 
-                                <!--td class="last-execution">{schedule.lastExecution}</td-->
-                                <td>
-                                    <span class={schedule.badgeStatusClass}>{schedule.statusLabel}</span>
-                                </td>
-                                <td class="actions"> 
-                                     
-                                    <!-- Paused / Play Action buttton-->
-                                    <lightning-icon
-                                        icon-name={schedule.iconActionName} 
-                                        onclick={handleToggleStatus}
-                                        data-id={schedule.id}
-                                        size="xx-small" 
-                                        alternative-text="Toggle Status"
-                                        title="Toggle Status"
-                                        class="action-icon">
-                                    </lightning-icon>
 
-                                    <!--edit button--> 
-                                    <lightning-icon
-                                        icon-name="utility:edit"
-                                        onclick={handleEditSchedule}
-                                        class="action-icon"
-                                        variant="neutral"
-                                        title="Edit"
-                                        size="xx-small" 
-                                        data-id={schedule.id}
-                                        disabled={isLoading}>
-                                    </lightning-icon>
-                                   
-                                    <!-- Delete button -->
-                                    <lightning-icon 
-                                        aria-label="Delete"
-                                        data-id={schedule.id}  
-                                        onclick={handleDeleteSchedule}
-                                        icon-name="utility:delete" 
-                                        size="xx-small" 
-                                        title='Delete'
-                                        class="action-icon"
-                                    >
-                                    </lightning-icon>
-                                </td>
+                                <!-- MODE READ -->
+                                <template if:false={schedule.isBeingEdited}>
+                                    <td>
+                                        <div class="project-cell">
+                                            <div class={schedule.boxIconClass} aria-label="box icon">
+                                                <lightning-icon icon-name={schedule.iconStatusName} size="small"
+                                                    class={schedule.iconClass}>
+                                                </lightning-icon>
+                                            </div>
+                                            <div class="project-info">
+                                                <div class="project-name">{schedule.title}</div>
+                                                <div class="project-sub">{schedule.subtitle}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class={schedule.badgeStatusClass}>{schedule.statusLabel}</span>
+                                    </td>
+                                    <td class="actions">
+                                        
+                                        <template if:false={schedule.isNotCompleted}>
+                                            <lightning-icon icon-name={schedule.iconActionName} onclick={handleToggleStatus}
+                                                data-id={schedule.id} data-running={schedule.isRunning} size="xx-small"
+                                                alternative-text="Toggle Status" title="Toggle Status" class="action-icon">
+                                            </lightning-icon>
+                                        </template>
+                                        <lightning-icon icon-name="utility:edit" onclick={handleEditClick}
+                                            class="action-icon" title="Edit" size="xx-small" data-id={schedule.id}
+                                            disabled={isLoading}>
+                                        </lightning-icon>
+                                        <lightning-icon aria-label="Delete" data-id={schedule.id}
+                                            onclick={handleDeleteSchedule} icon-name="utility:delete" size="xx-small"
+                                            title="Delete" class="action-icon">
+                                        </lightning-icon>
+                                    </td>
+                                </template>
+
+                                <!-- MODE EDIT -->
+                                <template if:true={schedule.isBeingEdited}>
+                                    <td colspan="3" class="edit-td">
+                                        <div class="edit-panel">
+
+                                            <!-- Header -->
+                                            <div class="edit-header">
+                                                <div class="edit-header-left">
+                                                    <div class="edit-header-icon">
+                                                        <lightning-icon icon-name="utility:edit" size="x-small"
+                                                            class="icon-white">
+                                                        </lightning-icon>
+                                                    </div>
+                                                    <div>
+                                                        <div class="edit-header-title">{labels.editTitle}</div>
+                                                        <div class="edit-header-sub">{schedule.title}</div>
+                                                    </div>
+                                                </div>
+                                                <button class="edit-close" onclick={handleCancelEdit}
+                                                    disabled={isLoading} title="Close">
+                                                    <lightning-icon icon-name="utility:close" size="x-small"
+                                                        class="icon-white">
+                                                    </lightning-icon>
+                                                </button>
+                                            </div>
+
+                                            <!-- Body -->
+                                            <div class="edit-body">
+
+                                                <!-- Frequency chips -->
+                                                <div class="field-group full-width">
+                                                    <label class="field-label">{labels.labelFrequency}</label>
+                                                    <div class="freq-chips">
+                                                        <template for:each={frequencyOptions} for:item="opt">
+                                                            <button key={opt.value} class={opt.chipClass}
+                                                                data-value={opt.value}
+                                                                onclick={handleFrequencyChipClick} disabled={isLoading}>
+                                                                {opt.label}
+                                                            </button>
+                                                        </template>
+                                                    </div>
+                                                    <template if:true={frequencyHasError}>
+                                                        <span class="form-error">{frequencyErrorMessage}</span>
+                                                    </template>
+                                                </div>
+
+                                                <!-- Next Run datetime (single field) -->
+                                                <div class="field-group full-width">
+                                                    <lightning-input type="datetime" label="Next Run"
+                                                        value={editNextRun} onchange={handleNextRunChange}
+                                                        message-when-value-missing="Next run date is required">
+                                                    </lightning-input>
+                                                    <template if:true={nextRunHasError}>
+                                                        <span class="form-error">{nextRunErrorMessage}</span>
+                                                    </template>
+                                                </div>
+
+                                            </div>
+
+                                            <!-- Info bar -->
+                                            <div class="edit-info-bar">
+                                                <lightning-icon icon-name="utility:info" size="x-small"
+                                                    class="primary-icon">
+                                                </lightning-icon>
+                                                <span>{labels.editInfoBar}</span>
+                                            </div>
+
+                                            <!-- Footer -->
+                                            <div class="edit-footer">
+                                                <span class="edit-footer-id">ID: {schedule.scheduleId}</span>
+                                                <div class="edit-footer-actions">
+                                                    <button class="btn btn-secondary" onclick={handleCancelEdit}
+                                                        disabled={isLoading}>
+                                                        <lightning-icon class="mr-2" icon-name="utility:clear"
+                                                            size="x-small">
+                                                        </lightning-icon>
+                                                        Cancel
+                                                    </button>
+                                                    <button class="btn btn-primary" onclick={handleSaveEdit}
+                                                        disabled={isSaveDisabled}>
+                                                        <lightning-icon icon-name="utility:shift_scheduling_operation"
+                                                            size="x-small" class=" mr-2 icon-white">
+                                                        </lightning-icon>
+                                                        {labels.labelRescheduleBtn}
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </td>
+                                </template>
+
                             </tr>
                         </template>
                     </tbody>
                 </table>
             </div>
-            <!-- Pagination -->
-            <!--c-paginator-component
-                page-size={pageSize}
-                page-index={currentPage}
-                onpagechange={handlePageChange}>
-            </c-paginator-component-->
         </template>
 
-        <!--  Afficher le message SI hasSchedules est false -->
+        <!-- No schedules -->
         <template if:false={hasSchedules}>
-            <div class="no-schedules-container ">
+            <div class="no-schedules-container">
                 <lightning-icon icon-name="custom:custom64" size="large" class="no-schedules-icon"></lightning-icon>
                 <div class="is-centered">
                     <p class="no-schedules-message">{noSchedulesMessage}</p>
@@ -106,14 +164,5 @@
             </div>
         </template>
 
-        <!-- Modal Add Schedule -->
-        <template if:true={showAddScheduleModal}>
-            <c-schedule-register-modal 
-                project-id={projectId}
-                show-add-schedule-modal={showAddScheduleModal}
-                onaddschedule={handleAddSchedule}
-                onclosemodal={handleCloseModal}>
-            </c-schedule-register-modal>
-        </template>
     </div>
 </template>

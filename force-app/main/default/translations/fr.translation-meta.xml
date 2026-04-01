@@ -1,17 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Translations xmlns="http://soap.sforce.com/2006/04/metadata">
     <customLabels>
-        <label>Tous les champs sont obligatoires</label>
-        <name>ALL_FIELDS_REQUIRED</name>
-    </customLabels>
-    <customLabels>
-        <label>La fonctionnalité d’analyse arrive bientôt</label>
-        <name>ANALYTICS_COMING_SOON</name>
-    </customLabels>
-    <customLabels>
-        <label>Veuillez d’abord créer un projet</label>
-        <name>CREATE_PROJECT_FIRST</name>
-    </customLabels>
+    <label>Tous les champs sont obligatoires</label>
+    <name>ALL_FIELDS_REQUIRED</name>
+</customLabels>
+<customLabels>
+    <label>Un projet avec ce nom et cet objet cible existe déjà</label>
+    <name>PROJECT_EXISTS</name>
+</customLabels>
+<customLabels>
+    <label>Projet créé avec succès avec l’ID : {0}</label>
+    <name>PROJECT_CREATED</name>
+</customLabels>
+<customLabels>
+    <label>Une erreur s’est produite</label>
+    <name>ERROR_OCCURRED</name>
+</customLabels>
+<customLabels>
+    <label>Veuillez sélectionner ou créer un projet d’abord</label>
+    <name>SELECT_PROJECT_FIRST</name>
+</customLabels>
+<customLabels>
+    <label>Veuillez d’abord créer un projet</label>
+    <name>CREATE_PROJECT_FIRST</name>
+</customLabels>
     <customLabels>
         <label>Retour à la source de données</label>
         <name>CsvUploader_Back_Button</name>
@@ -33,7 +45,7 @@
         <name>CsvUploader_Dropzone_Browse</name>
     </customLabels>
     <customLabels>
-        <label>Fichiers CSV jusqu'à 50 Mo acceptés</label>
+        <label>Fichiers CSV jusqu&apos;à 50 Mo acceptés</label>
         <name>CsvUploader_Dropzone_Hint</name>
     </customLabels>
     <customLabels>
@@ -45,7 +57,7 @@
         <name>CsvUploader_Filters_Button</name>
     </customLabels>
     <customLabels>
-        <label>Paramètres d'importation</label>
+        <label>Paramètres d&apos;importation</label>
         <name>CsvUploader_ImportSettings_Button</name>
     </customLabels>
     <customLabels>
@@ -121,7 +133,7 @@
         <name>CsvUploader_Modal_Settings_RowsPerPage</name>
     </customLabels>
     <customLabels>
-        <label>Paramètres d'importation</label>
+        <label>Paramètres d&apos;importation</label>
         <name>CsvUploader_Modal_Settings_Title</name>
     </customLabels>
     <customLabels>
@@ -197,7 +209,7 @@
         <name>Dashboard_FilterTab_Scheduled</name>
     </customLabels>
     <customLabels>
-        <label>Gérez vos projets d'importation de données</label>
+        <label>Gérez vos projets d&apos;importation de données</label>
         <name>Dashboard_FilterTab_Subtitle</name>
     </customLabels>
     <customLabels>
@@ -297,11 +309,11 @@
         <name>DataTable_Showing_Entries</name>
     </customLabels>
     <customLabels>
-        <label>Une erreur s’est produite</label>
+        <label><!-- Generic error message --></label>
         <name>ERROR_OCCURRED</name>
     </customLabels>
     <customLabels>
-        <label>La fonctionnalité d’export arrive bientôt</label>
+        <label><!-- Export feature placeholder --></label>
         <name>EXPORT_COMING_SOON</name>
     </customLabels>
     <customLabels>
@@ -337,11 +349,11 @@
         <name>IH_ApplyFilters</name>
     </customLabels>
     <customLabels>
-        <label>Supprimer {0} élément(s) d'historique et les journaux associés ?</label>
+        <label>Supprimer {0} élément(s) d&apos;historique et les journaux associés ?</label>
         <name>IH_Confirm_DeleteMultiple</name>
     </customLabels>
     <customLabels>
-        <label>Supprimer cet historique d'exécution et les journaux associés ?</label>
+        <label>Supprimer cet historique d&apos;exécution et les journaux associés ?</label>
         <name>IH_Confirm_DeleteSingle</name>
     </customLabels>
     <customLabels>
@@ -445,19 +457,19 @@
         <name>IH_KPI_TotalExecutions</name>
     </customLabels>
     <customLabels>
-        <label>Créer un nouveau projet d'importation</label>
+        <label>Créer un nouveau projet d&apos;importation</label>
         <name>IH_Modal_CreateTitle</name>
     </customLabels>
     <customLabels>
-        <label>Supprimer l'exécution</label>
+        <label>Supprimer l&apos;exécution</label>
         <name>IH_Modal_DeleteExecution</name>
     </customLabels>
     <customLabels>
-        <label>Détails de l'exécution</label>
+        <label>Détails de l&apos;exécution</label>
         <name>IH_Modal_ExecutionDetails</name>
     </customLabels>
     <customLabels>
-        <label>Exporter l'exécution</label>
+        <label>Exporter l&apos;exécution</label>
         <name>IH_Modal_ExportExecution</name>
     </customLabels>
     <customLabels>
@@ -465,7 +477,7 @@
         <name>IH_Modal_Records</name>
     </customLabels>
     <customLabels>
-        <label>Nouveau projet d'importation</label>
+        <label>Nouveau projet d&apos;importation</label>
         <name>IH_NewImportProject</name>
     </customLabels>
     <customLabels>
@@ -501,7 +513,7 @@
         <name>IH_Status_Running</name>
     </customLabels>
     <customLabels>
-        <label>Consultez et gérez toutes les exécutions de vos projets d'importation</label>
+        <label>Consultez et gérez toutes les exécutions de vos projets d&apos;importation</label>
         <name>IH_Subtitle</name>
     </customLabels>
     <customLabels>
@@ -561,7 +573,7 @@
         <name>IH_Time_1MinuteAgo</name>
     </customLabels>
     <customLabels>
-        <label>À l'instant</label>
+        <label>À l&apos;instant</label>
         <name>IH_Time_JustNow</name>
     </customLabels>
     <customLabels>
@@ -585,7 +597,7 @@
         <name>IH_Toast_CannotDeleteRunning</name>
     </customLabels>
     <customLabels>
-        <label>Historique d'exécution supprimé.</label>
+        <label>Historique d&apos;exécution supprimé.</label>
         <name>IH_Toast_DeleteSuccess</name>
     </customLabels>
     <customLabels>
@@ -593,23 +605,23 @@
         <name>IH_Toast_ErrorDeleteSelected</name>
     </customLabels>
     <customLabels>
-        <label>Impossible de supprimer l'historique d'exécution.</label>
+        <label>Impossible de supprimer l&apos;historique d&apos;exécution.</label>
         <name>IH_Toast_ErrorDeleteSingle</name>
     </customLabels>
     <customLabels>
-        <label>Impossible d'exporter le fichier CSV.</label>
+        <label>Impossible d&apos;exporter le fichier CSV.</label>
         <name>IH_Toast_ErrorExportCsv</name>
     </customLabels>
     <customLabels>
-        <label>Impossible de charger les détails de l'exécution.</label>
+        <label>Impossible de charger les détails de l&apos;exécution.</label>
         <name>IH_Toast_ErrorLoadDetails</name>
     </customLabels>
     <customLabels>
-        <label>Erreur lors du chargement de l'historique</label>
+        <label>Erreur lors du chargement de l&apos;historique</label>
         <name>IH_Toast_ErrorLoadingHistory</name>
     </customLabels>
     <customLabels>
-        <label>L'identifiant d'exécution est manquant.</label>
+        <label>L&apos;identifiant d&apos;exécution est manquant.</label>
         <name>IH_Toast_ExecutionIdMissing</name>
     </customLabels>
     <customLabels>
@@ -633,7 +645,7 @@
         <name>IH_Toast_SelectAtLeastOne</name>
     </customLabels>
     <customLabels>
-        <label>Import démarré en mode {0} avec une taille de lot de {1}</label>
+        <label><!-- Import started message --></label>
         <name>IMPORT_STARTED</name>
     </customLabels>
     <customLabels>
@@ -653,7 +665,7 @@
         <name>IM_DRY_Btn_ExportReport</name>
     </customLabels>
     <customLabels>
-        <label>Passer à l'exécution</label>
+        <label>Passer à l&apos;exécution</label>
         <name>IM_DRY_Btn_Proceed</name>
     </customLabels>
     <customLabels>
@@ -709,7 +721,7 @@
         <name>IM_DRY_Mode_Sample</name>
     </customLabels>
     <customLabels>
-        <label>Aucun problème détecté ! Les données sont prêtes pour l'import.</label>
+        <label>Aucun problème détecté ! Les données sont prêtes pour l&apos;import.</label>
         <name>IM_DRY_NoErrors_Message</name>
     </customLabels>
     <customLabels>
@@ -749,7 +761,7 @@
         <name>IM_DRY_Progress_Completed</name>
     </customLabels>
     <customLabels>
-        <label>ID d'exécution :</label>
+        <label>ID d&apos;exécution :</label>
         <name>IM_DRY_Progress_ExecutionId</name>
     </customLabels>
     <customLabels>
@@ -789,7 +801,7 @@
         <name>IM_DRY_Settings_Behavior</name>
     </customLabels>
     <customLabels>
-        <label>L'affichage des avertissements dépend du bouton Inclure les avertissements.</label>
+        <label>L&apos;affichage des avertissements dépend du bouton Inclure les avertissements.</label>
         <name>IM_DRY_Settings_BehaviorHelp</name>
     </customLabels>
     <customLabels>
@@ -821,11 +833,11 @@
         <name>IM_DRY_Settings_PerformanceHelp</name>
     </customLabels>
     <customLabels>
-        <label>La taille de l'échantillon s'applique uniquement en mode échantillon.</label>
+        <label>La taille de l&apos;échantillon s&apos;applique uniquement en mode échantillon.</label>
         <name>IM_DRY_Settings_SampleHelp</name>
     </customLabels>
     <customLabels>
-        <label>Taille de l'échantillon</label>
+        <label>Taille de l&apos;échantillon</label>
         <name>IM_DRY_Settings_SampleSize</name>
     </customLabels>
     <customLabels>
@@ -845,7 +857,7 @@
         <name>IM_DRY_Status_WithErrors</name>
     </customLabels>
     <customLabels>
-        <label>Examinez et corrigez les erreurs avant l'import</label>
+        <label>Examinez et corrigez les erreurs avant l&apos;import</label>
         <name>IM_DRY_Subtitle</name>
     </customLabels>
     <customLabels>
@@ -869,7 +881,7 @@
         <name>IM_EX_Btn_BackToValidation</name>
     </customLabels>
     <customLabels>
-        <label>Annuler l'import</label>
+        <label>Annuler l&apos;import</label>
         <name>IM_EX_Btn_CancelImport</name>
     </customLabels>
     <customLabels>
@@ -877,15 +889,15 @@
         <name>IM_EX_Btn_ExportLogs</name>
     </customLabels>
     <customLabels>
-        <label>Planifier l'import</label>
+        <label>Planifier l&apos;import</label>
         <name>IM_EX_Btn_ScheduleImport</name>
     </customLabels>
     <customLabels>
-        <label>Lancer l'import</label>
+        <label>Lancer l&apos;import</label>
         <name>IM_EX_Btn_StartImport</name>
     </customLabels>
     <customLabels>
-        <label>ID d'exécution :</label>
+        <label>ID d&apos;exécution :</label>
         <name>IM_EX_Detail_ExecutionId</name>
     </customLabels>
     <customLabels>
@@ -909,11 +921,11 @@
         <name>IM_EX_Detail_TotalRecords</name>
     </customLabels>
     <customLabels>
-        <label>L'export utilise l'ID d'exécution pour récupérer les logs depuis Apex.</label>
+        <label>L&apos;export utilise l&apos;ID d&apos;exécution pour récupérer les logs depuis Apex.</label>
         <name>IM_EX_Failed_Subtitle</name>
     </customLabels>
     <customLabels>
-        <label>L'import a échoué. Vous pouvez encore exporter les logs.</label>
+        <label>L&apos;import a échoué. Vous pouvez encore exporter les logs.</label>
         <name>IM_EX_Failed_Title</name>
     </customLabels>
     <customLabels>
@@ -921,35 +933,16 @@
         <name>IM_EX_Processing_Message</name>
     </customLabels>
     <customLabels>
-        <label>Statut d'exécution de l'import</label>
+        <label>Statut d&apos;exécution de l&apos;import</label>
         <name>IM_EX_Progress_Title</name>
     </customLabels>
-    <customLabels>
-        <label>Annulé</label>
-        <name>IM_EX_Status_Cancelled</name>
-    </customLabels>
-    <customLabels>
-        <label>Terminé</label>
-        <name>IM_EX_Status_Completed</name>
-    </customLabels>
-    <customLabels>
-        <label>Échoué</label>
-        <name>IM_EX_Status_Failed</name>
-    </customLabels>
-    <customLabels>
-        <label>En cours</label>
-        <name>IM_EX_Status_InProgress</name>
-    </customLabels>
-    <customLabels>
-        <label>En attente</label>
-        <name>IM_EX_Status_Pending</name>
-    </customLabels>
+    
     <customLabels>
         <label>Lancez votre import ou planifiez des exécutions récurrentes</label>
         <name>IM_EX_Subtitle</name>
     </customLabels>
     <customLabels>
-        <label>Exécution de l'import</label>
+        <label>Exécution de l&apos;import</label>
         <name>IM_EX_Title</name>
     </customLabels>
     <customLabels>
@@ -1109,7 +1102,7 @@
         <name>IM_IR_Col_CurrentValue</name>
     </customLabels>
     <customLabels>
-        <label>TYPE D'ERREUR</label>
+        <label>TYPE D&apos;ERREUR</label>
         <name>IM_IR_Col_ErrorType</name>
     </customLabels>
     <customLabels>
@@ -1125,11 +1118,11 @@
         <name>IM_IR_Col_Row</name>
     </customLabels>
     <customLabels>
-        <label>Tous les types d'erreur</label>
+        <label>Tous les types d&apos;erreur</label>
         <name>IM_IR_Filter_AllTypes</name>
     </customLabels>
     <customLabels>
-        <label>Chargement des résultats de l'import...</label>
+        <label>Chargement des résultats de l&apos;import...</label>
         <name>IM_IR_Loading</name>
     </customLabels>
     <customLabels>
@@ -1185,7 +1178,7 @@
         <name>IM_IR_Summary_TotalErrors</name>
     </customLabels>
     <customLabels>
-        <label>Résultats de l'import</label>
+        <label>Résultats de l&apos;import</label>
         <name>IM_IR_Title</name>
     </customLabels>
     <customLabels>
@@ -1553,7 +1546,7 @@
         <name>IM_TR_Warning_Title</name>
     </customLabels>
     <customLabels>
-        <label>Décrivez l'objectif et le périmètre de ce projet d'import...</label>
+        <label>Décrivez l&apos;objectif et le périmètre de ce projet d&apos;import...</label>
         <name>ImportProject_Description_Placeholder</name>
     </customLabels>
     <customLabels>
@@ -1561,16 +1554,92 @@
         <name>ImportProject_Name_Placeholder</name>
     </customLabels>
     <customLabels>
-        <label>La fonctionnalité de logs arrive bientôt</label>
-        <name>LOGS_COMING_SOON</name>
+        <label>Planifications Actives</label>
+        <name>Import_ActiveSchedules</name>
     </customLabels>
     <customLabels>
-        <label>Projet créé avec succès avec l’ID : {0}</label>
-        <name>PROJECT_CREATED</name>
+        <label>Taille du lot</label>
+        <name>Import_BatchSize</name>
     </customLabels>
     <customLabels>
-        <label>Un projet avec ce nom et cet objet cible existe déjà</label>
-        <name>PROJECT_EXISTS</name>
+        <label>Annulation de la modification du la planification </label>
+        <name>Import_CancelEditMessage</name>
+    </customLabels>
+    <customLabels>
+        <label>Date</label>
+        <name>Import_Date</name>
+    </customLabels>
+    <customLabels>
+        <label>Êtes-vous sûre de vouloir procéder à la suppression de la planification d&apos;exécution ? Cette action est irréversible . </label>
+        <name>Import_DeleteScheduleDialogMessage</name>
+    </customLabels>
+    <customLabels>
+        <label>Confirmation de la suppression d&apos;une exécution planifiée ?</label>
+        <name>Import_DeleteScheduleDialogTitle</name>
+    </customLabels>
+    <customLabels>
+        <label>Planification supprimée avec succés</label>
+        <name>Import_DeleteScheduleToastMessage</name>
+    </customLabels>
+    <customLabels>
+        <label>Mode d&apos;exécution</label>
+        <name>Import_ExecutionMode</name>
+    </customLabels>
+    <customLabels>
+        <label>Fréquence</label>
+        <name>Import_Frequency</name>
+    </customLabels>
+    <customLabels>
+        <label>Exécution Immédiate</label>
+        <name>Import_ImmediateExecution</name>
+    </customLabels>
+    <customLabels>
+        <label>Aucune planification trouvée. Créez-en une pour commencer.</label>
+        <name>Import_NoSchedulesFound</name>
+    </customLabels>
+    <customLabels>
+        <label>Reporté exécution</label>
+        <name>Import_RescheduleButton</name>
+    </customLabels>
+    <customLabels>
+        <label>Exécuter l&apos;import maintenant</label>
+        <name>Import_RunImportNow</name>
+    </customLabels>
+    <customLabels>
+        <label>Exécution Planifiée</label>
+        <name>Import_ScheduledExecution</name>
+    </customLabels>
+    <customLabels>
+        <label>Les imports planifiés utiliseront la même source de données et les transformations configurées aux étapes précédentes.</label>
+        <name>Import_ScheduledImportsNote</name>
+    </customLabels>
+    <customLabels>
+        <label>Sélectionner une option</label>
+        <name>Import_SelectAnOption</name>
+    </customLabels>
+    <customLabels>
+        <label>Envoyer une notification par email à la fin</label>
+        <name>Import_SendEmailNotificationsOnComplete</name>
+    </customLabels>
+    <customLabels>
+        <label>Configurer des imports récurrents</label>
+        <name>Import_SetUpRecurringImports</name>
+    </customLabels>
+    <customLabels>
+        <label>Date et heure de début</label>
+        <name>Import_StartDateAndTime</name>
+    </customLabels>
+    <customLabels>
+        <label>Exécution Planifiée enregistrée avec succés.</label>
+        <name>Import_SucessCreatedSchedulesMessage</name>
+    </customLabels>
+    <customLabels>
+        <label>Heure</label>
+        <name>Import_Time</name>
+    </customLabels>
+    <customLabels>
+        <label>Planification avec ID {0} mise à jour avec succés </label>
+        <name>Import_UpdateScheduleToastMessage</name>
     </customLabels>
     <customLabels>
         <label>Modifié le :</label>
@@ -1605,7 +1674,7 @@
         <name>ProjectForm_Description</name>
     </customLabels>
     <customLabels>
-        <label>Fournissez des détails sur la source des données, l'objectif commercial et les résultats attendus</label>
+        <label>Fournissez des détails sur la source des données, l&apos;objectif commercial et les résultats attendus</label>
         <name>ProjectForm_Helper_Description</name>
     </customLabels>
     <customLabels>
@@ -1613,7 +1682,7 @@
         <name>ProjectForm_Helper_Name</name>
     </customLabels>
     <customLabels>
-        <label>Sélectionnez l'objet Salesforce où les données seront importées</label>
+        <label>Sélectionnez l&apos;objet Salesforce où les données seront importées</label>
         <name>ProjectForm_Helper_Target_Object</name>
     </customLabels>
     <customLabels>
@@ -1629,7 +1698,7 @@
         <name>ProjectForm_Save_Button</name>
     </customLabels>
     <customLabels>
-        <label>Configurez votre projet d'importation de données avec l'objet cible et la configuration</label>
+        <label>Configurez votre projet d&apos;importation de données avec l&apos;objet cible et la configuration</label>
         <name>ProjectForm_Subtitle</name>
     </customLabels>
     <customLabels>
@@ -1637,7 +1706,7 @@
         <name>ProjectForm_Target_Object</name>
     </customLabels>
     <customLabels>
-        <label>Configuration de l'objet cible</label>
+        <label>Configuration de l&apos;objet cible</label>
         <name>ProjectForm_Target_Section_Label</name>
     </customLabels>
     <customLabels>
@@ -1645,76 +1714,8 @@
         <name>ProjectForm_Title</name>
     </customLabels>
     <customLabels>
-        <label><!-- Created date label --></label>
-        <name>ProjectRecent_Created_Label</name>
-    </customLabels>
-    <customLabels>
-        <label><!-- Project description label --></label>
-        <name>ProjectRecent_Description</name>
-    </customLabels>
-    <customLabels>
-        <label><!-- Project name label --></label>
-        <name>ProjectRecent_Name</name>
-    </customLabels>
-    <customLabels>
-        <label><!-- No project message --></label>
-        <name>ProjectRecent_No_Project</name>
-    </customLabels>
-    <customLabels>
-        <label><!-- Recent projects section title --></label>
-        <name>ProjectRecent_Recent_Projects</name>
-    </customLabels>
-    <customLabels>
-        <label><!-- Select project button --></label>
-        <name>ProjectRecent_Select_Project</name>
-    </customLabels>
-    <customLabels>
-        <label><!-- Target Salesforce object label --></label>
-        <name>ProjectRecent_Target_Object</name>
-    </customLabels>
-    <customLabels>
-        <label><!-- Target object label in project list --></label>
-        <name>ProjectRecent_Target_SObject</name>
-    </customLabels>
-    <customLabels>
-        <label><!-- Create new project title --></label>
-        <name>ProjectRecent_Title</name>
-    </customLabels>
-    <customLabels>
-        <label><!-- Use existing project card title --></label>
-        <name>ProjectRecent_Use_Existing</name>
-    </customLabels>
-    <customLabels>
-        <label><!-- Description for using an existing project --></label>
-        <name>ProjectRecent_Use_Existing_Description</name>
-    </customLabels>
-    <customLabels>
-        <label>Fonctionnalité de recherche de projets</label>
-        <name>SEARCH_PROJECTS_FEATURE</name>
-    </customLabels>
-    <customLabels>
-        <label>Veuillez sélectionner ou créer un projet d’abord</label>
-        <name>SELECT_PROJECT_FIRST</name>
-    </customLabels>
-    <customLabels>
-        <label>La fonctionnalité de paramètres arrive bientôt</label>
-        <name>SETTINGS_COMING_SOON</name>
-    </customLabels>
-    <customLabels>
-        <label><!-- Card title for select project --></label>
-        <name>SelectProject_Card_Title</name>
-    </customLabels>
-    <customLabels>
-        <label><!-- Button to close modal --></label>
-        <name>SelectProject_Close_Button</name>
-    </customLabels>
-    <customLabels>
-        <label><!-- Message for no project found --></label>
-        <name>SelectProject_No_Project</name>
-    </customLabels>
-    <customLabels>
-        <label><!-- Button to select project --></label>
-        <name>SelectProject_Select_Button</name>
+        <label>Actions Rapides</label>
+        <name>SideBar_QuickAction_Title</name>
     </customLabels>
     <customLabels>
         <label>Analytique</label>
@@ -1759,5 +1760,67 @@
     <customLabels>
         <label>Affichage des logs</label>
         <name>VIEW_LOGS</name>
+    </customLabels>
+    <!--Import Execution Status -->
+    
+<customLabels>
+    <label>En Attente</label>
+    <name>ProjectCard_Status_Pending</name>
+</customLabels>
+<customLabels>
+    <label>En Suspend</label>
+    <name>ProjectCard_Status_Suspended</name>
+</customLabels>
+<customLabels>
+    <label>Annulé</label>
+    <name>ProjectCard_Status_Cancelled</name>
+</customLabels>
+<customLabels>
+    <label>Échoué</label>
+    <name>ProjectCard_Status_Failed</name>
+</customLabels>
+<customLabels>
+    <label>Terminé</label>
+    <name>ProjectCard_Status_Completed</name>
+</customLabels>
+<customLabels>
+    <label>Succès</label>
+    <name>ProjectCard_Status_Success</name>
+</customLabels>
+    <customLabels>
+        <label>Quotidienne</label>
+        <name>Import_Frequency_Daily</name>
+    </customLabels>
+    <customLabels>
+        <label>Hebdomadaire</label>
+        <name>Import_Frequency_Weekly</name>
+    </customLabels>
+    <customLabels>
+        <label>Mensuelle</label>
+        <name>Import_Frequency_Monthly</name>
+    </customLabels>
+    <customLabels>
+        <label>à</label>
+        <name>Import_Schedule_At</name>
+    </customLabels> 
+     <customLabels>
+        <label>Modification planification d'exécution</label>
+        <name>Import_Schedule_Edit_Title</name>
+    </customLabels> 
+    <customLabels>
+        <label>Non planifiée</label>
+        <name>Import_Schedule_NotScheduled</name>
+    </customLabels>
+    <customLabels>
+        <label>Quotidienne à</label>
+        <name>Import_Schedule_DailyAt</name>
+    </customLabels>
+    <customLabels>
+        <label>Hebdomadaire le</label>
+        <name>Import_Schedule_WeeklyOn</name>
+    </customLabels>
+    <customLabels>
+        <label>Mensuelle le</label>
+        <name>Import_Schedule_MonthlyOn</name>
     </customLabels>
 </Translations>

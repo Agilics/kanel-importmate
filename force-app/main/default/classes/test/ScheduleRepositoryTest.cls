@@ -2,8 +2,8 @@
  * @description       : 
  * @author            : ChangeMeIn@UserSettingsUnder.SFDoc
  * @group             : 
- * @last modified on  : 12-29-2025
- * @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+ * @last modified on  : 30-03-2026
+ * @last modified by  : Remove shadow filter teste
 **/
 @isTest
 public with sharing class ScheduleRepositoryTest {
@@ -49,7 +49,7 @@ public with sharing class ScheduleRepositoryTest {
 
         //WHEN
         Test.startTest();
-            List<Schedule__c> results = ScheduleRepository.getSchedulesByIdProject(Project.Id);
+            List<Schedule__c> results = ScheduleRepository.getSchedulesByprojectId(String.valueOf(Project.Id));
         Test.stopTest();
 
         //Then - Assertions
@@ -73,26 +73,35 @@ public with sharing class ScheduleRepositoryTest {
      }
 
       //Tester la suppression de tâches par le nom de la planification
-    
-     
-    //Tester la récupération de planification par la fréquence(DAILY | WEEKLY | MONTHLY)
-     @IsTest
-     static void testGetScheduleByFrequency() {
-        //GIVEN
-         Schedule__c savedSchedule = TestDataFactory.createSchedule();
-        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
-
-        ImportMateEnum.FrequencyEnum expectedFrequence = ImportMateEnum.FrequencyEnum.DAILY;
-
-        //When 
+    //  suppression avec ID null cas de test négatif
+    @IsTest
+    static void testDeleteScheduleByIdNull() {
         Test.startTest();
-        List<Schedule__c> result =  ScheduleRepository.getSchedulesByFrequencyAndProjectId(expectedFrequence, project.Id);        
+        try {
+            ScheduleService.deleteScheduleById(null);
+        } catch (Exception e) {
+            Assert.isTrue(String.isNotBlank(e.getMessage()));
+        }
+        Test.stopTest();
+    }
+
+     static void testDeleteScheduleById() {
+        Schedule__c schedule = TestDataFactory.createSchedule();
+
+        String scheduleId = String.valueOf(schedule.Id);
+        ScheduleRepository.deleteScheduleById(scheduleId);
+        Test.startTest();
+        List<Schedule__c> schedules = [
+            SELECT Id, Name 
+            FROM Schedule__c
+            WHERE Id = :scheduleId
+        ];
         Test.stopTest();
 
-        //Then - Assertions
-        Assert.isNotNull(result, 'find a schedule success');     
-     }
-
+        Assert.isFalse( schedules.size() > 0, 'Schedule shouldn\'t  be find after deleted!');
+    }
+     
+    
 
     //Tester la récupération de planification par le nom du projet
     @IsTest
@@ -154,7 +163,7 @@ public with sharing class ScheduleRepositoryTest {
 
             ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
       
-            List<ScheduleService.ScheduleWrapper> results = ScheduleRepository.getSchedulesWithExecutionsByIdProject(project.id);
+            List<ScheduleService.ScheduleWrapper> results = ScheduleRepository.getSchedulesWithExecutionsByprojectId(project.id);
 
             Test.stopTest();
 
@@ -178,7 +187,7 @@ public with sharing class ScheduleRepositoryTest {
             Schedule__c schedule = TestDataFactory.createSchedule(); 
 
          
-            List<ScheduleService.ScheduleWrapper> results = ScheduleRepository.getSchedulesByExecutionStatusAndIdProject(status ,project.id);
+            List<ScheduleService.ScheduleWrapper> results = ScheduleRepository.getSchedulesByExecutionStatusAndprojectId(status, String.valueOf(project.id));
                 
             Test.stopTest();
 
@@ -187,4 +196,18 @@ public with sharing class ScheduleRepositoryTest {
           //  Assert.areEqual(status,results[0].importExecutions[0].Status__c,'Should not be false ');
             
     }
+ 
+    @isTest
+    static void testGetExecutionsByProject_WithStatus() {
+        ImportProject__c proj = [SELECT Id FROM ImportProject__c LIMIT 1];
+        
+        Test.startTest();
+        // Cas nominal : Filtrer par statut 'Completed'
+         List<ScheduleService.ScheduleWrapper> result = 
+            ScheduleRepository.getSchedulesWithExecutionsByprojectId(proj.Id);
+        Test.stopTest();
+
+        Assert.isTrue(result.size()> 0,'Scheduled linked should not be empty'); 
+    }
+
 }

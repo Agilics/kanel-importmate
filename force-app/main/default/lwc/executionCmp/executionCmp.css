@@ -41,6 +41,30 @@
 
 .export-button { min-width: 150px; }
 .schedule-button, .start-button { min-width: 160px; }
+/*execution grid*/
+.execution-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    max-width: 1200px;
+    padding: 1.5rem 2.3rem;
+    margin: 0 auto 2rem auto;
+}
+
+/*execution card*/
+.execution-card {
+    background: white;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); 
+    transition: box-shadow 0.2s ease; 
+    overflow: visible;
+    min-height: 362px;
+}
+
+.execution-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
 
 .progress-section {
   background-color: #fff;
@@ -186,6 +210,62 @@
   color: #991b1b;
 }
 
+/*button */
+.btn { 
+  height: 48px;
+  border-radius: 8px;
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
+  font-size: 16px;
+  color: #ffffff;
+  gap:13px;
+  line-height: 100%;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-top: 1rem;
+  border: none;
+  -webkit-transition: all 0.2s ease;
+  -moz-transition: all 0.2s ease;
+  -ms-transition: all 0.2s ease;
+  -o-transition: all 0.2s ease; 
+}
+
+.btn-primary {
+  background: #1e40af;
+  border: 1px solid #1e40af;
+  width:175.15625px;
+}
+.btn-secondary{ 
+    background-color: #FFFFff;
+    border: 1px solid #ffffff;
+    width:197.84375px;
+    color:#374151;
+}
+
+.btn-accent{
+  background: #e5e7eb;
+  border: 1px solid #e5e7eb;
+  font-family: "Inter", sans-serif;
+  color:#050404;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 100%;
+  width:190px;
+  text-align: center;
+}
+
+.secondary-icon{ 
+  --slds-c-icon-color-foreground-default: #374151;
+  --slds-c-icon-color-background: transparent;
+}
+.primary-icon{
+  --slds-c-icon-color-foreground-default: #ffffff;
+  --slds-c-icon-color-background: transparent ;
+}
+.icon{
+    margin: 0 12px 0 0;
+}
 .navigation-buttons {
   background: #fff;
   border-radius: 0.75rem;

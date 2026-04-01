@@ -1,10 +1,14 @@
+<!--
+@Modification : 30-03-2026
+
+-->
 <template>
     <div class="project-card" onclick={handleCardClick}>
         <!-- Card Header -->
         <div class="card-header">
             <div class="card-header-left">
                 <h3 class="project-title">{projectName}</h3>
-                <span class={statusClass}>{status}</span>
+                <span class={statusClass}>{statusLabel}</span>
             </div>
             <div class="card-header-right">
                 <lightning-button-icon icon-name="utility:edit" alternative-text="Edit" title="Edit Project"

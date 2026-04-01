@@ -1232,6 +1232,190 @@
         <value>Please create a project first</value>
     </labels>
     <labels>
+        <fullName>Import_ImmediateExecution</fullName>
+        <categories>Import</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Immediate Execution</shortDescription>
+        <value>Immediate Execution</value>
+    </labels>
+    <labels>
+        <fullName>Import_RunImportNow</fullName>
+        <categories>Import</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Run the import now</shortDescription>
+        <value>Run the import now</value>
+    </labels>
+    <labels>
+        <fullName>Import_CancelEditMessage</fullName>
+        <categories>Import</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Toast Message for cancelling edit</shortDescription>
+        <value>Edit cancelled</value>
+    </labels>
+    <labels>
+        <fullName>Import_RescheduleButton</fullName>
+        <categories>Import</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Label button for  edit a schedule</shortDescription>
+        <value>Reschedule</value>
+    </labels>
+    <labels>
+        <fullName>Import_ScheduledExecution</fullName>
+        <categories>Import</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Scheduled Execution</shortDescription>
+        <value>Scheduled Execution</value>
+    </labels>
+    <labels>
+        <fullName>Import_SetUpRecurringImports</fullName>
+        <categories>Import</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Set up recurring imports</shortDescription>
+        <value>Set up recurring imports</value>
+    </labels>
+    <labels>
+        <fullName>Import_ExecutionMode</fullName>
+        <categories>Import</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Execution Mode</shortDescription>
+        <value>Execution Mode</value>
+    </labels>
+    <labels>
+        <fullName>Import_BatchSize</fullName>
+        <categories>Import</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Batch Size</shortDescription>
+        <value>Batch Size</value>
+    </labels>
+    <labels>
+        <fullName>Import_SendEmailNotificationsOnComplete</fullName>
+        <categories>Import</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Send email notifications on complete</shortDescription>
+        <value>Send email notifications on complete</value>
+    </labels>
+    <labels>
+        <fullName>Import_Frequency</fullName>
+        <categories>Import</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Frequency</shortDescription>
+        <value>Frequency</value>
+    </labels>
+    <labels>
+        <fullName>Import_Schedule_Edit_Info_Bar</fullName>
+        <categories>Import</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>info bar message</shortDescription>
+        <value>Schedule date must be in the future. The existing Cron job will be replaced.</value>
+    </labels>
+    <labels>
+        <fullName>Import_StartDateAndTime</fullName>
+        <categories>Import</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Start Date &amp; Time</shortDescription>
+        <value>Start Date &amp; Time</value>
+    </labels>
+    <labels>
+        <fullName>Import_Date</fullName>
+        <categories>Import</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Date</shortDescription>
+        <value>Date</value>
+    </labels>
+    <labels>
+        <fullName>Import_Time</fullName>
+        <categories>Import</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Time</shortDescription>
+        <value>Time</value>
+    </labels>
+    <labels>
+        <fullName>Import_ActiveSchedules</fullName>
+        <categories>Import</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Active Schedules</shortDescription>
+        <value>Active Schedules</value>
+    </labels>
+    <labels>
+        <fullName>Import_NoSchedulesFound</fullName>
+        <categories>Import</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>No schedules found</shortDescription>
+        <value>No schedules found. Create a schedule to get started.</value>
+    </labels>
+    <labels>
+        <fullName>Import_SucessCreatedSchedulesMessage</fullName>
+        <categories>Import</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Message</shortDescription>
+        <value>Schedule created successfully</value>
+    </labels>
+    <labels>
+        <fullName>Import_DeleteScheduleDialogMessage</fullName>
+        <categories>Dialog Confirm</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Message</shortDescription>
+        <value>Are you sure you want to delete this schedule? This action cannot be undone.</value>
+    </labels>
+    <labels>
+        <fullName>Import_DeleteScheduleDialogTitle</fullName>
+        <categories>Dialog Confirm</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Message</shortDescription>
+        <value>Confirm deletion schedule?</value>
+    </labels>
+    <labels>
+        <fullName>Import_DeleteScheduleToastMessage</fullName>
+        <categories>Toast Message</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Success Toast Message for successfully  deleting schedule</shortDescription>
+        <value>Schedule deleted successfully</value>
+    </labels>
+    <labels>
+        <fullName>Import_UpdateScheduleToastMessage</fullName>
+        <categories>Toast Message</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Success Toast Message for successfully  deleting schedule</shortDescription>
+        <value>Schedule with ID {0} Updated  successfully</value>
+    </labels>
+    <labels>
+        <fullName>Import_SelectAnOption</fullName>
+        <categories>Import</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Select an option</shortDescription>
+        <value>Select an option</value>
+    </labels>
+    <labels>
+        <fullName>Import_ScheduledImportsNote</fullName>
+        <categories>Import</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Scheduled imports note</shortDescription>
+        <value>Scheduled imports will use the same data source and transformations configured in previous steps.</value>
+    </labels>
+    <labels>
         <fullName>IMPORT_STARTED</fullName>
         <language>en_US</language>
         <protected>false</protected>
@@ -2353,38 +2537,38 @@
         <value>Import Execution Status</value>
     </labels>
     <labels>
-        <fullName>IM_EX_Status_Completed</fullName>
+        <fullName>ProjectCard_Status_Completed</fullName>
         <language>en_US</language>
         <protected>false</protected>
-        <shortDescription>IM_EX_Status_Completed</shortDescription>
+        <shortDescription>ProjectCard_Status_Completed</shortDescription>
         <value>Completed</value>
     </labels>
     <labels>
-        <fullName>IM_EX_Status_Cancelled</fullName>
+        <fullName>ProjectCard_Status_Cancelled</fullName>
         <language>en_US</language>
         <protected>false</protected>
-        <shortDescription>IM_EX_Status_Cancelled</shortDescription>
+        <shortDescription>ProjectCard_Status_Cancelled</shortDescription>
         <value>Cancelled</value>
     </labels>
     <labels>
-        <fullName>IM_EX_Status_Failed</fullName>
+        <fullName>ProjectCard_Status_Failed</fullName>
         <language>en_US</language>
         <protected>false</protected>
-        <shortDescription>IM_EX_Status_Failed</shortDescription>
+        <shortDescription>ProjectCard_Status_Failed</shortDescription>
         <value>Failed</value>
     </labels>
     <labels>
-        <fullName>IM_EX_Status_InProgress</fullName>
+        <fullName>ProjectCard_Status_InProgress</fullName>
         <language>en_US</language>
         <protected>false</protected>
-        <shortDescription>IM_EX_Status_InProgress</shortDescription>
+        <shortDescription>ProjectCard_Status_InProgress</shortDescription>
         <value>In Progress</value>
     </labels>
     <labels>
-        <fullName>IM_EX_Status_Pending</fullName>
+        <fullName>ProjectCard_Status_Pending</fullName>
         <language>en_US</language>
         <protected>false</protected>
-        <shortDescription>IM_EX_Status_Pending</shortDescription>
+        <shortDescription>ProjectCard_Status_Pending</shortDescription>
         <value>Pending</value>
     </labels>
     <labels>
@@ -3254,6 +3438,13 @@
         <value>Edit Import Project</value>
     </labels>
     <labels>
+        <fullName>SideBar_QuickAction_Title</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Title section</shortDescription>
+        <value>Quick Actions</value>
+    </labels>
+    <labels>
         <fullName>SideBar_QuickAction_Analytics</fullName>
         <language>en_US</language>
         <protected>false</protected>
@@ -3316,4 +3507,118 @@
         <shortDescription>Step 5 - Validation (Dry Run)</shortDescription>
         <value>Validation</value>
     </labels>
+    <!-- status ImportExecution-->
+     <labels>
+        <fullName>ProjectCard_Status_Pending</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Import status - Pending</shortDescription>
+        <value>Pending</value>
+    </labels>
+        <labels>
+        <fullName>ProjectCard_Status_Suspended</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Import status - Suspended</shortDescription>
+        <value>Suspended</value>
+    </labels>
+     <labels>
+        <fullName>ProjectCard_Status_Cancelled</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Import status - Cancelled</shortDescription>
+        <value>Cancelled</value>
+    </labels>
+    <labels>
+        <fullName>ProjectCard_Status_InProgress</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Import status - In Progress</shortDescription>
+        <value>In Progress</value>
+    </labels>
+    <labels>
+        <fullName>ProjectCard_Status_Failed</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Import status - Failed</shortDescription>
+        <value>Failed</value>
+    </labels>
+    <labels>
+        <fullName>ProjectCard_Status_Completed</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Import status - Completed</shortDescription>
+        <value>Completed</value>
+    </labels>
+    <labels>
+        <fullName>ProjectCard_Status_Success</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Import status - Success</shortDescription>
+        <value>Success</value>
+    </labels>
+    <labels>
+        <fullName>Import_Frequency_Daily</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Frequency option - Daily</shortDescription>
+        <value>Daily</value>
+    </labels>
+    <labels>
+        <fullName>Import_Frequency_Weekly</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Frequency option - Weekly</shortDescription>
+        <value>Weekly</value>
+    </labels>
+    <labels>
+        <fullName>Import_Frequency_Monthly</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Frequency option - Monthly</shortDescription>
+        <value>Monthly</value>
+    </labels>
+    <labels>
+        <fullName>Import_Schedule_At</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Preposition "at" for time</shortDescription>
+        <value>at</value>
+    </labels>
+    <labels>
+        <fullName>Import_Schedule_NotScheduled</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Not scheduled message</shortDescription>
+        <value>Not scheduled</value>
+    </labels>
+    <labels>
+        <fullName>Import_Schedule_Edit_Title</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Edit Schedule</shortDescription>
+        <value>Edit Schedule</value>
+    </labels>
+    <labels>
+        <fullName>Import_Schedule_DailyAt</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Daily at ...</shortDescription>
+        <value>Daily at</value>
+    </labels>
+    <labels>
+        <fullName>Import_Schedule_WeeklyOn</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Weekly on ...</shortDescription>
+        <value>Weekly on</value>
+    </labels>
+    <labels>
+        <fullName>Import_Schedule_MonthlyOn</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Monthly on ...</shortDescription>
+        <value>Monthly on</value>
+    </labels>
+    
 </CustomLabels>
