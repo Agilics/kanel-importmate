@@ -147,8 +147,7 @@ export default class ScheduledSchedules extends LightningElement {
 
             return (wrapper.schedules || []).map(sch => {   
 
-                const specificExecutions = executions
-                    .filter(exec => exec.ApexJobId__c === sch.Id)
+                const specificExecutions = executions 
                     .sort((a, b) => new Date(b.StartTime__c) - new Date(a.StartTime__c));
 
                 const lastExecution = specificExecutions.length > 0 ? specificExecutions[0] : null;
