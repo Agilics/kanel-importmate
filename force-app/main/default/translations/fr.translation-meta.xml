@@ -1823,4 +1823,8 @@
         <label>Mensuelle le</label>
         <name>Import_Schedule_MonthlyOn</name>
     </customLabels>
+    <customLabels>
+        <label>La date prévue doit être ultérieure. La tâche Cron existante sera remplacée.</label>
+        <name>Import_Schedule_Edit_Info_Bar</name>
+    </customLabels>
 </Translations>

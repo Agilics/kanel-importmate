@@ -1311,6 +1311,14 @@
         <shortDescription>Frequency</shortDescription>
         <value>Frequency</value>
     </labels>
+      <labels>
+        <fullName>Import_NextRun</fullName>
+        <categories>Import</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Frequency</shortDescription>
+        <value>Date prochaine exécution </value>
+    </labels>
     <labels>
         <fullName>Import_Schedule_Edit_Info_Bar</fullName>
         <categories>Import</categories>
