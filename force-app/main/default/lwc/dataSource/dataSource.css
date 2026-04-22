@@ -1,3 +1,8 @@
+/**
+ * @last modification : 04-22-2026
+ * @Modified by : Mouhamed NIANG
+ * @Modification : add badge 
+*/
 body {
   padding: 2rem 2.5rem;
   max-width: 1200px;
@@ -13,6 +18,17 @@ body {
   opacity: 1;
   flex-wrap: wrap;
 }
+
+.flex{
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  align-content: stretch;
+  gap: 8px;
+}
+
 
 .header {
   width: 100%;
@@ -99,6 +115,16 @@ body {
   --slds-c-icon-color-background: #1e40af;
 }
 
+.badge { 
+  padding: 4px 8px;
+  text-align: center;
+  border-radius: 999px;
+}
+.primary-badge{ 
+  margin: 0.25rem 0 0 0;
+  background-color: #1e40af;
+  color: white; 
+}
 /* Responsive breakpoints */
 
 /* Tablets et petits écrans (≤ 1024px) */

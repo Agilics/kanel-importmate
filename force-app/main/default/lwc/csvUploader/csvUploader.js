@@ -48,7 +48,7 @@ const DEFAULT_PAGE_SIZE     = 3;
 
 export default class CsvUploader extends LightningElement {
     @api title = LBL_PAGE_TITLE;
-
+    @api projectName;
     // ✅ Single label object exposed to the template
     label = {
         pageSubtitle       : LBL_PAGE_SUBTITLE,

@@ -2,16 +2,21 @@
    @description       : Data source selector page - shows selection cards for CSV or SOQL
    @author            : ChangeMeIn@UserSettingsUnder.SFDoc
    @group             : 
-   @last modified on  : 02-23-2026
+   @last modified on  : 04-22-2026
    @last modified by  : Mouhamed NIANG
-   @Modification: Add custom labels
+   @Modification: Add project's name 
 -->
    <template>
     <div class="container" id="container">
 
         <!-- Header title -->
         <div class="header">
-            <h1 class="header-title">{label.title}</h1>
+            <div class="flex">
+                <h1 class="header-title">{label.title}</h1>
+                <span class="badge primary-badge header-subtitle ">
+                  {projectName}
+                </span>
+            </div>
             <p class="header-subtitle">{label.subtitle}</p>
         </div>
 
