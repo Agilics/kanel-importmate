@@ -1,3 +1,6 @@
+<!--
+  @last modification : 24/04/2026
+-->
 <template>
   <div class="page">
     <!-- Header -->
@@ -36,7 +39,10 @@
         <p class="info info--ok slds-m-top_small">{label.loading}</p>
       </template>
       <template if:true={parseError}>
-        <p class="info info--error slds-m-top_small">{parseError}</p>
+        <p class="info info--error slds-m-top_small">
+           <lightning-icon icon-name="utility:error" class="custom-icon-error" size="x-small"></lightning-icon>
+          {parseError}
+        </p>
       </template>
       <template if:true={fileName}>
         <div class="file-meta slds-m-top_small">
