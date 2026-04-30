@@ -40,19 +40,22 @@
                   </lightning-combobox>
                </div>
             </lightning-layout-item>
-            <!-- Batch Size --> 
+            <!-- Batch Size -->
             <lightning-layout-item size="12" padding="around-small">
                <div class={formGroup}>
-                  <label class={formLabel} for="batch-size">
-                  {labels.labelBatchSize}
-                  </label>
-                  <lightning-combobox 
-                        options={batchSizeOptions} 
-                        class="form-control" 
-                        id="batch-size"
-                        value={batchSize}
-                        onchange={handleBatchSizeChange}
-                  ></lightning-combobox>
+                  <lightning-input
+                     type="number"
+                     label={labels.labelBatchSize}
+                     name="batch-size"
+                     min="1"
+                     max="2000"
+                     step="1"
+                     value={batchSize}
+                     placeholder="e.g. 200"
+                     class="form-control"
+                     onchange={handleBatchSizeChange}>
+                  </lightning-input>
+                  <p class="batch-size-hint">Recommended: 50–500. Leave blank to use the project default.</p>
                </div>
             </lightning-layout-item>
             <!-- checkbox --> 
