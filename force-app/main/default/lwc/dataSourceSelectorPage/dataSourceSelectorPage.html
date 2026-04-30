@@ -9,6 +9,12 @@
   <div class="container">
     <!-- header title -->
     <div class="header">
+      <template if:true={projectName}>
+        <p class="project-context-label">
+          <lightning-icon icon-name="utility:folder" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+          {projectName}
+        </p>
+      </template>
       <h1 class="header-title">Choose Data Source</h1>
       <p class="header-subtitle">
         Select how you want to import your data into Salesforce
