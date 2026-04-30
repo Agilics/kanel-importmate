@@ -7,10 +7,11 @@
     <!-- Header -->
     <div class="page-header">
       <div class="header-content">
-        <div class="header-left">
-          <div class="header-row">
-            <h1 class="header-title">{labels.title}</h1>
 
+        <!-- Left: title + status badge + subtitle -->
+        <div class="header-info">
+          <div class="header-title-row">
+            <h1 class="header-title">{labels.title}</h1>
             <template if:true={validationExecuted}>
               <template if:true={hasErrors}>
                 <span class="error-status-badge">
@@ -26,17 +27,18 @@
               </template>
             </template>
           </div>
-
           <p class="header-subtitle">{labels.subtitle}</p>
-
           <template if:true={precheck.totalRows}>
             <p class="precheck-line">
-              Precheck: {precheck.totalRows} row(s), {precheck.emptyRows} empty row(s), {precheck.invalidRows} invalid row(s)
+              Precheck: {precheck.totalRows} row(s) &nbsp;·&nbsp;
+              {precheck.emptyRows} empty &nbsp;·&nbsp;
+              {precheck.invalidRows} invalid
             </p>
           </template>
         </div>
 
-        <div class="header-right">
+        <!-- Right: actions row (all inline) -->
+        <div class="header-actions-row">
           <lightning-button
             label={labels.btnSettings}
             onclick={openSettings}
@@ -45,6 +47,24 @@
             icon-name="utility:settings"
             icon-position="left">
           </lightning-button>
+
+          <!-- Insert valid / rollback failed toggle (inline with buttons) -->
+          <div class="keep-valid-rows-toggle">
+            <input
+              type="checkbox"
+              id="keepValidRowsCheck"
+              checked={settings.keepValidRows}
+              onchange={handleKeepValidRowsChange}
+              disabled={isLoading} />
+            <label for="keepValidRowsCheck">{labels.settingsKeepValidRows}</label>
+            <span class="rollback-hint">
+              <lightning-icon
+                icon-name="utility:info"
+                size="xx-small"
+                title="Checked → valid rows are inserted, only failed rows are rolled back. Unchecked → all rows are rolled back (safe dry-run).">
+              </lightning-icon>
+            </span>
+          </div>
 
           <lightning-button
             label={labels.btnRun}
@@ -61,8 +81,7 @@
             disabled={isExportDisabled}
             variant="neutral"
             icon-name="utility:download"
-            icon-position="left"
-            class="slds-m-left_x-small">
+            icon-position="left">
           </lightning-button>
         </div>
       </div>
@@ -90,16 +109,37 @@
                   onchange={handleSettingChange}>
                 </lightning-combobox>
 
-                <lightning-input
-                  name="sampleSize"
-                  type="number"
-                  label={labels.settingsSampleSize}
-                  value={settings.sampleSize}
-                  onchange={handleSettingChange}
-                  disabled={isLoading}>
-                </lightning-input>
+                <template if:true={isPartialOrSample}>
+                  <div class="range-inputs">
+                    <lightning-input
+                      name="fromLine"
+                      type="number"
+                      label="From line"
+                      min="1"
+                      value={settings.fromLine}
+                      onchange={handleSettingChange}
+                      disabled={isLoading}
+                      class="range-input">
+                    </lightning-input>
+                    <lightning-input
+                      name="toLine"
+                      type="number"
+                      label="To line"
+                      min="1"
+                      value={settings.toLine}
+                      onchange={handleSettingChange}
+                      disabled={isLoading}
+                      class="range-input">
+                    </lightning-input>
+                  </div>
+                  <div class="settings-help">
+                    Validate only the rows between "From line" and "To line" (inclusive). Line 1 = first data row after the header.
+                  </div>
+                </template>
 
-                <div class="settings-help">{labels.settingsSampleHelp}</div>
+                <template if:false={isPartialOrSample}>
+                  <div class="settings-help">{labels.settingsSampleHelp}</div>
+                </template>
               </div>
 
               <!-- Performance -->

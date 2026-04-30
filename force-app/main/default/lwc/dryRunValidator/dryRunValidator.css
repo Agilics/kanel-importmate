@@ -49,38 +49,35 @@ lightning-button:disabled::part(button) {
   cursor: not-allowed;
 }
 
+/* =========================
+   Header
+   ========================= */
 .page-header {
-  background-color: #f3f4f6;
+  background: linear-gradient(135deg, #f8fafc 0%, #f3f4f6 100%);
   padding: 1.5rem 2rem;
   border-bottom: 1px solid #e5e7eb;
-  position: relative;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
 }
 
 .header-content {
-  position: relative;
-}
-
-.header-left {
-  padding-right: 520px;
-}
-
-.header-right {
-  position: absolute;
-  top: 1.5rem;
-  right: 2rem;
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  flex-wrap: nowrap;
-  white-space: nowrap;
-}
-
-.header-row {
   display: flex;
   align-items: flex-start;
-  gap: 1rem;
-  margin-bottom: 0.25rem;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+/* ---- Left block ---- */
+.header-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.header-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
   flex-wrap: wrap;
+  margin-bottom: 0.3rem;
 }
 
 .header-title {
@@ -88,6 +85,7 @@ lightning-button:disabled::part(button) {
   font-weight: 700;
   color: #111827;
   margin: 0;
+  white-space: nowrap;
 }
 
 .header-subtitle {
@@ -100,27 +98,79 @@ lightning-button:disabled::part(button) {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.35rem 0.75rem;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 700;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
   background-color: #fee2e2;
   color: #991b1b;
-  max-width: 420px;
-  white-space: normal;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 1.2;
+  white-space: nowrap;
+  line-height: 1.3;
+  border: 1px solid #fecaca;
 }
+
 .success-badge {
   background-color: #d1fae5;
   color: #065f46;
+  border-color: #a7f3d0;
 }
 
 .precheck-line {
-  margin-top: 0.25rem;
-  font-size: 0.8rem;
+  margin-top: 0.4rem;
+  font-size: 0.78rem;
+  color: #9ca3af;
+  letter-spacing: 0.01em;
+}
+
+/* ---- Right block ---- */
+.header-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+  flex-wrap: nowrap;
+}
+
+/* =========================
+   Keep Valid Rows toggle (header inline)
+   ========================= */
+.keep-valid-rows-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  white-space: nowrap;
+  cursor: pointer;
+  padding: 0 0.25rem;
+}
+
+.keep-valid-rows-toggle input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
+  cursor: pointer;
+  accent-color: #4f46e5;
+  flex-shrink: 0;
+}
+
+.keep-valid-rows-toggle label {
+  cursor: pointer;
+  margin: 0;
+  user-select: none;
+}
+
+.rollback-hint {
+  display: inline-flex;
+  align-items: center;
   color: #6b7280;
+  cursor: help;
+}
+
+.keep-valid-rows-toggle input:disabled,
+.keep-valid-rows-toggle input:disabled + label {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* =========================
@@ -250,7 +300,9 @@ lightning-button:disabled::part(button) {
   color: #374151;
 }
 
-/* Report section */
+/* =========================
+   Report section
+   ========================= */
 .error-details-section {
   background-color: white;
   border-radius: 0.5rem;
@@ -325,6 +377,9 @@ lightning-button:disabled::part(button) {
   color: #374151;
 }
 
+/* =========================
+   Navigation buttons
+   ========================= */
 .action-buttons-section {
   background-color: white;
   border-radius: 0.5rem;
@@ -340,7 +395,7 @@ lightning-button:disabled::part(button) {
 .action-buttons-right { display: flex; gap: 0.5rem; }
 
 /* =========================
-   Settings Modal — FIXES
+   Settings Modal
    ========================= */
 .slds-modal__container {
   max-width: 58rem !important;
@@ -386,20 +441,40 @@ lightning-button:disabled::part(button) {
   overflow-wrap: break-word;
 }
 
+.range-inputs {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.range-input {
+  flex: 1;
+}
+
 /* =========================
    Responsive
    ========================= */
-@media (max-width: 768px) {
-  .page-header { padding: 1.25rem 1rem; }
-  .header-left { padding-right: 0; }
-  .header-right {
-    position: static;
-    margin-top: 1rem;
-    width: 100%;
-    justify-content: flex-start;
+@media (max-width: 1100px) {
+  .header-content {
+    gap: 1rem;
+  }
+  .header-actions-row {
     flex-wrap: wrap;
   }
-  .header-content,
+}
+
+@media (max-width: 768px) {
+  .page-header { padding: 1.25rem 1rem; }
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .header-actions-row {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+  .keep-valid-rows-toggle { width: auto; }
   .error-filters,
   .filter-controls,
   .action-buttons-content,
@@ -409,7 +484,6 @@ lightning-button:disabled::part(button) {
     align-items: flex-start;
     gap: 1rem;
   }
-  .header-right,
   .filter-controls,
   .action-buttons-right,
   .search-container { width: 100%; }
@@ -418,7 +492,6 @@ lightning-button:disabled::part(button) {
   .action-buttons-section { margin-left: 1rem; margin-right: 1rem; }
   .statistics-grid { grid-template-columns: 1fr; gap: 1rem; }
   .stat-number { font-size: 2rem; }
-  .error-status-badge { max-width: 100%; }
 }
 
 @media (max-width: 900px) {

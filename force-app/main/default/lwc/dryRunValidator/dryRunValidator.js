@@ -10,7 +10,7 @@ import cancelExecution from '@salesforce/apex/BatchExecutionController.cancelExe
 import retryExecution from '@salesforce/apex/BatchExecutionController.retryExecution';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { subscribe, unsubscribe, onError } from 'lightning/empApi';
-import { parseCsvData } from 'c/utility';
+import { parseCsvData, validateCsvHeaders } from 'c/utility';
 
 // ===== Custom Labels =====
 import LABEL_TITLE from '@salesforce/label/c.IM_DRY_Title';
@@ -40,6 +40,7 @@ import LABEL_SETTINGS_WARNINGS from '@salesforce/label/c.IM_DRY_Settings_Include
 import LABEL_SETTINGS_STOP from '@salesforce/label/c.IM_DRY_Settings_StopOnError';
 import LABEL_SETTINGS_DEFAULT_TAB from '@salesforce/label/c.IM_DRY_Settings_DefaultTab';
 import LABEL_SETTINGS_BEHAVIOR_HELP from '@salesforce/label/c.IM_DRY_Settings_BehaviorHelp';
+import LABEL_SETTINGS_KEEP_VALID_ROWS from '@salesforce/label/c.IM_DRY_Settings_KeepValidRows';
 import LABEL_PROGRESS_TITLE from '@salesforce/label/c.IM_DRY_Progress_Title';
 import LABEL_PROGRESS_IN_PROGRESS from '@salesforce/label/c.IM_DRY_Progress_InProgress';
 import LABEL_PROGRESS_COMPLETED from '@salesforce/label/c.IM_DRY_Progress_Completed';
@@ -110,10 +111,12 @@ export default class DryRunValidator extends LightningElement {
   @track isSettingsOpen = false;
   @track settings = {
     mode: 'full',
-    sampleSize: 50,
+    fromLine: 1,
+    toLine: 50,
     asyncThreshold: 200,
     includeWarnings: true,
     stopOnFirstErrorClientSide: false,
+    keepValidRows: false,
     defaultTab: 'errors',
     pageSize: 5
   };
@@ -159,6 +162,7 @@ export default class DryRunValidator extends LightningElement {
       settingsStop: LABEL_SETTINGS_STOP,
       settingsDefaultTab: LABEL_SETTINGS_DEFAULT_TAB,
       settingsBehaviorHelp: LABEL_SETTINGS_BEHAVIOR_HELP,
+      settingsKeepValidRows: LABEL_SETTINGS_KEEP_VALID_ROWS,
       progressTitle: LABEL_PROGRESS_TITLE,
       progressInProgress: LABEL_PROGRESS_IN_PROGRESS,
       progressCompleted: LABEL_PROGRESS_COMPLETED,
@@ -222,9 +226,14 @@ export default class DryRunValidator extends LightningElement {
   get modeOptions() {
     return [
       { label: LABEL_MODE_FULL, value: 'full' },
-      { label: LABEL_MODE_SAMPLE, value: 'sample' }
+      { label: LABEL_MODE_SAMPLE, value: 'sample' },
+      { label: 'Partial (line range)', value: 'partial' }
     ];
   }
+
+  get isPartialMode() { return this.settings?.mode === 'partial'; }
+  get isSampleMode() { return this.settings?.mode === 'sample'; }
+  get isPartialOrSample() { return this.isPartialMode || this.isSampleMode; }
 
   get tabOptions() {
     return [
@@ -390,7 +399,11 @@ export default class DryRunValidator extends LightningElement {
     let value = event.detail?.value;
     if (event.target.type === 'checkbox') value = event.target.checked;
     const next = { ...this.settings };
-    if (name === 'sampleSize' || name === 'asyncThreshold') {
+    if (name === 'fromLine') {
+      next.fromLine = Math.max(1, parseInt(value, 10) || 1);
+    } else if (name === 'toLine') {
+      next.toLine = Math.max(next.fromLine || 1, parseInt(value, 10) || 50);
+    } else if (name === 'asyncThreshold') {
       next[name] = Math.max(1, parseInt(value, 10) || 1);
     } else if (name === 'pageSize') {
       next.pageSize = Math.max(1, parseInt(value, 10) || 5);
@@ -400,6 +413,12 @@ export default class DryRunValidator extends LightningElement {
     this.settings = next;
     this.pageSize = Number(this.settings.pageSize) || 5;
     this.currentPage = 1;
+    this.persistSettings();
+  }
+
+  // ===== Handler dédié pour le checkbox "Save valid rows" dans le header =====
+  handleKeepValidRowsChange(event) {
+    this.settings = { ...this.settings, keepValidRows: event.target.checked };
     this.persistSettings();
   }
 
@@ -584,7 +603,7 @@ export default class DryRunValidator extends LightningElement {
 
   get isDryRunDisabled() { return this.isLoading || !this.projectId || !this.hasCsvData; }
   get isProceedDisabled() { return this.isLoading || this.hasErrors || !this.validationExecuted; }
-  get isExportDisabled() { return this.isLoading || !this.hasIssues; }
+  get isExportDisabled() { return this.isLoading || !this.validationExecuted; }
 
   get isImportInProgress() { return this.importStatus === 'InProgress' || this.importStatus === 'In Progress'; }
   get isImportCompleted() { return this.importStatus === 'Completed'; }
@@ -717,7 +736,11 @@ export default class DryRunValidator extends LightningElement {
   startExecutionPolling(executionId) {
     this.stopExecutionPolling();
     this.pollExecutionStatus(executionId);
-    this.pollingTimer = window.setInterval(() => { this.pollExecutionStatus(executionId); }, 3000);
+    // ✅ La callback n'est pas async : pollExecutionStatus retourne une Promise
+    // que setInterval n'attend pas — pas besoin de await ici
+    this.pollingTimer = window.setInterval(() => {
+      this.pollExecutionStatus(executionId);
+    }, 3000);
   }
 
   stopExecutionPolling() {
@@ -791,18 +814,24 @@ export default class DryRunValidator extends LightningElement {
 
   async loadAllImportLogs(executionId) {
     const pageSize = 200;
-    let pageNumber = 1;
-    let hasMore = true;
-    let totalCount = 0;
     const allLogs = [];
-    while (hasMore && allLogs.length < MAX_UI_ISSUES) {
+    let totalCount = 0;
+
+    // ✅ Récursion à la place du while+await (eslint no-await-in-loop)
+    const fetchPage = async (pageNumber) => {
+      if (allLogs.length >= MAX_UI_ISSUES) return;
       const pageResult = await getImportLogs({ executionId, pageNumber, pageSize });
       const pageLogs = Array.isArray(pageResult?.logs) ? pageResult.logs : [];
       totalCount = Number(pageResult?.totalCount || totalCount || 0);
       allLogs.push(...pageLogs);
-      hasMore = Boolean(pageResult?.hasMore) && pageLogs.length > 0;
-      pageNumber += 1;
-    }
+      const hasMore = Boolean(pageResult?.hasMore) && pageLogs.length > 0;
+      if (hasMore && allLogs.length < MAX_UI_ISSUES) {
+        await fetchPage(pageNumber + 1);
+      }
+    };
+
+    await fetchPage(1);
+
     return { logs: allLogs.slice(0, MAX_UI_ISSUES), totalCount, truncated: totalCount > MAX_UI_ISSUES };
   }
 
@@ -835,8 +864,8 @@ export default class DryRunValidator extends LightningElement {
   }
 
   async runDryRun() {
-    const isSample = (this.settings?.mode || 'full') === 'sample';
-    await this.runValidation(isSample);
+    const mode = this.settings?.mode || 'full';
+    await this.runValidation(mode === 'sample', mode === 'partial');
   }
 
   computePrecheck(rows) {
@@ -855,7 +884,13 @@ export default class DryRunValidator extends LightningElement {
     return rows.slice(0, size);
   }
 
-  async runValidation(isSample = false) {
+  takeRange(rows, fromLine, toLine) {
+    const from = Math.max(1, fromLine || 1);
+    const to = Math.min(rows.length, toLine || rows.length);
+    return rows.slice(from - 1, to);
+  }
+
+  async runValidation(isSample = false, isPartial = false) {
     const currentProjectId = (this.projectId || '').trim();
     if (!currentProjectId || !this.hasCsvData) {
       this.showToast('Error', 'Please enter project ID and CSV data', 'error');
@@ -864,6 +899,18 @@ export default class DryRunValidator extends LightningElement {
     this.isLoading = true;
     this.clearResults();
     try {
+      // Validate CSV header structure when raw text is available
+      const rawCsv = typeof this.csvData === 'string' ? this.csvData
+        : (this.csvData?.rawCsvText || null);
+      if (rawCsv) {
+        const headerCheck = validateCsvHeaders(rawCsv);
+        if (!headerCheck.valid) {
+          this.showToast('Error', headerCheck.error, 'error');
+          this.isLoading = false;
+          return;
+        }
+      }
+
       const parsedData = this.transformCsvData(this.csvData);
       if (parsedData.length === 0) {
         this.showToast('Error', 'No valid data found in CSV', 'error');
@@ -881,8 +928,32 @@ export default class DryRunValidator extends LightningElement {
       let result;
       let usedAsyncFlow = false;
       let runTotalRows = parsedData.length;
-      if (isSample) {
-        const sampleSize = Number(this.settings?.sampleSize) || 50;
+
+      // keepValidRows : si true → dryRun=false (pas de rollback des lignes valides)
+      const keepValidRows = Boolean(this.settings?.keepValidRows);
+
+      if (isPartial) {
+        const fromLine = Number(this.settings?.fromLine) || 1;
+        const toLine = Number(this.settings?.toLine) || 50;
+        const rangeData = this.takeRange(parsedData, fromLine, toLine);
+        if (rangeData.length === 0) {
+          this.showToast('Error', `No rows found between line ${fromLine} and line ${toLine}.`, 'error');
+          this.isLoading = false;
+          return;
+        }
+        runTotalRows = rangeData.length;
+        isLargeDataset = runTotalRows > asyncThreshold;
+        const useAsync = rangeData.length > MAX_SYNC_SAMPLE_ROWS;
+        if (useAsync) {
+          this.initialTotalRecords = runTotalRows;
+          this.showToast('Info', `Validating rows ${fromLine}–${toLine} (${rangeData.length} rows) in async mode.`, 'info');
+          result = await this.runClientStagingValidation(currentProjectId, rangeData, true, keepValidRows);
+          usedAsyncFlow = true;
+        } else {
+          result = await runDryRunValidationRollback({ projectId: currentProjectId, csvData: rangeData });
+        }
+      } else if (isSample) {
+        const sampleSize = Math.max(1, Math.min(parsedData.length, Number(this.settings?.toLine) || 50));
         const sample = this.takeSample(parsedData, sampleSize);
         runTotalRows = sample.length;
         isLargeDataset = runTotalRows > asyncThreshold;
@@ -890,16 +961,17 @@ export default class DryRunValidator extends LightningElement {
         if (useAsyncForSample) {
           this.initialTotalRecords = runTotalRows;
           this.showToast('Info', `Sample size is ${sample.length}. Switching automatically to async batch validation.`, 'info');
-          result = await this.runClientStagingValidation(currentProjectId, sample, true);
+          result = await this.runClientStagingValidation(currentProjectId, sample, true, keepValidRows);
           usedAsyncFlow = true;
         } else {
           result = await runDryRunValidationRollback({ projectId: currentProjectId, csvData: sample });
         }
       } else {
         this.initialTotalRecords = runTotalRows;
-        result = await this.runClientStagingValidation(currentProjectId, parsedData, false);
+        result = await this.runClientStagingValidation(currentProjectId, parsedData, false, keepValidRows);
         usedAsyncFlow = true;
       }
+
       if (result?.success) {
         if (usedAsyncFlow) {
           this.initialTotalRecords = runTotalRows;
@@ -973,36 +1045,56 @@ export default class DryRunValidator extends LightningElement {
     return rows.map((r) => { const out = {}; Object.keys(r || {}).forEach((k) => (out[k] = String(r?.[k] ?? ''))); return out; });
   }
 
-  async runClientStagingValidation(projectId, rows, isSample = false) {
+  // ===== runClientStagingValidation avec keepValidRows =====
+  // keepValidRows=true  → dryRun: false → le backend ne rollback PAS les lignes valides
+  // keepValidRows=false → dryRun: true  → comportement par défaut (tout rollback)
+  async runClientStagingValidation(projectId, rows, isSample = false, keepValidRows = false) {
     const rowCount = Array.isArray(rows) ? rows.length : 0;
     this.initialTotalRecords = rowCount;
     this.importStatus = 'Staging';
     this.importPhase = 'Staging';
     this.importProgress = 0;
     this.importMessage = `Uploading rows: 0/${rowCount}`;
-    const session = await startClientStaging({ projectId, dryRun: true, totalRows: rowCount });
+
+    const session = await startClientStaging({
+      projectId,
+      dryRun: !keepValidRows,   // ← clé : false si on veut garder les lignes valides
+      totalRows: rowCount
+    });
+
     if (!session?.success || !session?.executionId) throw new Error(session?.error || 'Unable to start staging session.');
     const executionId = session.executionId;
     let nextStartLine = Number(session.nextStartLine || 2);
     const startIndex = Math.max(0, nextStartLine - 2);
-    const resumed = Boolean(session.resumed);
-    if (resumed && startIndex > 0) {
+
+    if (Boolean(session.resumed) && startIndex > 0) {
       this.importStatus = 'Staging';
       this.importPhase = 'Staging';
       this.importProgress = rowCount > 0 ? Math.round((startIndex * 100) / rowCount) : 0;
       this.importMessage = `Resuming upload: ${startIndex}/${rowCount}`;
     }
-    for (let i = startIndex; i < rowCount; i += STAGING_CHUNK_SIZE) {
-      const chunk = rows.slice(i, i + STAGING_CHUNK_SIZE);
-      const appendResult = await appendClientStagingRows({ executionId, rows: chunk, startLine: nextStartLine });
+
+    // ✅ Récursion à la place du for+await (eslint no-await-in-loop)
+    const uploadChunk = async (currentIndex, currentStartLine) => {
+      if (currentIndex >= rowCount) return;
+      const chunk = rows.slice(currentIndex, currentIndex + STAGING_CHUNK_SIZE);
+      const appendResult = await appendClientStagingRows({
+        executionId,
+        rows: chunk,
+        startLine: currentStartLine
+      });
       if (!appendResult?.success) throw new Error(appendResult?.error || 'Unable to append staging rows.');
-      nextStartLine = Number(appendResult.nextStartLine || (nextStartLine + chunk.length));
-      const uploaded = Number(appendResult.uploadedRows || Math.min(rowCount, i + chunk.length));
+      const newStartLine = Number(appendResult.nextStartLine || (currentStartLine + chunk.length));
+      const uploaded = Number(appendResult.uploadedRows || Math.min(rowCount, currentIndex + chunk.length));
       this.importStatus = 'Staging';
       this.importPhase = 'Staging';
       this.importProgress = rowCount > 0 ? Math.round((uploaded * 100) / rowCount) : 0;
       this.importMessage = `Uploading rows: ${uploaded}/${rowCount}`;
-    }
+      await uploadChunk(currentIndex + STAGING_CHUNK_SIZE, newStartLine);
+    };
+
+    await uploadChunk(startIndex, nextStartLine);
+
     const finishResult = await finishClientStaging({ executionId });
     if (!finishResult?.success) throw new Error(finishResult?.error || 'Unable to finish staging.');
     if (isSample) this.showToast('Info', `Sample uploaded (${rowCount} rows). Batch validation started.`, 'info');
@@ -1024,18 +1116,24 @@ export default class DryRunValidator extends LightningElement {
   }
 
   exportErrors() {
-    const rows = this.filteredIssues || [];
-    if (!rows.length) { this.showToast('Info', 'No issues to export', 'info'); return; }
-    const headers = ['issueLevel', 'lineNumber', 'fieldApiName', 'errorType', 'errorMessage', 'columnName', 'currentValue'];
-    const csv = [
-      headers.join(','),
-      ...rows.map((r) => headers.map((h) => { const val = (r?.[h] ?? '').toString().replace(/"/g, '""'); return `"${val}"`; }).join(','))
-    ].join('\n');
+    const rows = this.allIssues || [];
+    const fields = ['issueLevel', 'lineNumber', 'fieldApiName', 'errorType', 'errorMessage', 'columnName', 'currentValue'];
+    const escape = (v) => { const s = (v ?? '').toString().replace(/"/g, '""'); return `"${s}"`; };
+    let csvRows;
+    if (rows.length === 0) {
+      csvRows = [fields.join(','), fields.map(() => '').join(',').replace(/,+/, '"No issues found — all rows valid"')];
+    } else {
+      csvRows = [
+        fields.join(','),
+        ...rows.map((r) => fields.map((h) => escape(r?.[h])).join(','))
+      ];
+    }
+    const csv = csvRows.join('\n');
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `validation_report_${this.activeIssueTab}_${new Date().toISOString().slice(0, 10)}.csv`;
+    a.download = `validation_report_${new Date().toISOString().slice(0, 10)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -1086,5 +1184,28 @@ export default class DryRunValidator extends LightningElement {
   }
 
   handleEditError() { this.showToast('Info', 'Edit is not implemented yet', 'info'); }
-  handleDeleteError() { this.showToast('Info', 'Delete is not implemented yet', 'info'); }
+
+  handleDeleteError(event) {
+    const id = event.currentTarget?.dataset?.errorId;
+    if (!id) return;
+
+    const errorsBefore = this.validationResults?.validationErrors || [];
+    const warningsBefore = this.warningResults || [];
+
+    const filteredErrors = errorsBefore.filter((e) => e.id !== id);
+    const filteredWarnings = warningsBefore.filter((w) => w.id !== id);
+
+    this.validationResults = {
+      ...this.validationResults,
+      validationErrors: filteredErrors,
+      errorCount: filteredErrors.length
+    };
+    this.warningResults = filteredWarnings;
+
+    this.selectedErrors.delete(id);
+    this.selectedErrors = new Set(this.selectedErrors);
+
+    const totalAfter = filteredErrors.length + filteredWarnings.length;
+    if (totalAfter === 0) this.validationExecuted = true;
+  }
 }
