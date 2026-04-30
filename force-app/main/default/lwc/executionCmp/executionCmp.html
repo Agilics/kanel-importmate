@@ -47,15 +47,15 @@
     <div class="execution-grid "> 
       <!-- Immediate Execution Card -->
       <div class="execution-card">
-        <c-execution-card    
+        <c-execution-card
           batch-size={batchSize}
           batch-size-options={batchSizeOptions}
           onbatchsizechange={handleBatchSizeChange}
           execution-mode={executionMode}
           mode-options={executionModeOptions}
-          show-scheduled-card={hideScheduledExecution}  
-          onmodechange={handleExecutionModeChange} 
-          onsendnotification={handleEmailNotificationChange}>
+          show-scheduled-card={hideScheduledExecution}
+          onmodechange={handleModeChange}
+          onsendnotification={handleSendNotificationChange}>
         </c-execution-card>
       </div>
 
