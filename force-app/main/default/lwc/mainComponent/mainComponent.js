@@ -46,7 +46,7 @@ export default class MainComponent extends LightningElement {
   projectName = '';
   description = '';
   targetObject = '';
-    currentProject;
+  @track currentProject;
     
     //edit modal
   modal_edit_title = PROJECT_MODAL_EDIT_TITLE; 
