@@ -102,7 +102,8 @@
               <!-- Step 2: SOQL Builder -->
               <template if:true={showSoqlBuilder}>
                 <c-soql-builder
-                  project-target-object={mappingTargetObject}
+                  project-target-object={soqlBuilderTargetObject}
+                  project-name={currentProjectName}
                   onstartmapping={handleStartMapping}
                   onprevious={handleBackToDataSourceSelection}
                 ></c-soql-builder>

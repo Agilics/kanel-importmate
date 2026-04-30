@@ -81,6 +81,7 @@ export default class MainComponent extends LightningElement {
         event.returnValue = message;
         return message;
       }
+      return undefined;
     };
     
     window.addEventListener('beforeunload', this.beforeUnloadHandler);
@@ -191,7 +192,7 @@ export default class MainComponent extends LightningElement {
           this.markAsSaved();
           this.showToast(
               TOAST_VARIANTS.SUCCESS,
-              MESSAGES.PROJECT_CREATED.replace('{0}', result.Id),
+              MESSAGES.PROJECT_CREATED.replace('{0}', result.Name),
               TOAST_VARIANTS.SUCCESS
           );
 
@@ -333,6 +334,15 @@ export default class MainComponent extends LightningElement {
 
   get showSoqlBuilder() {
       return this.isSelectSource && this.selectedDataSource === 'SOQL';
+  }
+
+  get soqlBuilderTargetObject() {
+      if (this.mappingTargetObject) return this.mappingTargetObject;
+      return this.getTargetObjectFromProject(this.currentProject || {});
+  }
+
+  get currentProjectName() {
+      return this.currentProject?.Name || '';
   }
 
   get isMappingAndTransformation() {
@@ -551,13 +561,6 @@ export default class MainComponent extends LightningElement {
             this.showToast(TOAST_VARIANTS.ERROR, err?.body?.message || MESSAGES.ERROR_OCCURRED, TOAST_VARIANTS.ERROR);
         } finally {
             this.isLoading = false;
-        }
-    }
-
-    refreshDashboard() {
-        const dashboard = this.template.querySelector('c-dashboard-cmp');
-        if (dashboard) {
-            dashboard.refreshDashboard(); // appel méthode @api sur DashboardCmp
         }
     }
 
