@@ -9,7 +9,7 @@
     <name>PROJECT_EXISTS</name>
 </customLabels>
 <customLabels>
-    <label>Projet créé avec succès avec l’ID : {0}</label>
+    <label>Projet {0} créé avec succès</label>
     <name>PROJECT_CREATED</name>
 </customLabels>
 <customLabels>
@@ -1738,7 +1738,7 @@
         <name>SideBar_Step_Execution</name>
     </customLabels>
     <customLabels>
-        <label>Mapping des champs</label>
+        <label>Cartographie des champs</label>
         <name>SideBar_Step_FieldMapping</name>
     </customLabels>
     <customLabels>

@@ -1,3 +1,7 @@
+<!--
+  @Last modification: 22-04-2026
+  @Modification : Suppression Immediate execution
+-->
 <template>
   <div class="execution-container">
     <div class="page-header">
@@ -6,7 +10,7 @@
           <h1 class="header-title">{labels.title}</h1>
           <p class="header-subtitle">{labels.subtitle}</p>
         </div>
-
+        <span class="badge primary-badge">{projectName}</span>
         <div class="header-actions">
           <button 
             onclick={handleExportLogsCsv}
@@ -42,23 +46,12 @@
         </div>
       </div>
     </div>
-
-    <!-- Page cards Scheduled | Immediate Execution -->
-    <div class="execution-grid "> 
-      <!-- Immediate Execution Card -->
-      <div class="execution-card">
-        <c-execution-card    
-          batch-size={batchSize}
-          batch-size-options={batchSizeOptions}
-          onbatchsizechange={handleBatchSizeChange}
-          execution-mode={executionMode}
-          mode-options={executionModeOptions}
-          show-scheduled-card={hideScheduledExecution}  
-          onmodechange={handleExecutionModeChange} 
-          onsendnotification={handleEmailNotificationChange}>
-        </c-execution-card>
-      </div>
-
+    <div>
+    </div>
+    <!-- Page cards Scheduled  -->
+    
+    <div class="slds-align_absolute-center execution-content "> 
+  
       <!-- Scheduled Execution -->
       <div class="execution-card">
         <c-execution-card  
