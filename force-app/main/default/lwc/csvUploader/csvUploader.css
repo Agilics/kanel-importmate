@@ -13,6 +13,16 @@
 .btn--ghost:hover { background: #e5f2ff; }
 .btn--outline { background: transparent; border: 1px solid #ddd; }
 .btn--xl { padding: 0.7rem 1.4rem; font-size: 1rem; }
+ 
+/*Add the class name below to the lightning-icon element.*/
+.custom-icon-error { 
+ --slds-c-icon-color-foreground-default: #e21212;
+}
+.info--error {
+  color: #e21212;
+  margin:  0;
+  gap: 12px 9px;
+}
 
 /* -- Badges -- */
 .badge { 
