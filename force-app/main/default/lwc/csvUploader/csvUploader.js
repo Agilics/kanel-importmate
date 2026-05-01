@@ -203,12 +203,25 @@ export default class CsvUploader extends LightningElement {
     }
 
     // ─── Filtering / sorting ─────────────────────────────────────────────────
+    //
+    // allRows holds raw row objects { id, values: string[] } straight from
+    // the parser. Filtering/sorting operate on raw strings; cell decoration
+    // (status pill class, etc.) happens on demand for the visible page only.
 
     get filteredRows() {
+        // Fast path: nothing to do, return raw allRows reference (no copy, no work)
+        if (!this.searchTerm && !this.filter.column && !this.sortBy) {
+            return this.allRows;
+        }
         const searched = this.applySearch(this.allRows);
         const filtered = this.applyColumnFilter(searched);
-        const sorted = this.applySort(filtered);
-        return sorted;
+        return this.applySort(filtered);
+    }
+
+    rawCellAt(row, columnIndex) {
+        const cell = row.values[columnIndex];
+        if (cell === undefined || cell === null) return '';
+        return typeof cell === 'object' ? (cell.value ?? '') : cell;
     }
 
     applySearch(rows) {
@@ -217,12 +230,12 @@ export default class CsvUploader extends LightningElement {
             return rows;
         }
 
-        return rows.filter((row) => {
-            return row.values.some((cell) => {
-                const cellText = (cell.value || '').toString().toLowerCase();
-                return cellText.includes(query);
-            });
-        });
+        return rows.filter((row) =>
+            row.values.some((cell) => {
+                const text = (typeof cell === 'object' ? cell.value : cell) || '';
+                return text.toString().toLowerCase().includes(query);
+            })
+        );
     }
 
     applyColumnFilter(rows) {
@@ -236,7 +249,7 @@ export default class CsvUploader extends LightningElement {
         const needle = value.toString().toLowerCase();
 
         return rows.filter((row) => {
-            const cellValue = (row.values[columnIndex]?.value ?? '').toString().toLowerCase();
+            const cellValue = this.rawCellAt(row, columnIndex).toString().toLowerCase();
 
             if (operator === FILTER_OP_EQUALS) {
                 return cellValue === needle;
@@ -256,9 +269,9 @@ export default class CsvUploader extends LightningElement {
         const columnIndex = this.columns.indexOf(this.sortBy);
         const ascending = this.sortAsc;
 
-        const sorted = [...rows].sort((rowA, rowB) => {
-            const valueA = (rowA.values[columnIndex]?.value ?? '').toString().toLowerCase();
-            const valueB = (rowB.values[columnIndex]?.value ?? '').toString().toLowerCase();
+        return [...rows].sort((rowA, rowB) => {
+            const valueA = this.rawCellAt(rowA, columnIndex).toString().toLowerCase();
+            const valueB = this.rawCellAt(rowB, columnIndex).toString().toLowerCase();
 
             if (valueA === valueB) {
                 return 0;
@@ -267,8 +280,6 @@ export default class CsvUploader extends LightningElement {
             const comparison = valueA > valueB ? 1 : -1;
             return ascending ? comparison : -comparison;
         });
-
-        return sorted;
     }
 
     // ─── Pagination ──────────────────────────────────────────────────────────
@@ -289,7 +300,10 @@ export default class CsvUploader extends LightningElement {
     get pagedRows() {
         const start = (this.pageIndex - 1) * this.pageSize;
         const end = start + this.pageSize;
-        return this.filteredRows.slice(start, end);
+        const slice = this.filteredRows.slice(start, end);
+        // Decorate only the rows we are about to render — keeps the UI snappy
+        // even when allRows holds 300k+ raw rows.
+        return slice.map((row, i) => this.decorateRow(row, this.columns, start + i));
     }
 
     get showingFrom() {
@@ -461,8 +475,11 @@ export default class CsvUploader extends LightningElement {
         const rawRows = Array.isArray(parsed.rows) ? parsed.rows : [];
         const totalRowCount = parsed.totalRowCount ?? rawRows.length;
 
+        // Keep rawRows in memory (lightweight: { id, values: string[] } per row).
+        // Decoration into rich cells happens on demand for the visible page only,
+        // so a 300k-row file does not pay the cost of building 300k × N cells up front.
         this.columns = columns;
-        this.allRows = rawRows.map((row, index) => this.decorateRow(row, columns, index));
+        this.allRows = rawRows;
         this.totalRows = totalRowCount;
         this.pageIndex = 1;
         this.isPreview = totalRowCount > this.previewLimit;
@@ -770,7 +787,7 @@ export default class CsvUploader extends LightningElement {
         const row = this.allRows[rowIndex];
         return this.columns.map((label, columnIndex) => ({
             label,
-            value: row.values[columnIndex]?.value || ''
+            value: this.rawCellAt(row, columnIndex)
         }));
     }
 
@@ -778,7 +795,7 @@ export default class CsvUploader extends LightningElement {
         const row = this.allRows[rowIndex];
         return this.columns.map((label, columnIndex) => ({
             label,
-            value: row.values[columnIndex]?.value || '',
+            value: this.rawCellAt(row, columnIndex),
             idx: columnIndex
         }));
     }
@@ -803,11 +820,16 @@ export default class CsvUploader extends LightningElement {
             return;
         }
 
+        // allRows holds raw rows (values: string[]). Persist the edit as a
+        // plain string at the same column index.
         const row = this.allRows[this.currentRowIndex];
-        const updatedValues = row.values.map((cell, columnIndex) => ({
-            ...cell,
-            value: this.editBuffer[columnIndex]?.value ?? cell.value
-        }));
+        const updatedValues = row.values.map((cell, columnIndex) => {
+            const next = this.editBuffer[columnIndex]?.value;
+            if (next === undefined) {
+                return cell;
+            }
+            return next;
+        });
 
         const before = this.allRows.slice(0, this.currentRowIndex);
         const after = this.allRows.slice(this.currentRowIndex + 1);
