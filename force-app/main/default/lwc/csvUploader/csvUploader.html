@@ -1,6 +1,3 @@
-<!--
-  @last modification : 24/04/2026
--->
 <template>
   <div class="page">
     <!-- Header -->
@@ -17,9 +14,6 @@
       </div>
     </div>
 
-    <span class="badge primary-badge">
-      {projectName}
-    </span>
     <!-- File Upload Card -->
     <div onclick={handleBrowseClick} class="card">
       <div class="card__title">{label.cardTitle}</div>
@@ -38,14 +32,21 @@
         <input data-id="file" type="file" accept=".csv,text/csv" class="hidden-input" onchange={handleFileUpload}/>
       </div>
 
-      <template if:true={isLoading}>
-        <p class="info info--ok slds-m-top_small">{label.loading}</p>
+      <template if:true={showProgress}>
+        <div class="progress slds-m-top_small">
+          <div class="progress__header">
+            <span class="progress__label">{progressLabel}</span>
+            <button type="button" class="btn btn--ghost btn--sm" onclick={handleCancelImport}>
+              {label.modalCancel}
+            </button>
+          </div>
+          <div class="progress__bar">
+            <div class="progress__fill" style={progressBarStyle}></div>
+          </div>
+        </div>
       </template>
       <template if:true={parseError}>
-        <p class="info info--error slds-m-top_small">
-           <lightning-icon icon-name="utility:error" class="custom-icon-error" size="x-small"></lightning-icon>
-          {parseError}
-        </p>
+        <p class="info info--error slds-m-top_small">{parseError}</p>
       </template>
       <template if:true={fileName}>
         <div class="file-meta slds-m-top_small">
