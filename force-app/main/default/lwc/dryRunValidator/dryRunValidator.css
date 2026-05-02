@@ -1,3 +1,17 @@
+/**
+  * @last modification :  22/04/2026
+  * @Modified : Mouhamed NIANG
+*/
+.badge { 
+  padding: 4px 8px;
+  text-align: center;
+  border-radius: 999px;
+}
+.primary-badge{ 
+  margin: 0.25rem 0 0 0;
+  background-color: #1e40af;
+  color: white; 
+}
 .validation-container {
   background-color: #f9fafb;
   min-height: 100vh;

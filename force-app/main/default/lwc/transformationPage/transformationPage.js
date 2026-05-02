@@ -1,9 +1,8 @@
 /**
  * @author : Mouhamed NIANG
- * @date : 09/02/2026 
+ * @date : 22/04/2026 
  * @Modification : 
- *  - Integrated Custom Labels for i18n
- *  - Picklist values translated via IM_TR_Picklist_* labels
+ *  - Add project's name
  */
 import { LightningElement, api, wire, track } from "lwc";
 import TransformationModal from 'c/transformationSaveModal';
@@ -45,6 +44,7 @@ const DEFAULT_PAGE_SIZE = 4;
 export default class TransformationPage extends LightningElement {
   isWarningBadge = true;
   @api projectId; 
+  @api projectName;
   @wire(searchProjetById, { projectId: "$projectId" }) selectedProject; 
   @track transformationsByMappingId = [];
   wiredTransformationResults = [];

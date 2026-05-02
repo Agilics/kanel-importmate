@@ -1208,7 +1208,7 @@
         <language>en_US</language>
         <protected>false</protected>
         <shortDescription>Project created success message</shortDescription>
-        <value>Project "{0}" created successfully</value>
+        <value>Project {0} created successfully</value>
     </labels>
     <labels>
         <fullName>ERROR_OCCURRED</fullName>

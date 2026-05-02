@@ -1,4 +1,9 @@
-import {LightningElement,wire,track} from 'lwc';
+/**
+ * @Last Modification: 22-04-2026
+ * @Modified by: Mouhamed Niang
+ * @Modification :  Affichage du nom du projet créé  en remplacement de l'ID du projet  dans le message toast
+ */
+import { LightningElement, wire, track } from 'lwc';
 import {ShowToastEvent} from 'lightning/platformShowToastEvent';
 
 import doesProjectExist from '@salesforce/apex/ImportProjectController.doesProjectExist';

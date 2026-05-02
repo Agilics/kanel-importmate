@@ -50,7 +50,8 @@ const SS_RUN_STATE_LAST_KEY = 'IM_executionCmpRun_last_v1';
 export default class ExecutionCmp extends LightningElement {
   _projectId = '';
   @api csvData;
-
+  @api projectName;
+  
   @track isLoading = false;
 
   @track currentExecutionId = null;

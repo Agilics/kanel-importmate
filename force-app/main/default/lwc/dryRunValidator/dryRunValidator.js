@@ -82,6 +82,7 @@ const STAGING_CHUNK_SIZE = 200;
 export default class DryRunValidator extends LightningElement {
   _projectId = '';
   @api csvData = null;
+  @api projectName;
 
   @track projectDetails = null;
   @track validationResults = null;

@@ -70,9 +70,9 @@
    </div>
    <!-- end Immediate Schedule --> 
    <!-- scheduled execution -->
-   <div class="slds-grid slds-wrap slds-gutters p-1">
+   <div class="slds-grid slds-wrap slds-grid_vertical-stretch scheduled-container">
       <template if:true={showScheduledCard}>
-         <lightning-layout multiple-rows="true" class="full-width">
+         <lightning-layout multiple-rows="true" class="slds-size_1-of-1 layout-full-width">
             <lightning-layout-item size="12" padding="around-small">
                <!-- ComboBox for Select Frequency DAILY | WEEKLY | MONTHLY -->
                <div class={formGroup}>
@@ -80,7 +80,7 @@
                   {labels.labelFrequency}
                   </label>
                   <lightning-combobox
-                     class="frequency-combobox form-control "
+                     class="frequency-combobox form-control  slds-size_1-of-1"
                      name="frequency" 
                      id="frequency"
                      value={selectedFrequency}
@@ -96,7 +96,7 @@
                      {labels.labelStartDate}
                   </label>
                   <lightning-input
-                     class="time-input form-control "
+                     class="time-input form-control slds-size_1-of-1 "
                      type="datetime" 
                      id="start-date"
                      value={nextRun}
@@ -107,7 +107,7 @@
             </lightning-layout-item>
             <!-- footer -->  
             <lightning-layout-item size="12" padding="horizontal-small">
-               <div class="paragraph  txt regular-text">
+               <div class="paragraph  txt regular-text slds-size_1-of-1">
                   {labels.scheduledImportNote}
                </div>
             </lightning-layout-item>

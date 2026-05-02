@@ -1,3 +1,7 @@
+/**
+ * @last modification : 24/04/2026
+ * @modified : ajout Validation des headers dans parseCSV 
+ */
 import { LightningElement, track, api } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { validateCsvHeaders } from 'c/utility';
@@ -50,7 +54,7 @@ const DEFAULT_PAGE_SIZE     = 3;
 
 export default class CsvUploader extends LightningElement {
     @api title = LBL_PAGE_TITLE;
-
+    @api projectName;
     // ✅ Single label object exposed to the template
     label = {
         pageSubtitle       : LBL_PAGE_SUBTITLE,
@@ -224,16 +228,31 @@ export default class CsvUploader extends LightningElement {
                 this.dispatchEvent(new CustomEvent('csvloaded', { detail: { columns, rows: this.toObjectRows(previewRows, columns, this.previewLimit), totalRowCount, fileName: this.fileName, fileSize: this.fileSize }, bubbles: true, composed: true }));
                 this.rebuildDisplayColumns();
             } catch (e) {
-                this.parseError = (e && e.message) || 'Failed to parse CSV.'; this.columns = []; this.allRows = []; this.totalRows = 0;
+                console.error("[CsvUploader] parseCSV error:", e);
+                 const code = (e &&  e.message) || "Failed to parse CSV";
+                 const errorMessages = {
+                   NO_HEADER_LINE:
+                     "This file does not appear to contain a header line. Please check the file.",
+                   DUPLICATE_HEADER_LINE:
+                     "Two header lines were detected. The file must contain only one header line.",
+                   EMPTY_FILE: "The file is empty."
+                 };
+                 this.parseError = errorMessages[code] || "Unable to read CSV file.";
+                 this.columns = [];
+                 this.allRows = [];
+                 this.totalRows = 0;
+               // this.parseError = (e && e.message) || 'Failed to parse CSV.'; this.columns = []; this.allRows = []; this.totalRows = 0;
             } finally { this.isLoading = false; }
         };
         reader.readAsText(file);
     }
 
     parseCSV(csvText) {
-        const normalize = (csvText || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+        let normalize = (csvText || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+        normalize = normalize.replace(/^\uFEFF/, "");
         const lines     = normalize.split('\n');
-        if (!lines.length || (lines.length === 1 && lines[0].trim() === '')) return { columns: [], rows: [], allRows: [], totalRowCount: 0 };
+
+        if (!lines.length || (lines.length === 1 && lines[0].trim() === ''))throw new Error( "EMPTY_FILE") ; // return { columns: [], rows: [], allRows: [], totalRowCount: 0 };
         const headerLine = lines[0] || '';
         const delimiter  = ((headerLine.match(/;/g) || []).length > (headerLine.match(/,/g) || []).length) ? ';' : ',';
         const parseLine  = (line) => {
@@ -246,7 +265,24 @@ export default class CsvUploader extends LightningElement {
             }
             out.push(cur); return out;
         };
-        const columns = parseLine(headerLine).map((c, index) => { const t = (c || '').trim(); return t || `Column_${index + 1}`; });
+
+        const parsedHeader = parseLine(headerLine);
+
+        // Validation  : pas de header (1ère ligne ressemble à des données)
+        if (this._looksLikeData(parsedHeader)) {
+          throw new Error ("NO_HEADER_LINE" );
+        }
+
+        //Validation 2 : double header (ligne 2 ressemble aussi à un header)
+          const dataLines = lines.slice(1).filter((l) => l.trim() !== "");
+          if (dataLines.length >= 1) {
+            const parsedLine2 = parseLine(dataLines[0]);
+            if (this._looksLikeDuplicateHeader(parsedHeader, parsedLine2)) {
+              throw new Error("DUPLICATE_HEADER_LINE");
+            }
+          }
+
+        const columns = parseLine(headerLine).map((c, index) => { const t = (c || '').trim(); return t });// || `Column_${index + 1}`; });
         const allRows = lines.slice(1).filter((l) => l !== '').map((l, i) => this.buildRow(parseLine(l), columns, i));
         return { columns, rows: allRows.slice(0, this.previewLimit || DEFAULT_PREVIEW_LIMIT), allRows, totalRowCount: allRows.length };
     }
@@ -312,6 +348,34 @@ export default class CsvUploader extends LightningElement {
     editInputChanged(e) { const pos = Number(e.currentTarget?.dataset?.pos); if (Number.isNaN(pos)) return; const newValue = e.target.value; this.editBuffer = this.editBuffer.map((c, i) => (i === pos ? { ...c, value: newValue } : c)); }
     saveEdit() { if (this.currentRowIndex < 0) return; const row = this.allRows[this.currentRowIndex]; const updatedValues = row.values.map((c, i) => ({ ...c, value: this.editBuffer[i]?.value ?? c.value })); this.allRows = [...this.allRows.slice(0, this.currentRowIndex), { ...row, values: updatedValues }, ...this.allRows.slice(this.currentRowIndex + 1)]; this.showEditor = false; }
     cancelEdit() { this.showEditor = false; }
+
+    // *** helpers csv's validations  ***
+    // Retourne true si la ligne ressemble à des données (pas un header)
+    _looksLikeData(parsedLine) {
+        const nonEmptyCells = parsedLine.filter((c) => (c || "").trim() !== "");
+        if (nonEmptyCells.length === 0) return true; 
+        
+        const dataPatterns = [
+            /^\d+(\.\d+)?$/,                         // nombre
+            /^\d{2}[\/\-]\d{2}[\/\-]\d{4}$/,        // date
+            /^[\w.+-]+@[\w-]+\.[a-z]{2,}$/i,         // email
+            /^\+?[\d\s\-()]{7,}$/,                   // téléphone
+        ];
+        const dataCount = parsedLine.filter(cell => {
+            const val = (cell || '').trim();
+            return val !== '' && dataPatterns.some(p => p.test(val));
+        }).length;
+
+        // Si +50% des cellules sont des données typées → pas un header
+        return parsedLine.length > 0 && (dataCount / parsedLine.length) >= 0.5;
+    }
+
+    // Retourne true si deux lignes se ressemblent structurellement (double header)
+    _looksLikeDuplicateHeader(line1, line2) {
+        const isTextOnly = (cells) =>
+            cells.every(c => /^[a-zA-Z_\s\u00C0-\u017F]+$/.test((c || '').trim()));
+        return isTextOnly(line1) && isTextOnly(line2);
+    }
 
     // ===== Navigation / Cleanup =====
     handleBackClick() { this.dispatchEvent(new CustomEvent('previous', { bubbles: true, composed: true })); }
