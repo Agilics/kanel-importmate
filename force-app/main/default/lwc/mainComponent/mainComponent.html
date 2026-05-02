@@ -38,6 +38,21 @@
 
       <!-- Main Content Area -->
       <div class="main-content">
+
+        <!-- Project Context Bar — visible on all pages when a project is active -->
+        <template if:true={currentProject}>
+          <div class="project-context-bar">
+            <lightning-icon icon-name="utility:folder" size="x-small" class="project-context-bar__icon"></lightning-icon>
+            <span class="project-context-bar__label">Projet actif :</span>
+            <span class="project-context-bar__name">{currentProject.Name}</span>
+            <template if:true={currentProject.TargetObject__c}>
+              <span class="project-context-bar__sep">·</span>
+              <lightning-icon icon-name="utility:salesforce1" size="x-small" class="project-context-bar__icon"></lightning-icon>
+              <span class="project-context-bar__object">{currentProject.TargetObject__c}</span>
+            </template>
+          </div>
+        </template>
+
         <!-- Execution History View -->
         <template if:true={showExecutionHistory}>
           <div class="content-container ih">
@@ -102,7 +117,8 @@
               <!-- Step 2: SOQL Builder -->
               <template if:true={showSoqlBuilder}>
                 <c-soql-builder
-                  project-target-object={mappingTargetObject}
+                  project-target-object={soqlBuilderTargetObject}
+                  project-name={currentProjectName}
                   onstartmapping={handleStartMapping}
                   onprevious={handleBackToDataSourceSelection}
                 ></c-soql-builder>

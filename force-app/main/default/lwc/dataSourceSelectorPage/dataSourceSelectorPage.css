@@ -82,6 +82,20 @@ body {
   letter-spacing: 0%;
 }
 
+.project-context-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-bottom: 8px;
+}
+
 .automatic {
   width: 446px;
   height: 24px;

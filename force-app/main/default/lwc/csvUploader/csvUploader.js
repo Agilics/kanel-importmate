@@ -3,6 +3,8 @@
  * @modified : ajout Validation des headers dans parseCSV 
  */
 import { LightningElement, track, api } from 'lwc';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { validateCsvHeaders } from 'c/utility';
 
 // Custom Labels
 import SHOWING_ENTRIES from '@salesforce/label/c.DataTable_Showing_Entries';
@@ -128,7 +130,7 @@ export default class CsvUploader extends LightningElement {
 
     // ===== Derived =====
     get hasHeaders()          { return Array.isArray(this.columns) && this.columns.length > 0; }
-    get disableGoForMapping() { return !this.hasHeaders; }
+    get disableGoForMapping() { return !this.hasHeaders || !!this.parseError; }
     get displayColumns()      { return this._displayColumns; }
     get recordWord()          { return this.totalEntries === 1 ? 'record' : 'records'; }
     get badgeText()           { return `${this.totalEntries} ${this.recordWord}`; }
@@ -208,6 +210,14 @@ export default class CsvUploader extends LightningElement {
         reader.onload = () => {
             const text = reader.result || '';
             try {
+                const headerCheck = validateCsvHeaders(text);
+                if (!headerCheck.valid) {
+                    this.parseError = headerCheck.error;
+                    this.columns = []; this.allRows = []; this.totalRows = 0;
+                    this.isLoading = false;
+                    this.dispatchEvent(new ShowToastEvent({ title: 'Fichier CSV invalide', message: headerCheck.error, variant: 'error', mode: 'sticky' }));
+                    return;
+                }
                 const parsed        = this.parseCSV(text);
                 const columns       = parsed.columns || [];
                 const allRows       = Array.isArray(parsed.allRows) ? parsed.allRows : [];

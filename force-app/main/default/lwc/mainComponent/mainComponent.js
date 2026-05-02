@@ -51,7 +51,7 @@ export default class MainComponent extends LightningElement {
   projectName = '';
   description = '';
   targetObject = '';
-    currentProject;
+  @track currentProject;
     
     //edit modal
   modal_edit_title = PROJECT_MODAL_EDIT_TITLE; 
@@ -86,6 +86,7 @@ export default class MainComponent extends LightningElement {
         event.returnValue = message;
         return message;
       }
+      return undefined;
     };
     
     window.addEventListener('beforeunload', this.beforeUnloadHandler);
@@ -340,6 +341,15 @@ export default class MainComponent extends LightningElement {
       return this.isSelectSource && this.selectedDataSource === 'SOQL';
   }
 
+  get soqlBuilderTargetObject() {
+      if (this.mappingTargetObject) return this.mappingTargetObject;
+      return this.getTargetObjectFromProject(this.currentProject || {});
+  }
+
+  get currentProjectName() {
+      return this.currentProject?.Name || '';
+  }
+
   get isMappingAndTransformation() {
       return (
           this.currentProject && this.currentStep === STEPS.FIELD_MAPPING
@@ -556,13 +566,6 @@ export default class MainComponent extends LightningElement {
             this.showToast(TOAST_VARIANTS.ERROR, err?.body?.message || MESSAGES.ERROR_OCCURRED, TOAST_VARIANTS.ERROR);
         } finally {
             this.isLoading = false;
-        }
-    }
-
-    refreshDashboard() {
-        const dashboard = this.template.querySelector('c-dashboard-cmp');
-        if (dashboard) {
-            dashboard.refreshDashboard(); // appel méthode @api sur DashboardCmp
         }
     }
 

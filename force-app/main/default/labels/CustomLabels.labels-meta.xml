@@ -3628,5 +3628,11 @@
         <shortDescription>Monthly on ...</shortDescription>
         <value>Monthly on</value>
     </labels>
-    
+    <labels>
+        <fullName>IM_DRY_Settings_KeepValidRows</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Save valid rows</shortDescription>
+        <value>Save valid rows</value>
+   </labels>
 </CustomLabels>
