@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ImportMate — Analytique</title>
+<link rel="stylesheet" href="aurora-shared.css"/>
+<link rel="stylesheet" href="aurora-theme.css"/>
+<style>
+.layout { display: flex; min-height: calc(100vh - 62px); }
+
+.sidebar {
+  width: 232px; min-width: 232px;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--sidebar-border);
+  padding: 20px 12px;
+  display: flex; flex-direction: column; gap: 2px;
+  position: sticky; top: 62px; height: calc(100vh - 62px); overflow-y: auto;
+}
+.sidebar-section { font-size:.65rem;font-weight:700;letter-spacing:.1em;color:var(--sidebar-muted);text-transform:uppercase;padding:14px 12px 6px; }
+.sidebar-item {
+  display:flex;align-items:center;gap:9px;padding:8px 12px;border-radius:var(--radius-sm);
+  cursor:pointer;font-size:.82rem;font-weight:500;color:var(--sidebar-text);transition:all .15s;text-decoration:none;
+}
+.sidebar-item:hover { background:var(--sidebar-hover);color:var(--sidebar-text-active); }
+.sidebar-item.active { background:linear-gradient(90deg,rgba(79,70,229,.25),rgba(79,70,229,.08));color:#fff;font-weight:600;border-left:2px solid var(--indigo);padding-left:10px; }
+.sidebar-icon { width:20px;height:20px;display:grid;place-items:center;font-size:14px;flex-shrink:0; }
+.sidebar-badge { margin-left:auto;background:var(--grad-brand);color:#fff;font-size:.65rem;font-weight:700;padding:2px 7px;border-radius:var(--radius-pill); }
+
+.main { flex:1;padding:32px 36px;overflow-y:auto;min-width:0; }
+
+/* KPI large */
+.kpi-lg { display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px; }
+.kpi-lg-card {
+  background:var(--card-bg);backdrop-filter:blur(16px);
+  border:1px solid var(--card-border);border-radius:var(--radius);
+  padding:20px;box-shadow:var(--shadow-md);
+  position:relative;overflow:hidden;
+  transition:all .2s var(--ease-out);
+  animation:fadeUp .4s var(--ease-out) both;
+}
+.kpi-lg-card:nth-child(1){animation-delay:.04s;} .kpi-lg-card:nth-child(2){animation-delay:.08s;}
+.kpi-lg-card:nth-child(3){animation-delay:.12s;} .kpi-lg-card:nth-child(4){animation-delay:.16s;}
+.kpi-lg-card::before { content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:var(--radius) var(--radius) 0 0; }
+.kpi-lg-card:nth-child(1)::before{background:var(--grad-brand);}
+.kpi-lg-card:nth-child(2)::before{background:var(--grad-green);}
+.kpi-lg-card:nth-child(3)::before{background:var(--grad-coral);}
+.kpi-lg-card:nth-child(4)::before{background:var(--grad-amber);}
+.kpi-lg-card:hover { transform:translateY(-2px);box-shadow:var(--shadow-lg); }
+.klc-top { display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:12px; }
+.klc-icon { width:38px;height:38px;border-radius:var(--radius-sm);display:grid;place-items:center;font-size:17px; }
+.klc-trend { font-size:.72rem;font-weight:600;padding:3px 8px;border-radius:var(--radius-pill); }
+.trend-up { background:var(--green-soft);color:#059669; }
+.trend-dn { background:var(--coral-soft);color:#BE123C; }
+.klc-val { font-size:1.8rem;font-weight:800;color:var(--text);letter-spacing:-1px;line-height:1; }
+.klc-label { font-size:.78rem;color:var(--muted);margin-top:4px;font-weight:500; }
+
+/* Charts grid */
+.charts-grid { display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:16px; }
+.charts-grid-2 { display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px; }
+.chart-card {
+  background:var(--card-bg);backdrop-filter:blur(16px);
+  border:1px solid var(--card-border);border-radius:var(--radius);
+  padding:22px;box-shadow:var(--shadow-md);
+  animation:fadeUp .4s var(--ease-out) .2s both;
+}
+.chart-header { display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:8px; }
+.chart-title { font-size:.92rem;font-weight:800;color:var(--text);letter-spacing:-0.3px; }
+.chart-sub   { font-size:.75rem;color:var(--muted);margin-top:2px; }
+
+/* Bar chart (CSS only) */
+.bar-chart { display:flex;align-items:flex-end;gap:8px;height:140px;padding-bottom:28px;position:relative; }
+.bar-chart::after { content:'';position:absolute;bottom:28px;left:0;right:0;height:1px;background:var(--card-border); }
+.bar-wrap { flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;height:100%;justify-content:flex-end; }
+.bar {
+  width:100%;border-radius:6px 6px 0 0;
+  background:var(--grad-brand);
+  position:relative;min-height:4px;
+  transition:height .6s var(--ease-out);
+  cursor:pointer;
+}
+.bar:hover::after {
+  content:attr(data-val);
+  position:absolute;top:-24px;left:50%;transform:translateX(-50%);
+  background:var(--text);color:var(--card-bg-solid);
+  font-size:.7rem;font-weight:700;padding:2px 6px;border-radius:4px;white-space:nowrap;
+}
+.bar.success { background:var(--grad-green); }
+.bar.error   { background:var(--grad-coral); }
+.bar-label   { font-size:.68rem;color:var(--muted);white-space:nowrap;position:absolute;bottom:0; }
+.bar-group   { flex:1;display:flex;align-items:flex-end;gap:2px;height:100%; }
+
+/* Donut chart (CSS only) */
+.donut-wrap { display:flex;flex-direction:column;align-items:center;gap:16px; }
+.donut {
+  width:130px;height:130px;border-radius:50%;
+  background:conic-gradient(
+    var(--green) 0% 94.7%,
+    var(--coral) 94.7% 100%
+  );
+  display:grid;place-items:center;
+  box-shadow:0 0 0 12px var(--card-bg), 0 0 0 13px var(--card-border);
+  position:relative;
+}
+.donut-center {
+  width:80px;height:80px;border-radius:50%;
+  background:var(--card-bg-solid);
+  display:grid;place-items:center;text-align:center;
+}
+.donut-val   { font-size:1.2rem;font-weight:800;color:var(--text);line-height:1; }
+.donut-sub   { font-size:.65rem;color:var(--muted);font-weight:500; }
+.donut-legend { display:flex;flex-direction:column;gap:6px;width:100%; }
+.legend-item { display:flex;align-items:center;gap:8px;font-size:.78rem;font-weight:500;color:var(--text); }
+.legend-dot  { width:10px;height:10px;border-radius:50%;flex-shrink:0; }
+.legend-val  { margin-left:auto;font-weight:700; }
+
+/* Horizontal bar (object breakdown) */
+.hbar-list { display:flex;flex-direction:column;gap:12px; }
+.hbar-item { }
+.hbar-meta { display:flex;justify-content:space-between;margin-bottom:5px;font-size:.8rem; }
+.hbar-name { font-weight:600;color:var(--text); }
+.hbar-val  { color:var(--muted); }
+.hbar-track { height:7px;background:var(--card-border);border-radius:99px;overflow:hidden; }
+.hbar-fill  { height:100%;border-radius:99px;background:var(--grad-brand);transition:width .8s var(--ease-out); }
+.hbar-fill.v2 { background:var(--grad-green); }
+.hbar-fill.v3 { background:var(--grad-coral); }
+.hbar-fill.v4 { background:var(--grad-amber); }
+
+/* Recent activity */
+.activity-list { display:flex;flex-direction:column;gap:0; }
+.activity-item {
+  display:flex;align-items:flex-start;gap:12px;
+  padding:12px 0;border-bottom:1px solid var(--card-border);
+}
+.activity-item:last-child { border-bottom:none; }
+.act-dot {
+  width:28px;height:28px;border-radius:50%;flex-shrink:0;
+  display:grid;place-items:center;font-size:12px;margin-top:1px;
+}
+.act-title { font-size:.82rem;font-weight:600;color:var(--text);line-height:1.3; }
+.act-sub   { font-size:.75rem;color:var(--muted);margin-top:2px; }
+.act-time  { font-size:.72rem;color:var(--muted-2);margin-left:auto;flex-shrink:0; }
+
+/* Period selector */
+.period-btns { display:flex;gap:4px;background:rgba(148,163,184,0.08);border-radius:var(--radius-pill);padding:3px; }
+.period-btn {
+  padding:5px 12px;border-radius:var(--radius-pill);font-size:.75rem;font-weight:600;
+  border:none;font-family:inherit;background:transparent;color:var(--muted);cursor:pointer;transition:all .15s;
+}
+.period-btn.active { background:var(--card-bg-solid);color:var(--indigo);box-shadow:var(--shadow-xs); }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <a href="aurora-dashboard.html" class="header-logo">
+    <div class="header-logo-mark">◈</div> ImportMate
+  </a>
+  <div class="header-spacer"></div>
+  <nav class="header-nav">
+    <a href="aurora-dashboard.html">Dashboard</a>
+    <a href="aurora-step1.html">Nouveau projet</a>
+    <a href="aurora-history.html">Historique</a>
+    <a href="aurora-analytics.html" class="active">Analytique</a>
+  </nav>
+  <button class="theme-toggle" onclick="toggleTheme()" title="Changer le thème">🌙</button>
+  <div class="avatar">NK</div>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-section">Menu</div>
+    <a class="sidebar-item" href="aurora-dashboard.html"><span class="sidebar-icon">⊞</span> Dashboard</a>
+    <a class="sidebar-item" href="aurora-step1.html"><span class="sidebar-icon">＋</span> Nouveau projet</a>
+    <a class="sidebar-item" href="aurora-history.html"><span class="sidebar-icon">◷</span> Historique<span class="sidebar-badge">3</span></a>
+    <a class="sidebar-item" href="#"><span class="sidebar-icon">📅</span> Planifications</a>
+    <a class="sidebar-item active" href="aurora-analytics.html"><span class="sidebar-icon">📊</span> Analytique</a>
+
+    <div class="sidebar-section">Actions rapides</div>
+    <a class="sidebar-item" href="aurora-dashboard.html"><span class="sidebar-icon">↺</span> Projets récents</a>
+    <a class="sidebar-item active" href="aurora-analytics.html"><span class="sidebar-icon">📈</span> Analytique</a>
+    <a class="sidebar-item" href="aurora-history.html"><span class="sidebar-icon">🕐</span> Historique des exécutions</a>
+
+    <div class="sidebar-section" style="margin-top:auto">Compte</div>
+    <a class="sidebar-item" href="#"><span class="sidebar-icon">⚙</span> Paramètres</a>
+    <a class="sidebar-item" href="#"><span class="sidebar-icon">?</span> Aide</a>
+  </aside>
+
+  <main class="main">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:26px;animation:fadeUp .35s var(--ease-out) both">
+      <div>
+        <h1 style="font-size:1.5rem;font-weight:800;color:var(--text);letter-spacing:-0.5px">Analytique</h1>
+        <p style="font-size:.875rem;color:var(--muted);margin-top:4px">Vue d'ensemble des performances d'import</p>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <div class="period-btns">
+          <button class="period-btn">7j</button>
+          <button class="period-btn active">30j</button>
+          <button class="period-btn">3m</button>
+          <button class="period-btn">1an</button>
+        </div>
+        <button class="btn btn-outline btn-sm">📤 Exporter</button>
+      </div>
+    </div>
+
+    <!-- KPI large -->
+    <div class="kpi-lg">
+      <div class="kpi-lg-card">
+        <div class="klc-top">
+          <div class="klc-icon" style="background:var(--indigo-soft)">📦</div>
+          <span class="klc-trend trend-up">↑ +18%</span>
+        </div>
+        <div class="klc-val">48 200</div>
+        <div class="klc-label">Records importés ce mois</div>
+      </div>
+      <div class="kpi-lg-card">
+        <div class="klc-top">
+          <div class="klc-icon" style="background:var(--green-soft)">✅</div>
+          <span class="klc-trend trend-up">↑ +0.4%</span>
+        </div>
+        <div class="klc-val">98.4%</div>
+        <div class="klc-label">Taux de succès global</div>
+      </div>
+      <div class="kpi-lg-card">
+        <div class="klc-top">
+          <div class="klc-icon" style="background:var(--amber-soft)">⚡</div>
+          <span class="klc-trend trend-up">↑ +2</span>
+        </div>
+        <div class="klc-val">48</div>
+        <div class="klc-label">Exécutions ce mois</div>
+      </div>
+      <div class="kpi-lg-card">
+        <div class="klc-top">
+          <div class="klc-icon" style="background:var(--coral-soft)">⏱</div>
+          <span class="klc-trend trend-dn">↓ -12s</span>
+        </div>
+        <div class="klc-val">1m 48s</div>
+        <div class="klc-label">Durée moyenne d'import</div>
+      </div>
+    </div>
+
+    <!-- Volume + Donut -->
+    <div class="charts-grid">
+
+      <!-- Bar chart volume -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Volume d'imports par semaine</div>
+            <div class="chart-sub">Records insérés avec succès</div>
+          </div>
+          <div style="display:flex;gap:10px;font-size:.75rem;font-weight:600">
+            <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:var(--indigo);display:inline-block"></span>Insérés</span>
+            <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:2px;background:var(--coral);display:inline-block"></span>Erreurs</span>
+          </div>
+        </div>
+        <div class="bar-chart" id="bar-chart">
+          <!-- Bars injected by JS -->
+        </div>
+      </div>
+
+      <!-- Donut succès -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Taux de succès</div>
+            <div class="chart-sub">Ce mois · toutes exécutions</div>
+          </div>
+        </div>
+        <div class="donut-wrap">
+          <div class="donut">
+            <div class="donut-center">
+              <div><div class="donut-val">98.4%</div><div class="donut-sub">Succès</div></div>
+            </div>
+          </div>
+          <div class="donut-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Lignes valides<span class="legend-val" style="color:#059669">47 430</span></div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--coral)"></div>Erreurs<span class="legend-val" style="color:var(--coral)">770</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Object breakdown + Activity -->
+    <div class="charts-grid-2">
+
+      <!-- Horizontal bars by object -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Répartition par objet Salesforce</div>
+            <div class="chart-sub">Records importés par type d'objet</div>
+          </div>
+        </div>
+        <div class="hbar-list">
+          <div class="hbar-item">
+            <div class="hbar-meta"><span class="hbar-name">Account__c</span><span class="hbar-val">19 800 — 41%</span></div>
+            <div class="hbar-track"><div class="hbar-fill" style="width:41%"></div></div>
+          </div>
+          <div class="hbar-item">
+            <div class="hbar-meta"><span class="hbar-name">Lead</span><span class="hbar-val">14 400 — 30%</span></div>
+            <div class="hbar-track"><div class="hbar-fill v2" style="width:30%"></div></div>
+          </div>
+          <div class="hbar-item">
+            <div class="hbar-meta"><span class="hbar-name">Opportunity</span><span class="hbar-val">8 640 — 18%</span></div>
+            <div class="hbar-track"><div class="hbar-fill v3" style="width:18%"></div></div>
+          </div>
+          <div class="hbar-item">
+            <div class="hbar-meta"><span class="hbar-name">Contact</span><span class="hbar-val">3 360 — 7%</span></div>
+            <div class="hbar-track"><div class="hbar-fill v4" style="width:7%"></div></div>
+          </div>
+          <div class="hbar-item">
+            <div class="hbar-meta"><span class="hbar-name">Case</span><span class="hbar-val">2 000 — 4%</span></div>
+            <div class="hbar-track"><div class="hbar-fill" style="width:4%;background:rgba(148,163,184,.5)"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Activity feed -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">Activité récente</div>
+        </div>
+        <div class="activity-list">
+          <div class="activity-item">
+            <div class="act-dot" style="background:var(--green-soft)">✅</div>
+            <div>
+              <div class="act-title">Import Contacts Q2 terminé</div>
+              <div class="act-sub">1 174 records · Account__c</div>
+            </div>
+            <span class="act-time">il y a 2h</span>
+          </div>
+          <div class="activity-item">
+            <div class="act-dot" style="background:var(--green-soft)">✅</div>
+            <div>
+              <div class="act-title">Migration Leads 2025 terminée</div>
+              <div class="act-sub">12 400 records · Lead</div>
+            </div>
+            <span class="act-time">hier</span>
+          </div>
+          <div class="activity-item">
+            <div class="act-dot" style="background:var(--coral-soft)">❌</div>
+            <div>
+              <div class="act-title">Export Accounts EMEA — échec</div>
+              <div class="act-sub">Timeout API · Account</div>
+            </div>
+            <span class="act-time">12 mai</span>
+          </div>
+          <div class="activity-item">
+            <div class="act-dot" style="background:var(--indigo-soft)">📅</div>
+            <div>
+              <div class="act-title">Planification Contacts Daily créée</div>
+              <div class="act-sub">Quotidien · 08:00 · Contact</div>
+            </div>
+            <span class="act-time">11 mai</span>
+          </div>
+          <div class="activity-item">
+            <div class="act-dot" style="background:var(--green-soft)">✅</div>
+            <div>
+              <div class="act-title">Sync Opportunités Q2 terminée</div>
+              <div class="act-sub">3 840 records · Opportunity</div>
+            </div>
+            <span class="act-time">10 mai</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="aurora-theme.js"></script>
+<script>
+// Draw bar chart
+const weeks = [
+  { label:'25 avr',ok:6200,err:180 },
+  { label:'2 mai', ok:8400,err:90  },
+  { label:'9 mai', ok:7100,err:310 },
+  { label:'16 mai',ok:9800,err:55  },
+  { label:'23 mai',ok:11200,err:135},
+];
+const max = Math.max(...weeks.map(w=>w.ok+w.err));
+const container = document.getElementById('bar-chart');
+weeks.forEach(w => {
+  const pctOk  = (w.ok  / max * 100).toFixed(1);
+  const pctErr = (w.err / max * 100).toFixed(1);
+  const group = document.createElement('div');
+  group.className = 'bar-wrap';
+  group.innerHTML = `
+    <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;width:100%;gap:2px">
+      <div class="bar" style="height:${pctErr}%" data-val="${w.err} erreurs"></div>
+      <div class="bar success" style="height:${pctOk}%" data-val="${w.ok.toLocaleString('fr')} insérés"></div>
+    </div>
+    <div class="bar-label">${w.label}</div>`;
+  container.appendChild(group);
+});
+
+// Period btn toggle
+document.querySelectorAll('.period-btn').forEach(b=>{
+  b.addEventListener('click',()=>{ document.querySelectorAll('.period-btn').forEach(x=>x.classList.remove('active')); b.classList.add('active'); });
+});
+</script>
+</body>
+</html>

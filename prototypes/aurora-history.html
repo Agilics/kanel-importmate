@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ImportMate — Historique des exécutions</title>
+<link rel="stylesheet" href="aurora-shared.css"/>
+<link rel="stylesheet" href="aurora-theme.css"/>
+<style>
+.layout { display: flex; min-height: calc(100vh - 62px); }
+
+/* Sidebar */
+.sidebar {
+  width: 232px; min-width: 232px;
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--sidebar-border);
+  padding: 20px 12px;
+  display: flex; flex-direction: column; gap: 2px;
+  position: sticky; top: 62px; height: calc(100vh - 62px); overflow-y: auto;
+}
+.sidebar-section {
+  font-size: .65rem; font-weight: 700; letter-spacing: .1em;
+  color: var(--sidebar-muted); text-transform: uppercase;
+  padding: 14px 12px 6px;
+}
+.sidebar-item {
+  display: flex; align-items: center; gap: 9px;
+  padding: 8px 12px; border-radius: var(--radius-sm);
+  cursor: pointer; font-size: .82rem; font-weight: 500;
+  color: var(--sidebar-text);
+  transition: all .15s; text-decoration: none;
+}
+.sidebar-item:hover { background: var(--sidebar-hover); color: var(--sidebar-text-active); }
+.sidebar-item.active {
+  background: linear-gradient(90deg, rgba(79,70,229,0.25), rgba(79,70,229,0.08));
+  color: #fff; font-weight: 600;
+  border-left: 2px solid var(--indigo); padding-left: 10px;
+}
+.sidebar-icon { width: 20px; height: 20px; display: grid; place-items: center; font-size: 14px; flex-shrink: 0; }
+.sidebar-badge {
+  margin-left: auto; background: var(--grad-brand); color: #fff;
+  font-size: .65rem; font-weight: 700; padding: 2px 7px;
+  border-radius: var(--radius-pill); box-shadow: 0 2px 8px rgba(79,70,229,0.4);
+}
+
+/* Main */
+.main { flex: 1; padding: 32px 36px; overflow-y: auto; min-width: 0; }
+
+/* KPI mini */
+.kpi-mini { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 24px; }
+.kpi-mini-card {
+  background: var(--card-bg);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm); padding: 16px;
+  display: flex; align-items: center; gap: 12px;
+  box-shadow: var(--shadow-sm);
+  animation: fadeUp .35s var(--ease-out) both;
+  transition: transform .2s, box-shadow .2s;
+}
+.kpi-mini-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.kpi-mini-card:nth-child(1) { animation-delay:.04s; }
+.kpi-mini-card:nth-child(2) { animation-delay:.08s; }
+.kpi-mini-card:nth-child(3) { animation-delay:.12s; }
+.kpi-mini-card:nth-child(4) { animation-delay:.16s; }
+.kmi-icon {
+  width: 38px; height: 38px; border-radius: var(--radius-sm);
+  display: grid; place-items: center; font-size: 17px; flex-shrink: 0;
+}
+.kmi-val   { font-size: 1.3rem; font-weight: 800; color: var(--text); letter-spacing: -0.5px; line-height: 1; }
+.kmi-label { font-size: .72rem; color: var(--muted); margin-top: 2px; font-weight: 500; }
+
+/* Filters bar */
+.filters-bar {
+  display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center;
+}
+.search-box {
+  flex: 1; min-width: 220px; display: flex; align-items: center; gap: 8px;
+  background: var(--input-bg); border: 1.5px solid var(--input-border);
+  border-radius: var(--radius-sm); padding: 8px 13px; box-shadow: var(--shadow-xs);
+  transition: all .15s;
+}
+.search-box:focus-within { border-color: var(--indigo); box-shadow: var(--shadow-glow); }
+.search-box input { border:none; outline:none; background:transparent; font-size:.85rem; font-family:inherit; color:var(--text); flex:1; }
+.search-box input::placeholder { color: var(--muted-2); }
+.filter-select {
+  border: 1.5px solid var(--input-border); border-radius: var(--radius-sm);
+  padding: 8px 13px; font-size: .82rem; font-family: inherit;
+  background: var(--input-bg); color: var(--text);
+  cursor: pointer; outline: none; box-shadow: var(--shadow-xs); transition: all .15s;
+}
+.filter-select:focus { border-color: var(--indigo); box-shadow: var(--shadow-glow); }
+
+/* History table */
+.history-table-wrap {
+  background: var(--card-bg);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  animation: fadeUp .4s var(--ease-out) .1s both;
+}
+table { width: 100%; border-collapse: collapse; }
+thead th {
+  text-align: left; padding: 11px 16px;
+  background: var(--table-head-bg);
+  font-weight: 700; color: var(--muted);
+  border-bottom: 1px solid var(--card-border);
+  font-size: .69rem; text-transform: uppercase; letter-spacing: .07em;
+  white-space: nowrap;
+}
+tbody td { padding: 13px 16px; border-bottom: 1px solid var(--table-row-border); vertical-align: middle; }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr { transition: background .12s; cursor: pointer; }
+tbody tr:hover td { background: var(--table-row-hover); }
+
+.exec-id   { font-size: .8rem; font-weight: 700; color: var(--indigo); font-family: monospace; }
+.proj-name { font-size: .85rem; font-weight: 700; color: var(--text); }
+.proj-obj  {
+  font-size: .7rem; font-weight: 600; color: var(--indigo);
+  background: var(--indigo-soft); border: 1px solid rgba(79,70,229,.12);
+  padding: 2px 8px; border-radius: var(--radius-pill); margin-top: 3px; display: inline-block;
+}
+.exec-date  { font-size: .8rem; color: var(--muted); white-space: nowrap; }
+.exec-dur   { font-size: .8rem; color: var(--text); font-weight: 500; }
+.rec-counts { display: flex; flex-direction: column; gap: 3px; }
+.rec-ok  { font-size: .8rem; font-weight: 600; color: #059669; }
+.rec-err { font-size: .75rem; color: var(--muted); }
+
+.row-actions { display: flex; gap: 6px; }
+.row-btn {
+  padding: 5px 11px; border-radius: var(--radius-xs);
+  font-size: .75rem; font-weight: 600; cursor: pointer; border: none;
+  font-family: inherit; transition: all .15s; text-decoration: none;
+}
+.row-btn-view    { background: var(--indigo-soft); color: var(--indigo); }
+.row-btn-view:hover  { background: var(--indigo); color: #fff; }
+.row-btn-export  { background: var(--table-head-bg); color: var(--muted); }
+.row-btn-export:hover { color: var(--text); }
+
+/* Pagination */
+.pager { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-top: 1px solid var(--card-border); flex-wrap: wrap; gap: 10px; }
+.pager-info { font-size: .8rem; color: var(--muted); }
+.pager-btns { display: flex; gap: 4px; }
+.pg {
+  width: 30px; height: 30px; border-radius: var(--radius-xs);
+  display: grid; place-items: center; font-size: .8rem; font-weight: 600;
+  cursor: pointer; border: 1px solid var(--input-border);
+  background: var(--input-bg); color: var(--text); transition: all .15s;
+}
+.pg.active { background: var(--grad-brand); color: #fff; border-color: var(--indigo); box-shadow: 0 4px 10px var(--indigo-glow); }
+.pg:hover:not(.active) { border-color: var(--indigo); color: var(--indigo); }
+
+/* Detail drawer */
+.drawer-overlay {
+  position: fixed; inset: 0; background: rgba(15,23,42,0.5);
+  backdrop-filter: blur(4px); z-index: 300;
+  display: none;
+}
+.drawer-overlay.open { display: block; }
+.drawer {
+  position: fixed; top: 0; right: 0; bottom: 0; width: 420px;
+  background: var(--card-bg-solid);
+  border-left: 1px solid var(--card-border);
+  box-shadow: var(--shadow-xl);
+  display: flex; flex-direction: column;
+  transform: translateX(100%); transition: transform .3s var(--ease-out);
+  z-index: 301;
+}
+.drawer.open { transform: translateX(0); }
+.drawer-header {
+  padding: 20px 22px; border-bottom: 1px solid var(--card-border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.drawer-title { font-size: 1rem; font-weight: 800; color: var(--text); letter-spacing: -0.3px; }
+.drawer-close {
+  width: 30px; height: 30px; border-radius: var(--radius-xs);
+  display: grid; place-items: center; cursor: pointer; font-size: 14px;
+  background: rgba(148,163,184,0.1); color: var(--muted); border: none;
+  transition: all .15s;
+}
+.drawer-close:hover { background: var(--coral-soft); color: var(--coral); }
+.drawer-body { flex: 1; overflow-y: auto; padding: 20px 22px; }
+.drawer-section { margin-bottom: 20px; }
+.drawer-sec-title {
+  font-size: .68rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: .1em; color: var(--muted-2); margin-bottom: 10px;
+}
+.drawer-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 9px 0; border-bottom: 1px solid var(--card-border); gap: 8px;
+}
+.drawer-row:last-child { border-bottom: none; }
+.dr-key { font-size: .82rem; color: var(--muted); font-weight: 500; }
+.dr-val { font-size: .82rem; font-weight: 600; color: var(--text); text-align: right; }
+.drawer-progress { margin: 14px 0; }
+.drawer-footer { padding: 16px 22px; border-top: 1px solid var(--card-border); display: flex; gap: 8px; }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <a href="aurora-dashboard.html" class="header-logo">
+    <div class="header-logo-mark">◈</div> ImportMate
+  </a>
+  <div class="header-spacer"></div>
+  <nav class="header-nav">
+    <a href="aurora-dashboard.html">Dashboard</a>
+    <a href="aurora-step1.html">Nouveau projet</a>
+    <a href="aurora-history.html" class="active">Historique</a>
+    <a href="aurora-analytics.html">Analytique</a>
+  </nav>
+  <button class="theme-toggle" onclick="toggleTheme()" title="Changer le thème">🌙</button>
+  <div class="avatar">NK</div>
+</header>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-section">Menu</div>
+    <a class="sidebar-item" href="aurora-dashboard.html"><span class="sidebar-icon">⊞</span> Dashboard</a>
+    <a class="sidebar-item" href="aurora-step1.html"><span class="sidebar-icon">＋</span> Nouveau projet</a>
+    <a class="sidebar-item active" href="aurora-history.html"><span class="sidebar-icon">◷</span> Historique<span class="sidebar-badge">3</span></a>
+    <a class="sidebar-item" href="#">         <span class="sidebar-icon">📅</span> Planifications</a>
+    <a class="sidebar-item" href="aurora-analytics.html"><span class="sidebar-icon">📊</span> Analytique</a>
+
+    <div class="sidebar-section">Actions rapides</div>
+    <a class="sidebar-item" href="aurora-dashboard.html"><span class="sidebar-icon">↺</span> Projets récents</a>
+    <a class="sidebar-item" href="aurora-analytics.html"><span class="sidebar-icon">📈</span> Analytique</a>
+    <a class="sidebar-item active" href="aurora-history.html"><span class="sidebar-icon">🕐</span> Historique des exécutions</a>
+
+    <div class="sidebar-section" style="margin-top:auto">Compte</div>
+    <a class="sidebar-item" href="#"><span class="sidebar-icon">⚙</span> Paramètres</a>
+    <a class="sidebar-item" href="#"><span class="sidebar-icon">?</span> Aide</a>
+  </aside>
+
+  <main class="main">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:26px;animation:fadeUp .35s var(--ease-out) both">
+      <div>
+        <h1 style="font-size:1.5rem;font-weight:800;color:var(--text);letter-spacing:-0.5px">Historique des exécutions</h1>
+        <p style="font-size:.875rem;color:var(--muted);margin-top:4px">Toutes vos exécutions d'import — détails, logs et résultats</p>
+      </div>
+      <a href="aurora-step1.html" class="btn btn-primary">＋ Nouveau projet</a>
+    </div>
+
+    <!-- KPI mini -->
+    <div class="kpi-mini">
+      <div class="kpi-mini-card">
+        <div class="kmi-icon" style="background:var(--indigo-soft)">📦</div>
+        <div><div class="kmi-val">48</div><div class="kmi-label">Exécutions totales</div></div>
+      </div>
+      <div class="kpi-mini-card">
+        <div class="kmi-icon" style="background:var(--green-soft)">✅</div>
+        <div><div class="kmi-val">44</div><div class="kmi-label">Succès</div></div>
+      </div>
+      <div class="kpi-mini-card">
+        <div class="kmi-icon" style="background:var(--coral-soft)">❌</div>
+        <div><div class="kmi-val">4</div><div class="kmi-label">Échecs</div></div>
+      </div>
+      <div class="kpi-mini-card">
+        <div class="kmi-icon" style="background:var(--amber-soft)">📊</div>
+        <div><div class="kmi-val">48.2k</div><div class="kmi-label">Records importés</div></div>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-bar">
+      <div class="search-box">
+        <span style="color:var(--muted-2)">🔍</span>
+        <input type="text" placeholder="Rechercher une exécution, un projet..."/>
+      </div>
+      <select class="filter-select"><option>Tous les statuts</option><option>Succès</option><option>Échec</option><option>En cours</option></select>
+      <select class="filter-select"><option>Tous les projets</option><option>Import Contacts Q2</option><option>Migration Leads</option></select>
+      <select class="filter-select"><option>30 derniers jours</option><option>7 jours</option><option>3 mois</option><option>Tout</option></select>
+    </div>
+
+    <!-- Table -->
+    <div class="history-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Projet</th>
+            <th>Démarré</th>
+            <th>Durée</th>
+            <th>Records</th>
+            <th>Statut</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr onclick="openDrawer('EXE-20260519-001')">
+            <td><span class="exec-id">EXE-001</span></td>
+            <td><div class="proj-name">Import Contacts Q2</div><span class="proj-obj">Account__c</span></td>
+            <td><div class="exec-date">19 mai 2026</div><div style="font-size:.72rem;color:var(--muted-2)">14:32</div></td>
+            <td><span class="exec-dur">1m 24s</span></td>
+            <td><div class="rec-counts"><span class="rec-ok">✓ 1 174 insérés</span><span class="rec-err">✕ 8 erreurs</span></div></td>
+            <td><span class="badge badge-green">✓ Succès</span></td>
+            <td><div class="row-actions"><a class="row-btn row-btn-view" onclick="event.stopPropagation();openDrawer('EXE-001')">Détails</a><a class="row-btn row-btn-export">📤</a></div></td>
+          </tr>
+          <tr onclick="openDrawer('EXE-002')">
+            <td><span class="exec-id">EXE-002</span></td>
+            <td><div class="proj-name">Migration Leads 2025</div><span class="proj-obj">Lead</span></td>
+            <td><div class="exec-date">18 mai 2026</div><div style="font-size:.72rem;color:var(--muted-2)">09:15</div></td>
+            <td><span class="exec-dur">3m 02s</span></td>
+            <td><div class="rec-counts"><span class="rec-ok">✓ 12 400 insérés</span><span class="rec-err">✕ 0 erreur</span></div></td>
+            <td><span class="badge badge-green">✓ Succès</span></td>
+            <td><div class="row-actions"><a class="row-btn row-btn-view" onclick="event.stopPropagation();openDrawer('EXE-002')">Détails</a><a class="row-btn row-btn-export">📤</a></div></td>
+          </tr>
+          <tr onclick="openDrawer('EXE-003')">
+            <td><span class="exec-id">EXE-003</span></td>
+            <td><div class="proj-name">Export Accounts EMEA</div><span class="proj-obj">Account</span></td>
+            <td><div class="exec-date">12 mai 2026</div><div style="font-size:.72rem;color:var(--muted-2)">16:48</div></td>
+            <td><span class="exec-dur">0m 38s</span></td>
+            <td><div class="rec-counts"><span class="rec-ok" style="color:var(--coral)">✕ 0 insérés</span><span class="rec-err">Timeout API Salesforce</span></div></td>
+            <td><span class="badge badge-coral">✕ Échec</span></td>
+            <td><div class="row-actions"><a class="row-btn row-btn-view" onclick="event.stopPropagation();openDrawer('EXE-003')">Détails</a><a class="row-btn row-btn-export">📤</a></div></td>
+          </tr>
+          <tr onclick="openDrawer('EXE-004')">
+            <td><span class="exec-id">EXE-004</span></td>
+            <td><div class="proj-name">Sync Opportunités Q2</div><span class="proj-obj">Opportunity</span></td>
+            <td><div class="exec-date">10 mai 2026</div><div style="font-size:.72rem;color:var(--muted-2)">11:00</div></td>
+            <td><span class="exec-dur">2m 17s</span></td>
+            <td><div class="rec-counts"><span class="rec-ok">✓ 3 840 insérés</span><span class="rec-err">✕ 12 erreurs</span></div></td>
+            <td><span class="badge badge-green">✓ Succès</span></td>
+            <td><div class="row-actions"><a class="row-btn row-btn-view" onclick="event.stopPropagation();openDrawer('EXE-004')">Détails</a><a class="row-btn row-btn-export">📤</a></div></td>
+          </tr>
+          <tr onclick="openDrawer('EXE-005')">
+            <td><span class="exec-id">EXE-005</span></td>
+            <td><div class="proj-name">Import Contacts Q1</div><span class="proj-obj">Account__c</span></td>
+            <td><div class="exec-date">2 mai 2026</div><div style="font-size:.72rem;color:var(--muted-2)">08:30</div></td>
+            <td><span class="exec-dur">1m 55s</span></td>
+            <td><div class="rec-counts"><span class="rec-ok">✓ 980 insérés</span><span class="rec-err">✕ 2 erreurs</span></div></td>
+            <td><span class="badge badge-green">✓ Succès</span></td>
+            <td><div class="row-actions"><a class="row-btn row-btn-view" onclick="event.stopPropagation();openDrawer('EXE-005')">Détails</a><a class="row-btn row-btn-export">📤</a></div></td>
+          </tr>
+          <tr>
+            <td><span class="exec-id">EXE-006</span></td>
+            <td><div class="proj-name">Planifié — Contacts Daily</div><span class="proj-obj">Contact</span></td>
+            <td><div class="exec-date">20 mai 2026</div><div style="font-size:.72rem;color:var(--muted-2)">08:00 (prévu)</div></td>
+            <td><span class="exec-dur">—</span></td>
+            <td><div class="rec-counts"><span style="font-size:.78rem;color:var(--muted)">En attente</span></div></td>
+            <td><span class="badge badge-indigo">📅 Planifié</span></td>
+            <td><div class="row-actions"><a class="row-btn row-btn-view">Détails</a><a class="row-btn row-btn-export">✕ Annuler</a></div></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="pager">
+        <span class="pager-info">Affichage 1–6 sur 48 exécutions</span>
+        <div class="pager-btns">
+          <button class="pg">←</button>
+          <button class="pg active">1</button>
+          <button class="pg">2</button>
+          <button class="pg">3</button>
+          <span style="font-size:.8rem;color:var(--muted-2);padding:0 4px">…</span>
+          <button class="pg">8</button>
+          <button class="pg">→</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Detail drawer -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-header">
+    <div class="drawer-title" id="drawer-title">Détails — EXE-001</div>
+    <button class="drawer-close" onclick="closeDrawer()">✕</button>
+  </div>
+  <div class="drawer-body">
+    <div class="drawer-section">
+      <div class="drawer-sec-title">Résumé</div>
+      <div class="drawer-row"><span class="dr-key">Statut</span><span class="dr-val"><span class="badge badge-green">✓ Succès</span></span></div>
+      <div class="drawer-row"><span class="dr-key">Projet</span><span class="dr-val">Import Contacts Q2</span></div>
+      <div class="drawer-row"><span class="dr-key">Objet cible</span><span class="dr-val">Account__c</span></div>
+      <div class="drawer-row"><span class="dr-key">Mode</span><span class="dr-val">Insert · Asynchrone</span></div>
+    </div>
+    <div class="drawer-section">
+      <div class="drawer-sec-title">Métriques</div>
+      <div class="drawer-row"><span class="dr-key">Records traités</span><span class="dr-val" style="color:#059669;font-weight:800">1 182</span></div>
+      <div class="drawer-row"><span class="dr-key">Insérés avec succès</span><span class="dr-val" style="color:#059669">1 174</span></div>
+      <div class="drawer-row"><span class="dr-key">Erreurs</span><span class="dr-val" style="color:var(--coral)">8</span></div>
+      <div class="drawer-row"><span class="dr-key">Taux de succès</span><span class="dr-val">99.3%</span></div>
+    </div>
+    <div class="drawer-section">
+      <div class="drawer-sec-title">Progression</div>
+      <div style="height:8px;background:rgba(148,163,184,.12);border-radius:99px;overflow:hidden;margin-bottom:6px">
+        <div style="height:100%;width:99.3%;background:linear-gradient(90deg,var(--indigo),var(--green));border-radius:99px"></div>
+      </div>
+      <div style="font-size:.75rem;color:var(--muted);text-align:right">99.3%</div>
+    </div>
+    <div class="drawer-section">
+      <div class="drawer-sec-title">Timing</div>
+      <div class="drawer-row"><span class="dr-key">Démarré</span><span class="dr-val">19 mai 2026 · 14:32:10</span></div>
+      <div class="drawer-row"><span class="dr-key">Terminé</span><span class="dr-val">19 mai 2026 · 14:33:34</span></div>
+      <div class="drawer-row"><span class="dr-key">Durée</span><span class="dr-val">1m 24s</span></div>
+      <div class="drawer-row"><span class="dr-key">Taille de lot</span><span class="dr-val">200 records/lot</span></div>
+    </div>
+  </div>
+  <div class="drawer-footer">
+    <a href="aurora-step6.html" class="btn btn-primary btn-sm" style="flex:1;justify-content:center">Relancer</a>
+    <button class="btn btn-outline btn-sm">📤 Exporter logs</button>
+  </div>
+</div>
+
+<script src="aurora-theme.js"></script>
+<script>
+function openDrawer(id) {
+  document.getElementById('drawer-title').textContent = 'Détails — ' + id;
+  document.getElementById('drawer-overlay').classList.add('open');
+  document.getElementById('drawer').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeDrawer() {
+  document.getElementById('drawer-overlay').classList.remove('open');
+  document.getElementById('drawer').classList.remove('open');
+  document.body.style.overflow = '';
+}
+</script>
+</body>
+</html>

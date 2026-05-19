@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ImportMate — Étape 1 : Projet</title>
+<link rel="stylesheet" href="aurora-shared.css"/>
+<link rel="stylesheet" href="aurora-theme.css"/>
+<style>
+.page-wrap { max-width: 640px; margin: 0 auto; }
+
+.object-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px;
+}
+.object-pill {
+  border: 1.5px solid var(--border-solid); border-radius: var(--radius-sm);
+  padding: 9px 12px; cursor: pointer; font-size: .82rem; font-weight: 500;
+  color: var(--text); text-align: center; background: var(--surface-solid);
+  box-shadow: var(--shadow-xs);
+  transition: all .18s var(--ease-out);
+}
+.object-pill:hover { border-color: var(--indigo); color: var(--indigo); background: var(--indigo-soft); transform: translateY(-1px); }
+.object-pill.selected {
+  border-color: var(--indigo); color: var(--indigo);
+  background: var(--indigo-soft); box-shadow: var(--shadow-glow);
+  font-weight: 700;
+}
+.object-pill.selected::before { content: '✓  '; }
+
+/* Mode toggle — larger hit area */
+.toggle-grid { grid-template-columns: repeat(3, 1fr); }
+.toggle-card { padding: 18px 14px; }
+.toggle-card.selected { box-shadow: var(--shadow-glow); }
+
+/* Progress sidebar */
+.form-progress {
+  position: sticky; top: 92px;
+  padding: 20px;
+  background: var(--surface);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+.fp-title { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin-bottom: 14px; }
+.fp-item { display: flex; align-items: center; gap: 9px; margin-bottom: 10px; font-size: .8rem; }
+.fp-dot {
+  width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
+  display: grid; place-items: center; font-size: .7rem; font-weight: 700;
+}
+.fp-dot.filled  { background: var(--green); color: #fff; box-shadow: 0 2px 8px rgba(16,185,129,.3); }
+.fp-dot.current { background: var(--grad-brand); color: #fff; box-shadow: 0 0 0 3px var(--indigo-soft); }
+.fp-dot.empty   { background: rgba(148,163,184,.12); color: var(--muted-2); border: 1.5px solid var(--border-solid); }
+.fp-label       { color: var(--muted); }
+.fp-label.current { color: var(--indigo); font-weight: 600; }
+.fp-label.filled  { color: var(--text); }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <a href="aurora-dashboard.html" class="header-logo">
+    <div class="header-logo-mark">◈</div> ImportMate
+  </a>
+  <div class="header-spacer"></div>
+  <nav class="header-nav">
+    <a href="aurora-dashboard.html">Dashboard</a>
+    <a href="aurora-step1.html" class="active">Nouveau projet</a>
+  </nav>
+  <button class="theme-toggle" onclick="toggleTheme()" title="Mode sombre">🌙</button>
+  <div class="avatar">NK</div>
+</header>
+
+<div class="stepper-wrap">
+  <div class="stepper">
+    <div class="step active"><div class="step-num">1</div> Projet</div>
+    <div class="step-connector"></div>
+    <div class="step"><div class="step-num">2</div> Source</div>
+    <div class="step-connector"></div>
+    <div class="step"><div class="step-num">3</div> Mapping</div>
+    <div class="step-connector"></div>
+    <div class="step"><div class="step-num">4</div> Transformation</div>
+    <div class="step-connector"></div>
+    <div class="step"><div class="step-num">5</div> Validation</div>
+    <div class="step-connector"></div>
+    <div class="step"><div class="step-num">6</div> Import</div>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 220px;gap:20px;padding:0 32px;margin-top:20px;align-items:start;">
+
+  <!-- Form -->
+  <div>
+    <div class="card" style="margin:0;">
+      <div class="card-header">
+        <div>
+          <div class="card-title">Nouveau projet d'import</div>
+          <div class="card-sub">Définissez les paramètres avant de commencer</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Nom du projet <span class="req">*</span></label>
+        <input class="form-input" type="text" value="Import Contacts Q2 2026" placeholder="ex : Import Contacts Q2 2026"/>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Objet Salesforce cible <span class="req">*</span></label>
+        <input class="form-input" type="text" placeholder="🔍  Rechercher un objet Salesforce..." style="margin-bottom:10px"/>
+        <div class="object-grid">
+          <div class="object-pill selected">Contact</div>
+          <div class="object-pill">Account</div>
+          <div class="object-pill">Lead</div>
+          <div class="object-pill">Opportunity</div>
+          <div class="object-pill">Case</div>
+          <div class="object-pill">+ Autre...</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Description <span style="font-weight:400;color:var(--muted-2)">(optionnel)</span></label>
+        <textarea class="form-input" placeholder="Décrivez l'objectif de cet import..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Mode d'import <span class="req">*</span></label>
+        <div class="toggle-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+          <div class="toggle-card selected" onclick="selectMode(this)">
+            <div class="toggle-icon">⬆</div>
+            <div class="toggle-label">Insert</div>
+            <div class="toggle-sub">Créer de nouveaux records</div>
+          </div>
+          <div class="toggle-card" onclick="selectMode(this)">
+            <div class="toggle-icon">↻</div>
+            <div class="toggle-label">Upsert</div>
+            <div class="toggle-sub">Insérer ou mettre à jour</div>
+          </div>
+          <div class="toggle-card" onclick="selectMode(this)">
+            <div class="toggle-icon">✎</div>
+            <div class="toggle-label">Update</div>
+            <div class="toggle-sub">Mettre à jour uniquement</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <a href="aurora-dashboard.html" class="btn btn-ghost">Annuler</a>
+        <a href="aurora-step2.html" class="btn btn-primary">Suivant →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sidebar progress -->
+  <div class="form-progress">
+    <div class="fp-title">Progression</div>
+    <div class="fp-item">
+      <div class="fp-dot current">1</div>
+      <span class="fp-label current">Projet</span>
+    </div>
+    <div class="fp-item">
+      <div class="fp-dot empty">2</div>
+      <span class="fp-label">Source de données</span>
+    </div>
+    <div class="fp-item">
+      <div class="fp-dot empty">3</div>
+      <span class="fp-label">Mapping des champs</span>
+    </div>
+    <div class="fp-item">
+      <div class="fp-dot empty">4</div>
+      <span class="fp-label">Transformations</span>
+    </div>
+    <div class="fp-item">
+      <div class="fp-dot empty">5</div>
+      <span class="fp-label">Validation (Dry Run)</span>
+    </div>
+    <div class="fp-item">
+      <div class="fp-dot empty">6</div>
+      <span class="fp-label">Import</span>
+    </div>
+  </div>
+
+</div>
+<div style="height:40px"></div>
+
+<script>
+function selectMode(el) {
+  document.querySelectorAll('.toggle-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+document.querySelectorAll('.object-pill').forEach(p => {
+  p.addEventListener('click', () => {
+    document.querySelectorAll('.object-pill').forEach(x => x.classList.remove('selected'));
+    p.classList.add('selected');
+  });
+});
+</script>
+<script src="aurora-theme.js"></script>
+</body>
+</html>
