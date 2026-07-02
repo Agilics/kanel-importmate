@@ -259,7 +259,7 @@ public class ExecutionRepositoryTest {
     // createLinkedExecution
 
 
-    /** Création avec lien schedule via ApexJobId__c */
+    /** Création avec lien schedule via ScheduleId__c */
     @isTest
     static void testCreateLinkedExecution_WithSchedule() {
         //geiven
@@ -270,7 +270,7 @@ public class ExecutionRepositoryTest {
         //when
         ImportExecution__c execution = ExecutionRepository.createLinkedExecution(
             schedule.Project__c,
-            String.valueOf(schedule.Id),    // apexJobId = scheduleId
+            String.valueOf(schedule.Id),
             'Pending',
             'Import',
             'Staging',
@@ -285,9 +285,9 @@ public class ExecutionRepositoryTest {
         Assert.areEqual('Staging',   execution.Phase__c,       'Phase should be Staging');
         Assert.areEqual(50, Integer.valueOf(execution.TotalRecords__c), 'TotalRecords should be 50');
         Assert.areEqual(
-            String.valueOf(schedule.Id),
-            execution.ApexJobId__c,
-            'ApexJobId__c should contain the scheduleId'
+            schedule.Id,
+            execution.ScheduleId__c,
+            'ScheduleId__c should contain the scheduleId'
         );
     }
 
@@ -369,7 +369,7 @@ public class ExecutionRepositoryTest {
     // findExecutionsByStatusAndApexJobId
 
     @isTest
-    static void testFindExecutionsByStatusAndApexJobId_Found() {
+    static void testFindExecutionsByStatusAndScheduleId_Found() {
         Schedule__c schedule = getSchedule();
 
         // Créer une exécution liée au schedule avec statut Pending
@@ -383,7 +383,7 @@ public class ExecutionRepositoryTest {
         );
 
         Test.startTest();
-        List<ImportExecution__c> results = ExecutionRepository.findExecutionsByStatusAndApexJobId(
+        List<ImportExecution__c> results = ExecutionRepository.findExecutionsByStatusAndScheduleId(
             String.valueOf(schedule.Id),
             new List<String>{ 'Pending' }
         );
@@ -396,7 +396,7 @@ public class ExecutionRepositoryTest {
 
  
     @isTest
-    static void testFindExecutionsByStatusAndApexJobIdWrongStatus() {
+    static void testFindExecutionsByStatusAndScheduleIdWrongStatus() {
         Schedule__c schedule = getSchedule();
 
         ExecutionRepository.createLinkedExecution(
@@ -409,7 +409,7 @@ public class ExecutionRepositoryTest {
         );
 
         Test.startTest();
-        List<ImportExecution__c> results = ExecutionRepository.findExecutionsByStatusAndApexJobId(
+        List<ImportExecution__c> results = ExecutionRepository.findExecutionsByStatusAndScheduleId(
             String.valueOf(schedule.Id),
             new List<String>{ 'Suspended' }   // exécution est Pending, pas Suspended
         );
@@ -419,9 +419,9 @@ public class ExecutionRepositoryTest {
     }
     
     @isTest
-    static void testFindExecutionsByStatusAndApexJobIdNullJobId() {
+    static void testFindExecutionsByStatusAndScheduleIdNullJobId() {
         Test.startTest();
-        List<ImportExecution__c> results = ExecutionRepository.findExecutionsByStatusAndApexJobId(
+        List<ImportExecution__c> results = ExecutionRepository.findExecutionsByStatusAndScheduleId(
             null,
             new List<String>{ 'Pending' }
         );
@@ -436,7 +436,7 @@ public class ExecutionRepositoryTest {
         Schedule__c schedule = getSchedule();
 
         Test.startTest();
-        List<ImportExecution__c> results = ExecutionRepository.findExecutionsByStatusAndApexJobId(
+        List<ImportExecution__c> results = ExecutionRepository.findExecutionsByStatusAndScheduleId(
             String.valueOf(schedule.Id),
             null
         );
@@ -447,11 +447,11 @@ public class ExecutionRepositoryTest {
 
     /** statuses vide  liste vide sans erreur */
     @isTest
-    static void testFindExecutionsByStatusAndApexJobIdEmptyStatuses() {
+    static void testFindExecutionsByStatusAndScheduleIdEmptyStatuses() {
         Schedule__c schedule = getSchedule();
 
         Test.startTest();
-        List<ImportExecution__c> results = ExecutionRepository.findExecutionsByStatusAndApexJobId(
+        List<ImportExecution__c> results = ExecutionRepository.findExecutionsByStatusAndScheduleId(
             String.valueOf(schedule.Id),
             new List<String>()
         );
@@ -462,7 +462,7 @@ public class ExecutionRepositoryTest {
 
     /** Recherche multi-statuts : InProgress + Pending */
     @isTest
-    static void testFindExecutionsByStatusAndApexJobId_MultipleStatuses() {
+    static void testFindExecutionsByStatusAndScheduleId_MultipleStatuses() {
         Schedule__c schedule = getSchedule();
 
         // Créer 2 exécutions avec des statuts différents liées au même schedule
@@ -471,7 +471,7 @@ public class ExecutionRepositoryTest {
         );
 
         Test.startTest();
-        List<ImportExecution__c> results = ExecutionRepository.findExecutionsByStatusAndApexJobId(
+        List<ImportExecution__c> results = ExecutionRepository.findExecutionsByStatusAndScheduleId(
             String.valueOf(schedule.Id),
             new List<String>{ 'InProgress', 'Pending' }
         );
@@ -486,7 +486,7 @@ public class ExecutionRepositoryTest {
 
     /** Exécution Suspended | trouvée avec le bon statut */
     @isTest
-    static void testFindExecutionsByStatusAndApexJobIdSuspended() {
+    static void testFindExecutionsByStatusAndScheduleIdSuspended() {
         Schedule__c schedule = getSchedule();
 
         // Créer une exécution Suspended
@@ -500,7 +500,7 @@ public class ExecutionRepositoryTest {
         );
 
         Test.startTest();
-        List<ImportExecution__c> results = ExecutionRepository.findExecutionsByStatusAndApexJobId(
+        List<ImportExecution__c> results = ExecutionRepository.findExecutionsByStatusAndScheduleId(
             String.valueOf(schedule.Id),
             new List<String>{ 'Suspended' }
         );
@@ -511,16 +511,16 @@ public class ExecutionRepositoryTest {
         Assert.areEqual(execution.Id, results[0].Id, 'Should return the correct execution');
     }
 
-    /** ApexJobId inexistant → liste vide */
+    /** ScheduleId inexistant → liste vide */
     @isTest
-    static void testFindExecutionsByStatusAndApexJobId_UnknownJobId() {
+    static void testFindExecutionsByStatusAndScheduleId_UnknownScheduleId() {
         Test.startTest();
-        List<ImportExecution__c> results = ExecutionRepository.findExecutionsByStatusAndApexJobId(
+        List<ImportExecution__c> results = ExecutionRepository.findExecutionsByStatusAndScheduleId(
             'a05000000000000AAA',    // ID valide format mais inexistant
             new List<String>{ 'Pending' }
         );
         Test.stopTest();
 
-        Assert.isTrue(results.size() == 0, 'Should return empty list for unknown apexJobId');
+        Assert.isTrue(results.size() == 0, 'Should return empty list for unknown scheduleId');
     }
 }

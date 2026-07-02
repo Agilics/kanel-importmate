@@ -101,15 +101,15 @@ public class TestDataFactory {
         Id projectId,
         String status,
         String type,
-        Id apexJobId
+        Id scheduleId
     ) {
         String safeType = isValidExecutionType(type) ? type : 'Import';
 
          ImportExecution__c execution = new ImportExecution__c(
             Project__c          = projectId,
             Status__c           = status,
-            Type__c             = type,        
-            ApexJobId__c        = String.valueOf(apexJobId), 
+            Type__c             = safeType,
+            ScheduleId__c       = scheduleId,
             StartTime__c        = Datetime.now(),
             TotalRecords__c     = 0,
             ProcessedRecords__c = 0,
@@ -117,6 +117,20 @@ public class TestDataFactory {
         );
         insert  execution;
         return execution;
+    }
+
+    public static ImportExecution__c createImportExecutionWithSchedule(
+        Id projectId,
+        String status,
+        String type,
+        String scheduleId
+    ) {
+        return createImportExecutionWithSchedule(
+            projectId,
+            status,
+            type,
+            Id.valueOf(scheduleId)
+        );
     }
     
 

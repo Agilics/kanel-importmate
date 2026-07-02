@@ -134,4 +134,28 @@ public with sharing class ScheduleController {
         throw new SchedulingException(e.getMessage());
       }
   }
+ 
+  
+    // Récupère et parse les données d'un ContentDocument attaché à un Schedule
+    @AuraEnabled(cacheable=true)
+    public static List<Map<String, String>> getContentDocumentData(Id scheduleId) {
+      try {
+        if (String.isBlank(scheduleId)) {
+            return new List<Map<String, String>>();
+        }
+
+         List<Map<String, String>> data = ScheduleService.getDataFromContentDocument(scheduleId);
+        
+        if (data == null || data.isEmpty()) {
+            System.debug( ' Aucun ContentDocument trouvé ou vide pour le schedule: ' + scheduleId);
+        } else {
+            System.debug( data.size() + ' lignes récupérées depuis ContentDocument');
+        }
+        return data;
+    } catch (Exception e) {
+        ErrorLogService.logException(e);
+        throw new AuraHandledException('Erreur lors de la récupération du fichier: ' + e.getMessage());
+    }
+  }
+
 }

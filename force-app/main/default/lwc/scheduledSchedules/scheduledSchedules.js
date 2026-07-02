@@ -156,7 +156,7 @@ export default class ScheduledSchedules extends LightningElement {
 
                 const lastExecution = specificExecutions.length > 0 ? specificExecutions[0] : null;
                 const status        = lastExecution?.Status__c;
-
+                console.log('Processing schedule:', sch.Id, 'Last Execution Status:', status);
                 return {
                     id              : sch.Id,
                     scheduleId      : sch.Id,

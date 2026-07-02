@@ -41,10 +41,10 @@
                                         <template if:false={schedule.isNotCompleted}>
                                             <lightning-icon icon-name={schedule.iconActionName} onclick={handleToggleStatus}
                                                 data-id={schedule.id} data-running={schedule.isRunning} size="xx-small"
-                                                alternative-text="Toggle Status" title="Toggle Status" class="action-icon">
+                                                title={schedule.isNotCompleted}
+                                                alternative-text="Toggle Status" class="action-icon">
                                             </lightning-icon>
-                                        </template>
-                                        <lightning-icon icon-name="utility:edit" onclick={handleEditClick}
+                                              <lightning-icon icon-name="utility:edit" onclick={handleEditClick}
                                             class="action-icon" title="Edit" size="xx-small" data-id={schedule.id}
                                             disabled={isLoading}>
                                         </lightning-icon>
@@ -52,6 +52,8 @@
                                             onclick={handleDeleteSchedule} icon-name="utility:delete" size="xx-small"
                                             title="Delete" class="action-icon">
                                         </lightning-icon>
+                                        </template>
+                                      
                                     </td>
                                 </template>
 

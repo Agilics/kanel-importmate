@@ -6,8 +6,8 @@
  */
 public with sharing class ScheduleRepository {
 
-  
-    // *** DML Operation *** 
+
+    // *** DML Operation ***
     /**
      * Insérer ou mettre à jour un Schedule__c
      */
@@ -35,7 +35,7 @@ public with sharing class ScheduleRepository {
             throw new ApplicationException('Insufficient permissions to delete Schedule__c');
         }
         try {
-            // Aborter les jobs Cron liés
+            // Abandonner les jobs Cron liés à la planification via l'id du schedule
             List<CronTrigger> triggers = [
                 SELECT Id FROM CronTrigger
                 WHERE CronJobDetail.Name LIKE :('%' + scheduleId + '%')
@@ -57,7 +57,7 @@ public with sharing class ScheduleRepository {
         }
     }
 
-  
+
     // *** QUERIES SIMPLES ***
 
     /**
@@ -132,7 +132,7 @@ public with sharing class ScheduleRepository {
         }
     }
 
-   
+
     // *** WRAPPERS ***
 
     /**
@@ -148,9 +148,9 @@ public with sharing class ScheduleRepository {
             List<Schedule__c> schedules = getSchedulesByprojectId(projectId);
             if (schedules.isEmpty()) return new List<ScheduleService.ScheduleWrapper>();
 
-            Map<Id, List<ImportExecution__c>> executionsByProject =
-                getExecutionsByProject(projectId, null);
-            return buildScheduleWrapper(schedules, executionsByProject);
+            Map<Id, List<ImportExecution__c>> executionsBySchedule =
+                getExecutionsBySchedule(projectId, null);
+            return buildScheduleWrapper(schedules, executionsBySchedule);
         } catch (Exception e) {
             ErrorLogService.logException(e);
             throw new ApplicationException(e.getMessage());
@@ -177,7 +177,7 @@ public with sharing class ScheduleRepository {
                 SELECT Id, Status__c, Type__c, Phase__c,
                        StartTime__c, EndTime__c,
                        TotalRecords__c, ProcessedRecords__c, FailedRecords__c,
-                       ApexJobId__c, RetryCount__c, MaxRetries__c,
+                       ScheduleId__c, ApexJobId__c, RetryCount__c, MaxRetries__c,
                        Project__c
                 FROM ImportExecution__c
                 WHERE Project__c = :projectId
@@ -186,6 +186,7 @@ public with sharing class ScheduleRepository {
                 ORDER BY StartTime__c DESC
             ];
 
+            Map<Id, List<ImportExecution__c>> executionsBySchedule = groupExecutionsBySchedule(filteredExecutions);
             List<ScheduleService.ScheduleWrapper> wrappers = new List<ScheduleService.ScheduleWrapper>();
             for (Schedule__c schedule : schedules) {
                 ScheduleService.ScheduleWrapper wrapper = new ScheduleService.ScheduleWrapper();
@@ -195,7 +196,9 @@ public with sharing class ScheduleRepository {
                     TargetObject__c = schedule.Project__r.TargetObject__c
                 );
                 wrapper.schedules        = new List<Schedule__c>{ schedule };
-                wrapper.importExecutions = filteredExecutions;
+                wrapper.importExecutions = executionsBySchedule.containsKey(schedule.Id)
+                    ? executionsBySchedule.get(schedule.Id)
+                    : new List<ImportExecution__c>();
                 wrappers.add(wrapper);
             }
             return wrappers;
@@ -229,16 +232,16 @@ public with sharing class ScheduleRepository {
             if (schedules.isEmpty()) return new List<ScheduleService.ScheduleWrapper>();
 
             String projectId = String.valueOf(schedules[0].Project__c);
-            Map<Id, List<ImportExecution__c>> executionsByProject =
-                getExecutionsByProject(projectId, null);
-            return buildScheduleWrapper(schedules, executionsByProject);
+            Map<Id, List<ImportExecution__c>> executionsBySchedule =
+                getExecutionsBySchedule(projectId, null);
+            return buildScheduleWrapper(schedules, executionsBySchedule);
         } catch (Exception e) {
             ErrorLogService.logException(e);
             throw new ApplicationException(e.getMessage());
         }
     }
 
-    
+
     // *** CRON ***
 
     /**
@@ -247,7 +250,7 @@ public with sharing class ScheduleRepository {
     public static List<CronTrigger> findCronTriggerByName(String scheduleId) {
         if (String.isBlank(scheduleId)) return new List<CronTrigger>();
         try {
-         
+
             return [
                 SELECT Id, CronJobDetail.Name, State, NextFireTime, PreviousFireTime
                 FROM CronTrigger
@@ -262,12 +265,12 @@ public with sharing class ScheduleRepository {
         }
     }
 
-  
-    // EXECUTIONS LIÉES 
+
+    // EXECUTIONS LIÉES
 
     /**
-     * Trouver les exécutions d'un projet par statut
-     * (1 seul schedule actif par projet -> pas d'ambiguïté)
+     * Trouver les exécutions d'un schedule par statut
+     * (via ScheduleId__c lié à l' ImportExecution__c)
      */
     public static List<ImportExecution__c> findExecutionsBySchedule(
         Id scheduleId,
@@ -277,17 +280,12 @@ public with sharing class ScheduleRepository {
             return new List<ImportExecution__c>();
         }
         try {
-            // Récupérer le projet du schedule pour la query
-            Schedule__c schedule = getScheduleById(String.valueOf(scheduleId));
-            if (schedule == null) return new List<ImportExecution__c>();
-
-            Id projectId = schedule.Project__c;
             return [
                 SELECT Id, Status__c, StartTime__c, EndTime__c,
-                       ApexJobId__c, TotalRecords__c, ProcessedRecords__c,
+                       ScheduleId__c, TotalRecords__c, ProcessedRecords__c,
                        FailedRecords__c, Project__c
                 FROM ImportExecution__c
-                WHERE Project__c = :projectId
+                WHERE ScheduleId__c = :scheduleId
                 AND   Status__c  IN :statuses
                 ORDER BY StartTime__c DESC
                 LIMIT 1
@@ -298,7 +296,7 @@ public with sharing class ScheduleRepository {
         }
     }
 
-    
+
     // PRIVATE HELPERS
 
     /**
@@ -306,7 +304,7 @@ public with sharing class ScheduleRepository {
      */
     private static List<ScheduleService.ScheduleWrapper> buildScheduleWrapper(
         List<Schedule__c> schedules,
-        Map<Id, List<ImportExecution__c>> executionsByProject
+        Map<Id, List<ImportExecution__c>> executionsBySchedule
     ) {
         List<ScheduleService.ScheduleWrapper> results = new List<ScheduleService.ScheduleWrapper>();
         if (!SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType) ||
@@ -317,8 +315,8 @@ public with sharing class ScheduleRepository {
             ScheduleService.ScheduleWrapper wrapper = new ScheduleService.ScheduleWrapper();
             wrapper.schedules = new List<Schedule__c>{ schedule };
             wrapper.project   = schedule.Project__r;
-            wrapper.importExecutions = executionsByProject.containsKey(schedule.Project__c)
-                ? executionsByProject.get(schedule.Project__c)
+            wrapper.importExecutions = executionsBySchedule.containsKey(schedule.Id)
+                ? executionsBySchedule.get(schedule.Id)
                 : new List<ImportExecution__c>();
             results.add(wrapper);
         }
@@ -326,9 +324,40 @@ public with sharing class ScheduleRepository {
     }
 
     /**
+     * @description  Update an schedule
+     * @param  frequency  frequency description
+     * @param  scheduleId scheduleId description
+     * @param  nextRun    nextRun description
+     * @return            return description
+     */
+    public static Schedule__c updateSchedule(String frequency,String scheduleId, Datetime nextRun) {
+        try {
+            Schedule__c existingSchedule = getScheduleById(scheduleId);
+            if (existingSchedule == null) {
+                throw new ApplicationException('Schedule not found with ID: ' + scheduleId);
+            }
+
+            if(SecurityUtils.isUpdateable(Schema.Schedule__c.SObjectType)) {
+                existingSchedule.Frequency__c = frequency;
+                existingSchedule.NextRun__c   = nextRun;
+                update existingSchedule;
+            } else {
+                throw new ApplicationException('Insufficient permissions to update Schedule__c');
+            }
+
+            return existingSchedule;
+        } catch (DmlException e) {
+            ErrorLogService.logException(e);
+            throw new ApplicationException('Error updating schedule: ' + e.getMessage());
+        }
+
+
+    }
+
+    /**
      * Récupérer les exécutions groupées par projet (avec filtre statut optionnel)
      */
-    private static Map<Id, List<ImportExecution__c>> getExecutionsByProject(
+    private static Map<Id, List<ImportExecution__c>> getExecutionsBySchedule(
         Id projectId,
         String status
     ) {
@@ -342,22 +371,30 @@ public with sharing class ScheduleRepository {
             String query =
                 'SELECT Id, Status__c, Type__c, Phase__c, StartTime__c, EndTime__c, ' +
                 'TotalRecords__c, ProcessedRecords__c, FailedRecords__c, ' +
-                'ApexJobId__c, Project__c ' +
+                'ScheduleId__c, ApexJobId__c, Project__c ' +
                 'FROM ImportExecution__c ' +
                 whereClause +
                 ' ORDER BY StartTime__c DESC LIMIT 10000';
 
             List<ImportExecution__c> executions = Database.query(query);
-            for (ImportExecution__c exec : executions) {
-                if (!result.containsKey(exec.Project__c)) {
-                    result.put(exec.Project__c, new List<ImportExecution__c>());
-                }
-                result.get(exec.Project__c).add(exec);
-            }
-            return result;
+            return groupExecutionsBySchedule(executions);
         } catch (Exception e) {
             ErrorLogService.logException(e);
             throw new ApplicationException(e.getMessage());
         }
+    }
+
+    private static Map<Id, List<ImportExecution__c>> groupExecutionsBySchedule(
+        List<ImportExecution__c> executions
+    ) {
+        Map<Id, List<ImportExecution__c>> result = new Map<Id, List<ImportExecution__c>>();
+        for (ImportExecution__c exec : executions) {
+            if (exec.ScheduleId__c == null) continue;
+            if (!result.containsKey(exec.ScheduleId__c)) {
+                result.put(exec.ScheduleId__c, new List<ImportExecution__c>());
+            }
+            result.get(exec.ScheduleId__c).add(exec);
+        }
+        return result;
     }
 }

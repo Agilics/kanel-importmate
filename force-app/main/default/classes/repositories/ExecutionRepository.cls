@@ -1,6 +1,6 @@
     /**
      * @Last Modification : 09-03-2026
-     * @Last Modifcation By: Mouhamed  
+     * @Last Modifcation By: Mouhamed
      */
     public with sharing class ExecutionRepository {
 
@@ -37,11 +37,37 @@
             }
         }
 
+        public static void updateExecution(Id executionId, String status, String phase, String type, Integer totalRecords) {
+            if (SecurityUtils.isUpdateable(ImportExecution__c.SObjectType)) {
+              
+                try {
+                    ImportExecution__c execution = getImportExecutionById(executionId);
+                    if (execution == null) {
+                        throw new ExecutionException('Execution not found for ID: ' + executionId);
+                    }
+                   
+                    // inject progress status and phase into the execution record
+                    execution.Status__c = status;
+                    execution.Phase__c = phase;
+                    execution.TotalRecords__c = totalRecords;
+                    if (type != null && type != ''){
+                        execution.Type__c = type;
+                    }
+                    
+                    
+                    update execution;
+                } catch (DmlException e) {
+                    ErrorLogService.logException(e);
+                    throw new ExecutionException('Error updating execution: ' + e.getMessage());
+                }
+            }
+        }
+
         public static ImportExecution__c getImportExecutionById(String executionId) {
             if (SecurityUtils.isAccessible(ImportExecution__c.SObjectType)) {
                 try {
-                    return [SELECT Id, Status__c, Type__c, Project__c, StartTime__c, EndTime__c, TotalRecords__c, ProcessedRecords__c, FailedRecords__c
-                            , Phase__c, ApexJobId__c, LogLimitReached__c, RetryCount__c, MaxRetries__c
+                    return [SELECT Id, Status__c, Type__c, Project__c, ScheduleId__c, StartTime__c, EndTime__c, TotalRecords__c, ProcessedRecords__c, FailedRecords__c
+                            , Phase__c, ApexJobId__c, LogLimitReached__c, RetryCount__c, MaxRetries__c,ScheduleId__c
                             FROM ImportExecution__c
                             WHERE Id = :executionId
                             LIMIT 1];
@@ -53,13 +79,41 @@
             return null;
         }
 
+        
+        public static ImportExecution__c getImportExecutionByScheduleId(String scheduleId) {
+            if (SecurityUtils.isAccessible(ImportExecution__c.SObjectType)) {
+                try {
+                    return [SELECT Id, Status__c, Type__c, Project__c, ScheduleId__c, StartTime__c, EndTime__c, TotalRecords__c, ProcessedRecords__c, FailedRecords__c
+                            , Phase__c, ApexJobId__c, LogLimitReached__c, RetryCount__c, MaxRetries__c,ScheduleId__c
+                            FROM ImportExecution__c
+                            WHERE ScheduleId__c = :scheduleId
+                            LIMIT 1];
+                } catch (QueryException e) {
+                    ErrorLogService.logException(e);
+                    throw new ExecutionException('Error retrieving execution: ' + e.getMessage());
+                }
+            }
+            return null;
+        }
+
+        public static void deleteImportExecutionByScheduleId(Id scheduleId) {
+            if (SecurityUtils.isDeleteable(ImportExecution__c.SObjectType)) {
+                try {
+                    delete getImportExecutionByScheduleId(scheduleId);
+                } catch (DmlException e) {
+                    ErrorLogService.logException(e);
+                    throw new ExecutionException('Error deleting execution: ' + e.getMessage());
+                }
+            }
+        }
+
         public static List<ImportExecution__c> getExecutionHistory(String projectId, String dateRange, String statusFilter) {
             try {
                 if (!SecurityUtils.isAccessible(ImportExecution__c.SObjectType)) {
                     return new List<ImportExecution__c>();
                 }
 
-                String query = 'SELECT Id, Project__c, Status__c, Type__c, StartTime__c, EndTime__c, TotalRecords__c, ProcessedRecords__c,ApexJobId__c, FailedRecords__c ' +
+                String query = 'SELECT Id, Project__c, ScheduleId__c, Status__c, Type__c, StartTime__c, EndTime__c, TotalRecords__c, ProcessedRecords__c,ApexJobId__c, FailedRecords__c ' +
                             'FROM ImportExecution__c WHERE Project__c = :projectId ';
 
                 if (dateRange != 'all' && dateRange != null) {
@@ -123,52 +177,59 @@
             }
         }
 
-        //Créer une exécution liée au schedule via ApexJobId__c 
+        // Créer une exécution liée au schedule via ScheduleId__c.
         public static ImportExecution__c createLinkedExecution(
-            Id projectId,String apexJobId, String status, String type,String phase,Integer totalRecord
+            Id projectId, String scheduleId, String status, String type,String phase,Integer totalRecord
         ) {
-            ImportExecution__c execution = new ImportExecution__c(
-                Project__c          = projectId,
-                Status__c           = status,
-                Type__c             = type,
-                ApexJobId__c           = apexJobId,
-                StartTime__c        = Datetime.now(),
-                TotalRecords__c     = 0,
-                ProcessedRecords__c = 0,
-                FailedRecords__c    = 0
-            );
-            
-            if(phase != null && phase!= ''){
-                execution.Phase__c = phase;
-            }
-            
-            if(totalRecord != null && totalRecord != 0){
-                execution.TotalRecords__c = totalRecord;
-            }
-            
-            if (SecurityUtils.isCreateable(ImportExecution__c.SObjectType)) {
-                insert execution;
-            }
+            try{
+                if (!SecurityUtils.isCreateable(ImportExecution__c.SObjectType)) {
+                    throw new ExecutionException('Insufficient permissions to create ImportExecution__c');
+                }
 
-            return execution;
+                ImportExecution__c execution = new ImportExecution__c(
+                    Project__c          = projectId,
+                    Status__c           = status,
+                    Type__c             = type,
+                    ScheduleId__c       = scheduleId,
+                    StartTime__c        = Datetime.now(),
+                    TotalRecords__c     = 0,
+                    ProcessedRecords__c = 0,
+                    FailedRecords__c    = 0
+                );
+
+                if(phase != null && phase!= ''){
+                    execution.Phase__c = phase;
+                }
+
+                if(totalRecord != null && totalRecord != 0){
+                    execution.TotalRecords__c = totalRecord;
+                }
+
+                insert execution;
+
+                return execution;
+            }catch(DmlException e){
+                ErrorLogService.logException(e);
+                throw new ExecutionException('Error creating linked execution: ' + e.getMessage());
+            }
         }
 
 
 
         /**
-         * Trouver les exécutions liées à un schedule via ApexJobId__c  
-         */
-        public static List<ImportExecution__c> findExecutionsByStatusAndApexJobId(
-            String apexJobId, List<String> statuses
+         * Trouver les exécutions liées à un schedule via ScheduleId__c
+        */
+        public static List<ImportExecution__c> findExecutionsByStatusAndScheduleId(
+            String scheduleId, List<String> statuses
         ) {
-            if (apexJobId == null || statuses == null || statuses.isEmpty()) {
+            if (scheduleId == null || statuses == null || statuses.isEmpty()) {
                 return new List<ImportExecution__c>();
             }
             return [
-                SELECT Id, Status__c, StartTime__c, EndTime__c,
+                SELECT Id, Status__c, StartTime__c, EndTime__c,ScheduleId__c,
                     ApexJobId__c, TotalRecords__c, ProcessedRecords__c, FailedRecords__c
                 FROM ImportExecution__c
-                WHERE ApexJobId__c =: apexJobId
+                WHERE ScheduleId__c = :scheduleId
                 AND   Status__c   IN :statuses
                 ORDER BY StartTime__c DESC
                 LIMIT 1

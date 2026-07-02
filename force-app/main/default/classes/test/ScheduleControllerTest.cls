@@ -305,7 +305,7 @@ public with sharing class ScheduleControllerTest {
         // Créer l'exécution liée si elle n'existe pas déjà
         List<ImportExecution__c> existing = [
             SELECT Id FROM ImportExecution__c
-            WHERE ApexJobId__c = :String.valueOf(schedule.Id)
+            WHERE ScheduleId__c = :schedule.Id
             AND Status__c IN ('Pending', 'InProgress')
             LIMIT 1
         ];
@@ -456,8 +456,8 @@ public with sharing class ScheduleControllerTest {
       
         Schedule__c schedule = ScheduleService.getScheduleById(scheduleId);
         ImportExecution__c  execution = [
-            SELECT Id, Status__c, Project__c,ApexJobId__c FROM ImportExecution__c 
-            WHERE ApexJobId__c = :scheduleId
+            SELECT Id, Status__c, Project__c, ScheduleId__c FROM ImportExecution__c
+            WHERE ScheduleId__c = :scheduleId
             LIMIT 1
         ];
 

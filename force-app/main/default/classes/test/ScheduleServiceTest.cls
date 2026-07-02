@@ -474,8 +474,8 @@ public with sharing class ScheduleServiceTest {
       
         Schedule__c schedule = ScheduleService.getScheduleById(scheduleId);
         ImportExecution__c  execution = [
-            SELECT Id, Status__c, Project__c,ApexJobId__c FROM ImportExecution__c 
-            WHERE ApexJobId__c = :scheduleId
+            SELECT Id, Status__c, Project__c, ScheduleId__c FROM ImportExecution__c
+            WHERE ScheduleId__c = :scheduleId
             LIMIT 1
         ];
 
