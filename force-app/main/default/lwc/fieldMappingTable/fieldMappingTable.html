@@ -1,124 +1,104 @@
 <template>
-  <div class="slds-p-around_medium">
+  <div class="fmt-shell">
     <!-- Status bar -->
-    <div
-      class="slds-notify slds-notify_alert slds-theme_alert-texture slds-theme_info slds-m-bottom_small"
-      role="status"
-    >
-      <span class="slds-assistive-text">info</span>
-      <span class="slds-icon_container slds-m-right_x-small" title="info"
-        >ℹ️</span
-      >
-      <h2>{statusText}</h2>
+    <div class="fmt-status-bar" role="status">
+      <span class="fmt-status-icon">ℹ</span>
+      <span>{statusText}</span>
     </div>
 
     <!-- Spinner -->
     <template if:true={isBusy}>
-      <lightning-spinner size="small" variant="brand"></lightning-spinner>
+      <div class="fmt-spinner-wrap">
+        <div class="aurora-spinner"></div>
+      </div>
     </template>
 
     <!-- Top controls: Target Object • Project • Version -->
-    <div class="slds-grid slds-wrap slds-gutters slds-m-bottom_small">
-      <div class="slds-size_1-of-1 slds-medium-size_1-of-3">
-        <lightning-combobox
-          name="targetObject"
-          label="Target Object"
-          value={selectedObjectApiName}
-          options={objectOptions}
-          placeholder="Select an object"
-          onchange={handleObjectPick}
-        >
-        </lightning-combobox>
+    <div class="fmt-controls">
+      <div class="fmt-control-item">
+        <label class="fmt-label">Target Object</label>
+        <select class="rounded-input" onchange={handleObjectPick}>
+          <option value="">Select an object</option>
+          <template for:each={objectOptionsWithSelected} for:item="o">
+            <option key={o.value} value={o.value} selected={o.isSelected}>{o.label}</option>
+          </template>
+        </select>
       </div>
 
-      <div class="slds-size_1-of-1 slds-medium-size_1-of-3">
-        <lightning-combobox
-          name="project"
-          label="Project"
-          value={selectedProjectId}
-          options={projectOptions}
-          placeholder="Select a project"
-          onchange={handleProjectPick}
-        >
-        </lightning-combobox>
+      <div class="fmt-control-item">
+        <label class="fmt-label">Project</label>
+        <select class="rounded-input" onchange={handleProjectPick}>
+          <option value="">Select a project</option>
+          <template for:each={projectOptionsWithSelected} for:item="o">
+            <option key={o.value} value={o.value} selected={o.isSelected}>{o.label}</option>
+          </template>
+        </select>
       </div>
 
-      <div class="slds-size_1-of-1 slds-medium-size_1-of-3">
-        <lightning-input
-          type="text"
-          label="Version"
-          value={selectedVersion}
-          onchange={handleVersionChange}
-        >
-        </lightning-input>
+      <div class="fmt-control-item">
+        <label class="fmt-label">Version</label>
+        <input type="text" class="rounded-input" value={selectedVersion} onchange={handleVersionChange} />
       </div>
     </div>
 
     <!-- Mapping grid -->
     <template if:true={hasColumns}>
-      <div class="slds-text-title_caps slds-m-bottom_x-small">
+      <div class="fmt-section-label">
         Map CSV columns to {selectedObjectApiName}
       </div>
 
-      <div class="table-wrap">
-        <table class="slds-table slds-table_cell-buffer slds-table_bordered">
+      <div class="fmt-table-wrap">
+        <table class="fmt-table">
           <thead>
             <tr>
-              <th scope="col">CSV Column</th>
-              <th scope="col">Target Field</th>
-              <th scope="col" style="width: 110px">Lookup?</th>
-              <th scope="col">Lookup Object</th>
-              <th scope="col">Match Field</th>
+              <th>CSV Column</th>
+              <th>Target Field</th>
+              <th style="width:90px">Lookup?</th>
+              <th>Lookup Object</th>
+              <th>Match Field</th>
             </tr>
           </thead>
           <tbody>
-            <template for:each={rows} for:item="r">
+            <template for:each={rowsWithOptions} for:item="r">
               <tr key={r.key}>
-                <td>{r.sourceColumn}</td>
+                <td class="fmt-col-source">{r.sourceColumn}</td>
 
                 <td>
-                  <lightning-combobox
-                    data-key={r.key}
-                    value={r.targetField}
-                    options={fieldOptions}
-                    placeholder="-- none --"
-                    onchange={handleFieldPick}
-                  >
-                  </lightning-combobox>
+                  <select class="rounded-input fmt-select" data-key={r.key} onchange={handleFieldPick}>
+                    <template for:each={r.targetFieldOpts} for:item="o">
+                      <option key={o.value} value={o.value} selected={o.isSelected}>{o.label}</option>
+                    </template>
+                  </select>
                 </td>
 
-                <td class="slds-text-align_center">
-                  <lightning-input
+                <td class="fmt-col-center">
+                  <input
                     type="checkbox"
+                    class="fmt-checkbox"
                     data-key={r.key}
                     checked={r.isLookup}
                     onchange={handleLookupToggle}
-                  >
-                  </lightning-input>
+                  />
                 </td>
 
                 <td>
-                  <lightning-combobox
-                    data-key={r.key}
-                    value={r.lookupObject}
-                    options={objectOptions}
-                    placeholder="Select object"
-                    disabled={r.disabledLookup}
-                    onchange={handleLookupObjectPick}
-                  >
-                  </lightning-combobox>
+                  <select class="rounded-input fmt-select" data-key={r.key}
+                    disabled={r.disabledLookup} onchange={handleLookupObjectPick}>
+                    <option value="">Select object</option>
+                    <template for:each={r.lookupObjectOpts} for:item="o">
+                      <option key={o.value} value={o.value} selected={o.isSelected}>{o.label}</option>
+                    </template>
+                  </select>
                 </td>
 
                 <td>
-                  <lightning-combobox
-                    data-key={r.key}
-                    value={r.lookupMatchField}
-                    options={r.lookupMatchFieldOptions}
-                    placeholder="Field on lookup object"
-                    disabled={r.disabledLookup}
-                    onchange={handleLookupMatchFieldPick}
-                  >
-                  </lightning-combobox>
+                  <select class="rounded-input fmt-select" data-key={r.key}
+                    disabled={r.disabledLookup} onchange={handleLookupMatchFieldPick}>
+                    <option value="">Field on lookup object</option>
+                    <template for:each={r.lookupMatchFieldOpts} for:item="o">
+                      <option key={o.value} value={o.value} selected={o.isSelected}>{o.label}</option>
+                    </template>
+                  </select>
                 </td>
               </tr>
             </template>
@@ -126,27 +106,18 @@
         </table>
       </div>
 
-      <div class="slds-m-top_medium slds-align_absolute-center">
-        <lightning-button
-          variant="brand"
-          label="Save mappings"
-          onclick={handleSave}
-          disabled={isSaveDisabled}
-        >
-        </lightning-button>
-
-        <lightning-button
-          class="slds-m-left_small"
-          label="Load existing"
-          onclick={handleLoadExisting}
-          disabled={disableLoad}
-        >
-        </lightning-button>
+      <div class="fmt-actions">
+        <button type="button" class="btn btn-primary" onclick={handleSave} disabled={isSaveDisabled}>
+          Save mappings
+        </button>
+        <button type="button" class="btn btn-secondary" onclick={handleLoadExisting} disabled={disableLoad}>
+          Load existing
+        </button>
       </div>
     </template>
 
     <template if:false={hasColumns}>
-      <p class="slds-text-color_weak">
+      <p class="fmt-empty">
         Upload a CSV (or provide columns) to start mapping.
       </p>
     </template>

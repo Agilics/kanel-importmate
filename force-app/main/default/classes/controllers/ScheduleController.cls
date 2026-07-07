@@ -11,11 +11,30 @@ public with sharing class ScheduleController {
 
     //création d'une nouvelle planification
     @AuraEnabled
-    public static Id addSchedule(String frequency,Datetime nextRun,String projectId){ 
+    public static Id addSchedule(String frequency,Datetime nextRun,String projectId){
         try {
           return  ScheduleService.schedule(frequency,nextRun, projectId);
         } catch (Exception e) {
           throw new SchedulingException(e.getMessage());
+        }
+    }
+
+    // Création d'une planification avec un fichier CSV fixe (mode "fichier fixe")
+    @AuraEnabled
+    public static Id addScheduleWithFile(String frequency, Datetime nextRun, String projectId, String contentDocumentId) {
+        try {
+            Id scheduleId = ScheduleService.schedule(frequency, nextRun, projectId);
+            if (String.isNotBlank(contentDocumentId) && scheduleId != null) {
+                ContentDocumentLink cdl = new ContentDocumentLink(
+                    ContentDocumentId = contentDocumentId,
+                    LinkedEntityId    = scheduleId,
+                    ShareType         = 'V'
+                );
+                insert cdl;
+            }
+            return scheduleId;
+        } catch (Exception e) {
+            throw new SchedulingException(e.getMessage());
         }
     }
 

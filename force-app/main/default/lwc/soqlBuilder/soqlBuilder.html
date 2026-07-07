@@ -1,265 +1,218 @@
 <template>
-  <div class="page">
-    <!-- LEFT COLUMN -->
-    <aside class="left">
-      <template if:true={projectName}>
-        <div class="project-badge">
-          <lightning-icon icon-name="utility:folder" size="xx-small" class="project-badge-icon"></lightning-icon>
-          <span>{projectName}</span>
-        </div>
-      </template>
-      <h2 class="panel-title">SOQL Query Builder</h2>
+  <div class="soql-builder">
 
-      <!-- Selected Object (read-only, from projectTargetObject) -->
-      <div class="card">
-        <div class="section-title">Selected Object</div>
-        <lightning-input
-          type="text"
-          value={selectedObject}
-          disabled
-          class="selected-object-input"
-        ></lightning-input>
-      </div>
+    <!-- Step tabs -->
+    <div class="soql-tabs">
+      <button class={tab1Class} data-step="1" onclick={handleGoStep}>1 · Objet</button>
+      <div class="soql-tab-sep">›</div>
+      <button class={tab2Class} data-step="2" onclick={handleGoStep}>2 · Champs</button>
+      <div class="soql-tab-sep">›</div>
+      <button class={tab3Class} data-step="3" onclick={handleGoStep}>3 · Filtres</button>
+      <div class="soql-tab-sep">›</div>
+      <button class={tab4Class} data-step="4" onclick={handleGoStep}>4 · Aperçu</button>
+      <div class="soql-spacer"></div>
+      <button class="soql-mode-btn" onclick={toggleSqlMode}>
+        <template if:true={sqlMode}>👁 Mode visuel</template>
+        <template if:false={sqlMode}>✎ Mode SQL</template>
+      </button>
+    </div>
 
-      <!-- Select Fields -->
-      <div class="card">
-        <div class="section-title row">
-          <span>Select Fields</span>
-          <span class="muted actions-inline">
-            <a onclick={selectAll}>Select all</a>
-            <span class="sep">|</span>
-            <a onclick={clearAll}>Clear</a>
-          </span>
+    <!-- Panel 1: Object selection -->
+    <template if:true={isStep1}>
+      <div class="soql-panel">
+        <div class="soql-panel-title">Choisissez un objet Salesforce</div>
+        <div class="soql-search-wrap">
+          <div class="soql-search-box">
+            <span class="soql-search-icon">🔍</span>
+            <input type="text" placeholder="Rechercher un objet..." value={objectSearchTerm} oninput={handleObjectSearch} />
+          </div>
         </div>
-        <div class="fields-list">
-          <template for:each={fieldsMeta} for:item="f">
-            <label class="field-item" key={f.apiName}>
-              <lightning-input
-                type="checkbox"
-                checked={f.checked}
-                data-api={f.apiName}
-                onchange={toggleField}
-              ></lightning-input>
-              <span class="fname">{f.label}</span>
-              <span class="ftype">{f.type}</span>
-            </label>
+        <div class="soql-obj-grid">
+          <template for:each={filteredObjects} for:item="obj">
+            <button key={obj.label} class={obj.pillClass} data-name={obj.label} onclick={handleSelectObject}>{obj.display}</button>
           </template>
         </div>
-      </div>
-
-      <!-- Query Settings -->
-      <div class="card">
-        <div class="section-title">Query Settings</div>
-
-        <lightning-input
-          type="number"
-          label="Record Limit"
-          value={limitRows}
-          onchange={handleLimitChange}
-        ></lightning-input>
-
-        <lightning-combobox
-          label="Order By"
-          value={orderByField}
-          options={orderByFieldOptions}
-          onchange={handleOrderByChange}
-        ></lightning-combobox>
-
-        <lightning-combobox
-          label="Direction"
-          value={orderDirection}
-          options={directionOptions}
-          onchange={handleDirectionChange}
-        ></lightning-combobox>
-
-        <div class="btns-vertical">
-          <button
-            class="btn-validate"
-            onclick={handleValidate}
-            disabled={isLoading}
-          >
-            <lightning-icon
-              icon-name="utility:check"
-              size="x-small"
-              class="btn-icon"
-            ></lightning-icon>
-            Validate Query
-          </button>
-          <button
-            class="btn-preview"
-            onclick={handlePreview}
-            disabled={isLoading}
-          >
-            <lightning-icon
-              icon-name="utility:preview"
-              size="x-small"
-              class="btn-icon"
-            ></lightning-icon>
-            Preview Results
-          </button>
+        <div class="soql-footer">
+          <button class="btn btn-primary btn-sm" data-step="2" onclick={handleGoStep}>Suivant · Choisir les champs →</button>
         </div>
       </div>
+    </template>
 
-     
-    </aside>
-
-    <!-- CENTER COLUMN -->
-    <main class="center">
-      <!-- Condition Builder -->
-      <div class="card card-fixed">
-        <div class="title-row">
-          <h3 class="section-title big">Condition Builder</h3>
-          <button class="btn-add-condition" onclick={addCondition}>
-            <lightning-icon
-              icon-name="utility:add"
-              size="x-small"
-              class="btn-icon-right"
-            ></lightning-icon>
-            Add Condition
-          </button>
-        </div>
-
-        <div class="h-scroll">
-          <div class="h-row">
-            <template for:each={conditions} for:item="c" for:index="i">
-              <div key={c.id} class="cond-row">
-                <lightning-combobox
-                  class="cond-field"
-                  data-idx={i}
-                  value={c.field}
-                  placeholder="Field"
-                  options={fieldOptions}
-                  onchange={updateCondField}
-                ></lightning-combobox>
-
-                <lightning-combobox
-                  class="cond-op"
-                  data-idx={i}
-                  value={c.operator}
-                  options={operatorOptions}
-                  onchange={updateCondOp}
-                ></lightning-combobox>
-
-                <lightning-input
-                  class="cond-val"
-                  data-idx={i}
-                  type="text"
-                  value={c.value}
-                  placeholder="Enter value…"
-                  onchange={updateCondVal}
-                ></lightning-input>
-
-                <lightning-combobox
-                  class="cond-joiner"
-                  data-idx={i}
-                  value={c.joiner}
-                  options={joinerOptions}
-                  onchange={updateCondJoiner}
-                ></lightning-combobox>
-
-                <lightning-button-icon
-                  class="cond-trash"
-                  icon-name="utility:delete"
-                  alternative-text="Remove"
-                  data-idx={i}
-                  onclick={removeCondition}
-                ></lightning-button-icon>
-              </div>
-            </template>
+    <!-- Panel 2: Field selection -->
+    <template if:true={isStep2}>
+      <div class="soql-panel">
+        <div class="soql-panel-title">Sélectionnez les champs à récupérer</div>
+        <div class="soql-fields-grid">
+          <!-- Available fields -->
+          <div>
+            <div class="soql-col-title">Champs disponibles · {selectedObject}</div>
+            <div class="soql-search-box soql-field-search">
+              <span class="soql-search-icon">🔍</span>
+              <input type="text" placeholder="Filtrer les champs..." value={fieldSearchTerm} oninput={handleFieldSearch} />
+            </div>
+            <div class="soql-field-list">
+              <template for:each={availableFields} for:item="f">
+                <div key={f.apiName} class={f.itemClass} data-api={f.apiName} onclick={toggleField}>
+                  <span class="sfi-type">{f.typeShort}</span>{f.label}
+                </div>
+              </template>
+            </div>
+          </div>
+          <!-- Selected fields -->
+          <div>
+            <div class="soql-col-title">Champs sélectionnés <span class="soql-count-badge">{selectedFieldsMeta.length}</span></div>
+            <div class="soql-field-list">
+              <template for:each={selectedFieldsMeta} for:item="f">
+                <div key={f.apiName} class="soql-sel-item">
+                  <span class="sel-grip">⣿</span>
+                  <span class="sfi-type">{f.typeShort}</span>
+                  <span class="sel-fname">{f.label}</span>
+                  <span class="sel-remove" data-api={f.apiName} onclick={toggleField}>✕</span>
+                </div>
+              </template>
+            </div>
           </div>
         </div>
-      </div>
-
-      <!-- Generated SOQL Query -->
-      <div class="card card-fixed">
-        <div class="title-row">
-          <h3 class="section-title big">Generated SOQL Query</h3>
-          <div class="title-actions">
-            <lightning-button-icon
-              icon-name="utility:copy"
-              alternative-text="Copy Query"
-              class="copy-icon"
-              onclick={copySoql}
-            ></lightning-button-icon>
-          </div>
-        </div>
-
-        <div class="soql-block">
-          <pre class="soql-code">
-            <template for:each={soqlTokens} for:item="t">
-              <span key={t.key} class={t.cls}>{t.text}</span>
-            </template>
-          </pre>
+        <div class="soql-footer">
+          <button class="btn btn-ghost btn-sm" data-step="1" onclick={handleGoStep}>← Retour</button>
+          <button class="btn btn-primary btn-sm" data-step="3" onclick={handleGoStep}>Suivant · Filtres →</button>
         </div>
       </div>
+    </template>
 
-      <!-- Query Results Preview -->
-      <div class="card card-fixed">
-        <div class="title-row">
-          <h3 class="section-title big">Query Results Preview</h3>
-          <div class="meta">
-            <template if:true={hasRows}>
-              <span class="found">
-                found <strong>{foundCountText}</strong> records
-              </span>
-              <a class="export" onclick={exportCsv}>Export</a>
-            </template>
-          </div>
-        </div>
-
-        <div class="h-scroll">
-          <table class="preview-table">
-            <thead>
-              <tr>
-                <template for:each={columns} for:item="c">
-                  <th key={c.key}>{c.label}</th>
+    <!-- Panel 3: Filters -->
+    <template if:true={isStep3}>
+      <div class="soql-panel">
+        <div class="soql-panel-title">Conditions de filtre <span class="subtitle">(optionnel)</span></div>
+        <div class="soql-filters-list">
+          <template for:each={conditionsWithOptions} for:item="c" for:index="i">
+            <div key={c.id} class="soql-filter-row">
+              <template if:true={c.showJoiner}>
+                <select class="soql-logic-sel" data-idx={i} onchange={updateCondJoiner}>
+                  <template for:each={c.joinOpts} for:item="o">
+                    <option key={o.value} value={o.value} selected={o.isSelected}>{o.label}</option>
+                  </template>
+                </select>
+              </template>
+              <select class="soql-sel" data-idx={i} onchange={updateCondField}>
+                <template for:each={c.fieldOpts} for:item="o">
+                  <option key={o.value} value={o.value} selected={o.isSelected}>{o.label}</option>
                 </template>
-              </tr>
-            </thead>
-            <tbody>
-              <template for:each={displayRows} for:item="r">
-                <tr key={r.id}>
-                  <template for:each={r.cells} for:item="cell">
-                    <td key={cell.key}>
-                      <template if:true={cell.isBadge}>
-                        <span class="pill pill-default">{cell.value}</span>
-                      </template>
-                      <template if:false={cell.isBadge}>
-                        {cell.value}
-                      </template>
-                    </td>
+              </select>
+              <select class="soql-sel soql-sel-op" data-idx={i} onchange={updateCondOp}>
+                <template for:each={c.opOpts} for:item="o">
+                  <option key={o.value} value={o.value} selected={o.isSelected}>{o.label}</option>
+                </template>
+              </select>
+              <input class="soql-val-input" type="text" data-idx={i} value={c.value} placeholder="Valeur..." oninput={updateCondVal} />
+              <button class="soql-remove-row" data-idx={i} onclick={removeCondition}>✕</button>
+            </div>
+          </template>
+        </div>
+        <button class="soql-add-filter" onclick={addCondition}>＋ Ajouter une condition</button>
+        <div class="soql-options-row">
+          <div class="soql-option">
+            <label class="soql-opt-label">Limite de résultats</label>
+            <input class="soql-val-input soql-val-sm" type="number" value={limitRows} min="1" max="10000" onchange={handleLimitChange} />
+          </div>
+          <div class="soql-option soql-option-sort">
+            <label class="soql-opt-label">Trier par</label>
+            <div class="soql-sort-row">
+              <select class="soql-sel" onchange={handleOrderByChange}>
+                <template for:each={orderByFieldOptionsWithSelected} for:item="o">
+                  <option key={o.value} value={o.value} selected={o.isSelected}>{o.label}</option>
+                </template>
+              </select>
+              <select class="soql-sel soql-sel-dir" onchange={handleDirectionChange}>
+                <template for:each={directionOptionsWithSelected} for:item="o">
+                  <option key={o.value} value={o.value} selected={o.isSelected}>{o.label}</option>
+                </template>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="soql-footer">
+          <button class="btn btn-ghost btn-sm" data-step="2" onclick={handleGoStep}>← Retour</button>
+          <button class="btn btn-primary btn-sm" data-step="4" onclick={handleGoStep}>Aperçu des données →</button>
+        </div>
+      </div>
+    </template>
+
+    <!-- Panel 4: Preview -->
+    <template if:true={isStep4}>
+      <div class="soql-panel">
+        <div class="soql-panel-title">Aperçu des données</div>
+
+        <!-- Generated query -->
+        <div class="soql-query-box">
+          <div class="soql-query-header">
+            <span class="soql-query-label">Requête générée</span>
+            <button class="soql-copy-btn" onclick={copySoql}>📋 Copier</button>
+          </div>
+          <pre class="soql-query-code"><template for:each={soqlTokens} for:item="t"><span key={t.key} class={t.cls}>{t.text}</span></template></pre>
+        </div>
+
+        <!-- Preview table -->
+        <div class="soql-preview-wrap">
+          <div class="soql-preview-header">
+            <span class="soql-preview-count">{paginationInfo}</span>
+            <button class="btn btn-outline btn-sm" onclick={handlePreview}>↺ Rafraîchir</button>
+          </div>
+          <div class="h-scroll">
+            <table class="soql-preview-table">
+              <thead>
+                <tr>
+                  <template for:each={columns} for:item="c">
+                    <th key={c.key}>{c.label}</th>
                   </template>
                 </tr>
-              </template>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="results-footer">
-          <div class="results-count">
-            <span class="muted">{foundCountText}</span>
+              </thead>
+              <tbody>
+                <template for:each={paginatedRows} for:item="r">
+                  <tr key={r.id}>
+                    <template for:each={r.cells} for:item="cell">
+                      <td key={cell.key}>{cell.value}</td>
+                    </template>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
           </div>
 
-          <button
-            class="btn-continue"
-            onclick={handleContinue}
-            disabled={isContinueDisabled}
-          >
-            <lightning-icon
-              icon-name="utility:forward"
-              size="x-small"
-              class="btn-icon"
-            ></lightning-icon>
-            Continue to Field Mapping
-          </button>
+          <!-- Pagination bar -->
+          <div class="pg-bar">
+            <button class="pg-arrow" onclick={handlePrevPage} disabled={isFirstPage}>←</button>
+            <template for:each={pageButtons} for:item="p">
+              <button key={p.key} class={p.btnClass} data-page={p.page} onclick={handleGoPage} disabled={p.isEllipsis}>{p.label}</button>
+            </template>
+            <button class="pg-arrow" onclick={handleNextPage} disabled={isLastPage}>→</button>
+          </div>
+        </div>
+
+        <div class="soql-footer">
+          <button class="btn btn-ghost btn-sm" data-step="3" onclick={handleGoStep}>← Retour</button>
+          <button class="btn btn-primary btn-sm" onclick={handleContinue} disabled={isContinueDisabled}>Utiliser ces données · Continuer →</button>
         </div>
       </div>
-    </main>
+    </template>
+
+    <!-- SQL manual mode -->
+    <template if:true={isSqlMode}>
+      <div class="soql-panel">
+        <div class="soql-panel-title">Mode SQL — Requête manuelle</div>
+        <textarea class="soql-manual-editor" spellcheck="false" onchange={handleManualSoqlChange}></textarea>
+        <div class="soql-footer">
+          <button class="btn btn-outline btn-sm" onclick={toggleSqlMode}>↩ Mode visuel</button>
+          <button class="btn btn-primary btn-sm" onclick={runManualPreview}>▶ Exécuter l'aperçu</button>
+        </div>
+      </div>
+    </template>
+
   </div>
 
   <template if:true={isLoading}>
     <div class="spinner-overlay">
-      <lightning-spinner alternative-text="Loading"></lightning-spinner>
+      <div class="soql-spinner"></div>
     </div>
   </template>
 

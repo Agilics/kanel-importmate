@@ -259,6 +259,20 @@ export default class DryRunValidator extends LightningElement {
     return options;
   }
 
+  get modeOptionsWithSelected() {
+    return this.modeOptions.map(o => ({ ...o, isSelected: o.value === this.settings?.mode }));
+  }
+  get tabOptionsWithSelected() {
+    return this.tabOptions.map(o => ({ ...o, isSelected: o.value === this.settings?.defaultTab }));
+  }
+  get pageSizeOptionsWithSelected() {
+    const cur = String(this.settings?.pageSize ?? '5');
+    return this.pageSizeOptions.map(o => ({ ...o, isSelected: o.value === cur }));
+  }
+  get errorTypeOptionsWithSelected() {
+    return this.errorTypeOptions.map(o => ({ ...o, isSelected: o.value === this.selectedErrorType }));
+  }
+
   restoreSettings() {
     try {
       const raw = sessionStorage.getItem(SS_SETTINGS_KEY);
@@ -397,7 +411,7 @@ export default class DryRunValidator extends LightningElement {
 
   handleSettingChange(event) {
     const name = event.target.name;
-    let value = event.detail?.value;
+    let value = event.detail?.value ?? event.target.value;
     if (event.target.type === 'checkbox') value = event.target.checked;
     const next = { ...this.settings };
     if (name === 'fromLine') {
@@ -557,7 +571,8 @@ export default class DryRunValidator extends LightningElement {
     let end = Math.min(total, start + maxVisible - 1);
     if (end - start + 1 < maxVisible) start = Math.max(1, end - maxVisible + 1);
     for (let i = start; i <= end; i++) {
-      pages.push({ number: i, variant: i === this.currentPage ? 'brand' : 'neutral' });
+      const isActive = i === this.currentPage;
+      pages.push({ number: i, isActive, btnClass: isActive ? 'pg-btn pg-btn-active' : 'pg-btn' });
     }
     return pages;
   }
@@ -622,6 +637,11 @@ export default class DryRunValidator extends LightningElement {
     if (this.isImportCompleted) return 'success';
     if (this.isImportFailed) return 'error';
     return 'base';
+  }
+
+  get progressFillStyle() {
+    const pct = Math.min(100, Math.max(0, this.importProgressPercentage || 0));
+    return `width:${pct}%`;
   }
   get totalRecords() { return this.backendTotalRecords || this.validationResults?.totalRecords || 0; }
   get totalRecordsToProcess() { return this.initialTotalRecords > 0 ? this.initialTotalRecords : this.totalRecords; }

@@ -296,6 +296,46 @@
 /* Shared footer */
 .soql-footer { display:flex;justify-content:flex-end;gap:8px;padding-top:16px;margin-top:4px;border-top:1px solid var(--border-solid);align-items:center; }
 
+/* Source tabs (Upload vs Stored) */
+.src-tabs {
+  display: flex; gap: 3px;
+  margin: 20px 0 16px; padding: 4px;
+  background: var(--surface-solid); border: 1px solid var(--border-solid);
+  border-radius: var(--radius-sm); width: fit-content; box-shadow: var(--shadow-xs);
+}
+.src-tab {
+  padding: 7px 18px; border-radius: calc(var(--radius-sm) - 2px);
+  font-size: .82rem; font-weight: 600; cursor: pointer;
+  color: var(--muted); background: transparent; border: none; font-family: inherit;
+  transition: all .15s;
+}
+.src-tab.active { background: var(--grad-brand); color: #fff; box-shadow: 0 4px 12px var(--indigo-glow); }
+.src-tab:hover:not(.active) { color: var(--indigo); background: var(--indigo-soft); }
+
+/* Stored files list */
+.stored-file-list { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+.stored-file-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px; border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border-solid); background: var(--surface-solid);
+  cursor: pointer; transition: all .18s var(--ease-out); box-shadow: var(--shadow-xs);
+}
+.stored-file-row:hover { border-color: rgba(79,70,229,0.3); box-shadow: var(--shadow-sm); transform: translateX(2px); }
+.stored-file-row.sel  { border-color: var(--indigo); background: var(--indigo-soft); box-shadow: var(--shadow-glow); }
+.stored-file-check {
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--green); color: #fff;
+  display: none; place-items: center;
+  font-size: 11px; font-weight: 700; flex-shrink: 0;
+}
+.stored-file-row.sel .stored-file-check { display: grid; }
+.sf-icon { font-size: 22px; flex-shrink: 0; }
+.sf-name { font-size: .85rem; font-weight: 700; color: var(--text); }
+.sf-meta { font-size: .74rem; color: var(--muted); margin-top: 2px; }
+.sf-badge { font-size: .68rem; font-weight: 700; padding: 2px 8px; border-radius: var(--radius-pill); flex-shrink: 0; }
+.sfb-new { background: var(--green-soft); color: #059669; }
+.sfb-old { background: rgba(148,163,184,0.1); color: var(--muted); }
+
 /* File info */
 .file-info {
   display: none; margin-top: 14px;
@@ -387,26 +427,73 @@
     </div>
   </div>
 
-  <!-- Drop zone -->
-  <div class="drop-zone" id="drop-zone"
-    ondragover="event.preventDefault();this.classList.add('drag-over')"
-    ondragleave="this.classList.remove('drag-over')"
-    ondrop="handleDrop(event)"
-    onclick="document.getElementById('fileInput').click()">
-    <div class="drop-icon">⬆</div>
-    <div class="drop-title">Glissez votre fichier ici</div>
-    <div class="drop-sub">.csv .txt · max 10 Mo · UTF-8 recommandé</div>
-    <div class="drop-btn">Parcourir les fichiers</div>
-    <input type="file" id="fileInput" accept=".csv,.txt" style="display:none" onchange="showFile(this)"/>
-  </div>
-
-  <div class="file-info" id="file-info">
-    <span style="font-size:26px">📄</span>
-    <div>
-      <div class="file-info-name" id="file-name">contacts.csv</div>
-      <div class="file-info-meta" id="file-meta">245 Ko · 1 248 lignes détectées</div>
+  <!-- CSV source panel: Upload vs Stored files -->
+  <div id="src-tabs-section">
+    <div class="src-tabs">
+      <button class="src-tab active" onclick="srcTab('upload',this)">📤 Upload CSV</button>
+      <button class="src-tab" onclick="srcTab('stored',this)">📁 Fichiers enregistrés</button>
     </div>
-    <span style="margin-left:auto;font-size:18px;cursor:pointer;color:var(--muted-2)" onclick="clearFile()">✕</span>
+
+    <!-- Panel upload -->
+    <div id="panel-upload">
+      <div class="drop-zone" id="drop-zone"
+        ondragover="event.preventDefault();this.classList.add('drag-over')"
+        ondragleave="this.classList.remove('drag-over')"
+        ondrop="handleDrop(event)"
+        onclick="document.getElementById('fileInput').click()">
+        <div class="drop-icon">⬆</div>
+        <div class="drop-title">Glissez votre fichier ici</div>
+        <div class="drop-sub">.csv .txt · max 10 Mo · UTF-8 recommandé</div>
+        <div class="drop-btn">Parcourir les fichiers</div>
+        <input type="file" id="fileInput" accept=".csv,.txt" style="display:none" onchange="showFile(this)"/>
+      </div>
+      <div class="file-info" id="file-info">
+        <span style="font-size:26px">📄</span>
+        <div>
+          <div class="file-info-name" id="file-name">contacts.csv</div>
+          <div class="file-info-meta" id="file-meta">245 Ko · 1 248 lignes détectées</div>
+        </div>
+        <span style="margin-left:auto;font-size:18px;cursor:pointer;color:var(--muted-2)" onclick="clearFile()">✕</span>
+      </div>
+    </div>
+
+    <!-- Panel stored files -->
+    <div id="panel-stored" style="display:none">
+      <div class="stored-file-list">
+        <div class="stored-file-row" onclick="selectStoredFile(this,'contacts_q1_2026.csv','245 Ko · 1 248 lignes · Importé le 15 mars 2026')">
+          <span class="sf-icon">📄</span>
+          <div style="flex:1"><div class="sf-name">contacts_q1_2026.csv</div><div class="sf-meta">245 Ko · 1 248 lignes · Importé le 15 mars 2026</div></div>
+          <span class="sf-badge sfb-new">Récent</span>
+          <span class="stored-file-check">✓</span>
+        </div>
+        <div class="stored-file-row" onclick="selectStoredFile(this,'leads_export_2026.csv','890 Ko · 3 540 lignes · Importé le 2 mars 2026')">
+          <span class="sf-icon">📄</span>
+          <div style="flex:1"><div class="sf-name">leads_export_2026.csv</div><div class="sf-meta">890 Ko · 3 540 lignes · Importé le 2 mars 2026</div></div>
+          <span class="sf-badge sfb-new">Récent</span>
+          <span class="stored-file-check">✓</span>
+        </div>
+        <div class="stored-file-row" onclick="selectStoredFile(this,'accounts_full.csv','3.2 Mo · 12 440 lignes · Importé le 18 fév. 2026')">
+          <span class="sf-icon">📄</span>
+          <div style="flex:1"><div class="sf-name">accounts_full.csv</div><div class="sf-meta">3.2 Mo · 12 440 lignes · Importé le 18 fév. 2026</div></div>
+          <span class="sf-badge sfb-old">Archivé</span>
+          <span class="stored-file-check">✓</span>
+        </div>
+        <div class="stored-file-row" onclick="selectStoredFile(this,'opportunites_s1.csv','198 Ko · 876 lignes · Importé le 5 janv. 2026')">
+          <span class="sf-icon">📄</span>
+          <div style="flex:1"><div class="sf-name">opportunites_s1.csv</div><div class="sf-meta">198 Ko · 876 lignes · Importé le 5 janv. 2026</div></div>
+          <span class="sf-badge sfb-old">Archivé</span>
+          <span class="stored-file-check">✓</span>
+        </div>
+      </div>
+      <div class="file-info" id="stored-info">
+        <span style="font-size:26px">📄</span>
+        <div>
+          <div class="file-info-name" id="stored-name"></div>
+          <div class="file-info-meta" id="stored-meta"></div>
+        </div>
+        <span style="margin-left:auto;font-size:18px;cursor:pointer;color:var(--muted-2)" onclick="clearStoredFile()">✕</span>
+      </div>
+    </div>
   </div>
 
   <!-- ═══ SOQL BUILDER ═══ -->
@@ -602,11 +689,34 @@ LIMIT 5000</textarea>
 function selectSource(type) {
   document.getElementById('csv-card').classList.toggle('selected', type === 'csv');
   document.getElementById('soql-card').classList.toggle('selected', type === 'soql');
-  document.getElementById('drop-zone').style.display  = type === 'csv'  ? 'block' : 'none';
-  document.getElementById('soql-builder').style.display = type === 'soql' ? 'block' : 'none';
+  document.getElementById('src-tabs-section').style.display = type === 'csv'  ? 'block' : 'none';
+  document.getElementById('soql-builder').style.display      = type === 'soql' ? 'block' : 'none';
   document.getElementById('file-info').classList.remove('visible');
   document.getElementById('next-btn').href = type === 'soql' ? 'aurora-step3.html' : '#';
   if (type === 'soql') { document.getElementById('soql-builder').scrollIntoView({ behavior:'smooth', block:'start' }); }
+}
+
+// ── Source tabs: Upload vs Stored ─────────────────────────────────────────────
+function srcTab(type, btn) {
+  document.querySelectorAll('.src-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('panel-upload').style.display = type === 'upload' ? 'block' : 'none';
+  document.getElementById('panel-stored').style.display = type === 'stored' ? 'block' : 'none';
+}
+
+function selectStoredFile(el, name, meta) {
+  document.querySelectorAll('.stored-file-row').forEach(r => r.classList.remove('sel'));
+  el.classList.add('sel');
+  document.getElementById('stored-name').textContent = name;
+  document.getElementById('stored-meta').textContent = meta;
+  document.getElementById('stored-info').classList.add('visible');
+  document.getElementById('next-btn').href = 'aurora-step3.html';
+}
+
+function clearStoredFile() {
+  document.querySelectorAll('.stored-file-row').forEach(r => r.classList.remove('sel'));
+  document.getElementById('stored-info').classList.remove('visible');
+  document.getElementById('next-btn').href = '#';
 }
 
 // ── CSV helpers ───────────────────────────────────────────────────────────────

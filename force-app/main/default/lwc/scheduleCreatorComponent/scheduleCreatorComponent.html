@@ -15,26 +15,8 @@
       </p>
     </div>
     <div class="btn-header">
-      <button class="btn btn-primary">
-        <lightning-icon
-          icon-name="utility:add"
-          alternative-text="add"
-          class="custom-icon-add icons"
-          size="small"
-          title="add"
-        ></lightning-icon>
-        New Schedule
-      </button>
-      <button class="btn btn-execute">
-        <lightning-icon
-          icon-name="utility:play"
-          alternative-text="play"
-          class="custom-icon-play icons"
-          size="small"
-          title="play"
-        ></lightning-icon>
-        Execute Now
-      </button>
+      <button class="btn btn-primary">＋ New Schedule</button>
+      <button class="btn btn-execute">▶ Execute Now</button>
     </div>
   </div>
   <!-- text title with buttons end-->
@@ -43,13 +25,7 @@
       <div class="head p-1">
         <!-- icon & title-->
         <div class="card-header">
-          <!-- date icon -->
-          <lightning-icon
-            icon-name="utility:date_input"
-            alternative-text="date_input"
-            class="custom-icon-date_input"
-            title="date_input"
-          ></lightning-icon>
+          <span class="custom-icon-date_input">📅</span>
           <h2 class="card-title">Schedule Configuration</h2>
         </div>
       </div>
@@ -63,29 +39,60 @@
         <div class="settings">
           <h3 class="frequency-settings-title">Frequency Settings</h3>
           <div class="zone">
-            <!-- ComboBox for Select Frequency DAILY | WEEKLY | MONTHLY -->
-            <lightning-combobox
-              class="frequency-combobox rounded-input"
-              name="frequency"
-              label="Frequency"
-              id="frequency"
-              value={selectedFrequency}
-              options={picklistValues}
-              onchange={handleFrequencyChange}
-            ></lightning-combobox>
+            <select class="frequency-combobox rounded-input" id="frequency" onchange={handleFrequencyChange}>
+              <template for:each={picklistValuesWithSelected} for:item="o">
+                <option key={o.value} value={o.value} selected={o.isSelected}>{o.label}</option>
+              </template>
+            </select>
           </div>
 
           <!-- Next Run date time picker  on local area -->
           <div class="zone">
-            <lightning-input
+            <input
+              type="datetime-local"
               class="time-input rounded-input"
-              type="datetime"
-              label="Time"
               id="time"
               value={nextRun}
               onchange={handleNextRunChange}
-            >
-            </lightning-input>
+            />
+          </div>
+
+          <!-- Source de fichier — cartes radio (aligné sur aurora-step6) -->
+          <div class="zone file-source-zone">
+            <div class="file-source-label-uc">Source du fichier</div>
+            <div class="sched-file-opts">
+              <div class={fixedFileOptClass} data-value="fixed" onclick={handleFileSourceChange}>
+                <span class="sfo-icon">📄</span>
+                <div>
+                  <div class="sfo-title">Fichier fixe</div>
+                  <div class="sfo-sub">{selectedFileName}</div>
+                </div>
+              </div>
+              <div class={uploadFileOptClass} data-value="upload" onclick={handleFileSourceChange}>
+                <span class="sfo-icon">📤</span>
+                <div>
+                  <div class="sfo-title">Upload à chaque run</div>
+                  <div class="sfo-sub">L'utilisateur fournit un fichier à chaque exécution</div>
+                </div>
+              </div>
+            </div>
+
+            <template if:true={isFixedFile}>
+              <template if:true={hasStoredFiles}>
+                <select class="rounded-input" onchange={handleStoredFileSelect}>
+                  <option value="" disabled>Choisir un fichier...</option>
+                  <template for:each={storedFileOptionsWithSelected} for:item="o">
+                    <option key={o.value} value={o.value} selected={o.isSelected}>{o.label}</option>
+                  </template>
+                </select>
+              </template>
+              <template if:false={hasStoredFiles}>
+                <p class="no-files-msg">
+                  Aucun fichier CSV trouvé pour ce projet.
+                  Uploadez-en un à l'étape 2 d'abord.
+                </p>
+              </template>
+            </template>
           </div>
         </div>
         <!--end frequency settings-->
@@ -96,14 +103,7 @@
             <div class="bloc">
               <div class="card-info px-1">
                 <div class="info-header">
-                  <!-- Icon info -->
-                  <lightning-icon
-                    icon-name="utility:info"
-                    alternative-text="info"
-                    class="custom-icon-info"
-                    title="info"
-                  ></lightning-icon>
-                  <!--end Icon info -->
+                  <span class="custom-icon-info">ℹ</span>
                   <!-- title -->
                   <h4 class="info-title">Next Execution</h4>
                   <!--title end-->
@@ -140,40 +140,12 @@
       <!-- separator-->
       <div class="separator footer-separator plr-1"></div>
       <!-- footer -->
-      <div
-        style="
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 0 1.8rem 1rem;
-          margin: 2.5rem 0px 0px;
-        "
-      >
+      <div class="plr-1" style="display:flex;justify-content:space-between;align-items:center;padding-bottom:1.25rem;padding-top:1rem;">
         <div class="checkbox">
-          <!-- checkbox-->
-          <lightning-input type="checkbox" label="Send email notifications">
-          </lightning-input>
-          <lightning-input type="checkbox" label="Auto-retry on failure">
-          </lightning-input>
+          <label class="scc-check-label"><input type="checkbox" /> Send email notifications</label>
+          <label class="scc-check-label"><input type="checkbox" /> Auto-retry on failure</label>
         </div>
-
-        <!-- save schedule btn-->
-        <!-- Save & Continue Button -->
-        <button
-          type="button"
-          class="btn slds-text-align_center btn-primary"
-          style="
-            font-family: Inter;
-            font-weight: 500;
-            font-style: Medium;
-            font-size: 16px;
-            leading-trim: NONE;
-            line-height: 100%;
-            letter-spacing: 0%;
-            text-align: center;
-          "
-          onclick={handleAddSchedule}
-        >
+        <button type="button" class="btn btn-primary" onclick={handleAddSchedule}>
           Save Schedule
         </button>
       </div>
@@ -185,7 +157,7 @@
   </div>
 
   <!----->
-  <c-schedule-jobs-component></c-schedule-jobs-component>
+  <c-schedule-jobs-component id-project={projectId}></c-schedule-jobs-component>
   <!-- <h2 class="title">New schedule</h2>
   <div class="slds-grid slds-gutters slds-align_absolute-center">
     <section

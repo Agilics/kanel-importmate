@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ImportMate — Scheduling Architecture</title>
+  <style>
+    :root {
+      --bg:         #0B0F1C;
+      --surface:    #131929;
+      --surface-2:  #1A2240;
+      --border:     rgba(148,163,184,0.12);
+      --border-2:   rgba(148,163,184,0.22);
+      --indigo:     #4F46E5;
+      --indigo-2:   #6366F1;
+      --violet:     #7C3AED;
+      --green:      #10B981;
+      --coral:      #F43F5E;
+      --amber:      #F59E0B;
+      --cyan:       #06B6D4;
+      --text:       #E2E8F0;
+      --text-2:     #94A3B8;
+      --text-dim:   #64748B;
+      --mono:       'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+      --sans:       -apple-system, 'Inter', system-ui, sans-serif;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg:        #F0F4FF;
+        --surface:   #FFFFFF;
+        --surface-2: #EEF2FF;
+        --border:    rgba(79,70,229,0.12);
+        --border-2:  rgba(79,70,229,0.25);
+        --text:      #0F172A;
+        --text-2:    #475569;
+        --text-dim:  #94A3B8;
+      }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 13px;
+      line-height: 1.5;
+      padding: 32px 24px;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    .page-header { text-align: center; margin-bottom: 36px; }
+    .page-header h1 {
+      font-size: 1.6rem; font-weight: 800; letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--indigo-2), var(--violet));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .page-header p { font-size: .82rem; color: var(--text-2); margin-top: 6px; }
+
+    /* ── Main diagram grid ── */
+    .diagram { max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 6px; position: relative; }
+
+    /* ── Swimlane ── */
+    .lane { display: grid; grid-template-columns: 120px 1fr; gap: 0; position: relative; }
+    .lane-label {
+      display: flex; align-items: center; justify-content: flex-end; padding-right: 16px;
+      font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em;
+      color: var(--text-dim); white-space: nowrap;
+    }
+    .lane-body {
+      border: 1px solid var(--border); border-radius: 12px; background: var(--surface);
+      padding: 14px 18px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+    }
+    .lane-body.accent-indigo { border-color: rgba(79,70,229,0.3);  background: rgba(79,70,229,0.05); }
+    .lane-body.accent-violet { border-color: rgba(124,58,237,0.3); background: rgba(124,58,237,0.05); }
+    .lane-body.accent-green  { border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.04); }
+    .lane-body.accent-amber  { border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.04); }
+    .lane-body.accent-cyan   { border-color: rgba(6,182,212,0.3);  background: rgba(6,182,212,0.04); }
+
+    /* ── Box (node) ── */
+    .box {
+      display: flex; flex-direction: column; gap: 3px;
+      background: var(--surface-2); border: 1px solid var(--border-2);
+      border-radius: 8px; padding: 8px 12px; min-width: 130px;
+    }
+    .box-name { font-family: var(--mono); font-size: .75rem; font-weight: 600; color: var(--text); white-space: nowrap; }
+    .box-sub  { font-size: .68rem; color: var(--text-2); line-height: 1.4; }
+
+    .box.highlight        { border-color: var(--indigo);  background: rgba(79,70,229,0.1);  }
+    .box.highlight .box-name { color: #818CF8; }
+    .box.hl-violet        { border-color: var(--violet);  background: rgba(124,58,237,0.1); }
+    .box.hl-violet .box-name { color: #A78BFA; }
+    .box.hl-green         { border-color: var(--green);   background: rgba(16,185,129,0.1); }
+    .box.hl-green .box-name  { color: #34D399; }
+    .box.hl-amber         { border-color: var(--amber);   background: rgba(245,158,11,0.1); }
+    .box.hl-amber .box-name  { color: #FCD34D; }
+    .box.hl-coral         { border-color: var(--coral);   background: rgba(244,63,94,0.1);  }
+    .box.hl-coral .box-name  { color: #FB7185; }
+    .box.hl-cyan          { border-color: var(--cyan);    background: rgba(6,182,212,0.1);  }
+    .box.hl-cyan .box-name   { color: #67E8F9; }
+
+    /* ── Methods list inside box ── */
+    .methods { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
+    .method {
+      font-family: var(--mono); font-size: .65rem; padding: 2px 7px;
+      border-radius: 4px; border: 1px solid var(--border-2);
+      color: var(--text-2); background: var(--bg); white-space: nowrap;
+    }
+    .method.primary   { border-color: rgba(79,70,229,0.4);  color: #818CF8; }
+    .method.secondary { border-color: rgba(16,185,129,0.4); color: #34D399; }
+    .method.warn      { border-color: rgba(245,158,11,0.4); color: #FCD34D; }
+    .method.danger    { border-color: rgba(244,63,94,0.4);  color: #FB7185; }
+
+    /* ── Badge ── */
+    .badge { display: inline-flex; align-items: center; gap: 4px; font-size: .65rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+    .badge-indigo { background: rgba(79,70,229,0.15);  color: #818CF8; border: 1px solid rgba(79,70,229,0.3); }
+    .badge-green  { background: rgba(16,185,129,0.12); color: #34D399; border: 1px solid rgba(16,185,129,0.3); }
+    .badge-amber  { background: rgba(245,158,11,0.12); color: #FCD34D; border: 1px solid rgba(245,158,11,0.3); }
+
+    /* ── Vertical flow connector ── */
+    .vflow { display: grid; grid-template-columns: 120px 1fr; height: 22px; }
+    .vflow-body { display: flex; justify-content: flex-start; align-items: center; padding-left: 50px; }
+    .vflow-line { width: 2px; height: 100%; background: var(--border-2); margin-left: 30px; }
+
+    /* ── Divider with label ── */
+    .divider { display: grid; grid-template-columns: 120px 1fr; margin: 16px 0 8px; }
+    .divider-body { display: flex; align-items: center; gap: 10px; }
+    .divider-line { flex: 1; height: 1px; background: var(--border); }
+    .divider-label { font-size: .67rem; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; color: var(--text-dim); white-space: nowrap; }
+
+    /* ── Data source strategy ── */
+    .fallback-chain { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+    .fallback-step  { display: flex; align-items: center; gap: 4px; }
+    .fallback-num   { width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .65rem; font-weight: 800; flex-shrink: 0; }
+    .fallback-arrow { font-size: .85rem; color: var(--text-dim); margin: 0 2px; }
+
+    /* ── Data model ── */
+    .data-model { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .sobject { display: flex; flex-direction: column; gap: 2px; background: var(--surface-2); border: 1px solid var(--border-2); border-radius: 7px; padding: 7px 11px; }
+    .sobject-name   { font-family: var(--mono); font-size: .73rem; font-weight: 700; color: #C4B5FD; }
+    .sobject-fields { font-size: .63rem; color: var(--text-dim); line-height: 1.6; }
+    .rel-arrow      { font-size: 1rem; color: var(--text-dim); flex-shrink: 0; }
+
+    /* ── Side flows ── */
+    .side-flows {
+      max-width: 1100px; margin: 16px auto 0;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px;
+    }
+    .side-flow-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; }
+    .side-flow-title { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; }
+    .side-flow-steps { display: flex; flex-direction: column; gap: 4px; }
+    .side-flow-step { display: flex; align-items: center; gap: 6px; font-size: .72rem; color: var(--text-2); }
+    .step-icon { width: 20px; height: 20px; border-radius: 5px; display: flex; align-items: center; justify-content: center; font-size: .65rem; font-weight: 800; flex-shrink: 0; }
+    .step-arrow-v { width: 1px; height: 10px; background: var(--border-2); margin-left: 10px; }
+
+    /* ── Cross-cutting ── */
+    .crosscut { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; max-width: 1100px; margin-left: auto; margin-right: auto; }
+    .crosscut-card { flex: 1; min-width: 160px; background: var(--surface); border: 1px dashed var(--border-2); border-radius: 10px; padding: 10px 14px; }
+    .crosscut-title { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--text-dim); margin-bottom: 6px; }
+
+    /* ── Legend ── */
+    .legend { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; margin-top: 28px; padding-bottom: 32px; font-size: .7rem; color: var(--text-2); }
+    .leg-item { display: flex; align-items: center; gap: 5px; }
+    .leg-dot  { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  </style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>ImportMate — Scheduling Architecture</h1>
+  <p>Flow complet · LWC → Controller → Service → Scheduler → Batch Pipeline → Real-time Events</p>
+</div>
+
+<div class="diagram">
+
+  <!-- LWC -->
+  <div class="lane">
+    <div class="lane-label">LWC</div>
+    <div class="lane-body accent-indigo">
+      <div class="box highlight">
+        <span class="box-name">scheduleCreatorComponent</span>
+        <span class="box-sub">Form · Frequency + NextRun + FileSource</span>
+        <div class="methods">
+          <span class="method primary">addSchedule</span>
+          <span class="method primary">addScheduleWithFile</span>
+          <span class="method warn">reSchedule</span>
+          <span class="method">toggleSchedule</span>
+          <span class="method danger">deleteSchedule</span>
+        </div>
+      </div>
+      <div class="box highlight">
+        <span class="box-name">scheduleJobsComponent</span>
+        <span class="box-sub">List · Status · Toggle · Execute Now</span>
+        <div class="methods">
+          <span class="method">getSchedulesByProjectName</span>
+          <span class="method">getSchedulesWithExecutions</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="vflow"><div class="vflow-body"><div class="vflow-line"></div></div></div>
+
+  <!-- Controller -->
+  <div class="lane">
+    <div class="lane-label">Controller</div>
+    <div class="lane-body accent-violet">
+      <div class="box hl-violet" style="min-width:200px">
+        <span class="box-name">ScheduleController</span>
+        <span class="box-sub">@AuraEnabled · 11 methods</span>
+        <div class="methods">
+          <span class="method primary">addSchedule</span>
+          <span class="method primary">addScheduleWithFile</span>
+          <span class="method warn">reSchedule</span>
+          <span class="method">toggleSchedule</span>
+          <span class="method danger">deleteSchedule</span>
+          <span class="method">getScheduleById</span>
+          <span class="method">getSchedulesByProjectName</span>
+          <span class="method">getSchedulesWithExecutions</span>
+          <span class="method">getCompatibleSObjects</span>
+          <span class="method">getObjectFields</span>
+          <span class="method">getPickListValues</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="vflow"><div class="vflow-body"><div class="vflow-line"></div></div></div>
+
+  <!-- Service -->
+  <div class="lane">
+    <div class="lane-label">Service</div>
+    <div class="lane-body accent-indigo">
+      <div class="box highlight" style="min-width:180px">
+        <span class="box-name">ScheduleService</span>
+        <span class="box-sub">Business logic</span>
+        <div class="methods">
+          <span class="method primary">schedule()</span>
+          <span class="method warn">reSchedule()</span>
+          <span class="method secondary">executeSchedule()</span>
+          <span class="method">pauseSchedule()</span>
+          <span class="method">resumeSchedule()</span>
+          <span class="method danger">deleteScheduleById()</span>
+          <span class="method">buildCron(NextRun__c)</span>
+          <span class="method">recalculateNextRun()</span>
+          <span class="method">retrieveScheduleData()</span>
+          <span class="method">createStagingRows()</span>
+        </div>
+      </div>
+      <div class="box" style="min-width:160px">
+        <span class="box-name">System.schedule()</span>
+        <span class="box-sub">Salesforce native scheduler<br/>Cron: <code style="font-size:.63rem;color:#A78BFA">ss mm HH dd MM ? yyyy</code></span>
+        <div class="methods">
+          <span class="method primary">buildCron(NextRun__c)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="vflow"><div class="vflow-body"><div class="vflow-line"></div></div></div>
+
+  <!-- Repository -->
+  <div class="lane">
+    <div class="lane-label">Repository</div>
+    <div class="lane-body accent-cyan">
+      <div class="box hl-cyan" style="min-width:200px">
+        <span class="box-name">ScheduleRepository</span>
+        <span class="box-sub">SOQL / DML · with SecurityUtils</span>
+        <div class="methods">
+          <span class="method">addSchedule()</span>
+          <span class="method">deleteScheduleById()</span>
+          <span class="method">getScheduleById()</span>
+          <span class="method">findCronTriggerByName()</span>
+          <span class="method">findExecutionsBySchedule()</span>
+          <span class="method">getSchedulesWithExecutions()</span>
+          <span class="method">buildScheduleWrapper()</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="vflow"><div class="vflow-body"><div class="vflow-line"></div></div></div>
+
+  <!-- SObjects -->
+  <div class="lane">
+    <div class="lane-label">SObjects</div>
+    <div class="lane-body" style="background:var(--surface)">
+      <div class="data-model">
+        <div class="sobject">
+          <span class="sobject-name">Schedule__c</span>
+          <span class="sobject-fields">
+            Frequency__c (Daily/Weekly/Monthly)<br/>
+            NextRun__c (Datetime)<br/>
+            IsActive__c (Boolean)<br/>
+            CronJobId__c (String)<br/>
+            ContentDocumentId__c<br/>
+            Project__c (lookup)
+          </span>
+        </div>
+        <span class="rel-arrow">→</span>
+        <div class="sobject">
+          <span class="sobject-name">ImportProject__c</span>
+          <span class="sobject-fields">Name<br/>TargetObject__c<br/>Description__c</span>
+        </div>
+        <span class="rel-arrow">→</span>
+        <div class="sobject">
+          <span class="sobject-name">ImportExecution__c</span>
+          <span class="sobject-fields">Status__c<br/>Schedule__c (lookup)<br/>StartTime__c<br/>EndTime__c</span>
+        </div>
+        <span class="rel-arrow">→</span>
+        <div class="sobject">
+          <span class="sobject-name">StagingRow__c</span>
+          <span class="sobject-fields">RowData__c (JSON)<br/>Status__c<br/>Execution__c (lookup)<br/>ErrorMessage__c</span>
+        </div>
+        <span class="rel-arrow">→</span>
+        <div class="sobject">
+          <span class="sobject-name">CronTrigger</span>
+          <span class="sobject-fields">CronExpression<br/>State<br/>NextFireTime</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end main diagram -->
+
+<!-- RUNTIME DIVIDER -->
+<div class="divider" style="max-width:1100px;margin:24px auto 10px;">
+  <div></div>
+  <div class="divider-body">
+    <div class="divider-line"></div>
+    <span class="divider-label">Runtime execution flow (triggered by Salesforce scheduler)</span>
+    <div class="divider-line"></div>
+  </div>
+</div>
+
+<div class="diagram">
+
+  <!-- Scheduler -->
+  <div class="lane">
+    <div class="lane-label">Scheduler</div>
+    <div class="lane-body accent-amber">
+      <div class="box hl-amber">
+        <span class="box-name">CronTrigger</span>
+        <span class="box-sub">Salesforce fires at <strong>NextRun__c</strong></span>
+      </div>
+      <span style="color:var(--text-dim);font-size:1.1rem">→</span>
+      <div class="box hl-amber">
+        <span class="box-name">ScheduleJob</span>
+        <span class="box-sub">implements Schedulable<br/><code style="font-size:.63rem">execute(SchedulableContext)</code></span>
+      </div>
+      <span style="color:var(--text-dim);font-size:1.1rem">→</span>
+      <div class="box hl-amber">
+        <span class="box-name">ScheduleService</span>
+        <span class="box-sub">executeSchedule(scheduleId)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="vflow"><div class="vflow-body"><div class="vflow-line"></div></div></div>
+
+  <!-- Data source strategy -->
+  <div class="lane">
+    <div class="lane-label">Data Source</div>
+    <div class="lane-body" style="background:var(--surface);flex-direction:column;align-items:flex-start;gap:8px">
+      <span style="font-size:.72rem;font-weight:700;color:var(--text-2)">retrieveScheduleData() — 3-fallback strategy</span>
+      <div class="fallback-chain">
+        <div class="fallback-step">
+          <span class="fallback-num badge badge-indigo">1</span>
+          <div class="box highlight" style="min-width:0">
+            <span class="box-name" style="font-size:.7rem">Fixed CSV on Schedule</span>
+            <span class="box-sub">ContentDocumentId__c<br/>on Schedule__c</span>
+          </div>
+        </div>
+        <span class="fallback-arrow">→ if null →</span>
+        <div class="fallback-step">
+          <span class="fallback-num badge badge-amber">2</span>
+          <div class="box hl-amber" style="min-width:0">
+            <span class="box-name" style="font-size:.7rem">CSV on Project</span>
+            <span class="box-sub">Latest ContentVersion<br/>linked to ImportProject__c</span>
+          </div>
+        </div>
+        <span class="fallback-arrow">→ if null →</span>
+        <div class="fallback-step">
+          <span class="fallback-num badge badge-green">3</span>
+          <div class="box hl-green" style="min-width:0">
+            <span class="box-name" style="font-size:.7rem">SOQL Query</span>
+            <span class="box-sub">Query TargetObject__c<br/>from ImportProject__c</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="vflow"><div class="vflow-body"><div class="vflow-line"></div></div></div>
+
+  <!-- Batch pipeline -->
+  <div class="lane">
+    <div class="lane-label">Batch</div>
+    <div class="lane-body accent-green">
+      <div class="box hl-green">
+        <span class="box-name">createStagingRows()</span>
+        <span class="box-sub">Write rows to StagingRow__c</span>
+      </div>
+      <span style="color:var(--text-dim);font-size:1.1rem">→</span>
+      <div class="box hl-green">
+        <span class="box-name">PreProcessBatch</span>
+        <span class="box-sub">Database.executeBatch()<br/>Processes StagingRow__c</span>
+      </div>
+      <span style="color:var(--text-dim);font-size:1.1rem">→</span>
+      <div class="box hl-green">
+        <span class="box-name">ImportExecution__c</span>
+        <span class="box-sub">Status updated<br/>after batch completes</span>
+      </div>
+      <span style="color:var(--text-dim);font-size:1.1rem">→</span>
+      <div class="box hl-green">
+        <span class="box-name">recalculateNextRun()</span>
+        <span class="box-sub">+1d / +7d / +1m<br/>re-schedules via System.schedule()</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="vflow"><div class="vflow-body"><div class="vflow-line"></div></div></div>
+
+  <!-- Events -->
+  <div class="lane">
+    <div class="lane-label">Events</div>
+    <div class="lane-body accent-indigo">
+      <div class="box highlight">
+        <span class="box-name">PublisherService</span>
+        <span class="box-sub">publishExecutionStarted()</span>
+        <div class="methods"><span class="method primary">Platform Event</span></div>
+      </div>
+      <span style="color:var(--text-dim);font-size:1.1rem">→</span>
+      <div class="box highlight">
+        <span class="box-name">LWC @wire listener</span>
+        <span class="box-sub">Real-time UI update<br/>in scheduleJobsComponent</span>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end runtime diagram -->
+
+<!-- SIDE FLOWS -->
+<div class="side-flows">
+  <div class="side-flow-card">
+    <div class="side-flow-title" style="color:#818CF8">⟳ reSchedule Flow</div>
+    <div class="side-flow-steps">
+      <div class="side-flow-step"><div class="step-icon" style="background:rgba(79,70,229,0.15);color:#818CF8">LWC</div>reSchedule() called</div>
+      <div class="step-arrow-v"></div>
+      <div class="side-flow-step"><div class="step-icon" style="background:rgba(79,70,229,0.15);color:#818CF8">Svc</div>findCronTriggerByName() → System.abortJob()</div>
+      <div class="step-arrow-v"></div>
+      <div class="side-flow-step"><div class="step-icon" style="background:rgba(79,70,229,0.15);color:#818CF8">Svc</div>buildCron(new NextRun) → System.schedule()</div>
+      <div class="step-arrow-v"></div>
+      <div class="side-flow-step"><div class="step-icon" style="background:rgba(79,70,229,0.15);color:#818CF8">DB</div>Update CronJobId__c on Schedule__c</div>
+    </div>
+  </div>
+
+  <div class="side-flow-card">
+    <div class="side-flow-title" style="color:#FCD34D">⏸ toggleSchedule Flow</div>
+    <div class="side-flow-steps">
+      <div class="side-flow-step"><div class="step-icon" style="background:rgba(245,158,11,0.15);color:#FCD34D">LWC</div>Toggle active/inactive</div>
+      <div class="step-arrow-v"></div>
+      <div class="side-flow-step"><div class="step-icon" style="background:rgba(245,158,11,0.15);color:#FCD34D">Svc</div>if IsActive__c → pauseSchedule()</div>
+      <div class="step-arrow-v"></div>
+      <div class="side-flow-step"><div class="step-icon" style="background:rgba(245,158,11,0.15);color:#FCD34D">Svc</div>System.abortJob(CronJobId)</div>
+      <div class="step-arrow-v"></div>
+      <div class="side-flow-step"><div class="step-icon" style="background:rgba(245,158,11,0.15);color:#FCD34D">Svc</div>resumeSchedule() → System.schedule() again</div>
+    </div>
+  </div>
+
+  <div class="side-flow-card">
+    <div class="side-flow-title" style="color:#FB7185">✕ deleteSchedule Flow</div>
+    <div class="side-flow-steps">
+      <div class="side-flow-step"><div class="step-icon" style="background:rgba(244,63,94,0.15);color:#FB7185">LWC</div>deleteSchedule(id)</div>
+      <div class="step-arrow-v"></div>
+      <div class="side-flow-step"><div class="step-icon" style="background:rgba(244,63,94,0.15);color:#FB7185">Svc</div>System.abortJob(CronJobId) → abort CronTrigger</div>
+      <div class="step-arrow-v"></div>
+      <div class="side-flow-step"><div class="step-icon" style="background:rgba(244,63,94,0.15);color:#FB7185">DB</div>delete Schedule__c record</div>
+      <div class="step-arrow-v"></div>
+      <div class="side-flow-step"><div class="step-icon" style="background:rgba(244,63,94,0.15);color:#FB7185">LWC</div>UI refreshes job list</div>
+    </div>
+  </div>
+</div>
+
+<!-- CROSS-CUTTING -->
+<div class="crosscut">
+  <div class="crosscut-card">
+    <div class="crosscut-title">🔒 SecurityUtils</div>
+    <div style="font-size:.72rem;color:var(--text-2);line-height:1.6">
+      Guards all SOQL &amp; DML operations<br/>
+      FLS / object-level checks before every query<br/>
+      Applied in ScheduleRepository on every method
+    </div>
+  </div>
+  <div class="crosscut-card">
+    <div class="crosscut-title">⚠ Error Handling</div>
+    <div style="font-size:.72rem;color:var(--text-2);line-height:1.6">
+      <code style="font-family:var(--mono);font-size:.68rem;color:#FB7185">SchedulingException</code> — custom exception<br/>
+      <code style="font-family:var(--mono);font-size:.68rem;color:#FB7185">ErrorLogService.logException()</code> throughout<br/>
+      ShowToastEvent surfaced to LWC on error
+    </div>
+  </div>
+  <div class="crosscut-card">
+    <div class="crosscut-title">📦 ContentDocument</div>
+    <div style="font-size:.72rem;color:var(--text-2);line-height:1.6">
+      File upload via <code style="font-family:var(--mono);font-size:.68rem;color:#67E8F9">ContentDocumentController</code><br/>
+      Stored as ContentVersion / ContentDocument<br/>
+      ID stored in <code style="font-family:var(--mono);font-size:.68rem">Schedule__c.ContentDocumentId__c</code>
+    </div>
+  </div>
+  <div class="crosscut-card">
+    <div class="crosscut-title">🔄 Cron Pattern</div>
+    <div style="font-size:.72rem;color:var(--text-2);line-height:1.6">
+      <code style="font-family:var(--mono);font-size:.68rem;color:#A78BFA">buildCron(NextRun__c)</code> → <code style="font-family:var(--mono);font-size:.68rem">"ss mm HH dd MM ? yyyy"</code><br/>
+      <code style="font-family:var(--mono);font-size:.68rem;color:#A78BFA">recalculateNextRun()</code> advances by frequency<br/>
+      Daily +1d · Weekly +7d · Monthly +1m
+    </div>
+  </div>
+</div>
+
+<!-- LEGEND -->
+<div class="legend">
+  <div class="leg-item"><div class="leg-dot" style="background:#4F46E5"></div> LWC / Controller</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#7C3AED"></div> Service</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#06B6D4"></div> Repository / SOQL</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#F59E0B"></div> Salesforce Scheduler</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#10B981"></div> Batch Pipeline</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#F43F5E"></div> Delete / Abort</div>
+</div>
+
+</body>
+</html>

@@ -36,7 +36,7 @@ public with sharing class ScheduleService {
                 throw new SchedulingException('Next run date must be in the future');
             }
 
-            // GUARD : 1 seul schedule par projet
+            // Si un schedule existe déjà, le mettre à jour au lieu d'en créer un nouveau
             List<Schedule__c> existing = [
                 SELECT Id, Frequency__c, NextRun__c
                 FROM Schedule__c
@@ -44,11 +44,11 @@ public with sharing class ScheduleService {
                 LIMIT 1
             ];
             if (!existing.isEmpty()) {
-                throw new SchedulingException(
-                    'Ce projet a déjà une planification active (' +
-                    existing[0].Frequency__c + '). ' +
-                    'Supprimez-la avant d\'en créer une nouvelle.'
-                );
+                Map<String, Object> result = reSchedule(existing[0].Id, frequence, nextRun);
+                if (result.get('success') == true) {
+                    return existing[0].Id;
+                }
+                throw new SchedulingException(String.valueOf(result.get('error')));
             }
 
             Schedule__c newSchedule = new Schedule__c(
@@ -423,8 +423,13 @@ public with sharing class ScheduleService {
     }
 
     private static List<Map<String, String>> retrieveScheduleData(Schedule__c schedule) {
+        // 1. Fichier fixe attaché directement à ce schedule (mode "fichier fixe")
         List<Map<String, String>> data = getDataFromContentDocument(schedule.Id);
         if (data != null && !data.isEmpty()) return data;
+        // 2. Fichier uploadé à l'étape 2 et lié au projet
+        data = getDataFromContentDocument(schedule.Project__c);
+        if (data != null && !data.isEmpty()) return data;
+        // 3. Repli sur la requête SOQL de l'objet cible
         return getDataFromQuery(schedule.Project__c);
     }
 

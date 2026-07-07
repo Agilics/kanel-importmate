@@ -39,6 +39,7 @@ export const STEP_CONFIG = [
 export const PAGES = {
   DASHBOARD: 'dashboard',
   PROJECTS : 'projects',
+  HISTORY  : 'history',
   LOGS     : 'logs',
   SETTINGS : 'settings'
 };

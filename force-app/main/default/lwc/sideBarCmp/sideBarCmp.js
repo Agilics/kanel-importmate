@@ -26,9 +26,9 @@ export default class SideBarCmp extends LightningElement {
     @api showProjectDetails = false;
 
     quickActions = [
-        { icon: 'utility:refresh', label: QUICK_ACTION_RECENT_PROJECT },
-        { icon: 'utility:chart', label:    QUICK_ACTION_ANALYTICS },
-        { icon: 'utility:clock', label:    QUICK_ACTION_EXECUTION_HISTORY }
+        { icon: 'utility:refresh', iconEmoji: '↺', label: QUICK_ACTION_RECENT_PROJECT },
+        { icon: 'utility:chart',   iconEmoji: '📊', label: QUICK_ACTION_ANALYTICS },
+        { icon: 'utility:clock',   iconEmoji: '⏱', label: QUICK_ACTION_EXECUTION_HISTORY }
     ];
 
     get steps() {

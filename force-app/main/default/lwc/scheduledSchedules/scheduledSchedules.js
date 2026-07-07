@@ -12,6 +12,7 @@ import getSchedulesWithExecutionsByIdProject from "@salesforce/apex/ScheduleCont
 import toggleSchedule from "@salesforce/apex/ScheduleController.toggleSchedule";
 import LightningConfirm from 'lightning/confirm';
 import LOCALE from '@salesforce/i18n/lang';
+import TIMEZONE from '@salesforce/i18n/timeZone';
 
 
 //custom labels
@@ -52,7 +53,16 @@ const STATUS_LABELS = {
     Suspended: STATUS_SUSPENDED
 };
 export default class ScheduledSchedules extends LightningElement {
-    @api projectId;
+    _projectId;
+    @api
+    get projectId() { return this._projectId; }
+    set projectId(val) {
+        if (val !== this._projectId) {
+            this._projectId = val;
+            this.scheduledInfos = [];   // vider immédiatement pour ne pas afficher l'ancien projet
+            this.resetEditState();
+        }
+    }
     @track scheduledInfos = [];
     @track isLoading = false;
     @track error;
@@ -115,9 +125,12 @@ export default class ScheduledSchedules extends LightningElement {
 
     connectedCallback() {
         console.log('connectedCallback');
-        
-        this.resetEditState();        //  S'assurer que tout est nettoyé au démarrage
-
+        this.resetEditState();
+        this._refreshInterval = setInterval(() => {
+            if (this.wiredSchedulesResult) {
+                refreshApex(this.wiredSchedulesResult);
+            }
+        }, 30000);
     }
 
     resetEditState() {
@@ -129,8 +142,9 @@ export default class ScheduledSchedules extends LightningElement {
 
     disconnectedCallback() {
         console.log('disconnectedCallback');
-        
-        //  Nettoyer quand le composant est détaché
+        if (this._refreshInterval) {
+            clearInterval(this._refreshInterval);
+        }
         this.isEditingScheduleId = null;
         this.editingData = {};
         this.editingErrors = {};
@@ -151,7 +165,7 @@ export default class ScheduledSchedules extends LightningElement {
 
             return (wrapper.schedules || []).map(sch => {   
 
-                const specificExecutions = executions 
+                const specificExecutions = [...executions]
                     .sort((a, b) => new Date(b.StartTime__c) - new Date(a.StartTime__c));
 
                 const lastExecution = specificExecutions.length > 0 ? specificExecutions[0] : null;
@@ -176,7 +190,9 @@ export default class ScheduledSchedules extends LightningElement {
                     iconClass       : this.getIconClass(status),
                     boxIconClass    : this.getBoxIconClass(status),
                     iconActionName  : status === 'Suspended' ? 'utility:play' : 'utility:pause_alt',
+                    iconActionEmoji : status === 'Suspended' ? '▶' : '⏸',
                     iconStatusName  : this.getStatusIcon(status),
+                    iconStatusEmoji : this.getStatusEmoji(status),
                     targetObject    : sch.Project__r?.TargetObject__c || 'N/A',
                     projectName: sch.Project__r?.Name || 'Unknown Project',
                     isNotCompleted: this.isNotExecutionCompleted(status), // hide play  if Execution completed
@@ -514,13 +530,14 @@ export default class ScheduledSchedules extends LightningElement {
                 return '—';
             }
             
-            return new Intl.DateTimeFormat(LOCALE, { 
-                year : 'numeric', 
-                month: 'short', 
+            return new Intl.DateTimeFormat(LOCALE, {
+                year : 'numeric',
+                month: 'short',
                 day  : 'numeric',
                 hour  : '2-digit',
-                minute: '2-digit'
-            }).format(date); 
+                minute: '2-digit',
+                timeZone: TIMEZONE
+            }).format(date);
             
         } catch (error) {
             console.error('Error formatting date:', error);
@@ -548,12 +565,12 @@ export default class ScheduledSchedules extends LightningElement {
 
         const date = new Date(nextRunDate); 
 
-        const dayName = new Intl.DateTimeFormat(LOCALE, { weekday: 'long' }).format(date);
+        const dayName = new Intl.DateTimeFormat(LOCALE, { weekday: 'long', timeZone: TIMEZONE }).format(date);
         const fullDate = new Intl.DateTimeFormat(LOCALE, {
-            weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'
+            weekday: 'long', day: '2-digit', month: 'long', year: 'numeric', timeZone: TIMEZONE
         }).format(date);
         const timeString = new Intl.DateTimeFormat(LOCALE, {
-            hour: 'numeric', minute: '2-digit'
+            hour: 'numeric', minute: '2-digit', timeZone: TIMEZONE
         }).format(date);
 
         switch (frequency) {
@@ -601,6 +618,22 @@ export default class ScheduledSchedules extends LightningElement {
             'Failed': 'utility:error'
         };
         return icons[status] || 'utility:info';
+    }
+
+    getStatusEmoji(status) {
+        const emojis = {
+            'Pending'   : '⏳',
+            'InProgress': '↺',
+            'Completed' : '✓',
+            'Suspended' : '⏸',
+            'Failed'    : '⚠'
+        };
+        return emojis[status] || 'ℹ';
+    }
+
+    handleNextRunNativeChange(event) {
+        this.editNextRun = event.target.value;
+        this.nextRunError = '';
     }
 
     getErrorMessage(error) {

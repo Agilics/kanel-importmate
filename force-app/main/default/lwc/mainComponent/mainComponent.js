@@ -32,6 +32,7 @@ export default class MainComponent extends LightningElement {
   showCreatorSection = false;
   showDashboard = true;
   showExecutionHistory = false;
+  showAnalytics = false;
   isLoading = false;
   activePage = PAGES.DASHBOARD;
   
@@ -138,8 +139,8 @@ export default class MainComponent extends LightningElement {
   }
 
   navigateToSelectedDataSource(event) {
+      this.clearWizardState();
       this.currentProject = event.detail;
-      this.selectedDataSource = null;
       this.currentStep = STEPS.DATA_SOURCE;
       this.updateUIForStep(this.currentStep);
   }
@@ -286,6 +287,18 @@ export default class MainComponent extends LightningElement {
       this.targetObject = '';
   }
 
+  clearWizardState() {
+      this.csvData           = null;
+      this.selectedDataSource = null;
+      this.mappingHeadersCsv  = '';
+      this.mappingTargetObject = '';
+      try {
+          window.sessionStorage.removeItem('IM_contentDocumentId');
+          window.sessionStorage.removeItem('IM_csvRows');
+          window.sessionStorage.removeItem('IM_sourceColumnsCsv');
+      } catch (e) { /* sessionStorage unavailable */ }
+  }
+
   handleProjectNameChange(event) {
       this.projectName = event.detail;
       this.markAsUnsaved();
@@ -312,6 +325,8 @@ export default class MainComponent extends LightningElement {
   }
 
   openNewProject() {
+      this.clearWizardState();
+      this.currentProject = null;
       this.currentStep = STEPS.PROJECT_SETUP;
       this.showDashboard = false;
       this.showCreatorSection = true;
@@ -457,6 +472,11 @@ export default class MainComponent extends LightningElement {
               this.currentStep = STEPS.PROJECT_SETUP;
               this.updateUIForStep(this.currentStep);
               break;
+          case PAGES.HISTORY:
+              this.showExecutionHistory = true;
+              this.showDashboard = false;
+              this.showCreatorSection = false;
+              break;
           case PAGES.LOGS:
               this.showToast(
                   TOAST_VARIANTS.INFO,
@@ -501,6 +521,7 @@ export default class MainComponent extends LightningElement {
 
   handleProjectSelect(event) {
       const project = event.detail.project || event.detail;
+      this.clearWizardState();
       this.currentProject = project;
       this.currentStep = STEPS.DATA_SOURCE;
       this.updateUIForStep(this.currentStep);
@@ -597,9 +618,11 @@ export default class MainComponent extends LightningElement {
           case 'Historique des executions':
               this.showExecutionHistory = true;
               this.showDashboard = false;
+              this.showAnalytics = false;
               this.showCreatorSection = false;
               break;
           case 'Recent Projects':
+              this.showAnalytics = false;
               this.showDashboard = true;
               this.showExecutionHistory = false;
               this.showCreatorSection = false;
@@ -607,11 +630,9 @@ export default class MainComponent extends LightningElement {
               this.updateUIForStep(this.currentStep);
               break;
           case 'Analytics':
-              this.showToast(
-                  TOAST_VARIANTS.INFO,
-                  'Analytics feature coming soon',
-                  TOAST_VARIANTS.INFO
-              );
+              this.showAnalytics = true;
+              this.showDashboard = false;
+              this.showExecutionHistory = false;
               break;
           default:
               break;
@@ -624,6 +645,7 @@ export default class MainComponent extends LightningElement {
           this.activePage = PAGES.DASHBOARD;
           this.showCreatorSection = false;
           this.showExecutionHistory = false;
+          this.showAnalytics = false;
           this.selectedDataSource = null;
           // Rafraîchir après que le DOM soit mis à jour
         Promise.resolve().then(() => this.refreshDashboard());

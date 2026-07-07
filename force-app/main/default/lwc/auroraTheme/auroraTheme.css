@@ -1,0 +1,56 @@
+/*
+ * Aurora Design System — CSS custom properties
+ * Import this in any LWC component CSS with:
+ *   @import 'c/auroraTheme';
+ *
+ * All variables are defined on :host so they cascade through the shadow DOM
+ * of the importing component.
+ */
+:host {
+  /* Brand colors */
+  --aurora-indigo:        #4F46E5;
+  --aurora-indigo-hi:     #6366F1;
+  --aurora-indigo-soft:   rgba(79, 70, 229, 0.08);
+  --aurora-indigo-glow:   rgba(79, 70, 229, 0.25);
+  --aurora-violet:        #7C3AED;
+  --aurora-coral:         #F43F5E;
+  --aurora-coral-soft:    rgba(244, 63, 94, 0.08);
+  --aurora-green:         #10B981;
+  --aurora-green-soft:    rgba(16, 185, 129, 0.10);
+  --aurora-amber:         #F59E0B;
+  --aurora-amber-soft:    rgba(245, 158, 11, 0.10);
+
+  /* Gradients */
+  --aurora-grad-brand:    linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+  --aurora-grad-green:    linear-gradient(135deg, #10B981 0%, #06B6D4 100%);
+
+  /* Text */
+  --aurora-text:          #0F172A;
+  --aurora-text-2:        #1E293B;
+  --aurora-muted:         #64748B;
+  --aurora-muted-2:       #94A3B8;
+
+  /* Surfaces */
+  --aurora-surface:       rgba(255, 255, 255, 0.78);
+  --aurora-surface-solid: #FFFFFF;
+  --aurora-bg:            #F8FAFF;
+
+  /* Borders */
+  --aurora-border:        rgba(148, 163, 184, 0.20);
+  --aurora-border-solid:  #E2E8F0;
+
+  /* Shadows */
+  --aurora-shadow-xs:     0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04);
+  --aurora-shadow-sm:     0 2px 8px rgba(79, 70, 229, 0.06), 0 1px 3px rgba(15, 23, 42, 0.04);
+  --aurora-shadow-md:     0 4px 20px rgba(79, 70, 229, 0.10), 0 2px 6px rgba(15, 23, 42, 0.05);
+  --aurora-shadow-glow:   0 0 0 3px rgba(79, 70, 229, 0.08), 0 4px 20px rgba(79, 70, 229, 0.15);
+  --aurora-shadow-xl:     0 20px 60px rgba(79, 70, 229, 0.18), 0 8px 24px rgba(15, 23, 42, 0.08);
+
+  /* Radius */
+  --aurora-radius-sm:     10px;
+  --aurora-radius:        16px;
+  --aurora-radius-pill:   999px;
+
+  /* Motion */
+  --aurora-ease-out:      cubic-bezier(0.16, 1, 0.30, 1);
+}

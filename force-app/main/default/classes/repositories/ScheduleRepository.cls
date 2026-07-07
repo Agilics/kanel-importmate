@@ -173,18 +173,16 @@ public with sharing class ScheduleRepository {
             List<Schedule__c> schedules = getSchedulesByprojectId(projectId);
             if (schedules.isEmpty()) return new List<ScheduleService.ScheduleWrapper>();
 
-            List<ImportExecution__c> filteredExecutions = [
-                SELECT Id, Status__c, Type__c, Phase__c,
-                       StartTime__c, EndTime__c,
-                       TotalRecords__c, ProcessedRecords__c, FailedRecords__c,
-                       ApexJobId__c, RetryCount__c, MaxRetries__c,
-                       Project__c
-                FROM ImportExecution__c
-                WHERE Project__c = :projectId
-                AND   Status__c  = :executionStatus
-
-                ORDER BY StartTime__c DESC
-            ];
+            String execQuery =
+                'SELECT Id, Status__c, Type__c, Phase__c, ' +
+                'StartTime__c, EndTime__c, TotalRecords__c, ProcessedRecords__c, FailedRecords__c, ' +
+                'ApexJobId__c, RetryCount__c, MaxRetries__c, Project__c ' +
+                'FROM ImportExecution__c WHERE Project__c = :projectId';
+            if (!String.isBlank(executionStatus)) {
+                execQuery += ' AND Status__c = :executionStatus';
+            }
+            execQuery += ' ORDER BY StartTime__c DESC';
+            List<ImportExecution__c> filteredExecutions = Database.query(execQuery);
 
             List<ScheduleService.ScheduleWrapper> wrappers = new List<ScheduleService.ScheduleWrapper>();
             for (Schedule__c schedule : schedules) {
