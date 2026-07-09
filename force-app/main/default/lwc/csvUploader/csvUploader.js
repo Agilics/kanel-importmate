@@ -257,7 +257,9 @@ export default class CsvUploader extends LightningElement {
                 ...e,
                 statusIcon    : STATUS_ICON[e.status] || '🕐',
                 statusClass   : 'exec-status exec-' + (e.status || 'Pending').toLowerCase(),
-                summary       : (e.totalRecords || 0) + ' enregistrements' + (e.failedRecords ? ` · ${e.failedRecords} erreurs` : '')
+                summary       : (e.totalRecords || 0) + ' enregistrements' + (e.failedRecords ? ` · ${e.failedRecords} erreurs` : ''),
+                typeLabel     : e.isScheduled ? 'Planifié' : 'Manuel',
+                typeClass     : 'exec-type-badge ' + (e.isScheduled ? 'exec-type--scheduled' : 'exec-type--manual')
             }));
         })
         .catch(err => { console.error('[CsvUploader] loadStoredFiles error', err); })
@@ -268,6 +270,14 @@ export default class CsvUploader extends LightningElement {
         const docId    = event.currentTarget?.dataset?.id;
         const fileName = event.currentTarget?.dataset?.name;
         if (!docId) return;
+
+        // Effacer l'état d'exécution sauvegardé pour que la page d'exécution reparte à zéro
+        try {
+            const pid = this._projectId || 'no_project';
+            sessionStorage.removeItem(`IM_executionCmpRun_v1_${pid}`);
+            sessionStorage.removeItem('IM_executionCmpRun_last_v1');
+        } catch (e) { /* ignore */ }
+
         this.selectedStoredFileDocId = docId;
         this.storedParseError = '';
         // Refresh row classes

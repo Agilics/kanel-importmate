@@ -227,21 +227,23 @@
       </div>
     </template>
 
-    <!-- ══ Execution card: schedule / run mode ══ -->
-    <div class="execution-content">
-      <div class="execution-card">
-        <c-execution-card
-          selected-frequency={frequency}
-          next-run={nextRun}
-          show-scheduled-card={showScheduledExecution}
-          onfrequencychange={handleFrequencyChange}
-          onnextrunchange={handleNextRunChange}
-          onmodechange={handleModeChange}
-          onbatchsizechange={handleBatchSizeChange}
-          onsendnotification={handleSendNotificationChange}>
-        </c-execution-card>
+    <!-- ══ Execution card: schedule / run mode — masqué si import en cours ou terminé ══ -->
+    <template if:true={showExecutionSetupCard}>
+      <div class="execution-content">
+        <div class="execution-card">
+          <c-execution-card
+            selected-frequency={frequency}
+            next-run={nextRun}
+            show-scheduled-card={showScheduledExecution}
+            onfrequencychange={handleFrequencyChange}
+            onnextrunchange={handleNextRunChange}
+            onmodechange={handleModeChange}
+            onbatchsizechange={handleBatchSizeChange}
+            onsendnotification={handleSendNotificationChange}>
+          </c-execution-card>
+        </div>
       </div>
-    </div>
+    </template>
 
     <!-- ══ Import results (error table) ══ -->
     <template if:true={showImportResults}>

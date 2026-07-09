@@ -95,6 +95,7 @@ public with sharing class ContentDocumentController {
         @AuraEnabled public Integer failedRecords { get; set; }
         @AuraEnabled public String  startTime     { get; set; }
         @AuraEnabled public String  type          { get; set; }
+        @AuraEnabled public Boolean isScheduled   { get; set; }
     }
 
     @AuraEnabled(cacheable=true)
@@ -116,6 +117,7 @@ public with sharing class ContentDocumentController {
                 w.failedRecords= e.FailedRecords__c != null ? Integer.valueOf(e.FailedRecords__c) : 0;
                 w.startTime    = e.StartTime__c != null ? e.StartTime__c.format('dd/MM/yyyy HH:mm') : '—';
                 w.type         = e.Type__c;
+                w.isScheduled  = 'Scheduled'.equals(e.Type__c);
                 result.add(w);
             }
             return result;

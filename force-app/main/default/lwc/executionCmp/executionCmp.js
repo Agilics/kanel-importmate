@@ -50,8 +50,20 @@ const SS_RUN_STATE_LAST_KEY = 'IM_executionCmpRun_last_v1';
 
 export default class ExecutionCmp extends LightningElement {
   _projectId = '';
-  @api csvData;
+  _csvData = null;
   @api projectName;
+
+  @api
+  get csvData() { return this._csvData; }
+  set csvData(value) {
+    const previous = this._csvData;
+    this._csvData = value;
+    // New file loaded while an execution is displayed → reset so the user starts fresh
+    if (value && value !== previous && (this.currentExecutionId || this.showImportResults)) {
+      this.resetExecutionState();
+      this.clearRunState();
+    }
+  }
   
   @track isLoading = false;
 
@@ -185,6 +197,9 @@ export default class ExecutionCmp extends LightningElement {
 
   get canRefreshStatus() { return !this.isLoading && !this.isCheckingStatus && !!this.projectId; }
   get hasImportLogs() { return this.importLogs.length > 0; }
+
+  // Masquer le formulaire de configuration (scheduling/immediate) quand un import est en cours ou terminé
+  get showExecutionSetupCard() { return !this.showImportProgress && !this.showImportResults; }
 
   get isStartImportDisabled() { return this.isLoading || !this.projectId; }
   get isScheduleImportDisabled() { return this.isLoading || !this.projectId; }
@@ -351,7 +366,8 @@ export default class ExecutionCmp extends LightningElement {
   startScheduleWatch() {
     if (this.scheduleWatchTimer) return;
     this.scheduleWatchTimer = window.setInterval(async () => {
-      if (this.currentExecutionId) { this.stopScheduleWatch(); return; }
+      // Stop only when an execution is actively running (not done)
+      if (this.currentExecutionId && !this.showImportResults) { this.stopScheduleWatch(); return; }
       await this.checkForActiveScheduledExecution();
     }, SCHEDULE_WATCH_INTERVAL_MS);
   }
@@ -364,12 +380,18 @@ export default class ExecutionCmp extends LightningElement {
   }
 
   async checkForActiveScheduledExecution() {
-    if (this.currentExecutionId || !this.projectId || this.isRestoringState) return;
+    if (!this.projectId || this.isRestoringState) return;
+    // Don't interfere with an actively running execution
+    if (this.currentExecutionId && !this.showImportResults) return;
     try {
       const details = await getLatestProjectExecution({ projectId: this.projectId });
       if (!details?.success || !details?.hasExecution) return;
       const status = (details.status || '').toLowerCase();
-      if (status === 'inprogress' || status === 'pending') {
+      // Pending = en attente de l'heure planifiée → ne rien faire, le CronJob s'en chargera
+      // Seulement InProgress déclenche l'affichage de la progression
+      if (status === 'inprogress') {
+        // Reset if a previous completed execution was displayed
+        if (this.currentExecutionId) this.resetExecutionState();
         this.currentExecutionId = details.executionId;
         this.showImportProgress = true;
         this.applyExecutionDetails(details);
@@ -481,10 +503,12 @@ export default class ExecutionCmp extends LightningElement {
       const currentProjectId = (this.projectId || '').trim();
       const executionProjectId = (details.projectId || '').trim();
       if (currentProjectId && executionProjectId && currentProjectId !== executionProjectId) return false;
+      const status = (details.status || '').toLowerCase();
+      // Don't adopt Pending — it hasn't started yet; the schedule watch will detect InProgress
+      if (status === 'pending') return false;
       this.currentExecutionId = details.executionId || executionId;
       this.showImportProgress = true;
       this.applyExecutionDetails(details);
-      const status = (details.status || '').toLowerCase();
       const isDone = status === 'completed' || status === 'failed' || status === 'cancelled';
       if (isDone) {
         this.stopExecutionPolling();
@@ -504,10 +528,12 @@ export default class ExecutionCmp extends LightningElement {
     try {
       const details = await getLatestProjectExecution({ projectId: this.projectId });
       if (!details?.success || !details?.hasExecution) return;
+      const status = (details.status || '').toLowerCase();
+      // Don't adopt Pending — it hasn't started yet; the schedule watch will detect InProgress
+      if (status === 'pending') return;
       this.currentExecutionId = details.executionId;
       this.showImportProgress = true;
       this.applyExecutionDetails(details);
-      const status = (details.status || '').toLowerCase();
       const isDone = status === 'completed' || status === 'failed' || status === 'cancelled';
       if (isDone) {
         this.stopExecutionPolling();
@@ -558,8 +584,11 @@ export default class ExecutionCmp extends LightningElement {
     const eventExecutionId = payload.ExecutionId__c;
     if (!eventExecutionId) return;
 
-    // Unknown execution — check if it belongs to our project (detects scheduled runs instantly)
-    if (!this.currentExecutionId) {
+    const currentIsDone = this.showImportResults ||
+      ['completed', 'failed', 'cancelled'].includes((this.importStatus || '').toLowerCase());
+
+    // No active execution, or previous one is done → try to adopt the new one
+    if (!this.currentExecutionId || currentIsDone) {
       this.adoptExecutionFromEvent(eventExecutionId, payload);
       return;
     }
@@ -575,6 +604,12 @@ export default class ExecutionCmp extends LightningElement {
 
   async adoptExecutionFromEvent(executionId, initialPayload) {
     if (!executionId || !this.projectId || this.isRestoringState || this.isAdoptingExecution) return;
+    // If a completed execution is displayed, reset before adopting the new one
+    if (this.currentExecutionId) {
+      const currentIsDone = ['completed', 'failed', 'cancelled'].includes((this.importStatus || '').toLowerCase());
+      if (!currentIsDone) return; // Don't interrupt an active execution
+      this.resetExecutionState();
+    }
     this.isAdoptingExecution = true;
     try {
       const details = await getExecutionDetails({ executionId });
@@ -624,6 +659,8 @@ export default class ExecutionCmp extends LightningElement {
         this.isLoading = false;
         this.showImportResults = true;
         await this.loadErrorCount(executionId);
+        // Resume watching so the next scheduled execution is detected automatically
+        this.startScheduleWatch();
       }
     } catch (error) { console.error('Polling error:', error); }
   }

@@ -36,7 +36,8 @@ public with sharing class ScheduleService {
                 throw new SchedulingException('Next run date must be in the future');
             }
 
-            // Si un schedule existe déjà, le mettre à jour au lieu d'en créer un nouveau
+            // Si un schedule ACTIF (non terminé) existe déjà, le mettre à jour
+            // Un schedule terminé (Completed/Failed/Cancelled) doit générer un nouveau record
             List<Schedule__c> existing = [
                 SELECT Id, Frequency__c, NextRun__c
                 FROM Schedule__c
@@ -44,11 +45,24 @@ public with sharing class ScheduleService {
                 LIMIT 1
             ];
             if (!existing.isEmpty()) {
-                Map<String, Object> result = reSchedule(existing[0].Id, frequence, nextRun);
-                if (result.get('success') == true) {
-                    return existing[0].Id;
+                List<ImportExecution__c> lastExec = [
+                    SELECT Status__c FROM ImportExecution__c
+                    WHERE Project__c = :projectId
+                    ORDER BY CreatedDate DESC
+                    LIMIT 1
+                ];
+                String lastStatus = lastExec.isEmpty() ? '' : (lastExec[0].Status__c != null ? lastExec[0].Status__c : '');
+                Set<String> terminalStatuses = new Set<String>{ 'Completed', 'Failed', 'Cancelled' };
+
+                if (!terminalStatuses.contains(lastStatus)) {
+                    // Schedule encore actif (Pending/InProgress/Suspended) → mettre à jour
+                    Map<String, Object> result = reSchedule(existing[0].Id, frequence, nextRun);
+                    if (result.get('success') == true) {
+                        return existing[0].Id;
+                    }
+                    throw new SchedulingException(String.valueOf(result.get('error')));
                 }
-                throw new SchedulingException(String.valueOf(result.get('error')));
+                // Statut terminal → on tombe dans la création d'un nouveau schedule ci-dessous
             }
 
             Schedule__c newSchedule = new Schedule__c(
@@ -65,7 +79,7 @@ public with sharing class ScheduleService {
                 Id.valueOf(savedSchedule.Project__c),
                 String.valueOf(savedSchedule.Id),
                 Constants.EXECUTION_STATUS_PENDING,
-                Constants.EXECUTION_TYPE_IMPORT,
+                Constants.EXECUTION_TYPE_SCHEDULED,
                 '',
                 0
             );

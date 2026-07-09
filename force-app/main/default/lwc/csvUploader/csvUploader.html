@@ -106,7 +106,7 @@
           </template>
         </template>
 
-        <!-- Historique des exécutions passées -->
+        <!-- Historique des exécutions passées (manuelles + planifiées) -->
         <template if:true={hasExecutionHistory}>
           <div class="card-title slds-m-top_medium">Historique des imports</div>
           <div class="stored-file-list">
@@ -117,6 +117,7 @@
                   <div class="sf-name">{ex.startTime}</div>
                   <div class="sf-meta">{ex.summary}</div>
                 </div>
+                <span class={ex.typeClass}>{ex.typeLabel}</span>
                 <span class={ex.statusClass}>{ex.status}</span>
               </div>
             </template>

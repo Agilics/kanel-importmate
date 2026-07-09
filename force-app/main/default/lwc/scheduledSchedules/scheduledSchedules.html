@@ -35,18 +35,23 @@
                                         <span class={schedule.badgeStatusClass}>{schedule.statusLabel}</span>
                                     </td>
                                     <td class="actions">
-                                        <template if:false={schedule.isNotCompleted}>
+                                        <!-- Pause/Resume : visible seulement si Pending ou Suspended -->
+                                        <template if:true={schedule.canToggle}>
                                             <button type="button" class="action-icon-btn"
                                                 data-id={schedule.id} data-running={schedule.isRunning}
-                                                onclick={handleToggleStatus} title="Toggle Status">
+                                                onclick={handleToggleStatus}
+                                                disabled={schedule.toggleBtnDisabled}
+                                                title="Toggle Status">
                                                 {schedule.iconActionEmoji}
                                             </button>
                                         </template>
+                                        <!-- Édition : désactivé si Completed ou InProgress -->
                                         <button type="button" class="action-icon-btn" title="Edit"
                                             data-id={schedule.id} onclick={handleEditClick}
-                                            disabled={isLoading}>✏</button>
+                                            disabled={schedule.editBtnDisabled}>✏</button>
                                         <button type="button" class="action-icon-btn action-icon-btn--delete"
-                                            data-id={schedule.id} onclick={handleDeleteSchedule} title="Delete">🗑</button>
+                                            data-id={schedule.id} onclick={handleDeleteSchedule}
+                                            disabled={isLoading} title="Delete">🗑</button>
                                     </td>
                                 </template>
 

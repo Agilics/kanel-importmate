@@ -301,6 +301,7 @@ public with sharing class ScheduleRepository {
 
     /**
      * Construire les wrappers Schedule + Executions
+     * Chaque schedule ne reçoit QUE ses propres exécutions (ApexJobId__c = schedule.Id)
      */
     private static List<ScheduleService.ScheduleWrapper> buildScheduleWrapper(
         List<Schedule__c> schedules,
@@ -311,13 +312,37 @@ public with sharing class ScheduleRepository {
             !SecurityUtils.isAccessible(Schema.ImportExecution__c.SObjectType)) {
             return results;
         }
+
+        // Indexer toutes les exécutions par leur ApexJobId__c (= Id du Schedule__c pour les planifiées)
+        Map<String, List<ImportExecution__c>> executionsByScheduleId = new Map<String, List<ImportExecution__c>>();
+        for (List<ImportExecution__c> execs : executionsByProject.values()) {
+            for (ImportExecution__c exec : execs) {
+                if (String.isNotBlank(exec.ApexJobId__c)) {
+                    String key = exec.ApexJobId__c;
+                    if (!executionsByScheduleId.containsKey(key)) {
+                        executionsByScheduleId.put(key, new List<ImportExecution__c>());
+                    }
+                    executionsByScheduleId.get(key).add(exec);
+                }
+            }
+        }
+
         for (Schedule__c schedule : schedules) {
             ScheduleService.ScheduleWrapper wrapper = new ScheduleService.ScheduleWrapper();
             wrapper.schedules = new List<Schedule__c>{ schedule };
             wrapper.project   = schedule.Project__r;
-            wrapper.importExecutions = executionsByProject.containsKey(schedule.Project__c)
-                ? executionsByProject.get(schedule.Project__c)
-                : new List<ImportExecution__c>();
+
+            // Chercher les exécutions liées à CE schedule (format 18 puis 15 caractères)
+            String sId18 = String.valueOf(schedule.Id);
+            String sId15 = sId18.left(15);
+
+            List<ImportExecution__c> schedExecs = executionsByScheduleId.containsKey(sId18)
+                ? executionsByScheduleId.get(sId18)
+                : (executionsByScheduleId.containsKey(sId15)
+                    ? executionsByScheduleId.get(sId15)
+                    : new List<ImportExecution__c>());
+
+            wrapper.importExecutions = schedExecs;
             results.add(wrapper);
         }
         return results;

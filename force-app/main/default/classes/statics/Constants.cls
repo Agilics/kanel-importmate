@@ -73,8 +73,9 @@ public with sharing class Constants {
 
     public static final String EXECUTION_TYPE_VALIDATION = 'Validation';
     public static final String EXECUTION_TYPE_TRANSFORMATION = 'Transformation';
-    public static final String EXECUTION_TYPE_IMPORT = 'Import';
-    public static final String EXECUTION_TYPE_UPDATE = 'Update';
+    public static final String EXECUTION_TYPE_IMPORT     = 'Import';
+    public static final String EXECUTION_TYPE_SCHEDULED  = 'Scheduled';
+    public static final String EXECUTION_TYPE_UPDATE     = 'Update';
     public static final String EXECUTION_TYPE_DELETE = 'Delete';
     public static final String EXECUTION_TYPE_UPSERT = 'Upsert';    
 

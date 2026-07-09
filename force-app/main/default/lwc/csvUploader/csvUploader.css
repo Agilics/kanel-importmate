@@ -269,3 +269,8 @@
 .exec-failed     { background: #fee2e2; color: #991b1b; }
 .exec-inprogress { background: #dbeafe; color: #1e40af; }
 .exec-pending    { background: #f3f4f6; color: #6b7280; }
+
+/* ══ Execution type badges (Planifié / Manuel) ══ */
+.exec-type-badge { font-size: .68rem; font-weight: 600; padding: 2px 7px; border-radius: 20px; white-space: nowrap; }
+.exec-type--scheduled { background: rgba(124,58,237,0.10); color: #6D28D9; }
+.exec-type--manual    { background: rgba(79,70,229,0.08);  color: #4338CA; }

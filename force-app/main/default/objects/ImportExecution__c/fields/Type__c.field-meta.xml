@@ -35,6 +35,11 @@
                 <default>false</default>
                 <label>Insert</label>
             </value>
+            <value>
+                <fullName>Scheduled</fullName>
+                <default>false</default>
+                <label>Scheduled</label>
+            </value>
         </valueSetDefinition>
     </valueSet>
 </CustomField>
