@@ -244,6 +244,16 @@ public with sharing class ScheduleServiceTest {
         Test.stopTest();
     }
 
+     @IsTest
+    static void testDeleteScheduleByIdEmpty() {
+        Test.startTest();
+        try {
+            ScheduleService.deleteScheduleById('');
+        } catch (Exception e) {
+            Assert.isTrue(String.isNotBlank(e.getMessage()));
+        }
+        Test.stopTest();
+    }
     
    
     @IsTest
@@ -306,8 +316,7 @@ public with sharing class ScheduleServiceTest {
         String type ='Import';
         Schedule__c schedule = TestDataFactory.createSchedule();
        
-        String projectId = String.valueOf(schedule.Project__c);
-        String apexJobId =  String.valueOf(schedule.Id); 
+        String projectId = String.valueOf(schedule.Project__c); 
 
         ImportExecution__c execution = TestDataFactory.createImportExecutionWithSchedule(schedule.Project__c,status,type,String.valueOf(schedule.Id) );
 
@@ -322,7 +331,38 @@ public with sharing class ScheduleServiceTest {
       
     }
 
+    @isTest
+    static void testExecuteScheduleSuccess() {
 
+        ImportProject__c project = TestDataFactory.createImportProject('Account');
+
+        String data = EncodingUtil.base64Encode(
+            Blob.valueOf('Name\nAcme')
+        );
+
+        ContentDocumentService.saveFileToProject(
+            data,
+            'test.csv',
+            project.Id
+        );
+
+        Schedule__c schedule = new Schedule__c(
+            Project__c = project.Id,
+            Frequency__c = 'DAILY',
+            NextRun__c = System.now().addDays(1)
+        );
+
+        insert schedule;
+
+        Test.startTest();
+
+        ScheduleJobResult result =
+            ScheduleService.executeSchedule(schedule.Id);
+
+        Test.stopTest();
+
+        Assert.isTrue(result.isSuccess());
+    }
 
 // Dans ScheduleControllerTest
     @IsTest

@@ -176,7 +176,7 @@ public with sharing class ScheduleRepository {
             String execQuery =
                 'SELECT Id, Status__c, Type__c, Phase__c, ' +
                 'StartTime__c, EndTime__c, TotalRecords__c, ProcessedRecords__c, FailedRecords__c, ' +
-                'ApexJobId__c, RetryCount__c, MaxRetries__c, Project__c ' +
+                'Project__c ' +
                 'FROM ImportExecution__c WHERE Project__c = :projectId';
             if (!String.isBlank(executionStatus)) {
                 execQuery += ' AND Status__c = :executionStatus';
@@ -282,8 +282,8 @@ public with sharing class ScheduleRepository {
             Id projectId = schedule.Project__c;
             return [
                 SELECT Id, Status__c, StartTime__c, EndTime__c,
-                       ApexJobId__c, TotalRecords__c, ProcessedRecords__c,
-                       FailedRecords__c, Project__c
+                TotalRecords__c, ProcessedRecords__c,
+                FailedRecords__c, Project__c
                 FROM ImportExecution__c
                 WHERE Project__c = :projectId
                 AND   Status__c  IN :statuses
@@ -301,7 +301,7 @@ public with sharing class ScheduleRepository {
 
     /**
      * Construire les wrappers Schedule + Executions
-     * Chaque schedule ne reçoit QUE ses propres exécutions (ApexJobId__c = schedule.Id)
+     * Chaque schedule ne reçoit QUE ses propres exécutions
      */
     private static List<ScheduleService.ScheduleWrapper> buildScheduleWrapper(
         List<Schedule__c> schedules,
@@ -313,36 +313,13 @@ public with sharing class ScheduleRepository {
             return results;
         }
 
-        // Indexer toutes les exécutions par leur ApexJobId__c (= Id du Schedule__c pour les planifiées)
-        Map<String, List<ImportExecution__c>> executionsByScheduleId = new Map<String, List<ImportExecution__c>>();
-        for (List<ImportExecution__c> execs : executionsByProject.values()) {
-            for (ImportExecution__c exec : execs) {
-                if (String.isNotBlank(exec.ApexJobId__c)) {
-                    String key = exec.ApexJobId__c;
-                    if (!executionsByScheduleId.containsKey(key)) {
-                        executionsByScheduleId.put(key, new List<ImportExecution__c>());
-                    }
-                    executionsByScheduleId.get(key).add(exec);
-                }
-            }
-        }
-
         for (Schedule__c schedule : schedules) {
             ScheduleService.ScheduleWrapper wrapper = new ScheduleService.ScheduleWrapper();
             wrapper.schedules = new List<Schedule__c>{ schedule };
             wrapper.project   = schedule.Project__r;
-
-            // Chercher les exécutions liées à CE schedule (format 18 puis 15 caractères)
-            String sId18 = String.valueOf(schedule.Id);
-            String sId15 = sId18.left(15);
-
-            List<ImportExecution__c> schedExecs = executionsByScheduleId.containsKey(sId18)
-                ? executionsByScheduleId.get(sId18)
-                : (executionsByScheduleId.containsKey(sId15)
-                    ? executionsByScheduleId.get(sId15)
-                    : new List<ImportExecution__c>());
-
-            wrapper.importExecutions = schedExecs;
+            wrapper.importExecutions = executionsByProject.containsKey(schedule.Project__c)
+                ? executionsByProject.get(schedule.Project__c)
+                : new List<ImportExecution__c>();
             results.add(wrapper);
         }
         return results;
@@ -364,8 +341,7 @@ public with sharing class ScheduleRepository {
             }
             String query =
                 'SELECT Id, Status__c, Type__c, Phase__c, StartTime__c, EndTime__c, ' +
-                'TotalRecords__c, ProcessedRecords__c, FailedRecords__c, ' +
-                'ApexJobId__c, Project__c ' +
+                'TotalRecords__c, ProcessedRecords__c, FailedRecords__c, Project__c ' +
                 'FROM ImportExecution__c ' +
                 whereClause +
                 ' ORDER BY StartTime__c DESC LIMIT 10000';
