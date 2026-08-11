@@ -1,0 +1,23 @@
+<template>
+    <section class="modal-backdrop">
+        <div class="modal">
+            <header class="modal__header">
+                <h2>
+                    📋 Logs d'exécution — {scheduleName}
+                    <template if:true={isInProgress}>
+                        <span class="log-live-badge"><span class="log-live-dot"></span>LIVE</span>
+                    </template>
+                </h2>
+                <button type="button" class="modal-close-btn" onclick={handleClose} title="Fermer">✕</button>
+            </header>
+
+            <div class="modal__body">
+                <c-import-results execution-id={executionId}></c-import-results>
+            </div>
+
+            <footer class="modal__footer">
+                <button type="button" class="btn btn-secondary" onclick={handleClose}>Fermer</button>
+            </footer>
+        </div>
+    </section>
+</template>

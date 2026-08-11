@@ -5,6 +5,7 @@
  */
 import { LightningElement, track, api, wire } from 'lwc';
 import { refreshApex } from '@salesforce/apex';
+import { subscribe, unsubscribe, onError } from 'lightning/empApi';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import LightningConfirm from 'lightning/confirm';
 
@@ -55,7 +56,42 @@ export default class ScheduleJobsComponent extends LightningElement {
     @track editNextRun    = '';
     @track isSaving       = false;
 
+    // Modale "Configurer" (critères de fichier, mode Criteria)
+    @track showCriteriaModal      = false;
+    @track criteriaModalScheduleId = null;
+
+    // Modale de consultation des logs d'exécution
+    @track showLogsModal          = false;
+    @track logsModalExecutionId   = null;
+    @track logsModalScheduleName  = '';
+
     _wiredResult;
+    _empSubscription = null;
+    _liveRefreshTimer = null;
+
+    // Rafraîchissement live : une exécution planifiée qui démarre/se termine en arrière-plan
+    // doit se refléter ici sans rechargement manuel de page.
+    connectedCallback() {
+        onError((error) => console.error('[ScheduleJobsComponent] EMP API error', JSON.stringify(error)));
+        if (!this._empSubscription) {
+            subscribe('/event/ImportStatusEvent__e', -1, () => this.queueLiveRefresh())
+                .then((response) => { this._empSubscription = response; })
+                .catch((error) => console.error('[ScheduleJobsComponent] subscribe error', JSON.stringify(error)));
+        }
+    }
+
+    disconnectedCallback() {
+        if (this._empSubscription) { unsubscribe(this._empSubscription, () => {}); this._empSubscription = null; }
+        if (this._liveRefreshTimer) { clearTimeout(this._liveRefreshTimer); this._liveRefreshTimer = null; }
+    }
+
+    queueLiveRefresh() {
+        if (this._liveRefreshTimer) clearTimeout(this._liveRefreshTimer);
+        this._liveRefreshTimer = setTimeout(() => {
+            this._liveRefreshTimer = null;
+            if (this._wiredResult) refreshApex(this._wiredResult);
+        }, 800);
+    }
 
     // ── Computed ──────────────────────────────────────────────────────────────
     get frequencyOptions() { return FREQUENCY_OPTIONS; }
@@ -102,6 +138,10 @@ export default class ScheduleJobsComponent extends LightningElement {
         return this.schedules.reduce((acc, s) => acc + (s.totalRecord || 0), 0);
     }
 
+    // Le wire est cacheable=true (requis pour @wire) : sur un nouveau montage du composant,
+    // le cache client peut renvoyer un résultat périmé (ex. une planification créée depuis
+    // csvUploader n'apparaît pas tout de suite ici). On force un rafraîchissement réel dès
+    // que le premier résultat (même périmé) est arrivé.
     // ── Wire ──────────────────────────────────────────────────────────────────
     @wire(getSchedulesByExecutionStatusAndIdProject, {
         status: '$selectedStatus',
@@ -109,6 +149,17 @@ export default class ScheduleJobsComponent extends LightningElement {
     })
     wiredSchedules(result) {
         this._wiredResult = result;
+
+        // Le wire est cacheable=true (requis pour @wire) : sur un nouveau montage du composant
+        // (ex. navigation depuis un autre onglet du wizard après avoir programmé un fichier
+        // ailleurs), le cache client peut renvoyer un résultat périmé. On force donc, dès la
+        // toute première résolution du wire (même périmée), un rafraîchissement réel — fait
+        // ici plutôt que dans renderedCallback pour ne pas dépendre du timing de rendu.
+        if (!this._forcedInitialRefreshDone) {
+            this._forcedInitialRefreshDone = true;
+            refreshApex(result);
+        }
+
         const { data, error } = result;
         if (data) {
             this.schedules = this._mapWrappers(data);
@@ -187,7 +238,11 @@ export default class ScheduleJobsComponent extends LightningElement {
                     pauseBtnClass,
                     nextRunClass,
                     iconAction   : isActive ? 'utility:pause' : 'utility:play',
-                    toggleLabel  : isActive ? 'Mettre en pause' : 'Reprendre'
+                    toggleLabel  : isActive ? 'Mettre en pause' : 'Reprendre',
+                    dataSourceMode : sch.DataSourceMode__c || 'Inherit',
+                    matchedFileName: lastExec?.MatchedFileName__c || '—',
+                    lastExecutionId: lastExec?.Id || null,
+                    logsBtnDisabled: !lastExec?.Id
                 };
             });
         });
@@ -208,6 +263,34 @@ export default class ScheduleJobsComponent extends LightningElement {
 
     handleSearchFieldChange(event) {
         this.projectName = event.target.value ?? event.detail?.value ?? '';
+    }
+
+    handleOpenCriteriaModal(event) {
+        this.criteriaModalScheduleId = event.currentTarget.dataset.id;
+        this.showCriteriaModal = true;
+    }
+
+    handleCloseCriteriaModal() {
+        this.showCriteriaModal = false;
+        this.criteriaModalScheduleId = null;
+    }
+
+    handleCriteriaSaved() {
+        refreshApex(this._wiredResult);
+    }
+
+    handleOpenLogsModal(event) {
+        const scheduleId = event.currentTarget.dataset.id;
+        const info = this.schedules.find(s => s.id === scheduleId);
+        if (!info || !info.lastExecutionId) return;
+        this.logsModalExecutionId = info.lastExecutionId;
+        this.logsModalScheduleName = info.projectName;
+        this.showLogsModal = true;
+    }
+
+    handleCloseLogsModal() {
+        this.showLogsModal = false;
+        this.logsModalExecutionId = null;
     }
 
     handleEditSchedule(event) {
@@ -339,6 +422,7 @@ export default class ScheduleJobsComponent extends LightningElement {
             Suspended : 'Suspendu',
             Cancelled : 'Annulé',
             Completed : 'Terminé',
+            CompletedWithErrors: 'Terminé avec erreurs',
             Failed    : 'Échoué',
             InProgress: 'En cours',
             Pending   : 'En attente'

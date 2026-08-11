@@ -1,105 +1,98 @@
-import { LightningElement, track,api, wire } from "lwc";
+import { LightningElement, track, api, wire } from "lwc";
 import SCHEDULE_OBJECT from "@salesforce/schema/Schedule__c";
 import { ShowToastEvent } from "lightning/platformShowToastEvent";
 import FREQUENCY_FIELD from "@salesforce/schema/Schedule__c.Frequency__c";
-import getPickListValues      from "@salesforce/apex/ScheduleController.getPickListValues";
-import addSchedule            from "@salesforce/apex/ScheduleController.addSchedule";
-import addScheduleWithFile    from "@salesforce/apex/ScheduleController.addScheduleWithFile";
-import getProjectFiles        from "@salesforce/apex/ContentDocumentController.getProjectFiles";
+import getPickListValues       from "@salesforce/apex/ScheduleController.getPickListValues";
+import addSchedule             from "@salesforce/apex/ScheduleController.addSchedule";
+import addScheduleWithCriteria from "@salesforce/apex/ScheduleController.addScheduleWithCriteria";
+import hasAllFilesMapped from "@salesforce/apex/FieldMappingController.hasAllFilesMapped";
+import getAllMappingsByProjectId from "@salesforce/apex/FieldMappingController.getAllMappingsByProjectId";
+import getProjectFiles         from "@salesforce/apex/ContentDocumentController.getProjectFiles";
+import getFileContent          from "@salesforce/apex/ContentDocumentController.getFileContent";
+import { detectDelimiter, parseCsvLine } from "c/utility";
 
-const SS_DOC_KEY = 'IM_contentDocumentId';
+// Numérotation des champs (badges ronds ①②③④…) — le panneau Critères (fileCriteriaBuilder)
+// poursuit la séquence à partir de 5 quand le mode Criteria est sélectionné.
+const CRITERIA_START_NUMBER = 5;
 
 export default class ScheduleCreatorComponent extends LightningElement {
-  @track executionDate;
-  @api projectId;
-  nextExecution;
+  @api targetObject;
+  @api projectName;
+  @api csvData;
+  @api sourceColumnsCsv;
+
   @track nextRun;
   @track picklistValues = [];
   @track selectedFrequency = "Daily";
-  @track showSchedule;
+  @track isSaving = false;
 
-  // ===== Source de fichier =====
-  @track selectedFileSource        = 'fixed';   // 'fixed' | 'upload'
-  @track selectedContentDocumentId = '';
-  @track storedFiles               = [];
-  @track isLoadingFiles            = false;
+  // ===== Source des données (Inherit | Criteria) =====
+  @track selectedDataSourceMode = 'Inherit';   // 'Inherit' | 'Criteria'
+  @track criteriaPattern        = '';
+  @track criteriaSelectionMode  = 'MostRecent';
 
-  get isFixedFile()     { return this.selectedFileSource === 'fixed'; }
-  get hasStoredFiles()  { return this.storedFiles.length > 0; }
+  criteriaStartNumber = CRITERIA_START_NUMBER;
 
-  get fixedFileOptClass()  { return 'sched-file-opt' + (this.isFixedFile  ? ' sched-file-opt--active' : ''); }
-  get uploadFileOptClass() { return 'sched-file-opt' + (!this.isFixedFile ? ' sched-file-opt--active' : ''); }
+  // ===== Mapping des champs (obligatoire avant de programmer un import) =====
+  @track hasFieldMapping   = false;
+  @track isCheckingMapping = false;
+  @track showMappingModal  = false;
+  @track projectFiles         = [];
+  @track isLoadingProjectFiles = false;
+  @track selectedMappingFileId = '';
+  @track loadedCsvData         = null;
+  @track loadedSourceColumnsCsv = '';
 
-  get selectedFileName() {
-    if (!this.selectedContentDocumentId) return 'Aucun fichier sélectionné';
-    const f = this.storedFiles.find(sf => sf.contentDocumentId === this.selectedContentDocumentId);
-    return f ? f.fileName + (f.fileSizeLabel ? ' · ' + f.fileSizeLabel : '') : 'Fichier sélectionné';
+  // ===== Transformations (bouton activé une fois le mapping complet) =====
+  @track showTransformationModal = false;
+
+  _projectId;
+  @api
+  get projectId() { return this._projectId; }
+  set projectId(value) {
+    if (value && value !== this._projectId) {
+      this._projectId = value;
+      this.checkFieldMapping();
+    }
   }
 
-  get fileSourceOptions() {
-    return [
-      { label: 'Fichier fixe — même CSV à chaque exécution', value: 'fixed' },
-      { label: 'Upload à chaque run — nouveau fichier par exécution', value: 'upload' }
-    ];
+  get isInheritMode()  { return this.selectedDataSourceMode !== 'Criteria'; }
+  get isCriteriaMode() { return this.selectedDataSourceMode === 'Criteria'; }
+
+  get inheritOptClass()  { return 'sched-file-opt' + (this.isInheritMode  ? ' sched-file-opt--active' : ''); }
+  get criteriaOptClass() { return 'sched-file-opt' + (this.isCriteriaMode ? ' sched-file-opt--active' : ''); }
+  get saveButtonLabel()  { return this.isSaving ? 'Enregistrement…' : 'Enregistrer la planification'; }
+  // Le fichier ciblé doit être mappé avant de pouvoir programmer son import — sans quoi
+  // chaque exécution planifiée n'insérerait que des enregistrements vides.
+  get isSaveDisabled()   { return this.isSaving || this.isCheckingMapping || !this.hasFieldMapping; }
+  get saveButtonTitle() {
+    if (this.hasFieldMapping || this.isCheckingMapping) return '';
+    return 'Tous les fichiers du projet doivent être mappés avant de programmer l\'import';
   }
 
-  get storedFileOptions() {
-    if (!this.storedFiles.length) return [{ label: 'Aucun fichier disponible', value: '' }];
-    return this.storedFiles.map(f => ({
-      label: f.fileName + (f.fileSizeLabel ? ' (' + f.fileSizeLabel + ')' : ''),
-      value: f.contentDocumentId
-    }));
+  get mappingBadgeClass() {
+    return 'mapping-badge ' + (this.hasFieldMapping ? 'mapping-badge--ok' : 'mapping-badge--warn');
+  }
+  get mappingBadgeLabel() {
+    if (this.isCheckingMapping) return 'Vérification…';
+    return this.hasFieldMapping ? '✅ Tous les fichiers mappés' : '⚠️ Fichier(s) non mappé(s)';
+  }
+
+  handleDataSourceModeChange(event) {
+    const val = event.currentTarget?.dataset?.value || event.detail?.value;
+    if (val) this.selectedDataSourceMode = val;
+  }
+
+  handleCriteriaPatternChange(event) {
+    this.criteriaPattern = event.detail.value;
+  }
+
+  handleCriteriaSelectionModeChange(event) {
+    this.criteriaSelectionMode = event.detail.value;
   }
 
   get picklistValuesWithSelected() {
     return (this.picklistValues || []).map(o => ({ ...o, isSelected: o.value === this.selectedFrequency }));
-  }
-
-  get storedFileOptionsWithSelected() {
-    return this.storedFileOptions.map(o => ({ ...o, isSelected: o.value === this.selectedContentDocumentId }));
-  }
-
-  connectedCallback() {
-    // Lire l'Id du fichier uploadé à l'étape 2 — il sera validé après le chargement des fichiers du projet
-    try {
-      const storedDocId = window.sessionStorage.getItem(SS_DOC_KEY);
-      if (storedDocId) this._pendingDocId = storedDocId;
-    } catch (e) { console.debug('[ScheduleCreator] sessionStorage unavailable', e); }
-    if (this.projectId) this.loadProjectFiles();
-  }
-
-  loadProjectFiles() {
-    this.isLoadingFiles = true;
-    getProjectFiles({ projectId: this.projectId })
-      .then(data => {
-        this.storedFiles = (data || []).map(f => ({
-          ...f,
-          fileSizeLabel: f.fileSize ? Math.round(f.fileSize / 1024) + ' Ko' : ''
-        }));
-        // Valider que le fichier en attente appartient bien à ce projet
-        const pendingMatch = this._pendingDocId
-          ? this.storedFiles.find(f => f.contentDocumentId === this._pendingDocId)
-          : null;
-        if (pendingMatch) {
-          this.selectedContentDocumentId = this._pendingDocId;
-        } else if (this.storedFiles.length) {
-          this.selectedContentDocumentId = this.storedFiles[0].contentDocumentId;
-        } else {
-          this.selectedContentDocumentId = '';
-        }
-        this._pendingDocId = null;
-      })
-      .catch(err => { console.error('[ScheduleCreator] loadProjectFiles error', err); })
-      .finally(() => { this.isLoadingFiles = false; });
-  }
-
-  handleFileSourceChange(event) {
-    const val = event.currentTarget?.dataset?.value || event.detail?.value;
-    if (val) this.selectedFileSource = val;
-  }
-
-  handleStoredFileSelect(event) {
-    this.selectedContentDocumentId = event.target.value ?? event.detail?.value ?? '';
   }
 
   //Récupération des valeurs de la liste de sélection de Frequency__c(Daily | Weekly | Monthly)
@@ -113,7 +106,6 @@ export default class ScheduleCreatorComponent extends LightningElement {
         label,
         value
       }));
-      console.log(data);
     } else if (error) {
       console.error(
         "Erreur lors de la récupération des valeurs de picklist : ",
@@ -138,54 +130,226 @@ export default class ScheduleCreatorComponent extends LightningElement {
     this.nextRun = event.target.value;
   }
 
+  // Convertit le format "yyyy-MM-ddThh:mm" de l'input datetime-local en ISO pour Apex
+  convertToISOFormat(dateTimeString) {
+    if (!dateTimeString) return null;
+    const date = new Date(dateTimeString);
+    if (isNaN(date.getTime())) {
+      console.error('[ScheduleCreator] Invalid date:', dateTimeString);
+      return null;
+    }
+    return date.toISOString();
+  }
+
+  // ===== Mapping des champs =====
+  async checkFieldMapping() {
+    if (!this._projectId) { this.hasFieldMapping = false; return; }
+    this.isCheckingMapping = true;
+    try {
+      this.hasFieldMapping = await hasAllFilesMapped({ projectId: this._projectId });
+    } catch (err) {
+      console.error('[ScheduleCreator] checkFieldMapping error', err);
+      this.hasFieldMapping = false;
+    } finally {
+      this.isCheckingMapping = false;
+    }
+  }
+
+  // csvData/sourceColumnsCsv viennent normalement de l'étape Data Source (session en cours) —
+  // mais l'étape Scheduling peut être ouverte directement, sans qu'aucun fichier n'ait jamais
+  // été chargé en mémoire. Dans ce cas on bascule sur le fichier choisi dans la liste ci-dessous.
+  get effectiveCsvData() { return this.csvData || this.loadedCsvData; }
+  get effectiveSourceColumnsCsv() { return this.sourceColumnsCsv || this.loadedSourceColumnsCsv; }
+  get hasEffectiveCsvData() { return !!this.effectiveCsvData; }
+  get hasProjectFiles() { return this.projectFiles.length > 0; }
+
+  async handleOpenMappingModal() {
+    this.showMappingModal = true;
+    // Si un fichier est déjà en mémoire (session en cours), pas besoin de faire choisir un
+    // fichier — le field mapper peut mapper directement dessus.
+    if (!this.csvData) {
+      await this.loadProjectFilesWithMappingStatus();
+    }
+  }
+
+  async handleCloseMappingModal() {
+    this.showMappingModal = false;
+    // Réactive automatiquement (via hasFieldMapping) le bouton "Ajouter une transformation"
+    // dès que le mapping est complet — pas de popup, juste le déblocage du bouton.
+    await this.checkFieldMapping();
+  }
+
+  // Un mapping doit exister avant de pouvoir définir des transformations sur ses champs.
+  get isTransformationDisabled() { return !this.hasFieldMapping; }
+  get transformationButtonTitle() {
+    return this.hasFieldMapping ? '' : 'Mappez d\'abord les champs avant de configurer une transformation';
+  }
+
+  handleOpenTransformationModal() {
+    if (!this.hasFieldMapping) return;
+    this.showTransformationModal = true;
+  }
+
+  handleCloseTransformationModal() {
+    this.showTransformationModal = false;
+  }
+
+  async loadProjectFilesWithMappingStatus() {
+    if (!this._projectId) return;
+    this.isLoadingProjectFiles = true;
+    try {
+      const [files, mappings] = await Promise.all([
+        getProjectFiles({ projectId: this._projectId }),
+        getAllMappingsByProjectId({ projectId: this._projectId })
+      ]);
+
+      const mappedColumns = new Set(
+        (mappings || [])
+          .map((m) => (m.sourceColumn || '').trim().toLowerCase())
+          .filter(Boolean)
+      );
+
+      this.projectFiles = await Promise.all(
+        (files || []).map(async (f) => {
+          const headers = await this.loadFileHeaders(f.contentDocumentId);
+          const isMapped = headers.length > 0 && headers.every((h) => mappedColumns.has(h.toLowerCase()));
+          return {
+            ...f,
+            isMapped,
+            rowClass: 'mapping-file-row' + (f.contentDocumentId === this.selectedMappingFileId ? ' sel' : ''),
+            statusLabel: isMapped ? '✅ Mappé' : '⚠️ Non mappé',
+            statusClass: 'file-map-badge ' + (isMapped ? 'file-map-badge--ok' : 'file-map-badge--warn')
+          };
+        })
+      );
+    } catch (err) {
+      console.error('[ScheduleCreator] loadProjectFilesWithMappingStatus error', err);
+      this.showToast('Error', "Impossible de charger la liste des fichiers du projet.", 'error');
+    } finally {
+      this.isLoadingProjectFiles = false;
+    }
+  }
+
+  async loadFileHeaders(contentDocumentId) {
+    try {
+      const content = await getFileContent({ contentDocumentId });
+      const headerLine = (content || '').split(/\r?\n/)[0] || '';
+      if (!headerLine.trim()) return [];
+      const delimiter = detectDelimiter(headerLine);
+      return parseCsvLine(headerLine, delimiter).map((h) => h.trim()).filter(Boolean);
+    } catch (err) {
+      console.error('[ScheduleCreator] loadFileHeaders error', err);
+      return [];
+    }
+  }
+
+  async handleSelectMappingFile(event) {
+    const contentDocumentId = event.currentTarget?.dataset?.id;
+    const fileName = event.currentTarget?.dataset?.name;
+    if (!contentDocumentId) return;
+
+    this.selectedMappingFileId = contentDocumentId;
+    this.projectFiles = this.projectFiles.map((f) => ({
+      ...f,
+      rowClass: 'mapping-file-row' + (f.contentDocumentId === contentDocumentId ? ' sel' : '')
+    }));
+
+    try {
+      const content = await getFileContent({ contentDocumentId });
+      const lines = (content || '').trim().split(/\r?\n/);
+      if (!lines.length || !lines[0].trim()) {
+        this.showToast('Warning', `« ${fileName} » semble vide.`, 'warning');
+        return;
+      }
+      const delimiter = detectDelimiter(lines[0]);
+      const columns = parseCsvLine(lines[0], delimiter).map((h) => h.trim()).filter(Boolean);
+      const allRows = [];
+      for (let i = 1; i < lines.length; i++) {
+        if (!lines[i].trim()) continue;
+        const values = parseCsvLine(lines[i], delimiter);
+        allRows.push({ values: columns.map((c, idx) => ({ column: c, value: values[idx] || '' })) });
+      }
+
+      this.loadedSourceColumnsCsv = columns.join(',');
+      this.loadedCsvData = { allRows, rows: allRows, columns, rawCsvText: content, totalRowCount: allRows.length };
+    } catch (err) {
+      console.error('[ScheduleCreator] handleSelectMappingFile error', err);
+      this.showToast('Error', `Impossible de charger « ${fileName} ».`, 'error');
+    }
+  }
+
   //Enregistrement  d'une nouvelle planification
   async handleAddSchedule() {
+    if (!this.projectId) {
+      this.showToast("Error", "Aucun projet sélectionné.", "error");
+      return;
+    }
+    if (!this.selectedFrequency || !this.nextRun) {
+      this.showToast("Warning", "La fréquence et la date de début sont obligatoires.", "warning");
+      return;
+    }
+    if (this.isCriteriaMode && !this.criteriaPattern) {
+      this.showToast("Warning", "Veuillez renseigner un modèle de nom de fichier.", "warning");
+      return;
+    }
+    // Un import (immédiat ou planifié) sans mapping ne produit que des enregistrements vides —
+    // on bloque donc l'enregistrement tant que TOUS les fichiers du projet ne sont pas mappés
+    // (un nouveau fichier aux colonnes différentes remet ce statut à "non mappé").
+    if (!this.hasFieldMapping) {
+      this.showToast(
+        "Warning",
+        "Tous les fichiers du projet doivent être mappés avant de programmer l'import. Cliquez sur « Mapper les champs ».",
+        "warning"
+      );
+      this.showMappingModal = true;
+      return;
+    }
+
+    // L'input datetime-local renvoie "yyyy-MM-ddThh:mm", qu'Apex ne convertit pas
+    // automatiquement en Datetime — il faut le passer en ISO avant l'appel.
+    const nextRunISO = this.convertToISOFormat(this.nextRun);
+    if (!nextRunISO) {
+      this.showToast("Error", "Format de date/heure invalide.", "error");
+      return;
+    }
+
+    this.isSaving = true;
     try {
-      if (!this.projectId) {
-        this.showToast("Error", "Project not found. Please select one!", "error");
-        return;
-      }
-      if (!this.selectedFrequency || !this.nextRun) {
-        this.showToast("Warning", "All fields are required.", "warning");
-        return;
-      }
-
-      const useFixedFile = this.isFixedFile && this.selectedContentDocumentId;
-
-      if (useFixedFile) {
-        await addScheduleWithFile({
+      if (this.isCriteriaMode) {
+        await addScheduleWithCriteria({
           frequency         : this.selectedFrequency,
-          nextRun           : this.nextRun,
+          nextRun           : nextRunISO,
           projectId         : this.projectId,
-          contentDocumentId : this.selectedContentDocumentId
+          dataSourceMode    : "Criteria",
+          fileSelectionMode : this.criteriaSelectionMode,
+          fileNamePattern   : this.criteriaPattern
         });
       } else {
         await addSchedule({
           frequency : this.selectedFrequency,
-          nextRun   : this.nextRun,
+          nextRun   : nextRunISO,
           projectId : this.projectId
         });
       }
 
-      this.resetFields();
       this.showToast("Success", "Planification créée avec succès.", "success");
+      this.dispatchEvent(new CustomEvent('scheduleadded'));
+      this.resetFields();
     } catch (err) {
       this.showToast(
         "Error",
         err?.body?.message || "Une erreur est survenue lors de la création de la planification.",
         "error"
       );
+    } finally {
+      this.isSaving = false;
     }
   }
 
-  //cancel all actions
-  handleCancel() {
-    this.dispatchEvent(new CustomEvent("cancel"));
-  }
-
-  // réintialisation des valeurs de tous les champs  de textes | combo box
+  // réintialisation des valeurs de tous les champs de texte / motif
   resetFields() {
-    // reset valeurs UI
+    this.criteriaPattern = '';
+    this.nextRun = null;
     this.template.querySelectorAll(".rounded-input").forEach((input) => {
       input.value = "";
     });

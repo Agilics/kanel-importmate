@@ -213,7 +213,9 @@ private class PreProcessBatchTest {
             WHERE Id = :execution.Id
         ];
         Assert.isNotNull(updated.EndTime__c, 'EndTime should be set');
-        Assert.areEqual(Constants.EXECUTION_STATUS_COMPLETED, updated.Status__c, 'Should complete');
+        Assert.isTrue(updated.FailedRecords__c > 0, 'Both rows are incomplete and should be counted as failed');
+        Assert.areEqual(Constants.EXECUTION_STATUS_COMPLETED_WITH_ERRORS, updated.Status__c,
+            'Should complete but flag the incomplete rows rather than reporting a clean Completed');
         Assert.areEqual(Constants.EXECUTION_PHASE_COMPLETED, updated.Phase__c, 'Phase should be Completed');
     }
 

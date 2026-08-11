@@ -2552,6 +2552,13 @@
         <value>Completed</value>
     </labels>
     <labels>
+        <fullName>ProjectCard_Status_CompletedWithErrors</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Import status - Completed with errors</shortDescription>
+        <value>Completed with errors</value>
+    </labels>
+    <labels>
         <fullName>ProjectCard_Status_Cancelled</fullName>
         <language>en_US</language>
         <protected>false</protected>
@@ -3486,6 +3493,13 @@
         <protected>false</protected>
         <shortDescription>Step 6 - Execution</shortDescription>
         <value>Execution</value>
+    </labels>
+    <labels>
+        <fullName>SideBar_Step_Scheduling</fullName>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Step 7 - Scheduling</shortDescription>
+        <value>Scheduling</value>
     </labels>
     <labels>
         <fullName>SideBar_Step_FieldMapping</fullName>

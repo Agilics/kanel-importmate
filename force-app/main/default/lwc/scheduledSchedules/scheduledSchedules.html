@@ -34,6 +34,9 @@
                                     <td>
                                         <span class={schedule.badgeStatusClass}>{schedule.statusLabel}</span>
                                     </td>
+                                    <td>
+                                        <span class="file-cell" title={schedule.matchedFileName}>{schedule.matchedFileName}</span>
+                                    </td>
                                     <td class="actions">
                                         <!-- Pause/Resume : visible seulement si Pending ou Suspended -->
                                         <template if:true={schedule.canToggle}>
@@ -45,7 +48,15 @@
                                                 {schedule.iconActionEmoji}
                                             </button>
                                         </template>
-                                        <!-- Édition : désactivé si Completed ou InProgress -->
+                                        <!-- Voir les logs d'exécution -->
+                                        <button type="button" class="action-icon-btn" title="Voir les logs"
+                                            data-id={schedule.id} onclick={handleOpenLogsModal}
+                                            disabled={schedule.logsBtnDisabled}>📋</button>
+                                        <!-- Configurer les critères de fichier (mode Criteria) -->
+                                        <button type="button" class="action-icon-btn" title="Configurer"
+                                            data-id={schedule.id} onclick={handleOpenCriteriaModal}
+                                            disabled={schedule.editBtnDisabled}>⚙</button>
+                                        <!-- Édition : désactivé si Completed, CompletedWithErrors ou InProgress -->
                                         <button type="button" class="action-icon-btn" title="Edit"
                                             data-id={schedule.id} onclick={handleEditClick}
                                             disabled={schedule.editBtnDisabled}>✏</button>
@@ -57,7 +68,7 @@
 
                                 <!-- MODE EDIT -->
                                 <template if:true={schedule.isBeingEdited}>
-                                    <td colspan="3" class="edit-td">
+                                    <td colspan="4" class="edit-td">
                                         <div class="edit-panel">
 
                                             <!-- Header -->
@@ -153,6 +164,24 @@
                     <p class="no-schedules-message">{noSchedulesMessage}</p>
                 </div>
             </div>
+        </template>
+
+        <!-- Modale "Configurer" (critères de fichier) -->
+        <template if:true={showCriteriaModal}>
+            <c-schedule-criteria-modal
+                schedule-id={criteriaModalScheduleId}
+                onclosemodal={handleCloseCriteriaModal}
+                onsaved={handleCriteriaSaved}
+            ></c-schedule-criteria-modal>
+        </template>
+
+        <!-- Modale "Logs d'exécution" -->
+        <template if:true={showLogsModal}>
+            <c-schedule-execution-logs-modal
+                execution-id={logsModalExecutionId}
+                schedule-name={logsModalScheduleName}
+                onclosemodal={handleCloseLogsModal}
+            ></c-schedule-execution-logs-modal>
         </template>
 
     </div>

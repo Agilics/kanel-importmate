@@ -127,4 +127,64 @@ private class FieldMappingControllerTest {
         System.assertNotEquals(null, pro.name, 'ProjectDTO.name must be populated');
         System.assertNotEquals(null, pro.targetObject, 'ProjectDTO.targetObject must be populated');
     }
+
+    @IsTest
+    static void test_hasFieldMappings_falseThenTrue() {
+        Id projectId = createProject();
+
+        Test.startTest();
+        Boolean beforeSave = FieldMappingController.hasFieldMappings(projectId);
+
+        String jsonBody = JSON.serialize(new List<FieldMappingRepository.FieldMappingDTO>{
+            dto('LastName', 'Lastname', false, null, null, projectId, '1.0')
+        });
+        FieldMappingController.saveMappingsJson('Contact', jsonBody);
+
+        Boolean afterSave = FieldMappingController.hasFieldMappings(projectId);
+        Test.stopTest();
+
+        System.assertEquals(false, beforeSave, 'No mapping saved yet: hasFieldMappings should be false');
+        System.assertEquals(true, afterSave, 'A mapping was saved: hasFieldMappings should be true');
+    }
+
+    /**
+     * Un mapping existant ne suffit pas : si un fichier du projet a des colonnes non couvertes
+     * (mapping partiel, ou nouveau fichier avec une colonne en plus), hasAllFilesMapped doit
+     * refléter que le projet n'est pas (encore) entièrement prêt pour la planification.
+     */
+    @IsTest
+    static void test_hasAllFilesMapped_reflectsEveryFileColumn() {
+        Id projectId = createProject();
+        TestDataFactory.createContentDocumentLinkedTo(projectId, 'contacts', 'LastName,Email\nDupont,dupont@ex.com');
+
+        Test.startTest();
+        Boolean noMappingAtAll = FieldMappingController.hasAllFilesMapped(projectId);
+
+        // Mapping partiel : LastName seulement, Email non couvert
+        FieldMappingController.saveMappingsJson('Contact', JSON.serialize(
+            new List<FieldMappingRepository.FieldMappingDTO>{
+                dto('LastName', 'Lastname', false, null, null, projectId, '1.0')
+            }
+        ));
+        Boolean partialMapping = FieldMappingController.hasAllFilesMapped(projectId);
+
+        // Mapping complet pour ce fichier
+        FieldMappingController.saveMappingsJson('Contact', JSON.serialize(
+            new List<FieldMappingRepository.FieldMappingDTO>{
+                dto('Email', 'Email', false, null, null, projectId, '1.0')
+            }
+        ));
+        Boolean fullMappingForFirstFile = FieldMappingController.hasAllFilesMapped(projectId);
+
+        // Un nouveau fichier avec une colonne en plus (Phone) remet le statut à "non mappé"
+        TestDataFactory.createContentDocumentLinkedTo(projectId, 'contacts2', 'LastName,Email,Phone\nMartin,martin@ex.com,0102030405');
+        Boolean afterNewFileWithExtraColumn = FieldMappingController.hasAllFilesMapped(projectId);
+        Test.stopTest();
+
+        System.assertEquals(false, noMappingAtAll, 'No mapping at all: should be false');
+        System.assertEquals(false, partialMapping, 'Email column still unmapped: should be false');
+        System.assertEquals(true, fullMappingForFirstFile, 'All columns of the only file are mapped: should be true');
+        System.assertEquals(false, afterNewFileWithExtraColumn,
+            'A newly uploaded file has an unmapped Phone column: should be false again');
+    }
 }

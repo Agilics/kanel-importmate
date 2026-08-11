@@ -24,8 +24,9 @@
           <button onclick={handleExportLogsCsv} disabled={isExportLogsDisabled} class="btn btn-secondary export-button">
             <span>📥</span><span>{labels.btnExportLogs}</span>
           </button>
-          <button onclick={handleScheduleImport} disabled={isScheduleImportDisabled} class="btn btn-secondary schedule-button">
-            <span>🗓</span><span>{labels.btnSchedule}</span>
+          <button onclick={handleGotoScheduling} disabled={isGotoSchedulingDisabled} title={gotoSchedulingTitle}
+                  class="btn btn-secondary scheduling-button">
+            <span>📅</span><span>Planification</span>
           </button>
           <button onclick={handleStartImport} disabled={isStartImportDisabled} class="btn btn-primary start-button">
             <span>▶</span><span>{labels.btnStart}</span>
@@ -40,6 +41,17 @@
         <span class="sb-icon">&#127881;</span>
         <div>
           <div class="sb-title">{labels.progressTitle}</div>
+          <div class="sb-sub">{successfulRecords} records inserted &middot; {failedRecords} errors</div>
+        </div>
+      </div>
+    </template>
+
+    <!-- ══ Warning banner (shown when import completed but some records failed) ══ -->
+    <template if:true={isImportCompletedWithErrors}>
+      <div class="success-banner warning-banner">
+        <span class="sb-icon">&#9888;&#65039;</span>
+        <div>
+          <div class="sb-title">{formattedImportStatus}</div>
           <div class="sb-sub">{successfulRecords} records inserted &middot; {failedRecords} errors</div>
         </div>
       </div>
@@ -69,6 +81,15 @@
       <template if:true={isImportCompleted}>
         <div class="status-ring status-ring--done">
           <span class="status-ring-icon">&#9989;</span>
+        </div>
+        <div class="status-label">{formattedImportStatus}</div>
+        <div class="status-sub">{successfulRecords} records &middot; {failedRecords} errors</div>
+      </template>
+
+      <!-- Completed with errors state -->
+      <template if:true={isImportCompletedWithErrors}>
+        <div class="status-ring status-ring--warning">
+          <span class="status-ring-icon">&#9888;&#65039;</span>
         </div>
         <div class="status-label">{formattedImportStatus}</div>
         <div class="status-sub">{successfulRecords} records &middot; {failedRecords} errors</div>
@@ -167,6 +188,15 @@
           </div>
         </template>
 
+        <!-- Ligne fin avec erreurs -->
+        <template if:true={isImportCompletedWithErrors}>
+          <div class="log-line">
+            <span class="log-ts">&#91;Done&#93;</span>
+            <span class="log-warn">WARN</span>
+            <span class="log-msg">{successfulRecords} enregistrements insérés &middot; {failedRecords} erreurs</span>
+          </div>
+        </template>
+
         <!-- Ligne erreur -->
         <template if:true={isImportFailed}>
           <div class="log-line">
@@ -227,24 +257,6 @@
       </div>
     </template>
 
-    <!-- ══ Execution card: schedule / run mode — masqué si import en cours ou terminé ══ -->
-    <template if:true={showExecutionSetupCard}>
-      <div class="execution-content">
-        <div class="execution-card">
-          <c-execution-card
-            selected-frequency={frequency}
-            next-run={nextRun}
-            show-scheduled-card={showScheduledExecution}
-            onfrequencychange={handleFrequencyChange}
-            onnextrunchange={handleNextRunChange}
-            onmodechange={handleModeChange}
-            onbatchsizechange={handleBatchSizeChange}
-            onsendnotification={handleSendNotificationChange}>
-          </c-execution-card>
-        </div>
-      </div>
-    </template>
-
     <!-- ══ Import results (error table) ══ -->
     <template if:true={showImportResults}>
       <c-import-results
@@ -254,16 +266,13 @@
       </c-import-results>
     </template>
 
-    <!-- ══ Active schedules ══ -->
-    <c-scheduled-schedules
-      lwc:ref="scheduledList"
-      project-id={projectId}>
-    </c-scheduled-schedules>
-
     <!-- ══ Navigation footer ══ -->
     <div class="navigation-buttons">
       <button onclick={handlePreviousStep} class="btn btn-accent">← {labels.btnBack}</button>
       <template if:true={isImportCompleted}>
+        <button onclick={handlePreviousStep} class="btn btn-primary finish-button">✓ View Dashboard</button>
+      </template>
+      <template if:true={isImportCompletedWithErrors}>
         <button onclick={handlePreviousStep} class="btn btn-primary finish-button">✓ View Dashboard</button>
       </template>
     </div>

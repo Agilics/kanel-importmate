@@ -2,10 +2,14 @@
     <section class="modal-backdrop">
         <div class="modal">
             <header class="modal__header">
-                <h2>Add New Schedule</h2>
+                <h2>{modalTitle}</h2>
                 <button type="button" class="modal-close-btn" onclick={handleCloseModal} title="Close">✕</button>
             </header>
             <div class="modal__body">
+                <template if:true={hasPresetFile}>
+                    <p class="preset-file-banner">📄 Fichier à importer : <strong>{presetFileName}</strong></p>
+                </template>
+
                 <div class="form-group">
                     <label class="form-label" for="freq">Frequency</label>
                     <select id="freq" class="rounded-input" onchange={handleFrequencyChange}>
@@ -29,7 +33,7 @@
 
             <footer class="modal__footer">
                 <button type="button" class="btn btn-secondary" onclick={handleCloseModal}>Cancel</button>
-                <button type="button" class="btn btn-primary" onclick={handleAddSchedule}>Add Schedule</button>
+                <button type="button" class="btn btn-primary" onclick={handleAddSchedule}>{saveButtonLabel}</button>
             </footer>
         </div>
     </section>

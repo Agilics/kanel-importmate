@@ -56,6 +56,7 @@
                 <th scope="col">Fréquence</th>
                 <th scope="col">Prochaine exécution</th>
                 <th scope="col">Dernière exécution</th>
+                <th scope="col">Fichier</th>
                 <th scope="col">Historique</th>
                 <th scope="col">Statut</th>
                 <th scope="col"></th>
@@ -102,6 +103,11 @@
                       </template>
                     </td>
 
+                    <!-- Fichier retenu (mode Criteria) -->
+                    <td>
+                      <span class="matched-file-cell" title={schedule.matchedFileName}>{schedule.matchedFileName}</span>
+                    </td>
+
                     <!-- Run history dots -->
                     <td>
                       <div class="run-hist">
@@ -122,6 +128,23 @@
                     <!-- Actions -->
                     <td class="row-acts-cell">
                       <div class="row-acts">
+                        <button
+                          type="button"
+                          class="ract"
+                          title="Voir les logs"
+                          aria-label="Voir les logs d'exécution"
+                          data-id={schedule.id}
+                          disabled={schedule.logsBtnDisabled}
+                          onclick={handleOpenLogsModal}
+                        >&#x1F4CB;</button>
+                        <button
+                          type="button"
+                          class="ract"
+                          title="Configurer les critères de fichier"
+                          aria-label="Configurer les critères de fichier"
+                          data-id={schedule.id}
+                          onclick={handleOpenCriteriaModal}
+                        >&#x2699;</button>
                         <button
                           type="button"
                           class="ract"
@@ -162,7 +185,7 @@
               <!-- Empty state -->
               <template if:false={hasSchedules}>
                 <tr>
-                  <td colspan="7" class="empty-state">
+                  <td colspan="8" class="empty-state">
                     <span class="empty-icon">🕐</span>
                     <p>Aucune planification trouvée.</p>
                   </td>
@@ -214,6 +237,24 @@
         <button type="button" class="btn btn-ghost" onclick={handleCancelEdit}>Annuler</button>
       </div>
     </div>
+  </template>
+
+  <!-- ══ Modale "Configurer" (critères de fichier) ══ -->
+  <template if:true={showCriteriaModal}>
+    <c-schedule-criteria-modal
+      schedule-id={criteriaModalScheduleId}
+      onclosemodal={handleCloseCriteriaModal}
+      onsaved={handleCriteriaSaved}
+    ></c-schedule-criteria-modal>
+  </template>
+
+  <!-- ══ Modale "Logs d'exécution" ══ -->
+  <template if:true={showLogsModal}>
+    <c-schedule-execution-logs-modal
+      execution-id={logsModalExecutionId}
+      schedule-name={logsModalScheduleName}
+      onclosemodal={handleCloseLogsModal}
+    ></c-schedule-execution-logs-modal>
   </template>
 
 </template>

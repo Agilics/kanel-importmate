@@ -114,6 +114,7 @@
                   oncsvloaded={handleCsvLoaded}
                   ongotomapping={handleStartMapping}
                   onprevious={handleBackToDataSourceSelection}
+                  ongotoscheduling={handleGotoScheduling}
                 ></c-csv-uploader>
               </template>
 
@@ -161,14 +162,30 @@
                 ></c-dry-run-validator>
               </template>
 
-              <!-- Step 6: Execution & scheduling-->
+              <!-- Step 6: Execution -->
               <template if:true={isRealExecution}>
                 <c-execution-cmp
                   project-id={currentProject.Id}
                   project-name={currentProject.Name}
                   csv-data={csvData}
                   onprevious={handleBackToStep}
+                  ongotoscheduling={handleGotoScheduling}
                 ></c-execution-cmp>
+              </template>
+
+              <!-- Step 7: Scheduling -->
+              <template if:true={isScheduling}>
+                <c-schedule-creator-component
+                  project-id={currentProject.Id}
+                  project-name={currentProject.Name}
+                  target-object={schedulingTargetObject}
+                  csv-data={csvData}
+                  source-columns-csv={mappingHeadersCsv}
+                  onscheduleadded={handleScheduleAdded}
+                ></c-schedule-creator-component>
+                <c-scheduled-schedules
+                  project-id={currentProject.Id}
+                ></c-scheduled-schedules>
               </template>
             <!-- </div> -->
           </div>

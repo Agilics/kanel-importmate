@@ -4,6 +4,7 @@
  */
 import { LightningElement, track, api } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { subscribe, unsubscribe, onError } from 'lightning/empApi';
 import { validateCsvHeaders } from 'c/utility';
 import saveFileToProject    from '@salesforce/apex/ContentDocumentController.saveFileToProject';
 import getProjectFiles      from '@salesforce/apex/ContentDocumentController.getProjectFiles';
@@ -70,6 +71,32 @@ export default class CsvUploader extends LightningElement {
         if (val) this.loadStoredFiles();
     }
 
+    // ===== Rafraîchissement live (historique + badges "déjà programmé") =====
+    // Sans ça, une exécution planifiée qui démarre/se termine en arrière-plan (ou une
+    // planification créée depuis une autre page) n'apparaît qu'après un rechargement manuel.
+    _empSubscription = null;
+    _liveRefreshTimer = null;
+
+    connectedCallback() {
+        onError((error) => console.error('[CsvUploader] EMP API error', JSON.stringify(error)));
+        if (!this._empSubscription) {
+            subscribe('/event/ImportStatusEvent__e', -1, (response) => this.handlePlatformEvent(response))
+                .then((response) => { this._empSubscription = response; })
+                .catch((error) => console.error('[CsvUploader] subscribe error', JSON.stringify(error)));
+        }
+    }
+
+    handlePlatformEvent() {
+        // On ne connaît pas forcément l'executionId concerné à l'avance (fichier tout juste
+        // programmé ailleurs) : un rafraîchissement complet, débouncé, reste simple et fiable
+        // pour une liste de cette taille (un seul projet).
+        if (this._liveRefreshTimer) window.clearTimeout(this._liveRefreshTimer);
+        this._liveRefreshTimer = window.setTimeout(() => {
+            this._liveRefreshTimer = null;
+            this.loadStoredFiles();
+        }, 800);
+    }
+
     label = {
         pageSubtitle       : LBL_PAGE_SUBTITLE,
         importSettingsBtn  : LBL_IMPORT_SETTINGS_BTN,
@@ -118,6 +145,11 @@ export default class CsvUploader extends LightningElement {
     @track executionHistory       = [];
     contentDocumentId             = '';         // Id du fichier uploadé dans cette session
 
+    // ===== Modale "Logs d'exécution" (historique des imports) =====
+    @track showExecutionLogsModal   = false;
+    @track logsModalExecutionId     = null;
+    @track logsModalScheduleName    = '';
+
     get isUploadTab()         { return this.activeTab === 'upload'; }
     get isStoredTab()         { return this.activeTab === 'stored'; }
     get storedFilesCount()    { return this.storedFiles.length || 0; }
@@ -125,6 +157,12 @@ export default class CsvUploader extends LightningElement {
     get hasExecutionHistory() { return this.executionHistory.length > 0; }
     get uploadTabClass()   { return 'src-tab' + (this.isUploadTab ? ' active' : ''); }
     get storedTabClass()   { return 'src-tab' + (this.isStoredTab  ? ' active' : ''); }
+
+    // Programmer un import n'a de sens que si le projet a déjà au moins un fichier.
+    get isGotoSchedulingDisabled() { return !this.hasStoredFiles; }
+    get gotoSchedulingTitle() {
+        return this.hasStoredFiles ? '' : 'Chargez d\'abord un fichier CSV pour ce projet';
+    }
 
     // ===== File / Data =====
     fileName = '';
@@ -238,7 +276,8 @@ export default class CsvUploader extends LightningElement {
         if (!this._projectId) return;
         this.isLoadingStoredFiles = true;
 
-        const STATUS_ICON = { Completed: '✅', Failed: '❌', InProgress: '⏳', Pending: '🕐' };
+        const STATUS_ICON  = { Completed: '✅', CompletedWithErrors: '⚠️', Failed: '❌', InProgress: '⏳', Pending: '🕐' };
+        const STATUS_LABEL = { Completed: 'Terminé', CompletedWithErrors: 'Terminé avec erreurs', Failed: 'Échoué', InProgress: 'En cours', Pending: 'En attente' };
 
         Promise.all([
             getProjectFiles({ projectId: this._projectId }),
@@ -247,15 +286,13 @@ export default class CsvUploader extends LightningElement {
         .then(([files, executions]) => {
             this.storedFiles = (files || []).map(f => ({
                 ...f,
-                fileSizeLabel : f.fileSize ? Math.round(f.fileSize / 1024) + ' Ko' : '—',
-                badgeLabel    : f.isRecent ? 'Récent' : 'Archivé',
-                badgeClass    : f.isRecent ? 'sf-badge sfb-new' : 'sf-badge sfb-old',
-                isSelected    : f.contentDocumentId === this.selectedStoredFileDocId,
-                rowClass      : 'stored-file-row' + (f.contentDocumentId === this.selectedStoredFileDocId ? ' sel' : '')
+                isSelected : f.contentDocumentId === this.selectedStoredFileDocId,
+                rowClass   : 'stored-file-row' + (f.contentDocumentId === this.selectedStoredFileDocId ? ' sel' : '')
             }));
             this.executionHistory = (executions || []).map(e => ({
                 ...e,
                 statusIcon    : STATUS_ICON[e.status] || '🕐',
+                statusLabel   : STATUS_LABEL[e.status] || e.status,
                 statusClass   : 'exec-status exec-' + (e.status || 'Pending').toLowerCase(),
                 summary       : (e.totalRecords || 0) + ' enregistrements' + (e.failedRecords ? ` · ${e.failedRecords} erreurs` : ''),
                 typeLabel     : e.isScheduled ? 'Planifié' : 'Manuel',
@@ -289,6 +326,34 @@ export default class CsvUploader extends LightningElement {
             badgeClass : f.isRecent ? 'sf-badge sfb-new' : 'sf-badge sfb-old'
         }));
         this.loadFromStoredFile(docId, fileName);
+    }
+
+    // Nom exact stocké — évite de dupliquer l'extension si le Title l'inclut déjà
+    // (même logique que fileCriteriaBuilder/FileMatchService côté Apex).
+    exactFileName(file) {
+        const name = file.fileName || '';
+        const ext = (file.fileExtension || '').toLowerCase();
+        if (ext && name.toLowerCase().endsWith('.' + ext)) return name;
+        return ext ? `${name}.${ext}` : name;
+    }
+
+    // ===== Navigation vers l'étape Scheduling =====
+    handleGotoScheduling() {
+        this.dispatchEvent(new CustomEvent('gotoscheduling'));
+    }
+
+    // ===== Modale "Logs d'exécution" (historique des imports) =====
+    handleOpenExecutionLogs(event) {
+        const executionId = event.currentTarget.dataset.id;
+        if (!executionId) return;
+        this.logsModalExecutionId = executionId;
+        this.logsModalScheduleName = event.currentTarget.dataset.starttime || '';
+        this.showExecutionLogsModal = true;
+    }
+
+    handleCloseExecutionLogsModal() {
+        this.showExecutionLogsModal = false;
+        this.logsModalExecutionId = null;
     }
 
     loadFromStoredFile(docId, fileName) {
@@ -523,7 +588,11 @@ export default class CsvUploader extends LightningElement {
 
     // ===== Navigation / Cleanup =====
     handleBackClick() { this.dispatchEvent(new CustomEvent('previous', { bubbles: true, composed: true })); }
-    disconnectedCallback() { if (this._lastObjectUrl) { URL.revokeObjectURL(this._lastObjectUrl); this._lastObjectUrl = null; } }
+    disconnectedCallback() {
+        if (this._lastObjectUrl) { URL.revokeObjectURL(this._lastObjectUrl); this._lastObjectUrl = null; }
+        if (this._empSubscription) { unsubscribe(this._empSubscription, () => {}); this._empSubscription = null; }
+        if (this._liveRefreshTimer) { window.clearTimeout(this._liveRefreshTimer); this._liveRefreshTimer = null; }
+    }
     resetState() {
         this.columns = []; this._displayColumns = []; this.allRows = []; this.totalRows = 0;
         this.isPreview = false; this.isLoading = false; this.parseError = ''; this.storedParseError = '';

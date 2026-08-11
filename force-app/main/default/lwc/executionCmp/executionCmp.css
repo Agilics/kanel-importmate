@@ -107,6 +107,9 @@
 .sb-icon  { font-size: 26px; flex-shrink: 0; }
 .sb-title { font-size: .9rem; font-weight: 800; color: #059669; }
 .sb-sub   { font-size: .8rem; color: var(--green); margin-top: 2px; }
+.warning-banner { background: rgba(245,158,11,0.1); border-color: rgba(245,158,11,0.25); }
+.warning-banner .sb-title { color: #B45309; }
+.warning-banner .sb-sub   { color: var(--amber); }
 
 /* ══ Status hero ring ══ */
 .status-hero {
@@ -137,6 +140,10 @@
 .status-ring--done {
   background: var(--green-soft);
   border: 2px solid rgba(16,185,129,0.3);
+}
+.status-ring--warning {
+  background: rgba(245,158,11,0.1);
+  border: 2px solid rgba(245,158,11,0.3);
 }
 .status-ring--error {
   background: var(--coral-soft);
@@ -296,6 +303,7 @@
   font-size: .78rem; font-weight: 700; border: 1px solid transparent;
 }
 .status-badge.completed   { background: var(--green-soft); color: #059669; border-color: rgba(16,185,129,0.2); }
+.status-badge.warning     { background: rgba(245,158,11,0.1); color: #B45309; border-color: rgba(245,158,11,0.2); }
 .status-badge.failed      { background: var(--coral-soft); color: #BE123C; border-color: rgba(244,63,94,0.15); }
 .status-badge.in-progress { background: var(--indigo-soft); color: var(--indigo); border-color: rgba(79,70,229,0.15); }
 

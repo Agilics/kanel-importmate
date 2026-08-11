@@ -1,0 +1,55 @@
+/* ====== Modal (mêmes tokens que scheduleRegisterModal) ====== */
+.modal-backdrop {
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex; justify-content: center; align-items: center;
+    z-index: 9999;
+}
+.modal {
+    background: white; border-radius: 1.5rem; width: 480px; max-height: 85vh;
+    overflow-y: auto; box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+}
+.modal__header {
+    background: linear-gradient(135deg,#4F46E5 0%,#7C3AED 100%);
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 1rem; font-weight: 600; padding: 1rem 1.2rem; color: white;
+}
+.modal-close-btn {
+    background: transparent; border: none; color: rgba(255,255,255,0.75);
+    font-size: 1rem; cursor: pointer; padding: 4px 8px; border-radius: 6px;
+}
+.modal-close-btn:hover { color: #fff; }
+
+.modal__body { padding: 1rem 1.2rem; }
+.modal__footer {
+    display: flex; justify-content: flex-end; gap: 0.5rem;
+    padding: 0.8rem 1.2rem; border-top: 1px solid #eee;
+}
+
+.btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+    padding: 0.6rem 1.5rem; border-radius: 0.5rem; font-weight: 600; font-size: 0.875rem;
+    cursor: pointer; border: none; min-height: 40px;
+}
+.btn-primary { background: linear-gradient(135deg,#4F46E5 0%,#7C3AED 100%); color: #fff; }
+.btn-primary:disabled { background: #9ca3af; cursor: not-allowed; opacity: .6; }
+.btn-secondary { background: #fff; color: #4F46E5; border: 1px solid #4F46E5; }
+.btn-secondary:hover { background: #f9fafb; }
+
+.preview-section { margin-top: 1rem; }
+.preview-title {
+    font-size: .78rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: .05em; color: #94A3B8; margin-bottom: .5rem;
+}
+.match-list { list-style: none; margin: 0; padding: 0; max-height: 160px; overflow-y: auto; }
+.match-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 8px; border-bottom: 1px solid #F1F5F9; font-size: .82rem; color: #1E293B;
+}
+.no-match-msg { font-size: .82rem; color: #64748B; }
+
+.processed-section {
+    margin-top: 1rem; padding: .75rem 1rem; background: rgba(79,70,229,0.06);
+    border-radius: 10px; display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;
+}
+.processed-count { font-size: .82rem; color: #1E293B; margin: 0; }

@@ -38,6 +38,67 @@ public with sharing class ScheduleController {
         }
     }
 
+    // Création d'une planification en mode Criteria (sélection de fichier par motif de nom)
+    @AuraEnabled
+    public static Id addScheduleWithCriteria(
+        String frequency, Datetime nextRun, String projectId,
+        String dataSourceMode, String fileSelectionMode, String fileNamePattern
+    ) {
+        try {
+            return ScheduleService.schedule(
+                frequency, nextRun, projectId, dataSourceMode, fileSelectionMode, fileNamePattern
+            );
+        } catch (Exception e) {
+            throw new SchedulingException(e.getMessage());
+        }
+    }
+
+    // Reprogrammer une planification en mettant à jour sa configuration Criteria
+    @AuraEnabled
+    public static Map<String, Object> reScheduleWithCriteria(
+        String scheduleId, String frequency, Datetime nextRun,
+        String dataSourceMode, String fileSelectionMode, String fileNamePattern
+    ) {
+        try {
+            return ScheduleService.reSchedule(
+                scheduleId, frequency, nextRun, dataSourceMode, fileSelectionMode, fileNamePattern
+            );
+        } catch (Exception e) {
+            throw new SchedulingException(e.getMessage());
+        }
+    }
+
+    // Aperçu en direct de tous les fichiers du projet correspondant au motif (modale "Configurer")
+    @AuraEnabled
+    public static List<FileMatchService.MatchedFile> previewFileMatches(
+        String projectId, String fileNamePattern
+    ) {
+        try {
+            if (String.isBlank(projectId) || String.isBlank(fileNamePattern)) {
+                return new List<FileMatchService.MatchedFile>();
+            }
+            String resolved = FileMatchService.resolvePattern(fileNamePattern, Date.today());
+            return FileMatchService.findMatchingFiles(projectId, resolved);
+        } catch (Exception e) {
+            throw new SchedulingException(e.getMessage());
+        }
+    }
+
+    // Réinitialiser la liste des fichiers déjà traités (mode "Un par exécution")
+    @AuraEnabled
+    public static void resetProcessedFiles(String scheduleId) {
+        try {
+            Schedule__c schedule = ScheduleService.getScheduleById(scheduleId);
+            if (schedule == null) {
+                throw new SchedulingException('Schedule not found');
+            }
+            schedule.LastProcessedFileIds__c = null;
+            update schedule;
+        } catch (Exception e) {
+            throw new SchedulingException(e.getMessage());
+        }
+    }
+
     //récupèrer les SObjets compatibles
      @AuraEnabled(cacheable=true)
     public static List<String> getCompatibleSObjects() {
@@ -78,10 +139,24 @@ public with sharing class ScheduleController {
 
 
     // récupérer la planification par l'id
-    @AuraEnabled(cacheable = true)
+    // Non cacheable : appelé juste après une création/modification, doit toujours être à jour
+    // (jamais utilisé via @wire, uniquement en appel impératif).
+    @AuraEnabled
     public static Schedule__c  getScheduleById(Id id){
         try {
           return ScheduleService.getScheduleById(id);
+        } catch (Exception e) {
+          throw new SchedulingException(e.getMessage());
+        }
+    }
+
+    // récupérer toutes les planifications d'un projet (savoir, par fichier, s'il est déjà programmé)
+    // Non cacheable : doit refléter immédiatement une planification tout juste créée depuis
+    // csvUploader (uniquement en appel impératif, jamais via @wire).
+    @AuraEnabled
+    public static List<Schedule__c> getSchedulesForProject(Id projectId){
+        try {
+          return ScheduleService.getSchedulesForProject(projectId);
         } catch (Exception e) {
           throw new SchedulingException(e.getMessage());
         }

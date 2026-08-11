@@ -17,12 +17,18 @@
     <span class="badge primary-badge">{projectName}</span>
 
     <!-- Source Tabs — classes du prototype aurora-step2 -->
-    <div class="src-tabs">
-      <button type="button" class={uploadTabClass} data-tab="upload" onclick={handleTabChange}>
-        📤 Upload CSV
-      </button>
-      <button type="button" class={storedTabClass} data-tab="stored" onclick={handleTabChange}>
-        📁 Fichiers enregistrés
+    <div class="src-tabs-row">
+      <div class="src-tabs">
+        <button type="button" class={uploadTabClass} data-tab="upload" onclick={handleTabChange}>
+          📤 Upload CSV
+        </button>
+        <button type="button" class={storedTabClass} data-tab="stored" onclick={handleTabChange}>
+          📁 Fichiers enregistrés
+        </button>
+      </div>
+      <button type="button" class="btn btn-outline goto-scheduling-btn" onclick={handleGotoScheduling}
+              disabled={isGotoSchedulingDisabled} title={gotoSchedulingTitle}>
+        📅 Planification
       </button>
     </div>
 
@@ -86,7 +92,6 @@
                 <span class="sf-icon">📄</span>
                 <div style="flex:1;min-width:0">
                   <div class="sf-name">{sf.fileName}</div>
-                  <div class="sf-meta">{sf.fileSizeLabel} · {sf.createdDate}</div>
                 </div>
                 <span class={sf.badgeClass}>{sf.badgeLabel}</span>
                 <template if:true={sf.isSelected}>
@@ -118,7 +123,9 @@
                   <div class="sf-meta">{ex.summary}</div>
                 </div>
                 <span class={ex.typeClass}>{ex.typeLabel}</span>
-                <span class={ex.statusClass}>{ex.status}</span>
+                <span class={ex.statusClass}>{ex.statusLabel}</span>
+                <button type="button" class="action-icon-btn" title="Voir les logs"
+                  data-id={ex.id} data-starttime={ex.startTime} onclick={handleOpenExecutionLogs}>📋</button>
               </div>
             </template>
           </div>
@@ -332,6 +339,15 @@
           </div>
         </div>
       </section>
+    </template>
+
+    <!-- Modale "Logs d'exécution" (historique des imports) -->
+    <template if:true={showExecutionLogsModal}>
+      <c-schedule-execution-logs-modal
+        execution-id={logsModalExecutionId}
+        schedule-name={logsModalScheduleName}
+        onclosemodal={handleCloseExecutionLogsModal}
+      ></c-schedule-execution-logs-modal>
     </template>
   </div>
 </template>

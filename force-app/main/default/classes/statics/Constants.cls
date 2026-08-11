@@ -46,6 +46,7 @@ public with sharing class Constants {
     public static final String SOURCE_FIELD = 'sourceField';
 
     public static final String EXECUTION_STATUS_COMPLETED = 'Completed';
+    public static final String EXECUTION_STATUS_COMPLETED_WITH_ERRORS = 'CompletedWithErrors';
     public static final String EXECUTION_STATUS_FAILED = 'Failed';
     public static final String EXECUTION_STATUS_IN_PROGRESS = 'InProgress';
     public static final String EXECUTION_STATUS_SUSPENDED = 'Suspended';
@@ -77,7 +78,17 @@ public with sharing class Constants {
     public static final String EXECUTION_TYPE_SCHEDULED  = 'Scheduled';
     public static final String EXECUTION_TYPE_UPDATE     = 'Update';
     public static final String EXECUTION_TYPE_DELETE = 'Delete';
-    public static final String EXECUTION_TYPE_UPSERT = 'Upsert';    
+    public static final String EXECUTION_TYPE_UPSERT = 'Upsert';
+
+    public static final String DATA_SOURCE_MODE_INHERIT  = 'Inherit';
+    public static final String DATA_SOURCE_MODE_CRITERIA = 'Criteria';
+
+    public static final String FILE_SELECTION_MOST_RECENT = 'MostRecent';
+    public static final String FILE_SELECTION_ALL         = 'All';
+    public static final String FILE_SELECTION_ONE_PER_RUN = 'OnePerRun';
+
+    public static final Integer MAX_PROCESSED_FILE_IDS_TRACKED = 100;
+    public static final Integer FILE_MATCH_QUERY_LIMIT = 500;
 
     public static final String ERROR_TYPE_VALIDATION = 'Validation';
     public static final String ERROR_TYPE_TRANSFORMATION = 'Transformation';

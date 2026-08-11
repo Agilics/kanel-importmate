@@ -12,10 +12,23 @@ import FREQUENCY_FIELD from '@salesforce/schema/Schedule__c.Frequency__c';
 
 import getPickListValues from '@salesforce/apex/ScheduleController.getPickListValues';
 import addSchedule from '@salesforce/apex/ScheduleController.addSchedule';
+import addScheduleWithCriteria from '@salesforce/apex/ScheduleController.addScheduleWithCriteria';
+import reScheduleWithCriteria from '@salesforce/apex/ScheduleController.reScheduleWithCriteria';
 
 export default class ScheduleRegisterModal extends LightningElement {
     @api projectId;
-    
+    // Optionnel : quand fourni (ex. bouton "Programmer" sur un fichier déjà chargé),
+    // la planification est créée en mode Criteria avec ce nom de fichier exact.
+    @api presetFileName;
+    // Optionnel : présents quand on MODIFIE une planification existante plutôt que d'en créer une.
+    @api existingScheduleId;
+    @api presetFrequency;
+    @api presetNextRun; // Datetime ISO ou tout format lisible par `new Date(...)`
+
+    get hasPresetFile() { return !!this.presetFileName; }
+    get isEditMode() { return !!this.existingScheduleId; }
+    get modalTitle() { return this.isEditMode ? 'Modifier la planification' : 'Add New Schedule'; }
+    get saveButtonLabel() { return this.isEditMode ? 'Enregistrer' : 'Add Schedule'; }
 
     @track selectedFrequency = 'Daily';
     @track picklistValues = [];
@@ -23,9 +36,9 @@ export default class ScheduleRegisterModal extends LightningElement {
     @track isLoading = false;
 
     connectedCallback() {
-        // Initialize nextRun with current datetime in the correct format
-        const now = new Date();
-        this.nextRun = this.formatDateTimeLocal(now);
+        this.selectedFrequency = this.presetFrequency || 'Daily';
+        const initialDate = this.presetNextRun ? new Date(this.presetNextRun) : new Date();
+        this.nextRun = this.formatDateTimeLocal(initialDate);
     }
 
     /**
@@ -109,12 +122,36 @@ export default class ScheduleRegisterModal extends LightningElement {
         this.isLoading = true;
 
         try {
-            
-            await addSchedule({
-                frequency: this.selectedFrequency,
-                nextRun: this.nextRun,
-                projectId: this.projectId
-            }); 
+
+            if (this.isEditMode) {
+                const result = await reScheduleWithCriteria({
+                    scheduleId: this.existingScheduleId,
+                    frequency: this.selectedFrequency,
+                    nextRun: nextRunISO,
+                    dataSourceMode: 'Criteria',
+                    fileSelectionMode: 'MostRecent',
+                    fileNamePattern: this.presetFileName
+                });
+                if (result?.success === false) {
+                    this.showToast('Error', result.error || 'Erreur lors de la mise à jour', 'error');
+                    return;
+                }
+            } else if (this.hasPresetFile) {
+                await addScheduleWithCriteria({
+                    frequency: this.selectedFrequency,
+                    nextRun: nextRunISO,
+                    projectId: this.projectId,
+                    dataSourceMode: 'Criteria',
+                    fileSelectionMode: 'MostRecent',
+                    fileNamePattern: this.presetFileName
+                });
+            } else {
+                await addSchedule({
+                    frequency: this.selectedFrequency,
+                    nextRun: nextRunISO,
+                    projectId: this.projectId
+                });
+            }
 
           //  this.showToast('Success', 'Schedule added successfully', 'success');
             this.dispatchEvent(

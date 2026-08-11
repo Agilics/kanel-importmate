@@ -223,6 +223,16 @@ export default class MainComponent extends LightningElement {
         }
     }
 
+    // Étape 7 (Scheduling) : le formulaire de création et la liste "Active Schedules" sont
+    // deux composants siblings sur la même page — sans ce rafraîchissement explicite, une
+    // planification tout juste créée n'apparaîtrait dans la liste qu'au prochain montage.
+    async handleScheduleAdded() {
+        const scheduledList = this.template.querySelector('c-scheduled-schedules');
+        if (scheduledList) {
+            await scheduledList.refreshSchedules();
+        }
+    }
+
   validateProjectFields() {
       return this.projectName && this.targetObject;
   }
@@ -361,6 +371,11 @@ export default class MainComponent extends LightningElement {
       return this.getTargetObjectFromProject(this.currentProject || {});
   }
 
+  get schedulingTargetObject() {
+      if (this.mappingTargetObject) return this.mappingTargetObject;
+      return this.getTargetObjectFromProject(this.currentProject || {});
+  }
+
   get currentProjectName() {
       return this.currentProject?.Name || '';
   }
@@ -381,6 +396,17 @@ export default class MainComponent extends LightningElement {
 
   get isRealExecution() {
       return this.currentProject && this.currentStep === STEPS.EXECUTION;
+  }
+
+  get isScheduling() {
+      return this.currentProject && this.currentStep === STEPS.SCHEDULING;
+  }
+
+  // Bouton "Planification" présent sur les étapes CSV Uploader et Execution — accès direct
+  // à l'étape 7 sans repasser par tout l'assistant.
+  handleGotoScheduling() {
+      if (!this.currentProject) return;
+      this.currentStep = STEPS.SCHEDULING;
   }
 
   handleStartMapping(event) {

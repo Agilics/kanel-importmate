@@ -78,6 +78,17 @@ const SS_RUN_STATE_LAST_KEY = 'IM_dryRunValidatorRun_last_v1';
 const MAX_UI_ISSUES = 5000;
 const MAX_SYNC_SAMPLE_ROWS = 200;
 const STAGING_CHUNK_SIZE = 200;
+// CompletedWithErrors est un état terminal au même titre que Completed/Failed/Cancelled —
+// sans lui ici, le suivi live/polling resterait bloqué en "en cours" pour toute validation
+// comportant au moins une ligne invalide (PreProcessBatch ne renvoie plus 'Completed' dans ce cas).
+const TERMINAL_STATUSES = ['completed', 'completedwitherrors', 'failed', 'cancelled'];
+function isTerminalStatus(status) {
+    return TERMINAL_STATUSES.includes((status || '').toLowerCase());
+}
+function hasValidationResults(status) {
+    const s = (status || '').toLowerCase();
+    return s === 'completed' || s === 'completedwitherrors' || s === 'failed';
+}
 
 export default class DryRunValidator extends LightningElement {
   _projectId = '';
@@ -389,11 +400,11 @@ export default class DryRunValidator extends LightningElement {
       this.initialTotalRecords = this.initialTotalRecords || total;
 
       const status = (details.status || '').toLowerCase();
-      const isDone = status === 'completed' || status === 'failed' || status === 'cancelled';
+      const isDone = isTerminalStatus(status);
       if (isDone) {
         this.isLoading = false;
         this.stopExecutionPolling();
-        if (status === 'completed' || status === 'failed') {
+        if (hasValidationResults(status)) {
           await this.loadValidationResults(executionId);
         }
       } else {
@@ -623,6 +634,7 @@ export default class DryRunValidator extends LightningElement {
 
   get isImportInProgress() { return this.importStatus === 'InProgress' || this.importStatus === 'In Progress'; }
   get isImportCompleted() { return this.importStatus === 'Completed'; }
+  get isImportCompletedWithErrors() { return this.importStatus === 'CompletedWithErrors'; }
   get isImportFailed() { return this.importStatus === 'Failed'; }
   get isImportCancelled() { return this.importStatus === 'Cancelled'; }
   get isStagingPhase() { return (this.importPhase || this.importStatus || '').toLowerCase() === 'staging'; }
@@ -726,15 +738,21 @@ export default class DryRunValidator extends LightningElement {
       this.importPhase = payload.Phase__c || this.importPhase;
       this.importProgress = newProgress;
       this.importMessage = payload.Message__c || '';
-      const isComplete = newProgress >= 100 || newStatus === 'Completed';
+      const isCompleteWithErrors = newStatus === 'CompletedWithErrors';
+      const isComplete = newProgress >= 100 || newStatus === 'Completed' || isCompleteWithErrors;
       const isFailed = newStatus === 'Failed';
       const isCancelled = newStatus === 'Cancelled';
-      if (isComplete && !(previousProgress >= 100 || previousStatus === 'Completed')) {
+      const wasAlreadyDone = previousProgress >= 100 || previousStatus === 'Completed' || previousStatus === 'CompletedWithErrors';
+      if (isComplete && !wasAlreadyDone) {
         this.isLoading = false;
         this.stopExecutionPolling();
         if (this.isAsyncValidation) {
           this.loadValidationResults(executionId);
-          this.showToast('Success', this.importMessage || 'Validation completed', 'success');
+          this.showToast(
+            isCompleteWithErrors ? 'Warning' : 'Success',
+            this.importMessage || (isCompleteWithErrors ? 'Validation completed with errors' : 'Validation completed'),
+            isCompleteWithErrors ? 'warning' : 'success'
+          );
           this.isAsyncValidation = false;
         }
       } else if (isFailed && previousStatus !== 'Failed') {
@@ -787,12 +805,12 @@ export default class DryRunValidator extends LightningElement {
       this.importMessage = `Phase: ${details.phase || 'N/A'} - Processed: ${processed}, Failed: ${failed}, Remaining: ${remaining}`;
       this.persistRunState();
       const status = (details.status || '').toLowerCase();
-      const isDone = status === 'completed' || status === 'failed' || status === 'cancelled';
+      const isDone = isTerminalStatus(status);
       if (isDone) {
         this.stopExecutionPolling();
         this.isLoading = false;
         if (this.isAsyncValidation) {
-          if (status === 'completed' || status === 'failed') await this.loadValidationResults(executionId);
+          if (hasValidationResults(status)) await this.loadValidationResults(executionId);
           this.isAsyncValidation = false;
         }
       }

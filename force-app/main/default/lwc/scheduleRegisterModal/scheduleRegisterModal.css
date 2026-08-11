@@ -107,6 +107,11 @@
     opacity: 0.6;
 }
 
+.preset-file-banner {
+    font-size: .85rem; color: #4F46E5; background: rgba(79,70,229,0.08);
+    border-radius: 8px; padding: .6rem .75rem; margin-bottom: 1rem;
+}
+
 /* Form Groups */
 .form-group {
     margin-bottom: 1.5rem;

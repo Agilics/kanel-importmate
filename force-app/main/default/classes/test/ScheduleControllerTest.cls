@@ -447,8 +447,252 @@ public with sharing class ScheduleControllerTest {
         Assert.isFalse(Boolean.valueOf(resultNull.get('success')));
     }
 
+    @IsTest
+    static void testAddScheduleWithCriteria_Success() {
+        ImportProject__c project = TestDataFactory.createImportProject();
+        Datetime nextRun = Datetime.now().addDays(1);
+
+        Test.startTest();
+        Id scheduleId = ScheduleController.addScheduleWithCriteria(
+            'Daily', nextRun, project.Id,
+            Constants.DATA_SOURCE_MODE_CRITERIA, Constants.FILE_SELECTION_MOST_RECENT, 'ventes_{yyyy-MM-dd}.csv'
+        );
+        Test.stopTest();
+
+        Assert.isNotNull(scheduleId, 'Le schedule doit être créé');
+        Schedule__c saved = [
+            SELECT DataSourceMode__c, FileSelectionMode__c, FileNamePattern__c
+            FROM Schedule__c WHERE Id = :scheduleId
+        ];
+        Assert.areEqual(Constants.DATA_SOURCE_MODE_CRITERIA, saved.DataSourceMode__c);
+        Assert.areEqual(Constants.FILE_SELECTION_MOST_RECENT, saved.FileSelectionMode__c);
+        Assert.areEqual('ventes_{yyyy-MM-dd}.csv', saved.FileNamePattern__c);
+    }
+
+    @IsTest
+    static void testReScheduleWithCriteria_Success() {
+        Schedule__c existingSchedule = TestDataFactory.createSchedule();
+        Datetime newNextRun = Datetime.now().addDays(7);
+
+        Test.startTest();
+        Map<String, Object> result = ScheduleController.reScheduleWithCriteria(
+            existingSchedule.Id, 'Weekly', newNextRun,
+            Constants.DATA_SOURCE_MODE_CRITERIA, Constants.FILE_SELECTION_ALL, 'achats_*.csv'
+        );
+        Test.stopTest();
+
+        Assert.isTrue(Boolean.valueOf(result.get('success')));
+        Schedule__c updated = [
+            SELECT DataSourceMode__c, FileSelectionMode__c, FileNamePattern__c
+            FROM Schedule__c WHERE Id = :existingSchedule.Id
+        ];
+        Assert.areEqual(Constants.DATA_SOURCE_MODE_CRITERIA, updated.DataSourceMode__c);
+        Assert.areEqual(Constants.FILE_SELECTION_ALL, updated.FileSelectionMode__c);
+        Assert.areEqual('achats_*.csv', updated.FileNamePattern__c);
+    }
+
+    @IsTest
+    static void testPreviewFileMatches_ReturnsMatches() {
+        ImportProject__c project = TestDataFactory.createImportProject();
+        TestDataFactory.createContentDocumentLinkedTo(project.Id, 'ventes_2026-07-16', 'Name\nA');
+
+        Test.startTest();
+        List<FileMatchService.MatchedFile> matches =
+            ScheduleController.previewFileMatches(project.Id, 'ventes_*');
+        Test.stopTest();
+
+        Assert.areEqual(1, matches.size(), 'Un fichier doit correspondre au motif');
+    }
+
+    @IsTest
+    static void testPreviewFileMatches_BlankPattern_ReturnsEmpty() {
+        ImportProject__c project = TestDataFactory.createImportProject();
+
+        Test.startTest();
+        List<FileMatchService.MatchedFile> matches =
+            ScheduleController.previewFileMatches(project.Id, '');
+        Test.stopTest();
+
+        Assert.isTrue(matches.isEmpty());
+    }
+
+    @IsTest
+    static void testResetProcessedFiles_ClearsField() {
+        ImportProject__c project = TestDataFactory.createImportProject();
+        Schedule__c schedule = TestDataFactory.createScheduleWithCriteria(
+            project.Id, Constants.DATA_SOURCE_MODE_CRITERIA, Constants.FILE_SELECTION_ONE_PER_RUN, 'ventes_*.csv'
+        );
+        schedule.LastProcessedFileIds__c = '["069000000000000AAA"]';
+        update schedule;
+
+        Test.startTest();
+        ScheduleController.resetProcessedFiles(schedule.Id);
+        Test.stopTest();
+
+        Schedule__c updated = [SELECT LastProcessedFileIds__c FROM Schedule__c WHERE Id = :schedule.Id];
+        Assert.isNull(updated.LastProcessedFileIds__c, 'La liste des fichiers traités doit être réinitialisée');
+    }
+
+    @IsTest
+    static void testAddScheduleWithFile_LinksFileToSchedule() {
+        ImportProject__c project = TestDataFactory.createImportProject();
+        Id contentDocumentId = TestDataFactory.createContentDocumentLinkedTo(project.Id, 'fixed_file', 'Name\nA');
+        Datetime nextRun = Datetime.now().addDays(1);
+
+        Test.startTest();
+        Id scheduleId = ScheduleController.addScheduleWithFile('Daily', nextRun, project.Id, contentDocumentId);
+        Test.stopTest();
+
+        Assert.isNotNull(scheduleId, 'Le schedule doit être créé');
+        List<ContentDocumentLink> links = [
+            SELECT Id FROM ContentDocumentLink
+            WHERE ContentDocumentId = :contentDocumentId AND LinkedEntityId = :scheduleId
+        ];
+        Assert.areEqual(1, links.size(), 'Le fichier fixe doit être lié au schedule créé');
+    }
+
+    @IsTest
+    static void testGetObjectFields_ReturnsFieldMap() {
+        Test.startTest();
+        Map<String, String> fields = ScheduleController.getObjectFields('Account');
+        Test.stopTest();
+
+        Assert.isTrue(fields.containsKey('Name'), 'Le champ Name doit être présent pour Account');
+    }
+
+    @IsTest
+    static void testGetPickListValues_ReturnsFrequencyValues() {
+        Test.startTest();
+        Map<String, String> values = ScheduleController.getPickListValues('Schedule__c', 'Frequency__c');
+        Test.stopTest();
+
+        Assert.isFalse(values.isEmpty(), 'Les valeurs de picklist Frequency__c doivent être retournées');
+    }
+
+    @IsTest
+    static void testAddSchedule_InvalidInput_ThrowsException() {
+        Test.startTest();
+        try {
+            ScheduleController.addSchedule('', null, null);
+            Assert.fail('Une exception devait être levée pour des paramètres invalides');
+        } catch (SchedulingException e) {
+            Assert.isNotNull(e.getMessage());
+        }
+        Test.stopTest();
+    }
+
+    @IsTest
+    static void testDeleteSchedule_BlankId_ThrowsException() {
+        Test.startTest();
+        try {
+            ScheduleController.deleteSchedule(null);
+            Assert.fail('Une exception devait être levée pour un Id manquant');
+        } catch (SchedulingException e) {
+            Assert.isNotNull(e.getMessage());
+        }
+        Test.stopTest();
+    }
+
+    @IsTest
+    static void testToggleSchedule_BlankId_ReturnsFailure() {
+        Test.startTest();
+        Map<String, Object> result = ScheduleController.toggleSchedule(null, true);
+        Test.stopTest();
+
+        Assert.isFalse(Boolean.valueOf(result.get('success')));
+    }
+
+    @IsTest
+    static void testAddScheduleWithFile_NoContentDocumentId_StillCreatesSchedule() {
+        ImportProject__c project = TestDataFactory.createImportProject();
+        Datetime nextRun = Datetime.now().addDays(1);
+
+        Test.startTest();
+        Id scheduleId = ScheduleController.addScheduleWithFile('Daily', nextRun, project.Id, null);
+        Test.stopTest();
+
+        Assert.isNotNull(scheduleId, 'Le schedule doit être créé même sans fichier fixe fourni');
+    }
+
+    @IsTest
+    static void testResetProcessedFiles_ScheduleNotFound_ThrowsException() {
+        Test.startTest();
+        try {
+            ScheduleController.resetProcessedFiles('a00000000000000AAA');
+            Assert.fail('Une exception devait être levée pour un schedule inexistant');
+        } catch (SchedulingException e) {
+            Assert.isNotNull(e.getMessage());
+        }
+        Test.stopTest();
+    }
+
+    @IsTest
+    static void testPreviewFileMatches_NullProjectId_ReturnsEmpty() {
+        Test.startTest();
+        List<FileMatchService.MatchedFile> matches = ScheduleController.previewFileMatches(null, 'ventes_*.csv');
+        Test.stopTest();
+
+        Assert.isTrue(matches.isEmpty());
+    }
+
+    @IsTest
+    static void testGetSchedulesByProjectName_BlankName_ReturnsEmpty() {
+        Test.startTest();
+        List<ScheduleService.ScheduleWrapper> results = ScheduleController.getSchedulesByProjectName('');
+        Test.stopTest();
+
+        Assert.isTrue(results.isEmpty());
+    }
+
+    @IsTest
+    static void testGetSchedulesWithExecutionsByIdProject_NullId_ReturnsEmpty() {
+        Test.startTest();
+        List<ScheduleService.ScheduleWrapper> results = ScheduleController.getSchedulesWithExecutionsByIdProject(null);
+        Test.stopTest();
+
+        Assert.isTrue(results.isEmpty());
+    }
+
+    @IsTest
+    static void testGetObjectFields_InvalidObject_ThrowsException() {
+        Test.startTest();
+        try {
+            ScheduleController.getObjectFields('NonExistentObject__zzz');
+            Assert.fail('Une exception devait être levée pour un objet inexistant');
+        } catch (SchedulingException e) {
+            Assert.isNotNull(e.getMessage());
+        }
+        Test.stopTest();
+    }
+
+    @IsTest
+    static void testGetSchedulesForProject_NullId_ReturnsEmpty() {
+        Test.startTest();
+        List<Schedule__c> schedules = ScheduleController.getSchedulesForProject(null);
+        Test.stopTest();
+
+        Assert.isTrue(schedules.isEmpty());
+    }
+
+    @IsTest
+    static void testGetSchedulesForProject_ReturnsAllFileSchedules() {
+        ImportProject__c project = TestDataFactory.createImportProject();
+        TestDataFactory.createScheduleWithCriteria(
+            project.Id, Constants.DATA_SOURCE_MODE_CRITERIA, Constants.FILE_SELECTION_MOST_RECENT, 'ventes.csv'
+        );
+        TestDataFactory.createScheduleWithCriteria(
+            project.Id, Constants.DATA_SOURCE_MODE_CRITERIA, Constants.FILE_SELECTION_MOST_RECENT, 'achats.csv'
+        );
+
+        Test.startTest();
+        List<Schedule__c> schedules = ScheduleController.getSchedulesForProject(project.Id);
+        Test.stopTest();
+
+        Assert.areEqual(2, schedules.size(), 'Les 2 planifications (une par fichier) doivent être retournées');
+    }
+
  /**
-     * Helper : construction schedule + exécution liés au même projet 
+     * Helper : construction schedule + exécution liés au même projet
      */
     private static Map<String, Object> setupScheduleWithExecution(
         String scheduleId

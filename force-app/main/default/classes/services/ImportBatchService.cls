@@ -137,6 +137,7 @@ public with sharing class ImportBatchService {
             throw new ExecutionException('Execution is cancelled.');
         }
         if (execution.Status__c == Constants.EXECUTION_STATUS_COMPLETED ||
+            execution.Status__c == Constants.EXECUTION_STATUS_COMPLETED_WITH_ERRORS ||
             execution.Status__c == Constants.EXECUTION_STATUS_FAILED) {
             throw new ExecutionException('Execution is already finished.');
         }
@@ -356,6 +357,7 @@ public with sharing class ImportBatchService {
         ];
 
         if (execution.Status__c == Constants.EXECUTION_STATUS_COMPLETED ||
+            execution.Status__c == Constants.EXECUTION_STATUS_COMPLETED_WITH_ERRORS ||
             execution.Status__c == Constants.EXECUTION_STATUS_FAILED ||
             execution.Status__c == Constants.EXECUTION_STATUS_CANCELLED) {
             return new Map<String, Object>{

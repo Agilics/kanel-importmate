@@ -379,6 +379,34 @@ public with sharing class ScheduleServiceTest {
         Assert.areEqual('Monthly', updated.Frequency__c);
     }
 
+    /**
+     * Régression : reSchedule() peut être appelé sur un schedule dont la dernière exécution est
+     * déjà terminale (Completed/Failed) — ex. reprogrammer un schedule qui a déjà tourné une fois.
+     * Sans exécution Pending fraîche, le prochain déclenchement du cron ne trouverait rien à
+     * traiter et échouerait silencieusement (c'est exactement ce qui a rendu tous les schedules
+     * de l'org inopérants après leur premier run).
+     */
+    @IsTest
+    static void testReSchedule_CreatesFreshPendingExecutionWhenNoneOpen() {
+        Schedule__c schedule = TestDataFactory.createSchedule();
+        TestDataFactory.createImportExecutionWithSchedule(schedule.Project__c, 'Completed', 'Scheduled', schedule.Id);
+
+        Test.startTest();
+        Map<String, Object> result = ScheduleService.reSchedule(schedule.Id, 'Daily', Datetime.now().addDays(1));
+
+        // Vérifié AVANT Test.stopTest() : celui-ci déclenche immédiatement le job cron
+        // fraîchement planifié (comportement standard des tests Apex), ce qui consommerait
+        // cette même exécution "Pending" et fausserait l'assertion.
+        Assert.isTrue(Boolean.valueOf(result.get('success')));
+        List<ImportExecution__c> openExecutions = ScheduleRepository.findExecutionsBySchedule(
+            schedule.Id, new List<String>{ 'Pending', 'InProgress' }
+        );
+        Assert.isFalse(openExecutions.isEmpty(),
+            'reSchedule() doit garantir une exécution Pending fraîche, sinon le prochain déclenchement '
+            + 'du cron ne trouverait rien à traiter');
+        Test.stopTest();
+    }
+
     @IsTest
     static void testReScheduleNullId() {
         Test.startTest();
@@ -465,8 +493,310 @@ public with sharing class ScheduleServiceTest {
         Assert.areEqual('paused', result.get('action'), 'Action doit être paused');
     }
 
+    // *** MODE CRITERIA (sélection de fichier par motif) ***
+
+    @IsTest
+    static void testExecuteSchedule_CriteriaMode_MatchFound_SetsMatchedFileNameOnExecution() {
+        ImportProject__c project = TestDataFactory.createImportProject();
+        Schedule__c schedule = TestDataFactory.createScheduleWithCriteria(
+            project.Id, Constants.DATA_SOURCE_MODE_CRITERIA, Constants.FILE_SELECTION_MOST_RECENT, 'ventes_*.csv'
+        );
+        TestDataFactory.createContentDocumentLinkedTo(project.Id, 'ventes_2026-07-16', 'Name\nTest Account');
+        TestDataFactory.createImportExecutionWithSchedule(project.Id, 'Pending', 'Import', schedule.Id);
+
+        Test.startTest();
+        ScheduleJobResult result = ScheduleService.executeSchedule(schedule.Id);
+        Test.stopTest();
+
+        Assert.isTrue(result.isSuccess(), 'L\'exécution en mode Criteria doit réussir : ' + result.message);
+
+        ImportExecution__c execution = [
+            SELECT MatchedFileName__c, MatchedContentDocumentId__c
+            FROM ImportExecution__c
+            WHERE Id = :result.executionId
+        ];
+        Assert.isNotNull(execution.MatchedFileName__c, 'Le nom du fichier retenu doit être enregistré');
+        Assert.isNotNull(execution.MatchedContentDocumentId__c, 'L\'Id du fichier retenu doit être enregistré');
+    }
+
+    /**
+     * Régression : le CronTrigger ponctuel (one-off) qui déclenche executeSchedule() est
+     * automatiquement supprimé par Salesforce une fois exécuté. Sans un nouvel appel à
+     * System.schedule() à l'intérieur même de executeSchedule(), une planification récurrente
+     * (Daily/Weekly/Monthly) ne se relance jamais après sa toute première exécution, même si
+     * NextRun__c affiche une date future en base.
+     */
+    @IsTest
+    static void testExecuteSchedule_ReschedulesNextRecurringRun() {
+        ImportProject__c project = TestDataFactory.createImportProject();
+        Schedule__c schedule = TestDataFactory.createScheduleWithCriteria(
+            project.Id, Constants.DATA_SOURCE_MODE_CRITERIA, Constants.FILE_SELECTION_MOST_RECENT, 'ventes_*.csv'
+        );
+        TestDataFactory.createContentDocumentLinkedTo(project.Id, 'ventes_2026-07-16', 'Name\nTest Account');
+        TestDataFactory.createImportExecutionWithSchedule(project.Id, 'Pending', 'Import', schedule.Id);
+
+        Test.startTest();
+        ScheduleJobResult result = ScheduleService.executeSchedule(schedule.Id);
+        Test.stopTest();
+
+        Assert.isTrue(result.isSuccess(), 'L\'exécution doit réussir : ' + result.message);
+
+        List<CronTrigger> pendingJobs = [
+            SELECT Id, CronJobDetail.Name
+            FROM CronTrigger
+            WHERE CronJobDetail.Name LIKE :('Schedule_' + schedule.Id + '%')
+            AND State != 'DELETED'
+        ];
+        Assert.isFalse(pendingJobs.isEmpty(),
+            'Un nouveau CronTrigger doit être planifié pour la prochaine occurrence récurrente, '
+            + 'sinon la planification s\'arrête silencieusement après cette seule exécution');
+    }
+
+    /**
+     * Régression : PreProcessBatch.finish() réécrit ApexJobId__c avec l'Id du job Apex suivant
+     * (ImportDmlBatch), qui n'a donc plus rien à voir avec le Schedule__c. Le lien vers la
+     * planification doit rester exploitable APRÈS l'exécution du pipeline batch complet —
+     * c'est exactement ce que le champ dédié Schedule__c garantit (jamais réécrit par le pipeline).
+     */
+    @IsTest
+    static void testExecuteSchedule_ExecutionStaysLinkedToScheduleAfterBatchPipelineOverwritesApexJobId() {
+        ImportProject__c project = TestDataFactory.createImportProject();
+        Schedule__c schedule = TestDataFactory.createScheduleWithCriteria(
+            project.Id, Constants.DATA_SOURCE_MODE_CRITERIA, Constants.FILE_SELECTION_MOST_RECENT, 'ventes.csv'
+        );
+        TestDataFactory.createContentDocumentLinkedTo(project.Id, 'ventes', 'Name\nTest Account');
+        TestDataFactory.createImportExecutionWithSchedule(project.Id, 'Pending', 'Import', schedule.Id);
+
+        Test.startTest();
+        ScheduleJobResult result = ScheduleService.executeSchedule(schedule.Id);
+        Test.stopTest(); // exécute PreProcessBatch → ImportDmlBatch → StagingCleanupBatch de façon synchrone
+
+        Assert.isTrue(result.isSuccess(), 'L\'exécution doit réussir : ' + result.message);
+
+        List<ImportExecution__c> found = ScheduleRepository.findExecutionsBySchedule(
+            schedule.Id, new List<String>{ 'Pending', 'InProgress', 'Completed', 'CompletedWithErrors', 'Failed' }
+        );
+        Assert.isFalse(found.isEmpty(),
+            'L\'exécution doit rester retrouvable via sa planification même après que le pipeline batch '
+            + 'ait réécrit ApexJobId__c pour son propre suivi de job');
+    }
+
+    @IsTest
+    static void testExecuteSchedule_CriteriaMode_NoMatch_ReturnsError() {
+        ImportProject__c project = TestDataFactory.createImportProject();
+        Schedule__c schedule = TestDataFactory.createScheduleWithCriteria(
+            project.Id, Constants.DATA_SOURCE_MODE_CRITERIA, Constants.FILE_SELECTION_MOST_RECENT, 'inexistant_*.csv'
+        );
+        ImportExecution__c execution = TestDataFactory.createImportExecutionWithSchedule(project.Id, 'Pending', 'Import', schedule.Id);
+
+        Test.startTest();
+        ScheduleJobResult result = ScheduleService.executeSchedule(schedule.Id);
+        Test.stopTest();
+
+        Assert.isFalse(result.isSuccess(), 'Aucun fichier ne correspond, l\'exécution doit échouer proprement');
+
+        ImportExecution__c updatedExecution = [SELECT Status__c, EndTime__c FROM ImportExecution__c WHERE Id = :execution.Id];
+        Assert.areEqual(Constants.EXECUTION_STATUS_FAILED, updatedExecution.Status__c,
+            'L\'exécution doit être marquée Failed, pas rester bloquée en Pending');
+        Assert.isNotNull(updatedExecution.EndTime__c, 'La date de fin doit être renseignée');
+
+        List<ImportLog__c> logs = [SELECT Details__c, Status__c FROM ImportLog__c WHERE Execution__c = :execution.Id];
+        Assert.isFalse(logs.isEmpty(), 'Un log doit expliquer pourquoi l\'exécution planifiée a échoué');
+        Assert.isTrue(logs[0].Details__c.contains('inexistant_*.csv'), 'Le log doit mentionner le motif recherché');
+    }
+
+    @IsTest
+    static void testExecuteSchedule_CriteriaMode_OnePerRun_UpdatesProcessedIds() {
+        ImportProject__c project = TestDataFactory.createImportProject();
+        Schedule__c schedule = TestDataFactory.createScheduleWithCriteria(
+            project.Id, Constants.DATA_SOURCE_MODE_CRITERIA, Constants.FILE_SELECTION_ONE_PER_RUN, 'ventes_*.csv'
+        );
+        TestDataFactory.createContentDocumentLinkedTo(project.Id, 'ventes_2026-07-15', 'Name\nA');
+        TestDataFactory.createContentDocumentLinkedTo(project.Id, 'ventes_2026-07-16', 'Name\nB');
+        TestDataFactory.createImportExecutionWithSchedule(project.Id, 'Pending', 'Import', schedule.Id);
+
+        Test.startTest();
+        ScheduleJobResult result = ScheduleService.executeSchedule(schedule.Id);
+        Test.stopTest();
+
+        Assert.isTrue(result.isSuccess(), 'L\'exécution OnePerRun doit réussir : ' + result.message);
+
+        Schedule__c updated = [SELECT LastProcessedFileIds__c FROM Schedule__c WHERE Id = :schedule.Id];
+        Assert.isNotNull(updated.LastProcessedFileIds__c, 'Le fichier traité doit être enregistré sur le schedule');
+    }
+
+    @IsTest
+    static void testExecuteSchedule_InheritMode_Unchanged() {
+        ImportProject__c project = TestDataFactory.createImportProject('Account');
+        insert new Account(Name = 'Compte Test Inherit');
+
+        Schedule__c schedule = new Schedule__c(
+            Frequency__c = 'Daily',
+            Project__c   = project.Id,
+            NextRun__c   = Datetime.now().addDays(1)
+        );
+        insert schedule;
+        TestDataFactory.createImportExecutionWithSchedule(project.Id, 'Pending', 'Import', schedule.Id);
+
+        Test.startTest();
+        ScheduleJobResult result = ScheduleService.executeSchedule(schedule.Id);
+        Test.stopTest();
+
+        Assert.isTrue(result.isSuccess(), 'Le mode Inherit doit continuer à fonctionner sans changement : ' + result.message);
+
+        ImportExecution__c execution = [
+            SELECT MatchedFileName__c FROM ImportExecution__c WHERE Id = :result.executionId
+        ];
+        Assert.isNull(execution.MatchedFileName__c, 'Le mode Inherit ne doit jamais renseigner le fichier retenu');
+    }
+
+    @IsTest
+    static void testReSchedule_CriteriaMode_PreservesFieldsWhenNullPassed() {
+        ImportProject__c project = TestDataFactory.createImportProject();
+        Schedule__c schedule = TestDataFactory.createScheduleWithCriteria(
+            project.Id, Constants.DATA_SOURCE_MODE_CRITERIA, Constants.FILE_SELECTION_ALL, 'ventes_*.csv'
+        );
+
+        Test.startTest();
+        // Appel de la variante 3-arg (simple édition fréquence/date) : ne doit PAS réinitialiser le mode Criteria
+        Map<String, Object> result = ScheduleService.reSchedule(schedule.Id, 'Weekly', Datetime.now().addDays(7));
+        Test.stopTest();
+
+        Assert.isTrue(Boolean.valueOf(result.get('success')));
+        Schedule__c updated = [
+            SELECT DataSourceMode__c, FileSelectionMode__c, FileNamePattern__c
+            FROM Schedule__c WHERE Id = :schedule.Id
+        ];
+        Assert.areEqual(Constants.DATA_SOURCE_MODE_CRITERIA, updated.DataSourceMode__c,
+            'Le mode Criteria existant ne doit pas être réinitialisé par un simple changement de date/fréquence');
+        Assert.areEqual(Constants.FILE_SELECTION_ALL, updated.FileSelectionMode__c);
+        Assert.areEqual('ventes_*.csv', updated.FileNamePattern__c);
+    }
+
+    // *** UNE SEULE PLANIFICATION ACTIVE PAR PROJET (pas par fichier) : l'écran de
+    // planification définit des critères et l'exécution parcourt l'ensemble des fichiers
+    // du projet pour trouver celui qui correspond — il n'y a donc qu'une seule planification
+    // "active" par projet, quel que soit le motif utilisé. ***
+
+    @IsTest
+    static void testSchedule_DifferentCriteriaOnSameProject_UpdatesExistingScheduleInsteadOfDuplicating() {
+        ImportProject__c project = TestDataFactory.createImportProject();
+        Datetime nextRun = Datetime.now().addDays(1);
+
+        Test.startTest();
+        Id scheduleIdA = ScheduleService.schedule(
+            'Daily', nextRun, project.Id,
+            Constants.DATA_SOURCE_MODE_CRITERIA, Constants.FILE_SELECTION_MOST_RECENT, 'ventes.csv'
+        );
+        Id scheduleIdB = ScheduleService.schedule(
+            'Weekly', nextRun.addHours(1), project.Id,
+            Constants.DATA_SOURCE_MODE_CRITERIA, Constants.FILE_SELECTION_MOST_RECENT, 'achats.csv'
+        );
+        Test.stopTest();
+
+        Assert.areEqual(scheduleIdA, scheduleIdB,
+            'Une seule planification active par projet : changer les critères doit mettre à jour '
+            + 'la planification existante plutôt que d\'en créer une autre');
+        List<Schedule__c> schedules = [
+            SELECT Id, Frequency__c, FileNamePattern__c FROM Schedule__c WHERE Project__c = :project.Id
+        ];
+        Assert.areEqual(1, schedules.size(), 'Il ne doit rester qu\'une seule planification pour ce projet');
+        Assert.areEqual('achats.csv', schedules[0].FileNamePattern__c);
+        Assert.areEqual('Weekly', schedules[0].Frequency__c);
+    }
+
+    @IsTest
+    static void testSchedule_SameFilePattern_UpdatesExistingScheduleInsteadOfDuplicating() {
+        ImportProject__c project = TestDataFactory.createImportProject();
+        Datetime nextRun = Datetime.now().addDays(1);
+
+        Test.startTest();
+        Id firstId = ScheduleService.schedule(
+            'Daily', nextRun, project.Id,
+            Constants.DATA_SOURCE_MODE_CRITERIA, Constants.FILE_SELECTION_MOST_RECENT, 'ventes.csv'
+        );
+        Id secondId = ScheduleService.schedule(
+            'Weekly', nextRun.addDays(1), project.Id,
+            Constants.DATA_SOURCE_MODE_CRITERIA, Constants.FILE_SELECTION_MOST_RECENT, 'ventes.csv'
+        );
+        Test.stopTest();
+
+        Assert.areEqual(firstId, secondId,
+            'Reprogrammer le MÊME fichier doit mettre à jour la planification existante, pas en créer une autre');
+        List<Schedule__c> schedules = [SELECT Id, Frequency__c FROM Schedule__c WHERE Project__c = :project.Id];
+        Assert.areEqual(1, schedules.size());
+        Assert.areEqual('Weekly', schedules[0].Frequency__c);
+    }
+
+    @IsTest
+    static void testToggleSchedule_PauseOneFile_DoesNotAffectOtherFileSchedule() {
+        ImportProject__c project = TestDataFactory.createImportProject();
+        Schedule__c scheduleA = TestDataFactory.createScheduleWithCriteria(
+            project.Id, Constants.DATA_SOURCE_MODE_CRITERIA, Constants.FILE_SELECTION_MOST_RECENT, 'ventes.csv'
+        );
+        Schedule__c scheduleB = TestDataFactory.createScheduleWithCriteria(
+            project.Id, Constants.DATA_SOURCE_MODE_CRITERIA, Constants.FILE_SELECTION_MOST_RECENT, 'achats.csv'
+        );
+        ImportExecution__c execA = TestDataFactory.createImportExecutionWithSchedule(project.Id, 'Pending', 'Import', scheduleA.Id);
+        ImportExecution__c execB = TestDataFactory.createImportExecutionWithSchedule(project.Id, 'Pending', 'Import', scheduleB.Id);
+
+        Test.startTest();
+        Map<String, Object> result = ScheduleService.toggleSchedule(scheduleA.Id, true);
+        Test.stopTest();
+
+        Assert.isTrue(Boolean.valueOf(result.get('success')));
+        ImportExecution__c updatedA = [SELECT Status__c FROM ImportExecution__c WHERE Id = :execA.Id];
+        ImportExecution__c updatedB = [SELECT Status__c FROM ImportExecution__c WHERE Id = :execB.Id];
+        Assert.areEqual('Suspended', updatedA.Status__c, 'L\'exécution du fichier mis en pause doit être Suspended');
+        Assert.areEqual('Pending', updatedB.Status__c, 'L\'exécution de l\'AUTRE fichier ne doit pas être affectée');
+    }
+
+    @IsTest
+    static void testGetSchedulesByExecutionStatus_DoesNotMixExecutionsAcrossFiles() {
+        ImportProject__c project = TestDataFactory.createImportProject();
+        Schedule__c scheduleA = TestDataFactory.createScheduleWithCriteria(
+            project.Id, Constants.DATA_SOURCE_MODE_CRITERIA, Constants.FILE_SELECTION_MOST_RECENT, 'ventes.csv'
+        );
+        Schedule__c scheduleB = TestDataFactory.createScheduleWithCriteria(
+            project.Id, Constants.DATA_SOURCE_MODE_CRITERIA, Constants.FILE_SELECTION_MOST_RECENT, 'achats.csv'
+        );
+        TestDataFactory.createImportExecutionWithSchedule(project.Id, 'Pending', 'Import', scheduleA.Id);
+        TestDataFactory.createImportExecutionWithSchedule(project.Id, 'Pending', 'Import', scheduleB.Id);
+
+        Test.startTest();
+        List<ScheduleService.ScheduleWrapper> wrappers =
+            ScheduleService.getSchedulesByExecutionStatusAndIdProject('Pending', project.Id);
+        Test.stopTest();
+
+        Assert.areEqual(2, wrappers.size());
+        for (ScheduleService.ScheduleWrapper wrapper : wrappers) {
+            Schedule__c sch = wrapper.schedules[0];
+            Assert.areEqual(1, wrapper.importExecutions.size(),
+                'Chaque planification ne doit voir que sa PROPRE exécution');
+            Assert.areEqual(String.valueOf(sch.Id), wrapper.importExecutions[0].ApexJobId__c,
+                'L\'exécution doit appartenir à cette planification précise, pas à une autre');
+        }
+    }
+
+    @IsTest
+    static void testGetSchedulesForProject_ReturnsAllSchedulesForTheProject() {
+        ImportProject__c project = TestDataFactory.createImportProject();
+        TestDataFactory.createScheduleWithCriteria(
+            project.Id, Constants.DATA_SOURCE_MODE_CRITERIA, Constants.FILE_SELECTION_MOST_RECENT, 'ventes.csv'
+        );
+        TestDataFactory.createScheduleWithCriteria(
+            project.Id, Constants.DATA_SOURCE_MODE_CRITERIA, Constants.FILE_SELECTION_MOST_RECENT, 'achats.csv'
+        );
+
+        Test.startTest();
+        List<Schedule__c> schedules = ScheduleService.getSchedulesForProject(project.Id);
+        Test.stopTest();
+
+        Assert.areEqual(2, schedules.size(), 'Les 2 planifications du projet doivent être retournées');
+    }
+
       /**
-     * Helper : construction schedule + exécution liés au même projet 
+     * Helper : construction schedule + exécution liés au même projet
      */
     private static Map<String, Object> setupScheduleWithExecution(
         String scheduleId

@@ -44,7 +44,76 @@ public with sharing class FieldMappingController {
     public static  List<FieldMappingRepository.FieldMappingDTO> getAllMappingsByProjectId(Id projectId){
         return FieldMappingService.getAllMappingsByProject(projectId);
     }
-    
+
+    // Non cacheable à dessein : appelé juste après l'enregistrement d'un mapping (fermeture de la
+    // modale) pour savoir si le fichier est désormais mappé — doit toujours refléter l'état réel,
+    // pas une réponse mise en cache par un @wire ailleurs (ex. fieldMapper) sur la même méthode.
+    @AuraEnabled
+    public static Boolean hasFieldMappings(Id projectId) {
+        return !FieldMappingService.getAllMappingsByProject(projectId).isEmpty();
+    }
+
+    // Un mapping existant ne suffit pas : si un fichier fraîchement chargé a des colonnes que
+    // le mapping actuel ne couvre pas, son import ne produirait que des enregistrements vides.
+    // Vérifie donc que CHAQUE fichier CSV du projet n'a que des colonnes déjà mappées.
+    @AuraEnabled
+    public static Boolean hasAllFilesMapped(Id projectId) {
+        if (!hasFieldMappings(projectId)) return false;
+
+        Set<String> mappedColumns = new Set<String>();
+        for (FieldMappingRepository.FieldMappingDTO mapping : FieldMappingService.getAllMappingsByProject(projectId)) {
+            if (String.isNotBlank(mapping.sourceColumn)) {
+                mappedColumns.add(mapping.sourceColumn.trim().toLowerCase());
+            }
+        }
+
+        for (ContentDocumentController.ContentFileWrapper file : ContentDocumentController.getProjectFiles(String.valueOf(projectId))) {
+            for (String header : getFileHeaders(file.contentDocumentId)) {
+                if (String.isNotBlank(header) && !mappedColumns.contains(header.trim().toLowerCase())) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    // Extrait uniquement la ligne d'en-tête d'un fichier CSV déjà chargé, sans logique
+    // d'échappement de guillemets complète (suffisant pour des en-têtes, qui contiennent
+    // rarement le délimiteur lui-même — même simplification que côté client, c/utility.js).
+    private static List<String> getFileHeaders(String contentDocumentId) {
+        String content = ContentDocumentController.getFileContent(contentDocumentId);
+        if (String.isBlank(content)) return new List<String>();
+
+        Integer newlineIdx = content.indexOf('\n');
+        String headerLine = (newlineIdx > -1 ? content.substring(0, newlineIdx) : content).replace('\r', '');
+        if (String.isBlank(headerLine)) return new List<String>();
+
+        String delimiter = detectDelimiter(headerLine);
+        List<String> headers = new List<String>();
+        for (String raw : headerLine.split(delimiter == '|' ? '\\|' : delimiter)) {
+            String h = raw.trim();
+            if (h.startsWith('"') && h.endsWith('"') && h.length() >= 2) {
+                h = h.substring(1, h.length() - 1);
+            }
+            headers.add(h);
+        }
+        return headers;
+    }
+
+    private static String detectDelimiter(String line) {
+        List<String> candidates = new List<String>{ ',', ';', '\t', '|' };
+        String best = ',';
+        Integer bestCount = -1;
+        for (String d : candidates) {
+            Integer count = line.length() - line.replace(d, '').length();
+            if (count > bestCount) {
+                bestCount = count;
+                best = d;
+            }
+        }
+        return best;
+    }
+
 
     @AuraEnabled
     public static List<FieldMapping__c> saveMappings(

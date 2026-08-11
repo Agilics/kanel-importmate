@@ -86,6 +86,7 @@
   border: 1.5px solid rgba(79,70,229,0.25); box-shadow: var(--shadow-xs);
 }
 .btn-outline:hover { border-color: var(--indigo); background: var(--indigo-soft); }
+.btn-outline[disabled] { opacity: 0.5; cursor: not-allowed; background: var(--surface-solid); border-color: var(--border-solid); color: var(--muted); }
 .btn-ghost  { background: transparent; color: var(--muted); border: none; }
 .btn-ghost:hover { color: var(--text); }
 .btn-icon {
@@ -107,12 +108,17 @@
 .primary-badge { background: var(--indigo-soft); color: var(--indigo); border: 1px solid rgba(79,70,229,0.15); margin: 8px 0; }
 
 /* ══ Source tabs (copié de aurora-step2.html) ══ */
+.src-tabs-row {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap; margin: 20px 0 16px;
+}
 .src-tabs {
   display: flex; gap: 3px;
-  margin: 20px 0 16px; padding: 4px;
+  padding: 4px;
   background: var(--surface-solid); border: 1px solid var(--border-solid);
   border-radius: var(--radius-sm); width: fit-content; box-shadow: var(--shadow-xs);
 }
+.goto-scheduling-btn { flex-shrink: 0; }
 .src-tab {
   padding: 7px 18px; border-radius: calc(var(--radius-sm) - 2px);
   font-size: .82rem; font-weight: 600; cursor: pointer;
@@ -184,13 +190,20 @@
   display: grid; place-items: center;
   font-size: 11px; font-weight: 700; flex-shrink: 0;
 }
+.action-icon-btn {
+  background: transparent; border: none; cursor: pointer;
+  font-size: .9rem; padding: 4px 6px; border-radius: 6px;
+  color: var(--muted); line-height: 1; flex-shrink: 0;
+  transition: background .15s, color .15s;
+  display: inline-flex; align-items: center;
+}
+.action-icon-btn:hover { background: var(--indigo-soft); color: var(--indigo); }
 .sf-icon  { font-size: 22px; flex-shrink: 0; }
 .sf-name  { font-size: .85rem; font-weight: 700; color: var(--text); }
 .sf-meta  { font-size: .74rem; color: var(--muted); margin-top: 2px; }
 .sf-badge { font-size: .68rem; font-weight: 700; padding: 2px 8px; border-radius: var(--radius-pill); flex-shrink: 0; }
 .sfb-new  { background: var(--green-soft); color: #059669; }
 .sfb-old  { background: rgba(148,163,184,0.1); color: var(--muted); }
-
 /* ══ Error / info ══ */
 .custom-icon-error { --slds-c-icon-color-foreground-default: #BE123C; }
 .info { font-size: .82rem; margin: 0; }
@@ -266,6 +279,7 @@
 /* ══ Execution history status badges ══ */
 .exec-status { font-size: .72rem; font-weight: 700; padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
 .exec-completed  { background: #d1fae5; color: #065f46; }
+.exec-completedwitherrors { background: #ffedd5; color: #9a3412; }
 .exec-failed     { background: #fee2e2; color: #991b1b; }
 .exec-inprogress { background: #dbeafe; color: #1e40af; }
 .exec-pending    { background: #f3f4f6; color: #6b7280; }

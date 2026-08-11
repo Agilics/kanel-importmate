@@ -214,7 +214,9 @@ public with sharing class PreProcessBatch implements Database.Batchable<SObject>
 
         if (dryRunMode) {
             //dry-run done, skip to cleanup
-            exec.Status__c = Constants.EXECUTION_STATUS_COMPLETED;
+            exec.Status__c = totalInvalid > 0
+                ? Constants.EXECUTION_STATUS_COMPLETED_WITH_ERRORS
+                : Constants.EXECUTION_STATUS_COMPLETED;
             exec.Phase__c = Constants.EXECUTION_PHASE_COMPLETED;
             exec.ProcessedRecords__c = totalProcessed;
             exec.FailedRecords__c = totalInvalid;
@@ -222,12 +224,12 @@ public with sharing class PreProcessBatch implements Database.Batchable<SObject>
             exec.EndTime__c = Datetime.now();
             update exec;
 
-            PublisherService.publishExecutionCompleted(
+            PublisherService.publishImportStatus(
                 String.valueOf(executionId),
-                true,
-                totalValid,
-                totalInvalid,
-                totalLogged
+                exec.Status__c,
+                100,
+                String.format('Execution completed. Processed: {0}, Failed Lines: {1}, Total Errors: {2}',
+                    new List<String>{ String.valueOf(totalValid), String.valueOf(totalInvalid), String.valueOf(totalLogged) })
             );
 
             Database.executeBatch(new StagingCleanupBatch(executionId), Constants.CLEANUP_BATCH_SIZE);

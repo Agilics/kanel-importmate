@@ -133,6 +133,10 @@ lightning-button { --slds-c-button-radius-border: var(--radius-sm); }
   background: var(--green-soft); color: #059669; border-color: rgba(16,185,129,0.2);
 }
 .status-badge.completed .status-dot { background: var(--green); }
+.status-badge.warning {
+  background: rgba(245,158,11,0.1); color: #B45309; border-color: rgba(245,158,11,0.2);
+}
+.status-badge.warning .status-dot { background: var(--amber, #F59E0B); }
 .status-badge.failed {
   background: var(--coral-soft); color: #BE123C; border-color: rgba(244,63,94,0.15);
 }

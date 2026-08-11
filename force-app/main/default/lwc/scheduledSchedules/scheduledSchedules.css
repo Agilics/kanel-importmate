@@ -71,6 +71,12 @@ tbody tr:last-child td { border-bottom: none; }
 .project-sub  { font-size: .72rem; color: var(--muted); }
 .d-flex { display: flex; flex-direction: column; }
 
+/* ══ Matched file cell (mode Criteria) ══ */
+.file-cell {
+  display: inline-block; max-width: 220px; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap; font-size: .78rem; color: var(--muted);
+}
+
 /* ══ Box icons (status indicator) ══ */
 .box-icon {
   width: 38px; height: 38px; border-radius: var(--radius-sm);
@@ -80,6 +86,7 @@ tbody tr:last-child td { border-bottom: none; }
 .box-icon-no-completed { background: var(--amber-soft); }
 .box-icon-failed       { background: var(--coral-soft); }
 .box-icon-completed    { background: var(--green-soft); }
+.box-icon-warning      { background: var(--amber-soft); }
 .box-icon-in-progress  { background: var(--indigo-soft); }
 .progress-status       { background: var(--indigo-soft); }
 
@@ -87,6 +94,10 @@ tbody tr:last-child td { border-bottom: none; }
 .completed-icon  { --slds-c-icon-color-foreground-default: var(--green); }
 .suspended-icon  { --slds-c-icon-color-foreground-default: #B45309; }
 .failed-icon     { --slds-c-icon-color-foreground-default: var(--coral); }
+.warning-icon    { --slds-c-icon-color-foreground-default: var(--amber); }
+.inprogress-icon { --slds-c-icon-color-foreground-default: var(--indigo); display: inline-block; }
+.spin { animation: sched-spin 1.2s linear infinite; }
+@keyframes sched-spin { to { transform: rotate(360deg); } }
 .icon-white      { --slds-c-icon-color-foreground-default: #ffffff; }
 .primary-icon    { --slds-c-icon-color-foreground-default: var(--indigo); }
 .remove-icon     { --slds-c-icon-color-foreground: var(--coral); --slds-c-icon-color-background: transparent; }
@@ -107,6 +118,7 @@ tbody tr:last-child td { border-bottom: none; }
 .status-badge.completed  { background: var(--green-soft); color: #059669; border-color: rgba(16,185,129,0.2); }
 .status-badge.failed     { background: var(--coral-soft);  color: #BE123C; border-color: rgba(244,63,94,0.15); }
 .status-badge.in-progress { background: var(--indigo-soft); color: var(--indigo); border-color: rgba(79,70,229,0.15); }
+.status-badge.warning   { background: var(--amber-soft); color: #B45309; border-color: rgba(245,158,11,0.2); }
 
 /* ══ Frequency chips (prototype: .freq-chip) ══ */
 .freq-chips { display: flex; gap: 8px; }

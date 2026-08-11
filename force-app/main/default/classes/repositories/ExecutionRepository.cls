@@ -123,7 +123,11 @@
             }
         }
 
-        //Créer une exécution liée au schedule via ApexJobId__c 
+        //Créer une exécution liée au schedule
+        //NB : ApexJobId__c est aussi réécrit plus tard par le pipeline batch partagé
+        //(PreProcessBatch.finish()) pour y stocker l'Id du job Apex EN COURS — ce champ ne
+        //peut donc PAS servir de lien stable et durable vers le Schedule__c. Le champ dédié
+        //Schedule__c (lookup) porte ce lien et n'est jamais modifié après création.
         public static ImportExecution__c createLinkedExecution(
             Id projectId,String apexJobId, String status, String type,String phase,Integer totalRecord
         ) {
@@ -137,7 +141,15 @@
                 ProcessedRecords__c = 0,
                 FailedRecords__c    = 0
             );
-            
+
+            if (String.isNotBlank(apexJobId)) {
+                try {
+                    execution.Schedule__c = Id.valueOf(apexJobId);
+                } catch (Exception e) {
+                    // apexJobId n'est pas un Id de Schedule__c valide (appel hors contexte de planification) — ignorer
+                }
+            }
+
             if(phase != null && phase!= ''){
                 execution.Phase__c = phase;
             }

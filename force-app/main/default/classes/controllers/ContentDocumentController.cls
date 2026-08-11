@@ -24,9 +24,13 @@ public with sharing class ContentDocumentController {
             if (String.isBlank(base64Data) || String.isBlank(fileName) || String.isBlank(projectId)) {
                 throw new AuraHandledException('base64Data, fileName et projectId sont obligatoires');
             }
+            // Le nom stocké inclut la date/heure de chargement, pour identifier sans ambiguïté
+            // quel fichier a été importé et quand (utile pour la planification par critères).
+            String storedFileName = buildTimestampedFileName(fileName);
+
             ContentVersion cv = new ContentVersion(
-                Title          = fileName,
-                PathOnClient   = fileName,
+                Title          = storedFileName,
+                PathOnClient   = storedFileName,
                 VersionData    = EncodingUtil.base64Decode(base64Data),
                 IsMajorVersion = true
             );
@@ -49,6 +53,28 @@ public with sharing class ContentDocumentController {
         } catch (Exception e) {
             throw new AuraHandledException(e.getMessage());
         }
+    }
+
+    /**
+     * Insère la date/heure de chargement dans le nom de fichier (avant l'extension),
+     * ex. "ventes.csv" -> "ventes_2026-07-21_11h40.csv"
+     */
+    private static String buildTimestampedFileName(String originalFileName) {
+        Integer lastDot   = originalFileName.lastIndexOf('.');
+        String  baseName  = lastDot > 0 ? originalFileName.substring(0, lastDot) : originalFileName;
+        String  extension = lastDot > 0 ? originalFileName.substring(lastDot + 1) : 'csv';
+
+        Datetime now = Datetime.now();
+        String timestamp = String.valueOf(now.year())
+            + '-' + padTwoDigits(now.month())
+            + '-' + padTwoDigits(now.day())
+            + '_' + padTwoDigits(now.hour()) + 'h' + padTwoDigits(now.minute());
+
+        return baseName + '_' + timestamp + '.' + extension;
+    }
+
+    private static String padTwoDigits(Integer value) {
+        return value < 10 ? '0' + String.valueOf(value) : String.valueOf(value);
     }
 
     /**

@@ -1,0 +1,58 @@
+<template>
+    <div class="file-criteria-builder">
+        <div class="form-group">
+            <label class="form-label" for="quick-pick-select"><span class="field-num">{numType}</span>Type de fichier</label>
+            <select id="quick-pick-select" class="rounded-input" onchange={handleQuickPickChange}>
+                <template for:each={quickPickOptions} for:item="qp">
+                    <option key={qp.value} value={qp.value} selected={qp.isSelected}>{qp.label}</option>
+                </template>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label"><span class="field-num">{numSelectionMode}</span>Si plusieurs correspondent</label>
+            <div class="selection-mode-row">
+                <template for:each={selectionModeOptions} for:item="sm">
+                    <button
+                        key={sm.value}
+                        type="button"
+                        class={sm.buttonClass}
+                        data-value={sm.value}
+                        onclick={handleSelectionModeClick}
+                    >{sm.label}</button>
+                </template>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label" for="pattern-input"><span class="field-num">{numPattern}</span>Modèle de nom de fichier</label>
+            <div class="pattern-input-row">
+                <input
+                    id="pattern-input"
+                    data-id="pattern-input"
+                    type="text"
+                    class="rounded-input"
+                    value={pattern}
+                    placeholder="ex. ventes_{yyyy-MM-dd}.csv"
+                    oninput={handlePatternInput}
+                />
+                <span class="field-num field-num--inline">{numShortcuts}</span>
+                <button type="button" class="btn-shortcut" data-token="date" onclick={handleInsertToken} title="Insérer la date">📅 Date</button>
+                <button type="button" class="btn-shortcut" data-token="star" onclick={handleInsertToken} title="Tout caractère">* Tout</button>
+                <button type="button" class="btn-shortcut" data-token="qmark" onclick={handleInsertToken} title="Un caractère">? Un car.</button>
+            </div>
+            <template if:true={hasStoredFiles}>
+                <select class="rounded-input stored-file-hint" onchange={handleStoredFileSelect}>
+                    <option value="" disabled selected>Ou choisir un fichier déjà chargé pour préremplir...</option>
+                    <template for:each={storedFileOptions} for:item="f">
+                        <option key={f.value} value={f.value}>{f.label}</option>
+                    </template>
+                </select>
+            </template>
+        </div>
+
+        <p class="pattern-preview"><span class="field-num">{numPreview}</span>Pour aujourd'hui, cherche : <code>{resolvedPreview}</code></p>
+
+        <div class="pattern-summary"><span class="field-num">{numSummary}</span>{summary}</div>
+    </div>
+</template>

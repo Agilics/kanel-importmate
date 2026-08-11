@@ -12,21 +12,21 @@ import getExecutionDetails from '@salesforce/apex/BatchExecutionController.getEx
 import getLatestProjectExecution from '@salesforce/apex/BatchExecutionController.getLatestProjectExecution';
 import getImportLogs from '@salesforce/apex/BatchExecutionController.getImportLogs';
 import cancelExecution from '@salesforce/apex/BatchExecutionController.cancelExecution';
+import getProjectFiles from '@salesforce/apex/ContentDocumentController.getProjectFiles';
 import { parseCsvData } from 'c/utility';
 import { subscribe, unsubscribe, onError } from 'lightning/empApi';
-import addSchedule from '@salesforce/apex/ScheduleController.addSchedule';
 
 
 // ===== Custom Labels =====
 import LABEL_TITLE from '@salesforce/label/c.IM_EX_Title';
 import LABEL_SUBTITLE from '@salesforce/label/c.IM_EX_Subtitle';
 import LABEL_BTN_EXPORT_LOGS from '@salesforce/label/c.IM_EX_Btn_ExportLogs';
-import LABEL_BTN_SCHEDULE from '@salesforce/label/c.IM_EX_Btn_ScheduleImport';
 import LABEL_BTN_START from '@salesforce/label/c.IM_EX_Btn_StartImport';
 import LABEL_BTN_CANCEL from '@salesforce/label/c.IM_EX_Btn_CancelImport';
 import LABEL_BTN_BACK from '@salesforce/label/c.IM_EX_Btn_BackToValidation';
 import LABEL_PROGRESS_TITLE from '@salesforce/label/c.IM_EX_Progress_Title';
 import LABEL_STATUS_COMPLETED from '@salesforce/label/c.ProjectCard_Status_Completed';
+import LABEL_STATUS_COMPLETED_WITH_ERRORS from '@salesforce/label/c.ProjectCard_Status_CompletedWithErrors';
 import LABEL_STATUS_CANCELLED from '@salesforce/label/c.ProjectCard_Status_Cancelled';
 import LABEL_STATUS_FAILED from '@salesforce/label/c.ProjectCard_Status_Failed';
 import LABEL_STATUS_IN_PROGRESS from '@salesforce/label/c.ProjectCard_Status_InProgress';
@@ -40,13 +40,19 @@ import LABEL_DETAIL_FAILED from '@salesforce/label/c.IM_EX_Detail_Failed';
 import LABEL_PROCESSING_MSG from '@salesforce/label/c.IM_EX_Processing_Message';
 import LABEL_FAILED_TITLE from '@salesforce/label/c.IM_EX_Failed_Title';
 import LABEL_FAILED_SUBTITLE from '@salesforce/label/c.IM_EX_Failed_Subtitle';
-import Import_SucessCreatedSchedulesMessage from '@salesforce/label/c.Import_SucessCreatedSchedulesMessage';
 
 const STAGING_CHUNK_SIZE = 200;
 const POLLING_INTERVAL_MS = 3000;
 const SCHEDULE_WATCH_INTERVAL_MS = 10000;
 const SS_RUN_STATE_PREFIX = 'IM_executionCmpRun_v1';
 const SS_RUN_STATE_LAST_KEY = 'IM_executionCmpRun_last_v1';
+// CompletedWithErrors est un état terminal au même titre que Completed/Failed/Cancelled —
+// sans lui ici, le suivi live/polling resterait bloqué en "en cours" pour tout import
+// comportant au moins une erreur (le batch ne renvoie plus jamais 'Completed' dans ce cas).
+const TERMINAL_STATUSES = ['completed', 'completedwitherrors', 'failed', 'cancelled'];
+function isTerminalStatus(status) {
+    return TERMINAL_STATUSES.includes((status || '').toLowerCase());
+}
 
 export default class ExecutionCmp extends LightningElement {
   _projectId = '';
@@ -81,11 +87,6 @@ export default class ExecutionCmp extends LightningElement {
   @track totalErrors = 0;
 
   @track showImportResults = false;
-  @track frequency='Weekly';
-  @track nextRun  ;
-  @track executionMode;
-  @track batchSize;
-  @track sendEmailNotification;
 
 
   subscription = null;
@@ -104,7 +105,6 @@ export default class ExecutionCmp extends LightningElement {
       title: LABEL_TITLE,
       subtitle: LABEL_SUBTITLE,
       btnExportLogs: LABEL_BTN_EXPORT_LOGS,
-      btnSchedule: LABEL_BTN_SCHEDULE,
       btnStart: LABEL_BTN_START,
       btnCancel: LABEL_BTN_CANCEL,
       btnBack: LABEL_BTN_BACK,
@@ -121,31 +121,6 @@ export default class ExecutionCmp extends LightningElement {
     };
   }
 
-  // Initialisation de next run 
-  initializeNextRun() {
-      const now = new Date();
-      now.setHours(now.getHours() + 1);
-      this.nextRun = this.formatDateTimeForInput(now);
-  }
-
-
-  // Formatage
-  formatDateTimeForInput(date) {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      const hours = String(date.getHours()).padStart(2, '0');
-      const minutes = String(date.getMinutes()).padStart(2, '0');
-      return `${year}-${month}-${day}T${hours}:${minutes}`;
-  }
-   
-  //configuration card  ScheduleExecution 
-  showScheduledExecution = true;
-  hideScheduledExecution = false; 
-  // schedule | Immediate  cards form  style 
-  get formGroup(){return 'form-group';}
-
-  get formLabel(){return 'form-label';}
 
   @api
   get projectId() {
@@ -157,10 +132,28 @@ export default class ExecutionCmp extends LightningElement {
     if (nextProjectId === this._projectId) return;
     this._projectId = nextProjectId;
     this.tryRestoreExecutionState();
+    this.checkHasProjectFiles();
+  }
+
+  // Programmer un import n'a de sens que si le projet a déjà au moins un fichier.
+  @track hasProjectFiles = false;
+  async checkHasProjectFiles() {
+    if (!this._projectId) { this.hasProjectFiles = false; return; }
+    try {
+      const files = await getProjectFiles({ projectId: this._projectId });
+      this.hasProjectFiles = Array.isArray(files) && files.length > 0;
+    } catch (e) {
+      console.error('[ExecutionCmp] checkHasProjectFiles error', e);
+      this.hasProjectFiles = false;
+    }
+  }
+
+  get isGotoSchedulingDisabled() { return !this.hasProjectFiles; }
+  get gotoSchedulingTitle() {
+    return this.hasProjectFiles ? '' : 'Chargez d\'abord un fichier CSV pour ce projet';
   }
 
   connectedCallback() {
-    this.initializeNextRun();
     this.registerErrorListener();
     this.handleSubscribe();
     this.tryRestoreExecutionState();
@@ -178,36 +171,16 @@ export default class ExecutionCmp extends LightningElement {
     onError((error) => console.error('EMP API error: ', JSON.stringify(error)));
   }
 
-  get executionModeOptions() {
-    return [
-      { label: 'Immediate', value: 'Immediate' },
-      { label: 'Batch', value: 'Batch' }
-    ];
-  }
-
-  get batchSizeOptions() {
-    return [
-      { label: '50', value: '50' },
-      { label: '100', value: '100' },
-      { label: '200', value: '200' },
-      { label: '500', value: '500' },
-      { label: '1000', value: '1000' }
-    ];
-  }
-
   get canRefreshStatus() { return !this.isLoading && !this.isCheckingStatus && !!this.projectId; }
   get hasImportLogs() { return this.importLogs.length > 0; }
 
-  // Masquer le formulaire de configuration (scheduling/immediate) quand un import est en cours ou terminé
-  get showExecutionSetupCard() { return !this.showImportProgress && !this.showImportResults; }
-
   get isStartImportDisabled() { return this.isLoading || !this.projectId; }
-  get isScheduleImportDisabled() { return this.isLoading || !this.projectId; }
   get isExportLogsDisabled() { return this.isLoading || !this.currentExecutionId; }
   get isImportInProgress() { return this.importStatus === 'InProgress' || this.importStatus === 'Pending'; }
   get isImportCancelled() { return this.importStatus === 'Cancelled'; }
   get canCancelImport() { return Boolean(this.currentExecutionId) && this.isImportInProgress && !this.isLoading; }
   get isImportCompleted() { return this.importStatus === 'Completed'; }
+  get isImportCompletedWithErrors() { return this.importStatus === 'CompletedWithErrors'; }
   get isImportFailed() { if (this.isImportCancelled) return false; return this.importStatus === 'Failed'; }
   get importProgressPercentage() { return Math.round(this.importProgress || 0); }
 
@@ -216,12 +189,14 @@ export default class ExecutionCmp extends LightningElement {
 
   get progressBarVariant() {
     if (this.isImportCompleted) return 'success';
+    if (this.isImportCompletedWithErrors) return 'warning';
     if (this.isImportFailed) return 'error';
     return 'base';
   }
 
   get importStatusIconName() {
     if (this.isImportCompleted) return 'utility:success';
+    if (this.isImportCompletedWithErrors) return 'utility:warning';
     if (this.isImportCancelled) return 'utility:warning';
     if (this.isImportFailed) return 'utility:error';
     return 'utility:info';
@@ -229,6 +204,7 @@ export default class ExecutionCmp extends LightningElement {
 
   get importStatusClass() {
     if (this.isImportCompleted) return 'status-badge completed';
+    if (this.isImportCompletedWithErrors) return 'status-badge warning';
     if (this.isImportCancelled) return 'status-badge failed';
     if (this.isImportFailed) return 'status-badge failed';
     return 'status-badge in-progress';
@@ -236,6 +212,7 @@ export default class ExecutionCmp extends LightningElement {
 
   get formattedImportStatus() {
     if (this.isImportCompleted) return LABEL_STATUS_COMPLETED;
+    if (this.isImportCompletedWithErrors) return LABEL_STATUS_COMPLETED_WITH_ERRORS;
     if (this.isImportCancelled) return LABEL_STATUS_CANCELLED;
     if (this.isImportFailed) return LABEL_STATUS_FAILED;
     if (this.isImportInProgress) return LABEL_STATUS_IN_PROGRESS;
@@ -286,45 +263,6 @@ export default class ExecutionCmp extends LightningElement {
     }
   }
 
-  // Conversion pour  next run en format Date
-  convertInputToDate(inputValue) {
-      return new Date(inputValue);
-  }
-
-  
-  //planifier une exécution
-  async handleScheduleImport() {
-    try {
-        this.isLoading = true;
-
-        const nextRunDate = this.convertInputToDate(this.nextRun);
-        await addSchedule({
-            frequency: this.frequency,
-            nextRun: nextRunDate,
-            projectId: this.projectId
-        });
-
-        // Notifier le parent via un événement — ne pas appeler directement
-        // le composant enfant depuis un sibling
-        this.dispatchEvent(new CustomEvent('schedulecreated'));
-
-        // Refresh en sécurité : seulement si le composant est dans ce template
-        const scheduledComponent = this.template.querySelector('c-scheduled-schedules');
-        if (scheduledComponent) {
-            await scheduledComponent.refreshSchedules();
-        }
-
-        this.showToast('Success', Import_SucessCreatedSchedulesMessage, 'success');
-
-    } catch (error) {
-        // Distinguer l'erreur Apex de l'erreur JS locale
-        const message = error?.body?.message || error?.message || 'Failed to create schedule';
-        console.error('Error in handleScheduleImport:', error);
-        this.showToast('Error', message, 'error');
-    } finally {
-        this.isLoading = false;
-    }
-}
 
   //annuler importation d'exécution
   async handleCancelImport() {
@@ -351,6 +289,8 @@ export default class ExecutionCmp extends LightningElement {
   }
 
   handlePreviousStep() { this.dispatchEvent(new CustomEvent('previous')); }
+
+  handleGotoScheduling() { this.dispatchEvent(new CustomEvent('gotoscheduling')); }
 
   async handleRefreshStatus() {
     if (!this.canRefreshStatus) return;
@@ -509,7 +449,7 @@ export default class ExecutionCmp extends LightningElement {
       this.currentExecutionId = details.executionId || executionId;
       this.showImportProgress = true;
       this.applyExecutionDetails(details);
-      const isDone = status === 'completed' || status === 'failed' || status === 'cancelled';
+      const isDone = isTerminalStatus(status);
       if (isDone) {
         this.stopExecutionPolling();
         this.showImportResults = true;
@@ -534,7 +474,7 @@ export default class ExecutionCmp extends LightningElement {
       this.currentExecutionId = details.executionId;
       this.showImportProgress = true;
       this.applyExecutionDetails(details);
-      const isDone = status === 'completed' || status === 'failed' || status === 'cancelled';
+      const isDone = isTerminalStatus(status);
       if (isDone) {
         this.stopExecutionPolling();
         this.showImportResults = true;
@@ -558,34 +498,13 @@ export default class ExecutionCmp extends LightningElement {
     if (this.subscription) { unsubscribe(this.subscription, () => {}); this.subscription = null; }
   }
 
-  //add schedule changes handler
-  handleFrequencyChange(event) {
-      this.frequency = event.detail.value;
-  }
-
-  handleNextRunChange(event) {
-      this.nextRun = event.detail.value;
-  }
-
-  handleModeChange(event) {
-      this.executionMode = event.detail.value;
-  }
-
-  handleBatchSizeChange(event) {
-      this.batchSize = event.detail.value;
-  }
-
-  handleSendNotificationChange(event) {
-      this.sendEmailNotification = event.detail;
-  }
-
   handlePlatformEvent(response) {
     const payload = response.data.payload;
     const eventExecutionId = payload.ExecutionId__c;
     if (!eventExecutionId) return;
 
     const currentIsDone = this.showImportResults ||
-      ['completed', 'failed', 'cancelled'].includes((this.importStatus || '').toLowerCase());
+      isTerminalStatus(this.importStatus);
 
     // No active execution, or previous one is done → try to adopt the new one
     if (!this.currentExecutionId || currentIsDone) {
@@ -598,7 +517,7 @@ export default class ExecutionCmp extends LightningElement {
     this.importMessage = payload.Message__c || this.importMessage;
     if (payload.Progress__c !== null && payload.Progress__c !== undefined) this.importProgress = Number(payload.Progress__c) || 0;
     const status = (this.importStatus || '').toLowerCase();
-    if (status === 'completed' || status === 'failed' || status === 'cancelled') this.pollExecutionStatus(this.currentExecutionId);
+    if (isTerminalStatus(status)) this.pollExecutionStatus(this.currentExecutionId);
     this.persistRunState();
   }
 
@@ -606,7 +525,7 @@ export default class ExecutionCmp extends LightningElement {
     if (!executionId || !this.projectId || this.isRestoringState || this.isAdoptingExecution) return;
     // If a completed execution is displayed, reset before adopting the new one
     if (this.currentExecutionId) {
-      const currentIsDone = ['completed', 'failed', 'cancelled'].includes((this.importStatus || '').toLowerCase());
+      const currentIsDone = isTerminalStatus(this.importStatus);
       if (!currentIsDone) return; // Don't interrupt an active execution
       this.resetExecutionState();
     }
@@ -653,7 +572,7 @@ export default class ExecutionCmp extends LightningElement {
       this.persistRunState();
       await this.fetchRecentLogs(executionId);
       const status = (this.importStatus || '').toLowerCase();
-      const isDone = status === 'completed' || status === 'failed' || status === 'cancelled';
+      const isDone = isTerminalStatus(status);
       if (isDone) {
         this.stopExecutionPolling();
         this.isLoading = false;
