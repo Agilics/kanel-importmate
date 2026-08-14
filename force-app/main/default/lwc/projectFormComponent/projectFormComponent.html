@@ -1,68 +1,109 @@
 <!--
-  @description: Project form — Aurora Step 1 design
+  @description       : Project FORM component hosting inputs from project form
+  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
+  @group             : 
+  @last modified on  : 02-25-2026
+  @last modified by  mouhamed niang
+  @Last Modification : refactoring du formulaire en responsive design
 -->
 <template>
-  <div class={containerClass}>
-    <div class={contentClass}>
-
-      <!-- Card header — création uniquement -->
+   <div class={containerClass}>
+      <!-- Header : création seulement -->
       <template if:false={openModal}>
-        <div class="card-header">
-          <div>
-            <div class="card-title">{label.projectInfoLabel}</div>
-            <div class="card-sub">{label.projectDetailsLabel}</div>
+        <div class="header">
+          <lightning-icon icon-name="utility:add" alternative-text="Add" class="plus-icons margin-icon"></lightning-icon>
+
+          <div class="text-header">
+            <h1>{label.projectInfoLabel}</h1>
+            <p class="subtitle">
+              {label.projectDetailsLabel}
+            </p>
           </div>
         </div>
+    </template>
+    <!-- Card container -->
+    <section class={contentClass} >
+      <div class="project-info">
+         <!-- Section header : création seulement -->
+          <template if:false={openModal}>
+              <!-- Project Information -->
+            <div class="section-header">
+              <lightning-icon icon-name="utility:info" alternative-text="Info"
+                class="icon-colors"></lightning-icon>
+              <h2>{label.projectInfoSectionLabel}</h2>
+            </div>
+          </template>
+      <div class="form-group">
+        <label class="custom-label name-label" for="project-name">
+          {label.projectNameLabel}<span class="required">*</span>
+        </label>
+        <lightning-input id="project-name" class="rounded-input" style="width: 100%" type="text"
+          placeholder= {projectNamePlaceholder} value={projectName}
+          onchange={handleProjectNameChange}></lightning-input>
+      </div>
+      <p class="help-text">
+        {label.helperNameLabel}
+      </p>
+
+      <!--Description textarea -->
+      <label class="custom-label mb-1 description-label" name="description">
+        {label.descriptionLabel}
+      </label>
+      <lightning-textarea class="input-field rounded-input" name="description" style="margin-top: -1.6rem; "
+        placeholder={descriptionPlaceholder} value={description}
+        onchange={handleDescriptionChange}></lightning-textarea>
+      <p class="help-text">
+        {label.helperDescriptionLabel}
+      </p>
+    
+      </div>
+    
+       <!-- Divider : création seulement -->
+      <template if:false={openModal}>
+        <hr class="divider" />
       </template>
 
-      <!-- Nom du projet -->
-      <div class="form-group">
-        <label class="form-label">
-          {label.projectNameLabel} <span class="req">*</span>
-        </label>
-        <input
-          type="text"
-          class="form-input"
-          placeholder={projectNamePlaceholder}
-          value={projectName}
-          oninput={handleProjectNameChange}
-        />
-      </div>
-
-      <!-- Objet Salesforce cible -->
-      <div class="form-group">
-        <label class="form-label">
-          {label.targetObjectLabel} <span class="req">*</span>
-        </label>
-        <select class="form-input" onchange={handleTargetObjectChange}>
-          <option value="" disabled selected={isNoTargetSelected}>Choisir un objet Salesforce...</option>
-          <template for:each={targetObjectOptionsWithSelected} for:item="o">
-            <option key={o.value} value={o.value} selected={o.isSelected}>{o.label}</option>
-          </template>
-        </select>
-      </div>
-
-      <!-- Description -->
-      <div class="form-group">
-        <label class="form-label">
-          {label.descriptionLabel} <span class="optional">(optionnel)</span>
-        </label>
-        <textarea
-          class="form-input form-textarea"
-          placeholder={descriptionPlaceholder}
-          oninput={handleDescriptionChange}
-          rows="3"
-        >{description}</textarea>
-      </div>
-
+      <!-- Target Object Configuration -->
+       <div class="target-object-config">
+          <!-- Section header : création seulement -->
+            <template if:false={openModal}>
+              <div class="section-header">
+                <lightning-icon icon-name="utility:campaign" alternative-text="Campaign"
+                  class="icon-colors "></lightning-icon>
+                <h2>{label.targetObjectInfoLabel}</h2>
+              </div>
+            </template>
+  
+        <div class="form-grid">
+          <div class="form-item">
+            <label class="custom-label target-label" for="project-name">
+              {label.targetObjectLabel} <span class="required">*</span>
+            </label>
+            <lightning-combobox value={targetObject} options={options} class="rounded-input"
+              onchange={handleTargetObjectChange}></lightning-combobox>
+            <p class="help-text">
+              {label.helpertargetObjectLabel}
+            </p>
+          </div>
+          <!--Import Operation-->
+          <div class="form-item">
+            <!--
+            <lightning-combobox
+              label="Import Operation"
+              value={importOperation}
+              options={importOptions}
+              required
+              onchange={handleImportOperationChange}
+            ></lightning-combobox>
+            <p class="help-text">Choose how the data should be processed</p>
+          -->
+          </div>
+        </div>
+       </div>
+        
       <!-- Footer -->
-      <div class="card-footer">
-        <button type="button" class="btn btn-ghost" onclick={handleCancel}>Annuler</button>
-        <button type="button" class="btn btn-primary" onclick={handleCreateProject}>
-          Enregistrer →
-        </button>
-      </div>
-
-    </div>
+        <c-project-form-footer-component onsave={handleCreateProject}
+          oncancel={handleCancel}></c-project-form-footer-component>
+    </section>
   </div>
 </template>

@@ -1,38 +1,37 @@
-/* ══ Aurora variables ══ */
+/* ══ Palette d'avant Aurora (mêmes tokens que les autres écrans restaurés) ══ */
 :host {
   display: block;
-  font-family: 'Inter', -apple-system, system-ui, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  --indigo:        #4F46E5;
-  --indigo-soft:   rgba(79,70,229,0.08);
-  --indigo-glow:   rgba(79,70,229,0.25);
-  --indigo-hi:     #6366F1;
-  --violet:        #7C3AED;
-  --coral:         #F43F5E;
-  --coral-soft:    rgba(244,63,94,0.08);
-  --green:         #10B981;
-  --green-soft:    rgba(16,185,129,0.1);
-  --amber:         #F59E0B;
-  --amber-soft:    rgba(245,158,11,0.1);
-  --text:          #0F172A;
-  --text-2:        #1E293B;
-  --muted:         #64748B;
-  --muted-2:       #94A3B8;
-  --border:        rgba(148,163,184,0.2);
-  --border-solid:  #E2E8F0;
-  --surface:       rgba(255,255,255,0.75);
+  font-family: "Salesforce Sans", Arial, sans-serif;
+  --indigo:        #1E40AF;
+  --indigo-soft:   rgba(30,64,175,0.08);
+  --indigo-glow:   rgba(30,64,175,0.2);
+  --indigo-hi:     #1E40AF;
+  --violet:        #1E40AF;
+  --coral:         #d9534f;
+  --coral-soft:    rgba(217,83,79,0.08);
+  --green:         #10893e;
+  --green-soft:    rgba(16,137,62,0.1);
+  --amber:         #f0ad4e;
+  --amber-soft:    rgba(240,173,78,0.15);
+  --text:          #181818;
+  --text-2:        #222222;
+  --muted:         #666666;
+  --muted-2:       #999999;
+  --border:        rgba(0,0,0,0.1);
+  --border-solid:  #eeeeee;
+  --surface:       #ffffff;
   --surface-solid: #FFFFFF;
-  --grad-brand:    linear-gradient(135deg,#4F46E5 0%,#7C3AED 100%);
-  --shadow-xs:     0 1px 3px rgba(15,23,42,0.06),0 1px 2px rgba(15,23,42,0.04);
-  --shadow-sm:     0 2px 8px rgba(79,70,229,0.06),0 1px 3px rgba(15,23,42,0.04);
-  --shadow-md:     0 4px 20px rgba(79,70,229,0.10),0 2px 6px rgba(15,23,42,0.05);
-  --shadow-glow:   0 0 0 3px rgba(79,70,229,0.08),0 4px 20px rgba(79,70,229,0.15);
-  --radius-xs:     6px;
-  --radius-sm:     10px;
-  --radius:        16px;
-  --radius-lg:     24px;
+  --grad-brand:    #1E40AF;
+  --shadow-xs:     0 1px 3px rgba(0,0,0,0.05);
+  --shadow-sm:     0 2px 5px rgba(0,0,0,0.05);
+  --shadow-md:     0 2px 8px rgba(0,0,0,0.08);
+  --shadow-glow:   0 0 0 3px rgba(30,64,175,0.08);
+  --radius-xs:     4px;
+  --radius-sm:     6px;
+  --radius:        10px;
+  --radius-lg:     14px;
   --radius-pill:   999px;
-  --ease-out:      cubic-bezier(0.16,1,0.3,1);
+  --ease-out:      ease;
 }
 
 /* ══ Main container (prototype: .card wrapper) ══ */
@@ -50,7 +49,7 @@
   padding: 3px 10px; border-radius: var(--radius-pill);
   font-size: .72rem; font-weight: 600;
   background: var(--indigo-soft); color: var(--indigo);
-  border: 1px solid rgba(79,70,229,0.15);
+  border: 1px solid rgba(30,64,175,0.15);
 }
 .primary-badge {
   background: var(--grad-brand); color: #fff;
@@ -130,7 +129,7 @@
 
 /* ══ Add panel (prototype: .add-panel) ══ */
 .add-panel {
-  border: 1.5px dashed rgba(79,70,229,0.22); border-radius: var(--radius-sm);
+  border: 1.5px dashed rgba(30,64,175,0.22); border-radius: var(--radius-sm);
   padding: 18px 20px; background: var(--indigo-soft); margin-top: 4px;
 }
 .add-title { font-size: .85rem; font-weight: 700; color: var(--indigo); margin-bottom: 13px; }
@@ -138,7 +137,7 @@
 .add-field { flex: 1; min-width: 150px; }
 .add-field label { font-size: .72rem; font-weight: 600; color: var(--indigo); display: block; margin-bottom: 5px; }
 .add-select {
-  width: 100%; border: 1.5px solid rgba(79,70,229,0.2); border-radius: var(--radius-sm);
+  width: 100%; border: 1.5px solid rgba(30,64,175,0.2); border-radius: var(--radius-sm);
   padding: 9px 12px; font-size: .84rem; font-family: inherit;
   background: var(--surface-solid); color: var(--text); outline: none; cursor: pointer;
   transition: border-color .15s;

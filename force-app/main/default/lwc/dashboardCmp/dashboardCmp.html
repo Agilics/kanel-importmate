@@ -1,93 +1,96 @@
 <template>
-  <div class="dash-main">
-
-    <!-- Page header -->
-    <div class="page-header">
-      <div>
-        <h1 class="greeting"><em>{sections.title}</em> 👋</h1>
-        <p class="page-sub">{sections.detailsTitle}</p>
-      </div>
-      <div class="page-actions">
-        <button class="btn btn-primary" onclick={handleNewProject}>
-          ＋ {buttonLabel.newProject}
-        </button>
-      </div>
-    </div>
-
-    <!-- Stats grid -->
-    <div class="stats-grid">
-      <template for:each={stats} for:item="stat">
-        <div key={stat.id} class="stat-card">
-          <div class="stat-top">
-            <div class="stat-icon">{stat.icon}</div>
-            <template if:true={stat.change}>
-              <span class="stat-trend trend-up">{stat.change}</span>
+    <div class="dashboard-container">
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <template for:each={stats} for:item="stat">
+                <div key={stat.id} class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">{stat.label}</span>
+                        <lightning-icon icon-name={stat.icon} size="small" class="stat-icon"></lightning-icon>
+                    </div>
+                    <div class="stat-value">{stat.value}</div>
+                    <div class="stat-footer">
+                        <span class="stat-change">{stat.change}</span>
+                        <template if:true={stat.changeLabel}>
+                            <span class="stat-change-label">{stat.changeLabel}</span>
+                        </template>
+                    </div>
+                </div>
             </template>
-          </div>
-          <div class="stat-value">{stat.value}</div>
-          <div class="stat-label">{stat.label}</div>
         </div>
-      </template>
-    </div>
 
-    <!-- Section header -->
-    <div class="section-row">
-      <span class="section-title">Projets récents</span>
-    </div>
+        <!-- Projects Section -->
+        <div class="projects-section">
+            <div class="section-header">
+                <div class="section-title-wrapper">
+                    <h2 class="section-title">{sections.title}</h2>
+                    <p class="section-subtitle">{sections.detailsTitle}</p>
+                </div>
+                <div class="section-actions">
+                    <div class="search-box">
+                        <lightning-icon icon-name="utility:search" size="x-small" class="search-icon"></lightning-icon>
+                        <input 
+                            type="text" 
+                            placeholder={placeholder} 
+                            class="search-input"
+                            onchange={handleSearch}
+                        />
+                    </div>
+                    <button class="btn-new-project" onclick={handleNewProject}>
+                        <lightning-icon icon-name="utility:add" size="x-small"></lightning-icon>
+                        {buttonLabel.newProject}
+                    </button>
+                </div>
+            </div>
 
-    <!-- Filters: search + status select -->
-    <div class="filters">
-      <div class="search-box">
-        <span class="search-icon-emoji">🔍</span>
-        <input type="text" placeholder={placeholder} onchange={handleSearch}/>
-      </div>
-      <template for:each={filterTabs} for:item="tab">
-        <button key={tab.value} class={tab.className} data-value={tab.value} onclick={handleFilterChange}>
-          {tab.label}
-        </button>
-      </template>
-    </div>
+            <!-- Filter Tabs -->
+            <div class="filter-tabs">
+                <template for:each={filterTabs} for:item="tab">
+                    <button 
+                        key={tab.value} 
+                        class={tab.className} 
+                        data-value={tab.value}
+                        onclick={handleFilterChange}>
+                        {tab.label}
+                    </button>
+                </template>
+            </div>
 
-    <!-- Loading -->
-    <template if:true={isLoading}>
-      <div class="loading-container">
-        <div class="dash-spinner"></div>
-      </div>
-    </template>
+            <!-- Projects Grid -->
+            <template if:true={isLoading}>
+                <div class="loading-container">
+                    <lightning-spinner alternative-text="Loading projects..." size="medium"></lightning-spinner>
+                </div>
+            </template>
 
-    <!-- Projects grid (has data) -->
-    <template if:true={hasProjects}>
-      <div class="projects-grid">
-        <template for:each={projects} for:item="project">
-          <c-project-card
-            key={project.Id}
-            project={project}
-            onprojectselect={handleProjectSelect}
-            onprojectedit={handleProjectEdit}
-            onprojectdelete={handleProjectDelete}>
-          </c-project-card>
-        </template>
-        <!-- "New project" card always shown at end of grid -->
-        <div class="project-card-new" onclick={handleNewProject}>
-          <div class="new-icon">＋</div>
-          <div class="new-label">{buttonLabel.newProject}</div>
-          <div class="new-sub">Importez de nouvelles données Salesforce en quelques clics</div>
+            <template if:true={hasProjects}>
+                <div class="projects-grid">
+                    <template for:each={projects} for:item="project">
+                        <c-project-card 
+                            key={project.Id} 
+                            project={project}
+                            onprojectselect={handleProjectSelect}
+                            onprojectedit={handleProjectEdit}
+                            onprojectdelete={handleProjectDelete}>
+                        </c-project-card>
+                    </template>
+                </div>
+            </template>
+
+            <template if:false={hasProjects}>
+                <template if:false={isLoading}>
+                    <div class="no-projects-container">
+                        <lightning-icon icon-name="custom:custom78" size="large" class="no-projects-icon"></lightning-icon>
+                        <p class="no-projects-message">{noProjectsMessage}</p>
+                        <template if:false={error}>
+                            <button class="btn-new-project" onclick={handleNewProject}>
+                                <lightning-icon icon-name="utility:add" size="x-small"></lightning-icon>
+                               {buttonLabel.createFirstProject}
+                            </button>
+                        </template>
+                    </div>
+                </template>
+            </template>
         </div>
-      </div>
-    </template>
-
-    <!-- Empty state -->
-    <template if:false={hasProjects}>
-      <template if:false={isLoading}>
-        <div class="projects-grid">
-          <div class="project-card-new" onclick={handleNewProject}>
-            <div class="new-icon">＋</div>
-            <div class="new-label">{buttonLabel.createFirstProject}</div>
-            <div class="new-sub">Importez de nouvelles données Salesforce en quelques clics</div>
-          </div>
-        </div>
-      </template>
-    </template>
-
-  </div>
+    </div>
 </template>

@@ -1,38 +1,37 @@
-/* ══ Aurora variables (mêmes noms que aurora-shared.css) ══ */
+/* ══ Palette d'avant Aurora (mêmes tokens que les autres écrans restaurés) ══ */
 :host {
   display: block;
-  font-family: 'Inter', -apple-system, system-ui, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  --indigo:        #4F46E5;
-  --indigo-soft:   rgba(79,70,229,0.08);
-  --indigo-glow:   rgba(79,70,229,0.25);
-  --violet:        #7C3AED;
-  --coral:         #F43F5E;
-  --coral-soft:    rgba(244,63,94,0.08);
-  --green:         #10B981;
-  --green-soft:    rgba(16,185,129,0.1);
-  --amber:         #F59E0B;
-  --amber-soft:    rgba(245,158,11,0.1);
-  --text:          #0F172A;
-  --text-2:        #1E293B;
-  --muted:         #64748B;
-  --muted-2:       #94A3B8;
-  --border:        rgba(148,163,184,0.2);
-  --border-solid:  #E2E8F0;
-  --surface:       rgba(255,255,255,0.75);
+  font-family: "Salesforce Sans", Arial, sans-serif;
+  --indigo:        #1E40AF;
+  --indigo-soft:   rgba(30,64,175,0.08);
+  --indigo-glow:   rgba(30,64,175,0.2);
+  --violet:        #1E40AF;
+  --coral:         #d9534f;
+  --coral-soft:    rgba(217,83,79,0.08);
+  --green:         #10893e;
+  --green-soft:    rgba(16,137,62,0.1);
+  --amber:         #f0ad4e;
+  --amber-soft:    rgba(240,173,78,0.15);
+  --text:          #181818;
+  --text-2:        #222222;
+  --muted:         #666666;
+  --muted-2:       #999999;
+  --border:        rgba(0,0,0,0.1);
+  --border-solid:  #eeeeee;
+  --surface:       #ffffff;
   --surface-solid: #FFFFFF;
-  --grad-brand:    linear-gradient(135deg,#4F46E5 0%,#7C3AED 100%);
-  --grad-green:    linear-gradient(135deg,#10B981 0%,#06B6D4 100%);
-  --shadow-xs:     0 1px 3px rgba(15,23,42,0.06),0 1px 2px rgba(15,23,42,0.04);
-  --shadow-sm:     0 2px 8px rgba(79,70,229,0.06),0 1px 3px rgba(15,23,42,0.04);
-  --shadow-md:     0 4px 20px rgba(79,70,229,0.10),0 2px 6px rgba(15,23,42,0.05);
-  --shadow-glow:   0 0 0 3px rgba(79,70,229,0.08),0 4px 20px rgba(79,70,229,0.15);
-  --radius-xs:     6px;
-  --radius-sm:     10px;
-  --radius:        16px;
-  --radius-lg:     24px;
+  --grad-brand:    #1E40AF;
+  --grad-green:    #10893e;
+  --shadow-xs:     0 1px 3px rgba(0,0,0,0.05);
+  --shadow-sm:     0 2px 5px rgba(0,0,0,0.05);
+  --shadow-md:     0 2px 8px rgba(0,0,0,0.08);
+  --shadow-glow:   0 0 0 3px rgba(30,64,175,0.08);
+  --radius-xs:     4px;
+  --radius-sm:     6px;
+  --radius:        10px;
+  --radius-lg:     14px;
   --radius-pill:   999px;
-  --ease-out:      cubic-bezier(0.16,1,0.3,1);
+  --ease-out:      ease;
 }
 
 /* ══ Card (prototype: .card dans aurora-shared.css) ══ */
@@ -58,7 +57,7 @@
 .schedules-container { width: 100%; overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; }
 tbody tr { transition: background .12s; }
-tbody tr:hover td { background: rgba(79,70,229,0.03); }
+tbody tr:hover td { background: rgba(30,64,175,0.03); }
 td { padding: 13px 12px; border-bottom: 1px solid rgba(226,232,240,0.5); vertical-align: middle; }
 tbody tr:last-child td { border-bottom: none; }
 
@@ -117,7 +116,7 @@ tbody tr:last-child td { border-bottom: none; }
 }
 .status-badge.completed  { background: var(--green-soft); color: #059669; border-color: rgba(16,185,129,0.2); }
 .status-badge.failed     { background: var(--coral-soft);  color: #BE123C; border-color: rgba(244,63,94,0.15); }
-.status-badge.in-progress { background: var(--indigo-soft); color: var(--indigo); border-color: rgba(79,70,229,0.15); }
+.status-badge.in-progress { background: var(--indigo-soft); color: var(--indigo); border-color: rgba(30,64,175,0.15); }
 .status-badge.warning   { background: var(--amber-soft); color: #B45309; border-color: rgba(245,158,11,0.2); }
 
 /* ══ Frequency chips (prototype: .freq-chip) ══ */
@@ -130,7 +129,7 @@ tbody tr:last-child td { border-bottom: none; }
   font-size: .82rem; font-weight: 500; color: var(--muted);
   cursor: pointer; text-align: center; transition: all .15s;
 }
-.freq-chip:hover { border-color: rgba(79,70,229,0.35); color: var(--indigo); background: var(--indigo-soft); }
+.freq-chip:hover { border-color: rgba(30,64,175,0.35); color: var(--indigo); background: var(--indigo-soft); }
 .freq-chip.active {
   border-color: var(--indigo); background: var(--indigo-soft);
   color: var(--indigo); font-weight: 700; box-shadow: var(--shadow-glow);

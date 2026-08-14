@@ -65,8 +65,6 @@ export default class DataSource extends LightningElement {
     isUpload    = true;
     isNotUpload = false;
 
-    get soqlIconSymbol() { return '{ }'; }
-
     @api currentProject;
 
     get projectName() {

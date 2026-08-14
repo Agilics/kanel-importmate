@@ -97,23 +97,6 @@ export default class FieldMappingTable extends LightningElement {
     return (this.csvColumns?.length || 0) > 0;
   }
 
-  get objectOptionsWithSelected() {
-    return this.objectOptions.map(o => ({ ...o, isSelected: o.value === this.selectedObjectApiName }));
-  }
-
-  get projectOptionsWithSelected() {
-    return this.projectOptions.map(o => ({ ...o, isSelected: o.value === this.selectedProjectId }));
-  }
-
-  get rowsWithOptions() {
-    return (this.rows || []).map(r => ({
-      ...r,
-      targetFieldOpts: this.fieldOptions.map(o => ({ ...o, isSelected: o.value === (r.targetField || '') })),
-      lookupObjectOpts: this.objectOptions.map(o => ({ ...o, isSelected: o.value === (r.lookupObject || '') })),
-      lookupMatchFieldOpts: (r.lookupMatchFieldOptions || []).map(o => ({ ...o, isSelected: o.value === (r.lookupMatchField || '') }))
-    }));
-  }
-
   get disableLoad() {
     return !this.hasColumns || !this.selectedProjectId || !this.selectedVersion;
   }
@@ -270,7 +253,7 @@ export default class FieldMappingTable extends LightningElement {
 
   // ------- Handlers -------
   handleObjectPick(e) {
-    this.selectedObjectApiName = e.target.value ?? e.detail?.value ?? '';
+    this.selectedObjectApiName = e.detail.value || "";
     if (this.selectedObjectApiName) {
       this.loadFields(this.selectedObjectApiName);
     }
@@ -279,7 +262,7 @@ export default class FieldMappingTable extends LightningElement {
 
   /** Project dropdown changed */
   handleProjectPick(e) {
-    const pid = e.target.value ?? e.detail?.value ?? '';
+    const pid = e.detail.value || "";
     this.applyProjectSelection(pid);
     this.markDirty();
   }
@@ -297,13 +280,13 @@ export default class FieldMappingTable extends LightningElement {
   }
 
   handleVersionChange(e) {
-    this.selectedVersion = e.target.value ?? e.detail?.value ?? '';
+    this.selectedVersion = e.detail.value || "";
     this.markDirty();
   }
 
   handleFieldPick(e) {
     const key = e.target.dataset.key;
-    const val = e.target.value ?? e.detail?.value ?? '';
+    const val = e.detail.value || "";
     const next = [];
     for (const r of this.rows) {
       next.push(r.key === key ? { ...r, targetField: val } : r);
@@ -336,7 +319,7 @@ export default class FieldMappingTable extends LightningElement {
 
   async handleLookupObjectPick(e) {
     const key = e.target.dataset.key;
-    const val = e.target.value ?? e.detail?.value ?? '';
+    const val = e.detail.value || "";
     const options = val ? await this.loadLookupMatchFieldOptions(val) : [];
     const next = [];
     for (const r of this.rows) {
@@ -357,7 +340,7 @@ export default class FieldMappingTable extends LightningElement {
 
   handleLookupMatchFieldPick(e) {
     const key = e.target.dataset.key;
-    const val = e.target.value ?? e.detail?.value ?? '';
+    const val = e.detail.value || "";
     const next = [];
     for (const r of this.rows) {
       next.push(

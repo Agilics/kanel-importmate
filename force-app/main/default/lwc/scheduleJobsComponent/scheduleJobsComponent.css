@@ -1,35 +1,34 @@
-/* ══ Aurora design tokens ══ */
+/* ══ Palette d'avant Aurora (mêmes tokens que les autres écrans restaurés) ══ */
 :host {
   display: block;
-  font-family: 'Inter', -apple-system, system-ui, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  --indigo:        #4F46E5;
-  --indigo-soft:   rgba(79,70,229,0.08);
-  --indigo-glow:   rgba(79,70,229,0.25);
-  --violet:        #7C3AED;
-  --green:         #10B981;
-  --green-soft:    rgba(16,185,129,0.1);
-  --coral:         #F43F5E;
-  --coral-soft:    rgba(244,63,94,0.1);
-  --amber:         #F59E0B;
-  --amber-soft:    rgba(245,158,11,0.1);
-  --text:          #0F172A;
-  --text-2:        #1E293B;
-  --muted:         #64748B;
-  --muted-2:       #94A3B8;
-  --border:        rgba(148,163,184,0.2);
-  --border-solid:  #E2E8F0;
-  --surface:       rgba(255,255,255,0.75);
+  font-family: "Salesforce Sans", Arial, sans-serif;
+  --indigo:        #1E40AF;
+  --indigo-soft:   rgba(30,64,175,0.08);
+  --indigo-glow:   rgba(30,64,175,0.2);
+  --violet:        #1E40AF;
+  --green:         #10893e;
+  --green-soft:    rgba(16,137,62,0.1);
+  --coral:         #d9534f;
+  --coral-soft:    rgba(217,83,79,0.1);
+  --amber:         #f0ad4e;
+  --amber-soft:    rgba(240,173,78,0.15);
+  --text:          #181818;
+  --text-2:        #222222;
+  --muted:         #666666;
+  --muted-2:       #999999;
+  --border:        rgba(0,0,0,0.1);
+  --border-solid:  #eeeeee;
+  --surface:       #ffffff;
   --surface-solid: #FFFFFF;
-  --grad-brand:    linear-gradient(135deg,#4F46E5 0%,#7C3AED 100%);
-  --shadow-xs:     0 1px 3px rgba(15,23,42,0.06),0 1px 2px rgba(15,23,42,0.04);
-  --shadow-sm:     0 2px 8px rgba(79,70,229,0.06),0 1px 3px rgba(15,23,42,0.04);
-  --shadow-md:     0 4px 20px rgba(79,70,229,0.10),0 2px 6px rgba(15,23,42,0.05);
-  --radius-xs:     6px;
-  --radius-sm:     10px;
-  --radius:        16px;
+  --grad-brand:    #1E40AF;
+  --shadow-xs:     0 1px 3px rgba(0,0,0,0.05);
+  --shadow-sm:     0 2px 5px rgba(0,0,0,0.05);
+  --shadow-md:     0 2px 8px rgba(0,0,0,0.08);
+  --radius-xs:     4px;
+  --radius-sm:     6px;
+  --radius:        10px;
   --radius-pill:   999px;
-  --ease-out:      cubic-bezier(0.16,1,0.3,1);
+  --ease-out:      ease;
 }
 
 /* ══ Shell ══ */
@@ -189,7 +188,7 @@
 }
 
 .sched-table tbody tr:last-child { border-bottom: none; }
-.sched-table tbody tr:hover td   { background: rgba(79,70,229,0.025); }
+.sched-table tbody tr:hover td   { background: rgba(30,64,175,0.025); }
 .sched-table tbody tr.row-paused { opacity: .65; }
 
 .sched-table tbody td {

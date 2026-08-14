@@ -6,10 +6,10 @@
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
-  <div class="main-content">
+  <div class="main-content" style="width: 1120px; height: 1517px; left: 320px; angle: 0 deg; opacity: 1">
     <!-- Header -->
     <div class="header">
-      <span class="plus-icons margin-icon">＋</span>
+      <lightning-icon icon-name="utility:add" alternative-text="Add" class="plus-icons margin-icon"></lightning-icon>
 
       <div class="text-header">
         <h1>New Project</h1>
@@ -20,18 +20,28 @@
     </div>
 
     <!-- Card container -->
-    <section class="card">
+    <section class="card" style="
+        width: 1056px;
+        height: 1053px;
+        top: 172px;
+        left: 32px;
+        angle: 0 deg;
+        opacity: 1;
+        border-radius: 12px;
+        border-width: 1px;
+      ">
       <!-- Project Information -->
       <div class="section-header">
-        <span class="icon-colors plus-icons">ℹ</span>
+        <lightning-icon icon-name="utility:info" alternative-text="Info"
+          class="icon-colors plus-icons"></lightning-icon>
         <h2>Project Information</h2>
       </div>
       <label class="custom-label name-label" for="project-name">
         Project Name <span class="required">*</span>
       </label>
-      <input id="project-name" class="rounded-input" type="text"
+      <lightning-input id="project-name" class="rounded-input" style="width: 100%" type="text"
         placeholder="Enter a descriptive project name (e.g., Q4 Contact Import)"
-        value={projectName} oninput={handleProjectNameChange} />
+        onchange={handleProjectNameChange}></lightning-input>
       <p class="help-text">
         Choose a clear, descriptive name for easy identification
       </p>
@@ -40,10 +50,10 @@
       <label class="custom-label description-label" name="description">
         Description
       </label>
-      <textarea class="rounded-input" name="description" rows="3"
+      <lightning-textarea class="input-field rounded-input" name="description" style="margin-top: -1.6rem; "
         placeholder="Describe the purpose and scope of this import project..."
-        oninput={handleDescriptionChange}>{description}</textarea>
-      <p class="help-text">
+        onchange={handleDescriptionChange}></lightning-textarea>
+      <p class="help-text" style="margin: 6em 0 0.75rem 0">
         Provide details about data source, business purpose, and expected
         outcomes
       </p>
@@ -52,7 +62,8 @@
 
       <!-- Target Object Configuration -->
       <div class="section-header" style="margin-top: 1.5rem">
-        <span class="icon-colors plus-icons">🎯</span>
+        <lightning-icon icon-name="utility:campaign" alternative-text="Campaign"
+          class="icon-colors plus-icons"></lightning-icon>
         <h2>Target Object Configuration</h2>
       </div>
 
@@ -61,11 +72,8 @@
           <label class="custom-label target-label" for="project-name">
             Target Salesforce Object <span class="required">*</span>
           </label>
-          <select class="rounded-input" onchange={handleTargetObjectChange}>
-            <template for:each={targetObjectOptionsWithSelected} for:item="o">
-              <option key={o.value} value={o.value} selected={o.isSelected}>{o.label}</option>
-            </template>
-          </select>
+          <lightning-combobox value={targetObject} options={options} class="rounded-input"
+            onchange={handleTargetObjectChange}></lightning-combobox>
           <p class="help-text">
             Select the Salesforce object where data will be imported
           </p>

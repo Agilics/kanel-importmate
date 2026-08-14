@@ -194,22 +194,6 @@ export default class TransformationSaveModal extends LightningModal {
         return this.preSelectedColumns.length;
     }
 
-    get ruleTypeOptionsWithSelected() {
-        return this.ruleTypeOptions.map(o => ({ ...o, isSelected: o.value === this.ruleType }));
-    }
-
-    get separatorOptionsWithSelected() {
-        return this.separatorOptions.map(o => ({ ...o, isSelected: o.value === this.separator }));
-    }
-
-    get targetFieldOptionsWithSelected() {
-        return this.targetFieldOptions.map(o => ({ ...o, isSelected: this.preSelectedColumns.includes(o.value) }));
-    }
-
-    get booleanDisplayLabel() {
-        return this.booleanValue ? this.labels.yes : this.labels.no;
-    }
-
     // ===== Wire: charger règle existante =====
     @wire(getRuleById, { ruleId: '$existingRuleId' })
     wiredExistingRuleById(result) {
@@ -294,14 +278,14 @@ export default class TransformationSaveModal extends LightningModal {
     }
 
     handleTargetFieldsChange(event) {
-        this.selectedColumns = Array.from(event.target.selectedOptions).map(o => o.value);
+        this.selectedColumns = event.detail.value;
         this.fields = this.selectedColumns
             .map(id => this.mappingIdToFieldMap.get(id) || null)
             .filter(Boolean);
     }
 
     handleRuleTypeChange(event) {
-        this.ruleType = event.target.value ?? event.detail?.value ?? '';
+        this.ruleType = event.detail.value;
         const val = this.ruleType.replaceAll(' ', '');
         if (val === 'BooleanTransformation' || val.includes('Boolean')) {
             this.isBooleanTransformation = true;
@@ -311,7 +295,7 @@ export default class TransformationSaveModal extends LightningModal {
         }
     }
 
-    handleSeparatorChange(event) { this.separator = event.target.value ?? event.detail?.value ?? ''; }
+    handleSeparatorChange(event) { this.separator = event.detail.value; }
     handleTargetValueChange(event) { this.targetValue = event.detail.value; }
     handleDomainChange(event) { this.domain = event.detail.value; }
     handleBooleanValueChange(event) { this.booleanValue = event.target.checked; }

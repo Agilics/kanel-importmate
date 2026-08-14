@@ -5,48 +5,57 @@
   <div class="page">
     <!-- Header -->
     <div class="page-header">
-      <div>
+      <div class="page-header__left">
         <div class="page-title">{title}</div>
         <div class="page-subtitle">{label.pageSubtitle}</div>
       </div>
-      <button type="button" class="btn btn-icon" onclick={openSettings} title={label.importSettingsBtn}>
-        ⚙
-      </button>
+      <div class="page-header__right">
+        <button type="button" class="btn btn--primary" onclick={openSettings}>
+          <lightning-icon icon-name="utility:setup_assistant_guide" size="x-small"></lightning-icon>
+          <span style="font-size: 18px;">{label.importSettingsBtn}</span>
+        </button>
+      </div>
     </div>
 
-    <span class="badge primary-badge">{projectName}</span>
+    <span class="badge primary-badge">
+      {projectName}
+    </span>
 
-    <!-- Source Tabs — classes du prototype aurora-step2 -->
+    <!-- Source Tabs -->
     <div class="src-tabs-row">
       <div class="src-tabs">
         <button type="button" class={uploadTabClass} data-tab="upload" onclick={handleTabChange}>
-          📤 Upload CSV
+          <lightning-icon icon-name="utility:upload" size="x-small"></lightning-icon>
+          <span>Upload CSV</span>
         </button>
         <button type="button" class={storedTabClass} data-tab="stored" onclick={handleTabChange}>
-          📁 Fichiers enregistrés
+          <lightning-icon icon-name="utility:file" size="x-small"></lightning-icon>
+          <span>Fichiers enregistrés</span>
         </button>
       </div>
-      <button type="button" class="btn btn-outline goto-scheduling-btn" onclick={handleGotoScheduling}
+      <button type="button" class="btn btn--ghost goto-scheduling-btn" onclick={handleGotoScheduling}
               disabled={isGotoSchedulingDisabled} title={gotoSchedulingTitle}>
-        📅 Planification
+        <lightning-icon icon-name="utility:date_input" size="x-small"></lightning-icon>
+        <span>Planification</span>
       </button>
     </div>
 
     <!-- Onglet Upload -->
     <template if:true={isUploadTab}>
-      <div class="card">
-        <div class="card-title">{label.cardTitle}</div>
-        <div class="card-sub">{label.cardSubtitle}</div>
+      <div onclick={handleBrowseClick} class="card">
+        <div class="card__title">{label.cardTitle}</div>
+        <div class="card__subtitle">{label.cardSubtitle}</div>
 
-        <div class="drop-zone"
-          ondragover={handleDragOver}
-          ondragleave={handleDragLeave}
-          ondrop={handleDrop}
-          onclick={handleBrowseClick}>
-          <div class="drop-icon">⬆</div>
-          <div class="drop-title">{label.dropzoneText}</div>
-          <div class="drop-sub">{label.dropzoneHint}</div>
-          <div class="drop-btn">{label.dropzoneBrowse}</div>
+        <div class="dropzone" ondragover={handleDragOver} ondragleave={handleDragLeave} ondrop={handleDrop}>
+          <div class="dropzone__icon">
+            <lightning-icon icon-name="utility:upload" size="large" variant="base"></lightning-icon>
+          </div>
+          <div class="dropzone__text">
+            {label.dropzoneText}
+            <span class="browse" onclick={handleBrowseClick}> {label.dropzoneBrowse}</span>
+          </div>
+          <div class="dropzone__hint">{label.dropzoneHint}</div>
+
           <input data-id="file" type="file" accept=".csv,text/csv" class="hidden-input" onchange={handleFileUpload}/>
         </div>
 
@@ -55,17 +64,15 @@
         </template>
         <template if:true={parseError}>
           <p class="info info--error slds-m-top_small">
-            <span class="custom-icon-error">✕</span>
+             <lightning-icon icon-name="utility:error" class="custom-icon-error" size="x-small"></lightning-icon>
             {parseError}
           </p>
         </template>
         <template if:true={fileName}>
-          <div class="file-info">
-            <span style="font-size:26px">📄</span>
-            <div>
-              <div class="file-info-name">{fileName}</div>
-              <div class="file-info-meta">{fileSize} bytes</div>
-            </div>
+          <div class="file-meta slds-m-top_small">
+            <span class="file-meta__name">{fileName}</span>
+            <span class="file-meta__sep">•</span>
+            <span>{fileSize} bytes</span>
           </div>
         </template>
       </div>
@@ -74,8 +81,8 @@
     <!-- Onglet Fichiers enregistrés -->
     <template if:true={isStoredTab}>
       <div class="card">
-        <div class="card-title">Fichiers CSV enregistrés</div>
-        <div class="card-sub">Sélectionnez un fichier déjà uploadé pour ce projet.</div>
+        <div class="card__title">Fichiers CSV enregistrés</div>
+        <div class="card__subtitle">Sélectionnez un fichier déjà uploadé pour ce projet.</div>
 
         <template if:true={isLoadingStoredFiles}>
           <p class="info slds-m-top_small">Chargement...</p>
@@ -89,13 +96,13 @@
                    data-id={sf.contentDocumentId}
                    data-name={sf.fileName}
                    onclick={handleSelectStoredFile}>
-                <span class="sf-icon">📄</span>
+                <lightning-icon icon-name="utility:file" size="x-small" class="sf-icon"></lightning-icon>
                 <div style="flex:1;min-width:0">
                   <div class="sf-name">{sf.fileName}</div>
                 </div>
                 <span class={sf.badgeClass}>{sf.badgeLabel}</span>
                 <template if:true={sf.isSelected}>
-                  <span class="stored-file-check">✓</span>
+                  <lightning-icon icon-name="utility:check" size="xx-small" class="stored-file-check"></lightning-icon>
                 </template>
               </div>
             </template>
@@ -105,7 +112,7 @@
         <template if:false={hasStoredFiles}>
           <template if:false={isLoadingStoredFiles}>
             <div class="empty-state slds-m-top_medium">
-              <div class="empty-state__icon">📄</div>
+              <lightning-icon icon-name="utility:file" size="medium" class="empty-state__icon"></lightning-icon>
               <p class="empty-state__text">Aucun fichier CSV stocké pour ce projet. Uploadez-en un ci-dessus.</p>
             </div>
           </template>
@@ -113,19 +120,21 @@
 
         <!-- Historique des exécutions passées (manuelles + planifiées) -->
         <template if:true={hasExecutionHistory}>
-          <div class="card-title slds-m-top_medium">Historique des imports</div>
+          <div class="card__title slds-m-top_medium">Historique des imports</div>
           <div class="stored-file-list">
             <template for:each={executionHistory} for:item="ex">
               <div key={ex.id} class="stored-file-row">
-                <span class="sf-icon">{ex.statusIcon}</span>
+                <span class="sf-icon sf-icon--status">{ex.statusIcon}</span>
                 <div style="flex:1;min-width:0">
                   <div class="sf-name">{ex.startTime}</div>
                   <div class="sf-meta">{ex.summary}</div>
                 </div>
                 <span class={ex.typeClass}>{ex.typeLabel}</span>
                 <span class={ex.statusClass}>{ex.statusLabel}</span>
-                <button type="button" class="action-icon-btn" title="Voir les logs"
-                  data-id={ex.id} data-starttime={ex.startTime} onclick={handleOpenExecutionLogs}>📋</button>
+                <button type="button" class="icon-btn" title="Voir les logs"
+                  data-id={ex.id} data-starttime={ex.startTime} onclick={handleOpenExecutionLogs}>
+                  <lightning-icon icon-name="utility:list" size="x-small"></lightning-icon>
+                </button>
               </div>
             </template>
           </div>
@@ -145,16 +154,16 @@
       <div class="card slds-m-top_medium">
         <div class="toolbar">
           <div class="toolbar__left">
-            <div class="tbl-title">{label.tableTitle}</div>
-            <span class="badge badge-green">{badgeText}</span>
+            <div class="title">{label.tableTitle}</div>
+            <span class="badge badge--green">{badgeText}</span>
           </div>
           <div class="toolbar__right">
             <div class="search">
-              <span class="search__icon">🔍</span>
+              <lightning-icon icon-name="utility:search" size="x-small" class="search__icon"></lightning-icon>
               <input class="search__input" type="search" placeholder={label.searchPlaceholder} oninput={handleSearchChange}/>
             </div>
-            <button type="button" class="btn btn-outline btn-sm" onclick={openFilters}>
-              <span>▤</span>
+            <button type="button" class="btn btn--ghost" onclick={openFilters}>
+              <lightning-icon icon-name="utility:filterList" size="x-small"></lightning-icon>
               <span>{label.filtersBtn}</span>
             </button>
           </div>
@@ -170,7 +179,7 @@
                       <button class="th-btn" data-field={col.name} onclick={handleHeaderClick}>
                         <span>{col.name}</span>
                         <template if:true={col.isSorted}>
-                          <span title="Sorted">
+                          <span class="sort-caret" title="Sorted">
                             <template if:true={col.sortAsc}>▲</template>
                             <template if:false={col.sortAsc}>▼</template>
                           </span>
@@ -193,13 +202,20 @@
                           <span class={cell.statusClass}>{cell.value}</span>
                         </template>
                         <template if:false={cell.isIndustry}>
-                          <template if:false={cell.isStatus}>{cell.value}</template>
+                          <template if:false={cell.isStatus}>
+                            {cell.value}
+                          </template>
                         </template>
                       </td>
                     </template>
+
                     <td class="actions-cell">
-                      <button type="button" class="icon-btn" title={label.editTooltip} data-rowid={row.id} onclick={handleRowEdit}>✎</button>
-                      <button type="button" class="icon-btn" title={label.previewTooltip} data-rowid={row.id} onclick={handleRowView}>👁</button>
+                      <button type="button" class="icon-btn" title={label.editTooltip} data-rowid={row.id} onclick={handleRowEdit}>
+                        <lightning-icon icon-name="utility:edit" size="x-small"></lightning-icon>
+                      </button>
+                      <button type="button" class="icon-btn" title={label.previewTooltip} data-rowid={row.id} onclick={handleRowView}>
+                        <lightning-icon icon-name="utility:preview" size="x-small"></lightning-icon>
+                      </button>
                     </td>
                   </tr>
                 </template>
@@ -207,12 +223,17 @@
             </table>
           </div>
 
+          <!-- Pagination -->
           <div class="table-footer">
-            <div>{showingText}</div>
-            <div class="pager">
+            <div class="table-footer__left">
+              {showingText}
+            </div>
+            <div class="table-footer__right pager">
               <button type="button" class="pager__btn" onclick={gotoPrev} disabled={isFirstPage}>
-                ← <span>{label.previous}</span>
+                <lightning-icon icon-name="utility:chevronleft" size="xx-small"></lightning-icon>
+                <span class="slds-m-left_xx-small">{label.previous}</span>
               </button>
+
               <template for:each={pageNumbers} for:item="p">
                 <span key={p.key}>
                   <template if:true={p.isEllipsis}>
@@ -228,8 +249,10 @@
                   </template>
                 </span>
               </template>
+
               <button type="button" class="pager__btn" onclick={gotoNext} disabled={isLastPage}>
-                <span>{label.next}</span> →
+                <span class="slds-m-right_xx-small">{label.next}</span>
+                <lightning-icon icon-name="utility:chevronright" size="xx-small"></lightning-icon>
               </button>
             </div>
           </div>
@@ -239,16 +262,22 @@
 
     <!-- Footer actions -->
     <div class="footer-actions">
-      <button type="button" class="btn btn-outline btn-xl" onclick={handleBackClick}>
-        ← <span>{label.backBtn}</span>
+      <button type="button" class="btn btn--ghost btn--xl" onclick={handleBackClick}>
+        <lightning-icon icon-name="utility:back" size="x-small"></lightning-icon>
+        <span>{label.backBtn}</span>
       </button>
       <div class="footer-actions__right">
-        <button type="button" class="btn btn-primary btn-xl" onclick={handleGoForMapping} disabled={disableGoForMapping}>
-          <span>{label.continueBtn}</span> →
+        <button type="button"
+          class="btn btn--primary"
+          onclick={handleGoForMapping}
+          disabled={disableGoForMapping}>
+          <span>{label.continueBtn}</span>
+          <lightning-icon icon-name="utility:chevronright" size="x-small"></lightning-icon>
         </button>
       </div>
     </div>
 
+    <!-- Hidden anchor (Locker-safe downloads) -->
     <a data-id="download-anchor" class="visually-hidden" tabindex="-1" aria-hidden="true"></a>
 
     <!-- Filters Modal -->
@@ -264,19 +293,22 @@
                 <option key={c} value={c}>{c}</option>
               </template>
             </select>
+
             <label class="lbl slds-m-top_small">{label.filtersOperator}</label>
             <select class="inp" data-id="filter-op">
               <option value="contains">{label.filtersOpContains}</option>
               <option value="equals">{label.filtersOpEquals}</option>
               <option value="starts">{label.filtersOpStarts}</option>
             </select>
+
             <label class="lbl slds-m-top_small">{label.filtersValue}</label>
             <input class="inp" type="text" data-id="filter-val" />
           </div>
           <div class="modal__footer">
-            <button type="button" class="btn btn-ghost" onclick={clearFilters}>{label.filtersClear}</button>
-            <button type="button" class="btn btn-outline" onclick={closeFilters}>{label.modalCancel}</button>
-            <button type="button" class="btn btn-primary" onclick={applyFilters}>{label.modalApply}</button>
+            <button type="button" class="btn btn--ghost" onclick={clearFilters}>{label.filtersClear}</button>
+            <div class="modal__spacer"></div>
+            <button type="button" class="btn btn--ghost" onclick={closeFilters}>{label.modalCancel}</button>
+            <button type="button" class="btn btn--primary" onclick={applyFilters}>{label.modalApply}</button>
           </div>
         </div>
       </section>
@@ -294,8 +326,8 @@
             <input class="inp" type="number" min="1" step="1" value={previewLimit} data-id="preview-limit" />
           </div>
           <div class="modal__footer">
-            <button type="button" class="btn btn-outline" onclick={closeSettings}>{label.modalCancel}</button>
-            <button type="button" class="btn btn-primary" onclick={applySettings}>{label.modalApply}</button>
+            <button type="button" class="btn btn--ghost" onclick={closeSettings}>{label.modalCancel}</button>
+            <button type="button" class="btn btn--primary" onclick={applySettings}>{label.modalApply}</button>
           </div>
         </div>
       </section>
@@ -314,7 +346,7 @@
             </template>
           </div>
           <div class="modal__footer">
-            <button type="button" class="btn btn-primary" onclick={closePreview}>{label.modalClose}</button>
+            <button type="button" class="btn btn--primary" onclick={closePreview}>{label.modalClose}</button>
           </div>
         </div>
       </section>
@@ -334,8 +366,8 @@
             </template>
           </div>
           <div class="modal__footer">
-            <button type="button" class="btn btn-outline" onclick={cancelEdit}>{label.modalCancel}</button>
-            <button type="button" class="btn btn-primary" onclick={saveEdit}>{label.modalSave}</button>
+            <button type="button" class="btn btn--ghost" onclick={cancelEdit}>{label.modalCancel}</button>
+            <button type="button" class="btn btn--primary" onclick={saveEdit}>{label.modalSave}</button>
           </div>
         </div>
       </section>

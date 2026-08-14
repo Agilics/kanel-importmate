@@ -95,10 +95,6 @@ export default class ImportStatistics extends LightningElement {
     ];
   }
 
-  get periodOptionsWithSelected() {
-    return this.periodOptions.map(o => ({ ...o, isSelected: o.value === this.selectedPeriod }));
-  }
-
   get selectedPeriodLabel() {
     const map = { '7': LABELS.period7, '30': LABELS.period30, '90': LABELS.period90, 'all': LABELS.periodAll };
     return map[this.selectedPeriod] || '';
@@ -179,7 +175,7 @@ export default class ImportStatistics extends LightningElement {
 
   // -- Handlers --
   handlePeriodChange(event) {
-    this.selectedPeriod = event.target.value ?? event.detail?.value ?? '';
+    this.selectedPeriod = event.detail.value;
     this._compute();
   }
 

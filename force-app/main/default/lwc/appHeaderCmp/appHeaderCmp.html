@@ -1,29 +1,31 @@
 <template>
-  <header class="app-header">
+    <header class="app-header">
+        <div class="header-container">
+            <!-- Logo Section -->
+            <div class="logo-section">
+                <div class="logo-icon">
+                    <lightning-icon icon-name="utility:download" size="small" alternative-text="ImportMate"></lightning-icon>
+                </div>
+                <h1 class="app-title">ImportMate</h1>
+            </div>
 
-    <!-- Logo (prototype: .header-logo) -->
-    <div class="header-logo">
-      <div class="header-logo-mark">◈</div>
-      ImportMate
-    </div>
+            <!-- Navigation Tabs -->
+            <nav class="nav-tabs">
+                <button class={dashboardClass} onclick={handleNavigation} data-page="dashboard">
+                    Dashboard
+                </button>
+                <button class={newProjectClass} onclick={handleNavigation} data-page="projects">
+                    Nouveau projet
+                </button>
+                <button class={historyClass} onclick={handleNavigation} data-page="history">
+                    Historique
+                </button>
+            </nav>
 
-    <div class="header-spacer"></div>
-
-    <!-- Navigation (prototype: .header-nav) -->
-    <nav class="header-nav">
-      <button class={dashboardClass} onclick={handleNavigation} data-page="dashboard">
-        Dashboard
-      </button>
-      <button class={newProjectClass} onclick={handleNavigation} data-page="projects">
-        Nouveau projet
-      </button>
-      <button class={historyClass} onclick={handleNavigation} data-page="history">
-        Historique
-      </button>
-    </nav>
-
-    <!-- Avatar — utilisateur Salesforce connecté -->
-    <button class="avatar" title={userFullName}>{userInitials}</button>
-
-  </header>
+            <!-- Actions -->
+            <div class="header-actions">
+                <button class="avatar-btn" title={userFullName}>{userInitials}</button>
+            </div>
+        </div>
+    </header>
 </template>

@@ -1,63 +1,50 @@
 <template>
   <div class="container">
+    <!-- Selected project banner -->
+    <template if:true={currentProject}>
+      <h1 class="slds-text-align_center">
+        Selected project: {projectName}
+      </h1>
+      <br />
+    </template>
 
     <!-- Source selection -->
     <template if:true={showSelection}>
-      <div class="card-header">
-        <div>
-          <div class="card-title">Source de données</div>
-          <div class="card-sub">Choisissez comment importer vos données</div>
-        </div>
-      </div>
-
-      <div class="source-grid">
-        <div class="source-card" onclick={handleCSV}>
-          <div class="source-icon">📄</div>
-          <div class="source-title">Fichier CSV</div>
-          <div class="source-desc">Importez un fichier CSV depuis votre machine. Colonnes et encodage auto-détectés.</div>
-          <div class="source-features">
-            <div class="source-feature">Colonnes auto-détectées</div>
-            <div class="source-feature">Encodage UTF-8 / UTF-16</div>
-            <div class="source-feature">Prévisualisation live</div>
-            <div class="source-feature">Formats .csv et .txt</div>
-          </div>
+      <h2 class="section-title">Data source</h2>
+      <div class="cards">
+        <div class="card" onclick={handleCSV}>
+          <div class="card-icon file-icon"></div>
+          <h3>Import CSV</h3>
+          <p>Import a CSV file from your local machine.</p>
         </div>
 
-        <div class="source-card" onclick={handleSOQL}>
-          <div class="source-icon soql-icon-inner">&#123; &#125;</div>
-          <div class="source-title">Requête SOQL</div>
-          <div class="source-desc">Interrogez Salesforce avec un constructeur visuel ou écrivez votre propre requête.</div>
-          <div class="source-features">
-            <div class="source-feature">Constructeur visuel</div>
-            <div class="source-feature">Filtres et conditions avancés</div>
-            <div class="source-feature">Pagination automatique</div>
-            <div class="source-feature">Export CSV disponible</div>
-          </div>
+        <div class="card" onclick={handleSOQL}>
+          <div class="card-icon soql-icon"></div>
+          <h3>SOQL Builder</h3>
+          <p>Build your query interactively from Salesforce objects.</p>
         </div>
       </div>
     </template>
 
     <!-- CSV -->
     <template if:true={showCSV}>
-      <c-csv-uploader
+      <c-csv-uploader 
           current-project={currentProject}
-          project-id={currentProject.Id}
           oncsvloaded={handleCsvLoaded}
           ongotomapping={handleGoToMapping}
-      >
+      > 
       </c-csv-uploader>
     </template>
 
     <!-- SOQL -->
-    <template if:true={showSOQL}>
-      <c-soql-builder
-          project-target-object={projectTargetObject}
-          project-name={projectName}
-          onsoqlbuilt={handleSoqlBuilt}
-          onstartmapping={handleStartMappingFromSoql}
-      ></c-soql-builder>
+    <template if:true={showSOQL}> 
+    <c-soql-builder
+        project-target-object={projectTargetObject}
+        project-name={projectName}
+        onsoqlbuilt={handleSoqlBuilt}
+        onstartmapping={handleStartMappingFromSoql}
+    ></c-soql-builder>
     </template>
-
   </div>
-  <c-backbutton onback={handleBackToMain}></c-backbutton>
+   <c-backbutton onback={handleBackToMain}></c-backbutton>
 </template>

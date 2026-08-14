@@ -164,15 +164,9 @@ export default class ExecutionCard extends LightningElement {
     }
 
     
-    get iconEmoji(){
-        return this.showScheduledCard ? '🗓' : '▶';
-    }
-
-    get modeOptionsWithSelected() {
-        return (this.modeOptions || []).map(o => ({ ...o, isSelected: o.value === this.executionMode }));
-    }
-    get frequencyOptionsWithSelected() {
-        return (this.frequencyOptions || []).map(o => ({ ...o, isSelected: o.value === this.selectedFrequency }));
+    //récupèrer le nom de l'icône
+    get iconName(){
+        return this.showScheduledCard ? 'utility:event': 'utility:connected_apps';
     }
 
     //récupère la taille de l'icône

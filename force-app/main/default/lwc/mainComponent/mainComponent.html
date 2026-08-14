@@ -8,13 +8,18 @@
 -->
 <template>
   <template if:true={isLoading}>
-    <div class="main-spinner-overlay">
-      <div class="main-spinner"></div>
+    <div class="slds-spinner_container">
+      <lightning-spinner
+        alternative-text="Loading"
+        size="medium"
+        variant="inverse"
+      >
+      </lightning-spinner>
     </div>
   </template>
 
   <div class="app-wrapper">
-    <!-- App Header (Aurora dark navbar — prototype: .header) -->
+    <!-- App Header -->
     <c-app-header-cmp
       active-page={activePage}
       onnavigation={handleNavigation}
@@ -37,12 +42,12 @@
         <!-- Project Context Bar — visible on all pages when a project is active -->
         <template if:true={currentProject}>
           <div class="project-context-bar">
-            <span class="project-context-bar__icon">📁</span>
+            <lightning-icon icon-name="utility:folder" size="x-small" class="project-context-bar__icon"></lightning-icon>
             <span class="project-context-bar__label">Projet actif :</span>
             <span class="project-context-bar__name">{currentProject.Name}</span>
             <template if:true={currentProject.TargetObject__c}>
               <span class="project-context-bar__sep">·</span>
-              <span class="project-context-bar__icon">☁</span>
+              <lightning-icon icon-name="utility:salesforce1" size="x-small" class="project-context-bar__icon"></lightning-icon>
               <span class="project-context-bar__object">{currentProject.TargetObject__c}</span>
             </template>
           </div>
@@ -202,7 +207,9 @@
             <!-- Header -->
             <header class="slds-modal__header">
                 <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
-                    title="Close" onclick={closeForm}>✕
+                    title="Close" onclick={closeForm}>
+                    <lightning-icon icon-name="utility:close"
+                      alternative-text="Close" size="small"></lightning-icon>
                 </button>
                 <h2 class="slds-modal__title">{modal_edit_title }</h2>
             </header>

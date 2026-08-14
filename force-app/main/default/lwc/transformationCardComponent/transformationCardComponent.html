@@ -1,64 +1,72 @@
 <!--
-  @description       :
+  @description       : 
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
-  @group             :
+  @group             : 
   @last modified on  : 02-04-2026
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
   <div class={cardClass}>
-    <!-- rule-header: icon + title + action buttons -->
-    <div class="rule-header">
-      <div class={iconBoxClass}>
-        <span class={headIconClass}>{iconName}</span>
-      </div>
-      <div class="rule-title">
-        {cardHeadTitle}
-        <template if:true={cardHeadSubtitle}>
-          <span>{cardHeadSubtitle}</span>
-        </template>
-      </div>
-      <template if:true={showActionButtons}>
-        <div class="rule-actions">
-          <div class="raction" onclick={handleEditTransformation} title="edit">✎</div>
-          <div class="raction del" onclick={handleDeleteTransformation} title="delete">✕</div>
+    <!-- card headers -->
+    <div class="card-header">
+      <!-- title with icon-->
+      <div class="title-with-icon">
+        <div class={iconBoxClass}>
+          <lightning-icon icon-name={iconName} class={headIconClass} size="small"></lightning-icon>
         </div>
+        <div class="header-content">
+          <div class="header-title">{cardHeadTitle}</div>
+          <p class="regular-text regular-text-size">{cardHeadSubtitle}</p>
+        </div>
+      </div>
+
+      <!-- actions buttons -->
+       <template if:true={showActionButtons}>
+
+      <div class="actions">
+      
+        <!-- icon buttons for editing & removing -->
+        <lightning-icon class="btn-action-icons" icon-name="utility:edit" alternative-text="edit" size="xx-small" title="edit"
+         onclick={handleEditTransformation} style="cursor: pointer"></lightning-icon>
+      
+        <lightning-icon class="btn-action-icons custom-icon-delete" icon-name="utility:delete" style="cursor: pointer"
+          alternative-text="delete" onclick={handleDeleteTransformation} title="delete" size="xx-small"></lightning-icon>
+      </div>  
       </template>
+    
     </div>
 
-    <!-- rule-body: field/type/order metadata grid -->
-    <div class="rule-body">
-      <template if:true={targetField}>
-        <div>
-          <div class="rf-label">Field</div>
-          <div class="rf-value">{targetField}</div>
-        </div>
-      </template>
-      <template if:true={showRuleType}>
-        <div>
-          <div class="rf-label">Type</div>
-          <div class="rf-value">{ruleType}</div>
-        </div>
-      </template>
-      <template if:true={showOrder}>
-        <div>
-          <div class="rf-label">Order</div>
-          <div class="rf-value">{order}</div>
-        </div>
-      </template>
-      <template if:true={status}>
-        <div>
-          <div class="rf-label">Status</div>
-          <div class="rf-value"><span class={badgeClass}>{status}</span></div>
-        </div>
-      </template>
-    </div>
+    <!-- card body -->
+    <div class="card-content"> 
+        <div class="transformation-rules">
+          <div class="infos">       
+                <div class="info-content">
+                  <p class="regular-text regular-text-size">Field : {targetField}</p>
+                  <template if:true={showRuleType}>
+                    <p class="regular-text regular-text-size">Type : {ruleType}</p>
+                  </template>
+                  <template if:true={showOrder}>
+                    <p class="regular-text regular-text-size">
+                      Order: {order}
+                    </p>
+                  </template>
+                  <template if:true={status}>
+                      <div class={badgeClass}>{status}</div>
+                  </template>
+                </div> 
+          </div>
+        </div> 
 
-    <!-- rule-preview: before/after example -->
-    <template if:true={showComparison}>
-      <div class="rule-preview">
-        <span class="rp-before">{dataComparison}</span>
-      </div>
-    </template>
+      <!-- data first -->
+      <template if:true={showComparison}>
+          <div class="transformation-rules">
+            <h3 class="content-title regular-text-size">Example:</h3>
+            <div class="lead-content">
+              <p class="regular-text regular-text-size">{dataComparison}</p>
+            </div>
+          </div>
+      </template>
+       
+    </div>
   </div>
 </template>

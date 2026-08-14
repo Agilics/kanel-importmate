@@ -11,7 +11,12 @@
     <!-- header content -->
     <div class="header">
       <div class={boxIconClass}>
-        <span class={headerIconClass}>{headerIconEmoji}</span>
+        <lightning-icon
+          icon-name={headerIcon}
+          alternative-text="paste"
+          class={headerIconClass}
+          title="paste"
+        ></lightning-icon>
       </div>
 
       <div class="text-content">
@@ -25,7 +30,15 @@
     <div class="content">
       <template for:each={contents} for:item="item">
         <div class="support" key={item.Id}>
-          <span class="custom-icon-check">✓</span>
+          <!-- check icon -->
+          <lightning-icon
+            icon-name="utility:check"
+            alternative-text="check"
+            class="custom-icon-check"
+            size="small"
+            title="check"
+          ></lightning-icon>
+          <!-- end check icon -->
 
           <!-- text content -->
           <p class="item">{item.Name}</p>

@@ -21,14 +21,6 @@ export default class ImportProjectRecentComponent extends LightningElement {
     return !(this.projects?.data && this.projects?.data.length > 0);
   }
 
-  get formattedProjects() {
-    return (this.projects?.data || []).map(p => ({
-      ...p,
-      formattedCreatedDate: p.CreatedDate
-        ? new Date(p.CreatedDate).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' })
-        : '—'
-    }));
-  }
 
   //on ferme la section projets recents et on affiche la section création de projet
   handleShow() {

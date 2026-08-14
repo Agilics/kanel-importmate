@@ -1,33 +1,33 @@
-﻿/* ══ Aurora design tokens ══ */
+﻿/* ══ Palette d'avant Aurora (mêmes tokens que les autres écrans restaurés) ══ */
 :host {
-  --indigo:        #4F46E5;
-  --indigo-soft:   rgba(79,70,229,0.08);
-  --indigo-glow:   rgba(79,70,229,0.25);
-  --violet:        #7C3AED;
-  --green:         #10B981;
-  --green-soft:    rgba(16,185,129,0.1);
-  --coral:         #F43F5E;
-  --amber:         #F59E0B;
-  --text:          #0F172A;
-  --text-2:        #1E293B;
-  --muted:         #64748B;
-  --muted-2:       #94A3B8;
-  --border:        rgba(148,163,184,0.2);
-  --border-solid:  #E2E8F0;
-  --surface:       rgba(255,255,255,0.75);
+  --indigo:        #1E40AF;
+  --indigo-soft:   rgba(30,64,175,0.08);
+  --indigo-glow:   rgba(30,64,175,0.2);
+  --violet:        #1E40AF;
+  --green:         #10893e;
+  --green-soft:    rgba(16,137,62,0.1);
+  --coral:         #d9534f;
+  --amber:         #f0ad4e;
+  --text:          #181818;
+  --text-2:        #222222;
+  --muted:         #666666;
+  --muted-2:       #999999;
+  --border:        rgba(0,0,0,0.1);
+  --border-solid:  #eeeeee;
+  --surface:       #ffffff;
   --surface-solid: #FFFFFF;
-  --grad-brand:    linear-gradient(135deg,#4F46E5 0%,#7C3AED 100%);
-  --grad-green:    linear-gradient(135deg,#10B981 0%,#06B6D4 100%);
-  --shadow-xs:     0 1px 3px rgba(15,23,42,0.06),0 1px 2px rgba(15,23,42,0.04);
-  --shadow-sm:     0 2px 8px rgba(79,70,229,0.06),0 1px 3px rgba(15,23,42,0.04);
-  --shadow-md:     0 4px 20px rgba(79,70,229,0.10),0 2px 6px rgba(15,23,42,0.05);
-  --shadow-glow:   0 0 0 3px rgba(79,70,229,0.08),0 4px 20px rgba(79,70,229,0.15);
-  --radius-xs:     6px;
-  --radius-sm:     10px;
-  --radius:        16px;
-  --radius-lg:     24px;
+  --grad-brand:    #1E40AF;
+  --grad-green:    #10893e;
+  --shadow-xs:     0 1px 3px rgba(0,0,0,0.05);
+  --shadow-sm:     0 2px 5px rgba(0,0,0,0.05);
+  --shadow-md:     0 2px 8px rgba(0,0,0,0.08);
+  --shadow-glow:   0 0 0 3px rgba(30,64,175,0.08);
+  --radius-xs:     4px;
+  --radius-sm:     6px;
+  --radius:        10px;
+  --radius-lg:     14px;
   --radius-pill:   999px;
-  --ease-out:      cubic-bezier(0.16,1,0.3,1);
+  --ease-out:      ease;
 }
 :host {
     --slds-c-modal-content-spacing-block-start: 0;
@@ -50,7 +50,7 @@
 }
 
 .modal { background: white; border-radius: 1.5rem; width: 420px; max-height: 85vh; overflow-y: auto; box-shadow: 0 8px 20px rgba(0,0,0,0.25); animation: fadeIn 0.25s ease;max-height: none;overflow: visible; }
-.modal__header { background: linear-gradient(135deg,#4F46E5 0%,#7C3AED 100%);display:flex;justify-content:space-between;align-items:center;font-size: 1rem; font-weight: 600; padding: 1rem 1.2rem; border-bottom: 1px solid #eee;color: white; }
+.modal__header { background: #1E40AF;display:flex;justify-content:space-between;align-items:center;font-size: 1rem; font-weight: 600; padding: 1rem 1.2rem; border-bottom: 1px solid #eee;color: white; }
 .modal-close-btn { background:transparent;border:none;color:rgba(255,255,255,0.75);font-size:1rem;cursor:pointer;padding:4px 8px;border-radius:6px;line-height:1;transition:color .15s; }
 .modal-close-btn:hover { color:#fff; }
 
@@ -86,7 +86,7 @@
 
 /* Bouton primaire */
 .btn-primary {
-    background: linear-gradient(135deg,#4F46E5 0%,#7C3AED 100%);
+    background: #1E40AF;
     color: #ffffff;
     box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
 }
@@ -108,7 +108,7 @@
 }
 
 .preset-file-banner {
-    font-size: .85rem; color: #4F46E5; background: rgba(79,70,229,0.08);
+    font-size: .85rem; color: #1E40AF; background: rgba(30,64,175,0.08);
     border-radius: 8px; padding: .6rem .75rem; margin-bottom: 1rem;
 }
 
@@ -119,11 +119,11 @@
 .rounded-input {
     display: block; width: 100%; box-sizing: border-box;
     padding: 8px 12px; border-radius: 8px;
-    border: 1px solid #E2E8F0; background: #fff;
-    font-size: .875rem; color: #0F172A;
+    border: 1px solid #eeeeee; background: #fff;
+    font-size: .875rem; color: #181818;
     outline: none; transition: border-color .15s;
 }
-.rounded-input:focus { border-color: #4F46E5; box-shadow: 0 0 0 3px rgba(79,70,229,0.08); }
+.rounded-input:focus { border-color: #1E40AF; box-shadow: 0 0 0 3px rgba(30,64,175,0.08); }
 .form-label {
     display: block;
     font-size: 0.875rem;
@@ -135,14 +135,14 @@
 /* Bouton secondaire */
 .btn-secondary {
     background-color: #ffffff;
-    color:#4F46E5; 
-    border: 1px solid #4F46E5;
+    color:#1E40AF; 
+    border: 1px solid #1E40AF;
     font-weight: 500;
 }
 
 .btn-secondary:hover {
     background-color: #f9fafb;
-    border-color: #4F46E5;;
+    border-color: #1E40AF;;
 }
 
 .btn-secondary:active {

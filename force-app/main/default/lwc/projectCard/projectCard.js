@@ -93,10 +93,10 @@ export default class ProjectCard extends LightningElement {
 
     get statusClass() {
         const status = this.status.toLowerCase();
-        if (status === 'completed') return 'status-badge badge-done';
-        if (status === 'inprogress' || status === 'pending') return 'status-badge badge-active';
-        if (status === 'failed') return 'status-badge badge-error';
-        return 'status-badge badge-draft';
+        if (status === 'completed') return 'status-badge status-success';
+        if (status === 'inprogress' || status === 'pending') return 'status-badge status-progress';
+        if (status === 'failed') return 'status-badge status-error';
+        return 'status-badge status-draft';
     }
 
     get progressPercentage() {

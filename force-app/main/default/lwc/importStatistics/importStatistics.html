@@ -5,7 +5,7 @@
     <div class="is-header">
       <div class="is-header-left">
         <div class="is-header-icon">
-          <span class="is-icon-emoji">📊</span>
+          <lightning-icon icon-name="utility:chart" size="small" alternative-text="Stats"></lightning-icon>
         </div>
         <div>
           <h1 class="is-title">{label.title}</h1>
@@ -13,20 +13,27 @@
         </div>
       </div>
       <div class="is-header-right">
-        <select class="is-period-select rounded-input" onchange={handlePeriodChange}>
-          <template for:each={periodOptionsWithSelected} for:item="o">
-            <option key={o.value} value={o.value} selected={o.isSelected}>{o.label}</option>
-          </template>
-        </select>
-        <button type="button" class="btn btn-secondary" onclick={handleRefresh} disabled={isLoading}>
-          <span class="btn-icon">↺</span> {label.refresh}
-        </button>
+        <lightning-combobox
+          value={selectedPeriod}
+          options={periodOptions}
+          variant="label-hidden"
+          class="is-period-select"
+          onchange={handlePeriodChange}
+        ></lightning-combobox>
+        <lightning-button
+          label={label.refresh}
+          variant="neutral"
+          icon-name="utility:refresh"
+          icon-position="left"
+          onclick={handleRefresh}
+          disabled={isLoading}
+        ></lightning-button>
       </div>
     </div>
 
     <template if:true={isLoading}>
       <div class="is-loading-overlay">
-        <div class="aurora-spinner"></div>
+        <lightning-spinner alternative-text={label.loading} size="medium"></lightning-spinner>
         <p class="is-loading-text">{label.loading}</p>
       </div>
     </template>
@@ -39,7 +46,7 @@
         <article class="is-kpi-card is-kpi-primary">
           <div class="is-kpi-inner">
             <div class="is-kpi-icon-wrap is-kpi-icon-blue">
-              <span class="is-icon-emoji">⚡</span>
+              <lightning-icon icon-name="utility:apex" size="x-small" alternative-text="Total"></lightning-icon>
             </div>
             <div class="is-kpi-body">
               <span class="is-kpi-label">{label.kpiTotal}</span>
@@ -54,7 +61,7 @@
         <article class="is-kpi-card">
           <div class="is-kpi-inner">
             <div class="is-kpi-icon-wrap is-kpi-icon-green">
-              <span class="is-icon-emoji">✓</span>
+              <lightning-icon icon-name="utility:check" size="x-small" alternative-text="Rate"></lightning-icon>
             </div>
             <div class="is-kpi-body">
               <span class="is-kpi-label">{label.kpiSuccessRate}</span>
@@ -66,7 +73,7 @@
         <article class="is-kpi-card">
           <div class="is-kpi-inner">
             <div class="is-kpi-icon-wrap is-kpi-icon-purple">
-              <span class="is-icon-emoji">🗃</span>
+              <lightning-icon icon-name="utility:database" size="x-small" alternative-text="Records"></lightning-icon>
             </div>
             <div class="is-kpi-body">
               <span class="is-kpi-label">{label.kpiRecords}</span>
@@ -78,7 +85,7 @@
         <article class="is-kpi-card">
           <div class="is-kpi-inner">
             <div class="is-kpi-icon-wrap is-kpi-icon-teal">
-              <span class="is-icon-emoji">⏱</span>
+              <lightning-icon icon-name="utility:clock" size="x-small" alternative-text="Duration"></lightning-icon>
             </div>
             <div class="is-kpi-body">
               <span class="is-kpi-label">{label.kpiAvgDuration}</span>
@@ -90,7 +97,7 @@
         <article class="is-kpi-card">
           <div class="is-kpi-inner">
             <div class="is-kpi-icon-wrap is-kpi-icon-red">
-              <span class="is-icon-emoji">⚠</span>
+              <lightning-icon icon-name="utility:error" size="x-small" alternative-text="Failed"></lightning-icon>
             </div>
             <div class="is-kpi-body">
               <span class="is-kpi-label">{label.kpiFailed}</span>
@@ -102,7 +109,7 @@
         <article class="is-kpi-card">
           <div class="is-kpi-inner">
             <div class="is-kpi-icon-wrap is-kpi-icon-blue-light">
-              <span class="is-icon-emoji">↺</span>
+              <lightning-icon icon-name="utility:sync" size="x-small" alternative-text="Running"></lightning-icon>
             </div>
             <div class="is-kpi-body">
               <span class="is-kpi-label">{label.kpiRunning}</span>

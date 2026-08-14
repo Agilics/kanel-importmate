@@ -8,16 +8,19 @@
     <!-- Loading State -->
     <template if:true={isLoading}>
       <div class="card">
-        <div class="ml-loading">
-          <div class="ml-spinner"></div>
+        <div class="slds-align_absolute-center" style="padding: 2rem;">
+          <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
         </div>
       </div>
     </template>
 
     <!-- Error State -->
     <template if:true={error}>
-      <div class="card ml-error">
-        <strong>{labels.errorTitle}:</strong> {error}
+      <div class="card">
+        <div class="slds-box slds-theme_error slds-m-bottom_small">
+          <strong>{labels.errorTitle}:</strong>
+          <span class="slds-m-left_x-small">{error}</span>
+        </div>
       </div>
     </template>
 
@@ -31,7 +34,11 @@
           </div>
           <div class="toolbar__right">
             <div class="search">
-              <span class="search__icon">🔍</span>
+              <lightning-icon
+                icon-name="utility:search"
+                size="x-small"
+                class="search__icon"
+              ></lightning-icon>
               <input
                 class="search__input"
                 type="search"
@@ -117,7 +124,14 @@
                         class="btn btn--primary"
                         data-mapping-id={mapping.id}
                         onclick={handleTransformation}
-                      >＋ {labels.addRule}</button>
+                      >
+                        <lightning-icon
+                          icon-name="utility:add"
+                          class="custom-icon-output"
+                          size="x-small"
+                        ></lightning-icon>
+                        <label>{labels.addRule}</label>
+                      </button>
                     </td>
                   </tr>
                 </template>
@@ -136,7 +150,10 @@
                 class="pager__btn"
                 onclick={gotoPrev}
                 disabled={isFirstPage}
-              >← {labels.previous}</button>
+              >
+                <lightning-icon icon-name="utility:chevronleft" size="xx-small"></lightning-icon>
+                <span class="slds-m-left_xx-small">{labels.previous}</span>
+              </button>
 
               <template for:each={pageNumbers} for:item="p">
                 <span key={p.key}>
@@ -168,7 +185,10 @@
                 class="pager__btn"
                 onclick={gotoNext}
                 disabled={isLastPage}
-              >{labels.next} →</button>
+              >
+                <span class="slds-m-right_xx-small">{labels.next}</span>
+                <lightning-icon icon-name="utility:chevronright" size="xx-small"></lightning-icon>
+              </button>
             </div>
           </div>
         </div>
@@ -177,11 +197,15 @@
 
     <!-- Empty State -->
     <template if:true={isEmpty}>
-      <div class="card empty-state-card">
-        <div class="empty-state">
-          <div class="empty-state-icon">▤</div>
-          <h3 class="empty-state-title">No Mappings Found</h3>
-          <p class="empty-state-sub">Create field mappings to configure transformations</p>
+      <div class="card">
+        <div class="slds-align_absolute-center" style="padding: 3rem 1rem;">
+          <lightning-icon icon-name="utility:table" size="large" variant="base"></lightning-icon>
+          <div style="display:flex; padding: 0 1rem;">
+            <h3 class="slds-text-heading_medium slds-m-top_medium">No Mappings Found</h3>
+            <p class="slds-text-color_weak slds-m-top_x-small">
+              Create field mappings to configure transformations
+            </p>
+          </div>
         </div>
       </div>
     </template>

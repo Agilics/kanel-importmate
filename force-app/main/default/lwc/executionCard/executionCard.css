@@ -1,134 +1,7 @@
-﻿/* ══ Aurora design tokens ══ */
-:host {
-  --indigo:        #4F46E5;
-  --indigo-soft:   rgba(79,70,229,0.08);
-  --indigo-glow:   rgba(79,70,229,0.25);
-  --violet:        #7C3AED;
-  --green:         #10B981;
-  --green-soft:    rgba(16,185,129,0.1);
-  --coral:         #F43F5E;
-  --amber:         #F59E0B;
-  --text:          #0F172A;
-  --text-2:        #1E293B;
-  --muted:         #64748B;
-  --muted-2:       #94A3B8;
-  --border:        rgba(148,163,184,0.2);
-  --border-solid:  #E2E8F0;
-  --surface:       rgba(255,255,255,0.75);
-  --surface-solid: #FFFFFF;
-  --grad-brand:    linear-gradient(135deg,#4F46E5 0%,#7C3AED 100%);
-  --grad-green:    linear-gradient(135deg,#10B981 0%,#06B6D4 100%);
-  --shadow-xs:     0 1px 3px rgba(15,23,42,0.06),0 1px 2px rgba(15,23,42,0.04);
-  --shadow-sm:     0 2px 8px rgba(79,70,229,0.06),0 1px 3px rgba(15,23,42,0.04);
-  --shadow-md:     0 4px 20px rgba(79,70,229,0.10),0 2px 6px rgba(15,23,42,0.05);
-  --shadow-glow:   0 0 0 3px rgba(79,70,229,0.08),0 4px 20px rgba(79,70,229,0.15);
-  --radius-xs:     6px;
-  --radius-sm:     10px;
-  --radius:        16px;
-  --radius-lg:     24px;
-  --radius-pill:   999px;
-  --ease-out:      cubic-bezier(0.16,1,0.3,1);
-}
-/* ══ Emoji icon in header box ══ */
-.ec-icon {
-  font-size: 20px;
-  line-height: 1;
-}
-
-/* ══ Immediate execution form ══ */
-.ec-form {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.ec-label {
-  display: block;
-  font-size: .72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: .07em;
-  color: var(--muted);
-  margin-bottom: 5px;
-}
-
-.ec-select {
-  width: 100%;
-  border: 1.5px solid var(--border-solid);
-  border-radius: var(--radius-sm);
-  padding: 7px 10px;
-  font-size: .85rem;
-  font-family: inherit;
-  background: var(--surface-solid);
-  color: var(--text);
-  outline: none;
-  appearance: none;
-  -webkit-appearance: none;
-  cursor: pointer;
-  box-sizing: border-box;
-}
-.ec-select:focus { border-color: var(--indigo); }
-
-.ec-input {
-  width: 100%;
-  border: 1.5px solid var(--border-solid);
-  border-radius: var(--radius-sm);
-  padding: 7px 10px;
-  font-size: .85rem;
-  font-family: inherit;
-  background: var(--surface-solid);
-  color: var(--text);
-  outline: none;
-  box-sizing: border-box;
-}
-.ec-input:focus { border-color: var(--indigo); }
-
-.ec-check-label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: .85rem;
-  color: var(--text);
-  cursor: pointer;
-}
-.ec-check-label input[type="checkbox"] {
-  width: 15px;
-  height: 15px;
-  accent-color: var(--indigo);
-  flex-shrink: 0;
-}
-
 .batch-size-hint {
   margin-top: 0.25rem;
   font-size: 0.75rem;
-  color: var(--muted);
-}
-
-/* ══ Schedule panel (prototype: .schedule-panel) ══ */
-.schedule-panel {
-  border: 1.5px dashed rgba(79,70,229,0.22);
-  border-radius: var(--radius-sm);
-  padding: 18px 20px;
-  background: var(--indigo-soft);
-  margin-top: 12px;
-}
-.sched-form {
-  display: flex; gap: 14px; align-items: flex-end; flex-wrap: wrap;
-  margin-bottom: 10px;
-}
-.sched-field {
-  flex: 1; min-width: 160px;
-  display: flex; flex-direction: column; gap: 5px;
-}
-.sched-label {
-  font-size: .72rem; font-weight: 700; color: var(--indigo);
-  text-transform: uppercase; letter-spacing: .06em;
-}
-.sched-combobox, .sched-datetime { width: 100%; }
-.sched-note {
-  font-size: .78rem; color: var(--indigo); font-weight: 500; opacity: .85;
-  padding: 8px 12px; background: rgba(79,70,229,0.06);
-  border-radius: var(--radius-xs); margin-top: 4px;
+  color: #6b7280;
 }
 
 .header {
@@ -136,10 +9,8 @@
   align-items: center;
   justify-content: flex-start;
   width: 100%;
-  margin-bottom: 16px;
-  gap: 14px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid var(--border-solid);
+  margin-bottom: 1rem;
+  gap: 1rem;
 }
 
 .is-centered{
@@ -152,7 +23,7 @@
   width: 48px;
   height: 48px;
   min-width: 48px;
-  border-radius: 16px;
+  border-radius: 12px;
   flex-shrink: 0;
 }
 
@@ -166,12 +37,12 @@
 
 }
 
-.box-icon-immediate {
-  background: var(--indigo-soft);
+.box-icon-immediate{
+  background: #DBEAFE;
 }
 
 .box-icon-scheduled {
-  background: rgba(124,58,237,0.08);
+  background: #F3E8FF;
 }
 
 /*Icons style*/
@@ -180,7 +51,7 @@
 
 /*Add the class name below to the lightning-icon element.*/
 .custom-icon-connected_apps { 
- --slds-c-icon-color-foreground-default: #4F46E5;
+ --slds-c-icon-color-foreground-default: #1e40af;
  --slds-c-icon-color-background: transparent;
 }
 
@@ -197,21 +68,18 @@
 
 .title {
   font-family: "Inter", sans-serif;
-  font-weight: 800;
-  font-size: 1rem;
-  line-height: 1.3;
-  color: var(--text);
-  letter-spacing: -0.3px;
-  margin: 0;
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 1.4;
+  color: #111827; 
   word-wrap: break-word;
 }
 
 .subtitle {
   font-weight: 400;
-  font-size: .825rem;
+  font-size: 16px;
   line-height: 1.5;
-  color: var(--muted);
-  margin: 2px 0 0;
+  color: #4b5563;
 }
 
 
@@ -236,13 +104,13 @@ lightning-combobox {
 }
  
 
-.paragraph {
-  background: rgba(248,250,252,0.95);
-  border: 1px solid var(--border-solid);
+.paragraph{
+  background:#F9FAFB;
   max-width: 430px;
-  border-radius: var(--radius-xs);
-  opacity: 1;
-  padding: 0.75rem 1.25rem;
+  height: 72px;
+  border-radius: 8px; 
+  opacity: 1; 
+  padding: 0.75rem 1.25rem ; 
 }
 
 /* Responsive breakpoints */

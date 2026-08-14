@@ -270,20 +270,6 @@ export default class DryRunValidator extends LightningElement {
     return options;
   }
 
-  get modeOptionsWithSelected() {
-    return this.modeOptions.map(o => ({ ...o, isSelected: o.value === this.settings?.mode }));
-  }
-  get tabOptionsWithSelected() {
-    return this.tabOptions.map(o => ({ ...o, isSelected: o.value === this.settings?.defaultTab }));
-  }
-  get pageSizeOptionsWithSelected() {
-    const cur = String(this.settings?.pageSize ?? '5');
-    return this.pageSizeOptions.map(o => ({ ...o, isSelected: o.value === cur }));
-  }
-  get errorTypeOptionsWithSelected() {
-    return this.errorTypeOptions.map(o => ({ ...o, isSelected: o.value === this.selectedErrorType }));
-  }
-
   restoreSettings() {
     try {
       const raw = sessionStorage.getItem(SS_SETTINGS_KEY);
@@ -582,8 +568,7 @@ export default class DryRunValidator extends LightningElement {
     let end = Math.min(total, start + maxVisible - 1);
     if (end - start + 1 < maxVisible) start = Math.max(1, end - maxVisible + 1);
     for (let i = start; i <= end; i++) {
-      const isActive = i === this.currentPage;
-      pages.push({ number: i, isActive, btnClass: isActive ? 'pg-btn pg-btn-active' : 'pg-btn' });
+      pages.push({ number: i, variant: i === this.currentPage ? 'brand' : 'neutral' });
     }
     return pages;
   }
@@ -651,10 +636,6 @@ export default class DryRunValidator extends LightningElement {
     return 'base';
   }
 
-  get progressFillStyle() {
-    const pct = Math.min(100, Math.max(0, this.importProgressPercentage || 0));
-    return `width:${pct}%`;
-  }
   get totalRecords() { return this.backendTotalRecords || this.validationResults?.totalRecords || 0; }
   get totalRecordsToProcess() { return this.initialTotalRecords > 0 ? this.initialTotalRecords : this.totalRecords; }
   get failedRecordsCount() { return this.backendFailedRecords || this.validationResults?.errorCount || 0; }

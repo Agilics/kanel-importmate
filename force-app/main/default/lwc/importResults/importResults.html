@@ -6,7 +6,7 @@
 
             <template if:true={isLoading}>
                 <div class="spinner-container">
-                    <div class="aurora-spinner"></div>
+                    <lightning-spinner alternative-text="Loading" size="medium"></lightning-spinner>
                     <p class="spinner-text">{labels.loading}</p>
                 </div>
             </template>
@@ -19,75 +19,115 @@
                         <div></div>
                         <div class="filter-controls">
                             <div class="search-container">
-                                <input
+                                <lightning-input
                                     type="search"
-                                    class="rounded-input"
                                     placeholder={labels.searchPlaceholder}
                                     value={searchTerm}
                                     onchange={handleSearchChange}
-                                />
+                                    variant="label-hidden">
+                                </lightning-input>
                             </div>
-                            <select class="rounded-input" onchange={handleFilterChange}>
-                                <template for:each={errorTypeOptionsWithSelected} for:item="o">
-                                    <option key={o.value} value={o.value} selected={o.isSelected}>{o.label}</option>
-                                </template>
-                            </select>
+                            <lightning-combobox
+                                name="errorTypeFilter"
+                                label="Filter"
+                                value={selectedErrorType}
+                                placeholder={labels.filterAllTypes}
+                                options={errorTypeOptions}
+                                onchange={handleFilterChange}
+                                variant="label-hidden">
+                            </lightning-combobox>
                         </div>
                     </div>
 
                     <!-- Summary -->
-                    <div class="results-summary">
-                        <strong>{labels.summaryTotal} {totalErrors}</strong>
-                        <span class="summary-sep">{labels.summaryFailed} {failedRecords}</span>
-                        <template if:true={searchTerm}>
-                            <span class="summary-sep">({labels.summaryFiltered} {filteredLogsCount})</span>
-                        </template>
+                    <div class="slds-m-bottom_medium">
+                        <div class="slds-text-body_regular">
+                            <strong>{labels.summaryTotal} {totalErrors}</strong>
+                            <span class="slds-m-left_small">{labels.summaryFailed} {failedRecords}</span>
+                            <template if:true={searchTerm}>
+                                <span class="slds-m-left_small">({labels.summaryFiltered} {filteredLogsCount})</span>
+                            </template>
+                        </div>
                     </div>
 
                     <!-- Table -->
-                    <div class="results-table-wrap">
-                        <table class="results-table">
+                    <div class="slds-scrollable_x">
+                        <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped">
                             <thead>
-                                <tr>
-                                    <th scope="col" class="col-check">
-                                        <input type="checkbox" onchange={handleSelectAll} />
+                                <tr class="slds-line-height_reset">
+                                    <th class="slds-text-title_caps" scope="col">
+                                        <div class="slds-truncate">
+                                            <lightning-input type="checkbox" onchange={handleSelectAll}></lightning-input>
+                                        </div>
                                     </th>
-                                    <th scope="col">{labels.colRow}</th>
-                                    <th scope="col">{labels.colField}</th>
-                                    <th scope="col">{labels.colErrorType}</th>
-                                    <th scope="col">{labels.colMessage}</th>
-                                    <th scope="col">{labels.colCurrentValue}</th>
+                                    <th class="slds-text-title_caps" scope="col">
+                                        <div class="slds-truncate">{labels.colRow}</div>
+                                    </th>
+                                    <th class="slds-text-title_caps" scope="col">
+                                        <div class="slds-truncate">{labels.colField}</div>
+                                    </th>
+                                    <th class="slds-text-title_caps" scope="col">
+                                        <div class="slds-truncate">{labels.colErrorType}</div>
+                                    </th>
+                                    <th class="slds-text-title_caps" scope="col">
+                                        <div class="slds-truncate">{labels.colMessage}</div>
+                                    </th>
+                                    <th class="slds-text-title_caps" scope="col">
+                                        <div class="slds-truncate">{labels.colCurrentValue}</div>
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <template if:true={hasFilteredLogs}>
                                     <template for:each={paginatedLogs} for:item="log">
-                                        <tr key={log.id}>
-                                            <td data-label="Select" class="col-check">
-                                                <input
+                                        <tr key={log.id} class="slds-hint-parent">
+                                            <td data-label="Select">
+                                                <lightning-input
                                                     type="checkbox"
                                                     data-error-id={log.id}
                                                     onchange={handleErrorSelect}
-                                                    checked={log.isSelected}
-                                                />
+                                                    checked={log.isSelected}>
+                                                </lightning-input>
                                             </td>
-                                            <td data-label="ROW">Row {log.lineNumber}</td>
-                                            <td data-label="FIELD">{log.fieldApiName}</td>
+                                            <td data-label="ROW">
+                                                <div class="slds-truncate" title={log.lineNumber}>
+                                                    Row {log.lineNumber}
+                                                </div>
+                                            </td>
+                                            <td data-label="FIELD">
+                                                <div class="slds-truncate" title={log.fieldApiName}>
+                                                    {log.fieldApiName}
+                                                </div>
+                                            </td>
                                             <td data-label="ERROR TYPE">
                                                 <span class="error-type-badge" data-error-type={log.errorType}>
                                                     {log.errorType}
                                                 </span>
                                             </td>
-                                            <td data-label="MESSAGE">{log.errorMessage}</td>
-                                            <td data-label="CURRENT VALUE">{log.currentValue}</td>
+                                            <td data-label="MESSAGE">
+                                                <div class="slds-truncate" title={log.errorMessage}>
+                                                    {log.errorMessage}
+                                                </div>
+                                            </td>
+                                            <td data-label="CURRENT VALUE">
+                                                <div class="slds-truncate" title={log.currentValue}>
+                                                    {log.currentValue}
+                                                </div>
+                                            </td>
                                         </tr>
                                     </template>
                                 </template>
                                 <template if:false={hasFilteredLogs}>
                                     <tr>
-                                        <td colspan="6" class="results-empty-row">
-                                            <template if:true={searchTerm}>{labels.noMatch}</template>
-                                            <template if:false={searchTerm}>{labels.noErrors}</template>
+                                        <td colspan="6" class="slds-text-align_center slds-p-vertical_medium">
+                                            <div class="slds-text-body_regular">
+                                                <template if:true={searchTerm}>
+                                                    {labels.noMatch}
+                                                </template>
+                                                <template if:false={searchTerm}>
+                                                    {labels.noErrors}
+                                                </template>
+                                            </div>
                                         </td>
                                     </tr>
                                 </template>
@@ -102,21 +142,32 @@
                                 {labels.paginationShowing} {startRecord} {labels.paginationTo} {endRecord} {labels.paginationOf} {filteredLogsCount} {labels.paginationErrors}
                             </div>
                             <div class="pagination-controls">
-                                <button type="button" class="pagination-btn pagination-btn--nav"
-                                    onclick={handlePreviousPage} disabled={isFirstPage}>
-                                    <span>‹</span> {labels.paginationPrevious}
-                                </button>
+                                <lightning-button
+                                    label={labels.paginationPrevious}
+                                    onclick={handlePreviousPage}
+                                    disabled={isFirstPage}
+                                    variant="neutral"
+                                    icon-name="utility:chevronleft"
+                                    icon-position="left">
+                                </lightning-button>
                                 <template for:each={pageNumbers} for:item="page">
-                                    <button key={page.number} type="button"
-                                        class={page.buttonClass}
-                                        data-page={page.number} onclick={handlePageClick}>
-                                        {page.number}
-                                    </button>
+                                    <lightning-button
+                                        key={page.number}
+                                        label={page.number}
+                                        onclick={handlePageClick}
+                                        data-page={page.number}
+                                        variant={page.variant}
+                                        class="page-button">
+                                    </lightning-button>
                                 </template>
-                                <button type="button" class="pagination-btn pagination-btn--nav"
-                                    onclick={handleNextPage} disabled={isLastPage}>
-                                    {labels.paginationNext} <span>›</span>
-                                </button>
+                                <lightning-button
+                                    label={labels.paginationNext}
+                                    onclick={handleNextPage}
+                                    disabled={isLastPage}
+                                    variant="neutral"
+                                    icon-name="utility:chevronright"
+                                    icon-position="right">
+                                </lightning-button>
                             </div>
                         </div>
                     </template>

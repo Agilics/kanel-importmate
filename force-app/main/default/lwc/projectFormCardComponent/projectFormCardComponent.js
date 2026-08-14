@@ -112,10 +112,6 @@ export default class ProjectFormCardComponent extends LightningElement {
     }
   }
 
-  get targetObjectOptionsWithSelected() {
-    return (this.options || []).map(o => ({ ...o, isSelected: o.value === this.targetObject }));
-  }
-
   //Mise à jour de la variable project name via le champs de texte
   handleProjectNameChange(event) {
     this.projectName = event.target.value;

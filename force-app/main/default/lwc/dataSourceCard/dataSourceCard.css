@@ -1,34 +1,3 @@
-﻿/* ══ Aurora design tokens ══ */
-:host {
-  --indigo:        #4F46E5;
-  --indigo-soft:   rgba(79,70,229,0.08);
-  --indigo-glow:   rgba(79,70,229,0.25);
-  --violet:        #7C3AED;
-  --green:         #10B981;
-  --green-soft:    rgba(16,185,129,0.1);
-  --coral:         #F43F5E;
-  --amber:         #F59E0B;
-  --text:          #0F172A;
-  --text-2:        #1E293B;
-  --muted:         #64748B;
-  --muted-2:       #94A3B8;
-  --border:        rgba(148,163,184,0.2);
-  --border-solid:  #E2E8F0;
-  --surface:       rgba(255,255,255,0.75);
-  --surface-solid: #FFFFFF;
-  --grad-brand:    linear-gradient(135deg,#4F46E5 0%,#7C3AED 100%);
-  --grad-green:    linear-gradient(135deg,#10B981 0%,#06B6D4 100%);
-  --shadow-xs:     0 1px 3px rgba(15,23,42,0.06),0 1px 2px rgba(15,23,42,0.04);
-  --shadow-sm:     0 2px 8px rgba(79,70,229,0.06),0 1px 3px rgba(15,23,42,0.04);
-  --shadow-md:     0 4px 20px rgba(79,70,229,0.10),0 2px 6px rgba(15,23,42,0.05);
-  --shadow-glow:   0 0 0 3px rgba(79,70,229,0.08),0 4px 20px rgba(79,70,229,0.15);
-  --radius-xs:     6px;
-  --radius-sm:     10px;
-  --radius:        16px;
-  --radius-lg:     24px;
-  --radius-pill:   999px;
-  --ease-out:      cubic-bezier(0.16,1,0.3,1);
-}
 body {
   font-family: "Inter", sans-serif;
 }
@@ -42,7 +11,7 @@ body {
   padding: 1.5rem;
   margin: 1.5rem auto;
   box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.05);
-  border-radius: 16px;
+  border-radius: 12px;
   position: relative;
 }
 
@@ -59,7 +28,7 @@ body {
   width: 64px;
   height: 64px;
   min-width: 64px;
-  border-radius: 16px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -74,15 +43,14 @@ body {
   background: #ffedd5;
 }
 
-.custom-icon-upload,
+.custom-icon-upload {
+  --slds-c-icon-color-foreground-default: #1e40af;
+  --slds-c-icon-color-background: #dbeafe;
+}
+
 .custom-icon-database {
-  font-size: 22px;
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
+  --slds-c-icon-color-foreground-default: #ea580c;
+  --slds-c-icon-color-background: #ffedd5;
 }
 
 .text-content {
@@ -126,10 +94,8 @@ body {
 }
 
 .custom-icon-check {
-  font-size: 14px;
-  color: #10B981;
-  font-weight: 700;
-  flex-shrink: 0;
+  --slds-c-icon-color-foreground-default: #16a34a;
+  --slds-c-icon-color-background: #ffffff;
   flex-shrink: 0;
   margin-right: 0.75rem;
   margin-top: 0.125rem;
@@ -163,8 +129,8 @@ body {
 }
 
 .btn-upload {
-  background: linear-gradient(135deg,#4F46E5 0%,#7C3AED 100%);
-  border: 1px solid #4F46E5;
+  background: #1e40af;
+  border: 1px solid #1e40af;
 }
 
 .btn-upload:hover {

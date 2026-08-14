@@ -1,40 +1,59 @@
 <!--
-  @Modification : 12-06-2026 — aligné sur prototype aurora-dashboard.html
+@Modification : 30-03-2026
+
 -->
 <template>
-  <div class="project-card" onclick={handleCardClick}>
-
-    <!-- Edit / Delete (hidden, shown on hover) -->
-    <div class="card-actions">
-      <button class="card-act-btn" title="Edit" onclick={handleEditClick}>✎</button>
-      <button class="card-act-btn del" title="Delete" onclick={handleDeleteClick}>🗑</button>
-    </div>
-
-    <!-- Name + object badge -->
-    <div class="project-top">
-      <div class="project-name">{projectName}</div>
-      <span class="project-object">{targetObject}</span>
-    </div>
-
-    <!-- Progress bar (only when > 0) -->
-    <template if:true={hasProgress}>
-      <div>
-        <div class="progress-label">
-          <span>{labels.progress}</span>
-          <span>{progressPercentage}%</span>
+    <div class="project-card" onclick={handleCardClick}>
+        <!-- Card Header -->
+        <div class="card-header">
+            <div class="card-header-left">
+                <h3 class="project-title">{projectName}</h3>
+                <span class={statusClass}>{statusLabel}</span>
+            </div>
+            <div class="card-header-right">
+                <lightning-button-icon icon-name="utility:edit" alternative-text="Edit" title="Edit Project"
+                    size="small" variant="bare" onclick={handleEditClick} class="action-icon">
+                </lightning-button-icon>
+                <lightning-button-icon icon-name="utility:delete" alternative-text="Delete" title="Delete Project"
+                    size="small" variant="bare" onclick={handleDeleteClick} class="action-icon">
+                </lightning-button-icon>
+            </div>
         </div>
-        <div class="progress-bar">
-          <div class="progress-fill" style={progressStyle}></div>
+
+        <!-- Card Body -->
+        <div class="card-body">
+            <p class="project-description">{description}</p>
+
+            <div class="project-meta">
+                <div class="meta-item">
+                    <lightning-icon icon-name="standard:account" size="x-small"></lightning-icon>
+                    <span class="meta-label">{labels.target}</span>
+                    <span class="meta-value">{targetObject}</span>
+                </div>
+                <div class="meta-item">
+                    <lightning-icon icon-name="standard:record" size="x-small"></lightning-icon>
+                    <span class="meta-label">{labels.records}</span>
+                    <span class="meta-value">{recordCount}</span>
+                </div>
+                <div class="meta-item">
+                    <lightning-icon icon-name="standard:date_time" size="x-small"></lightning-icon>
+                    <span class="meta-label">{labels.lastModified}</span>
+                    <span class="meta-value">{lastModifiedDate}</span>
+                </div>
+            </div>
+
+            <!-- Progress Bar -->
+            <template if:true={hasProgress}>
+                <div class="progress-section">
+                    <div class="progress-header">
+                        <span class="progress-label">{labels.progress}</span>
+                        <span class="progress-percentage">{progressPercentage}%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style={progressStyle}></div>
+                    </div>
+                </div>
+            </template>
         </div>
-      </div>
-    </template>
-
-    <!-- Footer: status · date · action -->
-    <div class="project-footer">
-      <span class={statusClass}>{statusLabel}</span>
-      <span class="project-meta">{lastModifiedDate}</span>
-      <span class="project-action">Ouvrir →</span>
     </div>
-
-  </div>
 </template>

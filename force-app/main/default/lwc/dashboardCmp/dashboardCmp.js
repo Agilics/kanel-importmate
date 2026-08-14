@@ -48,10 +48,10 @@ export default class DashboardCmp extends LightningElement {
 
     // ── Filter tabs ───────────────────────────────────────────────────────────
     @track filterTabs = [
-        { label: Dashboard_Filter_All_Project, value: 'all',       active: true,  className: 'filter-btn active' },
-        { label: Dashboard_Filter_Active,      value: 'active',    active: false, className: 'filter-btn' },
-        { label: Dashboard_Filter_Completed,   value: 'completed', active: false, className: 'filter-btn' },
-        { label: Dashboard_Filter_Scheduled,   value: 'scheduled', active: false, className: 'filter-btn' }
+        { label: Dashboard_Filter_All_Project, value: 'all',       active: true  },
+        { label: Dashboard_Filter_Active,      value: 'active',    active: false },
+        { label: Dashboard_Filter_Completed,   value: 'completed', active: false },
+        { label: Dashboard_Filter_Scheduled,   value: 'scheduled', active: false }
     ];
 
     // ── Bound label objects ───────────────────────────────────────────────────
@@ -123,7 +123,7 @@ export default class DashboardCmp extends LightningElement {
         this.filterTabs = this.filterTabs.map(tab => ({
             ...tab,
             active:    tab.value === selectedValue,
-            className: tab.value === selectedValue ? 'filter-btn active' : 'filter-btn'
+            className: tab.value === selectedValue ? 'filter-tab active' : 'filter-tab'
         }));
         this.filterProjects();
     }
@@ -249,7 +249,7 @@ export default class DashboardCmp extends LightningElement {
                 value:       String(totalProjects),
                 change:      '',
                 changeLabel: '',
-                icon:        '📁',
+                icon:        'standard:folder',
                 iconColor:   'blue'
             },
             {
@@ -258,7 +258,7 @@ export default class DashboardCmp extends LightningElement {
                 value:       recordsImported,
                 change:      '',
                 changeLabel: '',
-                icon:        '📊',
+                icon:        'standard:data_integration_hub',
                 iconColor:   'green'
             },
             {
@@ -267,7 +267,7 @@ export default class DashboardCmp extends LightningElement {
                 value:       successRate,
                 change:      '',
                 changeLabel: '',
-                icon:        '✓',
+                icon:        'standard:approval',
                 iconColor:   'green'
             },
             {
@@ -276,7 +276,7 @@ export default class DashboardCmp extends LightningElement {
                 value:       String(activeProjects),
                 change:      '',
                 changeLabel: '',
-                icon:        '⚡',
+                icon:        'standard:event',
                 iconColor:   'purple'
             }
         ];

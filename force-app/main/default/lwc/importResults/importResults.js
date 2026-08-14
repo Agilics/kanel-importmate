@@ -164,10 +164,6 @@ export default class ImportResults extends LightningElement {
     ];
   }
 
-  get errorTypeOptionsWithSelected() {
-    return this.errorTypeOptions.map(o => ({ ...o, isSelected: o.value === this.selectedErrorType }));
-  }
-
   get totalPages() { return this.filteredLogsCount > 0 ? Math.ceil(this.filteredLogsCount / this.pageSize) : 1; }
   get startRecord() { return this.filteredLogsCount === 0 ? 0 : (this.currentPage - 1) * this.pageSize + 1; }
   get endRecord() { return Math.min(this.currentPage * this.pageSize, this.filteredLogsCount); }
@@ -182,13 +178,13 @@ export default class ImportResults extends LightningElement {
     let endPage = Math.min(this.totalPages, startPage + maxVisiblePages - 1);
     if (endPage - startPage + 1 < maxVisiblePages) startPage = Math.max(1, endPage - maxVisiblePages + 1);
     for (let i = startPage; i <= endPage; i++) {
-      pages.push({ number: i, variant: i === this.currentPage ? 'brand' : 'neutral', isCurrentPage: i === this.currentPage, buttonClass: i === this.currentPage ? 'pagination-btn pagination-btn--active' : 'pagination-btn' });
+      pages.push({ number: i, variant: i === this.currentPage ? 'brand' : 'neutral' });
     }
     return pages;
   }
 
   handleSearchChange(event) { this.searchTerm = event.target.value; this.currentPage = 1; }
-  handleFilterChange(event) { this.selectedErrorType = event.target.value ?? event.detail?.value ?? ''; this.currentPage = 1; }
+  handleFilterChange(event) { this.selectedErrorType = event.detail.value; this.currentPage = 1; }
 
   handleErrorSelect(event) {
     const errorId = event.currentTarget.dataset.errorId;

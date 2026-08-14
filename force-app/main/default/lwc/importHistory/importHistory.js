@@ -432,29 +432,19 @@ export default class ImportHistory extends LightningElement {
   }
 
   handleStatusChange(event) {
-    this.statusFilter = event.target.value ?? event.detail?.value ?? 'all';
+    this.statusFilter = event.detail.value;
   }
 
   handleDateRangeChange(event) {
-    this.dateRangeFilter = event.target.value ?? event.detail?.value ?? 'all';
+    this.dateRangeFilter = event.detail.value;
   }
 
   handleProjectChange(event) {
-    this.projectFilter = event.target.value ?? event.detail?.value ?? 'all';
+    this.projectFilter = event.detail.value;
   }
 
   handleTargetChange(event) {
-    this.targetFilter = event.target.value ?? event.detail?.value ?? 'all';
-  }
-
-  get statusOptionsWithSelected() {
-    return this.statusOptions.map(o => ({ ...o, isSelected: o.value === this.statusFilter }));
-  }
-  get dateRangeOptionsWithSelected() {
-    return this.dateRangeOptions.map(o => ({ ...o, isSelected: o.value === this.dateRangeFilter }));
-  }
-  get projectOptionsWithSelected() {
-    return this.projectOptions.map(o => ({ ...o, isSelected: o.value === this.projectFilter }));
+    this.targetFilter = event.detail.value;
   }
 
   handleApplyFilters() {
@@ -579,28 +569,27 @@ export default class ImportHistory extends LightningElement {
       const targetLower = (r.targetObject || '').toLowerCase();
 
       let iconName = 'standard:record';
-      let iconEmoji = '📋';
       let iconBgClass = 'ih-project-icon ih-project-icon-generic';
 
       if (targetLower.includes('contact')) {
-        iconName = 'standard:contact'; iconEmoji = '👤';
+        iconName = 'standard:contact';
         iconBgClass = 'ih-project-icon ih-project-icon-blue';
       } else if (targetLower.includes('opportunity')) {
-        iconName = 'standard:opportunity'; iconEmoji = '💰';
+        iconName = 'standard:opportunity';
         iconBgClass = 'ih-project-icon ih-project-icon-orange';
       } else if (targetLower.includes('account')) {
-        iconName = 'standard:account'; iconEmoji = '🏢';
+        iconName = 'standard:account';
         iconBgClass = 'ih-project-icon ih-project-icon-purple';
       } else if (targetLower.includes('lead')) {
-        iconName = 'standard:lead'; iconEmoji = '⚡';
+        iconName = 'standard:lead';
         iconBgClass = 'ih-project-icon ih-project-icon-indigo';
       }
 
       if (nameLower.includes('analytics') || nameLower.includes('report')) {
-        iconName = 'standard:dashboard'; iconEmoji = '📈';
+        iconName = 'standard:dashboard';
         iconBgClass = 'ih-project-icon ih-project-icon-pink';
       } else if (nameLower.includes('migration') || nameLower.includes('sync')) {
-        iconName = 'standard:flow'; iconEmoji = '🔄';
+        iconName = 'standard:flow';
         iconBgClass = 'ih-project-icon ih-project-icon-teal';
       }
 
@@ -616,7 +605,6 @@ export default class ImportHistory extends LightningElement {
         durationText: this.formatDuration(r.durationMs),
         startedText: this.formatRelativeTime(r.startedAt),
         iconName,
-        iconEmoji,
         iconBgClass,
         showStatusDot,
         statusDotClass
