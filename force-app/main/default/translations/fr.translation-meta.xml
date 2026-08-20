@@ -309,10 +309,6 @@
         <name>DataTable_Showing_Entries</name>
     </customLabels>
     <customLabels>
-        <label><!-- Generic error message --></label>
-        <name>ERROR_OCCURRED</name>
-    </customLabels>
-    <customLabels>
         <label><!-- Export feature placeholder --></label>
         <name>EXPORT_COMING_SOON</name>
     </customLabels>
@@ -1046,11 +1042,11 @@
         <name>IM_FM_SalesforceFields</name>
     </customLabels>
     <customLabels>
-        <label><!-- Failed to save mappings --></label>
+        <label>Échec de l&apos;enregistrement des mappings</label>
         <name>IM_FM_SaveError_Body</name>
     </customLabels>
     <customLabels>
-        <label><!-- Error --></label>
+        <label>Erreur</label>
         <name>IM_FM_SaveError_Title</name>
     </customLabels>
     <customLabels>
@@ -1198,7 +1194,7 @@
         <name>IM_Soql_ContinueToMapping</name>
     </customLabels>
     <customLabels>
-        <label><!-- Clipboard not available --></label>
+        <label>Presse-papiers non disponible</label>
         <name>IM_Soql_CopyError</name>
     </customLabels>
     <customLabels>
@@ -1831,4 +1827,364 @@
         <label>Sauvegarder les lignes valides</label>
         <name>IM_DRY_Settings_KeepValidRows</name>
    </customLabels>
+    <customLabels>
+        <label>Permissions insuffisantes</label>
+        <name>SCH_Err_InsufficientPermissions</name>
+    </customLabels>
+    <customLabels>
+        <label>La fréquence, la date de prochaine exécution et l&apos;ID du projet sont requis</label>
+        <name>SCH_Err_RequiredFields</name>
+    </customLabels>
+    <customLabels>
+        <label>La date de prochaine exécution doit être dans le futur</label>
+        <name>SCH_Err_NextRunInFuture</name>
+    </customLabels>
+    <customLabels>
+        <label>Échec de la création de l&apos;enregistrement de planification</label>
+        <name>SCH_Err_CreateFailed</name>
+    </customLabels>
+    <customLabels>
+        <label>L&apos;ID de la planification est requis</label>
+        <name>SCH_Err_IdRequired</name>
+    </customLabels>
+    <customLabels>
+        <label>La fréquence et la date de prochaine exécution sont requises</label>
+        <name>SCH_Err_FreqAndDateRequired</name>
+    </customLabels>
+    <customLabels>
+        <label>Planification introuvable</label>
+        <name>SCH_Err_NotFound</name>
+    </customLabels>
+    <customLabels>
+        <label>La date de prochaine exécution est passée. Veuillez d&apos;abord reprogrammer.</label>
+        <name>SCH_Err_NextRunPast</name>
+    </customLabels>
+    <customLabels>
+        <label>Planification introuvable : {0}</label>
+        <name>SCH_Err_NotFoundWithId</name>
+    </customLabels>
+    <customLabels>
+        <label>L&apos;exécution est suspendue. Reprenez-la avant de la relancer.</label>
+        <name>SCH_Err_Suspended</name>
+    </customLabels>
+    <customLabels>
+        <label>Aucun fichier ne correspond au motif &quot;{0}&quot; pour ce projet.</label>
+        <name>SCH_Err_NoFileMatch</name>
+    </customLabels>
+    <customLabels>
+        <label>Aucune donnée trouvée pour cet import planifié (aucun fichier ni requête disponible).</label>
+        <name>SCH_Err_NoDataAvailable</name>
+    </customLabels>
+    <customLabels>
+        <label>Aucune donnée trouvée pour cet import planifié</label>
+        <name>SCH_Err_NoDataFound</name>
+    </customLabels>
+    <customLabels>
+        <label>Aucune exécution &quot;Pending&quot; trouvée pour cette planification — impossible de démarrer l&apos;import.</label>
+        <name>SCH_Err_NoPendingExecution</name>
+    </customLabels>
+    <customLabels>
+        <label>Import planifié démarré</label>
+        <name>SCH_Msg_ImportStarted</name>
+    </customLabels>
+    <customLabels>
+        <label>Erreur inattendue lors de l&apos;exécution planifiée : {0}</label>
+        <name>SCH_Err_UnexpectedExecution</name>
+    </customLabels>
+    <customLabels>
+        <label>L&apos;import planifié a échoué : {0}</label>
+        <name>SCH_Err_ScheduledImportFailed</name>
+    </customLabels>
+    <customLabels>
+        <label>Erreur lors du chargement des objets : {0}</label>
+        <name>SCH_Err_LoadObjectsFailed</name>
+    </customLabels>
+    <customLabels>
+        <label>Permissions insuffisantes pour créer Schedule__c</label>
+        <name>SCH_Err_NoCreatePermission</name>
+    </customLabels>
+    <customLabels>
+        <label>L&apos;ID de la planification ne peut pas être vide</label>
+        <name>SCH_Err_IdCannotBeBlank</name>
+    </customLabels>
+    <customLabels>
+        <label>Permissions insuffisantes pour supprimer Schedule__c</label>
+        <name>SCH_Err_NoDeletePermission</name>
+    </customLabels>
+    <customLabels>
+        <label>Opération terminée avec succès</label>
+        <name>SCH_Msg_OperationSuccess</name>
+    </customLabels>
+    <customLabels>
+        <label>Échec de l&apos;opération avec {0} erreur(s)</label>
+        <name>SCH_Err_OperationFailedCount</name>
+    </customLabels>
+    <customLabels>
+        <label>Erreur lors de la création de l&apos;exécution : {0}</label>
+        <name>EXR_Err_CreateExecution</name>
+    </customLabels>
+    <customLabels>
+        <label>Erreur lors de la mise à jour de l&apos;exécution : {0}</label>
+        <name>EXR_Err_UpdateExecution</name>
+    </customLabels>
+    <customLabels>
+        <label>Erreur lors de la récupération de l&apos;exécution : {0}</label>
+        <name>EXR_Err_RetrieveExecution</name>
+    </customLabels>
+    <customLabels>
+        <label>Erreur lors de la récupération de l&apos;historique des exécutions : {0}</label>
+        <name>EXR_Err_RetrieveHistory</name>
+    </customLabels>
+    <customLabels>
+        <label>Erreur lors de la récupération des statistiques d&apos;exécution : {0}</label>
+        <name>EXR_Err_RetrieveStats</name>
+    </customLabels>
+    <customLabels>
+        <label>Erreur</label>
+        <name>Toast_Title_Error</name>
+    </customLabels>
+    <customLabels>
+        <label>Succès</label>
+        <name>Toast_Title_Success</name>
+    </customLabels>
+    <customLabels>
+        <label>Attention</label>
+        <name>Toast_Title_Warning</name>
+    </customLabels>
+    <customLabels>
+        <label>Erreur lors de la récupération des valeurs des planifications</label>
+        <name>SCH_Creator_Err_LoadFrequencies</name>
+    </customLabels>
+    <customLabels>
+        <label>Impossible de charger la liste des fichiers du projet.</label>
+        <name>SCH_Creator_Err_LoadProjectFiles</name>
+    </customLabels>
+    <customLabels>
+        <label>« {0} » semble vide.</label>
+        <name>SCH_Creator_Warn_FileEmpty</name>
+    </customLabels>
+    <customLabels>
+        <label>Impossible de charger « {0} ».</label>
+        <name>SCH_Creator_Err_LoadFile</name>
+    </customLabels>
+    <customLabels>
+        <label>Aucun projet sélectionné.</label>
+        <name>SCH_Creator_Err_NoProjectSelected</name>
+    </customLabels>
+    <customLabels>
+        <label>La fréquence et la date de début sont obligatoires.</label>
+        <name>SCH_Creator_Warn_FreqAndDateRequired</name>
+    </customLabels>
+    <customLabels>
+        <label>Veuillez renseigner un modèle de nom de fichier.</label>
+        <name>SCH_Creator_Warn_PatternRequired</name>
+    </customLabels>
+    <customLabels>
+        <label>Tous les fichiers du projet doivent être mappés avant de programmer l&apos;import. Cliquez sur « Mapper les champs ».</label>
+        <name>SCH_Creator_Warn_MappingRequired</name>
+    </customLabels>
+    <customLabels>
+        <label>Format de date/heure invalide.</label>
+        <name>SCH_Creator_Err_InvalidDateTime</name>
+    </customLabels>
+    <customLabels>
+        <label>Planification créée avec succès.</label>
+        <name>SCH_Creator_Msg_ScheduleCreated</name>
+    </customLabels>
+    <customLabels>
+        <label>Une erreur est survenue lors de la création de la planification.</label>
+        <name>SCH_Creator_Err_CreateFailed</name>
+    </customLabels>
+    <customLabels>
+        <label>Erreur inconnue</label>
+        <name>SCH_List_Err_UnknownError</name>
+    </customLabels>
+    <customLabels>
+        <label>Erreur lors de la mise à jour</label>
+        <name>SCH_List_Err_UpdateFailed</name>
+    </customLabels>
+    <customLabels>
+        <label>Planification {0} avec succès</label>
+        <name>SCH_List_Msg_ToggleSuccess</name>
+    </customLabels>
+    <customLabels>
+        <label>mise en pause</label>
+        <name>SCH_List_Toggle_Paused</name>
+    </customLabels>
+    <customLabels>
+        <label>reprise</label>
+        <name>SCH_List_Toggle_Resumed</name>
+    </customLabels>
+    <customLabels>
+        <label>Échec du changement de statut</label>
+        <name>SCH_List_Err_ToggleFailed</name>
+    </customLabels>
+    <customLabels>
+        <label>Erreur lors de la suppression de la planification</label>
+        <name>SCH_List_Err_DeleteFailed</name>
+    </customLabels>
+    <customLabels>
+        <label>Impossible de charger les fréquences</label>
+        <name>SCH_Reg_Err_LoadFrequencies</name>
+    </customLabels>
+    <customLabels>
+        <label>Le contexte du projet est manquant.</label>
+        <name>SCH_Reg_Err_MissingProjectContext</name>
+    </customLabels>
+    <customLabels>
+        <label>Tous les champs sont obligatoires.</label>
+        <name>SCH_Reg_Warn_AllFieldsRequired</name>
+    </customLabels>
+    <customLabels>
+        <label>Format de date/heure invalide</label>
+        <name>SCH_Reg_Err_InvalidDateTime</name>
+    </customLabels>
+    <customLabels>
+        <label>Erreur lors de la mise à jour</label>
+        <name>SCH_Reg_Err_UpdateFailed</name>
+    </customLabels>
+    <customLabels>
+        <label>Erreur lors de l&apos;ajout de la planification</label>
+        <name>SCH_Reg_Err_AddFailed</name>
+    </customLabels>
+    <customLabels>
+        <label>Les fichiers déjà traités ont été réinitialisés.</label>
+        <name>SCH_Crit_Msg_ResetSuccess</name>
+    </customLabels>
+    <customLabels>
+        <label>Veuillez renseigner un modèle de nom de fichier.</label>
+        <name>SCH_Crit_Warn_PatternRequired</name>
+    </customLabels>
+    <customLabels>
+        <label>Critères de correspondance mis à jour.</label>
+        <name>SCH_Crit_Msg_SaveSuccess</name>
+    </customLabels>
+    <customLabels>
+        <label>Échec de la mise à jour.</label>
+        <name>SCH_Crit_Err_SaveFailed</name>
+    </customLabels>
+    <customLabels>
+        <label>Une erreur est survenue.</label>
+        <name>SCH_Crit_Err_Generic</name>
+    </customLabels>
+    <customLabels>
+        <label>Impossible de charger les planifications</label>
+        <name>SCH_Jobs_Err_LoadFailed</name>
+    </customLabels>
+    <customLabels>
+        <label>Champs requis</label>
+        <name>SCH_Jobs_Warn_FieldsRequired</name>
+    </customLabels>
+    <customLabels>
+        <label>Veuillez renseigner la fréquence et la date.</label>
+        <name>SCH_Jobs_Warn_FieldsRequiredMsg</name>
+    </customLabels>
+    <customLabels>
+        <label>Date invalide</label>
+        <name>SCH_Jobs_Warn_InvalidDateTitle</name>
+    </customLabels>
+    <customLabels>
+        <label>La prochaine exécution doit être dans le futur.</label>
+        <name>SCH_Jobs_Warn_InvalidDateMsg</name>
+    </customLabels>
+    <customLabels>
+        <label>Erreur lors de la mise à jour</label>
+        <name>SCH_Jobs_Err_UpdateFailed</name>
+    </customLabels>
+    <customLabels>
+        <label>Planification mise à jour</label>
+        <name>SCH_Jobs_Msg_UpdateSuccess</name>
+    </customLabels>
+    <customLabels>
+        <label>Erreur lors du changement de statut</label>
+        <name>SCH_Jobs_Err_StatusChangeFailed</name>
+    </customLabels>
+    <customLabels>
+        <label>Planification suspendue</label>
+        <name>SCH_Jobs_Msg_Suspended</name>
+    </customLabels>
+    <customLabels>
+        <label>Planification reprise</label>
+        <name>SCH_Jobs_Msg_Resumed</name>
+    </customLabels>
+    <customLabels>
+        <label>Erreur lors de la suppression</label>
+        <name>SCH_Jobs_Err_DeleteFailed</name>
+    </customLabels>
+    <customLabels>
+        <label>Planification supprimée</label>
+        <name>SCH_Jobs_Msg_DeleteSuccess</name>
+    </customLabels>
+    <customLabels>
+        <label>Supprimer cette planification ? Cette action est irréversible.</label>
+        <name>SCH_Jobs_Confirm_DeleteMsg</name>
+    </customLabels>
+    <customLabels>
+        <label>Confirmer la suppression</label>
+        <name>SCH_Jobs_Confirm_DeleteTitle</name>
+    </customLabels>
+    <customLabels>
+        <label>L&apos;ID du projet est requis</label>
+        <name>SCH_Exec_Err_ProjectIdRequired</name>
+    </customLabels>
+    <customLabels>
+        <label>Les données CSV sont requises</label>
+        <name>SCH_Exec_Err_CsvDataRequired</name>
+    </customLabels>
+    <customLabels>
+        <label>Aucune donnée valide trouvée dans le CSV</label>
+        <name>SCH_Exec_Err_NoValidCsvData</name>
+    </customLabels>
+    <customLabels>
+        <label>Import démarré avec succès</label>
+        <name>SCH_Exec_Msg_ImportStarted</name>
+    </customLabels>
+    <customLabels>
+        <label>Erreur au démarrage de l&apos;import</label>
+        <name>SCH_Exec_Err_StartFailed</name>
+    </customLabels>
+    <customLabels>
+        <label>Import annulé</label>
+        <name>SCH_Exec_Msg_ImportCancelled</name>
+    </customLabels>
+    <customLabels>
+        <label>Impossible d&apos;annuler l&apos;import</label>
+        <name>SCH_Exec_Err_CancelFailed</name>
+    </customLabels>
+    <customLabels>
+        <label>Échec de l&apos;annulation</label>
+        <name>SCH_Exec_Err_CancelException</name>
+    </customLabels>
+    <customLabels>
+        <label>Pas encore d&apos;ID d&apos;exécution.</label>
+        <name>SCH_Exec_Info_NoExecutionId</name>
+    </customLabels>
+    <customLabels>
+        <label>Aucun journal à exporter pour cette exécution.</label>
+        <name>SCH_Exec_Info_NoLogsToExport</name>
+    </customLabels>
+    <customLabels>
+        <label>Journaux exportés avec succès.</label>
+        <name>SCH_Exec_Msg_LogsExported</name>
+    </customLabels>
+    <customLabels>
+        <label>Échec de l&apos;export des journaux</label>
+        <name>SCH_Exec_Err_ExportFailed</name>
+    </customLabels>
+    <customLabels>
+        <label>Planification</label>
+        <name>SideBar_Step_Scheduling</name>
+    </customLabels>
+    <customLabels>
+        <label>En cours</label>
+        <name>ProjectCard_Status_InProgress</name>
+    </customLabels>
+    <customLabels>
+        <label>Terminé avec erreurs</label>
+        <name>ProjectCard_Status_CompletedWithErrors</name>
+    </customLabels>
+    <customLabels>
+        <label>Info</label>
+        <name>Toast_Title_Info</name>
+    </customLabels>
 </Translations>

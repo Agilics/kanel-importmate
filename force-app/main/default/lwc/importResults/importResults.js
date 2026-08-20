@@ -104,7 +104,7 @@ export default class ImportResults extends LightningElement {
       this.dispatchEvent(new CustomEvent('logsready', { detail: { logs: this.importLogs } }));
     } catch (error) {
       console.error('Error loading import logs:', error);
-      this.showToast('Warning', 'Could not load import logs', 'warning');
+      this.showToast('Attention', 'Impossible de charger les journaux d\'import', 'warning');
     } finally {
       this.isLoading = false;
     }

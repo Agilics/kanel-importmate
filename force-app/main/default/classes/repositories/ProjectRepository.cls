@@ -147,7 +147,7 @@ public static ImportProject__c saveProject(ImportProject__c project) {
         );
       }
     } else {
-      throw new ApplicationException('Unauthorized! You do not have permission to delete this project.');
+      throw new ApplicationException('Non autorisé ! Vous n\'avez pas la permission de supprimer ce projet.');
     }
   }
 }

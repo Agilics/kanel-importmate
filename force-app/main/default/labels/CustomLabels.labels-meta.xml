@@ -3649,4 +3649,700 @@
         <shortDescription>Save valid rows</shortDescription>
         <value>Save valid rows</value>
    </labels>
+    <labels>
+        <fullName>SCH_Err_InsufficientPermissions</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Err_InsufficientPermissions</shortDescription>
+        <value>Insufficient permissions</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Err_RequiredFields</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Err_RequiredFields</shortDescription>
+        <value>Frequency, next run date and project ID are required</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Err_NextRunInFuture</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Err_NextRunInFuture</shortDescription>
+        <value>Next run date must be in the future</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Err_CreateFailed</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Err_CreateFailed</shortDescription>
+        <value>Failed to create the schedule record</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Err_IdRequired</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Err_IdRequired</shortDescription>
+        <value>Schedule ID is required</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Err_FreqAndDateRequired</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Err_FreqAndDateRequired</shortDescription>
+        <value>Frequency and next run date are required</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Err_NotFound</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Err_NotFound</shortDescription>
+        <value>Schedule not found</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Err_NextRunPast</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Err_NextRunPast</shortDescription>
+        <value>Next run date is in the past. Please reschedule first.</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Err_NotFoundWithId</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Err_NotFoundWithId</shortDescription>
+        <value>Schedule not found: {0}</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Err_Suspended</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Err_Suspended</shortDescription>
+        <value>The execution is suspended. Resume it before running again.</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Err_NoFileMatch</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Err_NoFileMatch</shortDescription>
+        <value>No file matches the pattern &quot;{0}&quot; for this project.</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Err_NoDataAvailable</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Err_NoDataAvailable</shortDescription>
+        <value>No data found for this scheduled import (no file or query available).</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Err_NoDataFound</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Err_NoDataFound</shortDescription>
+        <value>No data found for this scheduled import</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Err_NoPendingExecution</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Err_NoPendingExecution</shortDescription>
+        <value>No &quot;Pending&quot; execution found for this schedule — cannot start the import.</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Msg_ImportStarted</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Msg_ImportStarted</shortDescription>
+        <value>Scheduled import started</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Err_UnexpectedExecution</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Err_UnexpectedExecution</shortDescription>
+        <value>Unexpected error during scheduled execution: {0}</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Err_ScheduledImportFailed</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Err_ScheduledImportFailed</shortDescription>
+        <value>Scheduled import failed: {0}</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Err_LoadObjectsFailed</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Err_LoadObjectsFailed</shortDescription>
+        <value>Error loading objects: {0}</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Err_NoCreatePermission</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Err_NoCreatePermission</shortDescription>
+        <value>Insufficient permissions to create Schedule__c</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Err_IdCannotBeBlank</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Err_IdCannotBeBlank</shortDescription>
+        <value>Schedule ID cannot be blank</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Err_NoDeletePermission</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Err_NoDeletePermission</shortDescription>
+        <value>Insufficient permissions to delete Schedule__c</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Msg_OperationSuccess</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Msg_OperationSuccess</shortDescription>
+        <value>Operation completed successfully</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Err_OperationFailedCount</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Err_OperationFailedCount</shortDescription>
+        <value>Operation failed with {0} error(s)</value>
+    </labels>
+    <labels>
+        <fullName>EXR_Err_CreateExecution</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>EXR_Err_CreateExecution</shortDescription>
+        <value>Error creating the execution: {0}</value>
+    </labels>
+    <labels>
+        <fullName>EXR_Err_UpdateExecution</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>EXR_Err_UpdateExecution</shortDescription>
+        <value>Error updating the execution: {0}</value>
+    </labels>
+    <labels>
+        <fullName>EXR_Err_RetrieveExecution</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>EXR_Err_RetrieveExecution</shortDescription>
+        <value>Error retrieving the execution: {0}</value>
+    </labels>
+    <labels>
+        <fullName>EXR_Err_RetrieveHistory</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>EXR_Err_RetrieveHistory</shortDescription>
+        <value>Error retrieving execution history: {0}</value>
+    </labels>
+    <labels>
+        <fullName>EXR_Err_RetrieveStats</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>EXR_Err_RetrieveStats</shortDescription>
+        <value>Error retrieving execution statistics: {0}</value>
+    </labels>
+    <labels>
+        <fullName>Toast_Title_Error</fullName>
+        <categories>Common</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Toast_Title_Error</shortDescription>
+        <value>Error</value>
+    </labels>
+    <labels>
+        <fullName>Toast_Title_Success</fullName>
+        <categories>Common</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Toast_Title_Success</shortDescription>
+        <value>Success</value>
+    </labels>
+    <labels>
+        <fullName>Toast_Title_Warning</fullName>
+        <categories>Common</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Toast_Title_Warning</shortDescription>
+        <value>Warning</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Creator_Err_LoadFrequencies</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Creator_Err_LoadFrequencies</shortDescription>
+        <value>Unable to load schedule values</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Creator_Err_LoadProjectFiles</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Creator_Err_LoadProjectFiles</shortDescription>
+        <value>Unable to load the project&apos;s file list.</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Creator_Warn_FileEmpty</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Creator_Warn_FileEmpty</shortDescription>
+        <value>“{0}” appears to be empty.</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Creator_Err_LoadFile</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Creator_Err_LoadFile</shortDescription>
+        <value>Unable to load “{0}”.</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Creator_Err_NoProjectSelected</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Creator_Err_NoProjectSelected</shortDescription>
+        <value>No project selected.</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Creator_Warn_FreqAndDateRequired</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Creator_Warn_FreqAndDateRequired</shortDescription>
+        <value>Frequency and start date are required.</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Creator_Warn_PatternRequired</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Creator_Warn_PatternRequired</shortDescription>
+        <value>Please enter a file name pattern.</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Creator_Warn_MappingRequired</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Creator_Warn_MappingRequired</shortDescription>
+        <value>All project files must be mapped before scheduling the import. Click “Map fields”.</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Creator_Err_InvalidDateTime</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Creator_Err_InvalidDateTime</shortDescription>
+        <value>Invalid date/time format.</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Creator_Msg_ScheduleCreated</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Creator_Msg_ScheduleCreated</shortDescription>
+        <value>Schedule created successfully.</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Creator_Err_CreateFailed</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Creator_Err_CreateFailed</shortDescription>
+        <value>An error occurred while creating the schedule.</value>
+    </labels>
+    <labels>
+        <fullName>SCH_List_Err_UnknownError</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_List_Err_UnknownError</shortDescription>
+        <value>Unknown error</value>
+    </labels>
+    <labels>
+        <fullName>SCH_List_Err_UpdateFailed</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_List_Err_UpdateFailed</shortDescription>
+        <value>Error updating</value>
+    </labels>
+    <labels>
+        <fullName>SCH_List_Msg_ToggleSuccess</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_List_Msg_ToggleSuccess</shortDescription>
+        <value>Schedule {0} successfully</value>
+    </labels>
+    <labels>
+        <fullName>SCH_List_Toggle_Paused</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_List_Toggle_Paused</shortDescription>
+        <value>paused</value>
+    </labels>
+    <labels>
+        <fullName>SCH_List_Toggle_Resumed</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_List_Toggle_Resumed</shortDescription>
+        <value>resumed</value>
+    </labels>
+    <labels>
+        <fullName>SCH_List_Err_ToggleFailed</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_List_Err_ToggleFailed</shortDescription>
+        <value>Status change failed</value>
+    </labels>
+    <labels>
+        <fullName>SCH_List_Err_DeleteFailed</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_List_Err_DeleteFailed</shortDescription>
+        <value>Error deleting the schedule</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Reg_Err_LoadFrequencies</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Reg_Err_LoadFrequencies</shortDescription>
+        <value>Unable to load frequencies</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Reg_Err_MissingProjectContext</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Reg_Err_MissingProjectContext</shortDescription>
+        <value>Project context is missing.</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Reg_Warn_AllFieldsRequired</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Reg_Warn_AllFieldsRequired</shortDescription>
+        <value>All fields are required.</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Reg_Err_InvalidDateTime</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Reg_Err_InvalidDateTime</shortDescription>
+        <value>Invalid date/time format</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Reg_Err_UpdateFailed</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Reg_Err_UpdateFailed</shortDescription>
+        <value>Error updating</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Reg_Err_AddFailed</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Reg_Err_AddFailed</shortDescription>
+        <value>Error adding the schedule</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Crit_Msg_ResetSuccess</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Crit_Msg_ResetSuccess</shortDescription>
+        <value>Already-processed files have been reset.</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Crit_Warn_PatternRequired</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Crit_Warn_PatternRequired</shortDescription>
+        <value>Please enter a file name pattern.</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Crit_Msg_SaveSuccess</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Crit_Msg_SaveSuccess</shortDescription>
+        <value>Matching criteria updated.</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Crit_Err_SaveFailed</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Crit_Err_SaveFailed</shortDescription>
+        <value>Update failed.</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Crit_Err_Generic</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Crit_Err_Generic</shortDescription>
+        <value>An error occurred.</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Jobs_Err_LoadFailed</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Jobs_Err_LoadFailed</shortDescription>
+        <value>Unable to load schedules</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Jobs_Warn_FieldsRequired</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Jobs_Warn_FieldsRequired</shortDescription>
+        <value>Required fields</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Jobs_Warn_FieldsRequiredMsg</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Jobs_Warn_FieldsRequiredMsg</shortDescription>
+        <value>Please enter the frequency and the date.</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Jobs_Warn_InvalidDateTitle</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Jobs_Warn_InvalidDateTitle</shortDescription>
+        <value>Invalid date</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Jobs_Warn_InvalidDateMsg</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Jobs_Warn_InvalidDateMsg</shortDescription>
+        <value>The next run must be in the future.</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Jobs_Err_UpdateFailed</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Jobs_Err_UpdateFailed</shortDescription>
+        <value>Error updating</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Jobs_Msg_UpdateSuccess</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Jobs_Msg_UpdateSuccess</shortDescription>
+        <value>Schedule updated</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Jobs_Err_StatusChangeFailed</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Jobs_Err_StatusChangeFailed</shortDescription>
+        <value>Error changing status</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Jobs_Msg_Suspended</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Jobs_Msg_Suspended</shortDescription>
+        <value>Schedule suspended</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Jobs_Msg_Resumed</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Jobs_Msg_Resumed</shortDescription>
+        <value>Schedule resumed</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Jobs_Err_DeleteFailed</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Jobs_Err_DeleteFailed</shortDescription>
+        <value>Error deleting</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Jobs_Msg_DeleteSuccess</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Jobs_Msg_DeleteSuccess</shortDescription>
+        <value>Schedule deleted</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Jobs_Confirm_DeleteMsg</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Jobs_Confirm_DeleteMsg</shortDescription>
+        <value>Delete this schedule? This action cannot be undone.</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Jobs_Confirm_DeleteTitle</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Jobs_Confirm_DeleteTitle</shortDescription>
+        <value>Confirm deletion</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Exec_Err_ProjectIdRequired</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Exec_Err_ProjectIdRequired</shortDescription>
+        <value>Project ID is required</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Exec_Err_CsvDataRequired</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Exec_Err_CsvDataRequired</shortDescription>
+        <value>CSV data is required</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Exec_Err_NoValidCsvData</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Exec_Err_NoValidCsvData</shortDescription>
+        <value>No valid data found in the CSV</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Exec_Msg_ImportStarted</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Exec_Msg_ImportStarted</shortDescription>
+        <value>Import started successfully</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Exec_Err_StartFailed</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Exec_Err_StartFailed</shortDescription>
+        <value>Error starting the import</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Exec_Msg_ImportCancelled</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Exec_Msg_ImportCancelled</shortDescription>
+        <value>Import cancelled</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Exec_Err_CancelFailed</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Exec_Err_CancelFailed</shortDescription>
+        <value>Unable to cancel the import</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Exec_Err_CancelException</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Exec_Err_CancelException</shortDescription>
+        <value>Cancellation failed</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Exec_Info_NoExecutionId</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Exec_Info_NoExecutionId</shortDescription>
+        <value>No execution ID yet.</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Exec_Info_NoLogsToExport</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Exec_Info_NoLogsToExport</shortDescription>
+        <value>No logs to export for this execution.</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Exec_Msg_LogsExported</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Exec_Msg_LogsExported</shortDescription>
+        <value>Logs exported successfully.</value>
+    </labels>
+    <labels>
+        <fullName>SCH_Exec_Err_ExportFailed</fullName>
+        <categories>Scheduling</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>SCH_Exec_Err_ExportFailed</shortDescription>
+        <value>Log export failed</value>
+    </labels>
+    <labels>
+        <fullName>Toast_Title_Info</fullName>
+        <categories>Common</categories>
+        <language>en_US</language>
+        <protected>false</protected>
+        <shortDescription>Toast_Title_Info</shortDescription>
+        <value>Info</value>
+    </labels>
 </CustomLabels>

@@ -215,7 +215,7 @@ public class RowValidatorTest {
         );
 
         Assert.isTrue(errors.size() > 0, 'Row with invalid email should have validation errors');
-        Assert.isTrue(errors[0].getMessage().contains('Invalid email format'), 'Error should mention invalid email');
+        Assert.isTrue(errors[0].getMessage().contains('Format d\'email invalide'), 'Error should mention invalid email');
     }
 
     @IsTest
@@ -246,7 +246,7 @@ public class RowValidatorTest {
         );
 
         Assert.isTrue(errors.size() > 0, 'Row with invalid number should have validation errors');
-        Assert.isTrue(errors[0].getMessage().contains('Invalid number format'), 'Error should mention invalid number');
+        Assert.isTrue(errors[0].getMessage().contains('Format de nombre invalide'), 'Error should mention invalid number');
     }
 
     @IsTest
@@ -410,7 +410,7 @@ public class RowValidatorTest {
         );
 
         Assert.isTrue(errors.size() > 0, 'Row with incomplete lookup config should have errors');
-        Assert.isTrue(errors[0].getMessage().contains('Incomplete lookup setup for mapping:'), 'Error should mention incomplete lookup');
+        Assert.isTrue(errors[0].getMessage().contains('Configuration de recherche (lookup) incomplète pour le mapping :'), 'Error should mention incomplete lookup');
     }
 
     @IsTest

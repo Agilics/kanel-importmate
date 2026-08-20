@@ -18,19 +18,19 @@ public with sharing class DryRunController {
             Integer inputSize = csvData == null ? 0 : csvData.size();
             if (inputSize > MAX_SYNC_ROLLBACK_ROWS) {
                 throw new AuraHandledException(
-                    'Rollback validation supports up to ' + MAX_SYNC_ROLLBACK_ROWS +
-                    ' rows. Use async batch validation for larger datasets.'
+                    'La validation avec rollback prend en charge jusqu\'à ' + MAX_SYNC_ROLLBACK_ROWS +
+                    ' lignes. Utilisez la validation par lot asynchrone pour des jeux de données plus grands.'
                 );
             }
 
             ImportProject__c project = ProjectService.getProjectById(projectId);
             if (project == null) {
-                throw new AuraHandledException('Project not found: ' + projectId);
+                throw new AuraHandledException('Projet introuvable : ' + projectId);
             }
 
             List<FieldMapping__c> mappings = FieldMappingService.getAllMappingsByProject(projectId);
             if (mappings.isEmpty()) {
-                throw new AuraHandledException('No field mappings found for project');
+                throw new AuraHandledException('Aucun mapping de champ trouvé pour ce projet');
             }
 
             ImportExecution__c execution = ExecutionRepository.createImportExecution(
@@ -234,7 +234,7 @@ public with sharing class DryRunController {
             return formattedLogs;
         } catch (Exception e) {
             safeLogException(e);
-            throw new AuraHandledException('Error retrieving logs: ' + e.getMessage());
+            throw new AuraHandledException('Erreur lors de la récupération des journaux : ' + e.getMessage());
         }
     }
 }

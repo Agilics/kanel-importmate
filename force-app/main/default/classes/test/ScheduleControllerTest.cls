@@ -433,7 +433,7 @@ public with sharing class ScheduleControllerTest {
         Map<String, Object> resultNull = ScheduleController.reSchedule(null, 'DAILY', Datetime.now());
         Test.stopTest();
         
-        Assert.areEqual('Schedule ID is required', String.valueOf(resultNull.get('error')));
+        Assert.areEqual(Label.SCH_Err_IdRequired, String.valueOf(resultNull.get('error')));
         Assert.isFalse(Boolean.valueOf(resultNull.get('success')));
     }
 

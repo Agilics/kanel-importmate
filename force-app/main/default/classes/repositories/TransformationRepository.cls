@@ -178,13 +178,13 @@ public with sharing class TransformationRepository {
                 //  Bloquer si on dépasse 3 transformations
                 if (existingRules.size() >= 3) {
                     throw new TransformationException(
-                        'Maximum of 3 transformations allowed for the same field'
+                        'Maximum de 3 transformations autorisées pour le même champ'
                     );
                 }
-                
+
             } catch (QueryException e) {
                 ErrorLogService.logException(e);
-                throw new TransformationException('Error while verifying the transformation rule exist: ' + e.getMessage());
+                throw new TransformationException('Erreur lors de la vérification de l\'existence de la règle de transformation : ' + e.getMessage());
             } 
         }
         return false;
@@ -221,7 +221,7 @@ public with sharing class TransformationRepository {
         } catch (DmlException e) {
             ErrorLogService.logException(e);
             throw new TransformationException(
-                'Error while updating rule ' + ruleId + ' : ' + e.getMessage()
+                'Erreur lors de la mise à jour de la règle ' + ruleId + ' : ' + e.getMessage()
             );
         }
     }

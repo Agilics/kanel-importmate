@@ -11,6 +11,21 @@ import getProjectFiles         from "@salesforce/apex/ContentDocumentController.
 import getFileContent          from "@salesforce/apex/ContentDocumentController.getFileContent";
 import { detectDelimiter, parseCsvLine } from "c/utility";
 
+import LABEL_TOAST_ERROR   from "@salesforce/label/c.Toast_Title_Error";
+import LABEL_TOAST_SUCCESS from "@salesforce/label/c.Toast_Title_Success";
+import LABEL_TOAST_WARNING from "@salesforce/label/c.Toast_Title_Warning";
+import LABEL_ERR_LOAD_FREQUENCIES     from "@salesforce/label/c.SCH_Creator_Err_LoadFrequencies";
+import LABEL_ERR_LOAD_PROJECT_FILES   from "@salesforce/label/c.SCH_Creator_Err_LoadProjectFiles";
+import LABEL_WARN_FILE_EMPTY          from "@salesforce/label/c.SCH_Creator_Warn_FileEmpty";
+import LABEL_ERR_LOAD_FILE            from "@salesforce/label/c.SCH_Creator_Err_LoadFile";
+import LABEL_ERR_NO_PROJECT_SELECTED  from "@salesforce/label/c.SCH_Creator_Err_NoProjectSelected";
+import LABEL_WARN_FREQ_DATE_REQUIRED  from "@salesforce/label/c.SCH_Creator_Warn_FreqAndDateRequired";
+import LABEL_WARN_PATTERN_REQUIRED    from "@salesforce/label/c.SCH_Creator_Warn_PatternRequired";
+import LABEL_WARN_MAPPING_REQUIRED    from "@salesforce/label/c.SCH_Creator_Warn_MappingRequired";
+import LABEL_ERR_INVALID_DATETIME     from "@salesforce/label/c.SCH_Creator_Err_InvalidDateTime";
+import LABEL_MSG_SCHEDULE_CREATED     from "@salesforce/label/c.SCH_Creator_Msg_ScheduleCreated";
+import LABEL_ERR_CREATE_FAILED        from "@salesforce/label/c.SCH_Creator_Err_CreateFailed";
+
 // Numérotation des champs (badges ronds ①②③④…) — le panneau Critères (fileCriteriaBuilder)
 // poursuit la séquence à partir de 5 quand le mode Criteria est sélectionné.
 const CRITERIA_START_NUMBER = 5;
@@ -112,9 +127,8 @@ export default class ScheduleCreatorComponent extends LightningElement {
         error
       );
       this.showToast(
-        "Error",
-        error?.body?.message ||
-          "Erreur lors de la récupération des valeurs des planifications",
+        LABEL_TOAST_ERROR,
+        error?.body?.message || LABEL_ERR_LOAD_FREQUENCIES,
         "error"
       );
     }
@@ -224,7 +238,7 @@ export default class ScheduleCreatorComponent extends LightningElement {
       );
     } catch (err) {
       console.error('[ScheduleCreator] loadProjectFilesWithMappingStatus error', err);
-      this.showToast('Error', "Impossible de charger la liste des fichiers du projet.", 'error');
+      this.showToast(LABEL_TOAST_ERROR, LABEL_ERR_LOAD_PROJECT_FILES, 'error');
     } finally {
       this.isLoadingProjectFiles = false;
     }
@@ -258,7 +272,7 @@ export default class ScheduleCreatorComponent extends LightningElement {
       const content = await getFileContent({ contentDocumentId });
       const lines = (content || '').trim().split(/\r?\n/);
       if (!lines.length || !lines[0].trim()) {
-        this.showToast('Warning', `« ${fileName} » semble vide.`, 'warning');
+        this.showToast(LABEL_TOAST_WARNING, LABEL_WARN_FILE_EMPTY.replace('{0}', fileName), 'warning');
         return;
       }
       const delimiter = detectDelimiter(lines[0]);
@@ -274,22 +288,22 @@ export default class ScheduleCreatorComponent extends LightningElement {
       this.loadedCsvData = { allRows, rows: allRows, columns, rawCsvText: content, totalRowCount: allRows.length };
     } catch (err) {
       console.error('[ScheduleCreator] handleSelectMappingFile error', err);
-      this.showToast('Error', `Impossible de charger « ${fileName} ».`, 'error');
+      this.showToast(LABEL_TOAST_ERROR, LABEL_ERR_LOAD_FILE.replace('{0}', fileName), 'error');
     }
   }
 
   //Enregistrement  d'une nouvelle planification
   async handleAddSchedule() {
     if (!this.projectId) {
-      this.showToast("Error", "Aucun projet sélectionné.", "error");
+      this.showToast(LABEL_TOAST_ERROR, LABEL_ERR_NO_PROJECT_SELECTED, "error");
       return;
     }
     if (!this.selectedFrequency || !this.nextRun) {
-      this.showToast("Warning", "La fréquence et la date de début sont obligatoires.", "warning");
+      this.showToast(LABEL_TOAST_WARNING, LABEL_WARN_FREQ_DATE_REQUIRED, "warning");
       return;
     }
     if (this.isCriteriaMode && !this.criteriaPattern) {
-      this.showToast("Warning", "Veuillez renseigner un modèle de nom de fichier.", "warning");
+      this.showToast(LABEL_TOAST_WARNING, LABEL_WARN_PATTERN_REQUIRED, "warning");
       return;
     }
     // Un import (immédiat ou planifié) sans mapping ne produit que des enregistrements vides —
@@ -297,8 +311,8 @@ export default class ScheduleCreatorComponent extends LightningElement {
     // (un nouveau fichier aux colonnes différentes remet ce statut à "non mappé").
     if (!this.hasFieldMapping) {
       this.showToast(
-        "Warning",
-        "Tous les fichiers du projet doivent être mappés avant de programmer l'import. Cliquez sur « Mapper les champs ».",
+        LABEL_TOAST_WARNING,
+        LABEL_WARN_MAPPING_REQUIRED,
         "warning"
       );
       this.showMappingModal = true;
@@ -309,7 +323,7 @@ export default class ScheduleCreatorComponent extends LightningElement {
     // automatiquement en Datetime — il faut le passer en ISO avant l'appel.
     const nextRunISO = this.convertToISOFormat(this.nextRun);
     if (!nextRunISO) {
-      this.showToast("Error", "Format de date/heure invalide.", "error");
+      this.showToast(LABEL_TOAST_ERROR, LABEL_ERR_INVALID_DATETIME, "error");
       return;
     }
 
@@ -332,13 +346,13 @@ export default class ScheduleCreatorComponent extends LightningElement {
         });
       }
 
-      this.showToast("Success", "Planification créée avec succès.", "success");
+      this.showToast(LABEL_TOAST_SUCCESS, LABEL_MSG_SCHEDULE_CREATED, "success");
       this.dispatchEvent(new CustomEvent('scheduleadded'));
       this.resetFields();
     } catch (err) {
       this.showToast(
-        "Error",
-        err?.body?.message || "Une erreur est survenue lors de la création de la planification.",
+        LABEL_TOAST_ERROR,
+        err?.body?.message || LABEL_ERR_CREATE_FAILED,
         "error"
       );
     } finally {

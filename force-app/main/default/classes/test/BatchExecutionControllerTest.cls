@@ -373,7 +373,7 @@ private class BatchExecutionControllerTest {
 
         Map<String, Object> finishResult = BatchExecutionController.finishClientStaging(executionId);
         System.assertEquals(false, finishResult.get('success'));
-        System.assert(String.valueOf(finishResult.get('error')).contains('Upload is not complete'));
+        System.assert(String.valueOf(finishResult.get('error')).contains('L\'envoi n\'est pas terminé'));
         System.assertEquals(3, Integer.valueOf(finishResult.get('nextStartLine')));
     }
 

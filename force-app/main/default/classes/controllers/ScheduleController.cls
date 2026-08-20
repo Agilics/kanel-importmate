@@ -90,7 +90,7 @@ public with sharing class ScheduleController {
         try {
             Schedule__c schedule = ScheduleService.getScheduleById(scheduleId);
             if (schedule == null) {
-                throw new SchedulingException('Schedule not found');
+                throw new SchedulingException(Label.SCH_Err_NotFound);
             }
             schedule.LastProcessedFileIds__c = null;
             update schedule;
@@ -105,7 +105,7 @@ public with sharing class ScheduleController {
       try {
         return ObjectMetadataService.getCompatibleSObjects();
       } catch (Exception e) {
-        throw new SchedulingException('Error loading objects: ' + e.getMessage());
+        throw new SchedulingException(String.format(Label.SCH_Err_LoadObjectsFailed, new List<Object>{ e.getMessage() }));
       }
     }
 

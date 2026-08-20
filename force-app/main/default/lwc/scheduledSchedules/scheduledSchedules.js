@@ -25,6 +25,16 @@ import Import_NoSchedulesFound from '@salesforce/label/c.Import_NoSchedulesFound
 import Import_DeleteScheduleDialogTitle from '@salesforce/label/c.Import_DeleteScheduleDialogTitle';
 import Import_DeleteScheduleDialogMessage from '@salesforce/label/c.Import_DeleteScheduleDialogMessage';
 import Import_DeleteScheduleToastMessage from '@salesforce/label/c.Import_DeleteScheduleToastMessage';
+import LABEL_TOAST_ERROR from '@salesforce/label/c.Toast_Title_Error';
+import LABEL_TOAST_SUCCESS from '@salesforce/label/c.Toast_Title_Success';
+import LABEL_TOAST_INFO from '@salesforce/label/c.Toast_Title_Info';
+import LABEL_ERR_UNKNOWN from '@salesforce/label/c.SCH_List_Err_UnknownError';
+import LABEL_ERR_UPDATE_FAILED from '@salesforce/label/c.SCH_List_Err_UpdateFailed';
+import LABEL_MSG_TOGGLE_SUCCESS from '@salesforce/label/c.SCH_List_Msg_ToggleSuccess';
+import LABEL_TOGGLE_PAUSED from '@salesforce/label/c.SCH_List_Toggle_Paused';
+import LABEL_TOGGLE_RESUMED from '@salesforce/label/c.SCH_List_Toggle_Resumed';
+import LABEL_ERR_TOGGLE_FAILED from '@salesforce/label/c.SCH_List_Err_ToggleFailed';
+import LABEL_ERR_DELETE_FAILED from '@salesforce/label/c.SCH_List_Err_DeleteFailed';
 import STATUS_COMPLETED from '@salesforce/label/c.ProjectCard_Status_Completed';
 import STATUS_COMPLETED_WITH_ERRORS from '@salesforce/label/c.ProjectCard_Status_CompletedWithErrors';
 import STATUS_FAILED from '@salesforce/label/c.ProjectCard_Status_Failed';
@@ -274,8 +284,8 @@ export default class ScheduledSchedules extends LightningElement {
             console.error(' Error loading schedules:', JSON.stringify(error, null, 2));
             
             this.showToast(
-                'Error', 
-                this.getErrorMessage(error), 
+                LABEL_TOAST_ERROR,
+                this.getErrorMessage(error),
                 'error'
             );
         }
@@ -424,13 +434,13 @@ export default class ScheduledSchedules extends LightningElement {
                 nextRun:    nextRunDate
             });
 
-            this.showToast('Success', Import_UpdateScheduleToastMessage.replace('{0}', this.editFrequency), 'success');
+            this.showToast(LABEL_TOAST_SUCCESS, Import_UpdateScheduleToastMessage.replace('{0}', this.editFrequency), 'success');
             this._clearEditState();
             await refreshApex(this.wiredSchedulesResult);
 
         } catch (error) {
             console.error('[handleSaveEdit] ERROR:', error);
-            this.showToast('Error', error?.body?.message || error?.message || 'Erreur lors de la mise à jour', 'error');
+            this.showToast(LABEL_TOAST_ERROR, error?.body?.message || error?.message || LABEL_ERR_UPDATE_FAILED, 'error');
         } finally {
             this.isLoading = false;
         }
@@ -476,7 +486,7 @@ export default class ScheduledSchedules extends LightningElement {
         
         console.log(' Edit state reset completely');
         
-        this.showToast('Info', Import_CancelEditMessage, 'info');
+        this.showToast(LABEL_TOAST_INFO, Import_CancelEditMessage, 'info');
     }
 
    
@@ -535,15 +545,15 @@ export default class ScheduledSchedules extends LightningElement {
             const result = await toggleSchedule({ scheduleId, isPause });
 
             if (result?.success) {
-                const action = isPause ? 'paused' : 'resumed';
-                this.showToast('Success', `Schedule ${action} successfully`, 'success');
+                const action = isPause ? LABEL_TOGGLE_PAUSED : LABEL_TOGGLE_RESUMED;
+                this.showToast(LABEL_TOAST_SUCCESS, LABEL_MSG_TOGGLE_SUCCESS.replace('{0}', action), 'success');
                 await refreshApex(this.wiredSchedulesResult);
             } else {
-                this.showToast('Error', result?.error || 'Toggle failed', 'error');
+                this.showToast(LABEL_TOAST_ERROR, result?.error || LABEL_ERR_TOGGLE_FAILED, 'error');
             }
         } catch (error) {
             console.error('Error toggling schedule:', error);
-            this.showToast('Error', this.getErrorMessage(error), 'error');
+            this.showToast(LABEL_TOAST_ERROR, this.getErrorMessage(error), 'error');
         } finally {
             this.isLoading = false;
         }
@@ -571,7 +581,7 @@ export default class ScheduledSchedules extends LightningElement {
             await refreshApex(this.wiredSchedulesResult);
 
             this.showToast(
-                'Success',
+                LABEL_TOAST_SUCCESS,
                 Import_DeleteScheduleToastMessage,
                 'success'
             );
@@ -579,8 +589,8 @@ export default class ScheduledSchedules extends LightningElement {
         } catch (error) {
             console.error('Error deleting schedule:', error);
             this.showToast(
-                'Error',
-                error?.body?.message || 'Error deleting schedule',
+                LABEL_TOAST_ERROR,
+                error?.body?.message || LABEL_ERR_DELETE_FAILED,
                 'error'
             );
         }
@@ -768,7 +778,7 @@ export default class ScheduledSchedules extends LightningElement {
     }
 
     getErrorMessage(error) {
-        if (!error) return 'Unknown error';
+        if (!error) return LABEL_ERR_UNKNOWN;
         
         if (error.body && error.body.message) {
             return error.body.message;

@@ -13,6 +13,7 @@ import { subscribe, unsubscribe, onError } from 'lightning/empApi';
 import { parseCsvData, validateCsvHeaders } from 'c/utility';
 
 // ===== Custom Labels =====
+import LABEL_TOAST_INFO from '@salesforce/label/c.Toast_Title_Info';
 import LABEL_TITLE from '@salesforce/label/c.IM_DRY_Title';
 import LABEL_SUBTITLE from '@salesforce/label/c.IM_DRY_Subtitle';
 import LABEL_STATUS_WITH_ERRORS from '@salesforce/label/c.IM_DRY_Status_WithErrors';
@@ -730,8 +731,8 @@ export default class DryRunValidator extends LightningElement {
         if (this.isAsyncValidation) {
           this.loadValidationResults(executionId);
           this.showToast(
-            isCompleteWithErrors ? 'Warning' : 'Success',
-            this.importMessage || (isCompleteWithErrors ? 'Validation completed with errors' : 'Validation completed'),
+            isCompleteWithErrors ? 'Attention' : 'Succès',
+            this.importMessage || (isCompleteWithErrors ? 'Validation terminée avec des erreurs' : 'Validation terminée'),
             isCompleteWithErrors ? 'warning' : 'success'
           );
           this.isAsyncValidation = false;
@@ -741,13 +742,13 @@ export default class DryRunValidator extends LightningElement {
         this.stopExecutionPolling();
         if (this.isAsyncValidation) {
           this.loadValidationResults(executionId);
-          this.showToast('Error', this.importMessage || 'Validation failed', 'error');
+          this.showToast('Erreur', this.importMessage || 'Validation échouée', 'error');
           this.isAsyncValidation = false;
         }
       } else if (isCancelled && previousStatus !== 'Cancelled') {
         this.isLoading = false;
         this.stopExecutionPolling();
-        this.showToast('Info', this.importMessage || 'Validation cancelled', 'info');
+        this.showToast(LABEL_TOAST_INFO,this.importMessage || 'Validation annulée', 'info');
         this.isAsyncValidation = false;
       }
     }
@@ -783,7 +784,7 @@ export default class DryRunValidator extends LightningElement {
       this.importPhase = details.phase || this.importPhase;
       this.importProgress = progress;
       const remaining = Math.max(0, total - processed - failed);
-      this.importMessage = `Phase: ${details.phase || 'N/A'} - Processed: ${processed}, Failed: ${failed}, Remaining: ${remaining}`;
+      this.importMessage = `Phase : ${details.phase || 'N/A'} - Traités : ${processed}, Échoués : ${failed}, Restants : ${remaining}`;
       this.persistRunState();
       const status = (details.status || '').toLowerCase();
       const isDone = isTerminalStatus(status);
@@ -824,11 +825,11 @@ export default class DryRunValidator extends LightningElement {
         targetObject: projectDetails?.targetObject
       };
       this.applyValidationResults(result);
-      if (logsData?.truncated) this.importMessage = `Showing first ${logs.length} issues out of ${logsData.totalCount} total.`;
+      if (logsData?.truncated) this.importMessage = `Affichage des ${logs.length} premiers problèmes sur ${logsData.totalCount} au total.`;
       this.persistRunState();
     } catch (error) {
       console.error('Error loading validation results:', error);
-      this.showToast('Warning', 'Could not load validation details', 'warning');
+      this.showToast('Attention', 'Impossible de charger les détails de la validation', 'warning');
     }
   }
 
@@ -913,7 +914,7 @@ export default class DryRunValidator extends LightningElement {
   async runValidation(isSample = false, isPartial = false) {
     const currentProjectId = (this.projectId || '').trim();
     if (!currentProjectId || !this.hasCsvData) {
-      this.showToast('Error', 'Please enter project ID and CSV data', 'error');
+      this.showToast('Erreur', 'Veuillez indiquer l\'ID du projet et les données CSV', 'error');
       return;
     }
     this.isLoading = true;
@@ -925,7 +926,7 @@ export default class DryRunValidator extends LightningElement {
       if (rawCsv) {
         const headerCheck = validateCsvHeaders(rawCsv);
         if (!headerCheck.valid) {
-          this.showToast('Error', headerCheck.error, 'error');
+          this.showToast('Erreur', headerCheck.error, 'error');
           this.isLoading = false;
           return;
         }
@@ -933,13 +934,13 @@ export default class DryRunValidator extends LightningElement {
 
       const parsedData = this.transformCsvData(this.csvData);
       if (parsedData.length === 0) {
-        this.showToast('Error', 'No valid data found in CSV', 'error');
+        this.showToast('Erreur', 'Aucune donnée valide trouvée dans le CSV', 'error');
         this.isLoading = false;
         return;
       }
       this.precheck = this.computePrecheck(parsedData);
       if (this.settings.stopOnFirstErrorClientSide && this.precheck.invalidRows > 0) {
-        this.showToast('Error', `Client precheck failed: ${this.precheck.invalidRows} invalid row(s). Fix data then retry.`, 'error');
+        this.showToast('Erreur', `Pré-vérification côté client échouée : ${this.precheck.invalidRows} ligne(s) invalide(s). Corrigez les données puis réessayez.`, 'error');
         this.isLoading = false;
         return;
       }
@@ -957,7 +958,7 @@ export default class DryRunValidator extends LightningElement {
         const toLine = Number(this.settings?.toLine) || 50;
         const rangeData = this.takeRange(parsedData, fromLine, toLine);
         if (rangeData.length === 0) {
-          this.showToast('Error', `No rows found between line ${fromLine} and line ${toLine}.`, 'error');
+          this.showToast('Erreur', `Aucune ligne trouvée entre la ligne ${fromLine} et la ligne ${toLine}.`, 'error');
           this.isLoading = false;
           return;
         }
@@ -966,7 +967,7 @@ export default class DryRunValidator extends LightningElement {
         const useAsync = rangeData.length > MAX_SYNC_SAMPLE_ROWS;
         if (useAsync) {
           this.initialTotalRecords = runTotalRows;
-          this.showToast('Info', `Validating rows ${fromLine}–${toLine} (${rangeData.length} rows) in async mode.`, 'info');
+          this.showToast(LABEL_TOAST_INFO,`Validation des lignes ${fromLine}–${toLine} (${rangeData.length} lignes) en mode asynchrone.`, 'info');
           result = await this.runClientStagingValidation(currentProjectId, rangeData, true, keepValidRows);
           usedAsyncFlow = true;
         } else {
@@ -980,7 +981,7 @@ export default class DryRunValidator extends LightningElement {
         const useAsyncForSample = sample.length > MAX_SYNC_SAMPLE_ROWS;
         if (useAsyncForSample) {
           this.initialTotalRecords = runTotalRows;
-          this.showToast('Info', `Sample size is ${sample.length}. Switching automatically to async batch validation.`, 'info');
+          this.showToast(LABEL_TOAST_INFO,`Taille de l'échantillon : ${sample.length}. Basculement automatique vers la validation par lot asynchrone.`, 'info');
           result = await this.runClientStagingValidation(currentProjectId, sample, true, keepValidRows);
           usedAsyncFlow = true;
         } else {
@@ -1000,25 +1001,25 @@ export default class DryRunValidator extends LightningElement {
           this.importStatus = 'InProgress';
           this.importPhase = 'Validating';
           this.importProgress = 0;
-          this.importMessage = 'Validation in progress...';
+          this.importMessage = 'Validation en cours...';
           this.persistRunState();
-          this.showToast('Info', `Validation started for ${runTotalRows} rows. Please wait...`, 'info');
+          this.showToast(LABEL_TOAST_INFO,`Validation démarrée pour ${runTotalRows} lignes. Veuillez patienter...`, 'info');
           this.startExecutionPolling(result.executionId);
           if (!isLargeDataset) this.pollExecutionStatus(result.executionId);
         } else {
           this.applyValidationResults(result);
           const msg = isSample
-            ? `Sample validation completed: ${result.errorCount} errors on ${result.totalRecords} records`
-            : `Dry run completed: ${result.errorCount} errors on ${result.totalRecords} records`;
-          this.showToast('Success', msg, 'success');
+            ? `Validation de l'échantillon terminée : ${result.errorCount} erreurs sur ${result.totalRecords} enregistrements`
+            : `Validation à blanc terminée : ${result.errorCount} erreurs sur ${result.totalRecords} enregistrements`;
+          this.showToast('Succès', msg, 'success');
           this.isLoading = false;
         }
       } else {
-        this.showToast('Error', result?.error || 'Validation error', 'error');
+        this.showToast('Erreur', result?.error || 'Erreur de validation', 'error');
         this.isLoading = false;
       }
     } catch (error) {
-      this.showToast('Error', 'Validation error: ' + this.getErrorMessage(error), 'error');
+      this.showToast('Erreur', 'Erreur de validation : ' + this.getErrorMessage(error), 'error');
       console.error('Validation error:', error);
       this.isLoading = false;
     }
@@ -1074,7 +1075,7 @@ export default class DryRunValidator extends LightningElement {
     this.importStatus = 'Staging';
     this.importPhase = 'Staging';
     this.importProgress = 0;
-    this.importMessage = `Uploading rows: 0/${rowCount}`;
+    this.importMessage = `Envoi des lignes : 0/${rowCount}`;
 
     const session = await startClientStaging({
       projectId,
@@ -1082,7 +1083,7 @@ export default class DryRunValidator extends LightningElement {
       totalRows: rowCount
     });
 
-    if (!session?.success || !session?.executionId) throw new Error(session?.error || 'Unable to start staging session.');
+    if (!session?.success || !session?.executionId) throw new Error(session?.error || 'Impossible de démarrer la session de staging.');
     const executionId = session.executionId;
     let nextStartLine = Number(session.nextStartLine || 2);
     const startIndex = Math.max(0, nextStartLine - 2);
@@ -1091,7 +1092,7 @@ export default class DryRunValidator extends LightningElement {
       this.importStatus = 'Staging';
       this.importPhase = 'Staging';
       this.importProgress = rowCount > 0 ? Math.round((startIndex * 100) / rowCount) : 0;
-      this.importMessage = `Resuming upload: ${startIndex}/${rowCount}`;
+      this.importMessage = `Reprise de l'envoi : ${startIndex}/${rowCount}`;
     }
 
     // ✅ Récursion à la place du for+await (eslint no-await-in-loop)
@@ -1103,32 +1104,32 @@ export default class DryRunValidator extends LightningElement {
         rows: chunk,
         startLine: currentStartLine
       });
-      if (!appendResult?.success) throw new Error(appendResult?.error || 'Unable to append staging rows.');
+      if (!appendResult?.success) throw new Error(appendResult?.error || 'Impossible d\'ajouter les lignes au staging.');
       const newStartLine = Number(appendResult.nextStartLine || (currentStartLine + chunk.length));
       const uploaded = Number(appendResult.uploadedRows || Math.min(rowCount, currentIndex + chunk.length));
       this.importStatus = 'Staging';
       this.importPhase = 'Staging';
       this.importProgress = rowCount > 0 ? Math.round((uploaded * 100) / rowCount) : 0;
-      this.importMessage = `Uploading rows: ${uploaded}/${rowCount}`;
+      this.importMessage = `Envoi des lignes : ${uploaded}/${rowCount}`;
       await uploadChunk(currentIndex + STAGING_CHUNK_SIZE, newStartLine);
     };
 
     await uploadChunk(startIndex, nextStartLine);
 
     const finishResult = await finishClientStaging({ executionId });
-    if (!finishResult?.success) throw new Error(finishResult?.error || 'Unable to finish staging.');
-    if (isSample) this.showToast('Info', `Sample uploaded (${rowCount} rows). Batch validation started.`, 'info');
+    if (!finishResult?.success) throw new Error(finishResult?.error || 'Impossible de finaliser le staging.');
+    if (isSample) this.showToast(LABEL_TOAST_INFO,`Échantillon envoyé (${rowCount} lignes). Validation par lot démarrée.`, 'info');
     return finishResult;
   }
 
   getErrorMessage(error) {
-    if (!error) return 'Unknown error';
+    if (!error) return 'Erreur inconnue';
     if (typeof error === 'string') return error;
-    if (Array.isArray(error?.body) && error.body.length > 0) return error.body[0]?.message || 'Unknown error';
-    if (error?.body?.output?.errors?.length) return error.body.output.errors[0]?.message || 'Unknown error';
+    if (Array.isArray(error?.body) && error.body.length > 0) return error.body[0]?.message || 'Erreur inconnue';
+    if (error?.body?.output?.errors?.length) return error.body.output.errors[0]?.message || 'Erreur inconnue';
     if (error?.body?.message) return error.body.message;
     if (error?.message) return error.message;
-    return 'Unknown error';
+    return 'Erreur inconnue';
   }
 
   showToast(title, message, variant) {
@@ -1165,17 +1166,17 @@ export default class DryRunValidator extends LightningElement {
         if (result?.success) {
           this.importStatus = result.status || 'Cancelled';
           this.importPhase = this.importPhase || 'Cancelled';
-          this.importMessage = 'Cancellation requested.';
+          this.importMessage = 'Annulation demandée.';
           this.persistRunState();
           this.stopExecutionPolling();
           this.isLoading = false;
           this.isAsyncValidation = false;
-          this.showToast('Info', 'Validation cancelled', 'info');
+          this.showToast(LABEL_TOAST_INFO,'Validation annulée', 'info');
           return;
         }
-        this.showToast('Error', 'Unable to cancel validation', 'error');
+        this.showToast('Erreur', 'Impossible d\'annuler la validation', 'error');
       })
-      .catch((error) => { this.showToast('Error', 'Cancel error: ' + (error.body?.message || error.message), 'error'); });
+      .catch((error) => { this.showToast('Erreur', 'Erreur d\'annulation : ' + (error.body?.message || error.message), 'error'); });
   }
 
   handleRetryValidation() {
@@ -1184,26 +1185,26 @@ export default class DryRunValidator extends LightningElement {
     this.importStatus = 'InProgress';
     this.importPhase = 'Validating';
     this.importProgress = 0;
-    this.importMessage = 'Retry started...';
+    this.importMessage = 'Nouvelle tentative démarrée...';
     this.persistRunState();
     retryExecution({ executionId: this.currentExecutionId })
       .then((result) => {
         if (result?.success) {
           this.isAsyncValidation = true;
           this.startExecutionPolling(this.currentExecutionId);
-          this.showToast('Info', 'Validation retry started', 'info');
+          this.showToast(LABEL_TOAST_INFO,'Nouvelle tentative de validation démarrée', 'info');
           return;
         }
         this.isLoading = false;
-        this.showToast('Error', 'Unable to retry validation', 'error');
+        this.showToast('Erreur', 'Impossible de relancer la validation', 'error');
       })
       .catch((error) => {
         this.isLoading = false;
-        this.showToast('Error', 'Retry error: ' + (error.body?.message || error.message), 'error');
+        this.showToast('Erreur', 'Erreur lors de la nouvelle tentative : ' + (error.body?.message || error.message), 'error');
       });
   }
 
-  handleEditError() { this.showToast('Info', 'Edit is not implemented yet', 'info'); }
+  handleEditError() { this.showToast(LABEL_TOAST_INFO,'Édition non implémentée pour le moment', 'info'); }
 
   handleDeleteError(event) {
     const id = event.currentTarget?.dataset?.errorId;

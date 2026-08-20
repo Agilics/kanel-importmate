@@ -58,7 +58,7 @@ public with sharing class TransformationController {
       try {
           return TransformationService.validateAllRulesForProject(projectId, sampleData);
       } catch (Exception e) {
-          throw new AuraHandledException('Error validating rules: ' + e.getMessage());
+          throw new AuraHandledException('Erreur lors de la validation des règles : ' + e.getMessage());
       }
   }
 
@@ -99,7 +99,7 @@ public with sharing class TransformationController {
         TransformationService.deleteRuleById(transformationId);
       } catch (ApplicationException e) {
         ErrorLogService.logException(e);
-        throw new TransformationException('Transformation rule not found : ' + e.getMessage());
+        throw new TransformationException('Règle de transformation introuvable : ' + e.getMessage());
       }
     }
 
@@ -114,7 +114,7 @@ public with sharing class TransformationController {
           TransformationRepository.updateRule(ruleId, ruleType,parameters,sourceFields, targetValue);
         } catch (Exception e) {
             ErrorLogService.logException(e);
-            throw new TransformationException('Error during the update of the rule : ' + e.getMessage());
+            throw new TransformationException('Erreur lors de la mise à jour de la règle : ' + e.getMessage());
         }
     }
 

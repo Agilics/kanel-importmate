@@ -13,7 +13,7 @@ public with sharing class ScheduleRepository {
      */
     public static Schedule__c addSchedule(Schedule__c schedule) {
         if (!SecurityUtils.isCreateable(Schedule__c.SObjectType)) {
-            throw new ApplicationException('Insufficient permissions to create Schedule__c');
+            throw new ApplicationException(Label.SCH_Err_NoCreatePermission);
         }
         try {
             upsert schedule;
@@ -29,10 +29,10 @@ public with sharing class ScheduleRepository {
      */
     public static void deleteScheduleById(String scheduleId) {
         if (String.isBlank(scheduleId)) {
-            throw new ApplicationException('Schedule ID cannot be blank');
+            throw new ApplicationException(Label.SCH_Err_IdCannotBeBlank);
         }
         if (!SecurityUtils.isDeletable(Schedule__c.SObjectType)) {
-            throw new ApplicationException('Insufficient permissions to delete Schedule__c');
+            throw new ApplicationException(Label.SCH_Err_NoDeletePermission);
         }
         try {
             // Aborter les jobs Cron liés

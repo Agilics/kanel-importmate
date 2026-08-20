@@ -32,6 +32,21 @@ import LABEL_STATUS_FAILED from '@salesforce/label/c.ProjectCard_Status_Failed';
 import LABEL_STATUS_IN_PROGRESS from '@salesforce/label/c.ProjectCard_Status_InProgress';
 import LABEL_STATUS_PENDING from '@salesforce/label/c.ProjectCard_Status_Pending';
 import LABEL_DETAIL_EXECUTION_ID from '@salesforce/label/c.IM_EX_Detail_ExecutionId';
+import LABEL_TOAST_ERROR from '@salesforce/label/c.Toast_Title_Error';
+import LABEL_TOAST_SUCCESS from '@salesforce/label/c.Toast_Title_Success';
+import LABEL_TOAST_INFO from '@salesforce/label/c.Toast_Title_Info';
+import LABEL_ERR_PROJECT_ID_REQUIRED from '@salesforce/label/c.SCH_Exec_Err_ProjectIdRequired';
+import LABEL_ERR_CSV_DATA_REQUIRED from '@salesforce/label/c.SCH_Exec_Err_CsvDataRequired';
+import LABEL_ERR_NO_VALID_CSV_DATA from '@salesforce/label/c.SCH_Exec_Err_NoValidCsvData';
+import LABEL_MSG_IMPORT_STARTED from '@salesforce/label/c.SCH_Exec_Msg_ImportStarted';
+import LABEL_ERR_START_FAILED from '@salesforce/label/c.SCH_Exec_Err_StartFailed';
+import LABEL_MSG_IMPORT_CANCELLED from '@salesforce/label/c.SCH_Exec_Msg_ImportCancelled';
+import LABEL_ERR_CANCEL_FAILED from '@salesforce/label/c.SCH_Exec_Err_CancelFailed';
+import LABEL_ERR_CANCEL_EXCEPTION from '@salesforce/label/c.SCH_Exec_Err_CancelException';
+import LABEL_INFO_NO_EXECUTION_ID from '@salesforce/label/c.SCH_Exec_Info_NoExecutionId';
+import LABEL_INFO_NO_LOGS_TO_EXPORT from '@salesforce/label/c.SCH_Exec_Info_NoLogsToExport';
+import LABEL_MSG_LOGS_EXPORTED from '@salesforce/label/c.SCH_Exec_Msg_LogsExported';
+import LABEL_ERR_EXPORT_FAILED from '@salesforce/label/c.SCH_Exec_Err_ExportFailed';
 import LABEL_DETAIL_STATUS from '@salesforce/label/c.IM_EX_Detail_Status';
 import LABEL_DETAIL_TOTAL from '@salesforce/label/c.IM_EX_Detail_TotalRecords';
 import LABEL_DETAIL_PROCESSED from '@salesforce/label/c.IM_EX_Detail_Processed';
@@ -226,8 +241,8 @@ export default class ExecutionCmp extends LightningElement {
   }
 
   async handleStartImport() {
-    if (!this.projectId) { this.showToast('Error', 'Project ID is required', 'error'); return; }
-    if (!this.csvData) { this.showToast('Error', 'CSV data is required', 'error'); return; }
+    if (!this.projectId) { this.showToast(LABEL_TOAST_ERROR, LABEL_ERR_PROJECT_ID_REQUIRED, 'error'); return; }
+    if (!this.csvData) { this.showToast(LABEL_TOAST_ERROR, LABEL_ERR_CSV_DATA_REQUIRED, 'error'); return; }
 
     this.isLoading = true;
     this.resetExecutionState();
@@ -236,12 +251,12 @@ export default class ExecutionCmp extends LightningElement {
     this.importStatus = 'InProgress';
     this.executionPhase = 'Staging';
     this.importProgress = 0;
-    this.importMessage = 'Starting upload...';
+    this.importMessage = 'Démarrage de l\'envoi...';
 
     try {
       const parsedCsvData = this.transformCsvData(this.csvData);
       if (!parsedCsvData || parsedCsvData.length === 0) {
-        this.showToast('Error', 'No valid data found in CSV', 'error');
+        this.showToast(LABEL_TOAST_ERROR, LABEL_ERR_NO_VALID_CSV_DATA, 'error');
         return;
       }
       this.totalRecords = parsedCsvData.length;
@@ -250,13 +265,13 @@ export default class ExecutionCmp extends LightningElement {
       this.showImportProgress = true;
       this.importStatus = 'InProgress';
       this.importProgress = 0;
-      this.importMessage = `Import started for ${parsedCsvData.length} rows...`;
+      this.importMessage = `Import démarré pour ${parsedCsvData.length} lignes...`;
       this.persistRunState();
       this.handleSubscribe();
       this.startExecutionPolling(this.currentExecutionId);
-      this.showToast('Success', 'Import started successfully', 'success');
+      this.showToast(LABEL_TOAST_SUCCESS, LABEL_MSG_IMPORT_STARTED, 'success');
     } catch (error) {
-      this.showToast('Error', error?.body?.message || error?.message || 'Error starting import', 'error');
+      this.showToast(LABEL_TOAST_ERROR, error?.body?.message || error?.message || LABEL_ERR_START_FAILED, 'error');
       console.error('Error starting import:', error);
     } finally {
       this.isLoading = false;
@@ -272,17 +287,17 @@ export default class ExecutionCmp extends LightningElement {
       const result = await cancelExecution({ executionId: this.currentExecutionId });
       if (result?.success) {
         this.importStatus = result.status || 'Cancelled';
-        this.importMessage = 'Cancellation requested.';
+        this.importMessage = 'Annulation demandée.';
         this.showImportResults = true;
         this.persistRunState();
         this.handleUnsubscribe();
         this.stopExecutionPolling();
-        this.showToast('Info', 'Import cancelled', 'info');
+        this.showToast(LABEL_TOAST_INFO,LABEL_MSG_IMPORT_CANCELLED, 'info');
       } else {
-        this.showToast('Error', 'Unable to cancel import', 'error');
+        this.showToast(LABEL_TOAST_ERROR, LABEL_ERR_CANCEL_FAILED, 'error');
       }
     } catch (error) {
-      this.showToast('Error', error?.body?.message || error?.message || 'Cancel failed', 'error');
+      this.showToast(LABEL_TOAST_ERROR, error?.body?.message || error?.message || LABEL_ERR_CANCEL_EXCEPTION, 'error');
     } finally {
       this.isLoading = false;
     }
@@ -611,20 +626,20 @@ export default class ExecutionCmp extends LightningElement {
   }
 
   async handleExportLogsCsv() {
-    if (!this.currentExecutionId) { this.showToast('Info', 'No execution id yet.', 'info'); return; }
+    if (!this.currentExecutionId) { this.showToast(LABEL_TOAST_INFO,LABEL_INFO_NO_EXECUTION_ID, 'info'); return; }
     this.isLoading = true;
     try {
       const rawLogs = await this.loadAllImportLogs(this.currentExecutionId);
       const logs = this.normalizeLogsForExport(rawLogs || []);
-      if (!Array.isArray(logs) || logs.length === 0) { this.showToast('Info', 'No logs to export for this execution.', 'info'); return; }
+      if (!Array.isArray(logs) || logs.length === 0) { this.showToast(LABEL_TOAST_INFO,LABEL_INFO_NO_LOGS_TO_EXPORT, 'info'); return; }
       const columns = this.getCsvColumns(logs);
       const csv = this.buildCsvContent(logs, columns);
       const fileName = this.buildLogsFileName();
       this.downloadCsv(csv, fileName);
-      this.showToast('Success', 'Logs exported successfully.', 'success');
+      this.showToast(LABEL_TOAST_SUCCESS, LABEL_MSG_LOGS_EXPORTED, 'success');
     } catch (e) {
       console.error('[ExportLogs] error', e);
-      this.showToast('Error', e?.body?.message || e?.message || 'Failed to export logs', 'error');
+      this.showToast(LABEL_TOAST_ERROR, e?.body?.message || e?.message || LABEL_ERR_EXPORT_FAILED, 'error');
     } finally { this.isLoading = false; }
   }
 

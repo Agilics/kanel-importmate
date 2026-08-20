@@ -3,6 +3,7 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import getRulesByProjectId from '@salesforce/apex/TransformationController.getRulesByProjectId';
 import generatePreview from '@salesforce/apex/TransformationController.generatePreview';
 import validateProjectRules from '@salesforce/apex/TransformationController.validateProjectRules';
+import LABEL_TOAST_INFO from '@salesforce/label/c.Toast_Title_Info';
 
 const maxRows = 10;
 const idColumn = {label: 'Id', fieldName: 'id', fixedWidth: 100, type: 'text', sortable: true};
@@ -123,8 +124,8 @@ export default class TransformationPreviewModal extends LightningElement {
         } else if (error) {
             console.error('Error loading rules:', error);
             this.rulesByProjectId = [];
-            this.errorMessage = error.body?.message || 'Error loading rules';
-            this.showToast('Error', this.errorMessage, 'error');
+            this.errorMessage = error.body?.message || 'Erreur lors du chargement des règles';
+            this.showToast('Erreur', this.errorMessage, 'error');
         }
     }
 
@@ -504,7 +505,7 @@ export default class TransformationPreviewModal extends LightningElement {
     }
 
     handleRuleSummary() {
-        this.showToast('Info', 'Will come soon!', 'info');
+        this.showToast(LABEL_TOAST_INFO,'Bientôt disponible !', 'info');
     }
 
     handleRowSelection(event) {
@@ -542,32 +543,32 @@ export default class TransformationPreviewModal extends LightningElement {
     // ===== Generate Preview =====
     async handlePreviewChanges() {
         if (!this.selectedRows || this.selectedRows.length === 0) {
-            this.showToast('Warning', 'Please select at least one row', 'warning');
+            this.showToast('Attention', 'Veuillez sélectionner au moins une ligne', 'warning');
             return;
         }
 
         if (this.selectedRows.length < 2) {
-            this.showToast('Warning', 'You must select at least 2 rows', 'warning');
+            this.showToast('Attention', 'Vous devez sélectionner au moins 2 lignes', 'warning');
             return;
         }
 
         if (this.selectedRows.length > 10) {
-            this.showToast('Warning', 'Maximum 10 rows allowed', 'warning');
+            this.showToast('Attention', 'Maximum 10 lignes autorisées', 'warning');
             return;
         }
-        
+
         try {
             const sampleData = this.getDataForPreviewExecution();
-            
+
             if (!sampleData || sampleData.length === 0) {
-                this.showToast('Warning', 'No valid data to preview', 'warning');
+                this.showToast('Attention', 'Aucune donnée valide à prévisualiser', 'warning');
                 return;
             }
 
             const mappingId = this.rulesByProjectId[0]?.FieldMapping__c;
-            
+
             if (!mappingId) {
-                this.showToast('Error', 'No mapping found for transformation', 'error');
+                this.showToast('Erreur', 'Aucun mapping trouvé pour cette transformation', 'error');
                 return;
             }
 
@@ -590,10 +591,10 @@ export default class TransformationPreviewModal extends LightningElement {
                 this.disableSelections = true;
                 this.isRunTestDisabled = true;
                 
-                this.showToast('Success', `Preview generated for ${result.length} rows`, 'success');
+                this.showToast('Succès', `Aperçu généré pour ${result.length} lignes`, 'success');
                 console.log('Preview Data:', JSON.stringify(this.previewItemsToShow));
             } else {
-                this.showToast('Warning', 'No preview data returned', 'warning');
+                this.showToast('Attention', 'Aucune donnée d\'aperçu retournée', 'warning');
             }
             
         } catch (error) {
@@ -603,8 +604,8 @@ export default class TransformationPreviewModal extends LightningElement {
             console.error('Error message:', error?.body?.message);
             
             this.showToast(
-                'Error',
-                error?.body?.message || error?.message || 'Failed to generate preview',
+                'Erreur',
+                error?.body?.message || error?.message || 'Échec de la génération de l\'aperçu',
                 'error'
             );
         }
@@ -667,7 +668,7 @@ export default class TransformationPreviewModal extends LightningElement {
         // Mettre à jour l'affichage
         this.updatePagedData();
         
-        this.showToast('Success', 'Filters cleared', 'success');
+        this.showToast('Succès', 'Filtres réinitialisés', 'success');
     }
 
     // ===== APPLY FILTERS - CORRIGÉ (SUPPRESSION DES DOUBLONS) =====
@@ -720,9 +721,9 @@ export default class TransformationPreviewModal extends LightningElement {
         
         // Afficher un message
         if (this.filteredRows.length === 0) {
-            this.showToast('Info', 'No rows match the filter criteria', 'info');
+            this.showToast(LABEL_TOAST_INFO,'Aucune ligne ne correspond aux critères de filtre', 'info');
         } else {
-            this.showToast('Success', `${this.filteredRows.length} rows match the filter`, 'success');
+            this.showToast('Succès', `${this.filteredRows.length} ligne(s) correspondent au filtre`, 'success');
         }
     }
 

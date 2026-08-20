@@ -4,6 +4,7 @@ import { NavigationMixin } from "lightning/navigation";
 
 import fetchFields from "@salesforce/apex/QueryBuilderController.fetchFields";
 import buildAndRunQueryEx from "@salesforce/apex/QueryBuilderController.buildAndRunQueryEx";
+import LABEL_TOAST_INFO from '@salesforce/label/c.Toast_Title_Info';
 
 const OP_MAP = {
   equals: "=",
@@ -495,7 +496,7 @@ export default class SoqlBuilder extends NavigationMixin(LightningElement) {
 
         this.queryResults = safeRows;
         this.currentPage = 1;
-        if (safeRows.length === 0) this.showToast("Info", "Aucun enregistrement trouvé.", "info");
+        if (safeRows.length === 0) this.showToast(LABEL_TOAST_INFO, "Aucun enregistrement trouvé.", "info");
       })
       .catch(err => {
         const msg = err?.body?.message || err?.message || "Échec de l'exécution de la requête.";
@@ -622,10 +623,10 @@ export default class SoqlBuilder extends NavigationMixin(LightningElement) {
   // ── Copy SOQL ─────────────────────────────────────────────────────────────────
   copySoql() {
     const text = this.soqlText || "";
-    if (!text.trim()) { this.showToast("Info", "No SOQL query to copy.", "info"); return; }
+    if (!text.trim()) { this.showToast(LABEL_TOAST_INFO, "Aucune requête SOQL à copier.", "info"); return; }
     if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
       navigator.clipboard.writeText(text)
-        .then(() => this.showToast("Copied!", "SOQL query copied to clipboard.", "success"))
+        .then(() => this.showToast("Copié !", "Requête SOQL copiée dans le presse-papiers.", "success"))
         .catch(() => this._copySoqlFallback(text));
     } else {
       this._copySoqlFallback(text);
@@ -643,9 +644,9 @@ export default class SoqlBuilder extends NavigationMixin(LightningElement) {
       ta.select();
       document.execCommand("copy");
       document.body.removeChild(ta);
-      this.showToast("Copied!", "SOQL query copied to clipboard.", "success");
+      this.showToast("Copié !", "Requête SOQL copiée dans le presse-papiers.", "success");
     } catch (e) {
-      this.showToast("Copy failed", "Clipboard is not available in this context.", "error");
+      this.showToast("Échec de la copie", "Le presse-papiers n'est pas disponible dans ce contexte.", "error");
     }
   }
 

@@ -784,8 +784,8 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
         e.target.checked = false;
 
         this.toast(
-          'Limit reached',
-          'You can configure at most 3 lookup fields in this mapping.',
+          'Limite atteinte',
+          'Vous pouvez configurer au maximum 3 champs de recherche (lookup) dans ce mapping.',
           'warning'
         );
         return;
@@ -968,19 +968,19 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
   async handleSave() {
     try {
       if (!this.selectedProjectId) {
-        throw new Error('Please select a Project before saving.');
+        throw new Error('Veuillez sélectionner un projet avant d\'enregistrer.');
       }
 
       if (!this.selectedTargetObject) {
-        throw new Error('Target object is not set for this project. Please select a target object first.');
+        throw new Error('L\'objet cible n\'est pas défini pour ce projet. Veuillez d\'abord sélectionner un objet cible.');
       }
 
       // Limite 3 champs lookup max
       const lookupCount = this.currentLookupCount;
       if (lookupCount > 3) {
         this.toast(
-          'Limit reached',
-          'You can configure at most 3 lookup fields in this mapping.',
+          'Limite atteinte',
+          'Vous pouvez configurer au maximum 3 champs de recherche (lookup) dans ce mapping.',
           'warning'
         );
         return;
@@ -1025,7 +1025,7 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
       //vérifie l'existance de mapping pour le projet sélectionné
       await this.checkProjectMappings();
 
-      this.toast('Success', 'Mappings saved.', 'success');
+      this.toast('Succès', 'Mappings enregistrés.', 'success');
       this._refreshPreviewDebounced();
     } catch (error) {
       console.error('[FieldMapper] handleSave error', JSON.stringify({
@@ -1039,8 +1039,8 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
         error?.body?.message ||
         error?.body?.output?.errors?.[0]?.message ||
         error?.message ||
-        'Failed to save mappings.';
-      this.toast('Error', msg, 'error');
+        'Échec de l\'enregistrement des mappings.';
+      this.toast('Erreur', msg, 'error');
     }
   }
 
@@ -1053,14 +1053,14 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
 
     if (!this.selectedProjectId) {
       if (!silent) {
-        this.toast('Info', 'Select a project first.', 'info');
+        this.toast('Info', 'Sélectionnez d\'abord un projet.', 'info');
       }
       return;
     }
 
     if (!this.selectedTargetObject) {
       if (!silent) {
-        this.toast('Info', 'Target object is missing for this project.', 'info');
+        this.toast('Info', 'L\'objet cible est manquant pour ce projet.', 'info');
       }
       return;
     }
@@ -1077,7 +1077,7 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
         if (!silent) {
           this.toast(
             'Info',
-            'No saved mappings found for this project.',
+            'Aucun mapping enregistré trouvé pour ce projet.',
             'info'
           );
         }
@@ -1111,13 +1111,13 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
       this._refreshPreviewDebounced();
 
       if (!silent) {
-        this.toast('Loaded', 'Existing mappings loaded.', 'success');
+        this.toast('Chargé', 'Mappings existants chargés.', 'success');
       }
     } catch (e) {
       if (!silent) {
         this.toast(
-          'Error',
-          e?.body?.message || 'Failed to load saved mappings.',
+          'Erreur',
+          e?.body?.message || 'Échec du chargement des mappings enregistrés.',
           'error'
         );
       } else {

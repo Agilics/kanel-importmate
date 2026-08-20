@@ -13,6 +13,15 @@ import FREQUENCY_FIELD from '@salesforce/schema/Schedule__c.Frequency__c';
 import getPickListValues from '@salesforce/apex/ScheduleController.getPickListValues';
 import addSchedule from '@salesforce/apex/ScheduleController.addSchedule';
 import addScheduleWithCriteria from '@salesforce/apex/ScheduleController.addScheduleWithCriteria';
+
+import LABEL_TOAST_ERROR from '@salesforce/label/c.Toast_Title_Error';
+import LABEL_TOAST_WARNING from '@salesforce/label/c.Toast_Title_Warning';
+import LABEL_ERR_LOAD_FREQUENCIES from '@salesforce/label/c.SCH_Reg_Err_LoadFrequencies';
+import LABEL_ERR_MISSING_PROJECT from '@salesforce/label/c.SCH_Reg_Err_MissingProjectContext';
+import LABEL_WARN_ALL_FIELDS_REQUIRED from '@salesforce/label/c.SCH_Reg_Warn_AllFieldsRequired';
+import LABEL_ERR_INVALID_DATETIME from '@salesforce/label/c.SCH_Reg_Err_InvalidDateTime';
+import LABEL_ERR_UPDATE_FAILED from '@salesforce/label/c.SCH_Reg_Err_UpdateFailed';
+import LABEL_ERR_ADD_FAILED from '@salesforce/label/c.SCH_Reg_Err_AddFailed';
 import reScheduleWithCriteria from '@salesforce/apex/ScheduleController.reScheduleWithCriteria';
 
 export default class ScheduleRegisterModal extends LightningElement {
@@ -84,7 +93,7 @@ export default class ScheduleRegisterModal extends LightningElement {
             }));
         } else if (error) {
             console.error('Picklist error:', error);
-            this.showToast('Error', 'Unable to load frequencies', 'error');
+            this.showToast(LABEL_TOAST_ERROR, LABEL_ERR_LOAD_FREQUENCIES, 'error');
         }
     }
     
@@ -102,20 +111,20 @@ export default class ScheduleRegisterModal extends LightningElement {
 
     async handleAddSchedule() {
         if (!this.projectId) {
-            this.showToast('Error', 'Project context is missing.', 'error');
+            this.showToast(LABEL_TOAST_ERROR, LABEL_ERR_MISSING_PROJECT, 'error');
             return;
         }
 
         if (!this.selectedFrequency || !this.nextRun) {
-            this.showToast('Warning', 'All fields are required.', 'warning');
+            this.showToast(LABEL_TOAST_WARNING, LABEL_WARN_ALL_FIELDS_REQUIRED, 'warning');
             return;
         }
 
         // Convert to ISO format for Apex
         const nextRunISO = this.convertToISOFormat(this.nextRun);
-        
+
         if (!nextRunISO) {
-            this.showToast('Error', 'Invalid date/time format', 'error');
+            this.showToast(LABEL_TOAST_ERROR, LABEL_ERR_INVALID_DATETIME, 'error');
             return;
         }
 
@@ -133,7 +142,7 @@ export default class ScheduleRegisterModal extends LightningElement {
                     fileNamePattern: this.presetFileName
                 });
                 if (result?.success === false) {
-                    this.showToast('Error', result.error || 'Erreur lors de la mise à jour', 'error');
+                    this.showToast(LABEL_TOAST_ERROR, result.error || LABEL_ERR_UPDATE_FAILED, 'error');
                     return;
                 }
             } else if (this.hasPresetFile) {
@@ -159,9 +168,9 @@ export default class ScheduleRegisterModal extends LightningElement {
                     'addschedule'
                 ));
 
-        } catch (err) { 
-            const errorMessage = err?.body?.message || err?.message || 'Error adding schedule';
-            this.showToast('Error', errorMessage, 'error');
+        } catch (err) {
+            const errorMessage = err?.body?.message || err?.message || LABEL_ERR_ADD_FAILED;
+            this.showToast(LABEL_TOAST_ERROR, errorMessage, 'error');
         } finally {
             this.isLoading = false;
         }

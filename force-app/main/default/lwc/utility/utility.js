@@ -34,13 +34,13 @@ export function navigateToPage(pageName, params = {}) {
  */
 export function validateCsvHeaders(csvString) {
   if (!csvString || csvString.trim() === '') {
-    return { valid: false, error: 'The CSV file is empty.' };
+    return { valid: false, error: 'Le fichier CSV est vide.' };
   }
 
   const lines = csvString.trim().split('\n').filter((l) => l.trim() !== '');
 
   if (lines.length === 0) {
-    return { valid: false, error: 'The CSV file is empty.' };
+    return { valid: false, error: 'Le fichier CSV est vide.' };
   }
 
   // Detect delimiter and parse headers
@@ -50,7 +50,7 @@ export function validateCsvHeaders(csvString) {
   // Check for empty/missing header names
   const nonEmptyHeaders = headerValues.filter((h) => h && h.trim() !== '');
   if (nonEmptyHeaders.length === 0) {
-    return { valid: false, error: 'The CSV file has no header row. Please ensure the first line contains column names.' };
+    return { valid: false, error: 'Le fichier CSV n\'a pas de ligne d\'en-tête. Assurez-vous que la première ligne contient les noms de colonnes.' };
   }
 
   // Check for duplicate column names
@@ -58,7 +58,7 @@ export function validateCsvHeaders(csvString) {
   const seen = new Set();
   for (const h of normalised) {
     if (seen.has(h)) {
-      return { valid: false, error: `The CSV header contains duplicate column name: "${h}". Each column must have a unique name.` };
+      return { valid: false, error: `L'en-tête du CSV contient un nom de colonne en double : "${h}". Chaque colonne doit avoir un nom unique.` };
     }
     seen.add(h);
   }
@@ -69,7 +69,7 @@ export function validateCsvHeaders(csvString) {
     const isSameAsHeader = row2Values.length === normalised.length &&
       row2Values.every((v, i) => v === normalised[i]);
     if (isSameAsHeader) {
-      return { valid: false, error: 'The CSV file appears to have two header rows. Please remove the duplicate header line.' };
+      return { valid: false, error: 'Le fichier CSV semble contenir deux lignes d\'en-tête. Veuillez supprimer la ligne d\'en-tête en double.' };
     }
     // Heuristic: if second row contains no numeric or date-like values and matches header format
     const allStringsLikeHeaders = row2Values.length > 0 &&
@@ -77,7 +77,7 @@ export function validateCsvHeaders(csvString) {
     const tooSimilarToHeader = allStringsLikeHeaders &&
       row2Values.filter((v, i) => v === normalised[i]).length >= Math.ceil(normalised.length * 0.5);
     if (tooSimilarToHeader) {
-      return { valid: false, error: 'The CSV file may have two header rows. Please verify that line 1 is your header and line 2 is real data.' };
+      return { valid: false, error: 'Le fichier CSV pourrait contenir deux lignes d\'en-tête. Vérifiez que la ligne 1 est bien l\'en-tête et la ligne 2 des données réelles.' };
     }
   }
 

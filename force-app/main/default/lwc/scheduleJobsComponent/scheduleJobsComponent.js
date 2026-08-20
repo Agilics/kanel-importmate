@@ -18,6 +18,23 @@ import reSchedule      from '@salesforce/apex/ScheduleController.reSchedule';
 import STATUS_FIELD          from '@salesforce/schema/ImportExecution__c.Status__c';
 import IMPORTEXECUTION_OBJECT from '@salesforce/schema/ImportExecution__c';
 
+import LABEL_TOAST_ERROR from '@salesforce/label/c.Toast_Title_Error';
+import LABEL_TOAST_SUCCESS from '@salesforce/label/c.Toast_Title_Success';
+import LABEL_ERR_LOAD_FAILED from '@salesforce/label/c.SCH_Jobs_Err_LoadFailed';
+import LABEL_WARN_FIELDS_REQUIRED from '@salesforce/label/c.SCH_Jobs_Warn_FieldsRequired';
+import LABEL_WARN_FIELDS_REQUIRED_MSG from '@salesforce/label/c.SCH_Jobs_Warn_FieldsRequiredMsg';
+import LABEL_WARN_INVALID_DATE_TITLE from '@salesforce/label/c.SCH_Jobs_Warn_InvalidDateTitle';
+import LABEL_WARN_INVALID_DATE_MSG from '@salesforce/label/c.SCH_Jobs_Warn_InvalidDateMsg';
+import LABEL_ERR_UPDATE_FAILED from '@salesforce/label/c.SCH_Jobs_Err_UpdateFailed';
+import LABEL_MSG_UPDATE_SUCCESS from '@salesforce/label/c.SCH_Jobs_Msg_UpdateSuccess';
+import LABEL_ERR_STATUS_CHANGE_FAILED from '@salesforce/label/c.SCH_Jobs_Err_StatusChangeFailed';
+import LABEL_MSG_SUSPENDED from '@salesforce/label/c.SCH_Jobs_Msg_Suspended';
+import LABEL_MSG_RESUMED from '@salesforce/label/c.SCH_Jobs_Msg_Resumed';
+import LABEL_ERR_DELETE_FAILED from '@salesforce/label/c.SCH_Jobs_Err_DeleteFailed';
+import LABEL_MSG_DELETE_SUCCESS from '@salesforce/label/c.SCH_Jobs_Msg_DeleteSuccess';
+import LABEL_CONFIRM_DELETE_MSG from '@salesforce/label/c.SCH_Jobs_Confirm_DeleteMsg';
+import LABEL_CONFIRM_DELETE_TITLE from '@salesforce/label/c.SCH_Jobs_Confirm_DeleteTitle';
+
 const FREQUENCY_OPTIONS = [
     { label: 'Quotidien',    value: 'Daily'   },
     { label: 'Hebdomadaire', value: 'Weekly'  },
@@ -164,7 +181,7 @@ export default class ScheduleJobsComponent extends LightningElement {
         if (data) {
             this.schedules = this._mapWrappers(data);
         } else if (error) {
-            this.showToast('Erreur', error?.body?.message || 'Impossible de charger les planifications', 'error');
+            this.showToast(LABEL_TOAST_ERROR, error?.body?.message || LABEL_ERR_LOAD_FAILED, 'error');
             this.schedules = [];
         }
     }
@@ -319,12 +336,12 @@ export default class ScheduleJobsComponent extends LightningElement {
 
     handleSaveEdit() {
         if (!this.editFrequency || !this.editNextRun) {
-            this.showToast('Champs requis', 'Veuillez renseigner la fréquence et la date.', 'warning');
+            this.showToast(LABEL_WARN_FIELDS_REQUIRED, LABEL_WARN_FIELDS_REQUIRED_MSG, 'warning');
             return;
         }
         const nextRunDt = new Date(this.editNextRun);
         if (nextRunDt <= new Date()) {
-            this.showToast('Date invalide', 'La prochaine exécution doit être dans le futur.', 'warning');
+            this.showToast(LABEL_WARN_INVALID_DATE_TITLE, LABEL_WARN_INVALID_DATE_MSG, 'warning');
             return;
         }
         this.isSaving = true;
@@ -335,16 +352,16 @@ export default class ScheduleJobsComponent extends LightningElement {
         })
             .then(result => {
                 if (result?.success === false) {
-                    this.showToast('Erreur', result.error || 'Erreur lors de la mise à jour', 'error');
+                    this.showToast(LABEL_TOAST_ERROR, result.error || LABEL_ERR_UPDATE_FAILED, 'error');
                     return;
                 }
-                this.showToast('Succès', 'Planification mise à jour', 'success');
+                this.showToast(LABEL_TOAST_SUCCESS, LABEL_MSG_UPDATE_SUCCESS, 'success');
                 this.showEditModal = false;
                 this._resetEditState();
                 refreshApex(this._wiredResult);
             })
             .catch(err => {
-                this.showToast('Erreur', err?.body?.message || 'Erreur lors de la mise à jour', 'error');
+                this.showToast(LABEL_TOAST_ERROR, err?.body?.message || LABEL_ERR_UPDATE_FAILED, 'error');
             })
             .finally(() => { this.isSaving = false; });
     }
@@ -355,30 +372,30 @@ export default class ScheduleJobsComponent extends LightningElement {
         const isActive = btn.dataset.active === 'true';
         toggleSchedule({ scheduleId: id, isPause: isActive })
             .then(() => {
-                const msg = isActive ? 'Planification suspendue' : 'Planification reprise';
-                this.showToast('Succès', msg, 'success');
+                const msg = isActive ? LABEL_MSG_SUSPENDED : LABEL_MSG_RESUMED;
+                this.showToast(LABEL_TOAST_SUCCESS, msg, 'success');
                 refreshApex(this._wiredResult);
             })
             .catch(err => {
-                this.showToast('Erreur', err?.body?.message || 'Erreur lors du changement de statut', 'error');
+                this.showToast(LABEL_TOAST_ERROR, err?.body?.message || LABEL_ERR_STATUS_CHANGE_FAILED, 'error');
             });
     }
 
     async handleDeleteSchedule(event) {
         const id = event.currentTarget.dataset.id;
         const confirmed = await LightningConfirm.open({
-            message : 'Supprimer cette planification ? Cette action est irréversible.',
+            message : LABEL_CONFIRM_DELETE_MSG,
             variant : 'headerless',
-            label   : 'Confirmer la suppression'
+            label   : LABEL_CONFIRM_DELETE_TITLE
         });
         if (!confirmed) return;
         deleteSchedule({ scheduleId: id })
             .then(() => {
-                this.showToast('Succès', 'Planification supprimée', 'success');
+                this.showToast(LABEL_TOAST_SUCCESS, LABEL_MSG_DELETE_SUCCESS, 'success');
                 refreshApex(this._wiredResult);
             })
             .catch(err => {
-                this.showToast('Erreur', err?.body?.message || 'Erreur lors de la suppression', 'error');
+                this.showToast(LABEL_TOAST_ERROR, err?.body?.message || LABEL_ERR_DELETE_FAILED, 'error');
             });
     }
 

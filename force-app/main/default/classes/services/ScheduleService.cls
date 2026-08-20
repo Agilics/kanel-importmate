@@ -50,13 +50,13 @@ public with sharing class ScheduleService {
         try {
             if (!SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType) ||
                 !SecurityUtils.isAccessible(Schema.ImportProject__c.SObjectType)) {
-                throw new SchedulingException('Insufficient permissions');
+                throw new SchedulingException(Label.SCH_Err_InsufficientPermissions);
             }
             if (String.isBlank(frequence) || nextRun == null || String.isBlank(projectId)) {
-                throw new SchedulingException('Frequency, nextRun and projectId are required');
+                throw new SchedulingException(Label.SCH_Err_RequiredFields);
             }
             if (nextRun <= System.now()) {
-                throw new SchedulingException('Next run date must be in the future');
+                throw new SchedulingException(Label.SCH_Err_NextRunInFuture);
             }
 
             // Une seule planification active par PROJET (pas par fichier) : l'écran de
@@ -111,7 +111,7 @@ public with sharing class ScheduleService {
             );
             Schedule__c savedSchedule = ScheduleRepository.addSchedule(newSchedule);
             if (savedSchedule == null || savedSchedule.Id == null) {
-                throw new ApplicationException('Failed to create schedule record');
+                throw new ApplicationException(Label.SCH_Err_CreateFailed);
             }
 
             ExecutionRepository.createLinkedExecution(
@@ -162,18 +162,18 @@ public with sharing class ScheduleService {
     ) {
         try {
             if (String.isBlank(scheduleId)) {
-                return new Map<String, Object>{ 'success' => false, 'error' => 'Schedule ID is required' };
+                return new Map<String, Object>{ 'success' => false, 'error' => Label.SCH_Err_IdRequired };
             }
             if (String.isBlank(frequency) || nextRun == null) {
-                return new Map<String, Object>{ 'success' => false, 'error' => 'Frequency and nextRun are required' };
+                return new Map<String, Object>{ 'success' => false, 'error' => Label.SCH_Err_FreqAndDateRequired };
             }
             if (nextRun <= System.now()) {
-                return new Map<String, Object>{ 'success' => false, 'error' => 'Next run date must be in the future' };
+                return new Map<String, Object>{ 'success' => false, 'error' => Label.SCH_Err_NextRunInFuture };
             }
 
             Schedule__c existingSchedule = ScheduleRepository.getScheduleById(scheduleId);
             if (existingSchedule == null) {
-                return new Map<String, Object>{ 'success' => false, 'error' => 'Schedule not found' };
+                return new Map<String, Object>{ 'success' => false, 'error' => Label.SCH_Err_NotFound };
             }
 
             cancelExistingJob(existingSchedule.Id);
@@ -245,11 +245,11 @@ public with sharing class ScheduleService {
     public static Map<String, Object> toggleSchedule(String scheduleId, Boolean isPause) {
         try {
             if (String.isBlank(scheduleId)) {
-                return new Map<String, Object>{ 'success' => false, 'error' => 'Schedule ID is required' };
+                return new Map<String, Object>{ 'success' => false, 'error' => Label.SCH_Err_IdRequired };
             }
             Schedule__c existing = ScheduleRepository.getScheduleById(scheduleId);
             if (existing == null) {
-                return new Map<String, Object>{ 'success' => false, 'error' => 'Schedule not found' };
+                return new Map<String, Object>{ 'success' => false, 'error' => Label.SCH_Err_NotFound };
             }
             return isPause ? pauseSchedule(existing) : resumeSchedule(existing);
         } catch (Exception e) {
@@ -292,7 +292,7 @@ public with sharing class ScheduleService {
         if (schedule.NextRun__c == null || schedule.NextRun__c <= System.now()) {
             return new Map<String, Object>{
                 'success' => false,
-                'error'   => 'Next run date is in the past. Please reschedule first.'
+                'error'   => Label.SCH_Err_NextRunPast
             };
         }
 
@@ -349,7 +349,7 @@ public with sharing class ScheduleService {
         try {
             existingSchedule = ScheduleRepository.getScheduleById(scheduleId);
             if (existingSchedule == null) {
-                return ScheduleJobResult.error('Schedule not found: ' + scheduleId);
+                return ScheduleJobResult.error(String.format(Label.SCH_Err_NotFoundWithId, new List<Object>{ scheduleId }));
             }
 
             // Bloquer si CETTE planification (pas une autre du même projet) est Suspended
@@ -360,7 +360,7 @@ public with sharing class ScheduleService {
                 LIMIT 1
             ];
             if (!suspendedExecution.isEmpty()) {
-                return ScheduleJobResult.error('Execution is suspended. Resume before running.');
+                return ScheduleJobResult.error(Label.SCH_Err_Suspended);
             }
 
             // Récupérer l'exécution Pending liée à ce schedule dès maintenant : elle sert de
@@ -384,18 +384,18 @@ public with sharing class ScheduleService {
 
             if (importData == null || importData.isEmpty()) {
                 String reason = isCriteriaMode
-                    ? 'Aucun fichier ne correspond au motif "' + existingSchedule.FileNamePattern__c + '" pour ce projet.'
-                    : 'Aucune donnée trouvée pour cet import planifié (aucun fichier ni requête disponible).';
+                    ? String.format(Label.SCH_Err_NoFileMatch, new List<Object>{ existingSchedule.FileNamePattern__c })
+                    : Label.SCH_Err_NoDataAvailable;
                 markExecutionFailed(execution, reason);
                 // Une planification récurrente (Daily/Weekly/Monthly) doit continuer à réessayer
                 // aux prochaines occurrences même si aucun fichier ne correspond aujourd'hui.
                 rescheduleNext(existingSchedule);
                 update existingSchedule;
-                return ScheduleJobResult.error('No data found for scheduled import');
+                return ScheduleJobResult.error(Label.SCH_Err_NoDataFound);
             }
 
             if (execution == null) {
-                String reason = 'Aucune exécution "Pending" trouvée pour cette planification — impossible de démarrer l\'import.';
+                String reason = Label.SCH_Err_NoPendingExecution;
                 ErrorLogService.logError(0, Constants.ERROR_TYPE_SCHEDULING, reason);
                 // Cas anormal mais pas définitif : la planification récurrente doit quand même
                 // retenter à la prochaine occurrence plutôt que de rester bloquée pour toujours.
@@ -438,14 +438,14 @@ public with sharing class ScheduleService {
 
             PublisherService.publishExecutionStarted(String.valueOf(execution.Id));
 
-            return ScheduleJobResult.ok('Scheduled import started')
+            return ScheduleJobResult.ok(Label.SCH_Msg_ImportStarted)
                 .withExecutionId(execution.Id)
                 .withPhase('Staging');
 
         } catch (Exception e) {
             System.debug(LOG_PREFIX + ' ERROR: ' + e.getMessage());
             ErrorLogService.logException(e);
-            markExecutionFailed(execution, 'Erreur inattendue lors de l\'exécution planifiée : ' + e.getMessage());
+            markExecutionFailed(execution, String.format(Label.SCH_Err_UnexpectedExecution, new List<Object>{ e.getMessage() }));
 
             // Une erreur inattendue sur CETTE occurrence ne doit pas tuer la planification
             // récurrente pour toujours : on retente à la prochaine échéance. Isolé dans son
@@ -460,7 +460,7 @@ public with sharing class ScheduleService {
                 }
             }
 
-            return ScheduleJobResult.error('Scheduled import failed: ' + e.getMessage());
+            return ScheduleJobResult.error(String.format(Label.SCH_Err_ScheduledImportFailed, new List<Object>{ e.getMessage() }));
         }
     }
 

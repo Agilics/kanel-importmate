@@ -20,7 +20,7 @@
                     insert execution;
                 } catch (DmlException e) {
                     ErrorLogService.logException(e);
-                    throw new ExecutionException('Error creating execution: ' + e.getMessage());
+                    throw new ExecutionException(String.format(Label.EXR_Err_CreateExecution, new List<Object>{ e.getMessage() }));
                 }
             }
             return execution;
@@ -32,7 +32,7 @@
                     update execution;
                 } catch (DmlException e) {
                     ErrorLogService.logException(e);
-                    throw new ExecutionException('Error updating execution: ' + e.getMessage());
+                    throw new ExecutionException(String.format(Label.EXR_Err_UpdateExecution, new List<Object>{ e.getMessage() }));
                 }
             }
         }
@@ -47,7 +47,7 @@
                             LIMIT 1];
                 } catch (QueryException e) {
                     ErrorLogService.logException(e);
-                    throw new ExecutionException('Error retrieving execution: ' + e.getMessage());
+                    throw new ExecutionException(String.format(Label.EXR_Err_RetrieveExecution, new List<Object>{ e.getMessage() }));
                 }
             }
             return null;
@@ -78,7 +78,7 @@
 
             } catch (Exception e) {
                 ErrorLogService.logException(e);
-                throw new ExecutionException('Error retrieving execution history: ' + e.getMessage());
+                throw new ExecutionException(String.format(Label.EXR_Err_RetrieveHistory, new List<Object>{ e.getMessage() }));
             }
         }
 
@@ -119,7 +119,7 @@
 
             } catch (Exception e) {
                 ErrorLogService.logException(e);
-                throw new ExecutionException('Error retrieving execution statistics: ' + e.getMessage());
+                throw new ExecutionException(String.format(Label.EXR_Err_RetrieveStats, new List<Object>{ e.getMessage() }));
             }
         }
 

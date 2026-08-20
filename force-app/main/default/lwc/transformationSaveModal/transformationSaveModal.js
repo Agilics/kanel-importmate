@@ -331,20 +331,20 @@ export default class TransformationSaveModal extends LightningModal {
 
     // ===== Validation =====
     validateForm(fields) {
-        if (!this._mappingId) return this.toastErr("Field mapping's required");
-        if (!this.ruleType) return this.toastErr("Rule type's required. Please choose one rule");
+        if (!this._mappingId) return this.toastErr("Le mapping de champ est requis");
+        if (!this.ruleType) return this.toastErr("Le type de règle est requis. Veuillez en choisir un");
         if ((!Array.isArray(fields) || fields.length === 0) && this.ruleType === 'Concatenation') {
-            return this.toastErr("Source fields's required. Please choose at least two source field");
+            return this.toastErr("Les champs source sont requis. Veuillez choisir au moins deux champs source");
         }
         switch (this.ruleType) {
             case 'Concatenation':
-                if (fields.length === 0) return this.toastErr('Please choose two or three source fields');
-                if (fields.length > 3) return this.toastErr('Maximum for concatenation is 3 source fields');
-                if (!this.separator) return this.toastErr('Please select a separator');
+                if (fields.length === 0) return this.toastErr('Veuillez choisir deux ou trois champs source');
+                if (fields.length > 3) return this.toastErr('Le maximum pour une concaténation est de 3 champs source');
+                if (!this.separator) return this.toastErr('Veuillez sélectionner un séparateur');
                 break;
             case 'EmailMasking':
-                if (!this.domain) return this.toastErr('Please select a domain');
-                if (fields.length === 0) return this.toastErr('Email is required');
+                if (!this.domain) return this.toastErr('Veuillez sélectionner un domaine');
+                if (fields.length === 0) return this.toastErr('L\'email est requis');
                 break;
             default:
                 break;
@@ -372,7 +372,7 @@ export default class TransformationSaveModal extends LightningModal {
             });
 
             if (hasRuleExist) {
-                this.close({ success: false, message: 'Rule already exists', variant: 'warning' });
+                this.close({ success: false, message: 'Cette règle existe déjà', variant: 'warning' });
                 return;
             }
 
@@ -390,14 +390,14 @@ export default class TransformationSaveModal extends LightningModal {
 
             const rule = await createRule(payload);
             this.resetState();
-            this.close({ success: true, ruleId: rule.Id, message: 'Rule created successfully' });
+            this.close({ success: true, ruleId: rule.Id, message: 'Règle créée avec succès' });
 
         } catch (error) {
             console.error('Error creating rule:', error);
             this.resetState();
             this.close({
                 success: false,
-                message: error.body?.message || error.message || 'Unknown error',
+                message: error.body?.message || error.message || 'Erreur inconnue',
                 variant: 'error'
             });
         }
@@ -430,14 +430,14 @@ export default class TransformationSaveModal extends LightningModal {
             await updateRule(payload);
             await refreshApex(this.wiredResultToRefresh);
             this.resetState();
-            this.close({ success: true, ruleId: savedRuleId, message: 'Rule updated successfully' });
+            this.close({ success: true, ruleId: savedRuleId, message: 'Règle mise à jour avec succès' });
 
         } catch (error) {
             console.error('Error updating rule:', error);
             this.resetState();
             this.close({
                 success: false,
-                message: error.body?.message || error.message || 'Unknown error',
+                message: error.body?.message || error.message || 'Erreur inconnue',
                 variant: 'error'
             });
         }

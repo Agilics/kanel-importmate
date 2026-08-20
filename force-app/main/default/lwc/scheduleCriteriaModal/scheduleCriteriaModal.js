@@ -12,6 +12,15 @@ import reScheduleWithCriteria from '@salesforce/apex/ScheduleController.reSchedu
 import previewFileMatches from '@salesforce/apex/ScheduleController.previewFileMatches';
 import resetProcessedFiles from '@salesforce/apex/ScheduleController.resetProcessedFiles';
 
+import LABEL_TOAST_ERROR from '@salesforce/label/c.Toast_Title_Error';
+import LABEL_TOAST_SUCCESS from '@salesforce/label/c.Toast_Title_Success';
+import LABEL_TOAST_WARNING from '@salesforce/label/c.Toast_Title_Warning';
+import LABEL_MSG_RESET_SUCCESS from '@salesforce/label/c.SCH_Crit_Msg_ResetSuccess';
+import LABEL_WARN_PATTERN_REQUIRED from '@salesforce/label/c.SCH_Crit_Warn_PatternRequired';
+import LABEL_MSG_SAVE_SUCCESS from '@salesforce/label/c.SCH_Crit_Msg_SaveSuccess';
+import LABEL_ERR_SAVE_FAILED from '@salesforce/label/c.SCH_Crit_Err_SaveFailed';
+import LABEL_ERR_GENERIC from '@salesforce/label/c.SCH_Crit_Err_Generic';
+
 const PREVIEW_DEBOUNCE_MS = 400;
 
 export default class ScheduleCriteriaModal extends LightningElement {
@@ -41,7 +50,7 @@ export default class ScheduleCriteriaModal extends LightningElement {
             this.processedCount = this.countProcessedFiles(this._schedule?.LastProcessedFileIds__c);
             this.refreshPreview();
         } catch (err) {
-            this.showToast('Error', this.getErrorMessage(err), 'error');
+            this.showToast(LABEL_TOAST_ERROR, this.getErrorMessage(err), 'error');
         } finally {
             this.isLoading = false;
         }
@@ -94,9 +103,9 @@ export default class ScheduleCriteriaModal extends LightningElement {
         try {
             await resetProcessedFiles({ scheduleId: this.scheduleId });
             this.processedCount = 0;
-            this.showToast('Success', 'Les fichiers déjà traités ont été réinitialisés.', 'success');
+            this.showToast(LABEL_TOAST_SUCCESS, LABEL_MSG_RESET_SUCCESS, 'success');
         } catch (err) {
-            this.showToast('Error', this.getErrorMessage(err), 'error');
+            this.showToast(LABEL_TOAST_ERROR, this.getErrorMessage(err), 'error');
         } finally {
             this.isLoading = false;
         }
@@ -104,7 +113,7 @@ export default class ScheduleCriteriaModal extends LightningElement {
 
     async handleSave() {
         if (!this.pattern) {
-            this.showToast('Warning', 'Veuillez renseigner un modèle de nom de fichier.', 'warning');
+            this.showToast(LABEL_TOAST_WARNING, LABEL_WARN_PATTERN_REQUIRED, 'warning');
             return;
         }
         this.isSaving = true;
@@ -118,14 +127,14 @@ export default class ScheduleCriteriaModal extends LightningElement {
                 fileNamePattern: this.pattern
             });
             if (result?.success) {
-                this.showToast('Success', 'Critères de correspondance mis à jour.', 'success');
+                this.showToast(LABEL_TOAST_SUCCESS, LABEL_MSG_SAVE_SUCCESS, 'success');
                 this.dispatchEvent(new CustomEvent('saved'));
                 this.handleClose();
             } else {
-                this.showToast('Error', result?.error || 'Échec de la mise à jour.', 'error');
+                this.showToast(LABEL_TOAST_ERROR, result?.error || LABEL_ERR_SAVE_FAILED, 'error');
             }
         } catch (err) {
-            this.showToast('Error', this.getErrorMessage(err), 'error');
+            this.showToast(LABEL_TOAST_ERROR, this.getErrorMessage(err), 'error');
         } finally {
             this.isSaving = false;
         }
@@ -136,7 +145,7 @@ export default class ScheduleCriteriaModal extends LightningElement {
     }
 
     getErrorMessage(err) {
-        return err?.body?.message || err?.message || 'Une erreur est survenue.';
+        return err?.body?.message || err?.message || LABEL_ERR_GENERIC;
     }
 
     showToast(title, message, variant) {

@@ -13,7 +13,7 @@ public with sharing class DashboardController {
             
             return data;
         } catch (Exception e) {
-            throw new AuraHandledException('Error loading dashboard data: ' + e.getMessage());
+            throw new AuraHandledException('Erreur lors du chargement des données du tableau de bord : ' + e.getMessage());
         }
     }
 
@@ -25,7 +25,7 @@ public with sharing class DashboardController {
             data.stats = ProjectService.calculateDashboardStats();
             return data;
         } catch (Exception e) {
-            throw new AuraHandledException('Error loading dashboard data: ' + e.getMessage());
+            throw new AuraHandledException('Erreur lors du chargement des données du tableau de bord : ' + e.getMessage());
         }
     }
 
@@ -46,7 +46,7 @@ public with sharing class DashboardController {
                 LIMIT :safeLimit
             ];
         } catch (Exception e) {
-            throw new AuraHandledException('Error loading execution history: ' + e.getMessage());
+            throw new AuraHandledException('Erreur lors du chargement de l\'historique des exécutions : ' + e.getMessage());
         }
     }
     
@@ -56,7 +56,7 @@ public with sharing class DashboardController {
         try {
             return ProjectService.getProjectsWithStats(limitor);
         } catch (Exception e) {
-            throw new AuraHandledException('Error loading projects: ' + e.getMessage());
+            throw new AuraHandledException('Erreur lors du chargement des projets : ' + e.getMessage());
         }
     }
     
@@ -66,7 +66,7 @@ public with sharing class DashboardController {
         try {
             ProjectService.deleteProject(projectId);
         } catch (ApplicationException e) {
-            throw new AuraHandledException('Error deleting project: ' + e.getMessage());
+            throw new AuraHandledException('Erreur lors de la suppression du projet : ' + e.getMessage());
         }
     }
 
@@ -74,12 +74,12 @@ public with sharing class DashboardController {
     public static Map<String, Object> deleteExecutionHistory(Id executionId) {
         try {
             if (executionId == null) {
-                throw new AuraHandledException('Execution ID is required.');
+                throw new AuraHandledException('L\'ID d\'exécution est requis.');
             }
 
             if (!SecurityUtils.isAccessible(ImportExecution__c.SObjectType) ||
                 !SecurityUtils.isDeletable(ImportExecution__c.SObjectType)) {
-                throw new AuraHandledException('You do not have permission to delete executions.');
+                throw new AuraHandledException('Vous n\'avez pas la permission de supprimer des exécutions.');
             }
 
             ImportExecution__c execution = [
@@ -91,7 +91,7 @@ public with sharing class DashboardController {
 
             if (execution.Status__c == Constants.EXECUTION_STATUS_IN_PROGRESS ||
                 execution.Status__c == Constants.EXECUTION_STATUS_PENDING) {
-                throw new AuraHandledException('Cannot delete an execution that is running.');
+                throw new AuraHandledException('Impossible de supprimer une exécution en cours.');
             }
 
             if (!SecurityUtils.isAccessible(StagingRow__c.SObjectType) ||
@@ -102,7 +102,7 @@ public with sharing class DashboardController {
                     WHERE Execution__c = :executionId
                 ];
                 if (orphanRows > 0) {
-                    throw new AuraHandledException('Cannot delete execution because staging rows still exist.');
+                    throw new AuraHandledException('Impossible de supprimer l\'exécution : des lignes de staging existent encore.');
                 }
             } else {
                 Integer stagingRowCount = [
@@ -112,7 +112,7 @@ public with sharing class DashboardController {
                 ];
                 if (stagingRowCount > 10000) {
                     throw new AuraHandledException(
-                        'Cannot delete execution because too many staging rows remain (' + stagingRowCount + ').'
+                        'Impossible de supprimer l\'exécution : trop de lignes de staging restantes (' + stagingRowCount + ').'
                     );
                 }
 
@@ -134,9 +134,9 @@ public with sharing class DashboardController {
         } catch (AuraHandledException e) {
             throw e;
         } catch (QueryException e) {
-            throw new AuraHandledException('Execution not found.');
+            throw new AuraHandledException('Exécution introuvable.');
         } catch (Exception e) {
-            throw new AuraHandledException('Error deleting execution: ' + e.getMessage());
+            throw new AuraHandledException('Erreur lors de la suppression de l\'exécution : ' + e.getMessage());
         }
     }
 
@@ -144,12 +144,12 @@ public with sharing class DashboardController {
     public static Map<String, Object> deleteExecutionHistories(List<Id> executionIds) {
         try {
             if (executionIds == null || executionIds.isEmpty()) {
-                throw new AuraHandledException('Execution IDs are required.');
+                throw new AuraHandledException('Les ID d\'exécution sont requis.');
             }
 
             if (!SecurityUtils.isAccessible(ImportExecution__c.SObjectType) ||
                 !SecurityUtils.isDeletable(ImportExecution__c.SObjectType)) {
-                throw new AuraHandledException('You do not have permission to delete executions.');
+                throw new AuraHandledException('Vous n\'avez pas la permission de supprimer des exécutions.');
             }
 
             Set<Id> requestedIds = new Set<Id>(executionIds);
@@ -267,7 +267,7 @@ public with sharing class DashboardController {
         } catch (AuraHandledException e) {
             throw e;
         } catch (Exception e) {
-            throw new AuraHandledException('Error deleting execution histories: ' + e.getMessage());
+            throw new AuraHandledException('Erreur lors de la suppression des historiques d\'exécution : ' + e.getMessage());
         }
     }
 

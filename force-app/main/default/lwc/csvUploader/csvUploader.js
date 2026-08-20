@@ -431,13 +431,13 @@ export default class CsvUploader extends LightningElement {
             this.rebuildDisplayColumns();
         } catch (e) {
             console.error('[CsvUploader] parseCSV error:', e);
-            const code = (e && e.message) || 'Failed to parse CSV';
+            const code = (e && e.message) || 'Échec de l\'analyse du fichier CSV';
             const errorMessages = {
-                NO_HEADER_LINE       : 'This file does not appear to contain a header line. Please check the file.',
-                DUPLICATE_HEADER_LINE: 'Two header lines were detected. The file must contain only one header line.',
-                EMPTY_FILE           : 'The file is empty.'
+                NO_HEADER_LINE       : 'Ce fichier ne semble pas contenir de ligne d\'en-tête. Veuillez vérifier le fichier.',
+                DUPLICATE_HEADER_LINE: 'Deux lignes d\'en-tête ont été détectées. Le fichier ne doit contenir qu\'une seule ligne d\'en-tête.',
+                EMPTY_FILE           : 'Le fichier est vide.'
             };
-            this.parseError = errorMessages[code] || 'Unable to read CSV file.';
+            this.parseError = errorMessages[code] || 'Impossible de lire le fichier CSV.';
             this.columns = []; this.allRows = []; this.totalRows = 0;
         } finally {
             this.isLoading = false;

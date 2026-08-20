@@ -50,14 +50,14 @@ public with sharing class ValidationUtils {
 
         String v = email.trim();
         if (v.length() > 320) {
-            return new ValidationResult(false, 'Invalid email format: ' + email, Constants.INVALID_EMAIL_FORMAT,
+            return new ValidationResult(false, 'Format d\'email invalide : ' + email, Constants.INVALID_EMAIL_FORMAT,
                 new Map<String, Object>{ 'fieldName' => fieldName, 'email' => email });
         }
 
         Integer atPos = v.indexOf('@');
         Integer lastAtPos = v.lastIndexOf('@');
         if (atPos <= 0 || atPos != lastAtPos || atPos >= v.length() - 3) {
-            return new ValidationResult(false, 'Invalid email format: ' + email, Constants.INVALID_EMAIL_FORMAT,
+            return new ValidationResult(false, 'Format d\'email invalide : ' + email, Constants.INVALID_EMAIL_FORMAT,
                 new Map<String, Object>{ 'fieldName' => fieldName, 'email' => email });
         }
 
@@ -65,7 +65,7 @@ public with sharing class ValidationUtils {
         String domainPart = v.substring(atPos + 1);
         Integer dotPos = domainPart.lastIndexOf('.');
         if (String.isBlank(localPart) || dotPos <= 0 || dotPos >= domainPart.length() - 2) {
-            return new ValidationResult(false, 'Invalid email format: ' + email, Constants.INVALID_EMAIL_FORMAT,
+            return new ValidationResult(false, 'Format d\'email invalide : ' + email, Constants.INVALID_EMAIL_FORMAT,
                 new Map<String, Object>{ 'fieldName' => fieldName, 'email' => email });
         }
 
@@ -78,7 +78,7 @@ public with sharing class ValidationUtils {
             Date.valueOf(dateValue);
             return new ValidationResult(true);
         } catch (Exception e) {
-            return new ValidationResult(false, 'Invalid date format: ' + dateValue, Constants.INVALID_DATE_FORMAT,
+            return new ValidationResult(false, 'Format de date invalide : ' + dateValue, Constants.INVALID_DATE_FORMAT,
                 new Map<String, Object>{ 'fieldName' => fieldName, 'dateValue' => dateValue });
         }
     }
@@ -98,11 +98,11 @@ public with sharing class ValidationUtils {
                 return new ValidationResult(true);
             } catch (Exception e2) {
                 //Check if it looks like a date format but is invalid (e.g., invalid month/day)
-                String errorMessage = 'Invalid datetime format: ' + datetimeValue;
+                String errorMessage = 'Format de date/heure invalide : ' + datetimeValue;
                 if (looksLikeDatePrefix(datetimeValue)) {
-                    errorMessage += '. Expected format: YYYY-MM-DD or YYYY-MM-DD HH:MM:SS';
+                    errorMessage += '. Format attendu : AAAA-MM-JJ ou AAAA-MM-JJ HH:MM:SS';
                 } else {
-                    errorMessage += '. Expected format: YYYY-MM-DD HH:MM:SS or YYYY-MM-DD';
+                    errorMessage += '. Format attendu : AAAA-MM-JJ HH:MM:SS ou AAAA-MM-JJ';
                 }
                 return new ValidationResult(false, errorMessage, Constants.INVALID_DATETIME_FORMAT,
                     new Map<String, Object>{ 'fieldName' => fieldName, 'datetimeValue' => datetimeValue });
@@ -116,7 +116,7 @@ public with sharing class ValidationUtils {
             Decimal.valueOf(numberValue);
             return new ValidationResult(true);
         } catch (Exception e) {
-            return new ValidationResult(false, 'Invalid number format: ' + numberValue, Constants.ERROR_CODE_INVALID_NUMBER_FORMAT,
+            return new ValidationResult(false, 'Format de nombre invalide : ' + numberValue, Constants.ERROR_CODE_INVALID_NUMBER_FORMAT,
                 new Map<String, Object>{ 'fieldName' => fieldName, 'numberValue' => numberValue });
         }
     }
@@ -130,10 +130,10 @@ public with sharing class ValidationUtils {
                 return new ValidationResult(true);
             }
 
-            return new ValidationResult(false, 'Invalid picklist value: ' + value, 'INVALID_PICKLIST_VALUE',
+            return new ValidationResult(false, 'Valeur de liste de sélection invalide : ' + value, 'INVALID_PICKLIST_VALUE',
                 new Map<String, Object>{ 'fieldName' => fieldName, 'value' => value, 'objectName' => objectName });
         } catch (Exception e) {
-            return new ValidationResult(false, 'Picklist validation error: ' + e.getMessage(), 'PICKLIST_VALIDATION_ERROR',
+            return new ValidationResult(false, 'Erreur de validation de la liste de sélection : ' + e.getMessage(), 'PICKLIST_VALIDATION_ERROR',
                 new Map<String, Object>{ 'fieldName' => fieldName, 'value' => value, 'objectName' => objectName });
         }
     }
@@ -147,7 +147,7 @@ public with sharing class ValidationUtils {
         if (lowerValue == 'true' || lowerValue == 'false') {
             return new ValidationResult(true);
         }
-        return new ValidationResult(false, 'Invalid boolean format: ' + value, Constants.INVALID_BOOLEAN_FORMAT,
+        return new ValidationResult(false, 'Format booléen invalide : ' + value, Constants.INVALID_BOOLEAN_FORMAT,
             new Map<String, Object>{ 'fieldName' => fieldName, 'value' => value });
     }
 
@@ -160,7 +160,7 @@ public with sharing class ValidationUtils {
     public static ValidationResult validateRequired(String value, String fieldName, String objectName) {
         Boolean isNotNullable = getCachedFieldNullable(objectName, fieldName);
         if (!isNotNullable && String.isBlank(value)) {
-            return new ValidationResult(false, 'Required field is missing: ' + fieldName, Constants.ERROR_CODE_REQUIRED_FIELDS_MISSING,
+            return new ValidationResult(false, 'Champ obligatoire manquant : ' + fieldName, Constants.ERROR_CODE_REQUIRED_FIELDS_MISSING,
                 new Map<String, Object>{ 'fieldName' => fieldName, 'objectName' => objectName });
         }
         return new ValidationResult(true);
@@ -173,13 +173,13 @@ public with sharing class ValidationUtils {
             Schema.DescribeFieldResult fieldDescribe = getCachedFieldDescribe(objectName, fieldName);
             if (fieldDescribe.getType() == Schema.DisplayType.STRING) {
                 if (value?.length() > fieldDescribe?.getLength()) {
-                    return new ValidationResult(false, 'Field value too long: ' + value, Constants.ERROR_CODE_FIELD_SIZE_TOO_LARGE,
+                    return new ValidationResult(false, 'Valeur de champ trop longue : ' + value, Constants.ERROR_CODE_FIELD_SIZE_TOO_LARGE,
                         new Map<String, Object>{ 'fieldName' => fieldName, 'value' => value, 'maxLength' => fieldDescribe.getLength() });
                 }
             }
             return new ValidationResult(true);
         } catch (Exception e) {
-            return new ValidationResult(false, 'Field size validation error: ' + e?.getMessage(), 'FIELD_SIZE_VALIDATION_ERROR',
+            return new ValidationResult(false, 'Erreur de validation de la taille du champ : ' + e?.getMessage(), 'FIELD_SIZE_VALIDATION_ERROR',
                 new Map<String, Object>{ 'fieldName' => fieldName, 'value' => value });
         }
     }
@@ -204,7 +204,7 @@ public with sharing class ValidationUtils {
                 if (isRequired) {
                     return new ValidationResult(
                         false,
-                        'Lookup value not found (required): "' + value + '" in ' + lookupObject + '.' + lookupMatchField,
+                        'Valeur de recherche (lookup) introuvable (obligatoire) : "' + value + '" dans ' + lookupObject + '.' + lookupMatchField,
                         Constants.LOOKUP_VALUE_NOT_FOUND,
                         new Map<String, Object>{
                             'fieldName' => fieldName,
@@ -217,7 +217,7 @@ public with sharing class ValidationUtils {
                     //If field is optional, return a warning
                     return new ValidationResult(
                         true, 
-                        'LOOKUP NOT FOUND: "' + value + '" FOR FIELD ' + lookupObject + '.' + lookupMatchField + '. The field will be left blank.',
+                        'RECHERCHE (LOOKUP) INTROUVABLE : "' + value + '" POUR LE CHAMP ' + lookupObject + '.' + lookupMatchField + '. Le champ sera laissé vide.',
                         Constants.LOOKUP_VALUE_NOT_FOUND,
                         new Map<String, Object>{
                             'fieldName' => fieldName,
@@ -235,7 +235,7 @@ public with sharing class ValidationUtils {
         } catch (QueryException qe) {
             return new ValidationResult(
                 false,
-                'LOOKUP QUERY ERROR: ' + qe.getMessage(),
+                'ERREUR DE REQUÊTE LOOKUP : ' + qe.getMessage(),
                 Constants.LOOKUP_RESOLUTION_ERROR,
                 new Map<String, Object>{
                     'fieldName' => fieldName,
@@ -248,7 +248,7 @@ public with sharing class ValidationUtils {
         } catch (Exception e) {
             return new ValidationResult(
                 false,
-                'Unexpected error during lookup validation: ' + e.getMessage(),
+                'Erreur inattendue lors de la validation du lookup : ' + e.getMessage(),
                 Constants.LOOKUP_RESOLUTION_ERROR,
                 new Map<String, Object>{
                     'fieldName' => fieldName,
@@ -277,7 +277,7 @@ public with sharing class ValidationUtils {
                 //By default, return a warning (optional field)
                 return new ValidationResult(
                     true, 
-                    'LOOKUP NOT FOUND: "' + value + '" FOR ' + lookupObject + '.' + lookupMatchField + '. The field will be left blank.',
+                    'RECHERCHE (LOOKUP) INTROUVABLE : "' + value + '" POUR ' + lookupObject + '.' + lookupMatchField + '. Le champ sera laissé vide.',
                     Constants.LOOKUP_VALUE_NOT_FOUND,
                     new Map<String, Object>{
                         'fieldName' => fieldName,
@@ -294,7 +294,7 @@ public with sharing class ValidationUtils {
         } catch (Exception e) {
             return new ValidationResult(
                 false,
-                'Error during lookup validation: ' + e.getMessage(),
+                'Erreur lors de la validation du lookup : ' + e.getMessage(),
                 Constants.LOOKUP_RESOLUTION_ERROR,
                 new Map<String, Object>{
                     'fieldName' => fieldName,
@@ -405,7 +405,7 @@ public with sharing class ValidationUtils {
                 'validationType' => type.name()
             };
             throw new ValidationException(
-                'Error during format validation: ' + e.getMessage(),
+                'Erreur lors de la validation du format : ' + e.getMessage(),
                 Constants.ERROR_CODE_VALIDATION,
                 context
             );

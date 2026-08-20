@@ -55,7 +55,7 @@ export default class ProjectFormCardComponent extends LightningElement {
   async handleCreateProject() {
     //Validation UI rappel que les champs sont obligatoires
     if (!this.projectName || !this.targetObject) {
-      this.showToast("Warning", "Fields are required.", "warning");
+      this.showToast("Attention", "Les champs sont obligatoires.", "warning");
       return;
     }
 
@@ -68,8 +68,8 @@ export default class ProjectFormCardComponent extends LightningElement {
 
       if (exists) {
         this.showToast(
-          "Warning",
-          "This project already exists, please choose another name/target object.",
+          "Attention",
+          "Ce projet existe déjà, veuillez choisir un autre nom/objet cible.",
           "warning"
         );
 
@@ -89,8 +89,8 @@ export default class ProjectFormCardComponent extends LightningElement {
 
       //Affichage du message toast de succès
       this.showToast(
-        "Success",
-        `Record  with ID:\t${result.Id}  created  successfully !`,
+        "Succès",
+        `Enregistrement avec l'ID :\t${result.Id} créé avec succès !`,
         "success"
       );
       // Réintialisation de tous les champs de texte | combo box
@@ -105,8 +105,8 @@ export default class ProjectFormCardComponent extends LightningElement {
     } catch (err) {
       //Affichage d'un toast de message d'erreur
       this.showToast(
-        "Error",
-        err?.body?.message || "An Error were occured!",
+        "Erreur",
+        err?.body?.message || "Une erreur est survenue !",
         "error"
       );
     }

@@ -14,7 +14,7 @@ public with sharing class FieldMappingService {
 
     private static void validateRowsAgainstSchema(String targetSObjectApiName,List<FieldMappingRepository.FieldMappingDTO> mappingRowDtos) {
         if (String.isBlank(targetSObjectApiName)) {
-            throw new ApplicationException('Target object is required.');
+            throw new ApplicationException('L\'objet cible est requis.');
         }
         if (mappingRowDtos == null || mappingRowDtos.isEmpty()) return;
 
@@ -26,19 +26,19 @@ public with sharing class FieldMappingService {
 
             if (!String.isBlank(mappingDto.targetField) && !targetDescribeFieldsMap.containsKey(mappingDto.targetField)) {
                 throw new ApplicationException(
-                    'Unknown target field "' + mappingDto.targetField + '" on ' + targetSObjectApiName + '.'
+                    'Champ cible inconnu "' + mappingDto.targetField + '" sur ' + targetSObjectApiName + '.'
                 );
             }
 
             if (mappingDto.isLookup == true) {
                 if (String.isBlank(mappingDto.lookupObject) || String.isBlank(mappingDto.lookupMatchField)) {
-                    throw new ApplicationException('Lookup requires both Lookup Object and Match Field.');
+                    throw new ApplicationException('Le lookup nécessite à la fois un objet de recherche et un champ de correspondance.');
                 }
                 Map<String, Schema.SObjectField> lookupDescribeFieldsMap =
                     ObjectMetadataService.getFieldsForObject(mappingDto.lookupObject);
                 if (!lookupDescribeFieldsMap.containsKey(mappingDto.lookupMatchField)) {
                     throw new ApplicationException(
-                        'Lookup match field "' + mappingDto.lookupMatchField + '" not found on ' + mappingDto.lookupObject + '.'
+                        'Champ de correspondance de lookup "' + mappingDto.lookupMatchField + '" introuvable sur ' + mappingDto.lookupObject + '.'
                     );
                 }
             }
@@ -76,7 +76,7 @@ public with sharing class FieldMappingService {
         }
 
         if (normalizedMappingRowDtos.isEmpty()) {
-            throw new ApplicationException('No valid mapping rows to save.');
+            throw new ApplicationException('Aucune ligne de mapping valide à enregistrer.');
         }
 
         validateRowsAgainstSchema(targetSObjectApiName, normalizedMappingRowDtos);

@@ -413,7 +413,7 @@ public with sharing class ScheduleServiceTest {
         Map<String, Object> resultNull = ScheduleService.reSchedule(null, 'DAILY', Datetime.now());
         Test.stopTest();
         
-        Assert.areEqual('Schedule ID is required', String.valueOf(resultNull.get('error')));
+        Assert.areEqual(Label.SCH_Err_IdRequired, String.valueOf(resultNull.get('error')));
         Assert.isFalse(Boolean.valueOf(resultNull.get('success')));
     }
 
