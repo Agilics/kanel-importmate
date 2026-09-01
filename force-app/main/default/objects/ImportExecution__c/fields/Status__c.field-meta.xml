@@ -26,6 +26,11 @@
                 <label>Completed</label>
             </value>
             <value>
+                <fullName>CompletedWithErrors</fullName>
+                <default>false</default>
+                <label>Completed with errors</label>
+            </value>
+            <value>
                 <fullName>Failed</fullName>
                 <default>false</default>
                 <label>Failed</label>

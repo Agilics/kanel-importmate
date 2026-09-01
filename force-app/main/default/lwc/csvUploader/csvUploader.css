@@ -13,9 +13,11 @@
 .btn--ghost:hover { background: #e5f2ff; }
 .btn--outline { background: transparent; border: 1px solid #ddd; }
 .btn--xl { padding: 0.7rem 1.4rem; font-size: 1rem; }
- 
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn:disabled:hover { background: transparent; }
+
 /*Add the class name below to the lightning-icon element.*/
-.custom-icon-error { 
+.custom-icon-error {
  --slds-c-icon-color-foreground-default: #e21212;
 }
 .info--error {
@@ -25,14 +27,14 @@
 }
 
 /* -- Badges -- */
-.badge { 
+.badge {
   padding: 4px 8px;
-  text-align: center; 
+  text-align: center;
   border-radius: 999px;
 }
-.primary-badge{ 
+.primary-badge{
   margin: 8px 0;
-  background-color: #1e40af; 
+  background-color: #1e40af;
   color: #000;
 }
 
@@ -41,7 +43,7 @@
   background: white;
   border-radius: 0.6rem;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
-  padding: 0.9rem 1.2rem; 
+  padding: 0.9rem 1.2rem;
 }
 
 .card__title { font-weight: 600; color: #222; }
@@ -49,11 +51,59 @@
   margin-bottom: 0.5rem;
 }
 
+/* ====== Source Tabs (Upload / Fichiers enregistrés) ====== */
+.src-tabs-row {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 0.8rem; flex-wrap: wrap; gap: 0.5rem;
+}
+.src-tabs { display: flex; gap: 0.3rem; background: #eef1f5; padding: 0.25rem; border-radius: 0.5rem; }
+.src-tab {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.4rem 0.9rem; border: none; background: transparent;
+  color: #555; font-size: 0.85rem; font-weight: 500; border-radius: 0.4rem;
+  cursor: pointer; transition: all 0.2s ease;
+}
+.src-tab:hover { color: #1E40AF; }
+.src-tab.active { background: white; color: #1E40AF; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.goto-scheduling-btn { white-space: nowrap; }
+
+/* ====== Fichiers enregistrés / Historique ====== */
+.stored-file-list { display: flex; flex-direction: column; gap: 0.4rem; margin-top: 0.5rem; }
+.stored-file-row {
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 0.6rem 0.8rem; border: 1px solid #eee; border-radius: 0.5rem;
+  cursor: pointer; transition: background 0.2s ease;
+}
+.stored-file-row:hover { background: #f7faff; }
+.stored-file-row.sel { border-color: #1E40AF; background: #eef6ff; }
+.sf-icon { color: #1E40AF; }
+.sf-icon--status { font-size: 1rem; }
+.sf-name { font-size: 0.85rem; font-weight: 600; color: #222; }
+.sf-meta { font-size: 0.75rem; color: #888; }
+.sf-badge { font-size: 0.7rem; font-weight: 600; padding: 0.2rem 0.55rem; border-radius: 1rem; white-space: nowrap; }
+.sfb-new { background: #e6f7e6; color: #10893e; }
+.sfb-old { background: #eee; color: #666; }
+.stored-file-check { color: #10893e; }
+
+.exec-status { font-size: 0.7rem; font-weight: 600; padding: 0.2rem 0.55rem; border-radius: 1rem; white-space: nowrap; }
+.exec-completed { background: #e6f7e6; color: #10893e; }
+.exec-completedwitherrors { background: #fef3c7; color: #92400e; }
+.exec-failed { background: #fdecea; color: #d9534f; }
+.exec-inprogress { background: #dbeafe; color: #1e40af; }
+.exec-pending, .exec-cancelled { background: #eee; color: #666; }
+.exec-type-badge { font-size: 0.7rem; font-weight: 600; padding: 0.2rem 0.55rem; border-radius: 1rem; white-space: nowrap; }
+.exec-type--scheduled { background: #eef2ff; color: #1E40AF; }
+.exec-type--manual { background: #eee; color: #555; }
+
+.empty-state { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; padding: 2rem 1rem; text-align: center; color: #888; }
+.empty-state__icon { color: #ccc; }
+.empty-state__text { font-size: 0.85rem; margin: 0; }
+
 /* ====== Dropzone ====== */
 .dropzone {
   border: 2px dashed #c7c7c7;
   border-radius: 0.6rem;
-  padding: 1.1rem 1rem;   
+  padding: 1.1rem 1rem;
   text-align: center;
   background: #fafafa;
   cursor: pointer;
@@ -62,17 +112,17 @@
 .dropzone--hover { border-color: #1E40AF; background: #eef6ff; }
 .dropzone__text .browse { color: #1E40AF; cursor: pointer; font-weight: 600; }
 .dropzone__icon {
-  margin-bottom: 0.3rem; 
- 
+  margin-bottom: 0.3rem;
+
 }
 
 .dropzone__text {
-  font-size: 0.9rem;     
+  font-size: 0.9rem;
   line-height: 1.2;
 }
 
 .dropzone__hint {
-  font-size: 0.75rem;    
+  font-size: 0.75rem;
   margin-top: 0.2rem;
 }
 .hidden-input { display: none; }
@@ -99,7 +149,7 @@
     max-width: 370px;                 /* Adjust width as needed */
 }
 
-.table th, .table td { padding: 0.7rem 1rem; border-bottom: 1px solid #f0f0f0; text-align: left; font-size: 
+.table th, .table td { padding: 0.7rem 1rem; border-bottom: 1px solid #f0f0f0; text-align: left; font-size:
 16px; }
 .table th { background: #f9fafb; color: #333; font-weight: 600; white-space: nowrap;width: 100%; }
 .table tbody tr:hover { background: #f7faff; }

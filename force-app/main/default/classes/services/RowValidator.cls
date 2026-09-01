@@ -135,7 +135,7 @@ public with sharing class RowValidator {
                 context.put('lookupMatchField', mapping.LookupMatchField__c);
                 context.put('isWarning', false);
                 return new ValidationException(
-                    'Required lookup field cannot be blank',
+                    'Le champ de recherche (lookup) obligatoire ne peut pas être vide',
                     Constants.LOOKUP_VALUE_NOT_FOUND,
                     context
                 );
@@ -149,7 +149,7 @@ public with sharing class RowValidator {
             context.put('lookupMatchField', mapping.LookupMatchField__c);
             context.put('isWarning', false);
             return new ValidationException(
-                'Incomplete lookup setup for mapping: ' + mapping.TargetField__c,
+                'Configuration de recherche (lookup) incomplète pour le mapping : ' + mapping.TargetField__c,
                 Constants.LOOKUP_RESOLUTION_ERROR,
                 context
             );
@@ -216,7 +216,7 @@ public with sharing class RowValidator {
         context.put('unexpectedError', e.getMessage());
         context.put('isWarning', false);
         return new ValidationException(
-            'Unexpected error during mapping check: ' + e.getMessage(),
+            'Erreur inattendue lors de la vérification du mapping : ' + e.getMessage(),
             Constants.ERROR_CODE_VALIDATION,
             context
         );

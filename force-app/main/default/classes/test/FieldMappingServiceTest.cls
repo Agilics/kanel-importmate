@@ -107,7 +107,7 @@ private class FieldMappingServiceTest {
             FieldMappingService.saveMappings('', input);
             System.assert(false, 'Expected ApplicationException for blank target object');
         } catch (ApplicationException ex) {
-            System.assert(ex.getMessage().contains('Target object is required'),
+            System.assert(ex.getMessage().contains('L\'objet cible est requis'),
                 'Message should mention required target object');
         }
     }
@@ -122,7 +122,7 @@ private class FieldMappingServiceTest {
             FieldMappingService.saveMappings('Contact', input);
             System.assert(false, 'Expected ApplicationException for unknown target field');
         } catch (ApplicationException ex) {
-            System.assert(ex.getMessage().contains('Unknown target field'),
+            System.assert(ex.getMessage().contains('Champ cible inconnu'),
                 'Message should mention unknown target field');
         }
     }
@@ -137,7 +137,7 @@ private class FieldMappingServiceTest {
             FieldMappingService.saveMappings('Contact', input);
             System.assert(false, 'Expected ApplicationException for missing lookup params');
         } catch (ApplicationException ex) {
-            System.assert(ex.getMessage().contains('Lookup requires both Lookup Object and Match Field'),
+            System.assert(ex.getMessage().contains('Le lookup nécessite à la fois un objet de recherche et un champ de correspondance'),
                 'Message should mention required lookup params');
         }
     }
@@ -152,7 +152,7 @@ private class FieldMappingServiceTest {
             FieldMappingService.saveMappings('Contact', input);
             System.assert(false, 'Expected ApplicationException for bad lookup match field');
         } catch (ApplicationException ex) {
-            System.assert(ex.getMessage().contains('Lookup match field'),
+            System.assert(ex.getMessage().contains('Champ de correspondance de lookup'),
                 'Message should mention lookup match field not found');
         }
     }

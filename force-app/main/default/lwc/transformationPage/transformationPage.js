@@ -171,44 +171,44 @@ export default class TransformationPage extends LightningElement {
       case 'EmailMask':
         return {
           title: LABEL_PICKLIST_EMAIL_MASK,
-          icon: 'utility:email',
+          icon: '✉',
           boxClass: 'box-icon is-centered email-card-icon-box',
-          iconClass: 'icon is-centered custom-icon-email'
+          iconClass: 'icon is-centered'
         };
       case 'PhoneMask':
         return {
           title: LABEL_PICKLIST_PHONE_MASK,
-          icon: 'utility:call',
+          icon: '📞',
           boxClass: 'box-icon is-centered phone-card-icon-box',
-          iconClass: 'icon is-centered custom-icon-phone'
+          iconClass: 'icon is-centered'
         };
       case 'Concatenation':
         return {
           title: LABEL_PICKLIST_CONCATENATION,
-          icon: 'utility:merge',
+          icon: '⊕',
           boxClass: 'box-icon is-centered lead-card-icon-box',
-          iconClass: 'icon is-centered custom-icon-product_transfer'
+          iconClass: 'icon is-centered'
         };
       case 'LowercaseTransformation':
         return {
           title: LABEL_PICKLIST_LOWERCASE,
-          icon: 'utility:text',
+          icon: 'aa',
           boxClass: 'box-icon is-centered lead-card-icon-box',
-          iconClass: 'icon is-centered custom-icon-product_transfer'
+          iconClass: 'icon is-centered'
         };
       case 'UppercaseTransformation':
         return {
           title: LABEL_PICKLIST_UPPERCASE,
-          icon: 'utility:display_rich_text',
+          icon: 'AA',
           boxClass: 'box-icon is-centered lead-card-icon-box',
-          iconClass: 'icon is-centered custom-icon-product_transfer'
+          iconClass: 'icon is-centered'
         };
       default:
         return {
           title: LABEL_PICKLIST_BOOLEAN,
-          icon: 'utility:settings',
+          icon: '⚙',
           boxClass: 'box-icon is-centered lead-card-icon-box',
-          iconClass: 'icon is-centered custom-icon-product_transfer'
+          iconClass: 'icon is-centered'
         };
     }
   }

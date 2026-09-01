@@ -289,6 +289,11 @@ public class ExecutionRepositoryTest {
             execution.ApexJobId__c,
             'ApexJobId__c should contain the scheduleId'
         );
+        Assert.areEqual(
+            schedule.Id,
+            execution.Schedule__c,
+            'Schedule__c (lookup dédié, jamais réécrit par le pipeline batch) doit aussi être renseigné'
+        );
     }
 
     /** Création sans phase ni totalRecords | valeurs par défaut */

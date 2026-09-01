@@ -3,7 +3,6 @@
  * @Modified : Ajout traduction statut d'exécution du projet 
  */
 import { LightningElement, api } from 'lwc';
-import { navigateToPage } from 'c/utility';
 import LOCALE from '@salesforce/i18n/lang';
 
 // import labels  
@@ -94,15 +93,9 @@ export default class ProjectCard extends LightningElement {
 
     get statusClass() {
         const status = this.status.toLowerCase();
-        if (status === 'completed') {
-            return 'status-badge status-success';
-        } else if (status === 'inprogress' || status === 'pending') {
-            return 'status-badge status-progress';
-        } else if (status === 'failed') {
-            return 'status-badge status-error';
-        } else if (status === 'suspended') {
-            return 'status-badge status-draft';
-        }
+        if (status === 'completed') return 'status-badge status-success';
+        if (status === 'inprogress' || status === 'pending') return 'status-badge status-progress';
+        if (status === 'failed') return 'status-badge status-error';
         return 'status-badge status-draft';
     }
 

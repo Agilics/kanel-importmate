@@ -48,6 +48,21 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>ImportExecution__c.MatchedFileName__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>ImportExecution__c.MatchedContentDocumentId__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>ImportExecution__c.Schedule__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>ImportExecution__c.EndTime__c</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -94,6 +109,26 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>ImportExecution__c.Type__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Schedule__c.DataSourceMode__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Schedule__c.FileSelectionMode__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Schedule__c.FileNamePattern__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Schedule__c.LastProcessedFileIds__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>

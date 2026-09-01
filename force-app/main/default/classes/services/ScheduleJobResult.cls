@@ -43,7 +43,7 @@ public class ScheduleJobResult {
     }
     
     public static ScheduleJobResult ok() {
-        return ok('Operation completed successfully');
+        return ok(Label.SCH_Msg_OperationSuccess);
     }
     
     /**
@@ -75,7 +75,7 @@ public class ScheduleJobResult {
      * @return ScheduleJobResult
      */
     public static ScheduleJobResult errors(List<String> errors) {
-        ScheduleJobResult result = new ScheduleJobResult(false, 'Operation failed with ' + errors.size() + ' error(s)');
+        ScheduleJobResult result = new ScheduleJobResult(false, String.format(Label.SCH_Err_OperationFailedCount, new List<Object>{ errors.size() }));
         result.errors.addAll(errors);
         return result;
     }

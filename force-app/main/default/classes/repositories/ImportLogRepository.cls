@@ -31,7 +31,7 @@ public with sharing class ImportLogRepository {
                 insert logs;
             } catch (Exception e) {
                 //ErrorLogService.logException(e);
-                throw new ImportException('Error saving import logs: ' + e.getMessage());
+                throw new ImportException('Erreur lors de l\'enregistrement des journaux d\'import : ' + e.getMessage());
             }
         }
     }

@@ -50,8 +50,8 @@ public with sharing class ObjectMetadataService {
     }
     public static Map<String, Schema.SObjectField> getFieldsForObject(String objectName) {
         if (!fieldsCache.containsKey(objectName)) {
-            if (!getGlobalDescribeMap().containsKey(objectName)) {
-                throw new ApplicationException();
+            if (Schema.getGlobalDescribe().get(objectName) == null) {
+                throw new ApplicationException('Objet introuvable dans le schéma : ' + objectName, 'OBJECT_NOT_FOUND');
             }
 
             Schema.DescribeSObjectResult describeResult = Schema.describeSObjects(new List<String>{objectName})[0];
@@ -79,12 +79,12 @@ public with sharing class ObjectMetadataService {
             Map<String, Schema.SObjectField> fieldsMap = describeResult.fields.getMap();
             
             if (!fieldsMap.containsKey(fieldApiName)) {
-                throw new ApplicationException('Field not found: ' + fieldApiName);
+                throw new ApplicationException('Champ introuvable : ' + fieldApiName);
             }
-            
+
             return fieldsMap.get(fieldApiName).getDescribe().isNillable();
         } catch (Exception e) {
-            throw new ApplicationException('Error checking field nullable: ' + e.getMessage());
+            throw new ApplicationException('Erreur lors de la vérification de la nullabilité du champ : ' + e.getMessage());
         }
     }
 

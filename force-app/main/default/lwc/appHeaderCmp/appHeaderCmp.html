@@ -3,15 +3,10 @@
         <div class="header-container">
             <!-- Logo Section -->
             <div class="logo-section">
-                <template if:true={logoUrl}>
-                    <img src={logoUrl} alt="ImportMate" class="logo-image" />
-                </template>
-                <template if:false={logoUrl}>
-                    <div class="logo-icon">
-                        <lightning-icon icon-name="utility:download" size="small" alternative-text="ImportMate"></lightning-icon>
-                    </div>
-                    <h1 class="app-title">ImportMate</h1>
-                </template>
+                <div class="logo-icon">
+                    <lightning-icon icon-name="utility:download" size="small" alternative-text="ImportMate"></lightning-icon>
+                </div>
+                <h1 class="app-title">ImportMate</h1>
             </div>
 
             <!-- Navigation Tabs -->
@@ -19,22 +14,17 @@
                 <button class={dashboardClass} onclick={handleNavigation} data-page="dashboard">
                     Dashboard
                 </button>
-                <button class={projectsClass} onclick={handleNavigation} data-page="projects">
-                    Projects
+                <button class={newProjectClass} onclick={handleNavigation} data-page="projects">
+                    Nouveau projet
                 </button>
-                <button class={logsClass} onclick={handleNavigation} data-page="logs">
-                    Logs
-                </button>
-                <button class={settingsClass} onclick={handleNavigation} data-page="settings">
-                    Settings
+                <button class={historyClass} onclick={handleNavigation} data-page="history">
+                    Historique
                 </button>
             </nav>
 
             <!-- Actions -->
             <div class="header-actions">
-                <button class="action-btn" onclick={handleNotifications} title="Notifications">
-                    <lightning-icon icon-name="utility:notification" size="small"></lightning-icon>
-                </button>
+                <button class="avatar-btn" title={userFullName}>{userInitials}</button>
             </div>
         </div>
     </header>

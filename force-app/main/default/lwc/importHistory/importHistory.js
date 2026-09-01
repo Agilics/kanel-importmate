@@ -6,6 +6,7 @@ import deleteExecutionHistories from '@salesforce/apex/DashboardController.delet
 import { subscribe, unsubscribe, onError } from 'lightning/empApi';
 
 // ─── Custom Labels ─────────────────────────────────────────────────────────────
+import LABEL_TOAST_INFO            from '@salesforce/label/c.Toast_Title_Info';
 import LBL_TITLE                   from '@salesforce/label/c.IH_Title';
 import LBL_SUBTITLE                from '@salesforce/label/c.IH_Subtitle';
 import LBL_EXPORT_REPORT           from '@salesforce/label/c.IH_ExportReport';
@@ -228,7 +229,7 @@ export default class ImportHistory extends LightningElement {
       this.applyFilters();
     } catch (e) {
       this.showToast(
-        'Error',
+        'Erreur',
         e?.body?.message || e?.message || LBL_TOAST_ERROR_LOADING,
         'error'
       );
@@ -688,12 +689,28 @@ export default class ImportHistory extends LightningElement {
     }
   }
 
+  handleRowClick(event) {
+    const id = event.currentTarget.dataset.id;
+    if (!id) return;
+    const row = (this.pageRows || []).find((r) => r.id === id);
+    if (!row) return;
+    this.selectedRow = { ...row };
+    this.showViewModal = true;
+  }
+
+  // Prevent row-level click from firing when interacting with cells that
+  // contain checkboxes or action buttons.
+  handleCellClick(event) {
+    event.stopPropagation();
+  }
+
   handleView(event) {
+    event.stopPropagation();
     const id = event.currentTarget.dataset.id;
     const row = (this.pageRows || []).find((r) => r.id === id);
 
     if (!row) {
-      this.showToast('Error', LBL_TOAST_ERR_LOAD_DETAILS, 'error');
+      this.showToast('Erreur', LBL_TOAST_ERR_LOAD_DETAILS, 'error');
       return;
     }
 
@@ -737,7 +754,7 @@ export default class ImportHistory extends LightningElement {
   async handleDeleteSelected() {
     const executionIds = [...this.selectedExecutionIds];
     if (!executionIds.length) {
-      this.showToast('Info', LBL_TOAST_SELECT_ONE, 'info');
+      this.showToast(LABEL_TOAST_INFO,LBL_TOAST_SELECT_ONE, 'info');
       return;
     }
 
@@ -757,16 +774,16 @@ export default class ImportHistory extends LightningElement {
       const skippedStagingCount = Number(result?.skippedStagingCount || 0);
       const failedCount = Number(result?.failedCount || 0);
 
-      let message = `${deletedCount} deleted`;
-      if (skippedRunningCount > 0) message += `, ${skippedRunningCount} running`;
-      if (skippedNotFoundCount > 0) message += `, ${skippedNotFoundCount} not found`;
-      if (skippedStagingCount > 0) message += `, ${skippedStagingCount} staging blocked`;
-      if (failedCount > 0) message += `, ${failedCount} failed`;
+      let message = `${deletedCount} supprimée(s)`;
+      if (skippedRunningCount > 0) message += `, ${skippedRunningCount} en cours`;
+      if (skippedNotFoundCount > 0) message += `, ${skippedNotFoundCount} introuvable(s)`;
+      if (skippedStagingCount > 0) message += `, ${skippedStagingCount} bloquée(s) par le staging`;
+      if (failedCount > 0) message += `, ${failedCount} échouée(s)`;
 
       if (deletedCount > 0) {
-        this.showToast('Success', message, 'success');
+        this.showToast('Succès', message, 'success');
       } else {
-        this.showToast('Warning', message, 'warning');
+        this.showToast('Attention', message, 'warning');
       }
 
       if (this.selectedRow?.id && executionIds.includes(this.selectedRow.id) && deletedCount > 0) {
@@ -777,7 +794,7 @@ export default class ImportHistory extends LightningElement {
       await this.loadData();
     } catch (e) {
       this.showToast(
-        'Error',
+        'Erreur',
         e?.body?.message || e?.message || LBL_TOAST_ERR_DEL_SELECTED,
         'error'
       );
@@ -787,16 +804,17 @@ export default class ImportHistory extends LightningElement {
   }
 
   async handleDeleteExecution(event) {
+    event.stopPropagation();
     const executionId = event.currentTarget?.dataset?.id;
     if (!executionId) {
-      this.showToast('Error', LBL_TOAST_EXEC_ID_MISSING, 'error');
+      this.showToast('Erreur', LBL_TOAST_EXEC_ID_MISSING, 'error');
       return;
     }
 
     const row = (this.filteredRows || []).find((r) => r.id === executionId);
     const status = (row?.status || '').toLowerCase();
     if (status === 'running') {
-      this.showToast('Warning', LBL_TOAST_CANNOT_DEL_RUN, 'warning');
+      this.showToast('Attention', LBL_TOAST_CANNOT_DEL_RUN, 'warning');
       return;
     }
 
@@ -814,11 +832,11 @@ export default class ImportHistory extends LightningElement {
         this.closeViewModal();
       }
 
-      this.showToast('Success', LBL_TOAST_DELETE_SUCCESS, 'success');
+      this.showToast('Succès', LBL_TOAST_DELETE_SUCCESS, 'success');
       await this.loadData();
     } catch (e) {
       this.showToast(
-        'Error',
+        'Erreur',
         e?.body?.message || e?.message || LBL_TOAST_ERR_DEL_SINGLE,
         'error'
       );
@@ -850,7 +868,7 @@ export default class ImportHistory extends LightningElement {
 
   handleExport() {
     if (!this.filteredRows.length) {
-      this.showToast('Info', LBL_TOAST_NOTHING_EXPORT, 'info');
+      this.showToast(LABEL_TOAST_INFO,LBL_TOAST_NOTHING_EXPORT, 'info');
       return;
     }
 
@@ -876,7 +894,7 @@ export default class ImportHistory extends LightningElement {
 
   handleExportSelected() {
     if (!this.selectedRow) {
-      this.showToast('Info', LBL_TOAST_NO_EXEC_SELECTED, 'info');
+      this.showToast(LABEL_TOAST_INFO,LBL_TOAST_NO_EXEC_SELECTED, 'info');
       return;
     }
 
@@ -914,7 +932,7 @@ export default class ImportHistory extends LightningElement {
       link.click();
       document.body.removeChild(link);
     } catch (e) {
-      this.showToast('Error', e?.message || LBL_TOAST_ERR_EXPORT_CSV, 'error');
+      this.showToast('Erreur', e?.message || LBL_TOAST_ERR_EXPORT_CSV, 'error');
     }
   }
 

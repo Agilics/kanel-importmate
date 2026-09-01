@@ -1,0 +1,53 @@
+<template>
+    <section class="modal-backdrop">
+        <div class="modal">
+            <header class="modal__header">
+                <h2>⚙ Configurer les critères de fichier</h2>
+                <button type="button" class="modal-close-btn" onclick={handleClose} title="Fermer">✕</button>
+            </header>
+
+            <div class="modal__body">
+                <c-file-criteria-builder
+                    pattern={pattern}
+                    selection-mode={selectionMode}
+                    project-id={projectId}
+                    onpatternchange={handlePatternChange}
+                    onselectionmodechange={handleSelectionModeChange}
+                ></c-file-criteria-builder>
+
+                <div class="preview-section">
+                    <h3 class="preview-title">Fichiers correspondant actuellement</h3>
+                    <template if:true={hasMatches}>
+                        <ul class="match-list">
+                            <template for:each={matches} for:item="m">
+                                <li key={m.key} class="match-item">
+                                    <span class="match-icon">📄</span>
+                                    <span class="match-name">{m.fileName}</span>
+                                </li>
+                            </template>
+                        </ul>
+                    </template>
+                    <template if:false={hasMatches}>
+                        <p class="no-match-msg">Aucun fichier ne correspond à ce motif pour le moment.</p>
+                    </template>
+                </div>
+
+                <template if:true={isOnePerRun}>
+                    <div class="processed-section">
+                        <p class="processed-count">
+                            {processedCount} fichier(s) déjà traité(s) par cette planification.
+                        </p>
+                        <button type="button" class="btn btn-secondary" onclick={handleResetProcessed}>
+                            Réinitialiser les fichiers traités
+                        </button>
+                    </div>
+                </template>
+            </div>
+
+            <footer class="modal__footer">
+                <button type="button" class="btn btn-secondary" onclick={handleClose}>Annuler</button>
+                <button type="button" class="btn btn-primary" disabled={isSaving} onclick={handleSave}>Enregistrer</button>
+            </footer>
+        </div>
+    </section>
+</template>

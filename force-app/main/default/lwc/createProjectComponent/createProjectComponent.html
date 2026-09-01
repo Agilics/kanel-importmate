@@ -1,66 +1,119 @@
-<!--
-  @description       : 
-  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
-  @group             : 
-  @last modified on  : 09-11-2025
-  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
--->
 <template>
-  <h2 class="title">New project</h2>
-  <div class="slds-grid slds-gutters slds-align_absolute-center">
-    <section class="container" aria-label="Recent Projects">
-      <div style="display: flex; gap: 8rem">
-        <lightning-input
-          style="width: 280px"
-          class="rounded-input"
-          type="text"
-          label="Project Name"
-          id="projectName"
-          name="projectName"
-          onchange={handleProjectNameChange}
-        >
-        </lightning-input>
-        <div style="display: inline-block">
-          <lightning-combobox
-            class="rounded-input"
-            name="tickets"
-            id="targetObjet"
-            label="Target Object"
-            value={targetObject}
-            options={options}
-            onchange={handleTargetObjectChange}
-            required
-          ></lightning-combobox>
-          <template if:true={isTargetObjetSelected}>
-            <p
-              for="targetObject"
-              id="target"
-              class="block text-sm font-semibold mb-2"
-            >
-              Target Object: {targetObject}
-            </p>
-          </template>
+  <div class="page-layout">
+
+    <!-- Formulaire principal -->
+    <div>
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Nouveau projet d'import</div>
+            <div class="card-sub">Définissez les paramètres avant de commencer</div>
+          </div>
+        </div>
+
+        <!-- Nom du projet -->
+        <div class="form-group">
+          <label class="form-label">Nom du projet <span class="req">*</span></label>
+          <input
+            type="text"
+            class="form-input"
+            placeholder="ex : Import Contacts Q2 2026"
+            value={projectName}
+            oninput={handleProjectNameChange}
+          />
+        </div>
+
+        <!-- Objet cible — pill grid -->
+        <div class="form-group">
+          <label class="form-label">Objet Salesforce cible <span class="req">*</span></label>
+          <input
+            type="text"
+            class="form-input"
+            placeholder="🔍  Rechercher un objet Salesforce..."
+            value={objectSearch}
+            oninput={handleObjectSearch}
+          />
+          <div class="object-grid">
+            <template for:each={filteredOptions} for:item="opt">
+              <div
+                key={opt.value}
+                class={opt.pillClass}
+                data-value={opt.value}
+                onclick={handlePillClick}
+              >{opt.label}</div>
+            </template>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="form-group">
+          <label class="form-label">Description <span class="optional">(optionnel)</span></label>
+          <textarea
+            class="form-input form-textarea"
+            placeholder="Décrivez l'objectif de cet import..."
+            oninput={handleDescriptionChange}
+            rows="3"
+          >{description}</textarea>
+        </div>
+
+        <!-- Mode d'import -->
+        <div class="form-group">
+          <label class="form-label">Mode d'import <span class="req">*</span></label>
+          <div class="toggle-grid">
+            <div class={insertCardClass} data-mode="Insert" onclick={handleModeSelect}>
+              <div class="toggle-icon">⬆</div>
+              <div class="toggle-label">Insert</div>
+              <div class="toggle-sub">Créer de nouveaux records</div>
+            </div>
+            <div class={upsertCardClass} data-mode="Upsert" onclick={handleModeSelect}>
+              <div class="toggle-icon">↻</div>
+              <div class="toggle-label">Upsert</div>
+              <div class="toggle-sub">Insérer ou mettre à jour</div>
+            </div>
+            <div class={updateCardClass} data-mode="Update" onclick={handleModeSelect}>
+              <div class="toggle-icon">✎</div>
+              <div class="toggle-label">Update</div>
+              <div class="toggle-sub">Mettre à jour uniquement</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="card-footer">
+          <button type="button" class="btn btn-ghost" onclick={handleCancel}>Annuler</button>
+          <button type="button" class="btn btn-primary" onclick={handleCreateProject}>Enregistrer →</button>
         </div>
       </div>
+    </div>
 
-      <!--- text area for description -->
-
-      <lightning-textarea
-        name="input1"
-        label="Description"
-        class="rounded-input champs"
-        id="description"
-        onchange={handleDescriptionChange}
-      ></lightning-textarea>
-      <!-- actions buttons-->
-      <div class="btn-groups">
-        <button class="btn btn-save" onclick={handleCreateProject}>
-          Save Project
-        </button>
-        <button class="btn btn-cancel" type="reset" onclick={handleCancel}>
-          Cancel
-        </button>
+    <!-- Sidebar progression -->
+    <div class="form-progress">
+      <div class="fp-title">Progression</div>
+      <div class="fp-item">
+        <div class="fp-dot current">1</div>
+        <span class="fp-label current">Projet</span>
       </div>
-    </section>
+      <div class="fp-item">
+        <div class="fp-dot empty">2</div>
+        <span class="fp-label">Source de données</span>
+      </div>
+      <div class="fp-item">
+        <div class="fp-dot empty">3</div>
+        <span class="fp-label">Mapping des champs</span>
+      </div>
+      <div class="fp-item">
+        <div class="fp-dot empty">4</div>
+        <span class="fp-label">Transformations</span>
+      </div>
+      <div class="fp-item">
+        <div class="fp-dot empty">5</div>
+        <span class="fp-label">Validation (Dry Run)</span>
+      </div>
+      <div class="fp-item">
+        <div class="fp-dot empty">6</div>
+        <span class="fp-label">Import</span>
+      </div>
+    </div>
+
   </div>
 </template>

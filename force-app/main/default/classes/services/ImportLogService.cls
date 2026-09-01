@@ -38,18 +38,18 @@ public with sharing class ImportLogService {
         if (String.isNotBlank(errorType)) {
             switch on errorType.toUpperCase() {
                 when 'VALIDATION' {
-                    if (message.contains('Invalid picklist value:')) return 'Invalid picklist value:';
-                    if (message.contains('Required field is missing')) return 'Required field is missing';
-                    if (message.contains('Invalid email format')) return 'Invalid email format:';
-                    if (message.contains('Invalid date format')) return 'Invalid date format:';
-                    if (message.contains('Invalid datetime format')) return 'Invalid datetime format:';
-                    if (message.contains('Invalid number format')) return 'Invalid number format:';
-                    if (message.contains('Invalid boolean format')) return 'Invalid boolean format:';
-                    if (message.contains('Field value too long')) return 'Field value too long:';
+                    if (message.contains('Valeur de liste de sélection invalide :')) return 'Valeur de liste de sélection invalide :';
+                    if (message.contains('Champ obligatoire manquant')) return 'Champ obligatoire manquant';
+                    if (message.contains('Format d\'email invalide')) return 'Format d\'email invalide :';
+                    if (message.contains('Format de date invalide')) return 'Format de date invalide :';
+                    if (message.contains('Format de date/heure invalide')) return 'Format de date/heure invalide :';
+                    if (message.contains('Format de nombre invalide')) return 'Format de nombre invalide :';
+                    if (message.contains('Format booléen invalide')) return 'Format booléen invalide :';
+                    if (message.contains('Valeur de champ trop longue')) return 'Valeur de champ trop longue :';
                 }
                 when else {
-                    if (message.contains('Lookup value not found')) return 'Lookup value not found:';
-                    if (message.contains('LOOKUP NOT FOUND')) return 'Lookup not found:';
+                    if (message.contains('Valeur de recherche (lookup) introuvable')) return 'Valeur de recherche (lookup) introuvable :';
+                    if (message.contains('RECHERCHE (LOOKUP) INTROUVABLE')) return 'Lookup introuvable :';
                 }
             }
         }
@@ -81,7 +81,7 @@ public with sharing class ImportLogService {
             return ImportLogRepository.getLogsByExecutionId(executionId);
         } catch (Exception e) {
             ErrorLogService.logException(e);
-            throw new ApplicationException('Error retrieving execution logs: ' + e.getMessage());
+            throw new ApplicationException('Erreur lors de la récupération des journaux d\'exécution : ' + e.getMessage());
         }
     }
 }

@@ -1,188 +1,460 @@
-import { LightningElement, track,api, wire } from "lwc";
-import { ShowToastEvent } from "lightning/platformShowToastEvent";
-import getSchedulesByProjectName from "@salesforce/apex/ScheduleController.getSchedulesByProjectName";
-import getSchedulesByExecutionStatusAndIdProject from "@salesforce/apex/ScheduleController.getSchedulesByExecutionStatusAndIdProject";
-import getPickListValues from "@salesforce/apex/ScheduleController.getPickListValues";
-import STATUS_FIELD from "@salesforce/schema/ImportExecution__c.Status__c";
-import IMPORTEXECUTION_OBJECT from "@salesforce/schema/ImportExecution__c";
+/**
+ * @last modification : 18/06/2026
+ * @modification : Fix ScheduleWrapper mapping, date calc, add Edit/Toggle/Delete handlers,
+ *                 remove conflicting second @wire, client-side project name search
+ */
+import { LightningElement, track, api, wire } from 'lwc';
+import { refreshApex } from '@salesforce/apex';
+import { subscribe, unsubscribe, onError } from 'lightning/empApi';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import LightningConfirm from 'lightning/confirm';
+
+import getSchedulesByExecutionStatusAndIdProject from '@salesforce/apex/ScheduleController.getSchedulesByExecutionStatusAndIdProject';
+import getPickListValues from '@salesforce/apex/ScheduleController.getPickListValues';
+import deleteSchedule  from '@salesforce/apex/ScheduleController.deleteSchedule';
+import toggleSchedule  from '@salesforce/apex/ScheduleController.toggleSchedule';
+import reSchedule      from '@salesforce/apex/ScheduleController.reSchedule';
+
+import STATUS_FIELD          from '@salesforce/schema/ImportExecution__c.Status__c';
+import IMPORTEXECUTION_OBJECT from '@salesforce/schema/ImportExecution__c';
+
+import LABEL_TOAST_ERROR from '@salesforce/label/c.Toast_Title_Error';
+import LABEL_TOAST_SUCCESS from '@salesforce/label/c.Toast_Title_Success';
+import LABEL_ERR_LOAD_FAILED from '@salesforce/label/c.SCH_Jobs_Err_LoadFailed';
+import LABEL_WARN_FIELDS_REQUIRED from '@salesforce/label/c.SCH_Jobs_Warn_FieldsRequired';
+import LABEL_WARN_FIELDS_REQUIRED_MSG from '@salesforce/label/c.SCH_Jobs_Warn_FieldsRequiredMsg';
+import LABEL_WARN_INVALID_DATE_TITLE from '@salesforce/label/c.SCH_Jobs_Warn_InvalidDateTitle';
+import LABEL_WARN_INVALID_DATE_MSG from '@salesforce/label/c.SCH_Jobs_Warn_InvalidDateMsg';
+import LABEL_ERR_UPDATE_FAILED from '@salesforce/label/c.SCH_Jobs_Err_UpdateFailed';
+import LABEL_MSG_UPDATE_SUCCESS from '@salesforce/label/c.SCH_Jobs_Msg_UpdateSuccess';
+import LABEL_ERR_STATUS_CHANGE_FAILED from '@salesforce/label/c.SCH_Jobs_Err_StatusChangeFailed';
+import LABEL_MSG_SUSPENDED from '@salesforce/label/c.SCH_Jobs_Msg_Suspended';
+import LABEL_MSG_RESUMED from '@salesforce/label/c.SCH_Jobs_Msg_Resumed';
+import LABEL_ERR_DELETE_FAILED from '@salesforce/label/c.SCH_Jobs_Err_DeleteFailed';
+import LABEL_MSG_DELETE_SUCCESS from '@salesforce/label/c.SCH_Jobs_Msg_DeleteSuccess';
+import LABEL_CONFIRM_DELETE_MSG from '@salesforce/label/c.SCH_Jobs_Confirm_DeleteMsg';
+import LABEL_CONFIRM_DELETE_TITLE from '@salesforce/label/c.SCH_Jobs_Confirm_DeleteTitle';
+
+const FREQUENCY_OPTIONS = [
+    { label: 'Quotidien',    value: 'Daily'   },
+    { label: 'Hebdomadaire', value: 'Weekly'  },
+    { label: 'Mensuel',      value: 'Monthly' }
+];
 
 export default class ScheduleJobsComponent extends LightningElement {
-  @api idProject;
-  //schedule jobs list table name
-  columns = [
-    { label: "Project", fieldName: "project" },
-    { label: "Frequency", fieldName: "frequency" },
-    { label: "Next Run", fieldName: "nextRun", type: "date" },
-    { label: "Last Execution", fieldName: "lastExecution" },
-    { label: "Status", fieldName: "status" },
-    { label: "Actions", fieldName: "actions" }
-  ];
-  @track projectName = "";
-  @track schedules = [];
-  @track selectedStatus = ""; // Status par défaut
-  @track picklistStatus =[]; //liste de statut
-  //filtrer les planifications associées aux éxécution importé par le statut
-  @wire(getSchedulesByExecutionStatusAndIdProject, { executionStatus: "$selectedStatus" ,idProject : "$idProject"})
-  wiredSchedulesByStatus({ error, data }) {
-    if (data) {
-      this.schedules = data.map((sch) => {
-        const status = sch.ImportExecutions__r?.Status__c || "Unknown";
-        const isActive = status === "Active";
+    _idProject;
+    @api
+    get idProject() { return this._idProject; }
+    set idProject(val) {
+        if (val !== this._idProject) {
+            this._idProject = val;
+            this.schedules = [];    // vider immédiatement pour ne pas afficher l'ancien projet
+        }
+    }
 
-        return {
-          id: sch.Id,
-          projectName: sch.Project__r?.Name,
-          target: sch.Project__r?.Target_Object__c,
-          frequency: sch.Frequency__c,
-          nextRun: sch.NextRun__c,
-          lastExecution: sch.LastExecution__c || "—",
-          totalRecord: sch.TotalRecord__c || 0,
-          hasFailRecord: sch.FailRecord__c > 0,
-          failRecord: sch.FailRecord__c || 0,
-          status,
-          badgeStatusClass: `${isActive ? "badge-success" : "badge-paused"}`,
-          iconAction: isActive ? "utility:pause" : "utility:play"
+    columns = [
+        { label: 'Projet'             },
+        { label: 'Fréquence'          },
+        { label: 'Prochaine exécution' },
+        { label: 'Dernière exécution'  },
+        { label: 'Statut'             },
+        { label: 'Actions'            }
+    ];
+
+    @track schedules     = [];
+    @track selectedStatus = '';
+    @track projectName   = '';
+    @track picklistStatus = [];
+
+    // Edit modal
+    @track showEditModal  = false;
+    @track editScheduleId = '';
+    @track editFrequency  = '';
+    @track editNextRun    = '';
+    @track isSaving       = false;
+
+    // Modale "Configurer" (critères de fichier, mode Criteria)
+    @track showCriteriaModal      = false;
+    @track criteriaModalScheduleId = null;
+
+    // Modale de consultation des logs d'exécution
+    @track showLogsModal          = false;
+    @track logsModalExecutionId   = null;
+    @track logsModalScheduleName  = '';
+
+    _wiredResult;
+    _empSubscription = null;
+    _liveRefreshTimer = null;
+
+    // Rafraîchissement live : une exécution planifiée qui démarre/se termine en arrière-plan
+    // doit se refléter ici sans rechargement manuel de page.
+    connectedCallback() {
+        onError((error) => console.error('[ScheduleJobsComponent] EMP API error', JSON.stringify(error)));
+        if (!this._empSubscription) {
+            subscribe('/event/ImportStatusEvent__e', -1, () => this.queueLiveRefresh())
+                .then((response) => { this._empSubscription = response; })
+                .catch((error) => console.error('[ScheduleJobsComponent] subscribe error', JSON.stringify(error)));
+        }
+    }
+
+    disconnectedCallback() {
+        if (this._empSubscription) { unsubscribe(this._empSubscription, () => {}); this._empSubscription = null; }
+        if (this._liveRefreshTimer) { clearTimeout(this._liveRefreshTimer); this._liveRefreshTimer = null; }
+    }
+
+    queueLiveRefresh() {
+        if (this._liveRefreshTimer) clearTimeout(this._liveRefreshTimer);
+        this._liveRefreshTimer = setTimeout(() => {
+            this._liveRefreshTimer = null;
+            if (this._wiredResult) refreshApex(this._wiredResult);
+        }, 800);
+    }
+
+    // ── Computed ──────────────────────────────────────────────────────────────
+    get frequencyOptions() { return FREQUENCY_OPTIONS; }
+
+    get hasSchedules() {
+        return this.filteredSchedules.length > 0;
+    }
+
+    get filteredSchedules() {
+        if (!this.projectName) return this.schedules;
+        const q = this.projectName.toLowerCase();
+        return this.schedules.filter(s => (s.projectName || '').toLowerCase().includes(q));
+    }
+
+    get minDatetime() {
+        const now = new Date();
+        now.setMinutes(now.getMinutes() + 5);
+        return this._toDatetimeLocalValue(now);
+    }
+
+    // ── KPI getters ───────────────────────────────────────────────────────────
+    get kpiActiveCount() {
+        return this.schedules.filter(s => s.isActive).length;
+    }
+
+    get kpiPausedCount() {
+        return this.schedules.filter(s => !s.isActive).length;
+    }
+
+    get kpiNextRun() {
+        const active = this.schedules
+            .filter(s => s.isActive && s.nextRunRaw)
+            .map(s => new Date(s.nextRunRaw).getTime())
+            .filter(t => !isNaN(t));
+        if (!active.length) return '—';
+        const diffMs   = Math.min(...active) - Date.now();
+        const diffDays = Math.ceil(diffMs / (1000 * 3600 * 24));
+        if (diffDays <= 0) return 'Aujourd\'hui';
+        if (diffDays === 1) return 'Demain';
+        return diffDays + 'j';
+    }
+
+    get kpiTotalExec() {
+        return this.schedules.reduce((acc, s) => acc + (s.totalRecord || 0), 0);
+    }
+
+    // Le wire est cacheable=true (requis pour @wire) : sur un nouveau montage du composant,
+    // le cache client peut renvoyer un résultat périmé (ex. une planification créée depuis
+    // csvUploader n'apparaît pas tout de suite ici). On force un rafraîchissement réel dès
+    // que le premier résultat (même périmé) est arrivé.
+    // ── Wire ──────────────────────────────────────────────────────────────────
+    @wire(getSchedulesByExecutionStatusAndIdProject, {
+        status: '$selectedStatus',
+        idProject: '$idProject'
+    })
+    wiredSchedules(result) {
+        this._wiredResult = result;
+
+        // Le wire est cacheable=true (requis pour @wire) : sur un nouveau montage du composant
+        // (ex. navigation depuis un autre onglet du wizard après avoir programmé un fichier
+        // ailleurs), le cache client peut renvoyer un résultat périmé. On force donc, dès la
+        // toute première résolution du wire (même périmée), un rafraîchissement réel — fait
+        // ici plutôt que dans renderedCallback pour ne pas dépendre du timing de rendu.
+        if (!this._forcedInitialRefreshDone) {
+            this._forcedInitialRefreshDone = true;
+            refreshApex(result);
+        }
+
+        const { data, error } = result;
+        if (data) {
+            this.schedules = this._mapWrappers(data);
+        } else if (error) {
+            this.showToast(LABEL_TOAST_ERROR, error?.body?.message || LABEL_ERR_LOAD_FAILED, 'error');
+            this.schedules = [];
+        }
+    }
+
+    @wire(getPickListValues, {
+        objectApiName: IMPORTEXECUTION_OBJECT.objectApiName,
+        fieldApiName: STATUS_FIELD.fieldApiName
+    })
+    wiredPicklist({ data, error }) {
+        if (data) {
+            this.picklistStatus = [
+                { label: 'Tous les statuts', value: '' },
+                ...Object.entries(data).map(([label, value]) => ({ label, value }))
+            ];
+        } else if (error) {
+            console.error('[ScheduleJobsComponent] picklist error', error);
+        }
+    }
+
+    // ── Data mapping ──────────────────────────────────────────────────────────
+    _mapWrappers(data) {
+        return (data || []).flatMap(wrapper => {
+            const executions = (wrapper.importExecutions || [])
+                .slice()
+                .sort((a, b) => new Date(b.StartTime__c) - new Date(a.StartTime__c));
+
+            return (wrapper.schedules || []).map(sch => {
+                const lastExec   = executions[0] || null;
+                const status     = lastExec?.Status__c || 'Pending';
+                const isActive   = status !== 'Suspended' && status !== 'Cancelled';
+                const failRecord = parseInt(lastExec?.FailedRecords__c || 0, 10);
+                const neverRan   = !lastExec;
+
+                // Run history dots — up to 8 most recent executions
+                const histExecs  = executions.slice(0, 8).reverse();
+                const runHistory = histExecs.map((ex, i) => {
+                    const f = parseInt(ex?.FailedRecords__c || 0, 10);
+                    const s = ex?.Status__c || '';
+                    let cls = 'rh-dot rh-skip';
+                    if (s === 'Completed' || s === 'Success') cls = 'rh-dot rh-ok';
+                    else if (s === 'Failed' || f > 0)         cls = 'rh-dot rh-err';
+                    return { key: i, cls };
+                });
+
+                // Aurora-specific classes
+                const freqChipClass  = isActive ? 'freq-chip' : 'freq-chip-paused';
+                const rowClass       = isActive ? '' : 'row-paused';
+                const pauseBtnClass  = isActive ? 'ract pause-btn' : 'ract paused-state';
+                const nextRunClass   = isActive && sch.NextRun__c ? 'next-run-soon' : isActive ? 'next-run-default' : 'next-run-none';
+                const badgeStatusClass = isActive ? 'status-pill sp-active' : 'status-pill sp-paused';
+
+                return {
+                    id           : sch.Id,
+                    projectName  : sch.Project__r?.Name || '—',
+                    target       : sch.Project__r?.TargetObject__c || '—',
+                    frequency    : sch.Frequency__c || '—',
+                    nextRunRaw   : sch.NextRun__c || '',
+                    nextRunDisplay: sch.NextRun__c ? this._formatDate(sch.NextRun__c) : (isActive ? '—' : 'En pause'),
+                    lastExecute  : lastExec?.StartTime__c ? this._timeAgo(lastExec.StartTime__c) : '—',
+                    totalRecord  : lastExec?.TotalRecords__c || 0,
+                    failRecord,
+                    hasFailRecord: failRecord > 0,
+                    neverRan,
+                    runHistory,
+                    status,
+                    statusLabel  : this._statusLabel(status),
+                    isActive,
+                    badgeStatusClass,
+                    freqChipClass,
+                    rowClass,
+                    pauseBtnClass,
+                    nextRunClass,
+                    iconAction   : isActive ? 'utility:pause' : 'utility:play',
+                    toggleLabel  : isActive ? 'Mettre en pause' : 'Reprendre',
+                    dataSourceMode : sch.DataSourceMode__c || 'Inherit',
+                    matchedFileName: lastExec?.MatchedFileName__c || '—',
+                    lastExecutionId: lastExec?.Id || null,
+                    logsBtnDisabled: !lastExec?.Id
+                };
+            });
+        });
+    }
+
+    // ── Getters for native selects ────────────────────────────────────────────
+    get picklistStatusWithSelected() {
+        return this.picklistStatus.map(o => ({ ...o, isSelected: o.value === this.selectedStatus }));
+    }
+    get frequencyOptionsWithSelected() {
+        return this.frequencyOptions.map(o => ({ ...o, isSelected: o.value === this.editFrequency }));
+    }
+
+    // ── Event handlers ────────────────────────────────────────────────────────
+    handleStatusChange(event) {
+        this.selectedStatus = event.target.value ?? event.detail?.value ?? '';
+    }
+
+    handleSearchFieldChange(event) {
+        this.projectName = event.target.value ?? event.detail?.value ?? '';
+    }
+
+    handleOpenCriteriaModal(event) {
+        this.criteriaModalScheduleId = event.currentTarget.dataset.id;
+        this.showCriteriaModal = true;
+    }
+
+    handleCloseCriteriaModal() {
+        this.showCriteriaModal = false;
+        this.criteriaModalScheduleId = null;
+    }
+
+    handleCriteriaSaved() {
+        refreshApex(this._wiredResult);
+    }
+
+    handleOpenLogsModal(event) {
+        const scheduleId = event.currentTarget.dataset.id;
+        const info = this.schedules.find(s => s.id === scheduleId);
+        if (!info || !info.lastExecutionId) return;
+        this.logsModalExecutionId = info.lastExecutionId;
+        this.logsModalScheduleName = info.projectName;
+        this.showLogsModal = true;
+    }
+
+    handleCloseLogsModal() {
+        this.showLogsModal = false;
+        this.logsModalExecutionId = null;
+    }
+
+    handleEditSchedule(event) {
+        const btn  = event.currentTarget;
+        const id   = btn.dataset.id;
+        const freq = btn.dataset.frequency || '';
+        const raw  = btn.dataset.nextrun   || '';
+        this.editScheduleId = id;
+        this.editFrequency  = freq;
+        this.editNextRun    = raw ? this._toDatetimeLocalValue(new Date(raw)) : '';
+        this.showEditModal  = true;
+    }
+
+    handleEditFrequencyChange(event) {
+        this.editFrequency = event.target.value ?? event.detail?.value ?? '';
+    }
+
+    handleEditNextRunChange(event) {
+        this.editNextRun = event.target.value;
+    }
+
+    handleCancelEdit() {
+        this.showEditModal = false;
+        this._resetEditState();
+    }
+
+    handleSaveEdit() {
+        if (!this.editFrequency || !this.editNextRun) {
+            this.showToast(LABEL_WARN_FIELDS_REQUIRED, LABEL_WARN_FIELDS_REQUIRED_MSG, 'warning');
+            return;
+        }
+        const nextRunDt = new Date(this.editNextRun);
+        if (nextRunDt <= new Date()) {
+            this.showToast(LABEL_WARN_INVALID_DATE_TITLE, LABEL_WARN_INVALID_DATE_MSG, 'warning');
+            return;
+        }
+        this.isSaving = true;
+        reSchedule({
+            scheduleId : this.editScheduleId,
+            frequency  : this.editFrequency,
+            nextRun    : nextRunDt.toISOString()
+        })
+            .then(result => {
+                if (result?.success === false) {
+                    this.showToast(LABEL_TOAST_ERROR, result.error || LABEL_ERR_UPDATE_FAILED, 'error');
+                    return;
+                }
+                this.showToast(LABEL_TOAST_SUCCESS, LABEL_MSG_UPDATE_SUCCESS, 'success');
+                this.showEditModal = false;
+                this._resetEditState();
+                refreshApex(this._wiredResult);
+            })
+            .catch(err => {
+                this.showToast(LABEL_TOAST_ERROR, err?.body?.message || LABEL_ERR_UPDATE_FAILED, 'error');
+            })
+            .finally(() => { this.isSaving = false; });
+    }
+
+    handleToggleSchedule(event) {
+        const btn      = event.currentTarget;
+        const id       = btn.dataset.id;
+        const isActive = btn.dataset.active === 'true';
+        toggleSchedule({ scheduleId: id, isPause: isActive })
+            .then(() => {
+                const msg = isActive ? LABEL_MSG_SUSPENDED : LABEL_MSG_RESUMED;
+                this.showToast(LABEL_TOAST_SUCCESS, msg, 'success');
+                refreshApex(this._wiredResult);
+            })
+            .catch(err => {
+                this.showToast(LABEL_TOAST_ERROR, err?.body?.message || LABEL_ERR_STATUS_CHANGE_FAILED, 'error');
+            });
+    }
+
+    async handleDeleteSchedule(event) {
+        const id = event.currentTarget.dataset.id;
+        const confirmed = await LightningConfirm.open({
+            message : LABEL_CONFIRM_DELETE_MSG,
+            variant : 'headerless',
+            label   : LABEL_CONFIRM_DELETE_TITLE
+        });
+        if (!confirmed) return;
+        deleteSchedule({ scheduleId: id })
+            .then(() => {
+                this.showToast(LABEL_TOAST_SUCCESS, LABEL_MSG_DELETE_SUCCESS, 'success');
+                refreshApex(this._wiredResult);
+            })
+            .catch(err => {
+                this.showToast(LABEL_TOAST_ERROR, err?.body?.message || LABEL_ERR_DELETE_FAILED, 'error');
+            });
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+    _timeAgo(dateStr) {
+        if (!dateStr) return '—';
+        const diffMs   = Date.now() - new Date(dateStr).getTime();
+        const diffDays = diffMs / (1000 * 3600 * 24);
+        if (diffDays < 1) {
+            const h = Math.round(diffMs / (1000 * 3600));
+            return `${h} heure${h > 1 ? 's' : ''}`;
+        }
+        if (diffDays < 7) {
+            const d = Math.round(diffDays);
+            return `${d} jour${d > 1 ? 's' : ''}`;
+        }
+        if (diffDays < 30) {
+            const w = Math.round(diffDays / 7);
+            return `${w} semaine${w > 1 ? 's' : ''}`;
+        }
+        const m = Math.round(diffDays / 30);
+        return `${m} mois`;
+    }
+
+    _formatDate(dateStr) {
+        if (!dateStr) return '—';
+        return new Date(dateStr).toLocaleString('fr-FR', {
+            day: '2-digit', month: '2-digit', year: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+        });
+    }
+
+    _toDatetimeLocalValue(date) {
+        const pad = n => String(n).padStart(2, '0');
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    }
+
+    _statusLabel(status) {
+        const map = {
+            Active    : 'Actif',
+            Suspended : 'Suspendu',
+            Cancelled : 'Annulé',
+            Completed : 'Terminé',
+            CompletedWithErrors: 'Terminé avec erreurs',
+            Failed    : 'Échoué',
+            InProgress: 'En cours',
+            Pending   : 'En attente'
         };
-      });
-    } else if (error) {
-      this.showToast("Error", error?.body?.message, "error");
-      this.schedules = [];
+        return map[status] || status;
     }
-  }
 
-  //Récupérer la liste des planifications dans une tableau 
-@wire(getSchedulesByProjectName, { projectName: "$projectName" })
-wireAllSchedulesByProjectName({ error, data }) {
-  if (data) {
-    // On récupère la liste de planifications par le nom du projet
-    // Si le champ de recherche est vide, il retourne 200 enregistrements
-    this.schedules = data.map((sch) => {
-      const exec = sch.ImportExecutions__r || {};
-      const status = exec.Status__c || "Paused";
-      const failRecord = parseInt(exec.FailRecord__c || 0, 10);
-
-      return {
-        id: sch.Id,
-        projectName: sch.Project__r?.Name || "",
-        target: sch.Project__r?.Target_Object__c || "",
-        status: status, // Statut d'exécution
-        nextRun: sch.NextRun__c || "",
-        frequency: sch.Frequency__c || "",
-        totalRecord: exec.TotalRecords__c || 0,
-        failRecord: failRecord,
-        // Icône selon le statut
-        iconAction: status === "Active" ? "utility:pause" : "utility:play",
-        // Dernière exécution
-        lastExecute: this.getLastExecution(exec.EndTime),
-        // Classe CSS du badge selon le statut
-        badgeStatusClass: this.getBadgeStatusClass(status),
-        // Indicateur d'échec d'import
-        hasFailRecord: failRecord > 0
-      };
-    });
-  } else if (error) {
-    // En cas d'erreur, on affiche un toast
-    this.showToast("Error", error?.body?.message || "Erreur inconnue", "error");
-  }
-}
-
-//récupérer la classe du statut badge css à afficher Activé | Pause
-getBadgeStatusClass(statusClass){
-  return statusClass === "Active"? "status-badge active-status": "status-badge paused-status";
-}
-
-  //Récupération des valeurs de la liste de sélection de Status d'éxécution
-  @wire(getPickListValues, {
-    objectApiName: IMPORTEXECUTION_OBJECT.objectApiName,
-    fieldApiName: STATUS_FIELD.fieldApiName
-  })
-  wiredPicklistValues({ error, data }) {
-    if (data) {
-      this.picklistStatus = Object.entries(data).map(([label, value]) => ({
-        label,
-        value
-      }));
-      console.log(data);
-    } else if (error) {
-      console.error(
-        "Erreur lors de la récupération des valeurs de picklist : ",
-        error
-      );
-      this.showToast(
-        "Error",
-        error?.body?.message ||
-          "Erreur lors de la récupération des valeurs des planifications",
-        "error"
-      );
+    _resetEditState() {
+        this.editScheduleId = '';
+        this.editFrequency  = '';
+        this.editNextRun    = '';
+        this.isSaving       = false;
     }
-  }
 
-  //calculer la date de la dernière éxécution qui est la diffèrence entre aujourd'hui et la fin de d'éxécution en datetime
-  getLastExecution(endDate) {
-    const today = Date.now();
-    const end = new Date(endDate);
-
-    var days = this.calculateDays(end);
-    var weeks = this.getWeeksDifference(end);
-    var monthDiff = this.getMonthDifference(this.end, this.today);
-
-    if (this.days < 1) {
-      //convertir en en heures
-      return parseInt(this.days) + "\thours\tago";
-    } else if (weeks > 1 || this.days > 7) {
-      //convertir en semaine
-      return parseInt(this.weeks) + "\tweeks\tago";
-    } else {
-      //convertir en mois
-      return parseInt(this.monthDiff) + "\tmonths\tago";
-    }
-  }
-
-  //mettre à jour le statut en cas de changement sur le champs de selection
-  handleStatusChange(event) {
-    this.selectedStatus = event.target.value;
-  }
-  //mettre à jour le nom du projet en cas de changement sur le champs de selection
-  handleSearchFieldChange(event) {
-    this.projectName = event.target.value;
-  }
-
-  //calculer la différence de mois entre deux dates  ou le nombre de semaines depuis la dernière éxécution
-  getMonthDifference(d1, d2) {
-    var months;
-    months = (d2.getFullYear() - d1.getFullYear()) * 12;
-    months -= d1.getMonth();
-    months += d2.getMonth();
-    return months <= 0 ? 0 : months;
-  }
-
-  //calculer la diffèrence de semaine entre aujourd'hui et la dernière date d'éxécution
-  getWeeksDifference(dt1) {
-    // Calculate the difference in milliseconds between dt2 and dt1
-    var diff = (Date.now().getTime() - dt1.getTime()) / 1000;
-    // Convert the difference from milliseconds to weeks by dividing it by the number of milliseconds in a week
-    diff /= 60 * 60 * 24 * 7;
-    // Return the absolute value of the rounded difference as the result
-    return Math.abs(Math.round(diff));
-  }
-
-  // calculer le nombre de jours depuis la dernière éxécution
-  calculateDays(endDate) {
-    let today = Date.now();
-    let end = new Date(endDate);
-    let timeDifference = today - end;
-    let daysDifference = timeDifference / (1000 * 3600 * 24);
-    return daysDifference;
-  }
-
-  //affiche un flash message via un toast
     showToast(title, message, variant) {
-      const event = new ShowToastEvent({
-        title: title,
-        message: message,
-        variant: variant,
-        mode: "dismissable"
-      });
-      this.dispatchEvent(event);
+        this.dispatchEvent(new ShowToastEvent({ title, message, variant, mode: 'dismissable' }));
     }
 }

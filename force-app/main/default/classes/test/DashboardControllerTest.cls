@@ -54,7 +54,7 @@ public with sharing class DashboardControllerTest {
             DashboardController.getDashboardData(null);
         } catch (AuraHandledException e) {
             Assert.isTrue(
-                e.getMessage().contains('Error loading dashboard data'),
+                e.getMessage().contains('Erreur lors du chargement des données du tableau de bord'),
                 'Error message should indicate dashboard load failure'
             );
         }
@@ -68,7 +68,7 @@ public with sharing class DashboardControllerTest {
             DashboardController.getProjectsWithStats(null);
         } catch (AuraHandledException e) {
             Assert.isTrue(
-                e.getMessage().contains('Error loading projects'),
+                e.getMessage().contains('Erreur lors du chargement des projets'),
                 'Error message should indicate project load failure'
             );
         }

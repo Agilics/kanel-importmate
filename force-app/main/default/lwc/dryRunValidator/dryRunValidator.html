@@ -226,6 +226,12 @@
                 {labels.progressCompleted}
               </span>
             </template>
+            <template if:true={isImportCompletedWithErrors}>
+              <span class="status-badge warning">
+                <span class="status-dot"></span>
+                {labels.progressCompleted}
+              </span>
+            </template>
             <template if:true={isImportFailed}>
               <span class="status-badge failed">
                 <span class="status-dot"></span>

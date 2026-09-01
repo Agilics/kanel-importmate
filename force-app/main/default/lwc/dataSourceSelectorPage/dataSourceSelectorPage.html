@@ -11,7 +11,7 @@
     <div class="header">
       <template if:true={projectName}>
         <p class="project-context-label">
-          <lightning-icon icon-name="utility:folder" size="xx-small" class="slds-m-right_xx-small"></lightning-icon>
+          <span class="dss-folder-icon">📁</span>
           {projectName}
         </p>
       </template>
@@ -52,13 +52,7 @@
 
       <!-- Cancel Button -->
     <button type="button" class="btn btn-secondary" onclick={handleBackToProjectSetup}>
-        <lightning-icon
-          icon-name="utility:back"
-          alternative-text="Cancel"
-          size="x-small"
-          title="Cancel"
-        ></lightning-icon>
-        <span>Back</span>
+        <span>← Back</span>
     </button>
   </div>
 </template>

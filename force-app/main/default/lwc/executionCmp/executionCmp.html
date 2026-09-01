@@ -1,159 +1,263 @@
 <!--
-  @Last modification: 22-04-2026
-  @Modification : Suppression Immediate execution
+  @Last modification: 02-07-2026
+  @Modification : Aurora step-6 UI alignment — status ring, KPI counters, log terminal, finish CTA
 -->
 <template>
   <div class="execution-container">
+
+    <!-- ══ Page header ══ -->
     <div class="page-header">
       <div class="header-content">
         <div class="header-left">
-          <h1 class="header-title">{labels.title}</h1>
+          <div class="header-title-row">
+            <h1 class="header-title">{labels.title}</h1>
+            <span class="badge primary-badge">{projectName}</span>
+          </div>
           <p class="header-subtitle">{labels.subtitle}</p>
         </div>
-        <span class="badge primary-badge">{projectName}</span>
         <div class="header-actions">
-          <button 
-            onclick={handleExportLogsCsv}
-            disabled={isExportLogsDisabled} 
-             class="btn btn-secondary export-button"
-          >
-          <lightning-icon icon-name="utility:download" class="icon secondary-icon"
-            size='small' title='download'>
-          </lightning-icon>
-          <label>{labels.btnExportLogs}</label>
+          <button onclick={handleRefreshStatus} disabled={isCheckingStatus} class="btn btn-secondary refresh-button">
+            <template if:true={isCheckingStatus}><span>⏳</span></template>
+            <template if:false={isCheckingStatus}><span>↺</span></template>
+            <span>Actualiser</span>
           </button>
-
-          <button  
-            onclick={handleScheduleImport}
-            disabled={isScheduleImportDisabled} 
-            class="btn btn-secondary schedule-button">
-            <lightning-icon icon-name="utility:event" class="icon secondary-icon"
-            alternative-text='lightning_component' size='small' title='import schedule'>
-            </lightning-icon>
-            <label>{labels.btnSchedule}</label>
+          <button onclick={handleExportLogsCsv} disabled={isExportLogsDisabled} class="btn btn-secondary export-button">
+            <span>📥</span><span>{labels.btnExportLogs}</span>
           </button>
-
-          <button 
-            onclick={handleStartImport}
-            disabled={isStartImportDisabled} 
-            class="btn btn-primary start-button"
-          >
-           <lightning-icon icon-name="utility:play" class="icon primary-icon"
-            alternative-text='lightning_component' size='x-small' title='start import'>
-            </lightning-icon>
-          <label>{labels.btnStart}</label>
-        </button>
+          <button onclick={handleGotoScheduling} disabled={isGotoSchedulingDisabled} title={gotoSchedulingTitle}
+                  class="btn btn-secondary scheduling-button">
+            <span>📅</span><span>Planification</span>
+          </button>
+          <button onclick={handleStartImport} disabled={isStartImportDisabled} class="btn btn-primary start-button">
+            <span>▶</span><span>{labels.btnStart}</span>
+          </button>
         </div>
       </div>
     </div>
-    <div>
-    </div>
-    <!-- Page cards Scheduled  -->
-    
-    <div class="slds-align_absolute-center execution-content "> 
-  
-      <!-- Scheduled Execution -->
-      <div class="execution-card">
-        <c-execution-card  
-            selected-frequency={frequency}
-            next-run={nextRun}
-            show-scheduled-card={showScheduledExecution}
-            onfrequencychange={handleFrequencyChange}
-            onnextrunchange={handleNextRunChange}
-            onmodechange={handleModeChange}
-            onbatchsizechange={handleBatchSizeChange}
-            onsendnotification={handleSendNotificationChange}>
-        </c-execution-card>
-      </div>
-    </div>
 
-    <template if:true={showImportProgress}>
-      <div class="progress-section">
-        <div class="progress-header">
-          <div class="progress-header-left">
-            <lightning-icon icon-name={importStatusIconName} size="small" class={statusIconClass}></lightning-icon>
-            <h2 class="progress-title">{labels.progressTitle}</h2>
-          </div>
-
-          <div class="progress-header-right">
-            <span class={importStatusClass}>{formattedImportStatus}</span>
-            <template if:true={canCancelImport}>
-              <button onclick={handleCancelImport} class="slds-m-left_small btn btn-accent">
-                <lightning-icon icon-name="utility:close" size="small"></lightning-icon>
-                 {labels.btnCancel}
-              </button>
-            </template>
-          </div>
-        </div>
-
-        <div class="progress-content">
-          <div class="progress-bar-container">
-            <lightning-progress-bar value={importProgressPercentage} variant={progressBarVariant} size="large"></lightning-progress-bar>
-
-            <div class="progress-info">
-              <span class="progress-numbers">{importProgressPercentage}%</span>
-            </div>
-
-            <template if:true={importMessage}>
-              <div class="progress-message">{importMessage}</div>
-            </template>
-          </div>
-
-          <template if:true={currentExecutionId}>
-            <div class="execution-details">
-              <div class="detail-item">
-                <span class="detail-label">{labels.detailExecutionId}</span>
-                <span class="detail-value">{currentExecutionId}</span>
-              </div>
-
-              <div class="detail-item">
-                <span class="detail-label">{labels.detailStatus}</span>
-                <span class="detail-value">{formattedImportStatus}</span>
-              </div>
-
-              <template if:true={showImportResults}>
-                <div class="detail-item">
-                  <span class="detail-label">{labels.detailTotal}</span>
-                  <span class="detail-value">{totalRecords}</span>
-                </div>
-
-                <div class="detail-item">
-                  <span class="detail-label">{labels.detailProcessed}</span>
-                  <span class="detail-value">{processedRecords}</span>
-                </div>
-
-                <div class="detail-item">
-                  <span class="detail-label">{labels.detailSuccessful}</span>
-                  <span class="detail-value success-value">{successfulRecords}</span>
-                </div>
-
-                <div class="detail-item">
-                  <span class="detail-label">{labels.detailFailed}</span>
-                  <span class="detail-value error-value">{failedRecords}</span>
-                </div>
-              </template>
-            </div>
-          </template>
-
-          <template if:true={isImportInProgress}>
-            <div class="spinner-container">
-              <p class="spinner-text">{labels.processingMsg}</p>
-            </div>
-          </template>
-
-          <template if:true={isImportFailed}>
-            <div class="error-message">
-              <lightning-icon icon-name="utility:error" size="small" variant="error"></lightning-icon>
-              <div>
-                <p class="msg-title">{labels.failedTitle}</p>
-                <p class="msg-sub">{labels.failedSubtitle}</p>
-              </div>
-            </div>
-          </template>
+    <!-- ══ Success banner (shown when import is completed) ══ -->
+    <template if:true={isImportCompleted}>
+      <div class="success-banner">
+        <span class="sb-icon">&#127881;</span>
+        <div>
+          <div class="sb-title">{labels.progressTitle}</div>
+          <div class="sb-sub">{successfulRecords} records inserted &middot; {failedRecords} errors</div>
         </div>
       </div>
     </template>
 
+    <!-- ══ Warning banner (shown when import completed but some records failed) ══ -->
+    <template if:true={isImportCompletedWithErrors}>
+      <div class="success-banner warning-banner">
+        <span class="sb-icon">&#9888;&#65039;</span>
+        <div>
+          <div class="sb-title">{formattedImportStatus}</div>
+          <div class="sb-sub">{successfulRecords} records inserted &middot; {failedRecords} errors</div>
+        </div>
+      </div>
+    </template>
+
+    <!-- ══ Status hero ring ══ -->
+    <div class="status-hero">
+      <!-- Idle state -->
+      <template if:false={showImportProgress}>
+        <div class="status-ring status-ring--idle">
+          <span class="status-ring-icon">&#9208;</span>
+        </div>
+        <div class="status-label">{labels.btnStart}</div>
+        <div class="status-sub">{labels.subtitle}</div>
+      </template>
+
+      <!-- Running state -->
+      <template if:true={isImportInProgress}>
+        <div class="status-ring status-ring--running">
+          <span class="status-ring-icon spin">&#9711;</span>
+        </div>
+        <div class="status-label">{labels.progressTitle}</div>
+        <div class="status-sub">{importMessage}</div>
+      </template>
+
+      <!-- Completed state -->
+      <template if:true={isImportCompleted}>
+        <div class="status-ring status-ring--done">
+          <span class="status-ring-icon">&#9989;</span>
+        </div>
+        <div class="status-label">{formattedImportStatus}</div>
+        <div class="status-sub">{successfulRecords} records &middot; {failedRecords} errors</div>
+      </template>
+
+      <!-- Completed with errors state -->
+      <template if:true={isImportCompletedWithErrors}>
+        <div class="status-ring status-ring--warning">
+          <span class="status-ring-icon">&#9888;&#65039;</span>
+        </div>
+        <div class="status-label">{formattedImportStatus}</div>
+        <div class="status-sub">{successfulRecords} records &middot; {failedRecords} errors</div>
+      </template>
+
+      <!-- Failed / Cancelled state -->
+      <template if:true={isImportFailed}>
+        <div class="status-ring status-ring--error">
+          <span class="status-ring-icon">&#10060;</span>
+        </div>
+        <div class="status-label">{labels.failedTitle}</div>
+        <div class="status-sub">{labels.failedSubtitle}</div>
+      </template>
+    </div>
+
+    <!-- ══ Progress bar (visible when import started) ══ -->
+    <template if:true={showImportProgress}>
+      <div class="prog-section">
+        <div class="prog-meta">
+          <span class="prog-meta-label">{labels.progressTitle}</span>
+          <span class="prog-meta-pct">{importProgressPercentage}%</span>
+        </div>
+        <div class="prog-bar-lg">
+          <div class="prog-fill-lg" style={progressBarStyle}></div>
+        </div>
+        <template if:true={importMessage}>
+          <div class="prog-message">{importMessage}</div>
+        </template>
+      </div>
+    </template>
+
+    <!-- ══ KPI counter cards ══ -->
+    <div class="counter-grid">
+      <div class="cnt-card cnt-card--green">
+        <div class="cnt-val">{successfulRecords}</div>
+        <div class="cnt-label">&#10003; Inserted</div>
+      </div>
+      <div class="cnt-card cnt-card--coral">
+        <div class="cnt-val">{failedRecords}</div>
+        <div class="cnt-label">&#10005; Errors</div>
+      </div>
+      <div class="cnt-card">
+        <div class="cnt-val">{processedRecords}</div>
+        <div class="cnt-label">&#9135; Processed</div>
+      </div>
+    </div>
+
+    <!-- ══ Log terminal (shown when import is active or done) ══ -->
+    <template if:true={showImportProgress}>
+      <div class="logs-terminal">
+
+        <!-- Indicateur LIVE pendant exécution -->
+        <template if:true={isImportInProgress}>
+          <div class="log-live-badge">
+            <span class="log-live-dot"></span>LIVE
+          </div>
+        </template>
+
+        <!-- Ligne exécution -->
+        <template if:true={currentExecutionId}>
+          <div class="log-line">
+            <span class="log-ts">&#91;Execution&#93;</span>
+            <span class="log-info">INFO</span>
+            <span class="log-msg">{currentExecutionId}</span>
+          </div>
+        </template>
+
+        <!-- Ligne statut / message courant -->
+        <template if:true={importMessage}>
+          <div class="log-line">
+            <span class="log-ts">&#91;Status&#93;</span>
+            <span class="log-info">INFO</span>
+            <span class="log-msg">{importMessage}</span>
+          </div>
+        </template>
+
+        <!-- Ligne compteurs en cours (pendant l'exécution) -->
+        <template if:true={isImportInProgress}>
+          <div class="log-line">
+            <span class="log-ts">&#91;Progress&#93;</span>
+            <span class="log-info">RUN</span>
+            <span class="log-msg">
+              Traités : {processedRecords} / {totalRecords} &nbsp;&#124;&nbsp;
+              Insérés : {successfulRecords} &nbsp;&#124;&nbsp;
+              Erreurs : {failedRecords}
+            </span>
+          </div>
+        </template>
+
+        <!-- Ligne fin OK -->
+        <template if:true={isImportCompleted}>
+          <div class="log-line">
+            <span class="log-ts">&#91;Done&#93;</span>
+            <span class="log-ok">OK</span>
+            <span class="log-msg">{successfulRecords} enregistrements insérés &middot; {failedRecords} erreurs</span>
+          </div>
+        </template>
+
+        <!-- Ligne fin avec erreurs -->
+        <template if:true={isImportCompletedWithErrors}>
+          <div class="log-line">
+            <span class="log-ts">&#91;Done&#93;</span>
+            <span class="log-warn">WARN</span>
+            <span class="log-msg">{successfulRecords} enregistrements insérés &middot; {failedRecords} erreurs</span>
+          </div>
+        </template>
+
+        <!-- Ligne erreur -->
+        <template if:true={isImportFailed}>
+          <div class="log-line">
+            <span class="log-ts">&#91;Error&#93;</span>
+            <span class="log-err">ERR</span>
+            <span class="log-msg">{labels.failedTitle}</span>
+          </div>
+        </template>
+
+        <!-- ══ Logs détaillés par enregistrement ══ -->
+        <template if:true={hasImportLogs}>
+          <div class="log-divider">── Import Logs ──────────────────────────</div>
+          <template for:each={importLogs} for:item="log">
+            <div key={log.id} class="log-line log-entry">
+              <span class="log-ts">L.{log.line}</span>
+              <span class={log.cssClass}>{log.severity}</span>
+              <span class="log-meta">
+                <template if:true={log.field}>{log.field} &nbsp;</template>
+                <template if:true={log.errorType}>[{log.errorType}] </template>
+              </span>
+              <span class="log-msg">{log.message}</span>
+            </div>
+          </template>
+        </template>
+
+      </div>
+    </template>
+
+    <!-- ══ Execution details grid ══ -->
+    <template if:true={currentExecutionId}>
+      <div class="exec-grid">
+        <div class="exec-cell">
+          <div class="exec-key">{labels.detailExecutionId}</div>
+          <div class="exec-val">{currentExecutionId}</div>
+        </div>
+        <div class="exec-cell">
+          <div class="exec-key">{labels.detailStatus}</div>
+          <div class="exec-val">
+            <span class={importStatusClass}>{formattedImportStatus}</span>
+          </div>
+        </div>
+        <div class="exec-cell">
+          <div class="exec-key">{labels.detailTotal}</div>
+          <div class="exec-val">{totalRecords}</div>
+        </div>
+        <div class="exec-cell">
+          <div class="exec-key">{labels.detailProcessed}</div>
+          <div class="exec-val">{processedRecords}</div>
+        </div>
+        <div class="exec-cell">
+          <div class="exec-key">{labels.detailSuccessful}</div>
+          <div class="exec-val exec-val--green">{successfulRecords}</div>
+        </div>
+        <div class="exec-cell">
+          <div class="exec-key">{labels.detailFailed}</div>
+          <div class="exec-val exec-val--coral">{failedRecords}</div>
+        </div>
+      </div>
+    </template>
+
+    <!-- ══ Import results (error table) ══ -->
     <template if:true={showImportResults}>
       <c-import-results
         execution-id={currentExecutionId}
@@ -162,18 +266,16 @@
       </c-import-results>
     </template>
 
-        <!-- Active Schedules Section -->
-    <c-scheduled-schedules  
-      lwc:ref="scheduledList"
-      project-id={projectId}>
-    </c-scheduled-schedules> 
-
+    <!-- ══ Navigation footer ══ -->
     <div class="navigation-buttons">
-      <button onclick={handlePreviousStep} class="btn btn-accent">
-        <lightning-icon class="secondary-icon" size="x-small" icon-name="utility:left">
-        </lightning-icon>
-        <label>{labels.btnBack}</label>
-      </button>
+      <button onclick={handlePreviousStep} class="btn btn-accent">← {labels.btnBack}</button>
+      <template if:true={isImportCompleted}>
+        <button onclick={handlePreviousStep} class="btn btn-primary finish-button">✓ View Dashboard</button>
+      </template>
+      <template if:true={isImportCompletedWithErrors}>
+        <button onclick={handlePreviousStep} class="btn btn-primary finish-button">✓ View Dashboard</button>
+      </template>
     </div>
+
   </div>
 </template>

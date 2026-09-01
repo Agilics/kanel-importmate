@@ -154,7 +154,7 @@ export default class DashboardCmp extends LightningElement {
             await deleteProject({ projectId });
 
             this.dispatchEvent(new ShowToastEvent({
-                title:   'Success',
+                title:   'Succès',
                 message: Dashboard_Delete_Success,       // ← label (was hardcoded EN)
                 variant: 'success'
             }));
@@ -163,8 +163,8 @@ export default class DashboardCmp extends LightningElement {
         } catch (error) {
             console.error('Error deleting project:', error);
             this.dispatchEvent(new ShowToastEvent({
-                title:   'Error',
-                message: error.body?.message || 'Error deleting project',
+                title:   'Erreur',
+                message: error.body?.message || 'Erreur lors de la suppression du projet',
                 variant: 'error'
             }));
         } finally {
@@ -263,7 +263,7 @@ export default class DashboardCmp extends LightningElement {
             },
             {
                 id:          3,
-                label:       Dashboard_Stat_Success_Rate,     // ← label (was 'Success Rate')
+                label:       Dashboard_Stat_Success_Rate,
                 value:       successRate,
                 change:      '',
                 changeLabel: '',
@@ -272,7 +272,7 @@ export default class DashboardCmp extends LightningElement {
             },
             {
                 id:          4,
-                label:       Dashboard_Stat_Active_Projects,  // ← label (was 'Active Projects')
+                label:       Dashboard_Stat_Active_Projects,
                 value:       String(activeProjects),
                 change:      '',
                 changeLabel: '',

@@ -1,0 +1,1 @@
+try { System.abortJob('08egL00000auWDNQA2'); System.debug('Job aborted OK'); } catch(Exception e) { System.debug('Error: ' + e.getMessage()); }

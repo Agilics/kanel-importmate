@@ -21,7 +21,7 @@ export default class DataSourceCard extends LightningElement {
     get headerIcon() {
       return this.isUpload ? "utility:download" : "utility:database";
     }
-  
+
     //retourne la classe css correspondant à l'icône de l'en tête
     get headerIconClass() {
       return this.isUpload

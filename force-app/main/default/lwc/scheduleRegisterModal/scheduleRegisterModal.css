@@ -1,3 +1,34 @@
+﻿/* ══ Palette d'avant Aurora (mêmes tokens que les autres écrans restaurés) ══ */
+:host {
+  --indigo:        #1E40AF;
+  --indigo-soft:   rgba(30,64,175,0.08);
+  --indigo-glow:   rgba(30,64,175,0.2);
+  --violet:        #1E40AF;
+  --green:         #10893e;
+  --green-soft:    rgba(16,137,62,0.1);
+  --coral:         #d9534f;
+  --amber:         #f0ad4e;
+  --text:          #181818;
+  --text-2:        #222222;
+  --muted:         #666666;
+  --muted-2:       #999999;
+  --border:        rgba(0,0,0,0.1);
+  --border-solid:  #eeeeee;
+  --surface:       #ffffff;
+  --surface-solid: #FFFFFF;
+  --grad-brand:    #1E40AF;
+  --grad-green:    #10893e;
+  --shadow-xs:     0 1px 3px rgba(0,0,0,0.05);
+  --shadow-sm:     0 2px 5px rgba(0,0,0,0.05);
+  --shadow-md:     0 2px 8px rgba(0,0,0,0.08);
+  --shadow-glow:   0 0 0 3px rgba(30,64,175,0.08);
+  --radius-xs:     4px;
+  --radius-sm:     6px;
+  --radius:        10px;
+  --radius-lg:     14px;
+  --radius-pill:   999px;
+  --ease-out:      ease;
+}
 :host {
     --slds-c-modal-content-spacing-block-start: 0;
     --slds-c-modal-content-spacing-block-end: 0;
@@ -19,7 +50,10 @@
 }
 
 .modal { background: white; border-radius: 1.5rem; width: 420px; max-height: 85vh; overflow-y: auto; box-shadow: 0 8px 20px rgba(0,0,0,0.25); animation: fadeIn 0.25s ease;max-height: none;overflow: visible; }
-.modal__header { background-color: #1E40AF;text-align: center;font-size: 1rem; font-weight: 600; padding: 1rem 1.2rem; border-bottom: 1px solid #eee;color: white;max-height: 60vh;overflow-y: auto; }
+.modal__header { background: #1E40AF;display:flex;justify-content:space-between;align-items:center;font-size: 1rem; font-weight: 600; padding: 1rem 1.2rem; border-bottom: 1px solid #eee;color: white; }
+.modal-close-btn { background:transparent;border:none;color:rgba(255,255,255,0.75);font-size:1rem;cursor:pointer;padding:4px 8px;border-radius:6px;line-height:1;transition:color .15s; }
+.modal-close-btn:hover { color:#fff; }
+
 .modal__body { padding: 1rem 1.2rem; }
 .modal__footer { display: flex; justify-content: flex-end; gap: 0.5rem; padding: 0.8rem 1.2rem; border-top: 1px solid #eee; }
 
@@ -42,7 +76,7 @@
     border-radius: 0.5rem;
     font-weight: 600;
     font-size: 0.875rem;
-    font-family: "Salesforce Sans", Arial, sans-serif;
+    font-family: 'Inter', -apple-system, system-ui, sans-serif;
     line-height: 1.25rem;
     cursor: pointer;
     transition: all 0.2s ease-in-out;
@@ -52,7 +86,7 @@
 
 /* Bouton primaire */
 .btn-primary {
-    background-color: #1e40af;
+    background: #1E40AF;
     color: #ffffff;
     box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
 }
@@ -73,10 +107,23 @@
     opacity: 0.6;
 }
 
+.preset-file-banner {
+    font-size: .85rem; color: #1E40AF; background: rgba(30,64,175,0.08);
+    border-radius: 8px; padding: .6rem .75rem; margin-bottom: 1rem;
+}
+
 /* Form Groups */
 .form-group {
     margin-bottom: 1.5rem;
 }
+.rounded-input {
+    display: block; width: 100%; box-sizing: border-box;
+    padding: 8px 12px; border-radius: 8px;
+    border: 1px solid #eeeeee; background: #fff;
+    font-size: .875rem; color: #181818;
+    outline: none; transition: border-color .15s;
+}
+.rounded-input:focus { border-color: #1E40AF; box-shadow: 0 0 0 3px rgba(30,64,175,0.08); }
 .form-label {
     display: block;
     font-size: 0.875rem;
@@ -89,13 +136,13 @@
 .btn-secondary {
     background-color: #ffffff;
     color:#1E40AF; 
-    border: 1px solid #0176d3;
+    border: 1px solid #1E40AF;
     font-weight: 500;
 }
 
 .btn-secondary:hover {
     background-color: #f9fafb;
-    border-color: #1e40af;;
+    border-color: #1E40AF;;
 }
 
 .btn-secondary:active {

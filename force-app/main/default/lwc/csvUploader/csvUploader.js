@@ -1,10 +1,15 @@
 /**
- * @last modification : 24/04/2026
- * @modified : ajout Validation des headers dans parseCSV 
+ * @last modification : 11/06/2026
+ * @modified : ajout onglet "Fichiers enregistrés", sauvegarde ContentDocument après upload
  */
 import { LightningElement, track, api } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { subscribe, unsubscribe, onError } from 'lightning/empApi';
 import { validateCsvHeaders } from 'c/utility';
+import saveFileToProject    from '@salesforce/apex/ContentDocumentController.saveFileToProject';
+import getProjectFiles      from '@salesforce/apex/ContentDocumentController.getProjectFiles';
+import getFileContent       from '@salesforce/apex/ContentDocumentController.getFileContent';
+import getProjectExecutions from '@salesforce/apex/ContentDocumentController.getProjectExecutions';
 
 // Custom Labels
 import SHOWING_ENTRIES from '@salesforce/label/c.DataTable_Showing_Entries';
@@ -49,13 +54,49 @@ import LBL_MODAL_SAVE           from '@salesforce/label/c.CsvUploader_Modal_Save
 
 const SS_ROWS_KEY           = 'IM_csvRows';
 const SS_COLS_KEY           = 'IM_sourceColumnsCsv';
+const SS_DOC_KEY            = 'IM_contentDocumentId';
 const DEFAULT_PREVIEW_LIMIT = 100;
 const DEFAULT_PAGE_SIZE     = 3;
 
 export default class CsvUploader extends LightningElement {
     @api title = LBL_PAGE_TITLE;
     @api projectName;
-    // ✅ Single label object exposed to the template
+
+    // projectId avec setter pour déclencher le chargement des fichiers stockés
+    _projectId;
+    @api
+    get projectId() { return this._projectId; }
+    set projectId(val) {
+        this._projectId = val;
+        if (val) this.loadStoredFiles();
+    }
+
+    // ===== Rafraîchissement live (historique + badges "déjà programmé") =====
+    // Sans ça, une exécution planifiée qui démarre/se termine en arrière-plan (ou une
+    // planification créée depuis une autre page) n'apparaît qu'après un rechargement manuel.
+    _empSubscription = null;
+    _liveRefreshTimer = null;
+
+    connectedCallback() {
+        onError((error) => console.error('[CsvUploader] EMP API error', JSON.stringify(error)));
+        if (!this._empSubscription) {
+            subscribe('/event/ImportStatusEvent__e', -1, (response) => this.handlePlatformEvent(response))
+                .then((response) => { this._empSubscription = response; })
+                .catch((error) => console.error('[CsvUploader] subscribe error', JSON.stringify(error)));
+        }
+    }
+
+    handlePlatformEvent() {
+        // On ne connaît pas forcément l'executionId concerné à l'avance (fichier tout juste
+        // programmé ailleurs) : un rafraîchissement complet, débouncé, reste simple et fiable
+        // pour une liste de cette taille (un seul projet).
+        if (this._liveRefreshTimer) window.clearTimeout(this._liveRefreshTimer);
+        this._liveRefreshTimer = window.setTimeout(() => {
+            this._liveRefreshTimer = null;
+            this.loadStoredFiles();
+        }, 800);
+    }
+
     label = {
         pageSubtitle       : LBL_PAGE_SUBTITLE,
         importSettingsBtn  : LBL_IMPORT_SETTINGS_BTN,
@@ -94,6 +135,34 @@ export default class CsvUploader extends LightningElement {
         modalClose         : LBL_MODAL_CLOSE,
         modalSave          : LBL_MODAL_SAVE
     };
+
+    // ===== Onglets source =====
+    @track activeTab              = 'upload';   // 'upload' | 'stored'
+    @track storedFiles            = [];
+    @track selectedStoredFileDocId = '';
+    @track isLoadingStoredFiles   = false;
+    @track storedParseError       = '';
+    @track executionHistory       = [];
+    contentDocumentId             = '';         // Id du fichier uploadé dans cette session
+
+    // ===== Modale "Logs d'exécution" (historique des imports) =====
+    @track showExecutionLogsModal   = false;
+    @track logsModalExecutionId     = null;
+    @track logsModalScheduleName    = '';
+
+    get isUploadTab()         { return this.activeTab === 'upload'; }
+    get isStoredTab()         { return this.activeTab === 'stored'; }
+    get storedFilesCount()    { return this.storedFiles.length || 0; }
+    get hasStoredFiles()      { return this.storedFiles.length > 0; }
+    get hasExecutionHistory() { return this.executionHistory.length > 0; }
+    get uploadTabClass()   { return 'src-tab' + (this.isUploadTab ? ' active' : ''); }
+    get storedTabClass()   { return 'src-tab' + (this.isStoredTab  ? ' active' : ''); }
+
+    // Programmer un import n'a de sens que si le projet a déjà au moins un fichier.
+    get isGotoSchedulingDisabled() { return !this.hasStoredFiles; }
+    get gotoSchedulingTitle() {
+        return this.hasStoredFiles ? '' : 'Chargez d\'abord un fichier CSV pour ce projet';
+    }
 
     // ===== File / Data =====
     fileName = '';
@@ -135,13 +204,13 @@ export default class CsvUploader extends LightningElement {
     get recordWord()          { return this.totalEntries === 1 ? 'record' : 'records'; }
     get badgeText()           { return `${this.totalEntries} ${this.recordWord}`; }
 
-    // ✅ Pagination "Showing X to Y of Z entries" built in JS (no label interpolation needed in HTML)
     get showingText() {
         return SHOWING_ENTRIES
             .replace('{0}', this.showingFrom)
             .replace('{1}', this.showingTo)
             .replace('{2}', this.totalEntries);
     }
+
     // ===== Filtered Rows =====
     get filteredRows() {
         let rows = this.allRows;
@@ -197,6 +266,112 @@ export default class CsvUploader extends LightningElement {
         return out;
     }
 
+    // ===== Onglet source =====
+    handleTabChange(event) {
+        this.activeTab = event.currentTarget?.dataset?.tab || 'upload';
+    }
+
+    // ===== Fichiers stockés =====
+    loadStoredFiles() {
+        if (!this._projectId) return;
+        this.isLoadingStoredFiles = true;
+
+        const STATUS_ICON  = { Completed: '✅', CompletedWithErrors: '⚠️', Failed: '❌', InProgress: '⏳', Pending: '🕐' };
+        const STATUS_LABEL = { Completed: 'Terminé', CompletedWithErrors: 'Terminé avec erreurs', Failed: 'Échoué', InProgress: 'En cours', Pending: 'En attente' };
+
+        Promise.all([
+            getProjectFiles({ projectId: this._projectId }),
+            getProjectExecutions({ projectId: this._projectId })
+        ])
+        .then(([files, executions]) => {
+            this.storedFiles = (files || []).map(f => ({
+                ...f,
+                isSelected : f.contentDocumentId === this.selectedStoredFileDocId,
+                rowClass   : 'stored-file-row' + (f.contentDocumentId === this.selectedStoredFileDocId ? ' sel' : '')
+            }));
+            this.executionHistory = (executions || []).map(e => ({
+                ...e,
+                statusIcon    : STATUS_ICON[e.status] || '🕐',
+                statusLabel   : STATUS_LABEL[e.status] || e.status,
+                statusClass   : 'exec-status exec-' + (e.status || 'Pending').toLowerCase(),
+                summary       : (e.totalRecords || 0) + ' enregistrements' + (e.failedRecords ? ` · ${e.failedRecords} erreurs` : ''),
+                typeLabel     : e.isScheduled ? 'Planifié' : 'Manuel',
+                typeClass     : 'exec-type-badge ' + (e.isScheduled ? 'exec-type--scheduled' : 'exec-type--manual')
+            }));
+        })
+        .catch(err => { console.error('[CsvUploader] loadStoredFiles error', err); })
+        .finally(() => { this.isLoadingStoredFiles = false; });
+    }
+
+    handleSelectStoredFile(event) {
+        const docId    = event.currentTarget?.dataset?.id;
+        const fileName = event.currentTarget?.dataset?.name;
+        if (!docId) return;
+
+        // Effacer l'état d'exécution sauvegardé pour que la page d'exécution reparte à zéro
+        try {
+            const pid = this._projectId || 'no_project';
+            sessionStorage.removeItem(`IM_executionCmpRun_v1_${pid}`);
+            sessionStorage.removeItem('IM_executionCmpRun_last_v1');
+        } catch (e) { /* ignore */ }
+
+        this.selectedStoredFileDocId = docId;
+        this.storedParseError = '';
+        // Refresh row classes
+        this.storedFiles = this.storedFiles.map(f => ({
+            ...f,
+            isSelected : f.contentDocumentId === docId,
+            rowClass   : 'stored-file-row' + (f.contentDocumentId === docId ? ' sel' : ''),
+            badgeLabel : f.isRecent ? 'Récent' : 'Archivé',
+            badgeClass : f.isRecent ? 'sf-badge sfb-new' : 'sf-badge sfb-old'
+        }));
+        this.loadFromStoredFile(docId, fileName);
+    }
+
+    // Nom exact stocké — évite de dupliquer l'extension si le Title l'inclut déjà
+    // (même logique que fileCriteriaBuilder/FileMatchService côté Apex).
+    exactFileName(file) {
+        const name = file.fileName || '';
+        const ext = (file.fileExtension || '').toLowerCase();
+        if (ext && name.toLowerCase().endsWith('.' + ext)) return name;
+        return ext ? `${name}.${ext}` : name;
+    }
+
+    // ===== Navigation vers l'étape Scheduling =====
+    handleGotoScheduling() {
+        this.dispatchEvent(new CustomEvent('gotoscheduling'));
+    }
+
+    // ===== Modale "Logs d'exécution" (historique des imports) =====
+    handleOpenExecutionLogs(event) {
+        const executionId = event.currentTarget.dataset.id;
+        if (!executionId) return;
+        this.logsModalExecutionId = executionId;
+        this.logsModalScheduleName = event.currentTarget.dataset.starttime || '';
+        this.showExecutionLogsModal = true;
+    }
+
+    handleCloseExecutionLogsModal() {
+        this.showExecutionLogsModal = false;
+        this.logsModalExecutionId = null;
+    }
+
+    loadFromStoredFile(docId, fileName) {
+        this.isLoading = true;
+        this.fileName  = fileName || '';
+        this.fileSize  = 0;
+        getFileContent({ contentDocumentId: docId })
+            .then(csvText => {
+                this.processCsvText(csvText, fileName, 0);
+                this.contentDocumentId = docId;
+                try { window.sessionStorage.setItem(SS_DOC_KEY, docId); } catch (e) { console.debug('[CsvUploader] sessionStorage unavailable', e); }
+            })
+            .catch(err => {
+                this.storedParseError = err?.body?.message || 'Impossible de charger le fichier';
+                this.isLoading = false;
+            });
+    }
+
     // ===== Dropzone & File read =====
     handleBrowseClick() { this.template.querySelector('input[data-id="file"]')?.click(); }
     handleDragOver(ev)  { ev.preventDefault(); this.template.querySelector('.dropzone')?.classList.add('dropzone--hover'); }
@@ -208,51 +383,93 @@ export default class CsvUploader extends LightningElement {
         this.resetState(); this.fileName = file.name; this.fileSize = file.size; this.isLoading = true;
         const reader = new FileReader();
         reader.onload = () => {
-            const text = reader.result || '';
+            // Lire comme Data URL pour obtenir base64 et texte en une seule passe
+            const dataUrl  = reader.result || '';
+            const commaIdx = dataUrl.indexOf(',');
+            const base64   = commaIdx >= 0 ? dataUrl.slice(commaIdx + 1) : '';
+
+            // Décoder base64 → UTF-8 pour le parsing
+            let text = '';
             try {
-                const headerCheck = validateCsvHeaders(text);
-                if (!headerCheck.valid) {
-                    this.parseError = headerCheck.error;
-                    this.columns = []; this.allRows = []; this.totalRows = 0;
-                    this.isLoading = false;
-                    this.dispatchEvent(new ShowToastEvent({ title: 'Fichier CSV invalide', message: headerCheck.error, variant: 'error', mode: 'sticky' }));
-                    return;
-                }
-                const parsed        = this.parseCSV(text);
-                const columns       = parsed.columns || [];
-                const allRows       = Array.isArray(parsed.allRows) ? parsed.allRows : [];
-                const previewRows   = Array.isArray(parsed.rows) ? parsed.rows : allRows;
-                const totalRowCount = typeof parsed.totalRowCount === 'number' ? parsed.totalRowCount : allRows.length;
-                this.columns = columns; this.allRows = allRows; this.totalRows = totalRowCount;
-                this.pageIndex = 1; this.isPreview = totalRowCount > this.previewLimit;
-                this.dispatchEvent(new CustomEvent('csvloaded', { detail: { columns, rows: this.toObjectRows(previewRows, columns, this.previewLimit), totalRowCount, fileName: this.fileName, fileSize: this.fileSize }, bubbles: true, composed: true }));
-                this.rebuildDisplayColumns();
-            } catch (e) {
-                console.error("[CsvUploader] parseCSV error:", e);
-                 const code = (e &&  e.message) || "Failed to parse CSV";
-                 const errorMessages = {
-                   NO_HEADER_LINE:
-                     "This file does not appear to contain a header line. Please check the file.",
-                   DUPLICATE_HEADER_LINE:
-                     "Two header lines were detected. The file must contain only one header line.",
-                   EMPTY_FILE: "The file is empty."
-                 };
-                 this.parseError = errorMessages[code] || "Unable to read CSV file.";
-                 this.columns = [];
-                 this.allRows = [];
-                 this.totalRows = 0;
-               // this.parseError = (e && e.message) || 'Failed to parse CSV.'; this.columns = []; this.allRows = []; this.totalRows = 0;
-            } finally { this.isLoading = false; }
+                const binary = atob(base64);
+                const bytes  = new Uint8Array(binary.length);
+                for (let i = 0; i < binary.length; i++) { bytes[i] = binary.charCodeAt(i); }
+                text = new TextDecoder('utf-8').decode(bytes);
+            } catch (_) { text = ''; }
+
+            this.processCsvText(text, file.name, file.size);
+
+            // Sauvegarder dans Salesforce en arrière-plan (non bloquant)
+            if (base64 && this._projectId && !this.parseError) {
+                this.uploadFileToSalesforce(base64, file.name);
+            }
         };
-        reader.readAsText(file);
+        reader.readAsDataURL(file);
+    }
+
+    processCsvText(text, fileName, fileSize) {
+        try {
+            const headerCheck = validateCsvHeaders(text);
+            if (!headerCheck.valid) {
+                this.parseError = headerCheck.error;
+                this.columns = []; this.allRows = []; this.totalRows = 0;
+                this.isLoading = false;
+                this.dispatchEvent(new ShowToastEvent({ title: 'Fichier CSV invalide', message: headerCheck.error, variant: 'error', mode: 'sticky' }));
+                return;
+            }
+            const parsed        = this.parseCSV(text);
+            const columns       = parsed.columns || [];
+            const allRows       = Array.isArray(parsed.allRows) ? parsed.allRows : [];
+            const previewRows   = Array.isArray(parsed.rows) ? parsed.rows : allRows;
+            const totalRowCount = typeof parsed.totalRowCount === 'number' ? parsed.totalRowCount : allRows.length;
+            this.columns = columns; this.allRows = allRows; this.totalRows = totalRowCount;
+            this.pageIndex = 1; this.isPreview = totalRowCount > this.previewLimit;
+            this.dispatchEvent(new CustomEvent('csvloaded', {
+                detail: { columns, rows: this.toObjectRows(previewRows, columns, this.previewLimit), totalRowCount, fileName, fileSize },
+                bubbles: true, composed: true
+            }));
+            this.rebuildDisplayColumns();
+        } catch (e) {
+            console.error('[CsvUploader] parseCSV error:', e);
+            const code = (e && e.message) || 'Échec de l\'analyse du fichier CSV';
+            const errorMessages = {
+                NO_HEADER_LINE       : 'Ce fichier ne semble pas contenir de ligne d\'en-tête. Veuillez vérifier le fichier.',
+                DUPLICATE_HEADER_LINE: 'Deux lignes d\'en-tête ont été détectées. Le fichier ne doit contenir qu\'une seule ligne d\'en-tête.',
+                EMPTY_FILE           : 'Le fichier est vide.'
+            };
+            this.parseError = errorMessages[code] || 'Impossible de lire le fichier CSV.';
+            this.columns = []; this.allRows = []; this.totalRows = 0;
+        } finally {
+            this.isLoading = false;
+        }
+    }
+
+    uploadFileToSalesforce(base64Data, fileName) {
+        saveFileToProject({ base64Data, fileName, projectId: this._projectId })
+            .then(docId => {
+                this.contentDocumentId = docId;
+                try { window.sessionStorage.setItem(SS_DOC_KEY, docId); } catch (e) { console.debug('[CsvUploader] sessionStorage unavailable', e); }
+                this.loadStoredFiles(); // rafraîchir la liste
+            })
+            .catch(err => {
+                console.error('[CsvUploader] saveFileToProject error', err);
+                this.dispatchEvent(new ShowToastEvent({
+                    title  : 'Sauvegarde échouée',
+                    message: err?.body?.message || 'Le fichier CSV n\'a pas pu être sauvegardé dans Salesforce. Vos données restent disponibles pour cette session.',
+                    variant: 'warning',
+                    mode   : 'dismissable'
+                }));
+            });
     }
 
     parseCSV(csvText) {
-        let normalize = (csvText || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-        normalize = normalize.replace(/^\uFEFF/, "");
+        // Strip BOM (U+FEFF) and normalize line endings
+        let normalize = (csvText || '');
+        if (normalize.charCodeAt(0) === 0xFEFF) normalize = normalize.slice(1);
+        normalize = normalize.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
         const lines     = normalize.split('\n');
 
-        if (!lines.length || (lines.length === 1 && lines[0].trim() === ''))throw new Error( "EMPTY_FILE") ; // return { columns: [], rows: [], allRows: [], totalRowCount: 0 };
+        if (!lines.length || (lines.length === 1 && lines[0].trim() === '')) throw new Error('EMPTY_FILE');
         const headerLine = lines[0] || '';
         const delimiter  = ((headerLine.match(/;/g) || []).length > (headerLine.match(/,/g) || []).length) ? ';' : ',';
         const parseLine  = (line) => {
@@ -268,21 +485,15 @@ export default class CsvUploader extends LightningElement {
 
         const parsedHeader = parseLine(headerLine);
 
-        // Validation  : pas de header (1ère ligne ressemble à des données)
-        if (this._looksLikeData(parsedHeader)) {
-          throw new Error ("NO_HEADER_LINE" );
+        if (this._looksLikeData(parsedHeader)) throw new Error('NO_HEADER_LINE');
+
+        const dataLines = lines.slice(1).filter((l) => l.trim() !== '');
+        if (dataLines.length >= 1) {
+            const parsedLine2 = parseLine(dataLines[0]);
+            if (this._looksLikeDuplicateHeader(parsedHeader, parsedLine2)) throw new Error('DUPLICATE_HEADER_LINE');
         }
 
-        //Validation 2 : double header (ligne 2 ressemble aussi à un header)
-          const dataLines = lines.slice(1).filter((l) => l.trim() !== "");
-          if (dataLines.length >= 1) {
-            const parsedLine2 = parseLine(dataLines[0]);
-            if (this._looksLikeDuplicateHeader(parsedHeader, parsedLine2)) {
-              throw new Error("DUPLICATE_HEADER_LINE");
-            }
-          }
-
-        const columns = parseLine(headerLine).map((c, index) => { const t = (c || '').trim(); return t });// || `Column_${index + 1}`; });
+        const columns = parseLine(headerLine).map((c) => (c || '').trim());
         const allRows = lines.slice(1).filter((l) => l !== '').map((l, i) => this.buildRow(parseLine(l), columns, i));
         return { columns, rows: allRows.slice(0, this.previewLimit || DEFAULT_PREVIEW_LIMIT), allRows, totalRowCount: allRows.length };
     }
@@ -302,7 +513,11 @@ export default class CsvUploader extends LightningElement {
         if (!Array.isArray(this.columns) || !this.columns.length) return;
         const totalRowCount = Array.isArray(this.allRows) ? this.allRows.length : 0;
         const plainRows     = this.toObjectRows(this.allRows, this.columns, totalRowCount || this.previewLimit);
-        try { window.sessionStorage.setItem(SS_COLS_KEY, this.columns.join(',')); window.sessionStorage.setItem(SS_ROWS_KEY, JSON.stringify(plainRows)); } catch (e) { console.debug('[CsvUploader] sessionStorage unavailable', e); }
+        try {
+            window.sessionStorage.setItem(SS_COLS_KEY, this.columns.join(','));
+            window.sessionStorage.setItem(SS_ROWS_KEY, JSON.stringify(plainRows));
+            if (this.contentDocumentId) window.sessionStorage.setItem(SS_DOC_KEY, this.contentDocumentId);
+        } catch (e) { console.debug('[CsvUploader] sessionStorage unavailable', e); }
         this.dispatchEvent(new CustomEvent('gotomapping', { detail: { columns: this.columns, rows: plainRows, totalRowCount, fileName: this.fileName, fileSize: this.fileSize }, bubbles: true, composed: true }));
     }
 
@@ -349,40 +564,38 @@ export default class CsvUploader extends LightningElement {
     saveEdit() { if (this.currentRowIndex < 0) return; const row = this.allRows[this.currentRowIndex]; const updatedValues = row.values.map((c, i) => ({ ...c, value: this.editBuffer[i]?.value ?? c.value })); this.allRows = [...this.allRows.slice(0, this.currentRowIndex), { ...row, values: updatedValues }, ...this.allRows.slice(this.currentRowIndex + 1)]; this.showEditor = false; }
     cancelEdit() { this.showEditor = false; }
 
-    // *** helpers csv's validations  ***
-    // Retourne true si la ligne ressemble à des données (pas un header)
+    // ===== CSV Validation helpers =====
     _looksLikeData(parsedLine) {
-        const nonEmptyCells = parsedLine.filter((c) => (c || "").trim() !== "");
-        if (nonEmptyCells.length === 0) return true; 
-        
+        const nonEmptyCells = parsedLine.filter((c) => (c || '').trim() !== '');
+        if (nonEmptyCells.length === 0) return true;
         const dataPatterns = [
-            /^\d+(\.\d+)?$/,                         // nombre
-            /^\d{2}[\/\-]\d{2}[\/\-]\d{4}$/,        // date
-            /^[\w.+-]+@[\w-]+\.[a-z]{2,}$/i,         // email
-            /^\+?[\d\s\-()]{7,}$/,                   // téléphone
+            /^\d+(\.\d+)?$/,
+            /^\d{2}[/-]\d{2}[/-]\d{4}$/,
+            /^[\w.+-]+@[\w-]+\.[a-z]{2,}$/i,
+            /^\+?[\d\s-()]{7,}$/,
         ];
         const dataCount = parsedLine.filter(cell => {
             const val = (cell || '').trim();
             return val !== '' && dataPatterns.some(p => p.test(val));
         }).length;
-
-        // Si +50% des cellules sont des données typées → pas un header
         return parsedLine.length > 0 && (dataCount / parsedLine.length) >= 0.5;
     }
 
-    // Retourne true si deux lignes se ressemblent structurellement (double header)
     _looksLikeDuplicateHeader(line1, line2) {
-        const isTextOnly = (cells) =>
-            cells.every(c => /^[a-zA-Z_\s\u00C0-\u017F]+$/.test((c || '').trim()));
+        const isTextOnly = (cells) => cells.every(c => /^[a-zA-Z_\sÀ-ſ]+$/.test((c || '').trim()));
         return isTextOnly(line1) && isTextOnly(line2);
     }
 
     // ===== Navigation / Cleanup =====
     handleBackClick() { this.dispatchEvent(new CustomEvent('previous', { bubbles: true, composed: true })); }
-    disconnectedCallback() { if (this._lastObjectUrl) { URL.revokeObjectURL(this._lastObjectUrl); this._lastObjectUrl = null; } }
+    disconnectedCallback() {
+        if (this._lastObjectUrl) { URL.revokeObjectURL(this._lastObjectUrl); this._lastObjectUrl = null; }
+        if (this._empSubscription) { unsubscribe(this._empSubscription, () => {}); this._empSubscription = null; }
+        if (this._liveRefreshTimer) { window.clearTimeout(this._liveRefreshTimer); this._liveRefreshTimer = null; }
+    }
     resetState() {
         this.columns = []; this._displayColumns = []; this.allRows = []; this.totalRows = 0;
-        this.isPreview = false; this.isLoading = false; this.parseError = '';
+        this.isPreview = false; this.isLoading = false; this.parseError = ''; this.storedParseError = '';
         this.searchTerm = ''; this.filter = { column: '', operator: 'contains', value: '' };
         this.pageSize = DEFAULT_PAGE_SIZE; this.pageIndex = 1; this.sortBy = ''; this.sortAsc = true;
         this.showPreview = false; this.showEditor = false; this.currentRowIndex = -1; this.previewCells = []; this.editBuffer = [];

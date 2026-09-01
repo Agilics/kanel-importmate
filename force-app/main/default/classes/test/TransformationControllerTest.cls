@@ -399,7 +399,7 @@ public class TransformationControllerTest {
         } catch (TransformationException e) {
             exceptionThrown = true;
             System.assert(
-                e.getMessage().contains('Error during the update of the rule'),
+                e.getMessage().contains('Erreur lors de la mise à jour de la règle'),
                 'Message d’erreur attendu'
             );
         }

@@ -788,7 +788,7 @@ public class TransformationServiceTest {
         } catch (TransformationException e) {
             exceptionThrown = true;
             Assert.isTrue(
-                e.getMessage().contains('Error during the update of the rule'),
+                e.getMessage().contains('Erreur lors de la mise à jour de la règle'),
                 'Message d’erreur attendu'
             );
         }

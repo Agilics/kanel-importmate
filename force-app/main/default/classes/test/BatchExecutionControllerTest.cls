@@ -269,6 +269,7 @@ private class BatchExecutionControllerTest {
         System.assertEquals(true, details.get('success'));
         System.assert(
             String.valueOf(details.get('status')) == Constants.EXECUTION_STATUS_COMPLETED ||
+            String.valueOf(details.get('status')) == Constants.EXECUTION_STATUS_COMPLETED_WITH_ERRORS ||
             String.valueOf(details.get('status')) == Constants.EXECUTION_STATUS_FAILED
         );
 
@@ -372,7 +373,7 @@ private class BatchExecutionControllerTest {
 
         Map<String, Object> finishResult = BatchExecutionController.finishClientStaging(executionId);
         System.assertEquals(false, finishResult.get('success'));
-        System.assert(String.valueOf(finishResult.get('error')).contains('Upload is not complete'));
+        System.assert(String.valueOf(finishResult.get('error')).contains('L\'envoi n\'est pas terminé'));
         System.assertEquals(3, Integer.valueOf(finishResult.get('nextStartLine')));
     }
 
@@ -406,7 +407,7 @@ private class BatchExecutionControllerTest {
             FROM ImportExecution__c
             WHERE Id = :exec.Id
         ];
-        System.assertEquals(Constants.EXECUTION_STATUS_COMPLETED, exec.Status__c);
+        System.assertEquals(Constants.EXECUTION_STATUS_COMPLETED_WITH_ERRORS, exec.Status__c);
         System.assertEquals(1, Integer.valueOf(exec.FailedRecords__c));
 
         exec.Status__c = Constants.EXECUTION_STATUS_CANCELLED;

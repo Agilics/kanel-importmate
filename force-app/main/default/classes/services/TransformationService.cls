@@ -91,7 +91,7 @@ public with sharing class TransformationService {
                 'originalError' => e.getMessage()
             };
             throw new TransformationException(
-                'Error applying transformations for row: ' + e.getMessage(),
+                'Erreur lors de l\'application des transformations à la ligne : ' + e.getMessage(),
                 Constants.ERROR_CODE_TRANSFORMATION,
                 context
             );
@@ -118,7 +118,7 @@ public with sharing class TransformationService {
                 'originalError' => e.getMessage()
             };
             throw new TransformationException(
-                'Error applying transformations from rules: ' + e.getMessage(),
+                'Erreur lors de l\'application des transformations depuis les règles : ' + e.getMessage(),
                 Constants.ERROR_CODE_TRANSFORMATION,
                 context
             );
@@ -131,7 +131,7 @@ public with sharing class TransformationService {
     public static List<Map<String, String>> generatePreview(String mappingId, List<Map<String, String>> sampleData) {
         try {
             if (sampleData == null || sampleData.isEmpty()) {
-                throw new TransformationException('Sample data is empty');
+                throw new TransformationException('Les données d\'exemple sont vides');
             }
             
             List<Map<String, String>> preview = new List<Map<String, String>>();
@@ -310,7 +310,7 @@ public static Map<String, String> validateAllRulesForProject(
     } catch (Exception e) {
         System.debug('ERROR in validateAllRulesForProject: ' + e.getMessage());
         throw new TransformationException(
-            'Error validating rules: ' + e.getMessage(),
+            'Erreur lors de la validation des règles : ' + e.getMessage(),
             Constants.ERROR_CODE_TRANSFORMATION,
             new Map<String, Object>{
                 'projectId' => projectId,
@@ -391,7 +391,7 @@ public static Map<String, String> validateAllRulesForProject(
            return TransformationRepository.getRuleById(ruleId);
        } catch (Exception e) {
            ErrorLogService.logException(e);
-           throw new TransformationException('Error during the retrieval of the rule : ' + e.getMessage());
+           throw new TransformationException('Erreur lors de la récupération de la règle : ' + e.getMessage());
        }
    }
    
@@ -416,7 +416,7 @@ public static Map<String, String> validateAllRulesForProject(
             return TransformationRepository.doesTransformationExist(projectId,sourceColumn,targetField,ruleType);
         } catch (Exception e) {
             ErrorLogService.logException(e);
-            throw new TransformationException('Error during the verification of the rule : ' + e.getMessage());
+            throw new TransformationException('Erreur lors de la vérification de la règle : ' + e.getMessage());
         }
     }
 
@@ -439,7 +439,7 @@ public static Map<String, String> validateAllRulesForProject(
             TransformationRepository.updateRule(ruleId, ruleType,parameters,sourceFields, targetValue);
         } catch (Exception e) {
             ErrorLogService.logException(e);
-            throw new TransformationException('Error during the update of the rule : ' + e.getMessage());
+            throw new TransformationException('Erreur lors de la mise à jour de la règle : ' + e.getMessage());
         }
     }
 

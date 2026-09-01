@@ -2,7 +2,7 @@ public with sharing class ImportBatchService {
     //Start a client-side staging session.
     public static Map<String, Object> startClientStaging(Id projectId, Boolean dryRun, Integer totalRows) {
         if (projectId == null) {
-            throw new ExecutionException('Project ID is required.');
+            throw new ExecutionException('L\'ID du projet est requis.');
         }
 
         List<ImportProject__c> projects = [
@@ -12,7 +12,7 @@ public with sharing class ImportBatchService {
             LIMIT 1
         ];
         if (projects.isEmpty()) {
-            throw new ExecutionException('Project not found.');
+            throw new ExecutionException('Projet introuvable.');
         }
 
         String executionType = dryRun
@@ -35,7 +35,7 @@ public with sharing class ImportBatchService {
                     : Integer.valueOf(activeRun.TotalRecords__c);
 
                 if (existingTotalRows > 0 && requestedTotalRows > 0 && existingTotalRows != requestedTotalRows) {
-                    throw new ExecutionException('A staging session already exists with a different total rows count.');
+                    throw new ExecutionException('Une session de staging existe déjà avec un nombre total de lignes différent.');
                 }
 
                 if (existingTotalRows == 0 && requestedTotalRows > 0) {
@@ -48,7 +48,7 @@ public with sharing class ImportBatchService {
                 return resumedState;
             }
 
-            throw new ExecutionException('An import is already in progress for this project.');
+            throw new ExecutionException('Un import est déjà en cours pour ce projet.');
         }
 
         ImportExecution__c execution = ExecutionRepository.createImportExecution(
@@ -80,7 +80,7 @@ public with sharing class ImportBatchService {
 
     public static Map<String, Object> getClientStagingState(Id executionId) {
         if (executionId == null) {
-            throw new ExecutionException('Execution ID is required.');
+            throw new ExecutionException('L\'ID d\'exécution est requis.');
         }
 
         ImportExecution__c execution = [
@@ -120,7 +120,7 @@ public with sharing class ImportBatchService {
     //Append one chunk of rows into StagingRow__c.
     public static Map<String, Object> appendClientStagingRows(Id executionId, List<Map<String, String>> rows, Integer startLine) {
         if (executionId == null) {
-            throw new ExecutionException('Execution ID is required.');
+            throw new ExecutionException('L\'ID d\'exécution est requis.');
         }
         if (rows == null || rows.isEmpty()) {
             return new Map<String, Object>{ 'success' => true, 'inserted' => 0 };
@@ -134,14 +134,15 @@ public with sharing class ImportBatchService {
         ];
 
         if (execution.Status__c == Constants.EXECUTION_STATUS_CANCELLED) {
-            throw new ExecutionException('Execution is cancelled.');
+            throw new ExecutionException('L\'exécution est annulée.');
         }
         if (execution.Status__c == Constants.EXECUTION_STATUS_COMPLETED ||
+            execution.Status__c == Constants.EXECUTION_STATUS_COMPLETED_WITH_ERRORS ||
             execution.Status__c == Constants.EXECUTION_STATUS_FAILED) {
-            throw new ExecutionException('Execution is already finished.');
+            throw new ExecutionException('L\'exécution est déjà terminée.');
         }
         if (execution.Phase__c != Constants.EXECUTION_PHASE_STAGING) {
-            throw new ExecutionException('Staging is already finished for this execution.');
+            throw new ExecutionException('Le staging est déjà terminé pour cette exécution.');
         }
 
         Integer lineBase = startLine == null || startLine < 1 ? 2 : startLine;
@@ -166,17 +167,17 @@ public with sharing class ImportBatchService {
                 };
             }
             throw new ExecutionException(
-                'Chunk overlaps already uploaded rows. Expected start line: ' + expectedStartLine + '.'
+                'Le bloc chevauche des lignes déjà envoyées. Ligne de début attendue : ' + expectedStartLine + '.'
             );
         }
         if (lineBase > expectedStartLine) {
             throw new ExecutionException(
-                'Out-of-order chunk. Expected start line: ' + expectedStartLine + ', received: ' + lineBase + '.'
+                'Bloc reçu dans le désordre. Ligne de début attendue : ' + expectedStartLine + ', reçue : ' + lineBase + '.'
             );
         }
         if (totalRows > 0 && (uploadedRows + rows.size()) > totalRows) {
             throw new ExecutionException(
-                'Chunk exceeds expected row count. Uploaded: ' + uploadedRows + ', incoming: ' + rows.size() + ', expected total: ' + totalRows + '.'
+                'Le bloc dépasse le nombre de lignes attendu. Envoyées : ' + uploadedRows + ', reçues : ' + rows.size() + ', total attendu : ' + totalRows + '.'
             );
         }
 
@@ -210,7 +211,7 @@ public with sharing class ImportBatchService {
     //Finish staging and launch Phase 2.
     public static Map<String, Object> finishClientStaging(Id executionId) {
         if (executionId == null) {
-            throw new ExecutionException('Execution ID is required.');
+            throw new ExecutionException('L\'ID d\'exécution est requis.');
         }
 
         ImportExecution__c execution = [
@@ -223,7 +224,7 @@ public with sharing class ImportBatchService {
         if (execution.Status__c == Constants.EXECUTION_STATUS_CANCELLED) {
             return new Map<String, Object>{
                 'success' => false,
-                'error' => 'Execution is cancelled.'
+                'error' => 'L\'exécution est annulée.'
             };
         }
         if (execution.Phase__c != Constants.EXECUTION_PHASE_STAGING) {
@@ -244,7 +245,7 @@ public with sharing class ImportBatchService {
         if (totalRows > 0 && uploadedRows < totalRows) {
             return new Map<String, Object>{
                 'success' => false,
-                'error' => 'Upload is not complete. Uploaded ' + uploadedRows + '/' + totalRows + ' rows.',
+                'error' => 'L\'envoi n\'est pas terminé. ' + uploadedRows + '/' + totalRows + ' lignes envoyées.',
                 'uploadedRows' => uploadedRows,
                 'totalRows' => totalRows,
                 'nextStartLine' => counters.get('nextStartLine')
@@ -323,7 +324,7 @@ public with sharing class ImportBatchService {
     //Used by LWC to restore last import execution for one project.
     public static Map<String, Object> getLatestProjectExecution(Id projectId) {
         if (projectId == null) {
-            throw new ExecutionException('Project ID is required.');
+            throw new ExecutionException('L\'ID du projet est requis.');
         }
 
         List<ImportExecution__c> executions = [
@@ -356,6 +357,7 @@ public with sharing class ImportBatchService {
         ];
 
         if (execution.Status__c == Constants.EXECUTION_STATUS_COMPLETED ||
+            execution.Status__c == Constants.EXECUTION_STATUS_COMPLETED_WITH_ERRORS ||
             execution.Status__c == Constants.EXECUTION_STATUS_FAILED ||
             execution.Status__c == Constants.EXECUTION_STATUS_CANCELLED) {
             return new Map<String, Object>{
@@ -373,7 +375,7 @@ public with sharing class ImportBatchService {
             String.valueOf(execution.Id),
             Constants.EXECUTION_STATUS_CANCELLED,
             null,
-            'Execution was cancelled by user.'
+            'L\'exécution a été annulée par l\'utilisateur.'
         );
 
         return new Map<String, Object>{
@@ -394,7 +396,7 @@ public with sharing class ImportBatchService {
         Integer maxRetries = execution.MaxRetries__c == null ? 3 : Integer.valueOf(execution.MaxRetries__c);
 
         if (retryCount >= maxRetries) {
-            throw new ExecutionException('Retry limit reached for this execution.');
+            throw new ExecutionException('Nombre maximal de tentatives atteint pour cette exécution.');
         }
 
         Boolean dryRunMode = execution.Type__c == Constants.EXECUTION_TYPE_VALIDATION;

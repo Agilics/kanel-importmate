@@ -215,8 +215,8 @@
             <template if:true={pageRows}>
               <template if:true={pageRows.length}>
                 <template for:each={pageRows} for:item="row">
-                  <tr key={row.id}>
-                    <td>
+                  <tr key={row.id} class="ih-clickable-row" data-id={row.id} onclick={handleRowClick}>
+                    <td onclick={handleCellClick}>
                       <lightning-input
                         type="checkbox"
                         variant="label-hidden"

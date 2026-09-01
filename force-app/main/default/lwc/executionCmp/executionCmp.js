@@ -12,26 +12,41 @@ import getExecutionDetails from '@salesforce/apex/BatchExecutionController.getEx
 import getLatestProjectExecution from '@salesforce/apex/BatchExecutionController.getLatestProjectExecution';
 import getImportLogs from '@salesforce/apex/BatchExecutionController.getImportLogs';
 import cancelExecution from '@salesforce/apex/BatchExecutionController.cancelExecution';
+import getProjectFiles from '@salesforce/apex/ContentDocumentController.getProjectFiles';
 import { parseCsvData } from 'c/utility';
 import { subscribe, unsubscribe, onError } from 'lightning/empApi';
-import addSchedule from '@salesforce/apex/ScheduleController.addSchedule';
 
 
 // ===== Custom Labels =====
 import LABEL_TITLE from '@salesforce/label/c.IM_EX_Title';
 import LABEL_SUBTITLE from '@salesforce/label/c.IM_EX_Subtitle';
 import LABEL_BTN_EXPORT_LOGS from '@salesforce/label/c.IM_EX_Btn_ExportLogs';
-import LABEL_BTN_SCHEDULE from '@salesforce/label/c.IM_EX_Btn_ScheduleImport';
 import LABEL_BTN_START from '@salesforce/label/c.IM_EX_Btn_StartImport';
 import LABEL_BTN_CANCEL from '@salesforce/label/c.IM_EX_Btn_CancelImport';
 import LABEL_BTN_BACK from '@salesforce/label/c.IM_EX_Btn_BackToValidation';
 import LABEL_PROGRESS_TITLE from '@salesforce/label/c.IM_EX_Progress_Title';
 import LABEL_STATUS_COMPLETED from '@salesforce/label/c.ProjectCard_Status_Completed';
+import LABEL_STATUS_COMPLETED_WITH_ERRORS from '@salesforce/label/c.ProjectCard_Status_CompletedWithErrors';
 import LABEL_STATUS_CANCELLED from '@salesforce/label/c.ProjectCard_Status_Cancelled';
 import LABEL_STATUS_FAILED from '@salesforce/label/c.ProjectCard_Status_Failed';
 import LABEL_STATUS_IN_PROGRESS from '@salesforce/label/c.ProjectCard_Status_InProgress';
 import LABEL_STATUS_PENDING from '@salesforce/label/c.ProjectCard_Status_Pending';
 import LABEL_DETAIL_EXECUTION_ID from '@salesforce/label/c.IM_EX_Detail_ExecutionId';
+import LABEL_TOAST_ERROR from '@salesforce/label/c.Toast_Title_Error';
+import LABEL_TOAST_SUCCESS from '@salesforce/label/c.Toast_Title_Success';
+import LABEL_TOAST_INFO from '@salesforce/label/c.Toast_Title_Info';
+import LABEL_ERR_PROJECT_ID_REQUIRED from '@salesforce/label/c.SCH_Exec_Err_ProjectIdRequired';
+import LABEL_ERR_CSV_DATA_REQUIRED from '@salesforce/label/c.SCH_Exec_Err_CsvDataRequired';
+import LABEL_ERR_NO_VALID_CSV_DATA from '@salesforce/label/c.SCH_Exec_Err_NoValidCsvData';
+import LABEL_MSG_IMPORT_STARTED from '@salesforce/label/c.SCH_Exec_Msg_ImportStarted';
+import LABEL_ERR_START_FAILED from '@salesforce/label/c.SCH_Exec_Err_StartFailed';
+import LABEL_MSG_IMPORT_CANCELLED from '@salesforce/label/c.SCH_Exec_Msg_ImportCancelled';
+import LABEL_ERR_CANCEL_FAILED from '@salesforce/label/c.SCH_Exec_Err_CancelFailed';
+import LABEL_ERR_CANCEL_EXCEPTION from '@salesforce/label/c.SCH_Exec_Err_CancelException';
+import LABEL_INFO_NO_EXECUTION_ID from '@salesforce/label/c.SCH_Exec_Info_NoExecutionId';
+import LABEL_INFO_NO_LOGS_TO_EXPORT from '@salesforce/label/c.SCH_Exec_Info_NoLogsToExport';
+import LABEL_MSG_LOGS_EXPORTED from '@salesforce/label/c.SCH_Exec_Msg_LogsExported';
+import LABEL_ERR_EXPORT_FAILED from '@salesforce/label/c.SCH_Exec_Err_ExportFailed';
 import LABEL_DETAIL_STATUS from '@salesforce/label/c.IM_EX_Detail_Status';
 import LABEL_DETAIL_TOTAL from '@salesforce/label/c.IM_EX_Detail_TotalRecords';
 import LABEL_DETAIL_PROCESSED from '@salesforce/label/c.IM_EX_Detail_Processed';
@@ -40,17 +55,36 @@ import LABEL_DETAIL_FAILED from '@salesforce/label/c.IM_EX_Detail_Failed';
 import LABEL_PROCESSING_MSG from '@salesforce/label/c.IM_EX_Processing_Message';
 import LABEL_FAILED_TITLE from '@salesforce/label/c.IM_EX_Failed_Title';
 import LABEL_FAILED_SUBTITLE from '@salesforce/label/c.IM_EX_Failed_Subtitle';
-import Import_SucessCreatedSchedulesMessage from '@salesforce/label/c.Import_SucessCreatedSchedulesMessage';
 
 const STAGING_CHUNK_SIZE = 200;
 const POLLING_INTERVAL_MS = 3000;
+const SCHEDULE_WATCH_INTERVAL_MS = 10000;
 const SS_RUN_STATE_PREFIX = 'IM_executionCmpRun_v1';
 const SS_RUN_STATE_LAST_KEY = 'IM_executionCmpRun_last_v1';
+// CompletedWithErrors est un état terminal au même titre que Completed/Failed/Cancelled —
+// sans lui ici, le suivi live/polling resterait bloqué en "en cours" pour tout import
+// comportant au moins une erreur (le batch ne renvoie plus jamais 'Completed' dans ce cas).
+const TERMINAL_STATUSES = ['completed', 'completedwitherrors', 'failed', 'cancelled'];
+function isTerminalStatus(status) {
+    return TERMINAL_STATUSES.includes((status || '').toLowerCase());
+}
 
 export default class ExecutionCmp extends LightningElement {
   _projectId = '';
-  @api csvData;
+  _csvData = null;
   @api projectName;
+
+  @api
+  get csvData() { return this._csvData; }
+  set csvData(value) {
+    const previous = this._csvData;
+    this._csvData = value;
+    // New file loaded while an execution is displayed → reset so the user starts fresh
+    if (value && value !== previous && (this.currentExecutionId || this.showImportResults)) {
+      this.resetExecutionState();
+      this.clearRunState();
+    }
+  }
   
   @track isLoading = false;
 
@@ -68,17 +102,17 @@ export default class ExecutionCmp extends LightningElement {
   @track totalErrors = 0;
 
   @track showImportResults = false;
-  @track frequency='Weekly';
-  @track nextRun  ;
-  @track executionMode;
-  @track batchSize;
-  @track sendEmailNotification;
 
 
   subscription = null;
   channelName = '/event/ImportStatusEvent__e';
   pollingTimer = null;
+  scheduleWatchTimer = null;
   isRestoringState = false;
+  isAdoptingExecution = false;
+
+  @track importLogs = [];
+  @track isCheckingStatus = false;
 
   // ===== Labels =====
   get labels() {
@@ -86,7 +120,6 @@ export default class ExecutionCmp extends LightningElement {
       title: LABEL_TITLE,
       subtitle: LABEL_SUBTITLE,
       btnExportLogs: LABEL_BTN_EXPORT_LOGS,
-      btnSchedule: LABEL_BTN_SCHEDULE,
       btnStart: LABEL_BTN_START,
       btnCancel: LABEL_BTN_CANCEL,
       btnBack: LABEL_BTN_BACK,
@@ -103,31 +136,6 @@ export default class ExecutionCmp extends LightningElement {
     };
   }
 
-  // Initialisation de next run 
-  initializeNextRun() {
-      const now = new Date();
-      now.setHours(now.getHours() + 1);
-      this.nextRun = this.formatDateTimeForInput(now);
-  }
-
-
-  // Formatage
-  formatDateTimeForInput(date) {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      const hours = String(date.getHours()).padStart(2, '0');
-      const minutes = String(date.getMinutes()).padStart(2, '0');
-      return `${year}-${month}-${day}T${hours}:${minutes}`;
-  }
-   
-  //configuration card  ScheduleExecution 
-  showScheduledExecution = true;
-  hideScheduledExecution = false; 
-  // schedule | Immediate  cards form  style 
-  get formGroup(){return 'form-group';}
-
-  get formLabel(){return 'form-label';}
 
   @api
   get projectId() {
@@ -139,60 +147,71 @@ export default class ExecutionCmp extends LightningElement {
     if (nextProjectId === this._projectId) return;
     this._projectId = nextProjectId;
     this.tryRestoreExecutionState();
+    this.checkHasProjectFiles();
+  }
+
+  // Programmer un import n'a de sens que si le projet a déjà au moins un fichier.
+  @track hasProjectFiles = false;
+  async checkHasProjectFiles() {
+    if (!this._projectId) { this.hasProjectFiles = false; return; }
+    try {
+      const files = await getProjectFiles({ projectId: this._projectId });
+      this.hasProjectFiles = Array.isArray(files) && files.length > 0;
+    } catch (e) {
+      console.error('[ExecutionCmp] checkHasProjectFiles error', e);
+      this.hasProjectFiles = false;
+    }
+  }
+
+  get isGotoSchedulingDisabled() { return !this.hasProjectFiles; }
+  get gotoSchedulingTitle() {
+    return this.hasProjectFiles ? '' : 'Chargez d\'abord un fichier CSV pour ce projet';
   }
 
   connectedCallback() {
-    this.initializeNextRun();
     this.registerErrorListener();
     this.handleSubscribe();
     this.tryRestoreExecutionState();
+    this.startScheduleWatch();
   }
 
   disconnectedCallback() {
     this.persistRunState();
     this.handleUnsubscribe();
     this.stopExecutionPolling();
+    this.stopScheduleWatch();
   }
 
   registerErrorListener() {
     onError((error) => console.error('EMP API error: ', JSON.stringify(error)));
   }
 
-  get executionModeOptions() {
-    return [
-      { label: 'Immediate', value: 'Immediate' },
-      { label: 'Batch', value: 'Batch' }
-    ];
-  }
-
-  get batchSizeOptions() {
-    return [
-      { label: '50', value: '50' },
-      { label: '100', value: '100' },
-      { label: '200', value: '200' },
-      { label: '500', value: '500' },
-      { label: '1000', value: '1000' }
-    ];
-  }
+  get canRefreshStatus() { return !this.isLoading && !this.isCheckingStatus && !!this.projectId; }
+  get hasImportLogs() { return this.importLogs.length > 0; }
 
   get isStartImportDisabled() { return this.isLoading || !this.projectId; }
-  get isScheduleImportDisabled() { return this.isLoading || !this.projectId; }
   get isExportLogsDisabled() { return this.isLoading || !this.currentExecutionId; }
   get isImportInProgress() { return this.importStatus === 'InProgress' || this.importStatus === 'Pending'; }
   get isImportCancelled() { return this.importStatus === 'Cancelled'; }
   get canCancelImport() { return Boolean(this.currentExecutionId) && this.isImportInProgress && !this.isLoading; }
   get isImportCompleted() { return this.importStatus === 'Completed'; }
+  get isImportCompletedWithErrors() { return this.importStatus === 'CompletedWithErrors'; }
   get isImportFailed() { if (this.isImportCancelled) return false; return this.importStatus === 'Failed'; }
   get importProgressPercentage() { return Math.round(this.importProgress || 0); }
 
+  /** CSS inline style for the Aurora progress-fill bar (width driven by import progress). */
+  get progressBarStyle() { return `width:${this.importProgressPercentage}%`; }
+
   get progressBarVariant() {
     if (this.isImportCompleted) return 'success';
+    if (this.isImportCompletedWithErrors) return 'warning';
     if (this.isImportFailed) return 'error';
     return 'base';
   }
 
   get importStatusIconName() {
     if (this.isImportCompleted) return 'utility:success';
+    if (this.isImportCompletedWithErrors) return 'utility:warning';
     if (this.isImportCancelled) return 'utility:warning';
     if (this.isImportFailed) return 'utility:error';
     return 'utility:info';
@@ -200,6 +219,7 @@ export default class ExecutionCmp extends LightningElement {
 
   get importStatusClass() {
     if (this.isImportCompleted) return 'status-badge completed';
+    if (this.isImportCompletedWithErrors) return 'status-badge warning';
     if (this.isImportCancelled) return 'status-badge failed';
     if (this.isImportFailed) return 'status-badge failed';
     return 'status-badge in-progress';
@@ -207,6 +227,7 @@ export default class ExecutionCmp extends LightningElement {
 
   get formattedImportStatus() {
     if (this.isImportCompleted) return LABEL_STATUS_COMPLETED;
+    if (this.isImportCompletedWithErrors) return LABEL_STATUS_COMPLETED_WITH_ERRORS;
     if (this.isImportCancelled) return LABEL_STATUS_CANCELLED;
     if (this.isImportFailed) return LABEL_STATUS_FAILED;
     if (this.isImportInProgress) return LABEL_STATUS_IN_PROGRESS;
@@ -220,8 +241,8 @@ export default class ExecutionCmp extends LightningElement {
   }
 
   async handleStartImport() {
-    if (!this.projectId) { this.showToast('Error', 'Project ID is required', 'error'); return; }
-    if (!this.csvData) { this.showToast('Error', 'CSV data is required', 'error'); return; }
+    if (!this.projectId) { this.showToast(LABEL_TOAST_ERROR, LABEL_ERR_PROJECT_ID_REQUIRED, 'error'); return; }
+    if (!this.csvData) { this.showToast(LABEL_TOAST_ERROR, LABEL_ERR_CSV_DATA_REQUIRED, 'error'); return; }
 
     this.isLoading = true;
     this.resetExecutionState();
@@ -230,12 +251,12 @@ export default class ExecutionCmp extends LightningElement {
     this.importStatus = 'InProgress';
     this.executionPhase = 'Staging';
     this.importProgress = 0;
-    this.importMessage = 'Starting upload...';
+    this.importMessage = 'Démarrage de l\'envoi...';
 
     try {
       const parsedCsvData = this.transformCsvData(this.csvData);
       if (!parsedCsvData || parsedCsvData.length === 0) {
-        this.showToast('Error', 'No valid data found in CSV', 'error');
+        this.showToast(LABEL_TOAST_ERROR, LABEL_ERR_NO_VALID_CSV_DATA, 'error');
         return;
       }
       this.totalRecords = parsedCsvData.length;
@@ -244,58 +265,19 @@ export default class ExecutionCmp extends LightningElement {
       this.showImportProgress = true;
       this.importStatus = 'InProgress';
       this.importProgress = 0;
-      this.importMessage = `Import started for ${parsedCsvData.length} rows...`;
+      this.importMessage = `Import démarré pour ${parsedCsvData.length} lignes...`;
       this.persistRunState();
       this.handleSubscribe();
       this.startExecutionPolling(this.currentExecutionId);
-      this.showToast('Success', 'Import started successfully', 'success');
+      this.showToast(LABEL_TOAST_SUCCESS, LABEL_MSG_IMPORT_STARTED, 'success');
     } catch (error) {
-      this.showToast('Error', error?.body?.message || error?.message || 'Error starting import', 'error');
+      this.showToast(LABEL_TOAST_ERROR, error?.body?.message || error?.message || LABEL_ERR_START_FAILED, 'error');
       console.error('Error starting import:', error);
     } finally {
       this.isLoading = false;
     }
   }
 
-  // Conversion pour  next run en format Date
-  convertInputToDate(inputValue) {
-      return new Date(inputValue);
-  }
-
-  
-  //planifier une exécution
-  async handleScheduleImport() {
-    try {
-        this.isLoading = true;
-
-        const nextRunDate = this.convertInputToDate(this.nextRun);
-        await addSchedule({
-            frequency: this.frequency,
-            nextRun: nextRunDate,
-            projectId: this.projectId
-        });
-
-        // Notifier le parent via un événement — ne pas appeler directement
-        // le composant enfant depuis un sibling
-        this.dispatchEvent(new CustomEvent('schedulecreated'));
-
-        // Refresh en sécurité : seulement si le composant est dans ce template
-        const scheduledComponent = this.template.querySelector('c-scheduled-schedules');
-        if (scheduledComponent) {
-            await scheduledComponent.refreshSchedules();
-        }
-
-        this.showToast('Success', Import_SucessCreatedSchedulesMessage, 'success');
-
-    } catch (error) {
-        // Distinguer l'erreur Apex de l'erreur JS locale
-        const message = error?.body?.message || error?.message || 'Failed to create schedule';
-        console.error('Error in handleScheduleImport:', error);
-        this.showToast('Error', message, 'error');
-    } finally {
-        this.isLoading = false;
-    }
-}
 
   //annuler importation d'exécution
   async handleCancelImport() {
@@ -305,23 +287,101 @@ export default class ExecutionCmp extends LightningElement {
       const result = await cancelExecution({ executionId: this.currentExecutionId });
       if (result?.success) {
         this.importStatus = result.status || 'Cancelled';
-        this.importMessage = 'Cancellation requested.';
+        this.importMessage = 'Annulation demandée.';
         this.showImportResults = true;
         this.persistRunState();
         this.handleUnsubscribe();
         this.stopExecutionPolling();
-        this.showToast('Info', 'Import cancelled', 'info');
+        this.showToast(LABEL_TOAST_INFO,LABEL_MSG_IMPORT_CANCELLED, 'info');
       } else {
-        this.showToast('Error', 'Unable to cancel import', 'error');
+        this.showToast(LABEL_TOAST_ERROR, LABEL_ERR_CANCEL_FAILED, 'error');
       }
     } catch (error) {
-      this.showToast('Error', error?.body?.message || error?.message || 'Cancel failed', 'error');
+      this.showToast(LABEL_TOAST_ERROR, error?.body?.message || error?.message || LABEL_ERR_CANCEL_EXCEPTION, 'error');
     } finally {
       this.isLoading = false;
     }
   }
 
   handlePreviousStep() { this.dispatchEvent(new CustomEvent('previous')); }
+
+  handleGotoScheduling() { this.dispatchEvent(new CustomEvent('gotoscheduling')); }
+
+  async handleRefreshStatus() {
+    if (!this.canRefreshStatus) return;
+    this.isCheckingStatus = true;
+    try {
+      await this.tryRestoreExecutionState();
+    } finally {
+      this.isCheckingStatus = false;
+    }
+  }
+
+  // ===== Schedule Watch — détecte les exécutions planifiées qui démarrent =====
+  startScheduleWatch() {
+    if (this.scheduleWatchTimer) return;
+    this.scheduleWatchTimer = window.setInterval(async () => {
+      // Stop only when an execution is actively running (not done)
+      if (this.currentExecutionId && !this.showImportResults) { this.stopScheduleWatch(); return; }
+      await this.checkForActiveScheduledExecution();
+    }, SCHEDULE_WATCH_INTERVAL_MS);
+  }
+
+  stopScheduleWatch() {
+    if (this.scheduleWatchTimer) {
+      window.clearInterval(this.scheduleWatchTimer);
+      this.scheduleWatchTimer = null;
+    }
+  }
+
+  async checkForActiveScheduledExecution() {
+    if (!this.projectId || this.isRestoringState) return;
+    // Don't interfere with an actively running execution
+    if (this.currentExecutionId && !this.showImportResults) return;
+    try {
+      const details = await getLatestProjectExecution({ projectId: this.projectId });
+      if (!details?.success || !details?.hasExecution) return;
+      const status = (details.status || '').toLowerCase();
+      // Pending = en attente de l'heure planifiée → ne rien faire, le CronJob s'en chargera
+      // Seulement InProgress déclenche l'affichage de la progression
+      if (status === 'inprogress') {
+        // Reset if a previous completed execution was displayed
+        if (this.currentExecutionId) this.resetExecutionState();
+        this.currentExecutionId = details.executionId;
+        this.showImportProgress = true;
+        this.applyExecutionDetails(details);
+        this.handleSubscribe();
+        this.startExecutionPolling(this.currentExecutionId);
+        this.stopScheduleWatch();
+        await this.fetchRecentLogs(this.currentExecutionId);
+      }
+    } catch (e) { /* ignore — polling will retry */ }
+  }
+
+  // ===== Logs détaillés — rafraîchissement live dans le terminal =====
+  async fetchRecentLogs(executionId) {
+    if (!executionId) return;
+    try {
+      const result = await getImportLogs({ executionId, pageNumber: 1, pageSize: 100 });
+      const raw = Array.isArray(result?.logs) ? result.logs : [];
+      const mapped = raw.map((l, idx) => ({
+        id: l.Id || l.id || `log-${idx}`,
+        line: l.LineNumber__c ?? l.lineNumber ?? '—',
+        severity: l.Severity__c || l.severity || 'Info',
+        field: l.FieldApiName__c || l.fieldApiName || '',
+        column: l.ColumnName__c || l.columnName || '',
+        errorType: l.ErrorType__c || l.errorType || '',
+        message: l.ErrorMessage__c || l.errorMessage || l.Details__c || l.details || '',
+        cssClass: (l.Severity__c || l.severity || '') === 'Error' ? 'log-err'
+                : (l.Severity__c || l.severity || '') === 'Warning' ? 'log-warn' : 'log-ok'
+      }));
+      // Only update if content actually changed (avoids unnecessary re-renders)
+      if (mapped.length !== this.importLogs.length ||
+          (mapped.length > 0 && mapped[mapped.length - 1].id !== this.importLogs[this.importLogs.length - 1]?.id)) {
+        this.importLogs = mapped;
+      }
+    } catch (e) { /* ignore */ }
+  }
 
   getRunStateStorageKey(projectId) { return `${SS_RUN_STATE_PREFIX}_${projectId || 'no_project'}`; }
  
@@ -398,15 +458,18 @@ export default class ExecutionCmp extends LightningElement {
       const currentProjectId = (this.projectId || '').trim();
       const executionProjectId = (details.projectId || '').trim();
       if (currentProjectId && executionProjectId && currentProjectId !== executionProjectId) return false;
+      const status = (details.status || '').toLowerCase();
+      // Don't adopt Pending — it hasn't started yet; the schedule watch will detect InProgress
+      if (status === 'pending') return false;
       this.currentExecutionId = details.executionId || executionId;
       this.showImportProgress = true;
       this.applyExecutionDetails(details);
-      const status = (details.status || '').toLowerCase();
-      const isDone = status === 'completed' || status === 'failed' || status === 'cancelled';
+      const isDone = isTerminalStatus(status);
       if (isDone) {
         this.stopExecutionPolling();
         this.showImportResults = true;
         await this.loadErrorCount(this.currentExecutionId);
+        await this.fetchRecentLogs(this.currentExecutionId);
       } else {
         this.startExecutionPolling(this.currentExecutionId);
       }
@@ -420,15 +483,18 @@ export default class ExecutionCmp extends LightningElement {
     try {
       const details = await getLatestProjectExecution({ projectId: this.projectId });
       if (!details?.success || !details?.hasExecution) return;
+      const status = (details.status || '').toLowerCase();
+      // Don't adopt Pending — it hasn't started yet; the schedule watch will detect InProgress
+      if (status === 'pending') return;
       this.currentExecutionId = details.executionId;
       this.showImportProgress = true;
       this.applyExecutionDetails(details);
-      const status = (details.status || '').toLowerCase();
-      const isDone = status === 'completed' || status === 'failed' || status === 'cancelled';
+      const isDone = isTerminalStatus(status);
       if (isDone) {
         this.stopExecutionPolling();
         this.showImportResults = true;
         await this.loadErrorCount(this.currentExecutionId);
+        await this.fetchRecentLogs(this.currentExecutionId);
       } else {
         this.startExecutionPolling(this.currentExecutionId);
       }
@@ -447,37 +513,57 @@ export default class ExecutionCmp extends LightningElement {
     if (this.subscription) { unsubscribe(this.subscription, () => {}); this.subscription = null; }
   }
 
-  //add schedule changes handler
-  handleFrequencyChange(event) {
-      this.frequency = event.detail.value;
-  }
-
-  handleNextRunChange(event) {
-      this.nextRun = event.detail.value;
-  }
-
-  handleModeChange(event) {
-      this.executionMode = event.detail.value;
-  }
-
-  handleBatchSizeChange(event) {
-      this.batchSize = event.detail.value;
-  }
-
-  handleSendNotificationChange(event) {
-      this.sendEmailNotification = event.detail;
-  }
-
   handlePlatformEvent(response) {
     const payload = response.data.payload;
-    const executionId = payload.ExecutionId__c;
-    if (!this.currentExecutionId || executionId !== this.currentExecutionId) return;
+    const eventExecutionId = payload.ExecutionId__c;
+    if (!eventExecutionId) return;
+
+    const currentIsDone = this.showImportResults ||
+      isTerminalStatus(this.importStatus);
+
+    // No active execution, or previous one is done → try to adopt the new one
+    if (!this.currentExecutionId || currentIsDone) {
+      this.adoptExecutionFromEvent(eventExecutionId, payload);
+      return;
+    }
+    if (eventExecutionId !== this.currentExecutionId) return;
+
     this.importStatus = payload.Status__c || this.importStatus;
     this.importMessage = payload.Message__c || this.importMessage;
     if (payload.Progress__c !== null && payload.Progress__c !== undefined) this.importProgress = Number(payload.Progress__c) || 0;
     const status = (this.importStatus || '').toLowerCase();
-    if (status === 'completed' || status === 'failed' || status === 'cancelled') this.pollExecutionStatus(this.currentExecutionId);
+    if (isTerminalStatus(status)) this.pollExecutionStatus(this.currentExecutionId);
     this.persistRunState();
+  }
+
+  async adoptExecutionFromEvent(executionId, initialPayload) {
+    if (!executionId || !this.projectId || this.isRestoringState || this.isAdoptingExecution) return;
+    // If a completed execution is displayed, reset before adopting the new one
+    if (this.currentExecutionId) {
+      const currentIsDone = isTerminalStatus(this.importStatus);
+      if (!currentIsDone) return; // Don't interrupt an active execution
+      this.resetExecutionState();
+    }
+    this.isAdoptingExecution = true;
+    try {
+      const details = await getExecutionDetails({ executionId });
+      if (!details?.success) return;
+      const execProjectId = (details.projectId || '').trim();
+      const myProjectId = (this.projectId || '').trim();
+      if (execProjectId && myProjectId && execProjectId !== myProjectId) return;
+      // Belongs to our project — adopt it
+      this.currentExecutionId = executionId;
+      this.showImportProgress = true;
+      this.applyExecutionDetails(details);
+      this.stopScheduleWatch();
+      this.startExecutionPolling(executionId);
+      await this.fetchRecentLogs(executionId);
+      // Apply live event payload on top
+      if (initialPayload.Status__c) this.importStatus = initialPayload.Status__c;
+      if (initialPayload.Message__c) this.importMessage = initialPayload.Message__c;
+      if (initialPayload.Progress__c != null) this.importProgress = Number(initialPayload.Progress__c) || 0;
+    } catch (e) { /* ignore */ }
+    finally { this.isAdoptingExecution = false; }
   }
 
   startExecutionPolling(executionId) {
@@ -499,13 +585,16 @@ export default class ExecutionCmp extends LightningElement {
       this.showImportProgress = true;
       this.applyExecutionDetails(details);
       this.persistRunState();
+      await this.fetchRecentLogs(executionId);
       const status = (this.importStatus || '').toLowerCase();
-      const isDone = status === 'completed' || status === 'failed' || status === 'cancelled';
+      const isDone = isTerminalStatus(status);
       if (isDone) {
         this.stopExecutionPolling();
         this.isLoading = false;
         this.showImportResults = true;
         await this.loadErrorCount(executionId);
+        // Resume watching so the next scheduled execution is detected automatically
+        this.startScheduleWatch();
       }
     } catch (error) { console.error('Polling error:', error); }
   }
@@ -537,20 +626,20 @@ export default class ExecutionCmp extends LightningElement {
   }
 
   async handleExportLogsCsv() {
-    if (!this.currentExecutionId) { this.showToast('Info', 'No execution id yet.', 'info'); return; }
+    if (!this.currentExecutionId) { this.showToast(LABEL_TOAST_INFO,LABEL_INFO_NO_EXECUTION_ID, 'info'); return; }
     this.isLoading = true;
     try {
       const rawLogs = await this.loadAllImportLogs(this.currentExecutionId);
       const logs = this.normalizeLogsForExport(rawLogs || []);
-      if (!Array.isArray(logs) || logs.length === 0) { this.showToast('Info', 'No logs to export for this execution.', 'info'); return; }
+      if (!Array.isArray(logs) || logs.length === 0) { this.showToast(LABEL_TOAST_INFO,LABEL_INFO_NO_LOGS_TO_EXPORT, 'info'); return; }
       const columns = this.getCsvColumns(logs);
       const csv = this.buildCsvContent(logs, columns);
       const fileName = this.buildLogsFileName();
       this.downloadCsv(csv, fileName);
-      this.showToast('Success', 'Logs exported successfully.', 'success');
+      this.showToast(LABEL_TOAST_SUCCESS, LABEL_MSG_LOGS_EXPORTED, 'success');
     } catch (e) {
       console.error('[ExportLogs] error', e);
-      this.showToast('Error', e?.body?.message || e?.message || 'Failed to export logs', 'error');
+      this.showToast(LABEL_TOAST_ERROR, e?.body?.message || e?.message || LABEL_ERR_EXPORT_FAILED, 'error');
     } finally { this.isLoading = false; }
   }
 
@@ -671,7 +760,9 @@ export default class ExecutionCmp extends LightningElement {
     this.failedRecords = 0;
     this.successfulRecords = 0;
     this.totalErrors = 0;
+    this.importLogs = [];
     this.stopExecutionPolling();
+    this.startScheduleWatch();
   }
 
   showToast(title, message, variant) { this.dispatchEvent(new ShowToastEvent({ title, message, variant })); }

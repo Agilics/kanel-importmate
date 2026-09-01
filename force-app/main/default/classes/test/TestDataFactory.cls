@@ -108,8 +108,9 @@ public class TestDataFactory {
          ImportExecution__c execution = new ImportExecution__c(
             Project__c          = projectId,
             Status__c           = status,
-            Type__c             = type,        
-            ApexJobId__c        = String.valueOf(apexJobId), 
+            Type__c             = type,
+            ApexJobId__c        = String.valueOf(apexJobId),
+            Schedule__c         = apexJobId,
             StartTime__c        = Datetime.now(),
             TotalRecords__c     = 0,
             ProcessedRecords__c = 0,
@@ -134,7 +135,7 @@ public class TestDataFactory {
  
     public static Schedule__c createSchedule(String targetObject) {
         ImportProject__c project =createImportProjectWithTargetObject(targetObject);
-        Schedule__c schedule = new Schedule__c( 
+        Schedule__c schedule = new Schedule__c(
             Frequency__c = 'DAILY',
             Project__c = project.Id,
             NextRun__c = Datetime.now().addDays(1)
@@ -143,7 +144,51 @@ public class TestDataFactory {
         return schedule;
     }
 
-  
+    public static Schedule__c createScheduleWithCriteria(
+        Id projectId,
+        String dataSourceMode,
+        String fileSelectionMode,
+        String fileNamePattern
+    ) {
+        Schedule__c schedule = new Schedule__c(
+            Frequency__c         = 'DAILY',
+            Project__c           = projectId,
+            NextRun__c           = Datetime.now().addDays(1),
+            DataSourceMode__c    = dataSourceMode,
+            FileSelectionMode__c = fileSelectionMode,
+            FileNamePattern__c   = fileNamePattern
+        );
+        insert schedule;
+        return schedule;
+    }
+
+    /**
+     * Crée un ContentVersion/ContentDocumentLink de test (fichier CSV) rattaché à une entité (projet ou schedule)
+     */
+    public static Id createContentDocumentLinkedTo(Id linkedEntityId, String title, String csvBody) {
+        ContentVersion cv = new ContentVersion(
+            Title          = title,
+            PathOnClient   = title + '.csv',
+            VersionData    = Blob.valueOf(csvBody),
+            IsMajorVersion = true
+        );
+        insert cv;
+
+        ContentVersion inserted = [
+            SELECT ContentDocumentId FROM ContentVersion WHERE Id = :cv.Id LIMIT 1
+        ];
+
+        ContentDocumentLink cdl = new ContentDocumentLink(
+            ContentDocumentId = inserted.ContentDocumentId,
+            LinkedEntityId    = linkedEntityId,
+            ShareType         = 'V'
+        );
+        insert cdl;
+
+        return inserted.ContentDocumentId;
+    }
+
+
 
     public static List<ImportLog__c> createImportLogs(Id executionId, Integer count) {
         List<ImportLog__c> logs = new List<ImportLog__c>();

@@ -62,7 +62,7 @@ public class ValidationUtilsTest {
         ValidationUtils.ValidationResult result3 = ValidationUtils.validateEmail('invalid-email', 'Email');
         Assert.isFalse(result3.isValid, 'Invalid email should fail');
         Assert.areEqual(Constants.INVALID_EMAIL_FORMAT, result3.errorCode, 'Error code should match');
-        Assert.isTrue(result3.errorMessage.contains('Invalid email format'), 'Error message should be descriptive');
+        Assert.isTrue(result3.errorMessage.contains('Format d\'email invalide'), 'Error message should be descriptive');
         
         ValidationUtils.ValidationResult result4 = ValidationUtils.validateEmail('test@', 'Email');
         Assert.isFalse(result4.isValid, 'Incomplete email should fail');
@@ -565,7 +565,7 @@ public class ValidationUtilsTest {
         Assert.isTrue(invalidLookup.isValid, 'Invalid lookup');
         Assert.isTrue(invalidLookup.isWarning, 'Invalid lookup');
         Assert.areEqual(Constants.LOOKUP_VALUE_NOT_FOUND, invalidLookup.errorCode, 'Error code should be LOOKUP_VALUE_NOT_FOUND');
-        Assert.isTrue(invalidLookup.errorMessage.contains('LOOKUP NOT FOUND'), 'Error message should indicate lookup not found');
+        Assert.isTrue(invalidLookup.errorMessage.contains('RECHERCHE (LOOKUP) INTROUVABLE'), 'Error message should indicate lookup not found');
         
         //Test empty value (should be valid)
         ValidationUtils.ValidationResult emptyLookup = ValidationUtils.validateLookup(
@@ -611,7 +611,7 @@ public class ValidationUtilsTest {
                 'ObjectNotFound'
             );
         } catch (ValidationException ve) {
-            Assert.isTrue(ve.getMessage().contains('Error during format validation'), 'Error message should be descriptive');
+            Assert.isTrue(ve.getMessage().contains('Erreur lors de la validation du format'), 'Error message should be descriptive');
             Assert.areEqual(Constants.ERROR_CODE_VALIDATION, ve.getErrorCode(), 'Error code should be VALIDATION_ERROR');
         }
         
@@ -667,7 +667,7 @@ public class ValidationUtilsTest {
         //ParentId is optional in Account (nullable), so should return warning, not error
         Assert.isTrue(optionalLookup.isValid, 'Optional field lookup not found should pass (isValid = true)');
         Assert.isTrue(optionalLookup.isWarning, 'Optional field lookup not found should be a warning');
-        Assert.isTrue(optionalLookup.errorMessage.contains('LOOKUP NOT FOUND'), 'Error message should indicate lookup not found');
+        Assert.isTrue(optionalLookup.errorMessage.contains('RECHERCHE (LOOKUP) INTROUVABLE'), 'Error message should indicate lookup not found');
         
         //Test lookup for a valid value with optional field
         ValidationUtils.ValidationResult validOptionalLookup = ValidationUtils.validateLookup(

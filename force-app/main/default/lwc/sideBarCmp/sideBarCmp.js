@@ -10,6 +10,7 @@ import STEP_FIELD_MAPPING from '@salesforce/label/c.SideBar_Step_FieldMapping';
 import STEP_TRANSFORMATIONS from '@salesforce/label/c.SideBar_Step_Transformations';
 import STEP_VALIDATION from '@salesforce/label/c.SideBar_Step_Validation';
 import STEP_EXECUTION from '@salesforce/label/c.SideBar_Step_Execution';
+import STEP_SCHEDULING from '@salesforce/label/c.SideBar_Step_Scheduling';
 
 // QUICK ACTIONS
 import TITLE_SECTION from '@salesforce/label/c.SideBar_QuickAction_Title';
@@ -38,7 +39,8 @@ export default class SideBarCmp extends LightningElement {
             { number: 3, label: STEP_FIELD_MAPPING},
             { number: 4, label:  STEP_TRANSFORMATIONS},
             { number: 5, label: STEP_VALIDATION},
-            { number: 6, label:  STEP_EXECUTION }
+            { number: 6, label:  STEP_EXECUTION },
+            { number: 7, label:  STEP_SCHEDULING }
         ].map(step => ({
             ...step,
             cssClass: this.getStepClass(step.number),

@@ -58,9 +58,15 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
   get csvRows() {
     return this._csvRows;
   }
-  set csvRows(v) {  
-    this._csvRows = Array.isArray(v) ? v : [];
-    this.initMappings();
+  set csvRows(v) {
+    const newRows = Array.isArray(v) ? v : [];
+    const newCols = newRows.length > 0 ? [...Object.keys(newRows[0] || {})].sort().join('|') : '';
+    const oldCols = this._csvRows.length > 0 ? [...Object.keys(this._csvRows[0] || {})].sort().join('|') : '';
+    this._csvRows = newRows;
+
+    if (newCols !== oldCols) {
+      this.initMappings();
+    }
 
     if (this._csvRows.length) {
       this.initialSourceColumns = Object.keys(this._csvRows[0] || {});
@@ -74,7 +80,9 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
     return this._sourceColumnsCsv;
   }
   set sourceColumnsCsv(v) {
-    this._sourceColumnsCsv = (v || '').trim();
+    const newVal = (v || '').trim();
+    if (newVal === this._sourceColumnsCsv) return;
+    this._sourceColumnsCsv = newVal;
     this.initMappings();
 
     if (!this.initialSourceColumns?.length && this._sourceColumnsCsv) {
@@ -275,13 +283,20 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
         isMapped: status === 'mapped',
         isUnmapped: status === 'unmapped',
         isTransform: status === 'transform',
-        pillClass: `pill ${status}`
+        pillClass: `pill ${status}`,
+        rowClass: `fm-source-row ${status}`
       };
     });
   }
 
   get hasSourceList() {
     return this.sourceList.length > 0;
+  }
+
+  /** Summary: skipped = source columns not present in any mapping */
+  get summarySkippedCount() {
+    const mapped = new Set((this.mappings || []).map((m) => m.sourceColumn));
+    return (this.initialSourceColumns || []).filter((c) => !mapped.has(c)).length;
   }
 
   /** Summary*/
@@ -569,16 +584,17 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
         const chipClass = `chip ${
           isTransform ? 'chip--transform' : 'chip--mapped'
         }`;
+        const lookupFields = Array.isArray(this.lookupFieldsByObject[m.lookupObject])
+          ? this.lookupFieldsByObject[m.lookupObject]
+          : [];
 
         return {
           key: `${field.apiName}__${m.sourceColumn}`,
           sourceColumn: m.sourceColumn,
           mapping: m,
-          lookupFieldsOptions: Array.isArray(
-            this.lookupFieldsByObject[m.lookupObject]
-          )
-            ? this.lookupFieldsByObject[m.lookupObject]
-            : [],
+          lookupFieldsOptions: lookupFields,
+          lookupObjOpts: (this.availableObjectsOptions || []).map(o => ({ ...o, isSelected: o.value === m.lookupObject })),
+          lookupFieldOpts: lookupFields.map(f => ({ ...f, isSelected: f.value === m.lookupMatchField })),
           chipClass
         };
       });
@@ -598,6 +614,7 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
       return {
         ...field,
         mappedSources,
+        hasMappedSources: hasMappings,
         cardClass: cardClasses.join(' ')
       };
     });
@@ -619,9 +636,10 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
   }
 
   ensureCsvIsSet() {
-    //CSV data is passed via event-driven props
-    if (Array.isArray(this._csvRows) && this._csvRows.length) return;
-    if (Array.isArray(this.initialSourceColumns) && this.initialSourceColumns.length) return;
+    //CSV data is passed via event-driven props — nothing to do if rows or columns are already present
+    if (!Array.isArray(this._csvRows) || !this._csvRows.length) {
+      console.warn('[FieldMapper] ensureCsvIsSet: no CSV rows available yet');
+    }
   }
 
   rebuildClientPreview() {
@@ -766,8 +784,8 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
         e.target.checked = false;
 
         this.toast(
-          'Limit reached',
-          'You can configure at most 3 lookup fields in this mapping.',
+          'Limite atteinte',
+          'Vous pouvez configurer au maximum 3 champs de recherche (lookup) dans ce mapping.',
           'warning'
         );
         return;
@@ -836,6 +854,37 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
     }
 
     this.updateMappedSources();
+  }
+
+  handleSelectMap(e) {
+    const sourceColumn = e.target.value;
+    const targetField = e.currentTarget.dataset.target;
+    e.target.value = '';
+    if (!sourceColumn || !targetField) return;
+
+    const already = (this.mappings || []).find(
+      m => m.sourceColumn === sourceColumn && m.targetField === targetField
+    );
+    if (already) return;
+
+    const idx = (this.mappings || []).findIndex(m => m.sourceColumn === sourceColumn);
+    if (idx >= 0) {
+      this.mappings[idx] = { ...this.mappings[idx], targetField, projectId: this.selectedProjectId, version: this.versionInput };
+    } else {
+      this.mappings = [...this.mappings, {
+        id: null, projectId: this.selectedProjectId, version: this.versionInput || '1.0',
+        sourceColumn, targetField, isLookup: false, lookupObject: null, lookupMatchField: null
+      }];
+      this.availableSourceColumns = (this.availableSourceColumns || []).filter(c => c !== sourceColumn);
+    }
+    this.updateMappedSources();
+  }
+
+  get sourceColumnOptions() {
+    return [
+      { label: 'Sélectionner...', value: '' },
+      ...(this.initialSourceColumns || []).map(c => ({ label: c, value: c }))
+    ];
   }
 
   handleRemoveMapping(e) {
@@ -919,15 +968,19 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
   async handleSave() {
     try {
       if (!this.selectedProjectId) {
-        throw new Error('Please select a Project before saving.');
+        throw new Error('Veuillez sélectionner un projet avant d\'enregistrer.');
+      }
+
+      if (!this.selectedTargetObject) {
+        throw new Error('L\'objet cible n\'est pas défini pour ce projet. Veuillez d\'abord sélectionner un objet cible.');
       }
 
       // Limite 3 champs lookup max
       const lookupCount = this.currentLookupCount;
       if (lookupCount > 3) {
         this.toast(
-          'Limit reached',
-          'You can configure at most 3 lookup fields in this mapping.',
+          'Limite atteinte',
+          'Vous pouvez configurer au maximum 3 champs de recherche (lookup) dans ce mapping.',
           'warning'
         );
         return;
@@ -953,7 +1006,15 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
         }));
 
       if (!payload.length) {
-        throw new Error('No valid mapping rows to save.');
+        const rawCount = (this.mappings || []).length;
+        const validCount = (this.mappings || []).filter(m => m.sourceColumn && m.targetField).length;
+        const projectOk = !!this.selectedProjectId;
+        this.toast(
+          'Aucun mapping à sauvegarder',
+          `Lignes: ${rawCount}, valides: ${validCount}, projet: ${projectOk ? 'OK' : 'manquant'}, cible: ${this.selectedTargetObject || 'manquante'}`,
+          'warning'
+        );
+        return;
       }
 
       await saveMappingsJson({
@@ -964,14 +1025,22 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
       //vérifie l'existance de mapping pour le projet sélectionné
       await this.checkProjectMappings();
 
-      this.toast('Success', 'Mappings saved.', 'success');
+      this.toast('Succès', 'Mappings enregistrés.', 'success');
       this._refreshPreviewDebounced();
     } catch (error) {
+      console.error('[FieldMapper] handleSave error', JSON.stringify({
+        bodyMessage: error?.body?.message,
+        bodyOutput: error?.body?.output,
+        message: error?.message,
+        status: error?.status,
+        body: error?.body
+      }));
       const msg =
         error?.body?.message ||
+        error?.body?.output?.errors?.[0]?.message ||
         error?.message ||
-        'Failed to save mappings.';
-      this.toast('Error', msg, 'error');
+        'Échec de l\'enregistrement des mappings.';
+      this.toast('Erreur', msg, 'error');
     }
   }
 
@@ -984,14 +1053,14 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
 
     if (!this.selectedProjectId) {
       if (!silent) {
-        this.toast('Info', 'Select a project first.', 'info');
+        this.toast('Info', 'Sélectionnez d\'abord un projet.', 'info');
       }
       return;
     }
 
     if (!this.selectedTargetObject) {
       if (!silent) {
-        this.toast('Info', 'Target object is missing for this project.', 'info');
+        this.toast('Info', 'L\'objet cible est manquant pour ce projet.', 'info');
       }
       return;
     }
@@ -1008,7 +1077,7 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
         if (!silent) {
           this.toast(
             'Info',
-            'No saved mappings found for this project.',
+            'Aucun mapping enregistré trouvé pour ce projet.',
             'info'
           );
         }
@@ -1042,13 +1111,13 @@ export default class FieldMapper extends NavigationMixin(LightningElement) {
       this._refreshPreviewDebounced();
 
       if (!silent) {
-        this.toast('Loaded', 'Existing mappings loaded.', 'success');
+        this.toast('Chargé', 'Mappings existants chargés.', 'success');
       }
     } catch (e) {
       if (!silent) {
         this.toast(
-          'Error',
-          e?.body?.message || 'Failed to load saved mappings.',
+          'Erreur',
+          e?.body?.message || 'Échec du chargement des mappings enregistrés.',
           'error'
         );
       } else {

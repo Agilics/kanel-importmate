@@ -227,6 +227,8 @@ lightning-button:disabled::part(button) {
 .status-badge.in-progress .status-dot { background-color: #1e40af; }
 .status-badge.completed { background-color: #d1fae5; color: #065f46; }
 .status-badge.completed .status-dot { background-color: #065f46; }
+.status-badge.warning { background-color: #fef3c7; color: #92400e; }
+.status-badge.warning .status-dot { background-color: #92400e; }
 .status-badge.failed { background-color: #fee2e2; color: #991b1b; }
 .status-badge.failed .status-dot { background-color: #991b1b; }
 

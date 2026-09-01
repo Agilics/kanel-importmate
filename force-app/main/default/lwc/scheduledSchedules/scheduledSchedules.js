@@ -5,6 +5,7 @@
  */
 import { LightningElement, wire, api, track } from 'lwc';
 import { refreshApex } from '@salesforce/apex';
+import { subscribe, unsubscribe, onError } from 'lightning/empApi';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import deleteSchedule from "@salesforce/apex/ScheduleController.deleteSchedule";
 import reSchedule from '@salesforce/apex/ScheduleController.reSchedule';
@@ -12,6 +13,7 @@ import getSchedulesWithExecutionsByIdProject from "@salesforce/apex/ScheduleCont
 import toggleSchedule from "@salesforce/apex/ScheduleController.toggleSchedule";
 import LightningConfirm from 'lightning/confirm';
 import LOCALE from '@salesforce/i18n/lang';
+import TIMEZONE from '@salesforce/i18n/timeZone';
 
 
 //custom labels
@@ -23,7 +25,18 @@ import Import_NoSchedulesFound from '@salesforce/label/c.Import_NoSchedulesFound
 import Import_DeleteScheduleDialogTitle from '@salesforce/label/c.Import_DeleteScheduleDialogTitle';
 import Import_DeleteScheduleDialogMessage from '@salesforce/label/c.Import_DeleteScheduleDialogMessage';
 import Import_DeleteScheduleToastMessage from '@salesforce/label/c.Import_DeleteScheduleToastMessage';
+import LABEL_TOAST_ERROR from '@salesforce/label/c.Toast_Title_Error';
+import LABEL_TOAST_SUCCESS from '@salesforce/label/c.Toast_Title_Success';
+import LABEL_TOAST_INFO from '@salesforce/label/c.Toast_Title_Info';
+import LABEL_ERR_UNKNOWN from '@salesforce/label/c.SCH_List_Err_UnknownError';
+import LABEL_ERR_UPDATE_FAILED from '@salesforce/label/c.SCH_List_Err_UpdateFailed';
+import LABEL_MSG_TOGGLE_SUCCESS from '@salesforce/label/c.SCH_List_Msg_ToggleSuccess';
+import LABEL_TOGGLE_PAUSED from '@salesforce/label/c.SCH_List_Toggle_Paused';
+import LABEL_TOGGLE_RESUMED from '@salesforce/label/c.SCH_List_Toggle_Resumed';
+import LABEL_ERR_TOGGLE_FAILED from '@salesforce/label/c.SCH_List_Err_ToggleFailed';
+import LABEL_ERR_DELETE_FAILED from '@salesforce/label/c.SCH_List_Err_DeleteFailed';
 import STATUS_COMPLETED from '@salesforce/label/c.ProjectCard_Status_Completed';
+import STATUS_COMPLETED_WITH_ERRORS from '@salesforce/label/c.ProjectCard_Status_CompletedWithErrors';
 import STATUS_FAILED from '@salesforce/label/c.ProjectCard_Status_Failed';
 import STATUS_IN_PROGRESS from '@salesforce/label/c.ProjectCard_Status_InProgress';
 import STATUS_PENDING from '@salesforce/label/c.ProjectCard_Status_Pending';
@@ -34,7 +47,6 @@ import Import_Frequency_Weekly from '@salesforce/label/c.Import_Frequency_Weekly
 import Import_Frequency_Monthly from '@salesforce/label/c.Import_Frequency_Monthly';
 import Import_Schedule_At from '@salesforce/label/c.Import_Schedule_At'; 
 import Import_Schedule_NotScheduled from '@salesforce/label/c.Import_Schedule_NotScheduled';
-import Import_Schedule_DailyAt from '@salesforce/label/c.Import_Schedule_DailyAt';
 import Import_Schedule_WeeklyOn from '@salesforce/label/c.Import_Schedule_WeeklyOn';
 import Import_Schedule_MonthlyOn from '@salesforce/label/c.Import_Schedule_MonthlyOn';
 import Import_Schedule_Edit_Title from '@salesforce/label/c.Import_Schedule_Edit_Title';
@@ -43,8 +55,9 @@ import Import_Schedule_Edit_Info_Bar from '@salesforce/label/c.Import_Schedule_E
 import IM_EX_Btn_CancelImport from '@salesforce/label/c.IM_EX_Btn_CancelImport';
 import Import_NextRun from '@salesforce/label/c.Import_NextRun';
 
-const STATUS_LABELS = { 
+const STATUS_LABELS = {
     Completed: STATUS_COMPLETED,
+    CompletedWithErrors: STATUS_COMPLETED_WITH_ERRORS,
     Failed: STATUS_FAILED,
     InProgress: STATUS_IN_PROGRESS,
     Cancelled: STATUS_CANCELLED,
@@ -52,11 +65,29 @@ const STATUS_LABELS = {
     Suspended: STATUS_SUSPENDED
 };
 export default class ScheduledSchedules extends LightningElement {
-    @api projectId;
+    _projectId;
+    @api
+    get projectId() { return this._projectId; }
+    set projectId(val) {
+        if (val !== this._projectId) {
+            this._projectId = val;
+            this.scheduledInfos = [];   // vider immédiatement pour ne pas afficher l'ancien projet
+            this.resetEditState();
+        }
+    }
     @track scheduledInfos = [];
     @track isLoading = false;
     @track error;
     @track showAddScheduleModal = false;
+
+    // Modale "Configurer" (critères de fichier, mode Criteria)
+    @track showCriteriaModal = false;
+    @track criteriaModalScheduleId = null;
+
+    // Modale de consultation des logs d'exécution
+    @track showLogsModal = false;
+    @track logsModalExecutionId = null;
+    @track logsModalScheduleName = '';
     
     // INLINE EDIT Properties
     @track isEditingScheduleId = null;
@@ -115,10 +146,31 @@ export default class ScheduledSchedules extends LightningElement {
 
     connectedCallback() {
         console.log('connectedCallback');
-        
-        this.resetEditState();        //  S'assurer que tout est nettoyé au démarrage
+        this.resetEditState();
+        this._refreshInterval = setInterval(() => {
+            if (this.wiredSchedulesResult) {
+                refreshApex(this.wiredSchedulesResult);
+            }
+        }, 30000);
 
+        // Rafraîchissement live : une exécution planifiée qui démarre/se termine en arrière-plan
+        // doit se refléter ici sans attendre le polling 30s ni un rechargement manuel de page.
+        onError((error) => console.error('[ScheduledSchedules] EMP API error', JSON.stringify(error)));
+        if (!this._empSubscription) {
+            subscribe('/event/ImportStatusEvent__e', -1, () => this.queueLiveRefresh())
+                .then((response) => { this._empSubscription = response; })
+                .catch((error) => console.error('[ScheduledSchedules] subscribe error', JSON.stringify(error)));
+        }
     }
+
+    queueLiveRefresh() {
+        if (this._liveRefreshTimer) clearTimeout(this._liveRefreshTimer);
+        this._liveRefreshTimer = setTimeout(() => {
+            this._liveRefreshTimer = null;
+            if (this.wiredSchedulesResult) refreshApex(this.wiredSchedulesResult);
+        }, 800);
+    }
+
 
     resetEditState() {
         this.isEditingScheduleId = null;
@@ -129,8 +181,17 @@ export default class ScheduledSchedules extends LightningElement {
 
     disconnectedCallback() {
         console.log('disconnectedCallback');
-        
-        //  Nettoyer quand le composant est détaché
+        if (this._refreshInterval) {
+            clearInterval(this._refreshInterval);
+        }
+        if (this._liveRefreshTimer) {
+            clearTimeout(this._liveRefreshTimer);
+            this._liveRefreshTimer = null;
+        }
+        if (this._empSubscription) {
+            unsubscribe(this._empSubscription, () => {});
+            this._empSubscription = null;
+        }
         this.isEditingScheduleId = null;
         this.editingData = {};
         this.editingErrors = {};
@@ -140,6 +201,17 @@ export default class ScheduledSchedules extends LightningElement {
     @wire(getSchedulesWithExecutionsByIdProject, { idProject: '$projectId' })
     wiredSchedules(result) {
         this.wiredSchedulesResult = result;
+
+        // Le wire est cacheable=true (requis pour @wire) : sur un nouveau montage du composant
+        // (ex. navigation depuis un autre onglet du wizard après avoir programmé un fichier
+        // ailleurs), le cache client peut renvoyer un résultat périmé. On force donc, dès la
+        // toute première résolution du wire (même périmée), un rafraîchissement réel — fait
+        // ici plutôt que dans renderedCallback pour ne pas dépendre du timing de rendu.
+        if (!this._forcedInitialRefreshDone) {
+            this._forcedInitialRefreshDone = true;
+            refreshApex(result);
+        }
+
         const { data, error } = result;
 
         if (data) {
@@ -151,11 +223,19 @@ export default class ScheduledSchedules extends LightningElement {
 
             return (wrapper.schedules || []).map(sch => {   
 
-                const specificExecutions = executions 
+                const specificExecutions = [...executions]
                     .sort((a, b) => new Date(b.StartTime__c) - new Date(a.StartTime__c));
 
                 const lastExecution = specificExecutions.length > 0 ? specificExecutions[0] : null;
                 const status        = lastExecution?.Status__c;
+
+                // ── Règles d'édition selon le statut ──
+                const isCompleted  = status === 'Completed' || status === 'CompletedWithErrors';
+                const isInProgress = status === 'InProgress';
+                // Modifiable seulement si l'exécution n'a pas encore tourné ou a échoué
+                const canEdit   = !isCompleted && !isInProgress;
+                // Pause/Resume : uniquement sur Pending et Suspended
+                const canToggle = status === 'Pending' || status === 'Suspended';
 
                 return {
                     id              : sch.Id,
@@ -176,11 +256,18 @@ export default class ScheduledSchedules extends LightningElement {
                     iconClass       : this.getIconClass(status),
                     boxIconClass    : this.getBoxIconClass(status),
                     iconActionName  : status === 'Suspended' ? 'utility:play' : 'utility:pause_alt',
+                    iconActionEmoji : status === 'Suspended' ? '▶' : '⏸',
                     iconStatusName  : this.getStatusIcon(status),
+                    iconStatusEmoji : this.getStatusEmoji(status),
                     targetObject    : sch.Project__r?.TargetObject__c || 'N/A',
-                    projectName: sch.Project__r?.Name || 'Unknown Project',
-                    isNotCompleted: this.isNotExecutionCompleted(status), // hide play  if Execution completed
-                    rawStatus: status
+                    projectName     : sch.Project__r?.Name || 'Unknown Project',
+                    rawStatus       : status,
+                    canEdit,
+                    canToggle,
+                    isCompleted,
+                    dataSourceMode  : sch.DataSourceMode__c || 'Inherit',
+                    matchedFileName : lastExecution?.MatchedFileName__c || '—',
+                    lastExecutionId : lastExecution?.Id || null,
                 };
         });
     });
@@ -197,15 +284,15 @@ export default class ScheduledSchedules extends LightningElement {
             console.error(' Error loading schedules:', JSON.stringify(error, null, 2));
             
             this.showToast(
-                'Error', 
-                this.getErrorMessage(error), 
+                LABEL_TOAST_ERROR,
+                this.getErrorMessage(error),
                 'error'
             );
         }
     } 
 
     isNotExecutionCompleted(status) {
-        return !status === 'Completed' ;
+        return status !== 'Completed';
     }
 
     // Formattage Status de la planification d'exécution
@@ -216,6 +303,7 @@ export default class ScheduledSchedules extends LightningElement {
         const lowerCaseStatus = status.toLowerCase();
 
         if (lowerCaseStatus === 'completed')  return 'Completed';
+        if (lowerCaseStatus === 'completedwitherrors') return 'CompletedWithErrors';
         if (lowerCaseStatus === 'cancelled')  return 'Cancelled';
         if (lowerCaseStatus === 'failed')     return 'Failed';
         if (lowerCaseStatus === 'inprogress') return 'In Progress';
@@ -247,33 +335,75 @@ export default class ScheduledSchedules extends LightningElement {
  
   
 
-    // Getter qui ajoute isBeingEdited à chaque schedule
+    // Getter qui ajoute isBeingEdited + boutons disabled selon statut
     get scheduledInfosWithEditState() {
         return this.scheduledInfos.map(s => ({
             ...s,
-            isBeingEdited: s.id === this.isEditingScheduleId
+            isBeingEdited:    s.id === this.isEditingScheduleId,
+            editBtnDisabled:  !s.canEdit || this.isLoading,
+            toggleBtnDisabled: this.isLoading,
+            isCriteriaMode:   s.dataSourceMode === 'Criteria',
+            hasLastExecution: !!s.lastExecutionId,
+            logsBtnDisabled:  !s.lastExecutionId
         }));
     }
 
-    handleEditClick(event) { 
+    // *** MODALE "CONFIGURER" (critères de fichier) ***
+
+    handleOpenCriteriaModal(event) {
+        this.criteriaModalScheduleId = event.currentTarget.dataset.id;
+        this.showCriteriaModal = true;
+    }
+
+    handleCloseCriteriaModal() {
+        this.showCriteriaModal = false;
+        this.criteriaModalScheduleId = null;
+    }
+
+    async handleCriteriaSaved() {
+        await refreshApex(this.wiredSchedulesResult);
+    }
+
+    // *** MODALE "LOGS D'EXÉCUTION" ***
+
+    handleOpenLogsModal(event) {
+        const scheduleId = event.currentTarget.dataset.id;
+        const info = this.scheduledInfos.find(s => s.id === scheduleId);
+        if (!info || !info.lastExecutionId) return;
+        this.logsModalExecutionId = info.lastExecutionId;
+        this.logsModalScheduleName = info.title;
+        this.showLogsModal = true;
+    }
+
+    handleCloseLogsModal() {
+        this.showLogsModal = false;
+        this.logsModalExecutionId = null;
+    }
+
+    handleEditClick(event) {
         const scheduleId = event.currentTarget.dataset.id;
         const scheduleInfo = this.scheduledInfos.find(s => s.id === scheduleId);
 
         if (!scheduleInfo) return;
+        if (!scheduleInfo.canEdit) return; // blocage côté JS en plus du disabled HTML
 
         const sch = scheduleInfo.schedule;
         this.isEditingScheduleId = scheduleId;
 
-        // FIX 2: Assigner des primitifs directement, pas dans un objet
         this.editFrequency = sch.Frequency__c || '';
-        // FIX 3: lightning-input type="datetime" attend une valeur ISO complète
-        this.editNextRun = sch.NextRun__c || '';
+
+        // Convertir en format datetime-local (YYYY-MM-DDTHH:mm) en heure locale
+        if (sch.NextRun__c) {
+            const d = new Date(sch.NextRun__c);
+            const offset = d.getTimezoneOffset() * 60000;
+            const local  = new Date(d.getTime() - offset);
+            this.editNextRun = local.toISOString().slice(0, 16);
+        } else {
+            this.editNextRun = '';
+        }
 
         this.frequencyError = '';
         this.nextRunError = '';
-
-        console.log('[handleEditClick] editFrequency:', this.editFrequency);
-        console.log('[handleEditClick] editNextRun:', this.editNextRun);
     }
 
     handleFrequencyChange(event) {
@@ -291,26 +421,26 @@ export default class ScheduledSchedules extends LightningElement {
     }
 
     async handleSaveEdit() {
-        //if (!this._validateForm()) return;
+        if (!this._validateForm()) return;
 
         this.isLoading = true;
-        try { 
-            console.log('[handleSaveEdit] nextRun envoyé à Apex:', this.editNextRun);
+        try {
+            // Convertir la valeur datetime-local en Date pour Apex
+            const nextRunDate = this.editNextRun ? new Date(this.editNextRun) : null;
 
             await reSchedule({
                 scheduleId: this.isEditingScheduleId,
-                frequency: this.editFrequency,
-                nextRun: this.editNextRun   
-            })
-            .catch(error => alert('Error updating schedule', error.body.message));
+                frequency:  this.editFrequency,
+                nextRun:    nextRunDate
+            });
 
-            this.showToast('Success', Import_UpdateScheduleToastMessage.replace('{0}', this.editFrequency), 'success');
+            this.showToast(LABEL_TOAST_SUCCESS, Import_UpdateScheduleToastMessage.replace('{0}', this.editFrequency), 'success');
             this._clearEditState();
             await refreshApex(this.wiredSchedulesResult);
 
         } catch (error) {
             console.error('[handleSaveEdit] ERROR:', error);
-            this.showToast('Error', error?.body?.message || error?.message || 'Error updating schedule', 'error');
+            this.showToast(LABEL_TOAST_ERROR, error?.body?.message || error?.message || LABEL_ERR_UPDATE_FAILED, 'error');
         } finally {
             this.isLoading = false;
         }
@@ -356,7 +486,7 @@ export default class ScheduledSchedules extends LightningElement {
         
         console.log(' Edit state reset completely');
         
-        this.showToast('Info', Import_CancelEditMessage, 'info');
+        this.showToast(LABEL_TOAST_INFO, Import_CancelEditMessage, 'info');
     }
 
    
@@ -415,15 +545,15 @@ export default class ScheduledSchedules extends LightningElement {
             const result = await toggleSchedule({ scheduleId, isPause });
 
             if (result?.success) {
-                const action = isPause ? 'paused' : 'resumed';
-                this.showToast('Success', `Schedule ${action} successfully`, 'success');
+                const action = isPause ? LABEL_TOGGLE_PAUSED : LABEL_TOGGLE_RESUMED;
+                this.showToast(LABEL_TOAST_SUCCESS, LABEL_MSG_TOGGLE_SUCCESS.replace('{0}', action), 'success');
                 await refreshApex(this.wiredSchedulesResult);
             } else {
-                this.showToast('Error', result?.error || 'Toggle failed', 'error');
+                this.showToast(LABEL_TOAST_ERROR, result?.error || LABEL_ERR_TOGGLE_FAILED, 'error');
             }
         } catch (error) {
             console.error('Error toggling schedule:', error);
-            this.showToast('Error', this.getErrorMessage(error), 'error');
+            this.showToast(LABEL_TOAST_ERROR, this.getErrorMessage(error), 'error');
         } finally {
             this.isLoading = false;
         }
@@ -451,7 +581,7 @@ export default class ScheduledSchedules extends LightningElement {
             await refreshApex(this.wiredSchedulesResult);
 
             this.showToast(
-                'Success',
+                LABEL_TOAST_SUCCESS,
                 Import_DeleteScheduleToastMessage,
                 'success'
             );
@@ -459,8 +589,8 @@ export default class ScheduledSchedules extends LightningElement {
         } catch (error) {
             console.error('Error deleting schedule:', error);
             this.showToast(
-                'Error',
-                error?.body?.message || 'Error deleting schedule',
+                LABEL_TOAST_ERROR,
+                error?.body?.message || LABEL_ERR_DELETE_FAILED,
                 'error'
             );
         }
@@ -514,13 +644,14 @@ export default class ScheduledSchedules extends LightningElement {
                 return '—';
             }
             
-            return new Intl.DateTimeFormat(LOCALE, { 
-                year : 'numeric', 
-                month: 'short', 
+            return new Intl.DateTimeFormat(LOCALE, {
+                year : 'numeric',
+                month: 'short',
                 day  : 'numeric',
                 hour  : '2-digit',
-                minute: '2-digit'
-            }).format(date); 
+                minute: '2-digit',
+                timeZone: TIMEZONE
+            }).format(date);
             
         } catch (error) {
             console.error('Error formatting date:', error);
@@ -532,6 +663,8 @@ export default class ScheduledSchedules extends LightningElement {
         switch (status) {
             case 'Completed':
                 return 'box-icon is-centered box-icon-complete';
+            case 'CompletedWithErrors':
+                return 'box-icon is-centered box-icon-warning';
             case 'Failed':
                 return 'box-icon is-centered box-icon-failed';
             case 'InProgress':
@@ -546,20 +679,28 @@ export default class ScheduledSchedules extends LightningElement {
     formatNextRun(frequency, nextRunDate) {
       if (!frequency || !nextRunDate) return Import_Schedule_NotScheduled;
 
-        const date = new Date(nextRunDate); 
+        const date = new Date(nextRunDate);
 
-        const dayName = new Intl.DateTimeFormat(LOCALE, { weekday: 'long' }).format(date);
+        const dayName = new Intl.DateTimeFormat(LOCALE, { weekday: 'long', timeZone: TIMEZONE }).format(date);
         const fullDate = new Intl.DateTimeFormat(LOCALE, {
-            weekday: 'long', day: '2-digit', month: 'long', year: 'numeric'
+            weekday: 'long', day: '2-digit', month: 'long', year: 'numeric', timeZone: TIMEZONE
         }).format(date);
         const timeString = new Intl.DateTimeFormat(LOCALE, {
-            hour: 'numeric', minute: '2-digit'
+            hour: 'numeric', minute: '2-digit', timeZone: TIMEZONE
         }).format(date);
+
+        // Comparer les dates calendaires (pas seulement l'heure) pour distinguer
+        // aujourd'hui / demain — sans ça, "Daily at 12:41" reste affiché tel quel même
+        // après l'heure passée, donnant l'impression trompeuse d'un retard alors que
+        // la prochaine exécution réelle (NextRun__c) a bien été avancée au lendemain.
+        const relativeDay = this.getRelativeDayLabel(date);
 
         switch (frequency) {
             case 'DAILY':
             case 'Daily':
-                return `${Import_Schedule_DailyAt} ${timeString}`;
+                return relativeDay
+                    ? `${relativeDay} ${Import_Schedule_At} ${timeString}`
+                    : `${fullDate} ${Import_Schedule_At} ${timeString}`;
             case 'WEEKLY':
             case 'Weekly':
                 return `${Import_Schedule_WeeklyOn} ${dayName} ${Import_Schedule_At} ${timeString}`;
@@ -570,17 +711,31 @@ export default class ScheduledSchedules extends LightningElement {
                 return `${fullDate} ${Import_Schedule_At} ${timeString}`;
         }
     }
-    
-    
-    
+
+    // "Today"/"Tomorrow" si la date calendaire de nextRunDate correspond, sinon null
+    // (le composant garde ses libellés existants en anglais pour rester cohérent avec eux)
+    getRelativeDayLabel(nextRunDate) {
+        const dateKeyOf = (d) => new Intl.DateTimeFormat('en-CA', { timeZone: TIMEZONE }).format(d);
+        const now = new Date();
+        const tomorrow = new Date(now);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+
+        const nextRunKey = dateKeyOf(nextRunDate);
+        if (nextRunKey === dateKeyOf(now)) return 'Today';
+        if (nextRunKey === dateKeyOf(tomorrow)) return 'Tomorrow';
+        return null;
+    }
+
     getIconClass(status) {
         switch (status) {
             case 'Completed':
                 return 'completed-icon';
+            case 'CompletedWithErrors':
+                return 'warning-icon';
             case 'Failed':
                 return 'failed-icon';
             case 'InProgress':
-                return 'suspended-icon';  
+                return 'inprogress-icon spin';
             default:
                 return 'suspended-icon';
         }
@@ -588,6 +743,7 @@ export default class ScheduledSchedules extends LightningElement {
 
     getBadgeStatusClass(status) {
       if (status === 'Completed') return 'status-badge completed';
+      if (status === 'CompletedWithErrors') return 'status-badge warning';
       if (status === 'Failed' || status === 'failed' || status === 'cancelled' || status === 'Cancelled') return 'status-badge failed';
       return 'status-badge in-progress';
     }
@@ -597,14 +753,32 @@ export default class ScheduledSchedules extends LightningElement {
             'Pending': 'utility:hourglass',
             'InProgress': 'utility:spinner',
             'Completed': 'utility:success',
+            'CompletedWithErrors': 'utility:warning',
             'Suspended': 'utility:pause_alt',
             'Failed': 'utility:error'
         };
         return icons[status] || 'utility:info';
     }
 
+    getStatusEmoji(status) {
+        const emojis = {
+            'Pending'   : '⏳',
+            'InProgress': '↺',
+            'Completed' : '✓',
+            'CompletedWithErrors': '⚠',
+            'Suspended' : '⏸',
+            'Failed'    : '⚠'
+        };
+        return emojis[status] || 'ℹ';
+    }
+
+    handleNextRunNativeChange(event) {
+        this.editNextRun = event.target.value;
+        this.nextRunError = '';
+    }
+
     getErrorMessage(error) {
-        if (!error) return 'Unknown error';
+        if (!error) return LABEL_ERR_UNKNOWN;
         
         if (error.body && error.body.message) {
             return error.body.message;

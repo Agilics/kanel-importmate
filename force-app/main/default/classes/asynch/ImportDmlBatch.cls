@@ -152,7 +152,12 @@ public with sharing class ImportDmlBatch implements Database.Batchable<SObject>,
         ];
 
         if (exec.Status__c != Constants.EXECUTION_STATUS_CANCELLED) {
-            exec.Status__c = Constants.EXECUTION_STATUS_COMPLETED;
+            // "Completed" seul suffisait à faire croire à un succès total même quand 100% des
+            // lignes échouaient (ex. 5 enregistrements / 5 erreurs) : on distingue désormais
+            // un import totalement propre d'un import terminé mais avec des erreurs.
+            exec.Status__c = totalFailed > 0
+                ? Constants.EXECUTION_STATUS_COMPLETED_WITH_ERRORS
+                : Constants.EXECUTION_STATUS_COMPLETED;
             exec.Phase__c = Constants.EXECUTION_PHASE_COMPLETED;
         }
 
@@ -162,13 +167,13 @@ public with sharing class ImportDmlBatch implements Database.Batchable<SObject>,
         exec.LogLimitReached__c = logCapReached;
         update exec;
 
-        PublisherService.publishExecutionCompleted(
-            String.valueOf(executionId),
-            exec.Status__c == Constants.EXECUTION_STATUS_COMPLETED,
-            totalSuccessful,
-            totalFailed,
-            totalLogged
-        );
+        String message = String.format('Execution completed. Processed: {0}, Failed Lines: {1}, Total Errors: {2}',
+            new List<String>{
+                String.valueOf(totalSuccessful + totalFailed),
+                String.valueOf(totalFailed),
+                String.valueOf(totalLogged)
+            });
+        PublisherService.publishImportStatus(String.valueOf(executionId), exec.Status__c, 100, message);
 
         //phase 4: cleanup
         Database.executeBatch(new StagingCleanupBatch(executionId), Constants.CLEANUP_BATCH_SIZE);

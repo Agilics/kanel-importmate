@@ -16,56 +16,109 @@ public with sharing class ScheduleService {
         public ScheduleWrapper() {}
     }
 
+    // Résultat de résolution de données en mode Criteria (fichier(s) trouvé(s) par motif)
+    private class ScheduleDataResult {
+        List<Map<String, String>> rows              = new List<Map<String, String>>();
+        String                    matchedFileName;
+        Id                        matchedContentDocumentId;
+        List<Id>                  resolvedFileIds    = new List<Id>();
+    }
+
    
     // CRÉATION / MODIFICATION / SUPPRESSION
    
 
     /**
-     * Créer et planifier un Schedule__c 
+     * Créer et planifier un Schedule__c (mode Inherit par défaut, rétrocompatible)
      */
     public static Id schedule(String frequence, Datetime nextRun, String projectId) {
+        return schedule(frequence, nextRun, projectId, Constants.DATA_SOURCE_MODE_INHERIT, null, null);
+    }
+
+    /**
+     * Créer et planifier un Schedule__c, avec configuration optionnelle du mode Criteria
+     * (sélection de fichier par motif de nom)
+     */
+    public static Id schedule(
+        String frequence,
+        Datetime nextRun,
+        String projectId,
+        String dataSourceMode,
+        String fileSelectionMode,
+        String fileNamePattern
+    ) {
         try {
             if (!SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType) ||
                 !SecurityUtils.isAccessible(Schema.ImportProject__c.SObjectType)) {
-                throw new SchedulingException('Insufficient permissions');
+                throw new SchedulingException(Label.SCH_Err_InsufficientPermissions);
             }
             if (String.isBlank(frequence) || nextRun == null || String.isBlank(projectId)) {
-                throw new SchedulingException('Frequency, nextRun and projectId are required');
+                throw new SchedulingException(Label.SCH_Err_RequiredFields);
             }
             if (nextRun <= System.now()) {
-                throw new SchedulingException('Next run date must be in the future');
+                throw new SchedulingException(Label.SCH_Err_NextRunInFuture);
             }
 
-            // GUARD : 1 seul schedule par projet
-            List<Schedule__c> existing = [
-                SELECT Id, Frequency__c, NextRun__c
+            // Une seule planification active par PROJET (pas par fichier) : l'écran de
+            // planification définit des critères (motif de nom) que l'exécution applique en
+            // parcourant l'ensemble des fichiers du projet pour trouver celui qui correspond.
+            // Reprogrammer met donc à jour l'unique planification active existante, quels que
+            // soient son mode ou son motif précédents. Un schedule terminé (Completed/Failed/
+            // Cancelled) ne compte plus comme actif : la demande suivante en crée un nouveau.
+            List<Schedule__c> projectSchedules = [
+                SELECT Id, Frequency__c, NextRun__c, DataSourceMode__c, FileNamePattern__c
                 FROM Schedule__c
                 WHERE Project__c = :projectId
-                LIMIT 1
+                ORDER BY CreatedDate DESC
             ];
-            if (!existing.isEmpty()) {
-                throw new SchedulingException(
-                    'Ce projet a déjà une planification active (' +
-                    existing[0].Frequency__c + '). ' +
-                    'Supprimez-la avant d\'en créer une nouvelle.'
+
+            Schedule__c existingActiveSchedule = null;
+            for (Schedule__c s : projectSchedules) {
+                List<ImportExecution__c> lastExec = [
+                    SELECT Status__c FROM ImportExecution__c
+                    WHERE Schedule__c = :s.Id
+                    ORDER BY CreatedDate DESC
+                    LIMIT 1
+                ];
+                String lastStatus = lastExec.isEmpty() ? '' : (lastExec[0].Status__c != null ? lastExec[0].Status__c : '');
+                Set<String> terminalStatuses = new Set<String>{
+                    Constants.EXECUTION_STATUS_COMPLETED, Constants.EXECUTION_STATUS_COMPLETED_WITH_ERRORS,
+                    Constants.EXECUTION_STATUS_FAILED, Constants.EXECUTION_STATUS_CANCELLED
+                };
+                if (!terminalStatuses.contains(lastStatus)) {
+                    existingActiveSchedule = s;
+                    break;
+                }
+            }
+
+            if (existingActiveSchedule != null) {
+                Map<String, Object> result = reSchedule(
+                    existingActiveSchedule.Id, frequence, nextRun, dataSourceMode, fileSelectionMode, fileNamePattern
                 );
+                if (result.get('success') == true) {
+                    return existingActiveSchedule.Id;
+                }
+                throw new SchedulingException(String.valueOf(result.get('error')));
             }
 
             Schedule__c newSchedule = new Schedule__c(
-                Frequency__c = frequence,
-                Project__c   = projectId,
-                NextRun__c   = nextRun
+                Frequency__c         = frequence,
+                Project__c           = projectId,
+                NextRun__c           = nextRun,
+                DataSourceMode__c    = String.isNotBlank(dataSourceMode) ? dataSourceMode : Constants.DATA_SOURCE_MODE_INHERIT,
+                FileSelectionMode__c = fileSelectionMode,
+                FileNamePattern__c   = fileNamePattern
             );
             Schedule__c savedSchedule = ScheduleRepository.addSchedule(newSchedule);
             if (savedSchedule == null || savedSchedule.Id == null) {
-                throw new ApplicationException('Failed to create schedule record');
+                throw new ApplicationException(Label.SCH_Err_CreateFailed);
             }
-           
+
             ExecutionRepository.createLinkedExecution(
                 Id.valueOf(savedSchedule.Project__c),
                 String.valueOf(savedSchedule.Id),
                 Constants.EXECUTION_STATUS_PENDING,
-                Constants.EXECUTION_TYPE_IMPORT,
+                Constants.EXECUTION_TYPE_SCHEDULED,
                 '',
                 0
             );
@@ -87,30 +140,70 @@ public with sharing class ScheduleService {
     }
 
     /**
-     * Reprogrammer OU Reporter une exécution planifiée (schedule) existante
+     * Reprogrammer OU Reporter une exécution planifiée (schedule) existante (fréquence/date uniquement ;
+     * la configuration Criteria existante, si elle existe, n'est pas modifiée)
      */
     public static Map<String, Object> reSchedule(String scheduleId, String frequency, Datetime nextRun) {
+        return reSchedule(scheduleId, frequency, nextRun, null, null, null);
+    }
+
+    /**
+     * Reprogrammer OU Reporter une exécution planifiée (schedule) existante, avec mise à jour
+     * optionnelle de la configuration Criteria. Un paramètre Criteria laissé à null conserve
+     * la valeur déjà enregistrée (ne réinitialise pas vers Inherit).
+     */
+    public static Map<String, Object> reSchedule(
+        String scheduleId,
+        String frequency,
+        Datetime nextRun,
+        String dataSourceMode,
+        String fileSelectionMode,
+        String fileNamePattern
+    ) {
         try {
             if (String.isBlank(scheduleId)) {
-                return new Map<String, Object>{ 'success' => false, 'error' => 'Schedule ID is required' };
+                return new Map<String, Object>{ 'success' => false, 'error' => Label.SCH_Err_IdRequired };
             }
             if (String.isBlank(frequency) || nextRun == null) {
-                return new Map<String, Object>{ 'success' => false, 'error' => 'Frequency and nextRun are required' };
+                return new Map<String, Object>{ 'success' => false, 'error' => Label.SCH_Err_FreqAndDateRequired };
             }
             if (nextRun <= System.now()) {
-                return new Map<String, Object>{ 'success' => false, 'error' => 'Next run date must be in the future' };
+                return new Map<String, Object>{ 'success' => false, 'error' => Label.SCH_Err_NextRunInFuture };
             }
 
             Schedule__c existingSchedule = ScheduleRepository.getScheduleById(scheduleId);
             if (existingSchedule == null) {
-                return new Map<String, Object>{ 'success' => false, 'error' => 'Schedule not found' };
+                return new Map<String, Object>{ 'success' => false, 'error' => Label.SCH_Err_NotFound };
             }
 
             cancelExistingJob(existingSchedule.Id);
 
             existingSchedule.Frequency__c = frequency;
             existingSchedule.NextRun__c   = nextRun;
+            if (dataSourceMode != null)    existingSchedule.DataSourceMode__c    = dataSourceMode;
+            if (fileSelectionMode != null) existingSchedule.FileSelectionMode__c = fileSelectionMode;
+            if (fileNamePattern != null)   existingSchedule.FileNamePattern__c   = fileNamePattern;
             update existingSchedule;
+
+            // reSchedule() peut être appelé sur un schedule dont la dernière exécution est déjà
+            // terminale (Completed/Failed) — ex. reprogrammer après un premier run. Sans exécution
+            // Pending/InProgress en attente, le job créé ci-dessous se déclencherait à vide au
+            // prochain NextRun__c (executeSchedule() ne trouverait rien à traiter) et ne
+            // n'importerait jamais rien.
+            List<ImportExecution__c> openExecutions = ScheduleRepository.findExecutionsBySchedule(
+                existingSchedule.Id,
+                new List<String>{ Constants.EXECUTION_STATUS_PENDING, Constants.EXECUTION_STATUS_IN_PROGRESS }
+            );
+            if (openExecutions.isEmpty()) {
+                ExecutionRepository.createLinkedExecution(
+                    Id.valueOf(existingSchedule.Project__c),
+                    String.valueOf(existingSchedule.Id),
+                    Constants.EXECUTION_STATUS_PENDING,
+                    Constants.EXECUTION_TYPE_SCHEDULED,
+                    '',
+                    0
+                );
+            }
 
             String newCron    = buildCron(nextRun);
             String newJobName = 'Schedule_' + existingSchedule.Id + '_' + Datetime.now().getTime();
@@ -152,11 +245,11 @@ public with sharing class ScheduleService {
     public static Map<String, Object> toggleSchedule(String scheduleId, Boolean isPause) {
         try {
             if (String.isBlank(scheduleId)) {
-                return new Map<String, Object>{ 'success' => false, 'error' => 'Schedule ID is required' };
+                return new Map<String, Object>{ 'success' => false, 'error' => Label.SCH_Err_IdRequired };
             }
             Schedule__c existing = ScheduleRepository.getScheduleById(scheduleId);
             if (existing == null) {
-                return new Map<String, Object>{ 'success' => false, 'error' => 'Schedule not found' };
+                return new Map<String, Object>{ 'success' => false, 'error' => Label.SCH_Err_NotFound };
             }
             return isPause ? pauseSchedule(existing) : resumeSchedule(existing);
         } catch (Exception e) {
@@ -169,11 +262,12 @@ public with sharing class ScheduleService {
     private static Map<String, Object> pauseSchedule(Schedule__c schedule) {
         cancelExistingJob(schedule.Id);
 
-        // 1 seul schedule par projet → query via Project__c sans ambiguïté
+        // Plusieurs schedules (un par fichier) peuvent coexister sur le même projet →
+        // ne toucher qu'à l'exécution liée à CE schedule précis (Schedule__c, lookup dédié).
         List<ImportExecution__c> executions = [
             SELECT Id, Status__c, EndTime__c
             FROM ImportExecution__c
-            WHERE Project__c = :schedule.Project__c
+            WHERE Schedule__c = :schedule.Id
             AND   Status__c IN ('InProgress', 'Pending')
             ORDER BY StartTime__c DESC
             LIMIT 1
@@ -198,14 +292,14 @@ public with sharing class ScheduleService {
         if (schedule.NextRun__c == null || schedule.NextRun__c <= System.now()) {
             return new Map<String, Object>{
                 'success' => false,
-                'error'   => 'Next run date is in the past. Please reschedule first.'
+                'error'   => Label.SCH_Err_NextRunPast
             };
         }
 
         List<ImportExecution__c> executions = [
             SELECT Id, Status__c, EndTime__c
             FROM ImportExecution__c
-            WHERE Project__c = :schedule.Project__c
+            WHERE Schedule__c = :schedule.Id
             AND   Status__c  = 'Suspended'
             ORDER BY StartTime__c DESC
             LIMIT 1
@@ -217,6 +311,18 @@ public with sharing class ScheduleService {
             executions[0].EndTime__c = null;
             ExecutionRepository.updateImportExecution(executions[0]);
             executionId = executions[0].Id;
+        } else {
+            // Cas anormal (ex. l'exécution Suspended a été supprimée entre-temps) : sans exécution
+            // Pending en attente, la reprise créerait un job qui se déclencherait à vide.
+            ImportExecution__c fresh = ExecutionRepository.createLinkedExecution(
+                Id.valueOf(schedule.Project__c),
+                String.valueOf(schedule.Id),
+                Constants.EXECUTION_STATUS_PENDING,
+                Constants.EXECUTION_TYPE_SCHEDULED,
+                '',
+                0
+            );
+            executionId = fresh.Id;
         }
 
         String newCron    = buildCron(schedule.NextRun__c);
@@ -238,48 +344,81 @@ public with sharing class ScheduleService {
      */
     public static ScheduleJobResult executeSchedule(Id scheduleId) {
         System.debug(LOG_PREFIX + ' Starting execution for: ' + scheduleId);
+        ImportExecution__c execution;
+        Schedule__c existingSchedule;
         try {
-            Schedule__c existingSchedule = ScheduleRepository.getScheduleById(scheduleId);
+            existingSchedule = ScheduleRepository.getScheduleById(scheduleId);
             if (existingSchedule == null) {
-                return ScheduleJobResult.error('Schedule not found: ' + scheduleId);
+                return ScheduleJobResult.error(String.format(Label.SCH_Err_NotFoundWithId, new List<Object>{ scheduleId }));
             }
 
-            // Bloquer si une exécution est Suspended
+            // Bloquer si CETTE planification (pas une autre du même projet) est Suspended
             List<ImportExecution__c> suspendedExecution = [
                 SELECT Id FROM ImportExecution__c
-                WHERE Project__c = :existingSchedule.Project__c
+                WHERE Schedule__c = :scheduleId
                 AND   Status__c  = 'Suspended'
                 LIMIT 1
             ];
             if (!suspendedExecution.isEmpty()) {
-                return ScheduleJobResult.error('Execution is suspended. Resume before running.');
+                return ScheduleJobResult.error(Label.SCH_Err_Suspended);
             }
 
-            List<Map<String, String>> importData = retrieveScheduleData(existingSchedule);
+            // Récupérer l'exécution Pending liée à ce schedule dès maintenant : elle sert de
+            // support de log, que l'exécution démarre normalement ou échoue plus bas.
+            List<ImportExecution__c> pendingExecutions = ScheduleRepository.findExecutionsBySchedule(
+                scheduleId, new List<String>{ Constants.EXECUTION_STATUS_PENDING }
+            );
+            execution = pendingExecutions.isEmpty() ? null : pendingExecutions[0];
+
+            Boolean isCriteriaMode = Constants.DATA_SOURCE_MODE_CRITERIA.equals(existingSchedule.DataSourceMode__c)
+                && String.isNotBlank(existingSchedule.FileNamePattern__c);
+
+            List<Map<String, String>> importData;
+            ScheduleDataResult criteriaResult;
+            if (isCriteriaMode) {
+                criteriaResult = retrieveScheduleDataByCriteria(existingSchedule);
+                importData = criteriaResult.rows;
+            } else {
+                importData = retrieveScheduleData(existingSchedule);
+            }
+
             if (importData == null || importData.isEmpty()) {
-                return ScheduleJobResult.error('No data found for scheduled import');
+                String reason = isCriteriaMode
+                    ? String.format(Label.SCH_Err_NoFileMatch, new List<Object>{ existingSchedule.FileNamePattern__c })
+                    : Label.SCH_Err_NoDataAvailable;
+                markExecutionFailed(execution, reason);
+                // Une planification récurrente (Daily/Weekly/Monthly) doit continuer à réessayer
+                // aux prochaines occurrences même si aucun fichier ne correspond aujourd'hui.
+                rescheduleNext(existingSchedule);
+                update existingSchedule;
+                return ScheduleJobResult.error(Label.SCH_Err_NoDataFound);
             }
 
-            Integer totalRecords = Integer.valueOf(importData.size());      
-            
-            List<String> statuses = new List<String>{'Pending'}; 
+            if (execution == null) {
+                String reason = Label.SCH_Err_NoPendingExecution;
+                ErrorLogService.logError(0, Constants.ERROR_TYPE_SCHEDULING, reason);
+                // Cas anormal mais pas définitif : la planification récurrente doit quand même
+                // retenter à la prochaine occurrence plutôt que de rester bloquée pour toujours.
+                rescheduleNext(existingSchedule);
+                update existingSchedule;
+                return ScheduleJobResult.error(reason);
+            }
 
-            //fetch existing ImportExecution__c by scheduleId
-            List<ImportExecution__c> executions = ScheduleRepository.findExecutionsBySchedule(
-                scheduleId,
-                statuses
-            );  
-            
+            Integer totalRecords = Integer.valueOf(importData.size());
 
-            ImportExecution__c execution = executions[0];
-            
             // inject phase
             execution.Status__c = Constants.EXECUTION_STATUS_IN_PROGRESS;
             execution.Phase__c = Constants.EXECUTION_PHASE_IMPORTING;
             execution.TotalRecords__c = totalRecords;
-            
-            // Update Status & Phase of ImportExecution 
-            ExecutionRepository.updateImportExecution(execution); 
+            if (isCriteriaMode) {
+                execution.MatchedFileName__c = criteriaResult.matchedFileName;
+                execution.MatchedContentDocumentId__c = criteriaResult.matchedContentDocumentId != null
+                    ? String.valueOf(criteriaResult.matchedContentDocumentId)
+                    : null;
+            }
+
+            // Update Status & Phase of ImportExecution
+            ExecutionRepository.updateImportExecution(execution);
 
             createStagingRows(execution.Id, importData);
 
@@ -288,19 +427,57 @@ public with sharing class ScheduleService {
                 Constants.PREPROCESS_BATCH_SIZE
             );
 
-            recalculateNextRun(existingSchedule);
+            rescheduleNext(existingSchedule);
+
+            if (isCriteriaMode && Constants.FILE_SELECTION_ONE_PER_RUN.equals(existingSchedule.FileSelectionMode__c)
+                && !criteriaResult.resolvedFileIds.isEmpty()) {
+                FileMatchService.markFilesProcessed(existingSchedule, criteriaResult.resolvedFileIds);
+            }
 
             update existingSchedule;
 
             PublisherService.publishExecutionStarted(String.valueOf(execution.Id));
 
-            return ScheduleJobResult.ok('Scheduled import started')
+            return ScheduleJobResult.ok(Label.SCH_Msg_ImportStarted)
                 .withExecutionId(execution.Id)
                 .withPhase('Staging');
 
         } catch (Exception e) {
             System.debug(LOG_PREFIX + ' ERROR: ' + e.getMessage());
-            return ScheduleJobResult.error('Scheduled import failed: ' + e.getMessage());
+            ErrorLogService.logException(e);
+            markExecutionFailed(execution, String.format(Label.SCH_Err_UnexpectedExecution, new List<Object>{ e.getMessage() }));
+
+            // Une erreur inattendue sur CETTE occurrence ne doit pas tuer la planification
+            // récurrente pour toujours : on retente à la prochaine échéance. Isolé dans son
+            // propre try/catch pour ne jamais masquer l'erreur d'origine ci-dessus si la
+            // replanification elle-même échoue (ex. Frequency__c invalide).
+            if (existingSchedule != null) {
+                try {
+                    rescheduleNext(existingSchedule);
+                    update existingSchedule;
+                } catch (Exception rescheduleError) {
+                    ErrorLogService.logException(rescheduleError);
+                }
+            }
+
+            return ScheduleJobResult.error(String.format(Label.SCH_Err_ScheduledImportFailed, new List<Object>{ e.getMessage() }));
+        }
+    }
+
+    /**
+     * Marque l'exécution planifiée comme Failed et consigne la raison dans ImportLog__c,
+     * afin que l'échec soit visible dans l'historique (et pas seulement dans les debug logs).
+     */
+    private static void markExecutionFailed(ImportExecution__c execution, String reason) {
+        if (execution == null) return;
+        try {
+            execution.Status__c = Constants.EXECUTION_STATUS_FAILED;
+            execution.EndTime__c = Datetime.now();
+            ExecutionRepository.updateImportExecution(execution);
+            ImportLogService.logImportLog(String.valueOf(execution.Id), Constants.EXECUTION_STATUS_FAILED, reason);
+            PublisherService.publishImportStatus(String.valueOf(execution.Id), Constants.EXECUTION_STATUS_FAILED, 100, reason);
+        } catch (Exception e) {
+            ErrorLogService.logException(e);
         }
     }
 
@@ -313,6 +490,24 @@ public with sharing class ScheduleService {
                 return new List<ScheduleWrapper>();
             }
             return ScheduleRepository.getSchedulesWithExecutionsByprojectId(idProject);
+        } catch (Exception e) {
+            ErrorLogService.logException(e);
+            throw new ApplicationException(e.getMessage());
+        }
+    }
+
+    /**
+     * Toutes les planifications d'un projet — plusieurs peuvent coexister (une par fichier
+     * en mode Criteria). Utilisé depuis l'écran des fichiers pour savoir, PAR FICHIER,
+     * s'il est déjà programmé (comparaison sur FileNamePattern__c), sans mélanger les
+     * planifications des autres fichiers du même projet.
+     */
+    public static List<Schedule__c> getSchedulesForProject(Id projectId) {
+        try {
+            if (!SecurityUtils.isAccessible(Schema.Schedule__c.SObjectType) || projectId == null) {
+                return new List<Schedule__c>();
+            }
+            return ScheduleRepository.getSchedulesByprojectId(String.valueOf(projectId));
         } catch (Exception e) {
             ErrorLogService.logException(e);
             throw new ApplicationException(e.getMessage());
@@ -378,6 +573,18 @@ public with sharing class ScheduleService {
         }
     }
 
+    // Planifie le prochain déclenchement récurrent (Daily/Weekly/Monthly) de ce schedule.
+    // Le CronTrigger ponctuel (one-off) qui vient de se déclencher est automatiquement
+    // supprimé par Salesforce une fois exécuté : sans ce nouvel appel à System.schedule(),
+    // NextRun__c avancerait bien en base mais plus aucun job ne se déclencherait jamais —
+    // la planification "mourrait" silencieusement après sa toute première exécution.
+    private static void rescheduleNext(Schedule__c schedule) {
+        recalculateNextRun(schedule);
+        String nextCron    = buildCron(schedule.NextRun__c);
+        String nextJobName = 'Schedule_' + schedule.Id + '_' + Datetime.now().getTime();
+        System.schedule(nextJobName, nextCron, new ScheduleJob(schedule.Id));
+    }
+
     private static void recalculateNextRun(Schedule__c schedule) {
         try {
             ImportMateEnum.FrequencyEnum frequency =
@@ -423,9 +630,64 @@ public with sharing class ScheduleService {
     }
 
     private static List<Map<String, String>> retrieveScheduleData(Schedule__c schedule) {
+        // 1. Fichier fixe attaché directement à ce schedule (mode "fichier fixe")
         List<Map<String, String>> data = getDataFromContentDocument(schedule.Id);
         if (data != null && !data.isEmpty()) return data;
+        // 2. Fichier uploadé à l'étape 2 et lié au projet
+        data = getDataFromContentDocument(schedule.Project__c);
+        if (data != null && !data.isEmpty()) return data;
+        // 3. Repli sur la requête SOQL de l'objet cible
         return getDataFromQuery(schedule.Project__c);
+    }
+
+    /**
+     * Mode Criteria : résout le motif de nom de fichier pour aujourd'hui, retrouve le(s) fichier(s)
+     * correspondant(s) du projet selon FileSelectionMode__c, et en extrait les lignes CSV.
+     * Ne retombe volontairement PAS sur le repli SOQL du mode Inherit en cas d'absence de match :
+     * l'utilisateur a explicitement choisi un critère de fichier, importer tout l'objet cible serait surprenant.
+     */
+    private static ScheduleDataResult retrieveScheduleDataByCriteria(Schedule__c schedule) {
+        ScheduleDataResult result = new ScheduleDataResult();
+
+        String resolvedPattern = FileMatchService.resolvePattern(schedule.FileNamePattern__c, Date.today());
+        List<FileMatchService.MatchedFile> candidates =
+            FileMatchService.findMatchingFiles(schedule.Project__c, resolvedPattern);
+        if (candidates.isEmpty()) return result;
+
+        Set<Id> processedIds = Constants.FILE_SELECTION_ONE_PER_RUN.equals(schedule.FileSelectionMode__c)
+            ? FileMatchService.getProcessedFileIds(schedule)
+            : new Set<Id>();
+
+        List<FileMatchService.MatchedFile> selected =
+            FileMatchService.applySelectionMode(candidates, schedule.FileSelectionMode__c, processedIds);
+        if (selected.isEmpty()) return result;
+
+        List<String> matchedNames = new List<String>();
+        for (FileMatchService.MatchedFile file : selected) {
+            List<Map<String, String>> rows = getDataFromContentDocumentId(file.contentDocumentId);
+            if (rows != null) result.rows.addAll(rows);
+            result.resolvedFileIds.add(file.contentDocumentId);
+            matchedNames.add(file.fileName);
+        }
+        result.matchedFileName = String.join(matchedNames, ', ');
+        result.matchedContentDocumentId = selected[0].contentDocumentId;
+        return result;
+    }
+
+    private static List<Map<String, String>> getDataFromContentDocumentId(Id contentDocumentId) {
+        try {
+            List<ContentVersion> versions = [
+                SELECT VersionData FROM ContentVersion
+                WHERE ContentDocumentId = :contentDocumentId
+                AND IsLatest = true LIMIT 1
+            ];
+            if (versions.isEmpty()) return null;
+
+            return parseCsvContent(versions[0].VersionData.toString());
+        } catch (Exception e) {
+            ErrorLogService.logException(e);
+            throw new SchedulingException(e.getMessage());
+        }
     }
 
     private static List<Map<String, String>> getDataFromContentDocument(Id scheduleId) {

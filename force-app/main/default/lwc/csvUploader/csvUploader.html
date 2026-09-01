@@ -1,5 +1,5 @@
 <!--
-  @last modification : 24/04/2026
+  @last modification : 12/06/2026
 -->
 <template>
   <div class="page">
@@ -20,41 +20,134 @@
     <span class="badge primary-badge">
       {projectName}
     </span>
-    <!-- File Upload Card -->
-    <div onclick={handleBrowseClick} class="card">
-      <div class="card__title">{label.cardTitle}</div>
-      <div class="card__subtitle">{label.cardSubtitle}</div>
 
-      <div class="dropzone" ondragover={handleDragOver} ondragleave={handleDragLeave} ondrop={handleDrop}>
-        <div class="dropzone__icon">
-          <lightning-icon icon-name="utility:upload" size="large" variant="base"></lightning-icon>
-        </div>
-        <div class="dropzone__text">
-          {label.dropzoneText}
-          <span class="browse" onclick={handleBrowseClick}> {label.dropzoneBrowse}</span>
-        </div>
-        <div class="dropzone__hint">{label.dropzoneHint}</div>
-
-        <input data-id="file" type="file" accept=".csv,text/csv" class="hidden-input" onchange={handleFileUpload}/>
+    <!-- Source Tabs -->
+    <div class="src-tabs-row">
+      <div class="src-tabs">
+        <button type="button" class={uploadTabClass} data-tab="upload" onclick={handleTabChange}>
+          <lightning-icon icon-name="utility:upload" size="x-small"></lightning-icon>
+          <span>Upload CSV</span>
+        </button>
+        <button type="button" class={storedTabClass} data-tab="stored" onclick={handleTabChange}>
+          <lightning-icon icon-name="utility:file" size="x-small"></lightning-icon>
+          <span>Fichiers enregistrés</span>
+        </button>
       </div>
-
-      <template if:true={isLoading}>
-        <p class="info info--ok slds-m-top_small">{label.loading}</p>
-      </template>
-      <template if:true={parseError}>
-        <p class="info info--error slds-m-top_small">
-           <lightning-icon icon-name="utility:error" class="custom-icon-error" size="x-small"></lightning-icon>
-          {parseError}
-        </p>
-      </template>
-      <template if:true={fileName}>
-        <div class="file-meta slds-m-top_small">
-          <span class="file-meta__name">{fileName}</span>
-          <span class="file-meta__sep">•</span>
-          <span>{fileSize} bytes</span>
-        </div>
-      </template>
+      <button type="button" class="btn btn--ghost goto-scheduling-btn" onclick={handleGotoScheduling}
+              disabled={isGotoSchedulingDisabled} title={gotoSchedulingTitle}>
+        <lightning-icon icon-name="utility:date_input" size="x-small"></lightning-icon>
+        <span>Planification</span>
+      </button>
     </div>
+
+    <!-- Onglet Upload -->
+    <template if:true={isUploadTab}>
+      <div onclick={handleBrowseClick} class="card">
+        <div class="card__title">{label.cardTitle}</div>
+        <div class="card__subtitle">{label.cardSubtitle}</div>
+
+        <div class="dropzone" ondragover={handleDragOver} ondragleave={handleDragLeave} ondrop={handleDrop}>
+          <div class="dropzone__icon">
+            <lightning-icon icon-name="utility:upload" size="large" variant="base"></lightning-icon>
+          </div>
+          <div class="dropzone__text">
+            {label.dropzoneText}
+            <span class="browse" onclick={handleBrowseClick}> {label.dropzoneBrowse}</span>
+          </div>
+          <div class="dropzone__hint">{label.dropzoneHint}</div>
+
+          <input data-id="file" type="file" accept=".csv,text/csv" class="hidden-input" onchange={handleFileUpload}/>
+        </div>
+
+        <template if:true={isLoading}>
+          <p class="info info--ok slds-m-top_small">{label.loading}</p>
+        </template>
+        <template if:true={parseError}>
+          <p class="info info--error slds-m-top_small">
+             <lightning-icon icon-name="utility:error" class="custom-icon-error" size="x-small"></lightning-icon>
+            {parseError}
+          </p>
+        </template>
+        <template if:true={fileName}>
+          <div class="file-meta slds-m-top_small">
+            <span class="file-meta__name">{fileName}</span>
+            <span class="file-meta__sep">•</span>
+            <span>{fileSize} bytes</span>
+          </div>
+        </template>
+      </div>
+    </template>
+
+    <!-- Onglet Fichiers enregistrés -->
+    <template if:true={isStoredTab}>
+      <div class="card">
+        <div class="card__title">Fichiers CSV enregistrés</div>
+        <div class="card__subtitle">Sélectionnez un fichier déjà uploadé pour ce projet.</div>
+
+        <template if:true={isLoadingStoredFiles}>
+          <p class="info slds-m-top_small">Chargement...</p>
+        </template>
+
+        <template if:true={hasStoredFiles}>
+          <div class="stored-file-list">
+            <template for:each={storedFiles} for:item="sf">
+              <div key={sf.contentDocumentId}
+                   class={sf.rowClass}
+                   data-id={sf.contentDocumentId}
+                   data-name={sf.fileName}
+                   onclick={handleSelectStoredFile}>
+                <lightning-icon icon-name="utility:file" size="x-small" class="sf-icon"></lightning-icon>
+                <div style="flex:1;min-width:0">
+                  <div class="sf-name">{sf.fileName}</div>
+                </div>
+                <span class={sf.badgeClass}>{sf.badgeLabel}</span>
+                <template if:true={sf.isSelected}>
+                  <lightning-icon icon-name="utility:check" size="xx-small" class="stored-file-check"></lightning-icon>
+                </template>
+              </div>
+            </template>
+          </div>
+        </template>
+
+        <template if:false={hasStoredFiles}>
+          <template if:false={isLoadingStoredFiles}>
+            <div class="empty-state slds-m-top_medium">
+              <lightning-icon icon-name="utility:file" size="medium" class="empty-state__icon"></lightning-icon>
+              <p class="empty-state__text">Aucun fichier CSV stocké pour ce projet. Uploadez-en un ci-dessus.</p>
+            </div>
+          </template>
+        </template>
+
+        <!-- Historique des exécutions passées (manuelles + planifiées) -->
+        <template if:true={hasExecutionHistory}>
+          <div class="card__title slds-m-top_medium">Historique des imports</div>
+          <div class="stored-file-list">
+            <template for:each={executionHistory} for:item="ex">
+              <div key={ex.id} class="stored-file-row">
+                <span class="sf-icon sf-icon--status">{ex.statusIcon}</span>
+                <div style="flex:1;min-width:0">
+                  <div class="sf-name">{ex.startTime}</div>
+                  <div class="sf-meta">{ex.summary}</div>
+                </div>
+                <span class={ex.typeClass}>{ex.typeLabel}</span>
+                <span class={ex.statusClass}>{ex.statusLabel}</span>
+                <button type="button" class="icon-btn" title="Voir les logs"
+                  data-id={ex.id} data-starttime={ex.startTime} onclick={handleOpenExecutionLogs}>
+                  <lightning-icon icon-name="utility:list" size="x-small"></lightning-icon>
+                </button>
+              </div>
+            </template>
+          </div>
+        </template>
+
+        <template if:true={storedParseError}>
+          <p class="info info--error slds-m-top_small">{storedParseError}</p>
+        </template>
+        <template if:true={isLoading}>
+          <p class="info slds-m-top_small">{label.loading}</p>
+        </template>
+      </div>
+    </template>
 
     <!-- Data Table -->
     <template if:true={hasHeaders}>
@@ -97,7 +190,6 @@
                   <th class="col-actions">{label.tableActions}</th>
                 </tr>
               </thead>
-
               <tbody>
                 <template for:each={pagedRows} for:item="row">
                   <tr key={row.id}>
@@ -279,6 +371,15 @@
           </div>
         </div>
       </section>
+    </template>
+
+    <!-- Modale "Logs d'exécution" (historique des imports) -->
+    <template if:true={showExecutionLogsModal}>
+      <c-schedule-execution-logs-modal
+        execution-id={logsModalExecutionId}
+        schedule-name={logsModalScheduleName}
+        onclosemodal={handleCloseExecutionLogsModal}
+      ></c-schedule-execution-logs-modal>
     </template>
   </div>
 </template>

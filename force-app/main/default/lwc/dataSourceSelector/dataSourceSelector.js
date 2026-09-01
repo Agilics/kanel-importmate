@@ -159,10 +159,10 @@ handleStartMapping(evt) {
   } catch (err) {
     this.dispatchEvent(
       new ShowToastEvent({
-        title: 'Open mapper failed',
+        title: 'Erreur',
         message:
           (err && err.message) ||
-          'Could not open the Field Mapping step.',
+          'Impossible d\'ouvrir l\'étape de mapping des champs.',
         variant: 'error'
       })
     );

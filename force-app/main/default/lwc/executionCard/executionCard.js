@@ -8,6 +8,9 @@ import SCHEDULE_OBJECT from "@salesforce/schema/Schedule__c";
 import FREQUENCY_FIELD from "@salesforce/schema/Schedule__c.Frequency__c";
 import getPickListValues from "@salesforce/apex/ScheduleController.getPickListValues";
 
+import LABEL_TOAST_ERROR from '@salesforce/label/c.Toast_Title_Error';
+import LABEL_ERR_LOAD_FREQUENCIES from '@salesforce/label/c.SCH_Creator_Err_LoadFrequencies';
+
 //custom labels
 
 import LABEL_IMMEDIATE_EXECUTION from '@salesforce/label/c.Import_ImmediateExecution'; 
@@ -87,9 +90,8 @@ export default class ExecutionCard extends LightningElement {
             error
           );
           this.showToast(
-            "Error",
-            error?.body?.message ||
-              "Erreur lors de la récupération des valeurs des planifications",
+            LABEL_TOAST_ERROR,
+            error?.body?.message || LABEL_ERR_LOAD_FREQUENCIES,
             "error"
           );
         }
@@ -164,7 +166,7 @@ export default class ExecutionCard extends LightningElement {
     }
 
     
-    //récupèrer le nom de l'icône 
+    //récupèrer le nom de l'icône
     get iconName(){
         return this.showScheduledCard ? 'utility:event': 'utility:connected_apps';
     }

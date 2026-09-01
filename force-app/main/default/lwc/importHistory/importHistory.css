@@ -201,6 +201,10 @@
   overflow-x: auto;
 }
 
+/* Ligne cliquable (ouvre le détail de l'exécution) */
+.ih-clickable-row { cursor: pointer; }
+.ih-clickable-row:hover { background: #f7faff; }
+
 .ih-spinner-overlay {
   position: absolute;
   inset: 0;

@@ -13,7 +13,7 @@ public with sharing class ScheduleRepository {
      */
     public static Schedule__c addSchedule(Schedule__c schedule) {
         if (!SecurityUtils.isCreateable(Schedule__c.SObjectType)) {
-            throw new ApplicationException('Insufficient permissions to create Schedule__c');
+            throw new ApplicationException(Label.SCH_Err_NoCreatePermission);
         }
         try {
             upsert schedule;
@@ -29,10 +29,10 @@ public with sharing class ScheduleRepository {
      */
     public static void deleteScheduleById(String scheduleId) {
         if (String.isBlank(scheduleId)) {
-            throw new ApplicationException('Schedule ID cannot be blank');
+            throw new ApplicationException(Label.SCH_Err_IdCannotBeBlank);
         }
         if (!SecurityUtils.isDeletable(Schedule__c.SObjectType)) {
-            throw new ApplicationException('Insufficient permissions to delete Schedule__c');
+            throw new ApplicationException(Label.SCH_Err_NoDeletePermission);
         }
         try {
             // Aborter les jobs Cron liés
@@ -69,6 +69,7 @@ public with sharing class ScheduleRepository {
         try {
             List<Schedule__c> results = [
                 SELECT Id, Name, Frequency__c, NextRun__c,
+                       DataSourceMode__c, FileSelectionMode__c, FileNamePattern__c, LastProcessedFileIds__c,
                        Project__c,
                        Project__r.Id,
                        Project__r.Name,
@@ -96,6 +97,7 @@ public with sharing class ScheduleRepository {
         try {
             return [
                 SELECT Id, Name, Frequency__c, NextRun__c,
+                       DataSourceMode__c, FileSelectionMode__c, FileNamePattern__c, LastProcessedFileIds__c,
                        Project__c,
                        Project__r.Id,
                        Project__r.Name,
@@ -173,21 +175,37 @@ public with sharing class ScheduleRepository {
             List<Schedule__c> schedules = getSchedulesByprojectId(projectId);
             if (schedules.isEmpty()) return new List<ScheduleService.ScheduleWrapper>();
 
-            List<ImportExecution__c> filteredExecutions = [
-                SELECT Id, Status__c, Type__c, Phase__c,
-                       StartTime__c, EndTime__c,
-                       TotalRecords__c, ProcessedRecords__c, FailedRecords__c,
-                       ApexJobId__c, RetryCount__c, MaxRetries__c,
-                       Project__c
-                FROM ImportExecution__c
-                WHERE Project__c = :projectId
-                AND   Status__c  = :executionStatus
+            String execQuery =
+                'SELECT Id, Status__c, Type__c, Phase__c, ' +
+                'StartTime__c, EndTime__c, TotalRecords__c, ProcessedRecords__c, FailedRecords__c, ' +
+                'ApexJobId__c, Schedule__c, RetryCount__c, MaxRetries__c, Project__c, ' +
+                'MatchedFileName__c, MatchedContentDocumentId__c ' +
+                'FROM ImportExecution__c WHERE Project__c = :projectId';
+            if (!String.isBlank(executionStatus)) {
+                execQuery += ' AND Status__c = :executionStatus';
+            }
+            execQuery += ' ORDER BY StartTime__c DESC';
+            List<ImportExecution__c> filteredExecutions = Database.query(execQuery);
 
-                ORDER BY StartTime__c DESC
-            ];
+            // Indexer par Schedule__c (lookup dédié, jamais réécrit après création — contrairement à
+            // ApexJobId__c que le pipeline batch partagé réutilise pour l'Id du job Apex en cours)
+            // pour que chaque planification ne reçoive QUE ses propres exécutions — plusieurs
+            // planifications (une par fichier) peuvent coexister pour le même projet.
+            Map<Id, List<ImportExecution__c>> executionsByScheduleId = new Map<Id, List<ImportExecution__c>>();
+            for (ImportExecution__c exec : filteredExecutions) {
+                if (exec.Schedule__c == null) continue;
+                if (!executionsByScheduleId.containsKey(exec.Schedule__c)) {
+                    executionsByScheduleId.put(exec.Schedule__c, new List<ImportExecution__c>());
+                }
+                executionsByScheduleId.get(exec.Schedule__c).add(exec);
+            }
 
             List<ScheduleService.ScheduleWrapper> wrappers = new List<ScheduleService.ScheduleWrapper>();
             for (Schedule__c schedule : schedules) {
+                List<ImportExecution__c> schedExecs = executionsByScheduleId.containsKey(schedule.Id)
+                    ? executionsByScheduleId.get(schedule.Id)
+                    : new List<ImportExecution__c>();
+
                 ScheduleService.ScheduleWrapper wrapper = new ScheduleService.ScheduleWrapper();
                 wrapper.project = new ImportProject__c(
                     Id              = schedule.Project__c,
@@ -195,7 +213,7 @@ public with sharing class ScheduleRepository {
                     TargetObject__c = schedule.Project__r.TargetObject__c
                 );
                 wrapper.schedules        = new List<Schedule__c>{ schedule };
-                wrapper.importExecutions = filteredExecutions;
+                wrapper.importExecutions = schedExecs;
                 wrappers.add(wrapper);
             }
             return wrappers;
@@ -216,6 +234,7 @@ public with sharing class ScheduleRepository {
         try {
             List<Schedule__c> schedules = [
                 SELECT Id, Name, Frequency__c, NextRun__c,
+                       DataSourceMode__c, FileSelectionMode__c, FileNamePattern__c, LastProcessedFileIds__c,
                        Project__c,
                        Project__r.Id,
                        Project__r.Name,
@@ -266,8 +285,10 @@ public with sharing class ScheduleRepository {
     // EXECUTIONS LIÉES 
 
     /**
-     * Trouver les exécutions d'un projet par statut
-     * (1 seul schedule actif par projet -> pas d'ambiguïté)
+     * Trouver les exécutions d'UNE planification précise par statut — plusieurs
+     * planifications (une par fichier) pouvant coexister sur le même projet, on
+     * scope par Schedule__c (lookup dédié, stable) et non par Project__c ni par
+     * ApexJobId__c (réécrit par le pipeline batch partagé après la 1ère phase).
      */
     public static List<ImportExecution__c> findExecutionsBySchedule(
         Id scheduleId,
@@ -277,17 +298,13 @@ public with sharing class ScheduleRepository {
             return new List<ImportExecution__c>();
         }
         try {
-            // Récupérer le projet du schedule pour la query
-            Schedule__c schedule = getScheduleById(String.valueOf(scheduleId));
-            if (schedule == null) return new List<ImportExecution__c>();
-
-            Id projectId = schedule.Project__c;
             return [
                 SELECT Id, Status__c, StartTime__c, EndTime__c,
-                       ApexJobId__c, TotalRecords__c, ProcessedRecords__c,
-                       FailedRecords__c, Project__c
+                       ApexJobId__c, Schedule__c, TotalRecords__c, ProcessedRecords__c,
+                       FailedRecords__c, Project__c,
+                       MatchedFileName__c, MatchedContentDocumentId__c
                 FROM ImportExecution__c
-                WHERE Project__c = :projectId
+                WHERE Schedule__c = :scheduleId
                 AND   Status__c  IN :statuses
                 ORDER BY StartTime__c DESC
                 LIMIT 1
@@ -303,6 +320,7 @@ public with sharing class ScheduleRepository {
 
     /**
      * Construire les wrappers Schedule + Executions
+     * Chaque schedule ne reçoit QUE ses propres exécutions (Schedule__c = schedule.Id)
      */
     private static List<ScheduleService.ScheduleWrapper> buildScheduleWrapper(
         List<Schedule__c> schedules,
@@ -313,13 +331,30 @@ public with sharing class ScheduleRepository {
             !SecurityUtils.isAccessible(Schema.ImportExecution__c.SObjectType)) {
             return results;
         }
+
+        // Indexer toutes les exécutions par leur Schedule__c (lookup dédié, stable)
+        Map<Id, List<ImportExecution__c>> executionsByScheduleId = new Map<Id, List<ImportExecution__c>>();
+        for (List<ImportExecution__c> execs : executionsByProject.values()) {
+            for (ImportExecution__c exec : execs) {
+                if (exec.Schedule__c != null) {
+                    if (!executionsByScheduleId.containsKey(exec.Schedule__c)) {
+                        executionsByScheduleId.put(exec.Schedule__c, new List<ImportExecution__c>());
+                    }
+                    executionsByScheduleId.get(exec.Schedule__c).add(exec);
+                }
+            }
+        }
+
         for (Schedule__c schedule : schedules) {
             ScheduleService.ScheduleWrapper wrapper = new ScheduleService.ScheduleWrapper();
             wrapper.schedules = new List<Schedule__c>{ schedule };
             wrapper.project   = schedule.Project__r;
-            wrapper.importExecutions = executionsByProject.containsKey(schedule.Project__c)
-                ? executionsByProject.get(schedule.Project__c)
+
+            List<ImportExecution__c> schedExecs = executionsByScheduleId.containsKey(schedule.Id)
+                ? executionsByScheduleId.get(schedule.Id)
                 : new List<ImportExecution__c>();
+
+            wrapper.importExecutions = schedExecs;
             results.add(wrapper);
         }
         return results;
@@ -342,7 +377,7 @@ public with sharing class ScheduleRepository {
             String query =
                 'SELECT Id, Status__c, Type__c, Phase__c, StartTime__c, EndTime__c, ' +
                 'TotalRecords__c, ProcessedRecords__c, FailedRecords__c, ' +
-                'ApexJobId__c, Project__c ' +
+                'ApexJobId__c, Schedule__c, Project__c, MatchedFileName__c, MatchedContentDocumentId__c ' +
                 'FROM ImportExecution__c ' +
                 whereClause +
                 ' ORDER BY StartTime__c DESC LIMIT 10000';

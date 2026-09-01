@@ -19,12 +19,6 @@
     gap: 0.75rem;
 }
 
-.logo-image {
-    width: 8rem;
-    height: 3.5rem;
-    object-fit: contain;
-}
-
 .logo-icon {
     display: flex;
     align-items: center;
@@ -102,4 +96,21 @@
 
 .action-btn:hover {
     background: #f3f4f6;
+}
+
+/* Avatar utilisateur — élément fonctionnel conservé (identité de l'utilisateur connecté),
+   habillé avec les mêmes tokens que le design d'avant Aurora. */
+.avatar-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    background: #1e40af;
+    color: #ffffff;
+    border: none;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: default;
 }

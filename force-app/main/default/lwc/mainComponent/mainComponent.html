@@ -20,10 +20,10 @@
 
   <div class="app-wrapper">
     <!-- App Header -->
-<!--     <c-app-header-cmp
+    <c-app-header-cmp
       active-page={activePage}
       onnavigation={handleNavigation}
-    ></c-app-header-cmp> -->
+    ></c-app-header-cmp>
 
     <div class="app-layout" role="main" aria-label="ImportMate project interface">
       <!-- Sidebar -->
@@ -53,9 +53,16 @@
           </div>
         </template>
 
+        <!-- Analytics View -->
+        <template if:true={showAnalytics}>
+          <div class="content-container">
+            <c-analytics-cmp></c-analytics-cmp>
+          </div>
+        </template>
+
         <!-- Execution History View -->
         <template if:true={showExecutionHistory}>
-          <div class="content-container ih">
+          <div class="content-container">
             <c-import-history onnewimportproject={openProjectForm}>
             </c-import-history>
           </div>
@@ -108,9 +115,11 @@
               <template if:true={showCsvUploader}>
                 <c-csv-uploader
                   project-name={currentProject.Name}
+                  project-id={currentProject.Id}
                   oncsvloaded={handleCsvLoaded}
                   ongotomapping={handleStartMapping}
                   onprevious={handleBackToDataSourceSelection}
+                  ongotoscheduling={handleGotoScheduling}
                 ></c-csv-uploader>
               </template>
 
@@ -158,14 +167,30 @@
                 ></c-dry-run-validator>
               </template>
 
-              <!-- Step 6: Execution & scheduling-->
+              <!-- Step 6: Execution -->
               <template if:true={isRealExecution}>
                 <c-execution-cmp
                   project-id={currentProject.Id}
                   project-name={currentProject.Name}
                   csv-data={csvData}
                   onprevious={handleBackToStep}
+                  ongotoscheduling={handleGotoScheduling}
                 ></c-execution-cmp>
+              </template>
+
+              <!-- Step 7: Scheduling -->
+              <template if:true={isScheduling}>
+                <c-schedule-creator-component
+                  project-id={currentProject.Id}
+                  project-name={currentProject.Name}
+                  target-object={schedulingTargetObject}
+                  csv-data={csvData}
+                  source-columns-csv={mappingHeadersCsv}
+                  onscheduleadded={handleScheduleAdded}
+                ></c-schedule-creator-component>
+                <c-scheduled-schedules
+                  project-id={currentProject.Id}
+                ></c-scheduled-schedules>
               </template>
             <!-- </div> -->
           </div>
