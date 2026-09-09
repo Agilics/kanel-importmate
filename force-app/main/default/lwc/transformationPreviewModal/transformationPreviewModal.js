@@ -103,10 +103,38 @@ export default class TransformationPreviewModal extends LightningElement {
 
     get statusClass() {
         const status = this.currentRule?.status;
-        let baseClass = 'slds-badge ';
-        if (status === 'Valid') return baseClass + 'slds-theme_success';
-        if (status === 'Invalid') return baseClass + 'slds-theme_error';
-        return baseClass + 'slds-theme_inverse';
+        if (status === 'Valid') return 'status-pill status-pill--valid';
+        if (status === 'Invalid') return 'status-pill status-pill--invalid';
+        return 'status-pill status-pill--active';
+    }
+
+    get columnsForDisplay() {
+        return this.columns.filter(c => c.type !== 'button-icon');
+    }
+
+    get filterColumnOptions() {
+        return [{ fieldName: '', label: '-- choose --', isSelected: this.filterColumn === '' }]
+            .concat(this.columnsForDisplay.map(c => ({ ...c, isSelected: c.fieldName === this.filterColumn })));
+    }
+
+    get filterOperatorOptions() {
+        return [
+            { value: 'contains', label: 'contains' },
+            { value: 'equals', label: 'equals' },
+            { value: 'starts', label: 'starts with' }
+        ].map(o => ({ ...o, isSelected: o.value === this.filterOperator }));
+    }
+
+    get tableDataForDisplay() {
+        return this.tableData.map(row => ({
+            id: row.id,
+            isChecked: this.selectedRows.includes(row.id),
+            cells: this.columnsForDisplay.map(col => ({
+                key: col.fieldName,
+                value: row[col.fieldName] ?? '',
+                cellClass: col.fieldName === 'status' ? this.getAuroraStatusClass(row.status) : ''
+            }))
+        }));
     }
 
     // ===== Wire Method =====
@@ -232,15 +260,9 @@ export default class TransformationPreviewModal extends LightningElement {
 
     // ===== Get Status Cell Class =====
     getStatusCellClass(status) {
-        let baseClass = 'slds-badge ';
-        switch(status) {
-            case 'Valid':
-                return baseClass + 'slds-theme_success';
-            case 'Invalid':
-                return baseClass + 'slds-theme_error';
-            default:
-                return baseClass + 'slds-theme_inverse';
-        }
+        if (status === 'Valid') return 'status-pill status-pill--valid';
+        if (status === 'Invalid') return 'status-pill status-pill--invalid';
+        return 'status-pill status-pill--active';
     }
 
     // ===== Build Column Data Table =====
@@ -487,6 +509,26 @@ export default class TransformationPreviewModal extends LightningElement {
         });
     }
 
+    // ===== Aurora status class helper =====
+    getAuroraStatusClass(status) {
+        if (status === 'Valid') return 'status-pill status-pill--valid';
+        if (status === 'Invalid') return 'status-pill status-pill--invalid';
+        return 'status-pill status-pill--active';
+    }
+
+    handleNativeRowCheck(event) {
+        if (this.disableSelections) { event.preventDefault(); return; }
+        const rowId = event.target.dataset.id;
+        if (event.target.checked) {
+            if (!this.selectedRows.includes(rowId)) {
+                this.selectedRows = [...this.selectedRows, rowId];
+            }
+        } else {
+            this.selectedRows = this.selectedRows.filter(id => id !== rowId);
+        }
+        this.selectAllRows = this.selectedRows.length === this.tableData.length && this.tableData.length > 0;
+    }
+
     // ===== Event Handlers =====
     handlePageChange(event) {
         this.pageIndex = event.detail.pageIndex;
@@ -503,7 +545,7 @@ export default class TransformationPreviewModal extends LightningElement {
         console.log('New rule index:', this.rulesPageIndex);
     }
 
-    handleRuleSummary(event) {
+    handleRuleSummary() {
         this.showToast('Info', 'Will come soon!', 'info');
     }
 

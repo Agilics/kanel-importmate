@@ -1,155 +1,147 @@
-body {
-  font-family: Inter;
+/* ══ Aurora design tokens ══ */
+:host {
+  --indigo:        #4F46E5;
+  --indigo-soft:   rgba(79,70,229,0.08);
+  --indigo-glow:   rgba(79,70,229,0.25);
+  --violet:        #7C3AED;
+  --green:         #10B981;
+  --green-soft:    rgba(16,185,129,0.1);
+  --coral:         #F43F5E;
+  --amber:         #F59E0B;
+  --text:          #0F172A;
+  --text-2:        #1E293B;
+  --muted:         #64748B;
+  --muted-2:       #94A3B8;
+  --border:        rgba(148,163,184,0.2);
+  --border-solid:  #E2E8F0;
+  --surface:       rgba(255,255,255,0.75);
+  --surface-solid: #FFFFFF;
+  --grad-brand:    linear-gradient(135deg,#4F46E5 0%,#7C3AED 100%);
+  --grad-green:    linear-gradient(135deg,#10B981 0%,#06B6D4 100%);
+  --shadow-xs:     0 1px 3px rgba(15,23,42,0.06),0 1px 2px rgba(15,23,42,0.04);
+  --shadow-sm:     0 2px 8px rgba(79,70,229,0.06),0 1px 3px rgba(15,23,42,0.04);
+  --shadow-md:     0 4px 20px rgba(79,70,229,0.10),0 2px 6px rgba(15,23,42,0.05);
+  --shadow-glow:   0 0 0 3px rgba(79,70,229,0.08),0 4px 20px rgba(79,70,229,0.15);
+  --radius-xs:     6px;
+  --radius-sm:     10px;
+  --radius:        16px;
+  --radius-lg:     24px;
+  --radius-pill:   999px;
+  --ease-out:      cubic-bezier(0.16,1,0.3,1);
 }
+
+/* Card container (prototype: .source-card) */
 .card {
   box-sizing: border-box;
-  position: absolute;
-  width: 512px;
-  height: 330px;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  width: 100%;
+  background: var(--surface-solid);
+  border: 1.5px solid var(--border-solid);
+  border-radius: var(--radius);
   padding: 24px;
-  margin: 24px;
-  box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.05);
-  border-radius: 12px;
-  padding: 24px; 
-  -webkit-border-radius: 12px;
-  -moz-border-radius: 12px;
-  -ms-border-radius: 12px;
-  -o-border-radius: 12px; 
+  box-shadow: var(--shadow-xs);
+  cursor: pointer;
+  transition: all .22s var(--ease-out);
+}
+.card:hover {
+  border-color: rgba(79,70,229,0.35);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 
 .header {
   display: flex;
   align-items: center;
-  justify-content: start;
-  width: 446px;
-  height: 64px;
-  opacity: 1;
-  padding: 18px 0 10px 0;
-  margin-left: -9px;
-  top: 33px;
-  left: 23px;
-}
-.content {
-  list-style: none;
-  padding: 0;
-  margin: 12px 0 24px;
-  color: #374151;
-  font-size: 14px;
-  line-height: 1.6;
+  gap: 16px;
+  margin-bottom: 16px;
 }
 
+/* Icon box */
 .box-icon {
-  width: 64px;
-  height: 64px;
-  margin: 0 25px 0 20px;
-  border-radius: 12px;
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: 1; 
+  flex-shrink: 0;
 }
-.box-icon-upload {
-  background: #dbeafe;
-}
-.box-icon-query {
-  background: #ffedd5;
-}
+.box-icon-upload { background: rgba(79,70,229,0.08); }
+.box-icon-query  { background: rgba(234,88,12,0.08); }
 
-/* */
-.custom-icon-upload {
-  --slds-c-icon-color-foreground-default: #1e40af;
-  --slds-c-icon-color-background: #dbeafe;
-}
-
-.icon-size {
-  top: 16px;
-  left: 23px;
-  opacity: 1;
-}
-
-/*Add the class name below to the lightning-icon element.*/
+/* Icon emoji sizing */
+.custom-icon-upload,
 .custom-icon-database {
-  --slds-c-icon-color-foreground-default: #ea580c;
-  --slds-c-icon-color-background: #ffedd5;
+  font-size: 22px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
 }
+
+.text-content { flex: 1; min-width: 0; }
 
 .title {
-  font-weight: 700;
-  font-style: Bold;
-  font-size: 20px;
-  line-height: 28px;
-  letter-spacing: 0%;
-  color: #111827;
+  font-weight: 800;
+  font-size: .95rem;
+  color: var(--text);
+  letter-spacing: -0.2px;
+  margin: 0 0 3px;
 }
 .subtitle {
-  font-family: Inter;
-  font-weight: 400;
-  font-style: Regular;
-  font-size: 16px;
-  line-height: 24px;
-  letter-spacing: 0%;
-  color: #4b5563;
+  font-size: .82rem;
+  color: var(--muted);
+  line-height: 1.5;
+  margin: 0;
 }
 
+/* Feature list */
+.content {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 20px;
+}
 .support {
-  margin: 26px 0 1.3rem 12px;
-  width: 446px;
-  height: 24px;
-  opacity: 1;
-  border: none;
   display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 8px;
 }
-
-/*Add the class name below to the lightning-icon element.*/
 .custom-icon-check {
-  --slds-c-icon-color-foreground-default: #16a34a;
-  --slds-c-icon-color-background: #ffffff;
-  width: 14px;
-  height: 24px;
-  opacity: 1;
-  margin: 0 1.1rem 0 0;
+  font-size: 14px;
+  color: var(--green);
+  font-weight: 700;
+  flex-shrink: 0;
 }
-
-/* card's text item  */
 .item {
-  font-family: Inter;
-  font-weight: 400;
-  font-style: Regular;
-  font-size: 16px;
-  line-height: 24px;
-  letter-spacing: 0%;
-  color: #374151;
+  font-size: .825rem;
+  color: var(--text-2);
+  line-height: 1.5;
 }
 
-/* button choose file upload*/
+/* CTA button */
 .btn {
-  width: 446px;
-  height: 48px;
-  border-radius: 8px;
-  opacity: 1;
-  font-family: Inter;
-  font-weight: 500;
-  font-style: Medium;
-  margin-left: 7.8px;
-  font-size: 16px;
-  color: #ffffff;
-  line-height: 100%;
-  letter-spacing: 0%;
-  text-align: center;
-  top: 249px;
-  left: 33px;
+  width: 100%;
+  padding: 11px 20px;
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-weight: 600;
+  font-size: .875rem;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  transition: all .2s var(--ease-out);
+  display: flex; align-items: center; justify-content: center; gap: 7px;
 }
-
-/* bouton upload de fichier*/
 .btn-upload {
-  background: #1e40af;
-  border: 1px solid #1e40af;
+  background: var(--grad-brand);
+  box-shadow: 0 4px 14px var(--indigo-glow);
 }
+.btn-upload:hover { transform: translateY(-1px); box-shadow: 0 8px 24px var(--indigo-glow); }
 
-/* bouton contructeur de requête*/
 .btn-query {
-  background-color: #ea580c;
-  border: 1px solid #ea580c;
+  background: linear-gradient(135deg,#ea580c 0%,#f97316 100%);
+  box-shadow: 0 4px 14px rgba(234,88,12,0.3);
 }
+.btn-query:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(234,88,12,0.35); }

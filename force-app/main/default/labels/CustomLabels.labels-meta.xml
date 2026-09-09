@@ -1311,13 +1311,13 @@
         <shortDescription>Frequency</shortDescription>
         <value>Frequency</value>
     </labels>
-      <labels>
+    <labels>
         <fullName>Import_NextRun</fullName>
         <categories>Import</categories>
         <language>en_US</language>
         <protected>false</protected>
         <shortDescription>Frequency</shortDescription>
-        <value>Date prochaine exécution </value>
+        <value>Date prochaine exécution</value>
     </labels>
     <labels>
         <fullName>Import_Schedule_Edit_Info_Bar</fullName>
@@ -3511,52 +3511,16 @@
     <labels>
         <fullName>SideBar_Step_Validation</fullName>
         <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Step 5 - Validation (Dry Run)</shortDescription>
+        <protected>true</protected>
+        <shortDescription>Validation</shortDescription>
         <value>Validation</value>
     </labels>
-    <!-- status ImportExecution-->
-     <labels>
-        <fullName>ProjectCard_Status_Pending</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Import status - Pending</shortDescription>
-        <value>Pending</value>
-    </labels>
-        <labels>
+    <labels>
         <fullName>ProjectCard_Status_Suspended</fullName>
         <language>en_US</language>
         <protected>false</protected>
         <shortDescription>Import status - Suspended</shortDescription>
         <value>Suspended</value>
-    </labels>
-     <labels>
-        <fullName>ProjectCard_Status_Cancelled</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Import status - Cancelled</shortDescription>
-        <value>Cancelled</value>
-    </labels>
-    <labels>
-        <fullName>ProjectCard_Status_InProgress</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Import status - In Progress</shortDescription>
-        <value>In Progress</value>
-    </labels>
-    <labels>
-        <fullName>ProjectCard_Status_Failed</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Import status - Failed</shortDescription>
-        <value>Failed</value>
-    </labels>
-    <labels>
-        <fullName>ProjectCard_Status_Completed</fullName>
-        <language>en_US</language>
-        <protected>false</protected>
-        <shortDescription>Import status - Completed</shortDescription>
-        <value>Completed</value>
     </labels>
     <labels>
         <fullName>ProjectCard_Status_Success</fullName>
@@ -3590,7 +3554,7 @@
         <fullName>Import_Schedule_At</fullName>
         <language>en_US</language>
         <protected>false</protected>
-        <shortDescription>Preposition "at" for time</shortDescription>
+        <shortDescription>Preposition &quot;at&quot; for time</shortDescription>
         <value>at</value>
     </labels>
     <labels>
@@ -3634,5 +3598,12 @@
         <protected>false</protected>
         <shortDescription>Save valid rows</shortDescription>
         <value>Save valid rows</value>
-   </labels>
+    </labels>
+    <labels>
+        <fullName>SideBar_Step_Schedule</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>Auto-Map All</shortDescription>
+        <value>Scheduling</value>
+    </labels>
 </CustomLabels>

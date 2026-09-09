@@ -1,62 +1,64 @@
+﻿/* ══ Aurora design tokens ══ */
+:host {
+  --indigo:        #4F46E5;
+  --indigo-soft:   rgba(79,70,229,0.08);
+  --indigo-glow:   rgba(79,70,229,0.25);
+  --violet:        #7C3AED;
+  --green:         #10B981;
+  --green-soft:    rgba(16,185,129,0.1);
+  --coral:         #F43F5E;
+  --amber:         #F59E0B;
+  --text:          #0F172A;
+  --text-2:        #1E293B;
+  --muted:         #64748B;
+  --muted-2:       #94A3B8;
+  --border:        rgba(148,163,184,0.2);
+  --border-solid:  #E2E8F0;
+  --surface:       rgba(255,255,255,0.75);
+  --surface-solid: #FFFFFF;
+  --grad-brand:    linear-gradient(135deg,#4F46E5 0%,#7C3AED 100%);
+  --grad-green:    linear-gradient(135deg,#10B981 0%,#06B6D4 100%);
+  --shadow-xs:     0 1px 3px rgba(15,23,42,0.06),0 1px 2px rgba(15,23,42,0.04);
+  --shadow-sm:     0 2px 8px rgba(79,70,229,0.06),0 1px 3px rgba(15,23,42,0.04);
+  --shadow-md:     0 4px 20px rgba(79,70,229,0.10),0 2px 6px rgba(15,23,42,0.05);
+  --shadow-glow:   0 0 0 3px rgba(79,70,229,0.08),0 4px 20px rgba(79,70,229,0.15);
+  --radius-xs:     6px;
+  --radius-sm:     10px;
+  --radius:        16px;
+  --radius-lg:     24px;
+  --radius-pill:   999px;
+  --ease-out:      cubic-bezier(0.16,1,0.3,1);
+}
 body {
   font-family: "Inter";
 }
 
+/* Tabs (prototype: .run-mode-tabs from aurora-step6.html) */
 .tab-container {
-  display: flex;
-  flex-wrap: nowrap;
-  align-items: center;
-  padding: 4px;
-  border: 1px solid #e2e8f0;
-  margin-bottom: 1.5rem;
-  border-radius: 8px;
-  background: #ffffff;
-  width: 100%;
-  height: auto;
-  min-height: 46px;
-  overflow-x: auto;
-  gap: 4px;
+  display: flex; flex-wrap: nowrap; align-items: center; gap: 3px;
+  padding: 4px; margin-bottom: 1.5rem;
+  border: 1px solid var(--border-solid); border-radius: var(--radius-sm);
+  background: rgba(248,250,252,0.95);
+  width: fit-content; height: auto; min-height: 46px; overflow-x: auto;
 }
 
 .tab {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 14px;
-  height: 36px;
-  white-space: nowrap;
-  flex-shrink: 0;
-  background-color: transparent;
-  color: #4b5563;
-  font-weight: 500;
-  font-size: 14px;
-  font-family: "Inter";
-  line-height: 100%;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
-  border: 1px solid transparent;
-  border-radius: 6px;
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 0 14px; height: 36px; white-space: nowrap; flex-shrink: 0;
+  background: transparent; color: var(--muted);
+  font-weight: 600; font-size: 14px; font-family: 'Inter', inherit;
+  line-height: 100%; text-align: center; cursor: pointer;
+  transition: all 0.15s; border: none;
+  border-radius: calc(var(--radius-sm) - 2px);
 }
 
-.tab:hover {
-  background-color: #eaeaea;
-  color: #000;
-  border-radius: 6px;
-}
+.tab:hover { color: var(--indigo); background: var(--indigo-soft); }
 
 .tab.active {
-  background-color: #1e40af;
-  color: #fff;
-  border-color: #005fb2;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+  background: var(--grad-brand); color: #fff;
+  box-shadow: 0 4px 12px var(--indigo-glow);
 }
 
-.tab:active {
-  transform: scale(0.97);
-}
+.tab:active { transform: scale(0.97); }
 
-.tab:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px #1e40af;
-}
+.tab:focus { outline: none; box-shadow: 0 0 0 2px rgba(79,70,229,0.3); }

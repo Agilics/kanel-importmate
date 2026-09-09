@@ -1,8 +1,8 @@
 /**
- * @description : Service for Schedule__c - logique métier complète
+ * @description : Service for Schedule__c - logique mÃ©tier complÃ¨te
  * @author      : mouhamed niang
- * @modified    : 31-03-2026
- * @Modified: Remove shadowing filter
+ * @modified    : 10-07-2026
+ * @Modified: Remove unused methods , refactoring methods and add comments for clarity
  */
 public with sharing class ScheduleService {
 
@@ -16,12 +16,30 @@ public with sharing class ScheduleService {
         public ScheduleWrapper() {}
     }
 
+    /**
+     * DTO pour le rÃ©sultat de l'opÃ©ration "Programmer tout" (bulk execute).
+     */
+    public class BulkExecuteResult {
+        @AuraEnabled public Integer totalSchedules    { get; set; }
+        @AuraEnabled public Integer successCount      { get; set; }
+        @AuraEnabled public Integer errorCount        { get; set; }
+        @AuraEnabled public List<String> successMessages { get; set; }
+        @AuraEnabled public List<String> errorMessages   { get; set; }
+        public BulkExecuteResult() {
+            this.totalSchedules   = 0;
+            this.successCount     = 0;
+            this.errorCount       = 0;
+            this.successMessages  = new List<String>();
+            this.errorMessages    = new List<String>();
+        }
+    }
+
    
-    // CRÉATION / MODIFICATION / SUPPRESSION
+    // CRÃ‰ATION / MODIFICATION / SUPPRESSION
    
 
     /**
-     * Créer et planifier un Schedule__c 
+     * CrÃ©er et planifier un Schedule__c 
      */
     public static Id schedule(String frequence, Datetime nextRun, String projectId) {
         try {
@@ -36,7 +54,8 @@ public with sharing class ScheduleService {
                 throw new SchedulingException('Next run date must be in the future');
             }
 
-            // GUARD : 1 seul schedule par projet
+            // Si un schedule ACTIF (non terminÃ©) existe dÃ©jÃ , le mettre Ã  jour
+            // Un schedule terminÃ© (Completed/Failed/Cancelled) doit gÃ©nÃ©rer un nouveau record
             List<Schedule__c> existing = [
                 SELECT Id, Frequency__c, NextRun__c
                 FROM Schedule__c
@@ -44,11 +63,24 @@ public with sharing class ScheduleService {
                 LIMIT 1
             ];
             if (!existing.isEmpty()) {
-                throw new SchedulingException(
-                    'Ce projet a déjà une planification active (' +
-                    existing[0].Frequency__c + '). ' +
-                    'Supprimez-la avant d\'en créer une nouvelle.'
-                );
+                List<ImportExecution__c> lastExec = [
+                    SELECT Status__c FROM ImportExecution__c
+                    WHERE Project__c = :projectId
+                    ORDER BY CreatedDate DESC
+                    LIMIT 1
+                ];
+                String lastStatus = lastExec.isEmpty() ? '' : (lastExec[0].Status__c != null ? lastExec[0].Status__c : '');
+                Set<String> terminalStatuses = new Set<String>{ 'Completed', 'Failed', 'Cancelled' };
+
+                if (!terminalStatuses.contains(lastStatus)) {
+                    // Schedule encore actif (Pending/InProgress/Suspended) â†’ mettre Ã  jour
+                    Map<String, Object> result = reSchedule(existing[0].Id, frequence, nextRun);
+                    if (result.get('success') == true) {
+                        return existing[0].Id;
+                    }
+                    throw new SchedulingException(String.valueOf(result.get('error')));
+                }
+                // Statut terminal â†’ on tombe dans la crÃ©ation d'un nouveau schedule ci-dessous
             }
 
             Schedule__c newSchedule = new Schedule__c(
@@ -61,14 +93,9 @@ public with sharing class ScheduleService {
                 throw new ApplicationException('Failed to create schedule record');
             }
            
-            ExecutionRepository.createLinkedExecution(
-                Id.valueOf(savedSchedule.Project__c),
-                String.valueOf(savedSchedule.Id),
-                Constants.EXECUTION_STATUS_PENDING,
-                Constants.EXECUTION_TYPE_IMPORT,
-                '',
-                0
-            );
+            // NOTE: ImportExecution__c n'est PAS cree ici.
+            // Elle est creee uniquement par bulkExecute() (bouton Execute Now).
+           
 
             // Planifier le CronJob
             String cron    = buildCron(savedSchedule.NextRun__c);
@@ -86,8 +113,123 @@ public with sharing class ScheduleService {
         }
     }
 
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+    //  BULK EXECUTE â€” "Programmer tout" (Programmer)
+    // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+
     /**
-     * Reprogrammer OU Reporter une exécution planifiée (schedule) existante
+     * ExÃ©cute en masse tous les schedules actifs d'un projet.
+     * Pour chaque schedule actif (Pending/Suspended), crÃ©e une ImportExecution__c
+     * avec le type 'Scheduled' et le statut 'Pending'.
+     *
+     * @param projectId L'ID du projet dont on veut programmer les exÃ©cutions
+     * @return BulkExecuteResult avec le rÃ©sumÃ© des opÃ©rations
+     */
+    public static BulkExecuteResult bulkExecute(Id projectId) {
+        BulkExecuteResult result = new BulkExecuteResult();
+
+        if (projectId == null) {
+            result.errorMessages.add('ID du projet requis.');
+            result.errorCount++;
+            return result;
+        }
+
+        try {
+            // 1. RÃ©cupÃ©rer tous les schedules liÃ©s Ã  ce projet
+            List<Schedule__c> schedules = ScheduleRepository.getSchedulesByprojectId(String.valueOf(projectId));
+            if (schedules == null || schedules.isEmpty()) {
+                result.errorMessages.add('Aucune planification trouvÃ©e pour ce projet.');
+                result.errorCount++;
+                return result;
+            }
+
+            result.totalSchedules = schedules.size();
+
+            // 2. VÃ©rifier les doublons â€” exÃ©cution active dÃ©jÃ  existante ?
+            Set<Id> projectIds = new Set<Id>{ projectId };
+            Set<Id> blockedProjects = ExecutionRepository.filterProjectsWithActiveExecutions(projectIds);
+
+            if (blockedProjects.contains(projectId)) {
+                result.errorMessages.add(
+                    'Une exÃ©cution est dÃ©jÃ  en cours pour ce projet. ' +
+                    'Veuillez attendre la fin de l\'exÃ©cution en cours.'
+                );
+                result.errorCount++;
+                return result;
+            }
+
+            // 3. CrÃ©er une ImportExecution__c pour CHAQUE schedule
+            List<ImportExecution__c> executionsToInsert = new List<ImportExecution__c>();
+
+            for (Schedule__c sched : schedules) {
+                ImportExecution__c exec = new ImportExecution__c(
+                    Project__c          = projectId,
+                    Status__c           = Constants.EXECUTION_STATUS_PENDING,
+                    Type__c             = Constants.EXECUTION_TYPE_SCHEDULED,
+                    StartTime__c        = System.now(),
+                    TotalRecords__c     = 0,
+                    ProcessedRecords__c = 0,
+                    FailedRecords__c    = 0
+                );
+                executionsToInsert.add(exec);
+            }
+
+            // 4. Insertion en masse (en respectant les droits)
+            if (!SecurityUtils.isCreateable(ImportExecution__c.SObjectType)) {
+                result.errorMessages.add('Permissions insuffisantes pour crÃ©er des exÃ©cutions.');
+                result.errorCount++;
+                return result;
+            }
+
+            insert executionsToInsert;
+
+            // 5. Pour chaque exÃ©cution crÃ©Ã©e, planifier le ScheduleJob
+            //    Les exÃ©cutions sont dans le mÃªme ordre que les schedules
+            for (Integer i = 0; i < executionsToInsert.size() && i < schedules.size(); i++) {
+                ImportExecution__c exec = executionsToInsert[i];
+                Schedule__c sched = schedules[i];
+
+                try {
+                    // Planifier le job CRON pour le schedule
+                    if (sched.NextRun__c != null && sched.NextRun__c > System.now()) {
+                        String cron    = buildCron(sched.NextRun__c);
+                        String jobName = 'Schedule_' + sched.Id + '_' + System.now().getTime();
+                        System.schedule(jobName, cron, new ScheduleJob(sched.Id));
+
+                        result.successMessages.add(
+                            'ExÃ©cution crÃ©Ã©e pour le schedule ' + sched.Name +
+                            ' (exÃ©cution: ' + exec.Id + ', prochaine exÃ©cution: ' + sched.NextRun__c + ')'
+                        );
+                        result.successCount++;
+                    } else {
+                        // NextRun dans le passÃ© â†’ on crÃ©e l'exÃ©cution mais on ne programme pas de CronTrigger
+                        result.successMessages.add(
+                            'ExÃ©cution crÃ©Ã©e pour le schedule ' + sched.Name +
+                            ' (exÃ©cution: ' + exec.Id + '). La date de prochaine exÃ©cution est passÃ©e, ' +
+                            'le job CRON n\'a pas Ã©tÃ© programmÃ©.'
+                        );
+                        result.successCount++;
+                    }
+                } catch (Exception e) {
+                    result.errorMessages.add(
+                        'Erreur lors de la planification du job pour le schedule ' + sched.Name +
+                        ' : ' + e.getMessage()
+                    );
+                    result.errorCount++;
+                }
+            }
+
+        } catch (Exception e) {
+            ErrorLogService.logException(e);
+            result.errorMessages.add('Erreur inattendue: ' + e.getMessage());
+            result.errorCount++;
+        }
+
+        return result;
+    }
+
+    /**
+     * Reprogrammer OU Reporter une exÃ©cution planifiÃ©e (schedule) existante
      */
     public static Map<String, Object> reSchedule(String scheduleId, String frequency, Datetime nextRun) {
         try {
@@ -145,7 +287,7 @@ public with sharing class ScheduleService {
     // PLAY / PAUSE
 
     /**
-     * Toggle  suspension/reprise  d'une exécution planifiée  via l'identifiant (schedule)
+     * Toggle  suspension/reprise  d'une exÃ©cution planifiÃ©e  via l'identifiant (schedule)
      * @param isPause typeof Boole  true = pause | false = play
      * @param scheduleId typeof String
      */
@@ -165,11 +307,11 @@ public with sharing class ScheduleService {
         }
     }
 
-    // Suspendre une exécution planifiée
+    // Suspendre une exÃ©cution planifiÃ©e
     private static Map<String, Object> pauseSchedule(Schedule__c schedule) {
         cancelExistingJob(schedule.Id);
 
-        // 1 seul schedule par projet → query via Project__c sans ambiguïté
+        // 1 seul schedule par projet â†’ query via Project__c sans ambiguÃ¯tÃ©
         List<ImportExecution__c> executions = [
             SELECT Id, Status__c, EndTime__c
             FROM ImportExecution__c
@@ -231,75 +373,44 @@ public with sharing class ScheduleService {
     }
 
     
-    // *** EXÉCUTION ***
+    // *** EXÃ‰CUTION ***
 
     /**
-     * Exécuter un schedule (appelé par ScheduleJob)
-     */
+     * ExÃ©cuter un schedule (appelÃ© par ScheduleJob)
+     */    
     public static ScheduleJobResult executeSchedule(Id scheduleId) {
         System.debug(LOG_PREFIX + ' Starting execution for: ' + scheduleId);
+
         try {
-            Schedule__c existingSchedule = ScheduleRepository.getScheduleById(scheduleId);
-            if (existingSchedule == null) {
-                return ScheduleJobResult.error('Schedule not found: ' + scheduleId);
+            
+            Schedule__c schedule = ScheduleRepository.getScheduleById(scheduleId);
+            Id projectId = Id.valueOf(schedule.Project__c);
+            List<ContentDocumentService.ContentFileWrapper> files = ContentDocumentService.getProjectFiles(String.valueOf(projectId));
+
+           // Validation
+            ScheduleJobResult validationResult = validateExecution(schedule, projectId, files);
+            if (!validationResult.isSuccess()) {
+                return validationResult;
             }
+           
+            ImportExecution__c execution = updateExecution(projectId,scheduleId,files);
 
-            // Bloquer si une exécution est Suspended
-            List<ImportExecution__c> suspendedExecution = [
-                SELECT Id FROM ImportExecution__c
-                WHERE Project__c = :existingSchedule.Project__c
-                AND   Status__c  = 'Suspended'
-                LIMIT 1
-            ];
-            if (!suspendedExecution.isEmpty()) {
-                return ScheduleJobResult.error('Execution is suspended. Resume before running.');
-            }
+            Id executionId = Id.valueOf(execution.Id);
 
-            List<Map<String, String>> importData = retrieveScheduleData(existingSchedule);
-            if (importData == null || importData.isEmpty()) {
-                return ScheduleJobResult.error('No data found for scheduled import');
-            }
-
-            Integer totalRecords = Integer.valueOf(importData.size());      
-            
-            List<String> statuses = new List<String>{'Pending'}; 
-
-            //fetch existing ImportExecution__c by scheduleId
-            List<ImportExecution__c> executions = ScheduleRepository.findExecutionsBySchedule(
-                scheduleId,
-                statuses
-            );  
-            
-
-            ImportExecution__c execution = executions[0];
-            
-            // inject phase
-            execution.Status__c = Constants.EXECUTION_STATUS_IN_PROGRESS;
-            execution.Phase__c = Constants.EXECUTION_PHASE_IMPORTING;
-            execution.TotalRecords__c = totalRecords;
-            
-            // Update Status & Phase of ImportExecution 
-            ExecutionRepository.updateImportExecution(execution); 
-
-            createStagingRows(execution.Id, importData);
-
-            Id jobId = Database.executeBatch(
-                new PreProcessBatch(execution.Id, false),
-                Constants.PREPROCESS_BATCH_SIZE
-            );
-
-            recalculateNextRun(existingSchedule);
-
-            update existingSchedule;
-
+            // 5. CrÃ©er les lignes de staging
+            createStagingRows(executionId, files);  
+            launchImport(executionId, schedule);
+          
+            // 6. Notification
             PublisherService.publishExecutionStarted(String.valueOf(execution.Id));
 
             return ScheduleJobResult.ok('Scheduled import started')
-                .withExecutionId(execution.Id)
-                .withPhase('Staging');
+                    .withExecutionId(execution.Id)
+                    .withPhase(Constants.EXECUTION_PHASE_STAGING); // ou 'Staging'
 
         } catch (Exception e) {
             System.debug(LOG_PREFIX + ' ERROR: ' + e.getMessage());
+            ErrorLogService.logException(e);
             return ScheduleJobResult.error('Scheduled import failed: ' + e.getMessage());
         }
     }
@@ -365,8 +476,84 @@ public with sharing class ScheduleService {
 
    
     // PRIVATE HELPERS
-   
 
+    // rÃ©gle de validations 
+    private static ScheduleJobResult validateExecution(Schedule__c schedule,Id projectId,List<ContentDocumentService.ContentFileWrapper> files){
+        if (schedule == null) {
+            return ScheduleJobResult.error('Schedule not found: ' + schedule.Id);
+        }
+            // 1. VÃ©rifier si une exÃ©cution est en cours de suspension
+        if (isExecutionSuspended(projectId)) {
+            return ScheduleJobResult.error('Execution is suspended. Resume before running.');
+        }
+        
+        if (files == null || files.isEmpty()) {
+            return ScheduleJobResult.error('No data found for scheduled import');
+        }
+        return  ScheduleJobResult.ok();
+    }
+
+    //  mise Ã  jour des donnÃ©es de l'exÃ©cution
+    private  static ImportExecution__c updateExecution(Id projectId,Id scheduleId,List<ContentDocumentService.ContentFileWrapper> file){
+       // 1. RÃ©cupÃ©rer ou crÃ©er l'exÃ©cution en cours (Pending) 
+        ImportExecution__c execution = getOrderedExecutionSchedule(projectId, scheduleId,file.size());
+
+        // 2. Mise Ã  jour de l'exÃ©cution avant traitement
+        execution.Status__c = Constants.EXECUTION_STATUS_IN_PROGRESS;
+        execution.Phase__c  = Constants.EXECUTION_PHASE_IMPORTING;
+        execution.TotalRecords__c = file.size();   // important pour le suivi
+
+        ExecutionRepository.updateImportExecution(execution);
+        return execution;
+    }
+
+    //lancer l'importation  via une exÃ©cution batch
+    private static void launchImport(Id executionId,Schedule__c schedule){
+          // 6. Lancer le batch de prÃ©traitement
+            Id batchJobId = Database.executeBatch(
+                new PreProcessBatch(executionId, false),
+                Constants.PREPROCESS_BATCH_SIZE
+            );
+
+            // 7. Mise Ã  jour du prochain run + sauvegarde
+            recalculateNextRun(schedule);
+            update schedule;
+    }
+   
+    /**
+     * RÃ©cupÃ¨re l'exÃ©cution la plus adaptÃ©e pour ce Schedule
+     * PrioritÃ© : Pending  la plus rÃ©cente de type Scheduled
+     */
+    private static ImportExecution__c getOrderedExecutionSchedule(Id projectId, Id scheduleId,Integer totalRecords) {
+        // On cherche d'abord une exÃ©cution Pending liÃ©e Ã  ce projet et de type Scheduled
+        List<ImportExecution__c> executions = ExecutionRepository.getExecutionHistory(
+            String.valueOf(projectId), 
+            Constants.EXECUTION_STATUS_PENDING, 
+            Constants.EXECUTION_TYPE_SCHEDULED
+        );
+
+        if (!executions.isEmpty()) {
+            return executions[0];   // la plus rÃ©cente grÃ¢ce au ORDER BY CreatedDate DESC
+        }
+
+        //  crÃ©er une nouvelle exÃ©cution s'il n'existe pas 
+        return ExecutionRepository.createImportExecution(
+            projectId,
+            Constants.EXECUTION_STATUS_PENDING,
+            Constants.EXECUTION_TYPE_SCHEDULED,
+            Constants.EXECUTION_PHASE_STAGING,
+            totalRecords != null ? totalRecords : 0
+        );
+    }
+    // vÃ©rifier si l'ImportExecution a statut Suspendue
+    private static Boolean isExecutionSuspended(Id projectId) {
+        List<ImportExecution__c> suspended = ExecutionRepository.getExecutionHistory(
+            String.valueOf(projectId), 'Suspended', null
+        );
+        return !suspended.isEmpty();
+    }
+
+    // annuler les tÃ¢ches CRON Job
     private static void cancelExistingJob(String scheduleId) {
         if (String.isBlank(scheduleId)) return;
         try {
@@ -378,6 +565,7 @@ public with sharing class ScheduleService {
         }
     }
 
+    // recalculer la prochaine exÃ©cution
     private static void recalculateNextRun(Schedule__c schedule) {
         try {
             ImportMateEnum.FrequencyEnum frequency =
@@ -409,7 +597,7 @@ public with sharing class ScheduleService {
     }
 
     //create new staging rows from csvdata
-    private static void createStagingRows(Id executionId, List<Map<String, String>> data) {
+    private static void createStagingRows(Id executionId, List<ContentDocumentService.ContentFileWrapper> data) {
         List<StagingRow__c> rows = new List<StagingRow__c>();
         for (Integer i = 0; i < data.size(); i++) {
             rows.add(new StagingRow__c(
@@ -422,33 +610,9 @@ public with sharing class ScheduleService {
         insert rows;
     }
 
-    private static List<Map<String, String>> retrieveScheduleData(Schedule__c schedule) {
-        List<Map<String, String>> data = getDataFromContentDocument(schedule.Id);
-        if (data != null && !data.isEmpty()) return data;
-        return getDataFromQuery(schedule.Project__c);
-    }
+    
 
-    private static List<Map<String, String>> getDataFromContentDocument(Id scheduleId) {
-        try {
-            List<ContentDocumentLink> links = [
-                SELECT ContentDocumentId FROM ContentDocumentLink
-                WHERE LinkedEntityId = :scheduleId LIMIT 1
-            ];
-            if (links.isEmpty()) return null;
-
-            List<ContentVersion> versions = [
-                SELECT VersionData FROM ContentVersion
-                WHERE ContentDocumentId = :links[0].ContentDocumentId
-                AND IsLatest = true LIMIT 1
-            ];
-            if (versions.isEmpty()) return null;
-
-            return parseCsvContent(versions[0].VersionData.toString());
-        } catch (Exception e) {
-           ErrorLogService.logException(e);
-            throw new SchedulingException(e.getMessage());
-        }
-    }
+     
 
     private static List<Map<String, String>> getDataFromQuery(Id projectId) {
         try {

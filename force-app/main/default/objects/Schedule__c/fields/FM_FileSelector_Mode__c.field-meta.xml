@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>FM_FileSelector_Mode__c</fullName>
+    <externalId>false</externalId>
+    <label>Mode de sélection de fichier</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value>
+                <fullName>Inherit</fullName>
+                <default>true</default>
+                <label>Hériter des étapes précédentes</label>
+            </value>
+            <value>
+                <fullName>Criteria</fullName>
+                <default>false</default>
+                <label>Choisir par critères</label>
+            </value>
+            <value>
+                <fullName>Fixed</fullName>
+                <default>false</default>
+                <label>Même fichier à chaque exécution</label>
+            </value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

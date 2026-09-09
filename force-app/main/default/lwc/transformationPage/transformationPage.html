@@ -61,29 +61,14 @@
          <!-- End Pagination --> 
       </template>
 
-      <!-- No transformation rule -->
-      <template if:false={isTransformation}>
-         <div class="no-rule-container">
-            <lightning-icon icon-name="custom:custom19" size="large" class="no-rule-icon"></lightning-icon>
-            <p class="no-rule-message">{labels.noRule}</p>
-         </div>
-      </template>
 
       <footer class="footer-container">
          <div class="footer-separator"></div>
          <div class="footer-actions">
-            <button class="btn btn-secondary" onclick={handleBackToMapping}>
-               <lightning-icon icon-name="utility:back" size="x-small"></lightning-icon>
-               <label>{labels.backToMapping}</label>
-            </button>
+            <button class="btn btn-secondary" onclick={handleBackToMapping}>← {labels.backToMapping}</button>
             <div class="btns">
-               <button class="btn btn-secondary" onclick={handleBackToMapping}>
-                  {labels.saveAsTemplate}
-               </button>
-               <button class="btn btn-primary" onclick={handleNextStep}>
-                  {labels.continueToValidation}
-                  <lightning-icon class="icon-inline custom-icon-output" icon-name="standard:output" size="small"></lightning-icon>
-               </button>
+               <button class="btn btn-secondary" onclick={handleBackToMapping}>{labels.saveAsTemplate}</button>
+               <button class="btn btn-primary" onclick={handleNextStep}>{labels.continueToValidation} →</button>
             </div>
          </div>
       </footer>

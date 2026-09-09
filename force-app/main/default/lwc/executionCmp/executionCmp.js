@@ -44,13 +44,26 @@ import Import_SucessCreatedSchedulesMessage from '@salesforce/label/c.Import_Suc
 
 const STAGING_CHUNK_SIZE = 200;
 const POLLING_INTERVAL_MS = 3000;
+const SCHEDULE_WATCH_INTERVAL_MS = 10000;
 const SS_RUN_STATE_PREFIX = 'IM_executionCmpRun_v1';
 const SS_RUN_STATE_LAST_KEY = 'IM_executionCmpRun_last_v1';
 
 export default class ExecutionCmp extends LightningElement {
   _projectId = '';
-  @api csvData;
+  _csvData = null;
   @api projectName;
+
+  @api
+  get csvData() { return this._csvData; }
+  set csvData(value) {
+    const previous = this._csvData;
+    this._csvData = value;
+    // New file loaded while an execution is displayed → reset so the user starts fresh
+    if (value && value !== previous && (this.currentExecutionId || this.showImportResults)) {
+      this.resetExecutionState();
+      this.clearRunState();
+    }
+  }
   
   @track isLoading = false;
 
@@ -78,7 +91,12 @@ export default class ExecutionCmp extends LightningElement {
   subscription = null;
   channelName = '/event/ImportStatusEvent__e';
   pollingTimer = null;
+  scheduleWatchTimer = null;
   isRestoringState = false;
+  isAdoptingExecution = false;
+
+  @track importLogs = [];
+  @track isCheckingStatus = false;
 
   // ===== Labels =====
   get labels() {
@@ -146,12 +164,14 @@ export default class ExecutionCmp extends LightningElement {
     this.registerErrorListener();
     this.handleSubscribe();
     this.tryRestoreExecutionState();
+    this.startScheduleWatch();
   }
 
   disconnectedCallback() {
     this.persistRunState();
     this.handleUnsubscribe();
     this.stopExecutionPolling();
+    this.stopScheduleWatch();
   }
 
   registerErrorListener() {
@@ -175,6 +195,12 @@ export default class ExecutionCmp extends LightningElement {
     ];
   }
 
+  get canRefreshStatus() { return !this.isLoading && !this.isCheckingStatus && !!this.projectId; }
+  get hasImportLogs() { return this.importLogs.length > 0; }
+
+  // Masquer le formulaire de configuration (scheduling/immediate) quand un import est en cours ou terminé
+  get showExecutionSetupCard() { return !this.showImportProgress && !this.showImportResults; }
+
   get isStartImportDisabled() { return this.isLoading || !this.projectId; }
   get isScheduleImportDisabled() { return this.isLoading || !this.projectId; }
   get isExportLogsDisabled() { return this.isLoading || !this.currentExecutionId; }
@@ -184,6 +210,9 @@ export default class ExecutionCmp extends LightningElement {
   get isImportCompleted() { return this.importStatus === 'Completed'; }
   get isImportFailed() { if (this.isImportCancelled) return false; return this.importStatus === 'Failed'; }
   get importProgressPercentage() { return Math.round(this.importProgress || 0); }
+
+  /** CSS inline style for the Aurora progress-fill bar (width driven by import progress). */
+  get progressBarStyle() { return `width:${this.importProgressPercentage}%`; }
 
   get progressBarVariant() {
     if (this.isImportCompleted) return 'success';
@@ -323,6 +352,82 @@ export default class ExecutionCmp extends LightningElement {
 
   handlePreviousStep() { this.dispatchEvent(new CustomEvent('previous')); }
 
+  async handleRefreshStatus() {
+    if (!this.canRefreshStatus) return;
+    this.isCheckingStatus = true;
+    try {
+      await this.tryRestoreExecutionState();
+    } finally {
+      this.isCheckingStatus = false;
+    }
+  }
+
+  // ===== Schedule Watch — détecte les exécutions planifiées qui démarrent =====
+  startScheduleWatch() {
+    if (this.scheduleWatchTimer) return;
+    this.scheduleWatchTimer = window.setInterval(async () => {
+      // Stop only when an execution is actively running (not done)
+      if (this.currentExecutionId && !this.showImportResults) { this.stopScheduleWatch(); return; }
+      await this.checkForActiveScheduledExecution();
+    }, SCHEDULE_WATCH_INTERVAL_MS);
+  }
+
+  stopScheduleWatch() {
+    if (this.scheduleWatchTimer) {
+      window.clearInterval(this.scheduleWatchTimer);
+      this.scheduleWatchTimer = null;
+    }
+  }
+
+  async checkForActiveScheduledExecution() {
+    if (!this.projectId || this.isRestoringState) return;
+    // Don't interfere with an actively running execution
+    if (this.currentExecutionId && !this.showImportResults) return;
+    try {
+      const details = await getLatestProjectExecution({ projectId: this.projectId });
+      if (!details?.success || !details?.hasExecution) return;
+      const status = (details.status || '').toLowerCase();
+      // Pending = en attente de l'heure planifiée → ne rien faire, le CronJob s'en chargera
+      // Seulement InProgress déclenche l'affichage de la progression
+      if (status === 'inprogress') {
+        // Reset if a previous completed execution was displayed
+        if (this.currentExecutionId) this.resetExecutionState();
+        this.currentExecutionId = details.executionId;
+        this.showImportProgress = true;
+        this.applyExecutionDetails(details);
+        this.handleSubscribe();
+        this.startExecutionPolling(this.currentExecutionId);
+        this.stopScheduleWatch();
+        await this.fetchRecentLogs(this.currentExecutionId);
+      }
+    } catch (e) { /* ignore — polling will retry */ }
+  }
+
+  // ===== Logs détaillés — rafraîchissement live dans le terminal =====
+  async fetchRecentLogs(executionId) {
+    if (!executionId) return;
+    try {
+      const result = await getImportLogs({ executionId, pageNumber: 1, pageSize: 100 });
+      const raw = Array.isArray(result?.logs) ? result.logs : [];
+      const mapped = raw.map((l, idx) => ({
+        id: l.Id || l.id || `log-${idx}`,
+        line: l.LineNumber__c ?? l.lineNumber ?? '—',
+        severity: l.Severity__c || l.severity || 'Info',
+        field: l.FieldApiName__c || l.fieldApiName || '',
+        column: l.ColumnName__c || l.columnName || '',
+        errorType: l.ErrorType__c || l.errorType || '',
+        message: l.ErrorMessage__c || l.errorMessage || l.Details__c || l.details || '',
+        cssClass: (l.Severity__c || l.severity || '') === 'Error' ? 'log-err'
+                : (l.Severity__c || l.severity || '') === 'Warning' ? 'log-warn' : 'log-ok'
+      }));
+      // Only update if content actually changed (avoids unnecessary re-renders)
+      if (mapped.length !== this.importLogs.length ||
+          (mapped.length > 0 && mapped[mapped.length - 1].id !== this.importLogs[this.importLogs.length - 1]?.id)) {
+        this.importLogs = mapped;
+      }
+    } catch (e) { /* ignore */ }
+  }
+
   getRunStateStorageKey(projectId) { return `${SS_RUN_STATE_PREFIX}_${projectId || 'no_project'}`; }
  
 
@@ -398,15 +503,18 @@ export default class ExecutionCmp extends LightningElement {
       const currentProjectId = (this.projectId || '').trim();
       const executionProjectId = (details.projectId || '').trim();
       if (currentProjectId && executionProjectId && currentProjectId !== executionProjectId) return false;
+      const status = (details.status || '').toLowerCase();
+      // Don't adopt Pending — it hasn't started yet; the schedule watch will detect InProgress
+      if (status === 'pending') return false;
       this.currentExecutionId = details.executionId || executionId;
       this.showImportProgress = true;
       this.applyExecutionDetails(details);
-      const status = (details.status || '').toLowerCase();
       const isDone = status === 'completed' || status === 'failed' || status === 'cancelled';
       if (isDone) {
         this.stopExecutionPolling();
         this.showImportResults = true;
         await this.loadErrorCount(this.currentExecutionId);
+        await this.fetchRecentLogs(this.currentExecutionId);
       } else {
         this.startExecutionPolling(this.currentExecutionId);
       }
@@ -420,15 +528,18 @@ export default class ExecutionCmp extends LightningElement {
     try {
       const details = await getLatestProjectExecution({ projectId: this.projectId });
       if (!details?.success || !details?.hasExecution) return;
+      const status = (details.status || '').toLowerCase();
+      // Don't adopt Pending — it hasn't started yet; the schedule watch will detect InProgress
+      if (status === 'pending') return;
       this.currentExecutionId = details.executionId;
       this.showImportProgress = true;
       this.applyExecutionDetails(details);
-      const status = (details.status || '').toLowerCase();
       const isDone = status === 'completed' || status === 'failed' || status === 'cancelled';
       if (isDone) {
         this.stopExecutionPolling();
         this.showImportResults = true;
         await this.loadErrorCount(this.currentExecutionId);
+        await this.fetchRecentLogs(this.currentExecutionId);
       } else {
         this.startExecutionPolling(this.currentExecutionId);
       }
@@ -470,14 +581,55 @@ export default class ExecutionCmp extends LightningElement {
 
   handlePlatformEvent(response) {
     const payload = response.data.payload;
-    const executionId = payload.ExecutionId__c;
-    if (!this.currentExecutionId || executionId !== this.currentExecutionId) return;
+    const eventExecutionId = payload.ExecutionId__c;
+    if (!eventExecutionId) return;
+
+    const currentIsDone = this.showImportResults ||
+      ['completed', 'failed', 'cancelled'].includes((this.importStatus || '').toLowerCase());
+
+    // No active execution, or previous one is done → try to adopt the new one
+    if (!this.currentExecutionId || currentIsDone) {
+      this.adoptExecutionFromEvent(eventExecutionId, payload);
+      return;
+    }
+    if (eventExecutionId !== this.currentExecutionId) return;
+
     this.importStatus = payload.Status__c || this.importStatus;
     this.importMessage = payload.Message__c || this.importMessage;
     if (payload.Progress__c !== null && payload.Progress__c !== undefined) this.importProgress = Number(payload.Progress__c) || 0;
     const status = (this.importStatus || '').toLowerCase();
     if (status === 'completed' || status === 'failed' || status === 'cancelled') this.pollExecutionStatus(this.currentExecutionId);
     this.persistRunState();
+  }
+
+  async adoptExecutionFromEvent(executionId, initialPayload) {
+    if (!executionId || !this.projectId || this.isRestoringState || this.isAdoptingExecution) return;
+    // If a completed execution is displayed, reset before adopting the new one
+    if (this.currentExecutionId) {
+      const currentIsDone = ['completed', 'failed', 'cancelled'].includes((this.importStatus || '').toLowerCase());
+      if (!currentIsDone) return; // Don't interrupt an active execution
+      this.resetExecutionState();
+    }
+    this.isAdoptingExecution = true;
+    try {
+      const details = await getExecutionDetails({ executionId });
+      if (!details?.success) return;
+      const execProjectId = (details.projectId || '').trim();
+      const myProjectId = (this.projectId || '').trim();
+      if (execProjectId && myProjectId && execProjectId !== myProjectId) return;
+      // Belongs to our project — adopt it
+      this.currentExecutionId = executionId;
+      this.showImportProgress = true;
+      this.applyExecutionDetails(details);
+      this.stopScheduleWatch();
+      this.startExecutionPolling(executionId);
+      await this.fetchRecentLogs(executionId);
+      // Apply live event payload on top
+      if (initialPayload.Status__c) this.importStatus = initialPayload.Status__c;
+      if (initialPayload.Message__c) this.importMessage = initialPayload.Message__c;
+      if (initialPayload.Progress__c != null) this.importProgress = Number(initialPayload.Progress__c) || 0;
+    } catch (e) { /* ignore */ }
+    finally { this.isAdoptingExecution = false; }
   }
 
   startExecutionPolling(executionId) {
@@ -499,6 +651,7 @@ export default class ExecutionCmp extends LightningElement {
       this.showImportProgress = true;
       this.applyExecutionDetails(details);
       this.persistRunState();
+      await this.fetchRecentLogs(executionId);
       const status = (this.importStatus || '').toLowerCase();
       const isDone = status === 'completed' || status === 'failed' || status === 'cancelled';
       if (isDone) {
@@ -506,6 +659,8 @@ export default class ExecutionCmp extends LightningElement {
         this.isLoading = false;
         this.showImportResults = true;
         await this.loadErrorCount(executionId);
+        // Resume watching so the next scheduled execution is detected automatically
+        this.startScheduleWatch();
       }
     } catch (error) { console.error('Polling error:', error); }
   }
@@ -671,7 +826,9 @@ export default class ExecutionCmp extends LightningElement {
     this.failedRecords = 0;
     this.successfulRecords = 0;
     this.totalErrors = 0;
+    this.importLogs = [];
     this.stopExecutionPolling();
+    this.startScheduleWatch();
   }
 
   showToast(title, message, variant) { this.dispatchEvent(new ShowToastEvent({ title, message, variant })); }

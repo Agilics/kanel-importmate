@@ -1,152 +1,219 @@
 <!--
-  @description       : 
-  @author            : ChangeMeIn@UserSettingsUnder.SFDoc
-  @group             : 
-  @last modified on  : 11-07-2025
-  @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
+  @last modification : 02/07/2026
+  @modification : Aurora UI — KPI strip, run-history dots, slide-in drawer
 -->
 <template>
-  <div class="main px-2">
+  <div class="sj-shell">
     <div class="card">
-      <div class="head p-1">
-        <div class="card-header  ">
-          <!-- date icon -->
-          <lightning-icon
-            icon-name="utility:picklist_type"
-            alternative-text="picklist_type"
-            class="custom-icon-groups icon-piclist_size"
-            title="date_input"
-          ></lightning-icon>
-          <!-- date icon -->
-          <h2 class="card-title">Schedule Jobs</h2>
-         </div>
-          <div class="btn-header pr-1" >
-          <!-- search field -->
-            <div class="search-field">
-               <lightning-input
-                type="search"
-                placeholder="Search schedules..."
-                onchange={handleSearch}
-              ></lightning-input>
-            </div>
-          <!-- search field -->
 
-          <!-- status filter -->
-            <!-- ComboBox for Select Status -->
-            <lightning-combobox
-              class="status-combobox rounded-input"
-              name="status" 
-              id="status"
-              value={selectedStatus}
-              options={picklistStatus}
-              placeholder="All Status"
-              onchange={handleStatusChange}
-            ></lightning-combobox>
-          <!-- status filter -->
+      <!-- ══ Card head ══ -->
+      <div class="card-head">
+        <div class="card-header">
+          <span class="sj-header-icon">🗓</span>
+          <h2 class="card-title">Schedule Jobs</h2>
+        </div>
+        <div class="card-filters">
+          <div class="search-field">
+            <span class="sj-search-icon">🔍</span>
+            <input type="search" class="sj-search-input" placeholder="Rechercher un projet..."
+              oninput={handleSearchFieldChange} />
+          </div>
+          <select class="sj-select" onchange={handleStatusChange}>
+            <template for:each={picklistStatusWithSelected} for:item="o">
+              <option key={o.value} value={o.value} selected={o.isSelected}>{o.label}</option>
+            </template>
+          </select>
         </div>
       </div>
+
+      <!-- ══ KPI strip ══ -->
+      <div class="kpi-strip">
+        <div class="kpi-mini indigo">
+          <div class="kpi-val">{kpiActiveCount}</div>
+          <div class="kpi-lbl">Actives</div>
+        </div>
+        <div class="kpi-mini amber">
+          <div class="kpi-val">{kpiPausedCount}</div>
+          <div class="kpi-lbl">En pause</div>
+        </div>
+        <div class="kpi-mini green">
+          <div class="kpi-val">{kpiNextRun}</div>
+          <div class="kpi-lbl">Prochain run</div>
+        </div>
+        <div class="kpi-mini coral">
+          <div class="kpi-val">{kpiTotalExec}</div>
+          <div class="kpi-lbl">Exécutions ce mois</div>
+        </div>
+      </div>
+
+      <!-- ══ Table ══ -->
       <div class="card-content">
-        <table role="grid" aria-label="Schedule Project Table">
-          <thead>
-            <tr>
-              <template for:each={columns} for:item="item">
-                <th scope="col" key={item.label}>{item.label}</th>
-              </template>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- schedules list-->
-            <tr>
-              <template for:each={schedules} for:item="schedule">
-                <td key={schedule.Id}>
-                  <div class="project-cell">
-                    <div
-                      class="project-icon icon-contact-import"
-                      aria-hidden="true"
-                      title="Contact Import"
-                    >
-                      <!-- People Icon -->
-                    </div>
-                    <div class="project-info">
-                      <div class="project-name">{schedule.projectName}</div>
-                      <div class="project-sub" aria-label="target object">
-                        Target: {schedule.target}
+        <div class="sched-table-wrap">
+          <table role="grid" aria-label="Schedule Jobs" class="sched-table">
+            <thead>
+              <tr>
+                <th scope="col">Planification</th>
+                <th scope="col">Fréquence</th>
+                <th scope="col">Prochaine exécution</th>
+                <th scope="col">Dernière exécution</th>
+                <th scope="col">Historique</th>
+                <th scope="col">Statut</th>
+                <th scope="col"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <template if:true={hasSchedules}>
+                <template for:each={filteredSchedules} for:item="schedule">
+                  <tr key={schedule.id} class={schedule.rowClass}>
+
+                    <!-- Project / name -->
+                    <td>
+                      <div class="project-cell">
+                        <div class="project-icon icon-contact-import" aria-hidden="true"></div>
+                        <div class="project-info">
+                          <div class="sched-name">{schedule.projectName}</div>
+                          <div class="sched-obj">Cible : {schedule.target}</div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                </td>
-                <td class="frequency" key={schedule.Id}>
-                  {schedule.frequency}
-                </td>
-                <td class="next-run" key={schedule.Id}>{schedule.nextRun}</td>
-                <td class="last-execution" key={schedule.Id}>
-                  <span>{schedule.lastExecution}</span><br />
-                  <!-- total records on success -->
-                  <template if:false={hasFailRecord}>
-                    <span class="success-text">
-                      Success &bull; {schedule.totalRecord} records
-                    </span>
-                  </template>
-                  <!-- total records on success end -->
+                    </td>
 
-                  <!-- failed records -->
-                  <template if:true={schedule.hasFailRecord}>
-                    <span class="failed-text">
-                      Failed &bull; {schedule.failRecord} errors
-                    </span>
-                  </template>
-                  <!-- failed records end -->
-                </td>
-                <td key={schedule.Id}>
-                  <!-- job status badge -->
-                  <span
-                    class={schedule.badgeStatusClass}
-                    aria-label="Schedule status"
-                    >Active</span
-                  >
-                  <!-- job status badge end -->
-                </td>
-                <td
-                  key={schedule.Id}
-                  class="actions"
-                  role="gridcell"
-                  aria-label="Actions for Contact Import"
-                >
-                  <!-- Edit Icon -->
-                  <button aria-label="Edit Contact Import">
-                    <lightning-icon
-                      icon-name="utility:edit"
-                      alternative-text="edit"
-                      class="slds-icon_action"
-                      title="edit"
-                    ></lightning-icon>
-                  </button>
-                  <!-- Pause / Play Icon -->
-                  <button title="Pause" aria-label="Pause Contact Import">
-                    <lightning-icon
-                      icon-name={schedule.iconAction}
-                      alternative-text="play | pause"
-                      class="slds-icon_action"
-                    ></lightning-icon>
-                  </button>
-                  <!-- Pause / Play Icon end -->
+                    <!-- Frequency chip -->
+                    <td>
+                      <span class={schedule.freqChipClass}>{schedule.frequency}</span>
+                    </td>
 
-                  <!-- Delete Icon -->
-                  <button title="Delete" aria-label="Delete Contact Import">
-                    <lightning-icon
-                      icon-name="utility:delete"
-                      alternative-text="delete"
-                      class="slds-icon_action"
-                      title="edit"
-                    ></lightning-icon>
-                  </button>
-                  <!-- Delete Icon end -->
-                </td>
+                    <!-- Next run -->
+                    <td>
+                      <div class={schedule.nextRunClass}>{schedule.nextRunDisplay}</div>
+                    </td>
+
+                    <!-- Last execution -->
+                    <td>
+                      <template if:false={schedule.hasFailRecord}>
+                        <div class="last-run ok">&#x2713; Succès</div>
+                        <div class="run-date">{schedule.lastExecute} &bull; {schedule.totalRecord} enreg.</div>
+                      </template>
+                      <template if:true={schedule.hasFailRecord}>
+                        <div class="last-run err">&#x2715; Échec</div>
+                        <div class="run-date">{schedule.lastExecute} &bull; {schedule.failRecord} erreurs</div>
+                      </template>
+                      <template if:true={schedule.neverRan}>
+                        <div class="last-run none">—</div>
+                      </template>
+                    </td>
+
+                    <!-- Run history dots -->
+                    <td>
+                      <div class="run-hist">
+                        <template for:each={schedule.runHistory} for:item="dot">
+                          <div key={dot.key} class={dot.cls}></div>
+                        </template>
+                      </div>
+                    </td>
+
+                    <!-- Status badge -->
+                    <td>
+                      <span class={schedule.badgeStatusClass}>
+                        <span class="sp-dot"></span>
+                        {schedule.statusLabel}
+                      </span>
+                    </td>
+
+                    <!-- Actions -->
+                    <td class="row-acts-cell">
+                      <div class="row-acts">
+                        <button
+                          type="button"
+                          class="ract"
+                          title="Modifier"
+                          aria-label="Modifier la planification"
+                          data-id={schedule.id}
+                          data-frequency={schedule.frequency}
+                          data-nextrun={schedule.nextRunRaw}
+                          onclick={handleEditSchedule}
+                        >&#x270E;</button>
+                        <button
+                          type="button"
+                          class={schedule.pauseBtnClass}
+                          title={schedule.toggleLabel}
+                          aria-label={schedule.toggleLabel}
+                          data-id={schedule.id}
+                          data-active={schedule.isActive}
+                          onclick={handleToggleSchedule}
+                        >
+                          <template if:true={schedule.isActive}>&#x23F8;</template>
+                          <template if:false={schedule.isActive}>&#x25B6;</template>
+                        </button>
+                        <button
+                          type="button"
+                          class="ract del"
+                          title="Supprimer"
+                          aria-label="Supprimer la planification"
+                          data-id={schedule.id}
+                          onclick={handleDeleteSchedule}
+                        >&#x2715;</button>
+                      </div>
+                    </td>
+
+                  </tr>
+                </template>
               </template>
-            </tr>
-          </tbody>
-        </table>
+
+              <!-- Empty state -->
+              <template if:false={hasSchedules}>
+                <tr>
+                  <td colspan="7" class="empty-state">
+                    <span class="empty-icon">🕐</span>
+                    <p>Aucune planification trouvée.</p>
+                  </td>
+                </tr>
+              </template>
+            </tbody>
+          </table>
+        </div>
+      </div><!-- /card-content -->
+
+    </div><!-- /card -->
+  </div><!-- /sj-shell -->
+
+  <!-- ══ Drawer overlay ══ -->
+  <template if:true={showEditModal}>
+    <div class="drawer-overlay open" onclick={handleCancelEdit}></div>
+
+    <!-- ══ Slide-in drawer ══ -->
+    <div class="edit-drawer open" role="dialog" aria-modal="true" aria-label="Modifier la planification">
+      <div class="drawer-head">
+        <div class="drawer-title">Modifier la planification</div>
+        <button type="button" class="drawer-close" onclick={handleCancelEdit} title="Fermer">&#x2715;</button>
+      </div>
+
+      <!-- Frequency -->
+      <div class="dsec">
+        <label class="dlabel">Fréquence</label>
+        <select class="sj-select sj-select-full" onchange={handleEditFrequencyChange}>
+          <option value="">Choisir une fréquence</option>
+          <template for:each={frequencyOptionsWithSelected} for:item="o">
+            <option key={o.value} value={o.value} selected={o.isSelected}>{o.label}</option>
+          </template>
+        </select>
+      </div>
+
+      <!-- Next run -->
+      <div class="dsec">
+        <label class="dlabel">Prochaine exécution</label>
+        <input type="datetime-local" class="sj-input-dt" value={editNextRun}
+          min={minDatetime} onchange={handleEditNextRunChange} />
+      </div>
+
+      <!-- Footer buttons -->
+      <div class="drawer-footer">
+        <button type="button" class="btn btn-primary" onclick={handleSaveEdit} disabled={isSaving}>
+          <template if:true={isSaving}>Enregistrement...</template>
+          <template if:false={isSaving}>&#x1F4BE; Enregistrer</template>
+        </button>
+        <button type="button" class="btn btn-ghost" onclick={handleCancelEdit}>Annuler</button>
       </div>
     </div>
-  </div>
+  </template>
+
 </template>

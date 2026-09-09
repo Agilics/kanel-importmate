@@ -69,6 +69,14 @@ export default class ProjectFormComponent extends LightningElement {
       });
   }
 
+  get targetObjectOptionsWithSelected() {
+    return (this.options || []).map(o => ({ ...o, isSelected: o.value === this.targetObject }));
+  }
+
+  get isNoTargetSelected() {
+    return !this.targetObject;
+  }
+
   //Vérifie si le champs d'objet ciblé est selectionnée
   @api
   get isTargetObjetSelected() {
