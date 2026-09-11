@@ -68,7 +68,7 @@ public with sharing class ScheduleRepository {
         if (String.isBlank(scheduleId)) return null;
         try {
             List<Schedule__c> results = [
-                SELECT Id, Name, Frequency__c, NextRun__c,
+                SELECT Id, Name, Frequency__c, NextRun__c, IsActive__c,
                        FM_FileSelector_Mode__c, FM_FileSelector_SelectionMode__c, FM_FilePatternName__c,
                        Project__c,
                        Project__r.Id,
@@ -96,7 +96,7 @@ public with sharing class ScheduleRepository {
         if (String.isBlank(projectId)) return new List<Schedule__c>();
         try {
             return [
-                SELECT Id, Name, Frequency__c, NextRun__c,
+                SELECT Id, Name, Frequency__c, NextRun__c, IsActive__c,
                        FM_FileSelector_Mode__c, FM_FileSelector_SelectionMode__c, FM_FilePatternName__c,
                        Project__c,
                        Project__r.Id,

@@ -154,7 +154,9 @@ export default class ScheduleJobsComponent extends LightningElement {
             return (wrapper.schedules || []).map(sch => {
                 const lastExec   = executions[0] || null;
                 const status     = lastExec?.Status__c || 'Pending';
-                const isActive   = status !== 'Suspended' && status !== 'Cancelled';
+                const isActive   = sch.IsActive__c !== undefined && sch.IsActive__c !== null
+                    ? sch.IsActive__c
+                    : (status !== 'Suspended' && status !== 'Cancelled');
                 const failRecord = parseInt(lastExec?.FailedRecords__c || 0, 10);
                 const neverRan   = !lastExec;
 

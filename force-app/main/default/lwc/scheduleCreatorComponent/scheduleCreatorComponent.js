@@ -36,6 +36,12 @@ export default class ScheduleCreatorComponent extends LightningElement {
   @track isLoadingFiles            = false;
   @track _uploadedFileName         = '';       // Nom du fichier uploadé pour pattern dynamique
 
+  // ===== Suggestion proactive de schedule =====
+  @track showScheduleSuggestion = false;
+  @track suggestedFrequency     = '';
+  @track suggestedNextRun       = null;
+  @track suggestedPattern       = '';
+
   // ===== Ãƒâ€°lÃƒÂ©ments 3-4 : Source des donnÃƒÂ©es (Inherit / Criteria / Fixed) =====
   @track fileMode = 'Inherit';
 
@@ -128,13 +134,26 @@ export default class ScheduleCreatorComponent extends LightningElement {
   }
 
   get fileTypeOptions() {
+    const baseName = this.uploadedFileBaseName || 'mon_fichier';
     return [
-      { label: ' quotidien', value: 'Daily', pattern: 'mon_fichier_{yyyy-MM-dd}.csv' },
-      { label: 'mensuel', value: 'Monthly', pattern: 'mon_fichier_{yyyyMM}.csv' },
+      { label: ' quotidien', value: 'Daily', pattern: baseName + '_{yyyy-MM-dd}.csv' },
+      { label: 'mensuel', value: 'Monthly', pattern: baseName + '_{yyyyMM}.csv' },
       { label: 'N\'importe quel CSV', value: 'AnyCsv', pattern: '*.csv' },
       //{ label: 'Un fichier prÃƒÂ©cis', value: 'Specific', pattern: '' },
      // { label: 'PersonnalisÃƒÂ©', value: 'Custom', pattern: '' }
     ];
+  }
+
+  /** Extrait le nom de base d'un fichier uploade (sans la date et l'extension) */
+  get uploadedFileBaseName() {
+    const fileName = this._uploadedFileName;
+    if (!fileName) return null;
+    // Supprime l'extension
+    const nameWithoutExt = fileName.replace(/\.[^.]+$/, '');
+    // Supprime la date et l'heure (formats: _AAAA-MM-DD_HHhMM ou _AAAA-MM-DD) et la frequence finale
+    const baseName = nameWithoutExt.replace(/_\d{4}-\d{2}-\d{2}(_\d{2}h\d{2})?(_(Daily|Weekly|Monthly))?$/, '');
+    // Supprime aussi la frequence si elle est au debut
+    return baseName.replace(/^(Daily|Weekly|Monthly)_/, '') || 'mon_fichier';
   }
 
   get selectionModeOptions() {
@@ -243,6 +262,36 @@ export default class ScheduleCreatorComponent extends LightningElement {
     if (val) this.selectedFileSource = val;
   }
 
+  /**
+   * Cree immediatement le schedule depuis la suggestion.
+   */
+  handleCreateFromSuggestion() {
+    this.selectedFrequency = this.suggestedFrequency;
+    this.nextRun = this.suggestedNextRun;
+    this.selectedFileType = this.suggestedPattern.includes('{yyyyMM}') ? 'Monthly' : 'Daily';
+    this.showScheduleSuggestion = false;
+    this.handleSave();
+  }
+
+  /**
+   * Ferme la suggestion et laisse l'utilisateur modifier manuellement.
+   */
+  handleModifySuggestion() {
+    this.selectedFrequency = this.suggestedFrequency;
+    this.nextRun = this.suggestedNextRun;
+    this.showScheduleSuggestion = false;
+  }
+
+  /**
+   * Ignore la suggestion et masque la banniere.
+   */
+  handleDismissSuggestion() {
+    this.showScheduleSuggestion = false;
+    this.suggestedFrequency = '';
+    this.suggestedNextRun = null;
+    this.suggestedPattern = '';
+  }
+
   handleStoredFileSelect(event) {
     const selectedId = event.target.value ?? event.detail?.value ?? '';
     const selectedFile = this.storedFiles.find(sf => sf.contentDocumentId === selectedId);
@@ -266,6 +315,13 @@ export default class ScheduleCreatorComponent extends LightningElement {
       // prÃƒÂ©Ã¢â‚¬â€˜remplissage de la frÃƒÂ©quence
       const freq = extractFrequencyFromFileName(selectedFile.fileName);
       if (freq) this.selectedFrequency = freq;
+      // Afficher la suggestion proactive quand frequence + date detectees
+      if (freq && dt) {
+        this.showScheduleSuggestion = true;
+        this.suggestedFrequency = freq;
+        this.suggestedNextRun = dt;
+        this.suggestedPattern = (this.uploadedFileBaseName || 'mon_fichier') + '_{yyyy-MM-dd}.csv';
+      }
     }
   }
 
@@ -299,6 +355,15 @@ export default class ScheduleCreatorComponent extends LightningElement {
       }
       const freq = extractFrequencyFromFileName(file.name);
       if (freq) this.selectedFrequency = freq;
+      // Afficher la suggestion proactive quand frequence + date detectees
+      if (freq && dt) {
+        this.showScheduleSuggestion = true;
+        this.suggestedFrequency = freq;
+        this.suggestedNextRun = dt;
+        this.suggestedPattern = (this.uploadedFileBaseName || 'mon_fichier') + '_{yyyy-MM-dd}.csv';
+      }
+      // Recharger la liste des fichiers pour rendre visible le fichier uploadé
+      this.loadProjectFiles();
     }
   }
 

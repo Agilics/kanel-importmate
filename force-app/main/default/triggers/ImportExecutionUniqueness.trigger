@@ -106,7 +106,7 @@ trigger ImportExecutionUniqueness on ImportExecution__c (before insert, before u
                 'Un ImportExecution actif existe déjà pour le projet : ' +
                 ie.Project__c +
                 ' (Id : ' + existing.Id +
-                '). Veuillez clôturer ou annuler cette exécution avant d’en créer une nouvelle.'
+                '). Veuillez clôturer ou annuler cette exécution avant d\'en créer une nouvelle.'
             );
         }
     }

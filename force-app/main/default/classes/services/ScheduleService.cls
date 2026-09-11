@@ -311,6 +311,14 @@ public with sharing class ScheduleService {
     private static Map<String, Object> pauseSchedule(Schedule__c schedule) {
         cancelExistingJob(schedule.Id);
 
+        // Marquer le schedule comme suspendu (champ de verite)
+        schedule.IsActive__c = false;
+        try {
+            update schedule;
+        } catch (DmlException e) {
+            ErrorLogService.logException(e);
+            return new Map<String, Object>{ 'success' => false, 'error' => e.getMessage() };
+        }
         // 1 seul schedule par projet â†’ query via Project__c sans ambiguÃ¯tÃ©
         List<ImportExecution__c> executions = [
             SELECT Id, Status__c, EndTime__c
@@ -360,6 +368,10 @@ public with sharing class ScheduleService {
             ExecutionRepository.updateImportExecution(executions[0]);
             executionId = executions[0].Id;
         }
+
+        // Marquer le schedule comme actif (champ de verite)
+        schedule.IsActive__c = true;
+        update schedule;
 
         String newCron    = buildCron(schedule.NextRun__c);
         String newJobName = 'Schedule_' + schedule.Id + '_' + Datetime.now().getTime();

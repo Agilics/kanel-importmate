@@ -36,7 +36,31 @@
                           l        ment 3 : Source des donn        es pour l'import planifi        
                Valeurs: Inherit (h        riter) / Criteria (crit        res) / Fixed (fixe)
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  -->
-          <div class="zone file-source-zone">
+                    <!-- Banniere de suggestion proactive de schedule -->
+          <template if:true={showScheduleSuggestion}>
+            <div class="schedule-suggestion-banner">
+              <span class="suggestion-icon">📅</span>
+              <div class="suggestion-content">
+                <strong class="suggestion-title">Schedule détecté</strong>
+                <span class="suggestion-details">
+                  Fréquence : {suggestedFrequency} • Prochaine exécution : {suggestedNextRun} • Motif : {suggestedPattern}
+                </span>
+              </div>
+              <div class="suggestion-actions">
+                <button type="button" class="btn btn-sm btn-success" onclick={handleCreateFromSuggestion}>
+                  ✓ Créer ce schedule
+                </button>
+                <button type="button" class="btn btn-sm btn-secondary" onclick={handleModifySuggestion}>
+                  Modifier
+                </button>
+                <button type="button" class="btn btn-sm btn-ghost" onclick={handleDismissSuggestion}>
+                  Ignorer
+                </button>
+              </div>
+            </div>
+          </template>
+
+<div class="zone file-source-zone">
             <div class="file-source-label-uc">Source des données</div>
             <select class="rounded-input" onchange={handleFileModeChange}>
               <template for:each={fileModeOptionsWithSelected} for:item="o">

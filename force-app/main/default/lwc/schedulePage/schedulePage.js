@@ -163,7 +163,7 @@ export default class SchedulePage extends LightningElement {
 
     /**
      * getter pour le refreshKey passÃ© Ã  schedule-jobs-component
-     * pour forcer un rafraÃ®chissement aprÃ¨s l'opÃ©ration bulk
+     * pour forcer un rafraîchissement aprés l'opération bulk
      */
     // get refreshKey() {
         // return this._refreshKey;
@@ -194,14 +194,14 @@ export default class SchedulePage extends LightningElement {
                 this.dispatchEvent(
                     new ShowToastEvent({
                         title: 'Erreur',
-                        message: 'RÃ©ponse inattendue du serveur.',
+                        message: 'Réponse inattendue du serveur.',
                         variant: 'error'
                     })
                 );
                 return;
             }
 
-            // RÃ©sumÃ© des opÃ©rations
+            // Résumé des opérations
             const total = result.totalSchedules || 0;
             const ok = result.successCount || 0;
             const ko = result.errorCount || 0;
@@ -229,13 +229,13 @@ export default class SchedulePage extends LightningElement {
                 this.dispatchEvent(
                     new ShowToastEvent({
                         title: 'Information',
-                        message: (result.errorMessages || []).join(', ') || 'Aucune exÃ©cution programmÃ©e.',
+                        message: (result.errorMessages || []).join(', ') || 'Aucune exécution programmée.',
                         variant: 'info'
                     })
                 );
             }
 
-            // Forcer le rafraÃ®chissement de la liste des jobs
+            // Forcer le rafraîchissement de la liste des jobs
             // this._refreshKey = Date.now(); -- no longer needed without key attribute
 
         } catch (err) {
