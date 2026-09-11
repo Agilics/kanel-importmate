@@ -68,7 +68,8 @@ public with sharing class ScheduleRepository {
         if (String.isBlank(scheduleId)) return null;
         try {
             List<Schedule__c> results = [
-                SELECT Id, Name, Frequency__c, NextRun__c,
+                SELECT Id, Name, Frequency__c, NextRun__c, IsActive__c,
+                       FM_FileSelector_Mode__c, FM_FileSelector_SelectionMode__c, FM_FilePatternName__c,
                        Project__c,
                        Project__r.Id,
                        Project__r.Name,
@@ -95,7 +96,8 @@ public with sharing class ScheduleRepository {
         if (String.isBlank(projectId)) return new List<Schedule__c>();
         try {
             return [
-                SELECT Id, Name, Frequency__c, NextRun__c,
+                SELECT Id, Name, Frequency__c, NextRun__c, IsActive__c,
+                       FM_FileSelector_Mode__c, FM_FileSelector_SelectionMode__c, FM_FilePatternName__c,
                        Project__c,
                        Project__r.Id,
                        Project__r.Name,
@@ -121,7 +123,8 @@ public with sharing class ScheduleRepository {
         try {
             Datetime now = System.now();
             return [
-                SELECT Id, Project__c, Frequency__c, NextRun__c
+                SELECT Id, Project__c, Frequency__c, NextRun__c,
+                       FM_FileSelector_Mode__c, FM_FileSelector_SelectionMode__c, FM_FilePatternName__c
                 FROM Schedule__c
                 WHERE NextRun__c <= :now
                 ORDER BY NextRun__c ASC
@@ -173,18 +176,16 @@ public with sharing class ScheduleRepository {
             List<Schedule__c> schedules = getSchedulesByprojectId(projectId);
             if (schedules.isEmpty()) return new List<ScheduleService.ScheduleWrapper>();
 
-            List<ImportExecution__c> filteredExecutions = [
-                SELECT Id, Status__c, Type__c, Phase__c,
-                       StartTime__c, EndTime__c,
-                       TotalRecords__c, ProcessedRecords__c, FailedRecords__c,
-                       ApexJobId__c, RetryCount__c, MaxRetries__c,
-                       Project__c
-                FROM ImportExecution__c
-                WHERE Project__c = :projectId
-                AND   Status__c  = :executionStatus
-
-                ORDER BY StartTime__c DESC
-            ];
+            String execQuery =
+                'SELECT Id, Status__c, Type__c, Phase__c, ' +
+                'StartTime__c, EndTime__c, TotalRecords__c, ProcessedRecords__c, FailedRecords__c, ' +
+                'Project__c ' +
+                'FROM ImportExecution__c WHERE Project__c = :projectId';
+            if (!String.isBlank(executionStatus)) {
+                execQuery += ' AND Status__c = :executionStatus';
+            }
+            execQuery += ' ORDER BY StartTime__c DESC';
+            List<ImportExecution__c> filteredExecutions = Database.query(execQuery);
 
             List<ScheduleService.ScheduleWrapper> wrappers = new List<ScheduleService.ScheduleWrapper>();
             for (Schedule__c schedule : schedules) {
@@ -284,8 +285,8 @@ public with sharing class ScheduleRepository {
             Id projectId = schedule.Project__c;
             return [
                 SELECT Id, Status__c, StartTime__c, EndTime__c,
-                       ApexJobId__c, TotalRecords__c, ProcessedRecords__c,
-                       FailedRecords__c, Project__c
+                TotalRecords__c, ProcessedRecords__c,
+                FailedRecords__c, Project__c
                 FROM ImportExecution__c
                 WHERE Project__c = :projectId
                 AND   Status__c  IN :statuses
@@ -303,6 +304,7 @@ public with sharing class ScheduleRepository {
 
     /**
      * Construire les wrappers Schedule + Executions
+     * Chaque schedule ne reçoit QUE ses propres exécutions
      */
     private static List<ScheduleService.ScheduleWrapper> buildScheduleWrapper(
         List<Schedule__c> schedules,
@@ -313,6 +315,7 @@ public with sharing class ScheduleRepository {
             !SecurityUtils.isAccessible(Schema.ImportExecution__c.SObjectType)) {
             return results;
         }
+
         for (Schedule__c schedule : schedules) {
             ScheduleService.ScheduleWrapper wrapper = new ScheduleService.ScheduleWrapper();
             wrapper.schedules = new List<Schedule__c>{ schedule };
@@ -341,8 +344,7 @@ public with sharing class ScheduleRepository {
             }
             String query =
                 'SELECT Id, Status__c, Type__c, Phase__c, StartTime__c, EndTime__c, ' +
-                'TotalRecords__c, ProcessedRecords__c, FailedRecords__c, ' +
-                'ApexJobId__c, Project__c ' +
+                'TotalRecords__c, ProcessedRecords__c, FailedRecords__c, Project__c ' +
                 'FROM ImportExecution__c ' +
                 whereClause +
                 ' ORDER BY StartTime__c DESC LIMIT 10000';

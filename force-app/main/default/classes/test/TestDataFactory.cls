@@ -50,11 +50,13 @@ public class TestDataFactory {
     }
     
     public static ImportExecution__c createImportExecution(Id projectId) {
+        // Statut 'Pending' par défaut : exécution active (utilisé par
+        // ExecutionRepositoryTest / ScheduleServiceTest pour tester la
+        // règle d'unicité qui bloque les exécutions actives).
         ImportExecution__c execution = new ImportExecution__c(
             Status__c = 'Pending',
             StartTime__c = System.now(),
             Type__c  = 'Import',
-            EndTime__c = System.now(),
             Project__c = projectId
         );
         insert execution;
@@ -64,7 +66,7 @@ public class TestDataFactory {
 
     public static ImportExecution__c createImportExecution(Id projectId, String type) {
         ImportExecution__c execution = new ImportExecution__c(
-            Status__c = 'Pending',
+            Status__c = 'Completed',
             Type__c = type,
             StartTime__c = System.now(),
             EndTime__c = System.now(),

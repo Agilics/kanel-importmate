@@ -11,6 +11,7 @@ import saveProject from '@salesforce/apex/ImportProjectController.saveProject';
 import getRecentsProjects from '@salesforce/apex/ImportProjectController.getRecentsProjects';
 import updateProject from '@salesforce/apex/ImportProjectController.updateProject';
 import searchProjetById from '@salesforce/apex/ImportProjectController.searchProjetById';
+import getAllMappingsByProjectId from '@salesforce/apex/FieldMappingController.getAllMappingsByProjectId';
 
 import {
   STEPS,
@@ -32,6 +33,8 @@ export default class MainComponent extends LightningElement {
   showCreatorSection = false;
   showDashboard = true;
   showExecutionHistory = false;
+  showAnalytics = false;
+  showSchedule = false;
   isLoading = false;
   activePage = PAGES.DASHBOARD;
   
@@ -68,6 +71,22 @@ export default class MainComponent extends LightningElement {
       limitor: '$recentProjectsLimit'
   })
   importProjects;
+
+  // ===== Vérification mapping pour accès Scheduling =====
+  @track _hasMappings = false;
+
+  @wire(getAllMappingsByProjectId, { projectId: '$currentProject?.Id' })
+  wiredMappingsForScheduleAccess({ data, error }) {
+      if (data) {
+          this._hasMappings = Array.isArray(data) && data.length > 0;
+      } else if (error) {
+          this._hasMappings = false;
+      }
+  }
+
+  get isMappingComplete() {
+      return this._hasMappings;
+  }
 
   connectedCallback() {
     this.setupBeforeUnloadHandler();
@@ -138,8 +157,8 @@ export default class MainComponent extends LightningElement {
   }
 
   navigateToSelectedDataSource(event) {
+      this.clearWizardState();
       this.currentProject = event.detail;
-      this.selectedDataSource = null;
       this.currentStep = STEPS.DATA_SOURCE;
       this.updateUIForStep(this.currentStep);
   }
@@ -159,7 +178,7 @@ export default class MainComponent extends LightningElement {
   async handleCreateProject() {
       this.isLoading = true;
 
-      if (!this.validateProjectFields()) {
+      if (!this.validateProjectFieldsTrimmed()) {
           this.showToast(
               TOAST_VARIANTS.WARNING,
               MESSAGES.ALL_FIELDS_REQUIRED,
@@ -222,18 +241,31 @@ export default class MainComponent extends LightningElement {
         }
     }
 
-  validateProjectFields() {
-      return this.projectName && this.targetObject;
+  validateProjectFieldsTrimmed() {
+      return (this.projectName || '').trim() && (this.targetObject || '').trim();
   }
 
   resetProjectForm() {
+      // Réinitialiser les propriétés du parent (source de vérité)
+      this.projectName = '';
+      this.description = '';
+      this.targetObject = '';
+
+      // Réinitialiser les champs visuels de projectFormComponent
+      const projectForm = this.template.querySelector(
+          'c-project-form-component'
+      );
+      if (projectForm) {
+          projectForm.resetFields();
+      }
+
+      // Réinitialiser aussi createProjectComponent s'il existe
       const createProjectComponent = this.template.querySelector(
           'c-create-project-component'
       );
       if (createProjectComponent) {
           createProjectComponent.resetFields();
       }
-      this.targetObject = '';
   }
 
   handleDataSourceSelected(event) {
@@ -286,6 +318,18 @@ export default class MainComponent extends LightningElement {
       this.targetObject = '';
   }
 
+  clearWizardState() {
+      this.csvData           = null;
+      this.selectedDataSource = null;
+      this.mappingHeadersCsv  = '';
+      this.mappingTargetObject = '';
+      try {
+          window.sessionStorage.removeItem('IM_contentDocumentId');
+          window.sessionStorage.removeItem('IM_csvRows');
+          window.sessionStorage.removeItem('IM_sourceColumnsCsv');
+      } catch (e) { /* sessionStorage unavailable */ }
+  }
+
   handleProjectNameChange(event) {
       this.projectName = event.detail;
       this.markAsUnsaved();
@@ -312,6 +356,8 @@ export default class MainComponent extends LightningElement {
   }
 
   openNewProject() {
+      this.clearWizardState();
+      this.currentProject = null;
       this.currentStep = STEPS.PROJECT_SETUP;
       this.showDashboard = false;
       this.showCreatorSection = true;
@@ -366,6 +412,10 @@ export default class MainComponent extends LightningElement {
 
   get isRealExecution() {
       return this.currentProject && this.currentStep === STEPS.EXECUTION;
+  }
+
+  get isScheduling() {
+      return this.currentProject && this.currentStep === STEPS.SCHEDULE;
   }
 
   handleStartMapping(event) {
@@ -457,6 +507,18 @@ export default class MainComponent extends LightningElement {
               this.currentStep = STEPS.PROJECT_SETUP;
               this.updateUIForStep(this.currentStep);
               break;
+          case PAGES.HISTORY:
+              this.showExecutionHistory = true;
+              this.showDashboard = false;
+              this.showCreatorSection = false;
+              break;
+          case PAGES.SCHEDULE:
+              this.showSchedule = true;
+              this.showDashboard = false;
+              this.showExecutionHistory = false;
+              this.showAnalytics = false;
+              this.showCreatorSection = false;
+              break;
           case PAGES.LOGS:
               this.showToast(
                   TOAST_VARIANTS.INFO,
@@ -487,6 +549,16 @@ export default class MainComponent extends LightningElement {
   handleSidebarStepClick(event) {
       const stepNumber = parseInt(event.detail, 10);
 
+      // Bloquer l'étape 7 (Scheduling) si pas de mapping configuré
+      if (stepNumber === STEPS.SCHEDULE && !this.isMappingComplete) {
+          this.showToast(
+              TOAST_VARIANTS.WARNING,
+              'Veuillez configurer le mapping des champs avant d\'accéder à la planification.',
+              TOAST_VARIANTS.WARNING
+          );
+          return;
+      }
+
       if (stepNumber === STEPS.PROJECT_SETUP || this.currentProject) {
           this.currentStep = stepNumber;
           this.updateUIForStep(this.currentStep);
@@ -501,6 +573,7 @@ export default class MainComponent extends LightningElement {
 
   handleProjectSelect(event) {
       const project = event.detail.project || event.detail;
+      this.clearWizardState();
       this.currentProject = project;
       this.currentStep = STEPS.DATA_SOURCE;
       this.updateUIForStep(this.currentStep);
@@ -532,7 +605,7 @@ export default class MainComponent extends LightningElement {
    async handleUpdateProject() {
         this.isLoading = true;
 
-        if (!this.validateProjectFields()) {
+        if (!this.validateProjectFieldsTrimmed()) {
             this.showToast(TOAST_VARIANTS.WARNING, MESSAGES.ALL_FIELDS_REQUIRED, TOAST_VARIANTS.WARNING);
             this.isLoading = false;
             return;
@@ -578,6 +651,13 @@ export default class MainComponent extends LightningElement {
               this.updateUIForStep(this.currentStep);
               this.showCreatorSection = true;
               break;
+          case 'Schedule':
+              this.showSchedule = true;
+              this.showDashboard = false;
+              this.showExecutionHistory = false;
+              this.showAnalytics = false;
+              this.showCreatorSection = false;
+              break;
           case QUICK_ACTIONS.VIEW_LOGS:
               this.showToast(
                   TOAST_VARIANTS.INFO,
@@ -597,9 +677,11 @@ export default class MainComponent extends LightningElement {
           case 'Historique des executions':
               this.showExecutionHistory = true;
               this.showDashboard = false;
+              this.showAnalytics = false;
               this.showCreatorSection = false;
               break;
           case 'Recent Projects':
+              this.showAnalytics = false;
               this.showDashboard = true;
               this.showExecutionHistory = false;
               this.showCreatorSection = false;
@@ -607,11 +689,9 @@ export default class MainComponent extends LightningElement {
               this.updateUIForStep(this.currentStep);
               break;
           case 'Analytics':
-              this.showToast(
-                  TOAST_VARIANTS.INFO,
-                  'Analytics feature coming soon',
-                  TOAST_VARIANTS.INFO
-              );
+              this.showAnalytics = true;
+              this.showDashboard = false;
+              this.showExecutionHistory = false;
               break;
           default:
               break;
@@ -624,6 +704,7 @@ export default class MainComponent extends LightningElement {
           this.activePage = PAGES.DASHBOARD;
           this.showCreatorSection = false;
           this.showExecutionHistory = false;
+          this.showAnalytics = false;
           this.selectedDataSource = null;
           // Rafraîchir après que le DOM soit mis à jour
         Promise.resolve().then(() => this.refreshDashboard());

@@ -35,9 +35,11 @@ private class ImportBatchTest {
         }
         insert rows;
 
-        //dry run execution
+        //dry run execution (projet distinct : la règle d'unicité n'autorise
+        // qu'une exécution active par projet)
+        ImportProject__c dryRunProject = TestDataFactory.createImportProject('Account');
         ImportExecution__c dryRunExecution = new ImportExecution__c(
-            Project__c = project.Id,
+            Project__c = dryRunProject.Id,
             Status__c = Constants.EXECUTION_STATUS_IN_PROGRESS,
             Phase__c = Constants.EXECUTION_PHASE_VALIDATING,
             Type__c = Constants.EXECUTION_TYPE_VALIDATION,
@@ -185,7 +187,9 @@ private class ImportBatchTest {
 
     @isTest
     static void testInvalidDataCreatesLogs() {
-        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
+        // Projet frais : le projet du @testSetup possède déjà une exécution
+        // InProgress (règle d'unicité : une seule active par projet).
+        ImportProject__c project = TestDataFactory.createImportProject('Account');
 
         ImportExecution__c execution = new ImportExecution__c(
             Project__c = project.Id,
@@ -234,7 +238,7 @@ private class ImportBatchTest {
 
     @isTest
     static void testEmptyStagingRows() {
-        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
+        ImportProject__c project = TestDataFactory.createImportProject('Account');
 
         ImportExecution__c execution = new ImportExecution__c(
             Project__c = project.Id,

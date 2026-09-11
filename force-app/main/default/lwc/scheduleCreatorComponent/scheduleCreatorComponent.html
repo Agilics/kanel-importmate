@@ -2,75 +2,22 @@
   @description       : 
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
   @group             : 
-  @last modified on  : 11-07-2025
+  @last modified on  : 11-07-2026
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
-  <!-- text title with buttons-->
-  <div class="main-sub pb-1">
-    <div class="title">
-      <h1>Import Scheduling</h1>
-      <p class="subtitle">
-        Set up recurring import schedules and manage scheduled jobs
-      </p>
-    </div>
-    <div class="btn-header">
-      <button class="btn btn-primary">
-        <lightning-icon
-          icon-name="utility:add"
-          alternative-text="add"
-          class="custom-icon-add icons"
-          size="small"
-          title="add"
-        ></lightning-icon>
-        New Schedule
-      </button>
-      <button class="btn btn-execute">
-        <lightning-icon
-          icon-name="utility:play"
-          alternative-text="play"
-          class="custom-icon-play icons"
-          size="small"
-          title="play"
-        ></lightning-icon>
-        Execute Now
-      </button>
-    </div>
-  </div>
-  <!-- text title with buttons end-->
-  <div class="main px-3">
-    <div class="card">
-      <div class="head p-1">
-        <!-- icon & title-->
-        <div class="card-header">
-          <!-- date icon -->
-          <lightning-icon
-            icon-name="utility:date_input"
-            alternative-text="date_input"
-            class="custom-icon-date_input"
-            title="date_input"
-          ></lightning-icon>
-          <h2 class="card-title">Schedule Configuration</h2>
-        </div>
-      </div>
-
-      <!-- separator-->
-      <hr class="separator" />
-
+  <div class="main">  
       <!-- form content -->
       <div class="card-content p-1">
         <!-- frequency settings -->
         <div class="settings">
           <h3 class="frequency-settings-title">Frequency Settings</h3>
           <div class="zone">
-            <!-- ComboBox for Select Frequency DAILY | WEEKLY | MONTHLY -->
             <lightning-combobox
               class="frequency-combobox rounded-input"
-              name="frequency"
-              label="Frequency"
               id="frequency"
               value={selectedFrequency}
-              options={picklistValues}
+              options={picklistValuesWithSelected}
               onchange={handleFrequencyChange}
             ></lightning-combobox>
           </div>
@@ -78,61 +25,158 @@
           <!-- Next Run date time picker  on local area -->
           <div class="zone">
             <lightning-input
+              type="datetime-local"
               class="time-input rounded-input"
-              type="datetime"
-              label="Time"
               id="time"
               value={nextRun}
               onchange={handleNextRunChange}
-            >
-            </lightning-input>
+            ></lightning-input>
           </div>
-        </div>
-        <!--end frequency settings-->
-        <!-- schedule preview  -->
-        <div class="box">
-          <div class="schedule-preview">
-            <h3 class="frequency-settings-title">Schedule Preview</h3>
-            <div class="bloc">
-              <div class="card-info px-1">
-                <div class="info-header">
-                  <!-- Icon info -->
-                  <lightning-icon
-                    icon-name="utility:info"
-                    alternative-text="info"
-                    class="custom-icon-info"
-                    title="info"
-                  ></lightning-icon>
-                  <!--end Icon info -->
-                  <!-- title -->
-                  <h4 class="info-title">Next Execution</h4>
-                  <!--title end-->
-                </div>
-
-                <!--card info : content next execution day -->
-                <div class="box-execution">
-                  <h3 class="next-execution-day">{nextExecution}</h3>
-                  <p class="recurrency">Recurring daily</p>
-                </div>
-                <!-- end next execution day -->
+          <!--                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+                          l        ment 3 : Source des donn        es pour l'import planifi        
+               Valeurs: Inherit (h        riter) / Criteria (crit        res) / Fixed (fixe)
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 -->
+                    <!-- Banniere de suggestion proactive de schedule -->
+          <template if:true={showScheduleSuggestion}>
+            <div class="schedule-suggestion-banner">
+              <span class="suggestion-icon">📅</span>
+              <div class="suggestion-content">
+                <strong class="suggestion-title">Schedule détecté</strong>
+                <span class="suggestion-details">
+                  Fréquence : {suggestedFrequency} • Prochaine exécution : {suggestedNextRun} • Motif : {suggestedPattern}
+                </span>
+              </div>
+              <div class="suggestion-actions">
+                <button type="button" class="btn btn-sm btn-success" onclick={handleCreateFromSuggestion}>
+                  ✓ Créer ce schedule
+                </button>
+                <button type="button" class="btn btn-sm btn-secondary" onclick={handleModifySuggestion}>
+                  Modifier
+                </button>
+                <button type="button" class="btn btn-sm btn-ghost" onclick={handleDismissSuggestion}>
+                  Ignorer
+                </button>
               </div>
             </div>
-          </div>
+          </template>
 
-          <div class="upcomings pt-1">
-            <h3 class="upcoming-title">Upcoming Executions</h3>
-            <!--List of upcoming executions date time-->
-            <template for:each={upcomingExecution} for:item="item">
-              <div key={executionDate}>
-                <ul class="upcoming-item">
-                  <li class="upcoming-date"></li>
-                </ul>
+<div class="zone file-source-zone">
+            <div class="file-source-label-uc">Source des données</div>
+            <select class="rounded-input" onchange={handleFileModeChange}>
+              <template for:each={fileModeOptionsWithSelected} for:item="o">
+                <option key={o.value} value={o.value} selected={o.isSelected}>{o.label}</option>
+              </template>
+            </select>
+
+            <!--                                           l        ment 4 : Mode Inherit (h        rit        )                                -->
+            <template if:true={isInheritMode}>
+              <div class="schedule-summary-box">
+                <p class="sched-summary-text">Les imports planifications utiliseront la même source de données et les mêmes mappings que les tapes précédentes.</p>
               </div>
             </template>
+
+            <!--                                Mode Fixed (fichier fixe)                                -->
+            <template if:true={isFixedMode}>
+              <div class="sched-file-opts">
+                <div class={fixedFileOptClass} data-value="fixed" onclick={handleFileSourceChange}>
+                  <span class="sfo-icon">                      </span>
+                  <div>
+                    <div class="sfo-title">Fichier fixe</div>
+                    <div class="sfo-sub">{selectedFileName}</div>
+                  </div>
+                </div>
+              </div>
+              <template if:true={isFixedFile}>
+                <template if:true={hasStoredFiles}>
+                  <select class="rounded-input" onchange={handleStoredFileSelect}>
+                    <option value="" disabled>Choisir un fichier...</option>
+                    <template for:each={storedFileOptionsWithSelected} for:item="o">
+                      <option key={o.value} value={o.value} selected={o.isSelected}>{o.label}</option>
+                    </template>
+                  </select>
+                </template>
+                <template if:false={hasStoredFiles}>
+                  <p class="no-files-msg">Aucun fichier CSV trouvé pour ce projet. Uploadez-en un          l'        tape 2 d'abord.</p>
+                </template>
+              </template>
+            </template>
+
+            <!--                                Mode Criteria :            l        ments 5          10                                -->
+            <template if:true={isCriteriaMode}>
+              <div class="criteria-section">
+
+                <!--                                           l        ment 5 : Type de fichier                                -->
+                <div class="zone">
+                  <div class="file-source-label-uc">Type de fichier</div>
+                  <select class="rounded-input" onchange={handleFileTypeChange} >
+                    <option value="">Choisir un type...</option>
+                    <template for:each={fileTypeOptionsWithSelected} for:item="o">
+                      <option key={o.value} value={o.value} selected={o.isSelected}>{o.label}</option>
+                    </template>
+                  </select>
+                </div>
+
+                <!--                                           l        ment 6 : Si plusieurs fichiers correspondent                                -->
+                <div class="zone">
+                  <div class="file-source-label-uc">Si plusieurs fichiers correspondent</div>
+                  <div class="sched-radio-group">
+                    <template for:each={selectionModeOptionsWithSelected} for:item="o">
+                      <label key={o.value} class="sched-radio-label">
+                        <input type="radio" name="selectionMode" value={o.value}
+                               checked={o.isSelected}
+                               onchange={handleSelectionModeChange} />
+                        <span class="sched-radio-text">{o.label}</span>
+                      </label>
+                    </template>
+                  </div>
+                </div>
+
+                <!--                                           l        ment 7 : Mod        le de nom de fichier                                -->
+                <div class="zone">
+                  <div class="file-source-label-uc">    Mode   le de nom de fichier</div>
+                  <lightning-input type="text" class="rounded-input" value={patternName}
+                         oninput={handlePatternInput}
+                         placeholder="ex: ventes_{yyyy-MM-dd}.csv" ></lightning-input>
+                </div>
+
+                <!--                                           l        ment 8 : Boutons raccourcis de saisie                                -->
+                <div class="zone">
+                  <div class="file-source-label-uc">Raccourcis</div>
+                  <div class="sched-shortcuts">
+                    <button type="button" class="btn btn-sm" onclick={handleDateShortcut} title="Ajouter la date du jour">                       Date</button>
+                    <button type="button" class="btn btn-sm" onclick={handleWildcardShortcut} title="N'importe quoi">* Tout</button>
+                    <button type="button" class="btn btn-sm" onclick={handleCharShortcut} title="Un seul caract        re">? Caract        re</button>
+                  </div>
+                </div>
+
+                <!--                                           l        ment 9 : Aperçu du nom recherché     aujourd'hui                                -->
+                <template if:true={resolvedPattern}>
+                  <div class="zone">
+                    <div class="file-source-label-uc"> Aperçu   du nom recherch  aujourd'hui</div>
+                    <div class="sched-preview-box">
+                      <code class="sched-preview-code">{resolvedPattern}</code>
+                    </div>
+                  </div>
+                </template>
+
+              </div>
+            </template>
+
+            <!--                                           l        ment 10 : R        sum         en langage clair                                -->
+            <template if:true={summaryText}>
+              <div class="sched-summary-banner">
+                <span class="sb-icon">               </span>
+                <span class="sb-text">{summaryText}</span>
+              </div>
+            </template>
+
           </div>
         </div>
+        <template if:false={isFixedFile}>
 
-        <!--end schedule preview -->
+</template>
+<!--end frequency settings-->
+       
       </div>
 
       <!-- end form content -->
@@ -140,52 +184,21 @@
       <!-- separator-->
       <div class="separator footer-separator plr-1"></div>
       <!-- footer -->
-      <div
-        style="
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 0 1.8rem 1rem;
-          margin: 2.5rem 0px 0px;
-        "
-      >
+      <div class="plr-1" style="display:flex;justify-content:space-between;align-items:center;padding-bottom:1.25rem;padding-top:1rem;">
         <div class="checkbox">
-          <!-- checkbox-->
-          <lightning-input type="checkbox" label="Send email notifications">
-          </lightning-input>
-          <lightning-input type="checkbox" label="Auto-retry on failure">
-          </lightning-input>
+          <label class="scc-check-label"><input type="checkbox" /> Send email notifications</label>
+          <label class="scc-check-label"><input type="checkbox" /> Auto-retry on failure</label>
         </div>
-
-        <!-- save schedule btn-->
-        <!-- Save & Continue Button -->
-        <button
-          type="button"
-          class="btn slds-text-align_center btn-primary"
-          style="
-            font-family: Inter;
-            font-weight: 500;
-            font-style: Medium;
-            font-size: 16px;
-            leading-trim: NONE;
-            line-height: 100%;
-            letter-spacing: 0%;
-            text-align: center;
-          "
-          onclick={handleAddSchedule}
-        >
-          Save Schedule
-        </button>
+        <button type="button" class="btn btn-primary" onclick={handleAddSchedule} disabled={disabled}>Save Schedule</button>
       </div>
 
       <!-- footer end-->
-    </div>
+    
 
     <!-- end card -->
   </div>
 
-  <!----->
-  <c-schedule-jobs-component></c-schedule-jobs-component>
+  
   <!-- <h2 class="title">New schedule</h2>
   <div class="slds-grid slds-gutters slds-align_absolute-center">
     <section

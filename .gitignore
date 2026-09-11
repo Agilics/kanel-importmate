@@ -43,14 +43,9 @@ $RECYCLE.BIN/
 **/__pycache__/
 **/.venv/
 **/venv/
-<<<<<<< HEAD
-
-<<<<<<< HEAD
-
 #vscode
-=======
-# Vs code 
->>>>>>> f61d39d76052d3bf877b76fb8a62acc707ec3f49
-.vscode
-=======
->>>>>>> origin/develop2
+.vscode/
+replace_select.py
+.gitignore
+.gitignore
+replace_filetype.py

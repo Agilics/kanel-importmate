@@ -1,0 +1,100 @@
+<template>
+    <!-- Loading overlay -->
+    <template if:true={isLoading}>
+        <div class="bulk-loading-overlay">
+            <div class="bulk-spinner"></div>
+            <p class="bulk-loading-text">Programmation en cours...</p>
+        </div>
+    </template>
+
+    <div class="slds-card slds-p-horizontal_small">
+        <div class="slds-card__body slds-p-around_medium">
+            <!-- text title with buttons (transféré depuis schedule-creator-component) -->
+            <div class="main-sub pb-1">
+                <div class="title">
+                    <h1>Import Scheduling</h1>
+                    <p class="subtitle">
+                        Set up recurring import schedules and manage scheduled jobs
+                    </p>
+                </div>
+                <div class="btn-header">
+                    <button type="button" class="btn btn-execute"
+                        onclick={handleExecuteNow} disabled={isExecuteDisabled}
+                        title="Créer une exécution pour chaque planification du projet">
+                        {executeButtonLabel}
+                    </button>
+                </div>
+            </div>
+            <!-- text title with buttons end-->
+
+            <!-- Trigger button to open the schedule creation modal -->
+            <div class="slds-grid slds-wrap slds-gutters">
+                <div class="slds-col slds-size_1-of-1 slds-m-bottom_medium">
+                    <p class="slds-text-heading_small">Configuration de l'exécution</p>
+                </div>
+                <div class="slds-col slds-size_1-of-1">
+                    <button
+                        type="button"
+                        class="btn btn-primary"
+                        onclick={openModal}
+                        disabled={isScheduleDisabled}
+                        title="Créer un nouveau schedule">
+                        New Schedule
+                    </button>
+                </div>
+            </div>
+
+            <!-- Drawer (slide-right) wrapping the Schedule Creator Component -->
+            <template if:true={isModalOpen}>
+                <div class="drawer-backdrop" onclick={closeModal}></div>
+                <aside class="drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title">
+                    <div class="drawer__header" onclick={handleDrawerContentClick}>
+                        <h2 id="drawer-title" class="drawer__title">New Schedule</h2>
+                        <button type="button" class="drawer-close-btn" onclick={closeModal} aria-label="Fermer">
+                            ✕
+                        </button>
+                    </div>
+                    <div class="drawer__body" onclick={handleDrawerContentClick}>
+                        <c-schedule-creator-component
+                            project-id={projectId}
+                            disabled={isScheduleDisabled}
+                            next-run={nextRun}
+                            onnextrunchange={handleNextRunChange}
+                            onschedulecreated={handleScheduleCreated}>
+                        </c-schedule-creator-component>
+                    </div>
+                </aside>
+            </template>
+
+            <!-- Separator -->
+            <hr class="slds-m-vertical_medium" />
+
+            <!-- Bulk Schedule Button -->
+        <!--    <div class="slds-grid slds-wrap slds-gutters">
+                <div class="slds-col slds-size_1-of-1 slds-m-bottom_small">
+                    <p class="slds-text-heading_small slds-m-bottom_small">Actions group  es</p>
+                    <button
+                        type="button"
+                        class="slds-button slds-button_brand"
+                        onclick={handleBulkSchedule}
+                        disabled={isBulkDisabled}
+                        title="Programmer tous les schedules">
+                        <span class="slds-button__icon slds-button__icon_left" aria-hidden="true">
+                            <svg class="slds-button__icon" aria-hidden="true">
+                                <use xlink:href="/_slds/icons/action-sprite/svg/symbols.svg#schedule"></use>
+                            </svg>
+                        </span>
+                             Programmer tout
+                    </button>
+                    <p class="slds-text-body_small slds-text-color_weak slds-m-top_xx-small">
+                        Cr  e une ex  cution pour chaque planification active du projet.
+                    </p>
+                </div>
+            </div>-->
+            
+            <div class="slds-m-top_large">
+               <c-schedule-jobs-component project-id={projectId}></c-schedule-jobs-component>
+            </div>
+        </div>
+    </div>
+</template>

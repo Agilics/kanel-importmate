@@ -1,29 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Translations xmlns="http://soap.sforce.com/2006/04/metadata">
     <customLabels>
-    <label>Tous les champs sont obligatoires</label>
-    <name>ALL_FIELDS_REQUIRED</name>
-</customLabels>
-<customLabels>
-    <label>Un projet avec ce nom et cet objet cible existe déjà</label>
-    <name>PROJECT_EXISTS</name>
-</customLabels>
-<customLabels>
-    <label>Projet {0} créé avec succès</label>
-    <name>PROJECT_CREATED</name>
-</customLabels>
-<customLabels>
-    <label>Une erreur s’est produite</label>
-    <name>ERROR_OCCURRED</name>
-</customLabels>
-<customLabels>
-    <label>Veuillez sélectionner ou créer un projet d’abord</label>
-    <name>SELECT_PROJECT_FIRST</name>
-</customLabels>
-<customLabels>
-    <label>Veuillez d’abord créer un projet</label>
-    <name>CREATE_PROJECT_FIRST</name>
-</customLabels>
+        <label>Tous les champs sont obligatoires</label>
+        <name>ALL_FIELDS_REQUIRED</name>
+    </customLabels>
+    <customLabels>
+        <label><!-- Analytics feature placeholder --></label>
+        <name>ANALYTICS_COMING_SOON</name>
+    </customLabels>
+    <customLabels>
+        <label>Veuillez d’abord créer un projet</label>
+        <name>CREATE_PROJECT_FIRST</name>
+    </customLabels>
     <customLabels>
         <label>Retour à la source de données</label>
         <name>CsvUploader_Back_Button</name>
@@ -309,7 +297,7 @@
         <name>DataTable_Showing_Entries</name>
     </customLabels>
     <customLabels>
-        <label><!-- Generic error message --></label>
+        <label>Une erreur s’est produite</label>
         <name>ERROR_OCCURRED</name>
     </customLabels>
     <customLabels>
@@ -813,6 +801,10 @@
         <name>IM_DRY_Settings_IncludeWarnings</name>
     </customLabels>
     <customLabels>
+        <label>Sauvegarder les lignes valides</label>
+        <name>IM_DRY_Settings_KeepValidRows</name>
+    </customLabels>
+    <customLabels>
         <label>Mode</label>
         <name>IM_DRY_Settings_Mode</name>
     </customLabels>
@@ -936,7 +928,6 @@
         <label>Statut d&apos;exécution de l&apos;import</label>
         <name>IM_EX_Progress_Title</name>
     </customLabels>
-    
     <customLabels>
         <label>Lancez votre import ou planifiez des exécutions récurrentes</label>
         <name>IM_EX_Subtitle</name>
@@ -1590,8 +1581,24 @@
         <name>Import_Frequency</name>
     </customLabels>
     <customLabels>
+        <label>Quotidienne</label>
+        <name>Import_Frequency_Daily</name>
+    </customLabels>
+    <customLabels>
+        <label>Mensuelle</label>
+        <name>Import_Frequency_Monthly</name>
+    </customLabels>
+    <customLabels>
+        <label>Hebdomadaire</label>
+        <name>Import_Frequency_Weekly</name>
+    </customLabels>
+    <customLabels>
         <label>Exécution Immédiate</label>
         <name>Import_ImmediateExecution</name>
+    </customLabels>
+    <customLabels>
+        <label><!-- Frequency --></label>
+        <name>Import_NextRun</name>
     </customLabels>
     <customLabels>
         <label>Aucune planification trouvée. Créez-en une pour commencer.</label>
@@ -1604,6 +1611,34 @@
     <customLabels>
         <label>Exécuter l&apos;import maintenant</label>
         <name>Import_RunImportNow</name>
+    </customLabels>
+    <customLabels>
+        <label>à</label>
+        <name>Import_Schedule_At</name>
+    </customLabels>
+    <customLabels>
+        <label>Quotidienne à</label>
+        <name>Import_Schedule_DailyAt</name>
+    </customLabels>
+    <customLabels>
+        <label>La date prévue doit être ultérieure. La tâche Cron existante sera remplacée.</label>
+        <name>Import_Schedule_Edit_Info_Bar</name>
+    </customLabels>
+    <customLabels>
+        <label>Modification planification d&apos;exécution</label>
+        <name>Import_Schedule_Edit_Title</name>
+    </customLabels>
+    <customLabels>
+        <label>Mensuelle le</label>
+        <name>Import_Schedule_MonthlyOn</name>
+    </customLabels>
+    <customLabels>
+        <label>Non planifiée</label>
+        <name>Import_Schedule_NotScheduled</name>
+    </customLabels>
+    <customLabels>
+        <label>Hebdomadaire le</label>
+        <name>Import_Schedule_WeeklyOn</name>
     </customLabels>
     <customLabels>
         <label>Exécution Planifiée</label>
@@ -1642,6 +1677,18 @@
         <name>Import_UpdateScheduleToastMessage</name>
     </customLabels>
     <customLabels>
+        <label><!-- Logs feature placeholder --></label>
+        <name>LOGS_COMING_SOON</name>
+    </customLabels>
+    <customLabels>
+        <label>Projet {0} créé avec succès</label>
+        <name>PROJECT_CREATED</name>
+    </customLabels>
+    <customLabels>
+        <label>Un projet avec ce nom et cet objet cible existe déjà</label>
+        <name>PROJECT_EXISTS</name>
+    </customLabels>
+    <customLabels>
         <label>Modifié le :</label>
         <name>ProjectCard_Meta_Modified</name>
     </customLabels>
@@ -1662,8 +1709,36 @@
         <name>ProjectCard_Progress_Label</name>
     </customLabels>
     <customLabels>
+        <label>Annulé</label>
+        <name>ProjectCard_Status_Cancelled</name>
+    </customLabels>
+    <customLabels>
+        <label>Terminé</label>
+        <name>ProjectCard_Status_Completed</name>
+    </customLabels>
+    <customLabels>
         <label>Brouillon</label>
         <name>ProjectCard_Status_Draft</name>
+    </customLabels>
+    <customLabels>
+        <label>Échoué</label>
+        <name>ProjectCard_Status_Failed</name>
+    </customLabels>
+    <customLabels>
+        <label><!-- ProjectCard_Status_InProgress --></label>
+        <name>ProjectCard_Status_InProgress</name>
+    </customLabels>
+    <customLabels>
+        <label>En Attente</label>
+        <name>ProjectCard_Status_Pending</name>
+    </customLabels>
+    <customLabels>
+        <label>Succès</label>
+        <name>ProjectCard_Status_Success</name>
+    </customLabels>
+    <customLabels>
+        <label>En Suspend</label>
+        <name>ProjectCard_Status_Suspended</name>
     </customLabels>
     <customLabels>
         <label>Annuler</label>
@@ -1714,8 +1789,76 @@
         <name>ProjectForm_Title</name>
     </customLabels>
     <customLabels>
-        <label>Actions Rapides</label>
-        <name>SideBar_QuickAction_Title</name>
+        <label><!-- Created date label --></label>
+        <name>ProjectRecent_Created_Label</name>
+    </customLabels>
+    <customLabels>
+        <label><!-- Project description label --></label>
+        <name>ProjectRecent_Description</name>
+    </customLabels>
+    <customLabels>
+        <label><!-- Project name label --></label>
+        <name>ProjectRecent_Name</name>
+    </customLabels>
+    <customLabels>
+        <label><!-- No project message --></label>
+        <name>ProjectRecent_No_Project</name>
+    </customLabels>
+    <customLabels>
+        <label><!-- Recent projects section title --></label>
+        <name>ProjectRecent_Recent_Projects</name>
+    </customLabels>
+    <customLabels>
+        <label><!-- Select project button --></label>
+        <name>ProjectRecent_Select_Project</name>
+    </customLabels>
+    <customLabels>
+        <label><!-- Target Salesforce object label --></label>
+        <name>ProjectRecent_Target_Object</name>
+    </customLabels>
+    <customLabels>
+        <label><!-- Target object label in project list --></label>
+        <name>ProjectRecent_Target_SObject</name>
+    </customLabels>
+    <customLabels>
+        <label><!-- Create new project title --></label>
+        <name>ProjectRecent_Title</name>
+    </customLabels>
+    <customLabels>
+        <label><!-- Use existing project card title --></label>
+        <name>ProjectRecent_Use_Existing</name>
+    </customLabels>
+    <customLabels>
+        <label><!-- Description for using an existing project --></label>
+        <name>ProjectRecent_Use_Existing_Description</name>
+    </customLabels>
+    <customLabels>
+        <label><!-- Search projects feature --></label>
+        <name>SEARCH_PROJECTS_FEATURE</name>
+    </customLabels>
+    <customLabels>
+        <label>Veuillez sélectionner ou créer un projet d’abord</label>
+        <name>SELECT_PROJECT_FIRST</name>
+    </customLabels>
+    <customLabels>
+        <label><!-- Settings feature placeholder --></label>
+        <name>SETTINGS_COMING_SOON</name>
+    </customLabels>
+    <customLabels>
+        <label><!-- Card title for select project --></label>
+        <name>SelectProject_Card_Title</name>
+    </customLabels>
+    <customLabels>
+        <label><!-- Button to close modal --></label>
+        <name>SelectProject_Close_Button</name>
+    </customLabels>
+    <customLabels>
+        <label><!-- Message for no project found --></label>
+        <name>SelectProject_No_Project</name>
+    </customLabels>
+    <customLabels>
+        <label><!-- Button to select project --></label>
+        <name>SelectProject_Select_Button</name>
     </customLabels>
     <customLabels>
         <label>Analytique</label>
@@ -1728,6 +1871,10 @@
     <customLabels>
         <label>Projets récents</label>
         <name>SideBar_QuickAction_Recent_Project</name>
+    </customLabels>
+    <customLabels>
+        <label>Actions Rapides</label>
+        <name>SideBar_QuickAction_Title</name>
     </customLabels>
     <customLabels>
         <label>Source de données</label>
@@ -1746,6 +1893,10 @@
         <name>SideBar_Step_ProjectSetup</name>
     </customLabels>
     <customLabels>
+        <label>Planning</label>
+        <name>SideBar_Step_Schedule</name>
+    </customLabels>
+    <customLabels>
         <label>Transformations</label>
         <name>SideBar_Step_Transformations</name>
     </customLabels>
@@ -1761,74 +1912,143 @@
         <label>Affichage des logs</label>
         <name>VIEW_LOGS</name>
     </customLabels>
-    <!--Import Execution Status -->
-    
-<customLabels>
-    <label>En Attente</label>
-    <name>ProjectCard_Status_Pending</name>
-</customLabels>
-<customLabels>
-    <label>En Suspend</label>
-    <name>ProjectCard_Status_Suspended</name>
-</customLabels>
-<customLabels>
-    <label>Annulé</label>
-    <name>ProjectCard_Status_Cancelled</name>
-</customLabels>
-<customLabels>
-    <label>Échoué</label>
-    <name>ProjectCard_Status_Failed</name>
-</customLabels>
-<customLabels>
-    <label>Terminé</label>
-    <name>ProjectCard_Status_Completed</name>
-</customLabels>
-<customLabels>
-    <label>Succès</label>
-    <name>ProjectCard_Status_Success</name>
-</customLabels>
-    <customLabels>
-        <label>Quotidienne</label>
-        <name>Import_Frequency_Daily</name>
-    </customLabels>
-    <customLabels>
-        <label>Hebdomadaire</label>
-        <name>Import_Frequency_Weekly</name>
-    </customLabels>
-    <customLabels>
-        <label>Mensuelle</label>
-        <name>Import_Frequency_Monthly</name>
-    </customLabels>
-    <customLabels>
-        <label>à</label>
-        <name>Import_Schedule_At</name>
-    </customLabels> 
-     <customLabels>
-        <label>Modification planification d'exécution</label>
-        <name>Import_Schedule_Edit_Title</name>
-    </customLabels> 
-    <customLabels>
-        <label>Non planifiée</label>
-        <name>Import_Schedule_NotScheduled</name>
-    </customLabels>
-    <customLabels>
-        <label>Quotidienne à</label>
-        <name>Import_Schedule_DailyAt</name>
-    </customLabels>
-    <customLabels>
-        <label>Hebdomadaire le</label>
-        <name>Import_Schedule_WeeklyOn</name>
-    </customLabels>
-    <customLabels>
-        <label>Mensuelle le</label>
-        <name>Import_Schedule_MonthlyOn</name>
-    </customLabels>
-    <customLabels>
-        <label>La date prévue doit être ultérieure. La tâche Cron existante sera remplacée.</label>
-        <name>Import_Schedule_Edit_Info_Bar</name>
-    </customLabels>
-    <customLabels>
-        <label>Sauvegarder les lignes valides</label>
-        <name>IM_DRY_Settings_KeepValidRows</name>
-   </customLabels>
+    <customTabs>
+        <label><!-- vb --></label>
+        <name>vb</name>
+    </customTabs>
+    <quickActions>
+        <label><!-- LogACall --></label>
+        <name>LogACall</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- NewAccount --></label>
+        <name>NewAccount</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- NewCase --></label>
+        <name>NewCase</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- NewContact --></label>
+        <name>NewContact</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- NewEvent --></label>
+        <name>NewEvent</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- NewGroup --></label>
+        <name>NewGroup</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- NewLead --></label>
+        <name>NewLead</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- NewNote --></label>
+        <name>NewNote</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- NewOpportunity --></label>
+        <name>NewOpportunity</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- NewTask --></label>
+        <name>NewTask</name>
+    </quickActions>
+    <quickActions>
+        <label><!-- SendEmail --></label>
+        <name>SendEmail</name>
+    </quickActions>
+    <reportTypes>
+        <description><!-- Journaux d’exécution d’orchestrations Spring &apos;24 --></description>
+        <label><!-- Journaux d’exécution d’orchestrations Spring &apos;24 --></label>
+        <name>flow_orchestration_log_ootb_crt_two_four_eight</name>
+        <sections>
+            <label><!-- Journaux d&apos;exécution d&apos;orchestration --></label>
+            <name>Journaux d&apos;exécution d&apos;orchestration</name>
+        </sections>
+    </reportTypes>
+    <reportTypes>
+        <description><!-- Orchestration Runs --></description>
+        <label><!-- Orchestration Runs --></label>
+        <name>flow_orchestration_run_crt</name>
+        <sections>
+            <label><!-- Orchestration Runs --></label>
+            <name>Orchestration Runs</name>
+        </sections>
+    </reportTypes>
+    <reportTypes>
+        <description><!-- Exécutions d’orchestration Spring &apos;24 --></description>
+        <label><!-- Exécutions d’orchestration Spring &apos;24 --></label>
+        <name>flow_orchestration_run_ootb_crt_two_four_eight</name>
+        <sections>
+            <label><!-- Exécutions d&apos;orchestration --></label>
+            <name>Exécutions d&apos;orchestration</name>
+        </sections>
+    </reportTypes>
+    <reportTypes>
+        <description><!-- Exécutions de phases d’orchestration Spring &apos;24 --></description>
+        <label><!-- Exécutions de phases d’orchestration Spring &apos;24 --></label>
+        <name>flow_orchestration_stage_run_ootb_crt_two_four_eight</name>
+        <sections>
+            <label><!-- Exécutions de phase d&apos;orchestration --></label>
+            <name>Exécutions de phase d&apos;orchestration</name>
+        </sections>
+    </reportTypes>
+    <reportTypes>
+        <description><!-- Exécutions d’étape d’orchestration Spring &apos;24 --></description>
+        <label><!-- Exécutions d’étape d’orchestration Spring &apos;24 --></label>
+        <name>flow_orchestration_step_run_ootb_crt_two_four_eight</name>
+        <sections>
+            <label><!-- Exécutions d&apos;étape d&apos;orchestration --></label>
+            <name>Exécutions d&apos;étape d&apos;orchestration</name>
+        </sections>
+    </reportTypes>
+    <reportTypes>
+        <description><!-- Éléments de travail d’orchestration Spring &apos;24 --></description>
+        <label><!-- Éléments de travail d’orchestration Spring &apos;24 --></label>
+        <name>flow_orchestration_work_item_ootb_crt_two_four_eight</name>
+        <sections>
+            <columns>
+                <label><!-- Exécution d’étape d’orchestration :Label --></label>
+                <name>Exécution d’étape d’orchestration :Label</name>
+            </columns>
+            <columns>
+                <label><!-- Exécution d’étape d’orchestration :Name --></label>
+                <name>Exécution d’étape d’orchestration :Name</name>
+            </columns>
+            <columns>
+                <label><!-- Exécution d’étape d’orchestration :Status --></label>
+                <name>Exécution d’étape d’orchestration :Status</name>
+            </columns>
+            <label><!-- Exécutions d&apos;étape d&apos;orchestration --></label>
+            <name>Exécutions d&apos;étape d&apos;orchestration</name>
+        </sections>
+        <sections>
+            <columns>
+                <label><!-- AttribuéeGroupe ou file d’attente --></label>
+                <name>AttribuéeGroupe ou file d’attente</name>
+            </columns>
+            <columns>
+                <label><!-- AttribuéeUser --></label>
+                <name>AttribuéeUser</name>
+            </columns>
+            <label><!-- Éléments de travail de l&apos;orchestration --></label>
+            <name>Éléments de travail de l&apos;orchestration</name>
+        </sections>
+    </reportTypes>
+    <reportTypes>
+        <description><!-- Screen Flows --></description>
+        <label><!-- Screen Flows --></label>
+        <name>screen_flows_prebuilt_crt</name>
+        <sections>
+            <label><!-- Flow Interview Log Entries --></label>
+            <name>Flow Interview Log Entries</name>
+        </sections>
+        <sections>
+            <label><!-- Flow Interview Logs --></label>
+            <name>Flow Interview Logs</name>
+        </sections>
+    </reportTypes>
 </Translations>
