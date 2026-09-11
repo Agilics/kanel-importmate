@@ -11,6 +11,7 @@ import saveProject from '@salesforce/apex/ImportProjectController.saveProject';
 import getRecentsProjects from '@salesforce/apex/ImportProjectController.getRecentsProjects';
 import updateProject from '@salesforce/apex/ImportProjectController.updateProject';
 import searchProjetById from '@salesforce/apex/ImportProjectController.searchProjetById';
+import getAllMappingsByProjectId from '@salesforce/apex/FieldMappingController.getAllMappingsByProjectId';
 
 import {
   STEPS,
@@ -70,6 +71,22 @@ export default class MainComponent extends LightningElement {
       limitor: '$recentProjectsLimit'
   })
   importProjects;
+
+  // ===== Vérification mapping pour accès Scheduling =====
+  @track _hasMappings = false;
+
+  @wire(getAllMappingsByProjectId, { projectId: '$currentProject?.Id' })
+  wiredMappingsForScheduleAccess({ data, error }) {
+      if (data) {
+          this._hasMappings = Array.isArray(data) && data.length > 0;
+      } else if (error) {
+          this._hasMappings = false;
+      }
+  }
+
+  get isMappingComplete() {
+      return this._hasMappings;
+  }
 
   connectedCallback() {
     this.setupBeforeUnloadHandler();
@@ -161,7 +178,7 @@ export default class MainComponent extends LightningElement {
   async handleCreateProject() {
       this.isLoading = true;
 
-      if (!this.validateProjectFields()) {
+      if (!this.validateProjectFieldsTrimmed()) {
           this.showToast(
               TOAST_VARIANTS.WARNING,
               MESSAGES.ALL_FIELDS_REQUIRED,
@@ -224,18 +241,31 @@ export default class MainComponent extends LightningElement {
         }
     }
 
-  validateProjectFields() {
-      return this.projectName && this.targetObject;
+  validateProjectFieldsTrimmed() {
+      return (this.projectName || '').trim() && (this.targetObject || '').trim();
   }
 
   resetProjectForm() {
+      // Réinitialiser les propriétés du parent (source de vérité)
+      this.projectName = '';
+      this.description = '';
+      this.targetObject = '';
+
+      // Réinitialiser les champs visuels de projectFormComponent
+      const projectForm = this.template.querySelector(
+          'c-project-form-component'
+      );
+      if (projectForm) {
+          projectForm.resetFields();
+      }
+
+      // Réinitialiser aussi createProjectComponent s'il existe
       const createProjectComponent = this.template.querySelector(
           'c-create-project-component'
       );
       if (createProjectComponent) {
           createProjectComponent.resetFields();
       }
-      this.targetObject = '';
   }
 
   handleDataSourceSelected(event) {
@@ -519,6 +549,16 @@ export default class MainComponent extends LightningElement {
   handleSidebarStepClick(event) {
       const stepNumber = parseInt(event.detail, 10);
 
+      // Bloquer l'étape 7 (Scheduling) si pas de mapping configuré
+      if (stepNumber === STEPS.SCHEDULE && !this.isMappingComplete) {
+          this.showToast(
+              TOAST_VARIANTS.WARNING,
+              'Veuillez configurer le mapping des champs avant d\'accéder à la planification.',
+              TOAST_VARIANTS.WARNING
+          );
+          return;
+      }
+
       if (stepNumber === STEPS.PROJECT_SETUP || this.currentProject) {
           this.currentStep = stepNumber;
           this.updateUIForStep(this.currentStep);
@@ -565,7 +605,7 @@ export default class MainComponent extends LightningElement {
    async handleUpdateProject() {
         this.isLoading = true;
 
-        if (!this.validateProjectFields()) {
+        if (!this.validateProjectFieldsTrimmed()) {
             this.showToast(TOAST_VARIANTS.WARNING, MESSAGES.ALL_FIELDS_REQUIRED, TOAST_VARIANTS.WARNING);
             this.isLoading = false;
             return;

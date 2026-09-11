@@ -34,6 +34,7 @@ export default class ScheduleCreatorComponent extends LightningElement {
   @track selectedContentDocumentId = '';
   @track storedFiles               = [];
   @track isLoadingFiles            = false;
+  @track _uploadedFileName         = '';       // Nom du fichier uploadé pour pattern dynamique
 
   // ===== Ãƒâ€°lÃƒÂ©ments 3-4 : Source des donnÃƒÂ©es (Inherit / Criteria / Fixed) =====
   @track fileMode = 'Inherit';
@@ -120,9 +121,9 @@ export default class ScheduleCreatorComponent extends LightningElement {
 
   get fileModeOptions() {
     return [
-      { label: 'HÃƒÂ©riter des ÃƒÂ©tapes prÃƒÂ©cÃƒÂ©dentes', value: 'Inherit' },
-      { label: 'Choisir par critÃƒÂ¨res (modÃƒÂ¨le de nom)', value: 'Criteria' },
-      { label: 'MÃƒÂªme fichier ÃƒÂ  chaque exÃƒÂ©cution', value: 'Fixed' }
+      { label: 'Hériter des étapes précédentes', value: 'Inherit' },
+      { label: 'Choisir par critères (modèle de nom)', value: 'Criteria' },
+      { label: 'Même fichier à chaque exécution', value: 'Fixed' }
     ];
   }
 
@@ -138,9 +139,9 @@ export default class ScheduleCreatorComponent extends LightningElement {
 
   get selectionModeOptions() {
     return [
-      { label: 'Le plus rÃƒÂ©cent', value: 'Latest' },
+      { label: 'Le plus récent', value: 'Latest' },
       { label: 'Tous', value: 'All' },
-      { label: 'Un par exÃƒÂ©cution', value: 'OnePerExecution' }
+      { label: 'Un par exécution', value: 'OnePerExecution' }
     ];
   }
 
@@ -225,7 +226,7 @@ export default class ScheduleCreatorComponent extends LightningElement {
                         this.emitNextRunChange();
                     } else {
                         // Le format correspond mais la date/heure est invalide (ex. mois 13, heure 25)
-                        this.showToast('Warning', 'La date/heure extraite du nom de fichier est invalide (mois doit ÃƒÂªtre entre 01 et 12, heure entre 00 et 23).', 'warning');
+                        this.showToast('Warning', 'La date/heure extraite du nom de fichier est invalide (mois doit être entre 01 et 12, heure entre 00 et 23).', 'warning');
                         this.nextRun = null;
                     }
                     const freq = extractFrequencyFromFileName(file.fileName);
@@ -251,14 +252,15 @@ export default class ScheduleCreatorComponent extends LightningElement {
       this.nextRun = null;
     } else {
       this.selectedContentDocumentId = selectedId;
-      // prÃƒÂ©Ã¢â‚¬â€˜remplissage du champ date/heure
+      this._uploadedFileName = selectedFile.fileName;
+      // prÃƒÂ©Ã¢‚à remplissage du champ date/heure
       const dt = extractDateTimeFromFileName(selectedFile.fileName);
       if (dt) {
         this.nextRun = dt;
         this.emitNextRunChange();
       } else {
         // Le format correspond mais la date/heure est invalide (ex. mois 13, heure 25)
-        this.showToast('Warning', 'La date/heure extraite du nom de fichier est invalide (mois doit ÃƒÂªtre entre 01 et 12, heure entre 00 et 23).', 'warning');
+        this.showToast('Warning', 'La date/heure extraite du nom de fichier est invalide (mois doit être entre 01 et 12, heure entre 00 et 23).', 'warning');
         this.nextRun = null;
       }
       // prÃƒÂ©Ã¢â‚¬â€˜remplissage de la frÃƒÂ©quence
@@ -283,6 +285,7 @@ export default class ScheduleCreatorComponent extends LightningElement {
         this.showToast('Warning', `Le fichier uploadÃƒÂ© doit respecter un des formats attendus : "Nom_AAAA-MM-JJ_HHhMM_Frequence", "Nom_Frequence_AAAA-MM-JJ_HHhMM" ou "Nom_AAAA-MM-JJ_HHhMM".`, 'warning');
         return;
       }
+      this._uploadedFileName = file.name;
       this.selectedContentDocumentId = file.documentId || file.contentVersionId || '';
       this.selectedFileSource = 'fixed';
       const dt = extractDateTimeFromFileName(file.name);
@@ -291,7 +294,7 @@ export default class ScheduleCreatorComponent extends LightningElement {
         this.emitNextRunChange();
       } else {
         // Le format correspond mais la date/heure est invalide (ex. mois 13, heure 25)
-        this.showToast('Warning', 'La date/heure extraite du nom de fichier est invalide (mois doit ÃƒÂªtre entre 01 et 12, heure entre 00 et 23).', 'warning');
+        this.showToast('Warning', 'La date/heure extraite du nom de fichier est invalide (mois doit être entre 01 et 12, heure entre 00 et 23).', 'warning');
         this.nextRun = null;
       }
       const freq = extractFrequencyFromFileName(file.name);
@@ -314,7 +317,7 @@ export default class ScheduleCreatorComponent extends LightningElement {
       console.log(data);
     } else if (error) {
       console.error(
-        "Erreur lors de la rÃƒÂ©cupÃƒÂ©ration des valeurs de picklist : ",
+        "Erreur lors de la récupération des valeurs de picklist : ",
         error
       );
       this.showToast(
@@ -326,12 +329,12 @@ export default class ScheduleCreatorComponent extends LightningElement {
     }
   }
 
-  //Mise ÃƒÂ  jour de la valeur de selectedFrequency
+  //Mise à jour de la valeur de selectedFrequency
   handleFrequencyChange(event) {
     this.selectedFrequency = event.target.value;
   }
 
-  //Mise ÃƒÂ  jour du champs de la date d'ÃƒÂ©xÃƒÂ©cution
+  //Mise à jour du champs de la date d'execution
   handleNextRunChange(event) {
     this.nextRun = event.target.value;
     this.emitNextRunChange();
@@ -467,6 +470,8 @@ export default class ScheduleCreatorComponent extends LightningElement {
 
       this.resetFields();
       this.showToast("Success", "Planification créée avec succès.", "success");
+      // Notifier le parent qu'un schedule a été créé
+      this.dispatchEvent(new CustomEvent('schedulecreated'));
     } catch (err) {
       this.showToast(
         "Error",

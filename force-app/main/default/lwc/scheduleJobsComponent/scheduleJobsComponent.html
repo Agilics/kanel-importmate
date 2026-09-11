@@ -9,12 +9,14 @@
       <!-- ══ Card head ══ -->
       <div class="card-head">
         <div class="card-header">
-          <span class="sj-header-icon">🗓</span>
+          <span class="sj-header-icon">
+            <lightning-icon icon-name='utility:tile_card_list' alternative-text='tile_card_list' size='large' title='tile_card_list'></lightning-icon>
+          </span>
           <h2 class="card-title">Schedule Jobs</h2>
         </div>
         <div class="card-filters">
           <div class="search-field">
-            <span class="sj-search-icon">🔍</span>
+            <span class="sj-search-icon"><lightning-icon icon-name="utility:search" size="xx-small"></lightning-icon></span>
             <input type="search" class="sj-search-input" placeholder="Rechercher un projet..."
               oninput={handleSearchFieldChange} />
           </div>
@@ -55,8 +57,7 @@
                 <th scope="col">Planification</th>
                 <th scope="col">Fréquence</th>
                 <th scope="col">Prochaine exécution</th>
-                <th scope="col">Dernière exécution</th>
-                <th scope="col">Historique</th>
+                <th scope="col">Dernière exécution</th> 
                 <th scope="col">Statut</th>
                 <th scope="col"></th>
               </tr>
@@ -101,15 +102,7 @@
                         <div class="last-run none">—</div>
                       </template>
                     </td>
-
-                    <!-- Run history dots -->
-                    <td>
-                      <div class="run-hist">
-                        <template for:each={schedule.runHistory} for:item="dot">
-                          <div key={dot.key} class={dot.cls}></div>
-                        </template>
-                      </div>
-                    </td>
+ 
 
                     <!-- Status badge -->
                     <td>
@@ -163,7 +156,9 @@
               <template if:false={hasSchedules}>
                 <tr>
                   <td colspan="7" class="empty-state">
-                    <span class="empty-icon">🕐</span>
+                    <span class="empty-icon">
+                      <lightning-icon icon-name='utility:real_time' size='small' title='real_time'></lightning-icon>
+                    </span>
                     <p>Aucune planification trouvée.</p>
                   </td>
                 </tr>

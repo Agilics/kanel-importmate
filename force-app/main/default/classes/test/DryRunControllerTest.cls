@@ -4,7 +4,7 @@ public class DryRunControllerTest {
     @TestSetup
     static void setupTestData() {
         ImportProject__c project = TestDataFactory.createImportProject('Account');
-        ImportExecution__c execution = TestDataFactory.createImportExecution(project.Id);
+        ImportExecution__c execution = TestDataFactory.createImportExecution(project.Id, 'Import');
         TestDataFactory.createFieldMapping(project.Id, 'Name', 'Name');
     }
 

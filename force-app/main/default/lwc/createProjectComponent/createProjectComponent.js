@@ -154,7 +154,9 @@ export default class ProjectCreatorComponent extends LightningElement {
     // reset valeurs UI
     this.template.querySelectorAll(".rounded-input").forEach((input) => {
       input.value = "";
-    });
+    }); 
+    this.template.querySelector('form').reset();
+   
   }
 
   //Masquer la section de création de projets

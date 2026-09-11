@@ -351,6 +351,7 @@ export default class ExecutionCmp extends LightningElement {
   }
 
   handlePreviousStep() { this.dispatchEvent(new CustomEvent('previous')); }
+  handleNextStep() { this.dispatchEvent(new CustomEvent('next')); }
 
   async handleRefreshStatus() {
     if (!this.canRefreshStatus) return;

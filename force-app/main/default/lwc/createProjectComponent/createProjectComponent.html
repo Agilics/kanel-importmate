@@ -1,119 +1,121 @@
 <template>
-  <div class="page-layout">
+  <form>
+    <div class="page-layout">
 
-    <!-- Formulaire principal -->
-    <div>
-      <div class="card">
-        <div class="card-header">
-          <div>
-            <div class="card-title">Nouveau projet d'import</div>
-            <div class="card-sub">Définissez les paramètres avant de commencer</div>
-          </div>
-        </div>
-
-        <!-- Nom du projet -->
-        <div class="form-group">
-          <label class="form-label">Nom du projet <span class="req">*</span></label>
-          <input
-            type="text"
-            class="form-input"
-            placeholder="ex : Import Contacts Q2 2026"
-            value={projectName}
-            oninput={handleProjectNameChange}
-          />
-        </div>
-
-        <!-- Objet cible — pill grid -->
-        <div class="form-group">
-          <label class="form-label">Objet Salesforce cible <span class="req">*</span></label>
-          <input
-            type="text"
-            class="form-input"
-            placeholder="🔍  Rechercher un objet Salesforce..."
-            value={objectSearch}
-            oninput={handleObjectSearch}
-          />
-          <div class="object-grid">
-            <template for:each={filteredOptions} for:item="opt">
-              <div
-                key={opt.value}
-                class={opt.pillClass}
-                data-value={opt.value}
-                onclick={handlePillClick}
-              >{opt.label}</div>
-            </template>
-          </div>
-        </div>
-
-        <!-- Description -->
-        <div class="form-group">
-          <label class="form-label">Description <span class="optional">(optionnel)</span></label>
-          <textarea
-            class="form-input form-textarea"
-            placeholder="Décrivez l'objectif de cet import..."
-            oninput={handleDescriptionChange}
-            rows="3"
-          >{description}</textarea>
-        </div>
-
-        <!-- Mode d'import -->
-        <div class="form-group">
-          <label class="form-label">Mode d'import <span class="req">*</span></label>
-          <div class="toggle-grid">
-            <div class={insertCardClass} data-mode="Insert" onclick={handleModeSelect}>
-              <div class="toggle-icon">⬆</div>
-              <div class="toggle-label">Insert</div>
-              <div class="toggle-sub">Créer de nouveaux records</div>
-            </div>
-            <div class={upsertCardClass} data-mode="Upsert" onclick={handleModeSelect}>
-              <div class="toggle-icon">↻</div>
-              <div class="toggle-label">Upsert</div>
-              <div class="toggle-sub">Insérer ou mettre à jour</div>
-            </div>
-            <div class={updateCardClass} data-mode="Update" onclick={handleModeSelect}>
-              <div class="toggle-icon">✎</div>
-              <div class="toggle-label">Update</div>
-              <div class="toggle-sub">Mettre à jour uniquement</div>
+      <!-- Formulaire principal -->
+      <div>
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title">Nouveau projet d'import</div>
+              <div class="card-sub">Définissez les paramètres avant de commencer</div>
             </div>
           </div>
-        </div>
 
-        <!-- Footer -->
-        <div class="card-footer">
-          <button type="button" class="btn btn-ghost" onclick={handleCancel}>Annuler</button>
-          <button type="button" class="btn btn-primary" onclick={handleCreateProject}>Enregistrer →</button>
+          <!-- Nom du projet -->
+          <div class="form-group">
+            <label class="form-label">Nom du projet <span class="req">*</span></label>
+            <input
+              type="text"
+              class="form-input"
+              placeholder="ex : Import Contacts Q2 2026"
+              value={projectName}
+              oninput={handleProjectNameChange}
+            />
+          </div>
+
+          <!-- Objet cible — pill grid -->
+          <div class="form-group">
+            <label class="form-label">Objet Salesforce cible <span class="req">*</span></label>
+            <input
+              type="text"
+              class="form-input"
+              placeholder="🔍  Rechercher un objet Salesforce..."
+              value={objectSearch}
+              oninput={handleObjectSearch}
+            />
+            <div class="object-grid">
+              <template for:each={filteredOptions} for:item="opt">
+                <div
+                  key={opt.value}
+                  class={opt.pillClass}
+                  data-value={opt.value}
+                  onclick={handlePillClick}
+                >{opt.label}</div>
+              </template>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="form-group">
+            <label class="form-label">Description <span class="optional">(optionnel)</span></label>
+            <textarea
+              class="form-input form-textarea"
+              placeholder="Décrivez l'objectif de cet import..."
+              oninput={handleDescriptionChange}
+              rows="3"
+            >{description}</textarea>
+          </div>
+
+          <!-- Mode d'import -->
+          <div class="form-group">
+            <label class="form-label">Mode d'import <span class="req">*</span></label>
+            <div class="toggle-grid">
+              <div class={insertCardClass} data-mode="Insert" onclick={handleModeSelect}>
+                <div class="toggle-icon">⬆</div>
+                <div class="toggle-label">Insert</div>
+                <div class="toggle-sub">Créer de nouveaux records</div>
+              </div>
+              <div class={upsertCardClass} data-mode="Upsert" onclick={handleModeSelect}>
+                <div class="toggle-icon">↻</div>
+                <div class="toggle-label">Upsert</div>
+                <div class="toggle-sub">Insérer ou mettre à jour</div>
+              </div>
+              <div class={updateCardClass} data-mode="Update" onclick={handleModeSelect}>
+                <div class="toggle-icon">✎</div>
+                <div class="toggle-label">Update</div>
+                <div class="toggle-sub">Mettre à jour uniquement</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div class="card-footer">
+            <button type="button" class="btn btn-ghost" onclick={handleCancel}>Annuler</button>
+            <button type="button" class="btn btn-primary" onclick={handleCreateProject}>Enregistrer →</button>
+          </div>
         </div>
       </div>
+
+      <!-- Sidebar progression -->
+      <div class="form-progress">
+        <div class="fp-title">Progression</div>
+        <div class="fp-item">
+          <div class="fp-dot current">1</div>
+          <span class="fp-label current">Projet</span>
+        </div>
+        <div class="fp-item">
+          <div class="fp-dot empty">2</div>
+          <span class="fp-label">Source de données</span>
+        </div>
+        <div class="fp-item">
+          <div class="fp-dot empty">3</div>
+          <span class="fp-label">Mapping des champs</span>
+        </div>
+        <div class="fp-item">
+          <div class="fp-dot empty">4</div>
+          <span class="fp-label">Transformations</span>
+        </div>
+        <div class="fp-item">
+          <div class="fp-dot empty">5</div>
+          <span class="fp-label">Validation (Dry Run)</span>
+        </div>
+        <div class="fp-item">
+          <div class="fp-dot empty">6</div>
+          <span class="fp-label">Import</span>
+        </div>
+      </div>
+
     </div>
-
-    <!-- Sidebar progression -->
-    <div class="form-progress">
-      <div class="fp-title">Progression</div>
-      <div class="fp-item">
-        <div class="fp-dot current">1</div>
-        <span class="fp-label current">Projet</span>
-      </div>
-      <div class="fp-item">
-        <div class="fp-dot empty">2</div>
-        <span class="fp-label">Source de données</span>
-      </div>
-      <div class="fp-item">
-        <div class="fp-dot empty">3</div>
-        <span class="fp-label">Mapping des champs</span>
-      </div>
-      <div class="fp-item">
-        <div class="fp-dot empty">4</div>
-        <span class="fp-label">Transformations</span>
-      </div>
-      <div class="fp-item">
-        <div class="fp-dot empty">5</div>
-        <span class="fp-label">Validation (Dry Run)</span>
-      </div>
-      <div class="fp-item">
-        <div class="fp-dot empty">6</div>
-        <span class="fp-label">Import</span>
-      </div>
-    </div>
-
-  </div>
+  </form>
 </template>

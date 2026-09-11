@@ -225,7 +225,7 @@
     </template>
 
     <!-- ══ Execution card: schedule / run mode — masqué si import en cours ou terminé ══ -->
-    <template if:true={showExecutionSetupCard}>
+    <!--<template if:true={showExecutionSetupCard}>
       <div class="execution-content">
         <div class="execution-card">
           <c-execution-card
@@ -241,21 +241,22 @@
         </div>
       </div>
     </template>
+  -->
 
     <!-- ══ Import results (error table) ══ -->
-    <template if:true={showImportResults}>
+    <!--<template if:true={showImportResults}>
       <c-import-results
         execution-id={currentExecutionId}
         total-errors={totalErrors}
         failed-records={failedRecords}>
       </c-import-results>
-    </template>
+    </template>-->
 
-    <!-- ══ Active schedules ══ -->
+    <!-- ══ Active schedules ══ 
     <c-scheduled-schedules
       lwc:ref="scheduledList"
       project-id={projectId}>
-    </c-scheduled-schedules>
+    </c-scheduled-schedules>-->
 
     <!-- ══ Navigation footer ══ -->
     <div class="navigation-buttons">
@@ -263,6 +264,11 @@
       <template if:true={isImportCompleted}>
         <button onclick={handlePreviousStep} class="btn btn-primary finish-button">✓ View Dashboard</button>
       </template>
+      <button onclick={handleNextStep} class="btn btn-accent">
+        Next 
+        <lightning-icon icon-name='utility:chevronright' alternative-text='chevronright' size='xx-small' title='chevronright'></lightning-icon>
+      </button>
+
     </div>
 
   </div>

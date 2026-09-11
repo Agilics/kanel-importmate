@@ -380,6 +380,7 @@
   margin-bottom: 16px;
   display: flex; align-items: center; gap: 12px;
   animation: fadeUp .4s var(--ease-out) .2s both;
+  justify-content: space-between;
 }
 
 /* ══ Buttons ══ */

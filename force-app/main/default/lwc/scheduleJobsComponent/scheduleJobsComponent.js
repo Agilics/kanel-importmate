@@ -24,12 +24,12 @@ const FREQUENCY_OPTIONS = [
 ];
 
 export default class ScheduleJobsComponent extends LightningElement {
-    _idProject;
+    _projectId;
     @api
-    get idProject() { return this._idProject; }
-    set idProject(val) {
-        if (val !== this._idProject) {
-            this._idProject = val;
+    get projectId() { return this._projectId; }
+    set projectId(val) {
+        if (val !== this._projectId) {
+            this._projectId = val;
             this.schedules = [];    // vider immédiatement pour ne pas afficher l'ancien projet
         }
     }
@@ -56,6 +56,17 @@ export default class ScheduleJobsComponent extends LightningElement {
     @track isSaving       = false;
 
     _wiredResult;
+
+    /**
+     * Méthode publique appelée par le parent pour rafraîchir la liste des schedules.
+     * Utilise refreshApex sur le résultat du @wire pour re-fetch les données.
+     */
+    @api
+    refresh() {
+        if (this._wiredResult) {
+            refreshApex(this._wiredResult);
+        }
+    }
 
     // ── Computed ──────────────────────────────────────────────────────────────
     get frequencyOptions() { return FREQUENCY_OPTIONS; }
@@ -105,7 +116,7 @@ export default class ScheduleJobsComponent extends LightningElement {
     // ── Wire ──────────────────────────────────────────────────────────────────
     @wire(getSchedulesByExecutionStatusAndIdProject, {
         status: '$selectedStatus',
-        idProject: '$idProject'
+        idProject: '$projectId'
     })
     wiredSchedules(result) {
         this._wiredResult = result;

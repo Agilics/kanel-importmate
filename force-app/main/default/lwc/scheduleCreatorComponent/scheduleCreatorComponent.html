@@ -2,68 +2,42 @@
   @description       : 
   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
   @group             : 
-  @last modified on  : 11-07-2025
+  @last modified on  : 11-07-2026
   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
 -->
 <template>
-  <!-- text title with buttons-->
-  <div class="main-sub pb-1">
-    <div class="title">
-      <h1>Import Scheduling</h1>
-      <p class="subtitle">
-        Set up recurring import schedules and manage scheduled jobs
-      </p>
-    </div>
-    <div class="btn-header">
-    <!--<button class="btn btn-primary">                New Schedule</button>-->  <button class="btn btn-primary">                New Schedule</button>
-      <button type="button" class="btn btn-execute" onclick={handleExecuteNow} disabled={isExecuteDisabled} title="Créer une exécution pour chaque planification du projet">
-        {executeButtonLabel}
-      </button>
-    </div>
-  </div>
-  <!-- text title with buttons end-->
-  <div class="main px-3">
-    <div class="card">
-      <div class="head p-1">
-        <!-- icon & title-->
-        <div class="card-header">
-          <span class="custom-icon-date_input">                      </span>
-          <h2 class="card-title">Schedule Configuration</h2>
-        </div>
-      </div>
-
-      <!-- separator-->
-      <hr class="separator" />
-
+  <div class="main">  
       <!-- form content -->
       <div class="card-content p-1">
         <!-- frequency settings -->
         <div class="settings">
           <h3 class="frequency-settings-title">Frequency Settings</h3>
           <div class="zone">
-            <select class="frequency-combobox rounded-input" id="frequency" onchange={handleFrequencyChange}>
-              <template for:each={picklistValuesWithSelected} for:item="o">
-                <option key={o.value} value={o.value} selected={o.isSelected}>{o.label}</option>
-              </template>
-            </select>
+            <lightning-combobox
+              class="frequency-combobox rounded-input"
+              id="frequency"
+              value={selectedFrequency}
+              options={picklistValuesWithSelected}
+              onchange={handleFrequencyChange}
+            ></lightning-combobox>
           </div>
 
           <!-- Next Run date time picker  on local area -->
           <div class="zone">
-            <input
+            <lightning-input
               type="datetime-local"
               class="time-input rounded-input"
               id="time"
               value={nextRun}
               onchange={handleNextRunChange}
-            />
+            ></lightning-input>
           </div>
           <!--                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
                           l        ment 3 : Source des donn        es pour l'import planifi        
                Valeurs: Inherit (h        riter) / Criteria (crit        res) / Fixed (fixe)
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  -->
           <div class="zone file-source-zone">
-            <div class="file-source-label-uc">3           Source des donn        es</div>
+            <div class="file-source-label-uc">Source des données</div>
             <select class="rounded-input" onchange={handleFileModeChange}>
               <template for:each={fileModeOptionsWithSelected} for:item="o">
                 <option key={o.value} value={o.value} selected={o.isSelected}>{o.label}</option>
@@ -72,7 +46,9 @@
 
             <!--                                           l        ment 4 : Mode Inherit (h        rit        )                                -->
             <template if:true={isInheritMode}>
-              <p class="sched-summary-text">Les imports planifi        s utiliseront la m        me source de donn        es et les m        mes mappings que les         tapes pr        c        dentes.</p>
+              <div class="schedule-summary-box">
+                <p class="sched-summary-text">Les imports planifications utiliseront la même source de données et les mêmes mappings que les tapes précédentes.</p>
+              </div>
             </template>
 
             <!--                                Mode Fixed (fichier fixe)                                -->
@@ -96,7 +72,7 @@
                   </select>
                 </template>
                 <template if:false={hasStoredFiles}>
-                  <p class="no-files-msg">Aucun fichier CSV trouv         pour ce projet. Uploadez-en un          l'        tape 2 d'abord.</p>
+                  <p class="no-files-msg">Aucun fichier CSV trouvé pour ce projet. Uploadez-en un          l'        tape 2 d'abord.</p>
                 </template>
               </template>
             </template>
@@ -107,7 +83,7 @@
 
                 <!--                                           l        ment 5 : Type de fichier                                -->
                 <div class="zone">
-                  <div class="file-source-label-uc">5           Type de fichier</div>
+                  <div class="file-source-label-uc">Type de fichier</div>
                   <select class="rounded-input" onchange={handleFileTypeChange} >
                     <option value="">Choisir un type...</option>
                     <template for:each={fileTypeOptionsWithSelected} for:item="o">
@@ -118,7 +94,7 @@
 
                 <!--                                           l        ment 6 : Si plusieurs fichiers correspondent                                -->
                 <div class="zone">
-                  <div class="file-source-label-uc">6           Si plusieurs fichiers correspondent</div>
+                  <div class="file-source-label-uc">Si plusieurs fichiers correspondent</div>
                   <div class="sched-radio-group">
                     <template for:each={selectionModeOptionsWithSelected} for:item="o">
                       <label key={o.value} class="sched-radio-label">
@@ -133,15 +109,15 @@
 
                 <!--                                           l        ment 7 : Mod        le de nom de fichier                                -->
                 <div class="zone">
-                  <div class="file-source-label-uc">7           Mod        le de nom de fichier</div>
-                  <input type="text" class="rounded-input" value={patternName}
+                  <div class="file-source-label-uc">    Mode   le de nom de fichier</div>
+                  <lightning-input type="text" class="rounded-input" value={patternName}
                          oninput={handlePatternInput}
-                         placeholder="ex: ventes_{yyyy-MM-dd}.csv" />
+                         placeholder="ex: ventes_{yyyy-MM-dd}.csv" ></lightning-input>
                 </div>
 
                 <!--                                           l        ment 8 : Boutons raccourcis de saisie                                -->
                 <div class="zone">
-                  <div class="file-source-label-uc">8           Raccourcis</div>
+                  <div class="file-source-label-uc">Raccourcis</div>
                   <div class="sched-shortcuts">
                     <button type="button" class="btn btn-sm" onclick={handleDateShortcut} title="Ajouter la date du jour">                       Date</button>
                     <button type="button" class="btn btn-sm" onclick={handleWildcardShortcut} title="N'importe quoi">* Tout</button>
@@ -149,10 +125,10 @@
                   </div>
                 </div>
 
-                <!--                                           l        ment 9 : Aper        u du nom recherch         aujourd'hui                                -->
+                <!--                                           l        ment 9 : Aperçu du nom recherché     aujourd'hui                                -->
                 <template if:true={resolvedPattern}>
                   <div class="zone">
-                    <div class="file-source-label-uc">9           Aper        u du nom recherch         aujourd'hui</div>
+                    <div class="file-source-label-uc"> Aperçu   du nom recherch  aujourd'hui</div>
                     <div class="sched-preview-box">
                       <code class="sched-preview-code">{resolvedPattern}</code>
                     </div>
@@ -176,43 +152,7 @@
 
 </template>
 <!--end frequency settings-->
-        <!-- schedule preview  -->
-        <div class="box">
-          <div class="schedule-preview">
-            <h3 class="frequency-settings-title">Schedule Preview</h3>
-            <div class="bloc">
-              <div class="card-info px-1">
-                <div class="info-header">
-                  <span class="custom-icon-info">               </span>
-                  <!-- title -->
-                  <h4 class="info-title">Next Execution</h4>
-                  <!--title end-->
-                </div>
-
-                <!--card info : content next execution day -->
-                <div class="box-execution">
-                  <h3 class="next-execution-day">{nextExecution}</h3>
-                  <p class="recurrency">Recurring daily</p>
-                </div>
-                <!-- end next execution day -->
-              </div>
-            </div>
-          </div>
-
-          <div class="upcomings pt-1">
-            <h3 class="upcoming-title">Upcoming Executions</h3>
-            <!--List of upcoming executions date time-->
-            <template for:each={upcomingExecution} for:item="item">
-              <div key={executionDate}>
-                <ul class="upcoming-item">
-                  <li class="upcoming-date"></li>
-                </ul>
-              </div>
-            </template>
-          </div>
-        </div>
-
-        <!--end schedule preview -->
+       
       </div>
 
       <!-- end form content -->
@@ -229,13 +169,12 @@
       </div>
 
       <!-- footer end-->
-    </div>
+    
 
     <!-- end card -->
   </div>
 
-  <!----->
-  <c-schedule-jobs-component id-project={projectId}></c-schedule-jobs-component>
+  
   <!-- <h2 class="title">New schedule</h2>
   <div class="slds-grid slds-gutters slds-align_absolute-center">
     <section

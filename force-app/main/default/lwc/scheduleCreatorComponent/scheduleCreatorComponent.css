@@ -222,10 +222,17 @@ li { list-style: none; }
 }
 
 .sched-summary-text {
-  font-size: .85rem; color: var(--muted);
+  font-size: .85rem; color: #fff; line-height: 1.5;
   font-style: italic; padding: .5rem 0; margin-bottom: 0;
 }
+.schedule-summary-box{
+  padding: 1rem;
+  margin: 1rem; 
+  background-color: #06B6D4; border-radius: var(--radius-sm);
+  max-width:300px;
+  min-height:120px;
 
+}
 .sched-summary-banner {
   display: flex; align-items: flex-start; gap: 8px;
   background: var(--indigo-soft);
