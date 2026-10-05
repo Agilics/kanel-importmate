@@ -20,6 +20,8 @@ const uid = () =>
   `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
 
 export default class SoqlBuilder extends NavigationMixin(LightningElement) {
+  @api projectName = '';
+
   //project target object from parent
    _projectTargetObject = "";
 

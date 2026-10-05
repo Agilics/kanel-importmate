@@ -40,6 +40,7 @@
     <template if:true={showSOQL}> 
     <c-soql-builder
         project-target-object={projectTargetObject}
+        project-name={projectName}
         onsoqlbuilt={handleSoqlBuilt}
         onstartmapping={handleStartMappingFromSoql}
     ></c-soql-builder>

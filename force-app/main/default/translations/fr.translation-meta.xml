@@ -1827,4 +1827,8 @@
         <label>La date prévue doit être ultérieure. La tâche Cron existante sera remplacée.</label>
         <name>Import_Schedule_Edit_Info_Bar</name>
     </customLabels>
+    <customLabels>
+        <label>Sauvegarder les lignes valides</label>
+        <name>IM_DRY_Settings_KeepValidRows</name>
+   </customLabels>
 </Translations>

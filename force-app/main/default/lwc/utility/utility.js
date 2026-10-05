@@ -28,6 +28,62 @@ export function navigateToPage(pageName, params = {}) {
     document.dispatchEvent(event);
 }   
 
+/**
+ * Validates CSV header structure.
+ * Returns { valid: false, error: '...' } if an issue is found, otherwise { valid: true }.
+ */
+export function validateCsvHeaders(csvString) {
+  if (!csvString || csvString.trim() === '') {
+    return { valid: false, error: 'The CSV file is empty.' };
+  }
+
+  const lines = csvString.trim().split('\n').filter((l) => l.trim() !== '');
+
+  if (lines.length === 0) {
+    return { valid: false, error: 'The CSV file is empty.' };
+  }
+
+  // Detect delimiter and parse headers
+  const delimiter = detectDelimiter(lines[0]);
+  const headerValues = parseCsvLine(lines[0], delimiter);
+
+  // Check for empty/missing header names
+  const nonEmptyHeaders = headerValues.filter((h) => h && h.trim() !== '');
+  if (nonEmptyHeaders.length === 0) {
+    return { valid: false, error: 'The CSV file has no header row. Please ensure the first line contains column names.' };
+  }
+
+  // Check for duplicate column names
+  const normalised = nonEmptyHeaders.map((h) => h.trim().toLowerCase());
+  const seen = new Set();
+  for (const h of normalised) {
+    if (seen.has(h)) {
+      return { valid: false, error: `The CSV header contains duplicate column name: "${h}". Each column must have a unique name.` };
+    }
+    seen.add(h);
+  }
+
+  // Detect double header: second row has the same values as the first (case-insensitive)
+  if (lines.length >= 2) {
+    const row2Values = parseCsvLine(lines[1], delimiter).map((v) => v.trim().toLowerCase());
+    const isSameAsHeader = row2Values.length === normalised.length &&
+      row2Values.every((v, i) => v === normalised[i]);
+    if (isSameAsHeader) {
+      return { valid: false, error: 'The CSV file appears to have two header rows. Please remove the duplicate header line.' };
+    }
+    // Heuristic: if second row contains no numeric or date-like values and matches header format
+    const allStringsLikeHeaders = row2Values.length > 0 &&
+      row2Values.every((v) => v !== '' && !/^\d/.test(v) && !/^[\d]{4}-/.test(v));
+    const tooSimilarToHeader = allStringsLikeHeaders &&
+      row2Values.filter((v, i) => v === normalised[i]).length >= Math.ceil(normalised.length * 0.5);
+    if (tooSimilarToHeader) {
+      return { valid: false, error: 'The CSV file may have two header rows. Please verify that line 1 is your header and line 2 is real data.' };
+    }
+  }
+
+  return { valid: true };
+}
+
 export function parseCsvData(csvString) {
     console.log('Parsing CSV data:', csvString);
     if (!csvString || csvString.trim() === '') {

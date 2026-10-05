@@ -21,6 +21,49 @@
   overflow-y: auto;
 }
 
+/* Project context bar — sticky, visible on all pages when a project is active */
+.project-context-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 2rem;
+  background: #eff6ff;
+  border-bottom: 1px solid #bfdbfe;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.project-context-bar__label {
+  font-size: 0.78rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.project-context-bar__name {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #1e40af;
+}
+
+.project-context-bar__sep {
+  color: #94a3b8;
+  font-size: 0.85rem;
+  margin: 0 0.1rem;
+}
+
+.project-context-bar__object {
+  font-size: 0.78rem;
+  color: #475569;
+  font-weight: 500;
+}
+
+.project-context-bar__icon {
+  --lwc-colorTextIconDefault: #3b82f6;
+}
+
 .content-container {
   flex: 1;
   padding: 2rem;

@@ -155,7 +155,7 @@ export default class CsvUploader extends LightningElement {
     }
 
     get disableGoForMapping() {
-        return !this.hasHeaders || this.isHandoffInProgress;
+        return !this.hasHeaders || !!this.parseError || this.isHandoffInProgress;
     }
 
     get displayColumns() {
@@ -502,6 +502,8 @@ export default class CsvUploader extends LightningElement {
                 'This file does not appear to contain a header line. Please check the file.',
             DUPLICATE_HEADER_LINE:
                 'Two header lines were detected. The file must contain only one header line.',
+            DUPLICATE_COLUMN_NAME:
+                `The CSV header contains duplicate column name: "${error?.columnName || ''}". Each column must have a unique name.`,
             EMPTY_FILE: 'The file is empty.'
         };
         this.parseError = errorMessages[code] || 'Unable to read CSV file.';

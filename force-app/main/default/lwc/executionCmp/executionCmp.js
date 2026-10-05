@@ -158,6 +158,23 @@ export default class ExecutionCmp extends LightningElement {
     onError((error) => console.error('EMP API error: ', JSON.stringify(error)));
   }
 
+  get executionModeOptions() {
+    return [
+      { label: 'Immediate', value: 'Immediate' },
+      { label: 'Batch', value: 'Batch' }
+    ];
+  }
+
+  get batchSizeOptions() {
+    return [
+      { label: '50', value: '50' },
+      { label: '100', value: '100' },
+      { label: '200', value: '200' },
+      { label: '500', value: '500' },
+      { label: '1000', value: '1000' }
+    ];
+  }
+
   get isStartImportDisabled() { return this.isLoading || !this.projectId; }
   get isScheduleImportDisabled() { return this.isLoading || !this.projectId; }
   get isExportLogsDisabled() { return this.isLoading || !this.currentExecutionId; }

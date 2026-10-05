@@ -2,6 +2,12 @@
   <div class="page">
     <!-- LEFT COLUMN -->
     <aside class="left">
+      <template if:true={projectName}>
+        <div class="project-badge">
+          <lightning-icon icon-name="utility:folder" size="xx-small" class="project-badge-icon"></lightning-icon>
+          <span>{projectName}</span>
+        </div>
+      </template>
       <h2 class="panel-title">SOQL Query Builder</h2>
 
       <!-- Selected Object (read-only, from projectTargetObject) -->

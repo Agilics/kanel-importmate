@@ -4,7 +4,8 @@ const DEFAULT_CHUNK_SIZE = 5000;
 export const CSV_ERR = {
     EMPTY_FILE: 'EMPTY_FILE',
     NO_HEADER_LINE: 'NO_HEADER_LINE',
-    DUPLICATE_HEADER_LINE: 'DUPLICATE_HEADER_LINE'
+    DUPLICATE_HEADER_LINE: 'DUPLICATE_HEADER_LINE',
+    DUPLICATE_COLUMN_NAME: 'DUPLICATE_COLUMN_NAME'
 };
 
 function normalizeLineEndings(text) {
@@ -39,9 +40,27 @@ function looksLikeDuplicateHeader(line1, line2) {
     return isTextOnly(line1) && isTextOnly(line2);
 }
 
+function findDuplicateColumn(headerCells) {
+    const seen = new Set();
+    for (const cell of headerCells) {
+        const name = (cell || '').trim().toLowerCase();
+        if (name !== '') {
+            if (seen.has(name)) return name;
+            seen.add(name);
+        }
+    }
+    return null;
+}
+
 function validateHeader(headerCells, dataLines, delimiter) {
     if (looksLikeData(headerCells)) {
         throw new Error(CSV_ERR.NO_HEADER_LINE);
+    }
+    const duplicate = findDuplicateColumn(headerCells);
+    if (duplicate !== null) {
+        const error = new Error(CSV_ERR.DUPLICATE_COLUMN_NAME);
+        error.columnName = duplicate;
+        throw error;
     }
     if (dataLines.length >= 1) {
         const secondLine = parseLine(dataLines[0], delimiter);
