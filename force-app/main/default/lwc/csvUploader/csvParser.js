@@ -1,4 +1,4 @@
-const DEFAULT_DELIMITERS = [',', ';'];
+const SUPPORTED_DELIMITERS = [',', ';'];
 const DEFAULT_CHUNK_SIZE = 5000;
 
 export const CSV_ERR = {
@@ -9,35 +9,35 @@ export const CSV_ERR = {
 };
 
 function normalizeLineEndings(text) {
-    const stripped = (text || '').replace(/^﻿/, '');
-    return stripped.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    const withoutBom = (text || '').replace(/^﻿/, '');
+    return withoutBom.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
 }
 
-const DATA_PATTERNS = [
+const DATA_VALUE_PATTERNS = [
     /^\d+(\.\d+)?$/,                       // number
     /^\d{2}[\/\-]\d{2}[\/\-]\d{4}$/,       // date dd/mm/yyyy or dd-mm-yyyy
     /^[\w.+-]+@[\w-]+\.[a-z]{2,}$/i,       // email
     /^\+?[\d\s\-()]{7,}$/                  // phone
 ];
 
-function looksLikeData(parsedLine) {
-    const nonEmpty = parsedLine.filter((c) => (c || '').trim() !== '');
-    if (nonEmpty.length === 0) return true;
+function isDataRow(cells) {
+    const nonEmptyCells = cells.filter((cell) => (cell || '').trim() !== '');
+    if (nonEmptyCells.length === 0) return true;
 
-    const dataCount = parsedLine.filter((cell) => {
-        const val = (cell || '').trim();
-        return val !== '' && DATA_PATTERNS.some((p) => p.test(val));
+    const dataCellCount = cells.filter((cell) => {
+        const value = (cell || '').trim();
+        return value !== '' && DATA_VALUE_PATTERNS.some((pattern) => pattern.test(value));
     }).length;
 
-    return parsedLine.length > 0 && dataCount / parsedLine.length >= 0.5;
+    return cells.length > 0 && dataCellCount / cells.length >= 0.5;
 }
 
-function isTextOnly(cells) {
-    return cells.every((c) => /^[a-zA-Z_\sÀ-ſ]+$/.test((c || '').trim()));
+function hasOnlyTextCells(cells) {
+    return cells.every((cell) => /^[a-zA-Z_\sÀ-ſ]+$/.test((cell || '').trim()));
 }
 
 function isSecondHeaderLine(headerCells, secondLine) {
-    return isTextOnly(headerCells) && isTextOnly(secondLine);
+    return hasOnlyTextCells(headerCells) && hasOnlyTextCells(secondLine);
 }
 
 function findDuplicateColumn(headerCells) {
@@ -53,13 +53,13 @@ function findDuplicateColumn(headerCells) {
 }
 
 function validateHeader(headerCells, dataLines, delimiter) {
-    if (looksLikeData(headerCells)) {
+    if (isDataRow(headerCells)) {
         throw new Error(CSV_ERR.NO_HEADER_LINE);
     }
-    const duplicate = findDuplicateColumn(headerCells);
-    if (duplicate !== null) {
+    const duplicateColumn = findDuplicateColumn(headerCells);
+    if (duplicateColumn !== null) {
         const error = new Error(CSV_ERR.DUPLICATE_COLUMN_NAME);
-        error.columnName = duplicate;
+        error.columnName = duplicateColumn;
         throw error;
     }
     if (dataLines.length >= 1) {
@@ -71,18 +71,18 @@ function validateHeader(headerCells, dataLines, delimiter) {
 }
 
 function detectDelimiter(headerLine) {
-    const counts = DEFAULT_DELIMITERS.map((delimiter) => {
+    const counts = SUPPORTED_DELIMITERS.map((delimiter) => {
         const matches = headerLine.match(new RegExp(`\\${delimiter}`, 'g'));
         return { delimiter, count: matches ? matches.length : 0 };
     });
 
-    const best = counts.reduce((a, b) => (b.count > a.count ? b : a));
-    return best.count > 0 ? best.delimiter : ',';
+    const mostFrequent = counts.reduce((top, candidate) => (candidate.count > top.count ? candidate : top));
+    return mostFrequent.count > 0 ? mostFrequent.delimiter : ',';
 }
 
 function parseLine(line, delimiter) {
     const fields = [];
-    let current = '';
+    let currentField = '';
     let insideQuotes = false;
 
     for (let i = 0; i < line.length; i += 1) {
@@ -92,7 +92,7 @@ function parseLine(line, delimiter) {
         if (char === '"') {
             const isEscapedQuote = insideQuotes && nextChar === '"';
             if (isEscapedQuote) {
-                current += '"';
+                currentField += '"';
                 i += 1;
             } else {
                 insideQuotes = !insideQuotes;
@@ -101,15 +101,15 @@ function parseLine(line, delimiter) {
         }
 
         if (char === delimiter && !insideQuotes) {
-            fields.push(current);
-            current = '';
+            fields.push(currentField);
+            currentField = '';
             continue;
         }
 
-        current += char;
+        currentField += char;
     }
 
-    fields.push(current);
+    fields.push(currentField);
     return fields;
 }
 
@@ -134,12 +134,12 @@ export function parseCsvText(csvText) {
     const headerLine = lines[0] || '';
     const delimiter = detectDelimiter(headerLine);
     const headerCells = parseLine(headerLine, delimiter);
-    const dataLines = lines.slice(1).filter((l) => l !== '');
+    const dataLines = lines.slice(1).filter((line) => line !== '');
 
     validateHeader(headerCells, dataLines, delimiter);
 
-    const columns = headerCells.map((c, index) => {
-        const trimmed = (c || '').trim();
+    const columns = headerCells.map((cell, index) => {
+        const trimmed = (cell || '').trim();
         return trimmed || `Column_${index + 1}`;
     });
 
@@ -168,16 +168,16 @@ function extractCellValue(cell) {
 
 export function rowsToObjects(rows, columns, limit) {
     const maxRows = Math.max(0, Number(limit) || rows.length);
-    const sliceLength = Math.min(rows.length, maxRows);
-    const result = new Array(sliceLength);
+    const rowCount = Math.min(rows.length, maxRows);
+    const result = new Array(rowCount);
 
-    for (let r = 0; r < sliceLength; r += 1) {
+    for (let r = 0; r < rowCount; r += 1) {
         const row = rows[r];
-        const obj = {};
+        const rowObject = {};
         for (let c = 0; c < columns.length; c += 1) {
-            obj[columns[c]] = extractCellValue(row.values[c]);
+            rowObject[columns[c]] = extractCellValue(row.values[c]);
         }
-        result[r] = obj;
+        result[r] = rowObject;
     }
 
     return result;
@@ -189,7 +189,7 @@ function yieldToBrowser() {
     return new Promise((resolve) => window.setTimeout(resolve, 0));
 }
 
-function isBlankLine(line) {
+function isEmptyLine(line) {
     return line === '' || line === undefined;
 }
 
@@ -198,7 +198,7 @@ function splitIntoLines(csvText) {
     return normalized.split('\n');
 }
 
-function isEmptyLines(lines) {
+function isEmptyFile(lines) {
     return lines.length === 0 || (lines.length === 1 && lines[0].trim() === '');
 }
 
@@ -208,31 +208,31 @@ export async function rowsToObjectsAsync(rows, columns, limit, options = {}) {
     const isAborted = options.isAborted || (() => false);
 
     const maxRows = Math.max(0, Number(limit) || rows.length);
-    const sliceLength = Math.min(rows.length, maxRows);
-    const result = new Array(sliceLength);
+    const rowCount = Math.min(rows.length, maxRows);
+    const result = new Array(rowCount);
 
-    let processed = 0;
-    while (processed < sliceLength) {
+    let processedCount = 0;
+    while (processedCount < rowCount) {
         if (isAborted()) {
-            return { rows: result.slice(0, processed), aborted: true };
+            return { rows: result.slice(0, processedCount), aborted: true };
         }
 
-        const end = Math.min(processed + chunkSize, sliceLength);
-        for (let r = processed; r < end; r += 1) {
+        const chunkEnd = Math.min(processedCount + chunkSize, rowCount);
+        for (let r = processedCount; r < chunkEnd; r += 1) {
             const row = rows[r];
-            const obj = {};
+            const rowObject = {};
             for (let c = 0; c < columns.length; c += 1) {
-                obj[columns[c]] = extractCellValue(row.values[c]);
+                rowObject[columns[c]] = extractCellValue(row.values[c]);
             }
-            result[r] = obj;
+            result[r] = rowObject;
         }
-        processed = end;
+        processedCount = chunkEnd;
 
         if (onProgress) {
             onProgress({
-                rowsConverted: processed,
-                totalRows: sliceLength,
-                percent: Math.round((processed / sliceLength) * 100)
+                rowsConverted: processedCount,
+                totalRows: rowCount,
+                percent: Math.round((processedCount / rowCount) * 100)
             });
         }
 
@@ -249,7 +249,7 @@ export async function parseCsvTextAsync(csvText, options = {}) {
 
     const lines = splitIntoLines(csvText);
 
-    if (isEmptyLines(lines)) {
+    if (isEmptyFile(lines)) {
         throw new Error(CSV_ERR.EMPTY_FILE);
     }
 
@@ -257,40 +257,40 @@ export async function parseCsvTextAsync(csvText, options = {}) {
     const delimiter = detectDelimiter(headerLine);
     const headerCells = parseLine(headerLine, delimiter);
 
-    const dataLines = lines.slice(1).filter((l) => !isBlankLine(l));
+    const dataLines = lines.slice(1).filter((line) => !isEmptyLine(line));
     const totalDataLines = dataLines.length;
 
     validateHeader(headerCells, dataLines, delimiter);
 
-    const columns = headerCells.map((c, index) => {
-        const trimmed = (c || '').trim();
+    const columns = headerCells.map((cell, index) => {
+        const trimmed = (cell || '').trim();
         return trimmed || `Column_${index + 1}`;
     });
     const rows = [];
 
-    let processed = 0;
-    while (processed < totalDataLines) {
+    let processedCount = 0;
+    while (processedCount < totalDataLines) {
         if (isAborted()) {
             return { columns, rows, totalRowCount: rows.length, aborted: true };
         }
 
-        const end = Math.min(processed + chunkSize, totalDataLines);
-        for (let i = processed; i < end; i += 1) {
+        const chunkEnd = Math.min(processedCount + chunkSize, totalDataLines);
+        for (let i = processedCount; i < chunkEnd; i += 1) {
             const line = dataLines[i];
-            if (isBlankLine(line)) {
+            if (isEmptyLine(line)) {
                 continue;
             }
             const rawValues = parseLine(line, delimiter);
             rows.push(buildRow(rawValues, columns.length, rows.length));
         }
-        processed = end;
+        processedCount = chunkEnd;
 
         if (onProgress) {
             onProgress({
-                linesProcessed: processed,
+                linesProcessed: processedCount,
                 totalLines: totalDataLines,
                 rowsBuilt: rows.length,
-                percent: Math.round((processed / totalDataLines) * 100)
+                percent: Math.round((processedCount / totalDataLines) * 100)
             });
         }
 
