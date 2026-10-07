@@ -36,8 +36,8 @@ function isTextOnly(cells) {
     return cells.every((c) => /^[a-zA-Z_\sÀ-ſ]+$/.test((c || '').trim()));
 }
 
-function looksLikeDuplicateHeader(line1, line2) {
-    return isTextOnly(line1) && isTextOnly(line2);
+function isSecondHeaderLine(headerCells, secondLine) {
+    return isTextOnly(headerCells) && isTextOnly(secondLine);
 }
 
 function findDuplicateColumn(headerCells) {
@@ -64,7 +64,7 @@ function validateHeader(headerCells, dataLines, delimiter) {
     }
     if (dataLines.length >= 1) {
         const secondLine = parseLine(dataLines[0], delimiter);
-        if (looksLikeDuplicateHeader(headerCells, secondLine)) {
+        if (isSecondHeaderLine(headerCells, secondLine)) {
             throw new Error(CSV_ERR.DUPLICATE_HEADER_LINE);
         }
     }
