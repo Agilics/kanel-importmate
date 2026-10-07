@@ -1033,7 +1033,16 @@ export default class DryRunValidator extends LightningElement {
     if (!Array.isArray(allRows) || !Array.isArray(columns) || !columns.length) return [];
     return allRows.map((row) => {
       const out = {};
-      columns.forEach((col, i) => { const v = row?.values?.[i]?.value ?? ''; out[col] = String(v ?? ''); });
+      columns.forEach((col, i) => {
+        // Cells from csvUploader can be raw strings (after the perf fix) or
+        // legacy decorated objects with { value, isStatus, ... }. Accept both.
+        const cell = row?.values?.[i];
+        let v;
+        if (cell === undefined || cell === null) v = '';
+        else if (typeof cell === 'object') v = cell.value ?? '';
+        else v = cell;
+        out[col] = String(v ?? '');
+      });
       return out;
     });
   }
