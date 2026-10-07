@@ -1,390 +1,894 @@
-/**
- * @last modification : 24/04/2026
- * @modified : ajout Validation des headers dans parseCSV 
- */
 import { LightningElement, track, api } from 'lwc';
-import { ShowToastEvent } from 'lightning/platformShowToastEvent';
-import { validateCsvHeaders } from 'c/utility';
+
+import { parseCsvTextAsync, rowsToObjects, rowsToObjectsAsync } from './csvParser';
 
 // Custom Labels
 import SHOWING_ENTRIES from '@salesforce/label/c.DataTable_Showing_Entries';
 import LBL_PAGE_TITLE from '@salesforce/label/c.CsvUploader_PageTitle';
-import LBL_PAGE_SUBTITLE        from '@salesforce/label/c.CsvUploader_PageSubtitle';
-import LBL_IMPORT_SETTINGS_BTN  from '@salesforce/label/c.CsvUploader_ImportSettings_Button';
-import LBL_CARD_TITLE           from '@salesforce/label/c.CsvUploader_Card_Title';
-import LBL_CARD_SUBTITLE        from '@salesforce/label/c.CsvUploader_Card_Subtitle';
-import LBL_DROPZONE_TEXT        from '@salesforce/label/c.CsvUploader_Dropzone_Text';
-import LBL_DROPZONE_BROWSE      from '@salesforce/label/c.CsvUploader_Dropzone_Browse';
-import LBL_DROPZONE_HINT        from '@salesforce/label/c.CsvUploader_Dropzone_Hint';
-import LBL_LOADING              from '@salesforce/label/c.CsvUploader_Loading_Text';
-import LBL_TABLE_TITLE          from '@salesforce/label/c.CsvUploader_Table_Title';
-import LBL_SEARCH_PLACEHOLDER   from '@salesforce/label/c.CsvUploader_Search_Placeholder';
-import LBL_FILTERS_BTN          from '@salesforce/label/c.CsvUploader_Filters_Button';
-import LBL_TABLE_ACTIONS        from '@salesforce/label/c.CsvUploader_Table_Actions';
-import LBL_EDIT_TOOLTIP         from '@salesforce/label/c.CsvUploader_Table_Edit_Tooltip';
-import LBL_PREVIEW_TOOLTIP      from '@salesforce/label/c.CsvUploader_Table_Preview_Tooltip';
-import LBL_PREVIOUS             from '@salesforce/label/c.CsvUploader_Pagination_Previous';
-import LBL_NEXT                 from '@salesforce/label/c.CsvUploader_Pagination_Next';
-import LBL_BACK_BTN             from '@salesforce/label/c.CsvUploader_Back_Button';
-import LBL_CONTINUE_BTN         from '@salesforce/label/c.CsvUploader_ContinueMapping_Button';
-import LBL_MODAL_FILTERS_TITLE  from '@salesforce/label/c.CsvUploader_Modal_Filters_Title';
-import LBL_FILTERS_COLUMN       from '@salesforce/label/c.CsvUploader_Modal_Filters_Column';
-import LBL_FILTERS_COL_DEFAULT  from '@salesforce/label/c.CsvUploader_Modal_Filters_ColumnDefault';
-import LBL_FILTERS_OPERATOR     from '@salesforce/label/c.CsvUploader_Modal_Filters_Operator';
-import LBL_FILTERS_OP_CONTAINS  from '@salesforce/label/c.CsvUploader_Modal_Filters_OpContains';
-import LBL_FILTERS_OP_EQUALS    from '@salesforce/label/c.CsvUploader_Modal_Filters_OpEquals';
-import LBL_FILTERS_OP_STARTS    from '@salesforce/label/c.CsvUploader_Modal_Filters_OpStarts';
-import LBL_FILTERS_VALUE        from '@salesforce/label/c.CsvUploader_Modal_Filters_Value';
-import LBL_FILTERS_CLEAR        from '@salesforce/label/c.CsvUploader_Modal_Filters_Clear';
+import LBL_PAGE_SUBTITLE from '@salesforce/label/c.CsvUploader_PageSubtitle';
+import LBL_IMPORT_SETTINGS_BTN from '@salesforce/label/c.CsvUploader_ImportSettings_Button';
+import LBL_CARD_TITLE from '@salesforce/label/c.CsvUploader_Card_Title';
+import LBL_CARD_SUBTITLE from '@salesforce/label/c.CsvUploader_Card_Subtitle';
+import LBL_DROPZONE_TEXT from '@salesforce/label/c.CsvUploader_Dropzone_Text';
+import LBL_DROPZONE_BROWSE from '@salesforce/label/c.CsvUploader_Dropzone_Browse';
+import LBL_DROPZONE_HINT from '@salesforce/label/c.CsvUploader_Dropzone_Hint';
+import LBL_LOADING from '@salesforce/label/c.CsvUploader_Loading_Text';
+import LBL_TABLE_TITLE from '@salesforce/label/c.CsvUploader_Table_Title';
+import LBL_SEARCH_PLACEHOLDER from '@salesforce/label/c.CsvUploader_Search_Placeholder';
+import LBL_FILTERS_BTN from '@salesforce/label/c.CsvUploader_Filters_Button';
+import LBL_TABLE_ACTIONS from '@salesforce/label/c.CsvUploader_Table_Actions';
+import LBL_EDIT_TOOLTIP from '@salesforce/label/c.CsvUploader_Table_Edit_Tooltip';
+import LBL_PREVIEW_TOOLTIP from '@salesforce/label/c.CsvUploader_Table_Preview_Tooltip';
+import LBL_PREVIOUS from '@salesforce/label/c.CsvUploader_Pagination_Previous';
+import LBL_NEXT from '@salesforce/label/c.CsvUploader_Pagination_Next';
+import LBL_BACK_BTN from '@salesforce/label/c.CsvUploader_Back_Button';
+import LBL_CONTINUE_BTN from '@salesforce/label/c.CsvUploader_ContinueMapping_Button';
+import LBL_MODAL_FILTERS_TITLE from '@salesforce/label/c.CsvUploader_Modal_Filters_Title';
+import LBL_FILTERS_COLUMN from '@salesforce/label/c.CsvUploader_Modal_Filters_Column';
+import LBL_FILTERS_COL_DEFAULT from '@salesforce/label/c.CsvUploader_Modal_Filters_ColumnDefault';
+import LBL_FILTERS_OPERATOR from '@salesforce/label/c.CsvUploader_Modal_Filters_Operator';
+import LBL_FILTERS_OP_CONTAINS from '@salesforce/label/c.CsvUploader_Modal_Filters_OpContains';
+import LBL_FILTERS_OP_EQUALS from '@salesforce/label/c.CsvUploader_Modal_Filters_OpEquals';
+import LBL_FILTERS_OP_STARTS from '@salesforce/label/c.CsvUploader_Modal_Filters_OpStarts';
+import LBL_FILTERS_VALUE from '@salesforce/label/c.CsvUploader_Modal_Filters_Value';
+import LBL_FILTERS_CLEAR from '@salesforce/label/c.CsvUploader_Modal_Filters_Clear';
 import LBL_MODAL_SETTINGS_TITLE from '@salesforce/label/c.CsvUploader_Modal_Settings_Title';
-import LBL_SETTINGS_ROWS        from '@salesforce/label/c.CsvUploader_Modal_Settings_RowsPerPage';
-import LBL_SETTINGS_PREVIEW     from '@salesforce/label/c.CsvUploader_Modal_Settings_PreviewLimit';
-import LBL_MODAL_PREVIEW_TITLE  from '@salesforce/label/c.CsvUploader_Modal_Preview_Title';
-import LBL_MODAL_EDIT_TITLE     from '@salesforce/label/c.CsvUploader_Modal_Edit_Title';
-import LBL_MODAL_CANCEL         from '@salesforce/label/c.CsvUploader_Modal_Cancel';
-import LBL_MODAL_APPLY          from '@salesforce/label/c.CsvUploader_Modal_Apply';
-import LBL_MODAL_CLOSE          from '@salesforce/label/c.CsvUploader_Modal_Close';
-import LBL_MODAL_SAVE           from '@salesforce/label/c.CsvUploader_Modal_Save';
-// ──────────────────────────────────────────────────────────────────────────────
+import LBL_SETTINGS_ROWS from '@salesforce/label/c.CsvUploader_Modal_Settings_RowsPerPage';
+import LBL_SETTINGS_PREVIEW from '@salesforce/label/c.CsvUploader_Modal_Settings_PreviewLimit';
+import LBL_MODAL_PREVIEW_TITLE from '@salesforce/label/c.CsvUploader_Modal_Preview_Title';
+import LBL_MODAL_EDIT_TITLE from '@salesforce/label/c.CsvUploader_Modal_Edit_Title';
+import LBL_MODAL_CANCEL from '@salesforce/label/c.CsvUploader_Modal_Cancel';
+import LBL_MODAL_APPLY from '@salesforce/label/c.CsvUploader_Modal_Apply';
+import LBL_MODAL_CLOSE from '@salesforce/label/c.CsvUploader_Modal_Close';
+import LBL_MODAL_SAVE from '@salesforce/label/c.CsvUploader_Modal_Save';
 
-const SS_ROWS_KEY           = 'IM_csvRows';
-const SS_COLS_KEY           = 'IM_sourceColumnsCsv';
+const SESSION_ROWS_KEY = 'IM_csvRows';
+const SESSION_COLUMNS_KEY = 'IM_sourceColumnsCsv';
+const SESSION_STORAGE_MAX_ROWS = 5000;
 const DEFAULT_PREVIEW_LIMIT = 100;
-const DEFAULT_PAGE_SIZE     = 3;
+const DEFAULT_PAGE_SIZE = 10;
+const PAGER_MAX_VISIBLE = 7;
+
+const COLUMN_INDUSTRY = 'industry';
+const COLUMN_STATUS = 'status';
+
+const STATUS_PILL_CLASSES = {
+    active: 'pill pill--green',
+    pending: 'pill pill--yellow'
+};
+const STATUS_PILL_DEFAULT = 'pill pill--red';
+
+const FILTER_OP_EQUALS = 'equals';
+const FILTER_OP_STARTS = 'starts';
 
 export default class CsvUploader extends LightningElement {
     @api title = LBL_PAGE_TITLE;
-    @api projectName;
-    // ✅ Single label object exposed to the template
+
     label = {
-        pageSubtitle       : LBL_PAGE_SUBTITLE,
-        importSettingsBtn  : LBL_IMPORT_SETTINGS_BTN,
-        cardTitle          : LBL_CARD_TITLE,
-        cardSubtitle       : LBL_CARD_SUBTITLE,
-        dropzoneText       : LBL_DROPZONE_TEXT,
-        dropzoneBrowse     : LBL_DROPZONE_BROWSE,
-        dropzoneHint       : LBL_DROPZONE_HINT,
-        loading            : LBL_LOADING,
-        tableTitle         : LBL_TABLE_TITLE,
-        searchPlaceholder  : LBL_SEARCH_PLACEHOLDER,
-        filtersBtn         : LBL_FILTERS_BTN,
-        tableActions       : LBL_TABLE_ACTIONS,
-        editTooltip        : LBL_EDIT_TOOLTIP,
-        previewTooltip     : LBL_PREVIEW_TOOLTIP,
-        previous           : LBL_PREVIOUS,
-        next               : LBL_NEXT,
-        backBtn            : LBL_BACK_BTN,
-        continueBtn        : LBL_CONTINUE_BTN,
-        modalFiltersTitle  : LBL_MODAL_FILTERS_TITLE,
-        filtersColumn      : LBL_FILTERS_COLUMN,
-        filtersColDefault  : LBL_FILTERS_COL_DEFAULT,
-        filtersOperator    : LBL_FILTERS_OPERATOR,
-        filtersOpContains  : LBL_FILTERS_OP_CONTAINS,
-        filtersOpEquals    : LBL_FILTERS_OP_EQUALS,
-        filtersOpStarts    : LBL_FILTERS_OP_STARTS,
-        filtersValue       : LBL_FILTERS_VALUE,
-        filtersClear       : LBL_FILTERS_CLEAR,
-        modalSettingsTitle : LBL_MODAL_SETTINGS_TITLE,
-        settingsRows       : LBL_SETTINGS_ROWS,
-        settingsPreview    : LBL_SETTINGS_PREVIEW,
-        modalPreviewTitle  : LBL_MODAL_PREVIEW_TITLE,
-        modalEditTitle     : LBL_MODAL_EDIT_TITLE,
-        modalCancel        : LBL_MODAL_CANCEL,
-        modalApply         : LBL_MODAL_APPLY,
-        modalClose         : LBL_MODAL_CLOSE,
-        modalSave          : LBL_MODAL_SAVE
+        pageSubtitle: LBL_PAGE_SUBTITLE,
+        importSettingsBtn: LBL_IMPORT_SETTINGS_BTN,
+        cardTitle: LBL_CARD_TITLE,
+        cardSubtitle: LBL_CARD_SUBTITLE,
+        dropzoneText: LBL_DROPZONE_TEXT,
+        dropzoneBrowse: LBL_DROPZONE_BROWSE,
+        dropzoneHint: LBL_DROPZONE_HINT,
+        loading: LBL_LOADING,
+        tableTitle: LBL_TABLE_TITLE,
+        searchPlaceholder: LBL_SEARCH_PLACEHOLDER,
+        filtersBtn: LBL_FILTERS_BTN,
+        tableActions: LBL_TABLE_ACTIONS,
+        editTooltip: LBL_EDIT_TOOLTIP,
+        previewTooltip: LBL_PREVIEW_TOOLTIP,
+        previous: LBL_PREVIOUS,
+        next: LBL_NEXT,
+        backBtn: LBL_BACK_BTN,
+        continueBtn: LBL_CONTINUE_BTN,
+        modalFiltersTitle: LBL_MODAL_FILTERS_TITLE,
+        filtersColumn: LBL_FILTERS_COLUMN,
+        filtersColDefault: LBL_FILTERS_COL_DEFAULT,
+        filtersOperator: LBL_FILTERS_OPERATOR,
+        filtersOpContains: LBL_FILTERS_OP_CONTAINS,
+        filtersOpEquals: LBL_FILTERS_OP_EQUALS,
+        filtersOpStarts: LBL_FILTERS_OP_STARTS,
+        filtersValue: LBL_FILTERS_VALUE,
+        filtersClear: LBL_FILTERS_CLEAR,
+        modalSettingsTitle: LBL_MODAL_SETTINGS_TITLE,
+        settingsRows: LBL_SETTINGS_ROWS,
+        settingsPreview: LBL_SETTINGS_PREVIEW,
+        modalPreviewTitle: LBL_MODAL_PREVIEW_TITLE,
+        modalEditTitle: LBL_MODAL_EDIT_TITLE,
+        modalCancel: LBL_MODAL_CANCEL,
+        modalApply: LBL_MODAL_APPLY,
+        modalClose: LBL_MODAL_CLOSE,
+        modalSave: LBL_MODAL_SAVE
     };
 
-    // ===== File / Data =====
+    // File metadata
     fileName = '';
     fileSize = 0;
 
-    @track columns         = [];
+    // Parsed data
+    @track columns = [];
     @track _displayColumns = [];
-    @track allRows         = [];
-    totalRows              = 0;
+    @track allRows = [];
+    fileRowCount = 0;
 
-    // ===== UI State =====
-    isLoading   = false;
-    parseError  = '';
-    isPreview   = false;
+    // UI state
+    isLoading = false;
+    parseError = '';
+    exceedsPreviewLimit = false;
 
-    @track searchTerm   = '';
-    @track showFilters  = false;
-    @track filter       = { column: '', operator: 'contains', value: '' };
+    // Progress (large file streaming + mapping handoff)
+    @track progressPercent = 0;
+    @track progressRowCount = 0;
+    @track progressPhase = '';
+    @track isPreparingMapping = false;
+    _cancelRequested = false;
+    _searchDebounceTimer = null;
+
+    // Search, filter, settings
+    @track searchTerm = '';
+    @track showFilters = false;
+    @track filter = { column: '', operator: 'contains', value: '' };
     @track showSettings = false;
-    @track pageSize     = DEFAULT_PAGE_SIZE;
+    @track pageSize = DEFAULT_PAGE_SIZE;
     @track previewLimit = DEFAULT_PREVIEW_LIMIT;
 
-    sortBy    = '';
-    sortAsc   = true;
+    // Sorting & pagination
+    sortBy = '';
+    sortAsc = true;
     pageIndex = 1;
 
-    @track showPreview  = false;
-    @track showEditor   = false;
-    currentRowIndex     = -1;
+    // Row preview / edit modal
+    @track showPreview = false;
+    @track showEditor = false;
+    currentRowIndex = -1;
     @track previewCells = [];
-    @track editBuffer   = [];
+    @track editedCells = [];
 
     _lastObjectUrl;
 
-    // ===== Derived =====
-    get hasHeaders()          { return Array.isArray(this.columns) && this.columns.length > 0; }
-    get disableGoForMapping() { return !this.hasHeaders || !!this.parseError; }
-    get displayColumns()      { return this._displayColumns; }
-    get recordWord()          { return this.totalEntries === 1 ? 'record' : 'records'; }
-    get badgeText()           { return `${this.totalEntries} ${this.recordWord}`; }
+    // ─── Derived getters ─────────────────────────────────────────────────────
 
-    // ✅ Pagination "Showing X to Y of Z entries" built in JS (no label interpolation needed in HTML)
-    get showingText() {
+    get hasHeaders() {
+        return Array.isArray(this.columns) && this.columns.length > 0;
+    }
+
+    get isContinueToMappingDisabled() {
+        return !this.hasHeaders || !!this.parseError || this.isPreparingMapping;
+    }
+
+    get displayColumns() {
+        return this._displayColumns;
+    }
+
+    get recordLabel() {
+        return this.filteredRowCount === 1 ? 'record' : 'records';
+    }
+
+    get badgeText() {
+        return `${this.filteredRowCount} ${this.recordLabel}`;
+    }
+
+    get paginationSummary() {
         return SHOWING_ENTRIES
             .replace('{0}', this.showingFrom)
             .replace('{1}', this.showingTo)
-            .replace('{2}', this.totalEntries);
+            .replace('{2}', this.filteredRowCount);
     }
-    // ===== Filtered Rows =====
+
+    get isParsing() {
+        return this.isLoading && this.progressPhase === 'parsing';
+    }
+
+    get progressBarStyle() {
+        return `width: ${this.progressPercent}%;`;
+    }
+
+    get progressLabel() {
+        if (this.progressPhase === 'reading') {
+            return 'Lecture du fichier…';
+        }
+        if (this.progressPhase === 'parsing') {
+            return `Analyse en cours — ${this.progressPercent}% (${this.progressRowCount} lignes)`;
+        }
+        if (this.progressPhase === 'mapping') {
+            return `Préparation du mapping — ${this.progressPercent}% (${this.progressRowCount} lignes)`;
+        }
+        return '';
+    }
+
+    get showProgress() {
+        return this.isLoading || this.isPreparingMapping;
+    }
+
+    // ─── Filtering / sorting ─────────────────────────────────────────────────
+    //
+    // allRows holds raw row objects { id, values: string[] } straight from
+    // the parser. Filtering/sorting operate on raw strings; cell decoration
+    // (status pill class, etc.) happens on demand for the visible page only.
+
     get filteredRows() {
-        let rows = this.allRows;
-        const q  = (this.searchTerm || '').toLowerCase();
-        if (q) { rows = rows.filter((r) => r.values.some((c) => (c.value || '').toString().toLowerCase().includes(q))); }
-
-        const { column, operator, value } = this.filter;
-        if (column && value !== '') {
-            const colIdx = this.columns.indexOf(column);
-            const needle = value.toString().toLowerCase();
-            rows = rows.filter((r) => {
-                const v = (r.values[colIdx]?.value ?? '').toString().toLowerCase();
-                if (operator === 'equals') return v === needle;
-                if (operator === 'starts') return v.startsWith(needle);
-                return v.includes(needle);
-            });
+        // Fast path: nothing to do, return raw allRows reference (no copy, no work)
+        if (!this.searchTerm && !this.filter.column && !this.sortBy) {
+            return this.allRows;
         }
-
-        if (this.sortBy) {
-            const i = this.columns.indexOf(this.sortBy); const asc = this.sortAsc;
-            rows = [...rows].sort((a, b) => {
-                const av = (a.values[i]?.value ?? '').toString().toLowerCase();
-                const bv = (b.values[i]?.value ?? '').toString().toLowerCase();
-                if (av === bv) return 0;
-                return asc ? (av > bv ? 1 : -1) : (av < bv ? 1 : -1);
-            });
-        }
-        return rows;
+        const searched = this.applySearch(this.allRows);
+        const filtered = this.applyColumnFilter(searched);
+        return this.applySort(filtered);
     }
 
-    // ===== Pagination =====
-    get totalPages()  { return Math.max(1, Math.ceil(this.filteredRows.length / this.pageSize)); }
-    get isFirstPage() { return this.pageIndex === 1; }
-    get isLastPage()  { return this.pageIndex >= this.totalPages; }
-    get pagedRows()   { const start = (this.pageIndex - 1) * this.pageSize; return this.filteredRows.slice(start, start + this.pageSize); }
-    get showingFrom() { return this.filteredRows.length ? (this.pageIndex - 1) * this.pageSize + 1 : 0; }
-    get showingTo()   { return Math.min(this.pageIndex * this.pageSize, this.filteredRows.length); }
-    get totalEntries(){ return this.filteredRows.length; }
+    getCellText(row, columnIndex) {
+        const cell = row.values[columnIndex];
+        if (cell === undefined || cell === null) return '';
+        return typeof cell === 'object' ? (cell.value ?? '') : cell;
+    }
+
+    applySearch(rows) {
+        const query = (this.searchTerm || '').toLowerCase();
+        if (!query) {
+            return rows;
+        }
+
+        return rows.filter((row) =>
+            row.values.some((cell) => {
+                const text = (typeof cell === 'object' ? cell.value : cell) || '';
+                return text.toString().toLowerCase().includes(query);
+            })
+        );
+    }
+
+    applyColumnFilter(rows) {
+        const { column, operator, value } = this.filter;
+        const isActive = column && value !== '';
+        if (!isActive) {
+            return rows;
+        }
+
+        const columnIndex = this.columns.indexOf(column);
+        const filterValue = value.toString().toLowerCase();
+
+        return rows.filter((row) => {
+            const cellValue = this.getCellText(row, columnIndex).toString().toLowerCase();
+
+            if (operator === FILTER_OP_EQUALS) {
+                return cellValue === filterValue;
+            }
+            if (operator === FILTER_OP_STARTS) {
+                return cellValue.startsWith(filterValue);
+            }
+            return cellValue.includes(filterValue);
+        });
+    }
+
+    applySort(rows) {
+        if (!this.sortBy) {
+            return rows;
+        }
+
+        const columnIndex = this.columns.indexOf(this.sortBy);
+        const ascending = this.sortAsc;
+
+        return [...rows].sort((rowA, rowB) => {
+            const valueA = this.getCellText(rowA, columnIndex).toString().toLowerCase();
+            const valueB = this.getCellText(rowB, columnIndex).toString().toLowerCase();
+
+            if (valueA === valueB) {
+                return 0;
+            }
+
+            const comparison = valueA > valueB ? 1 : -1;
+            return ascending ? comparison : -comparison;
+        });
+    }
+
+    // ─── Pagination ──────────────────────────────────────────────────────────
+
+    get totalPages() {
+        const pageCount = Math.ceil(this.filteredRows.length / this.pageSize);
+        return Math.max(1, pageCount);
+    }
+
+    get isFirstPage() {
+        return this.pageIndex === 1;
+    }
+
+    get isLastPage() {
+        return this.pageIndex >= this.totalPages;
+    }
+
+    get pagedRows() {
+        const start = (this.pageIndex - 1) * this.pageSize;
+        const end = start + this.pageSize;
+        const slice = this.filteredRows.slice(start, end);
+        // Decorate only the rows we are about to render — keeps the UI snappy
+        // even when allRows holds 300k+ raw rows.
+        return slice.map((row, i) => this.buildDisplayRow(row, this.columns, start + i));
+    }
+
+    get showingFrom() {
+        if (!this.filteredRows.length) {
+            return 0;
+        }
+        return (this.pageIndex - 1) * this.pageSize + 1;
+    }
+
+    get showingTo() {
+        return Math.min(this.pageIndex * this.pageSize, this.filteredRows.length);
+    }
+
+    get filteredRowCount() {
+        return this.filteredRows.length;
+    }
 
     get pageNumbers() {
-        const total = this.totalPages; const current = this.pageIndex; const out = [];
-        const pushPage     = (n)   => out.push({ key: `p-${n}`, label: String(n), page: n, isActive: n === current, isEllipsis: false });
-        const pushEllipsis = (pos) => out.push({ key: `e-${pos}-${out.length}`, label: '…', isEllipsis: true });
-        if (total <= 7) { for (let i = 1; i <= total; i++) pushPage(i); return out; }
-        pushPage(1);
-        if (current > 3) pushPage(2);
-        const start = Math.max(3, current - 1); const end = Math.min(total - 2, current + 1);
-        if (start > 3) pushEllipsis('left');
-        for (let i = start; i <= end; i++) pushPage(i);
-        if (end < total - 2) pushEllipsis('right');
-        if (current < total - 2) pushPage(total - 1);
-        pushPage(total);
-        return out;
+        const total = this.totalPages;
+        const current = this.pageIndex;
+
+        if (total <= PAGER_MAX_VISIBLE) {
+            return this.buildSimplePager(total, current);
+        }
+        return this.buildCompactPager(total, current);
     }
 
-    // ===== Dropzone & File read =====
-    handleBrowseClick() { this.template.querySelector('input[data-id="file"]')?.click(); }
-    handleDragOver(ev)  { ev.preventDefault(); this.template.querySelector('.dropzone')?.classList.add('dropzone--hover'); }
-    handleDragLeave()   { this.template.querySelector('.dropzone')?.classList.remove('dropzone--hover'); }
-    handleDrop(ev)      { ev.preventDefault(); this.template.querySelector('.dropzone')?.classList.remove('dropzone--hover'); const f = ev.dataTransfer?.files?.[0]; if (f) this.readFile(f); }
-    handleFileUpload(e) { const f = e.target.files?.[0]; if (f) this.readFile(f); }
+    buildSimplePager(total, current) {
+        const pages = [];
+        for (let i = 1; i <= total; i += 1) {
+            pages.push(this.buildPageItem(i, current));
+        }
+        return pages;
+    }
+
+    buildCompactPager(total, current) {
+        const pages = [];
+
+        pages.push(this.buildPageItem(1, current));
+
+        if (current > 3) {
+            pages.push(this.buildPageItem(2, current));
+        }
+
+        const start = Math.max(3, current - 1);
+        const end = Math.min(total - 2, current + 1);
+
+        if (start > 3) {
+            pages.push(this.buildEllipsisItem('left', pages.length));
+        }
+        for (let i = start; i <= end; i += 1) {
+            pages.push(this.buildPageItem(i, current));
+        }
+        if (end < total - 2) {
+            pages.push(this.buildEllipsisItem('right', pages.length));
+        }
+
+        if (current < total - 2) {
+            pages.push(this.buildPageItem(total - 1, current));
+        }
+        pages.push(this.buildPageItem(total, current));
+
+        return pages;
+    }
+
+    buildPageItem(pageNumber, currentPage) {
+        return {
+            key: `p-${pageNumber}`,
+            label: String(pageNumber),
+            page: pageNumber,
+            isActive: pageNumber === currentPage,
+            isEllipsis: false
+        };
+    }
+
+    buildEllipsisItem(position, sequence) {
+        return {
+            key: `e-${position}-${sequence}`,
+            label: '…',
+            isEllipsis: true
+        };
+    }
+
+    // ─── Dropzone & file reading ─────────────────────────────────────────────
+
+    handleBrowseClick() {
+        const fileInput = this.template.querySelector('input[data-id="file"]');
+        fileInput?.click();
+    }
+
+    handleDragOver(event) {
+        event.preventDefault();
+        const dropzone = this.template.querySelector('.dropzone');
+        dropzone?.classList.add('dropzone--hover');
+    }
+
+    handleDragLeave() {
+        const dropzone = this.template.querySelector('.dropzone');
+        dropzone?.classList.remove('dropzone--hover');
+    }
+
+    handleDrop(event) {
+        event.preventDefault();
+        const dropzone = this.template.querySelector('.dropzone');
+        dropzone?.classList.remove('dropzone--hover');
+
+        const file = event.dataTransfer?.files?.[0];
+        if (file) {
+            this.readFile(file);
+        }
+    }
+
+    handleFileUpload(event) {
+        const file = event.target.files?.[0];
+        if (file) {
+            this.readFile(file);
+        }
+    }
 
     readFile(file) {
-        this.resetState(); this.fileName = file.name; this.fileSize = file.size; this.isLoading = true;
+        this.resetState();
+        this.fileName = file.name;
+        this.fileSize = file.size;
+        this.isLoading = true;
+        this.progressPhase = 'reading';
+        this._cancelRequested = false;
+
         const reader = new FileReader();
-        reader.onload = () => {
-            const text = reader.result || '';
-            try {
-                const headerCheck = validateCsvHeaders(text);
-                if (!headerCheck.valid) {
-                    this.parseError = headerCheck.error;
-                    this.columns = []; this.allRows = []; this.totalRows = 0;
-                    this.isLoading = false;
-                    this.dispatchEvent(new ShowToastEvent({ title: 'Fichier CSV invalide', message: headerCheck.error, variant: 'error', mode: 'sticky' }));
-                    return;
-                }
-                const parsed        = this.parseCSV(text);
-                const columns       = parsed.columns || [];
-                const allRows       = Array.isArray(parsed.allRows) ? parsed.allRows : [];
-                const previewRows   = Array.isArray(parsed.rows) ? parsed.rows : allRows;
-                const totalRowCount = typeof parsed.totalRowCount === 'number' ? parsed.totalRowCount : allRows.length;
-                this.columns = columns; this.allRows = allRows; this.totalRows = totalRowCount;
-                this.pageIndex = 1; this.isPreview = totalRowCount > this.previewLimit;
-                this.dispatchEvent(new CustomEvent('csvloaded', { detail: { columns, rows: this.toObjectRows(previewRows, columns, this.previewLimit), totalRowCount, fileName: this.fileName, fileSize: this.fileSize }, bubbles: true, composed: true }));
-                this.rebuildDisplayColumns();
-            } catch (e) {
-                console.error("[CsvUploader] parseCSV error:", e);
-                 const code = (e &&  e.message) || "Failed to parse CSV";
-                 const errorMessages = {
-                   NO_HEADER_LINE:
-                     "This file does not appear to contain a header line. Please check the file.",
-                   DUPLICATE_HEADER_LINE:
-                     "Two header lines were detected. The file must contain only one header line.",
-                   EMPTY_FILE: "The file is empty."
-                 };
-                 this.parseError = errorMessages[code] || "Unable to read CSV file.";
-                 this.columns = [];
-                 this.allRows = [];
-                 this.totalRows = 0;
-               // this.parseError = (e && e.message) || 'Failed to parse CSV.'; this.columns = []; this.allRows = []; this.totalRows = 0;
-            } finally { this.isLoading = false; }
-        };
+        reader.onload = () => this.parseFileText(reader.result);
+        reader.onerror = () => this.handleParseError(reader.error);
         reader.readAsText(file);
     }
 
-    parseCSV(csvText) {
-        let normalize = (csvText || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-        normalize = normalize.replace(/^\uFEFF/, "");
-        const lines     = normalize.split('\n');
+    handleCancelImport() {
+        this._cancelRequested = true;
+    }
 
-        if (!lines.length || (lines.length === 1 && lines[0].trim() === ''))throw new Error( "EMPTY_FILE") ; // return { columns: [], rows: [], allRows: [], totalRowCount: 0 };
-        const headerLine = lines[0] || '';
-        const delimiter  = ((headerLine.match(/;/g) || []).length > (headerLine.match(/,/g) || []).length) ? ';' : ',';
-        const parseLine  = (line) => {
-            const out = []; let cur = ''; let inQuotes = false;
-            for (let i = 0; i < line.length; i += 1) {
-                const ch = line[i];
-                if (ch === '"') { if (inQuotes && i + 1 < line.length && line[i + 1] === '"') { cur += '"'; i += 1; } else { inQuotes = !inQuotes; } }
-                else if (ch === delimiter && !inQuotes) { out.push(cur); cur = ''; }
-                else { cur += ch; }
+    async parseFileText(fileText) {
+        try {
+            this.progressPhase = 'parsing';
+            const text = fileText || '';
+
+            const parsed = await parseCsvTextAsync(text, {
+                onProgress: (progress) => this.updateProgress(progress),
+                isAborted: () => this._cancelRequested
+            });
+
+            if (parsed.aborted) {
+                this.resetAfterCancel();
+                return;
             }
-            out.push(cur); return out;
+
+            this.applyParsedData(parsed);
+        } catch (error) {
+            this.handleParseError(error);
+        } finally {
+            this.isLoading = false;
+            this.progressPhase = '';
+        }
+    }
+
+    updateProgress(progress) {
+        this.progressPercent = progress.percent;
+        this.progressRowCount = progress.rowsBuilt;
+    }
+
+    applyParsedData(parsed) {
+        const columns = parsed.columns || [];
+        const rawRows = Array.isArray(parsed.rows) ? parsed.rows : [];
+        const totalRowCount = parsed.totalRowCount ?? rawRows.length;
+
+        // Keep rawRows in memory (lightweight: { id, values: string[] } per row).
+        // Decoration into rich cells happens on demand for the visible page only,
+        // so a 300k-row file does not pay the cost of building 300k × N cells up front.
+        this.columns = columns;
+        this.allRows = rawRows;
+        this.fileRowCount = totalRowCount;
+        this.pageIndex = 1;
+        this.exceedsPreviewLimit = totalRowCount > this.previewLimit;
+
+        this.rebuildDisplayColumns();
+        this.dispatchCsvLoaded(columns, rawRows, totalRowCount);
+    }
+
+    resetAfterCancel() {
+        this.parseError = 'Import annulé.';
+        this.columns = [];
+        this.allRows = [];
+        this.fileRowCount = 0;
+    }
+
+    handleParseError(error) {
+        const code = error?.message || 'Failed to parse CSV';
+        const errorMessages = {
+            NO_HEADER_LINE:
+                'This file does not appear to contain a header line. Please check the file.',
+            DUPLICATE_HEADER_LINE:
+                'Two header lines were detected. The file must contain only one header line.',
+            DUPLICATE_COLUMN_NAME:
+                `The CSV header contains duplicate column name: "${error?.columnName || ''}". Each column must have a unique name.`,
+            EMPTY_FILE: 'The file is empty.'
+        };
+        this.parseError = errorMessages[code] || 'Unable to read CSV file.';
+        this.columns = [];
+        this.allRows = [];
+        this.fileRowCount = 0;
+    }
+
+    dispatchCsvLoaded(columns, rawRows, totalRowCount) {
+        const previewObjects = rowsToObjects(rawRows, columns, this.previewLimit);
+        const detail = {
+            columns,
+            rows: previewObjects,
+            totalRowCount,
+            fileName: this.fileName,
+            fileSize: this.fileSize
         };
 
-        const parsedHeader = parseLine(headerLine);
+        const event = new CustomEvent('csvloaded', {
+            detail,
+            bubbles: true,
+            composed: true
+        });
+        this.dispatchEvent(event);
+    }
 
-        // Validation  : pas de header (1ère ligne ressemble à des données)
-        if (this._looksLikeData(parsedHeader)) {
-          throw new Error ("NO_HEADER_LINE" );
+    // ─── Row decoration (UI-specific cell metadata) ──────────────────────────
+
+    buildDisplayRow(row, columns, index) {
+        const displayCells = columns.map((column, columnIndex) => {
+            return this.buildDisplayCell(column, row.values[columnIndex] || '', index);
+        });
+        return { id: index, values: displayCells };
+    }
+
+    buildDisplayCell(columnName, rawValue, rowIndex) {
+        const columnLower = (columnName || '').toLowerCase();
+        const isIndustry = columnLower === COLUMN_INDUSTRY;
+        const isStatus = columnLower === COLUMN_STATUS;
+
+        return {
+            key: `${columnName}_${rowIndex}`,
+            value: rawValue,
+            isIndustry,
+            isStatus,
+            statusClass: isStatus ? this.computeStatusClass(rawValue) : ''
+        };
+    }
+
+    computeStatusClass(value) {
+        const normalized = (value || '').toLowerCase();
+        return STATUS_PILL_CLASSES[normalized] || STATUS_PILL_DEFAULT;
+    }
+
+    // ─── Mapping handoff ─────────────────────────────────────────────────────
+
+    async handleContinueToMapping() {
+        if (!this.hasHeaders || this.isPreparingMapping) {
+            return;
         }
 
-        //Validation 2 : double header (ligne 2 ressemble aussi à un header)
-          const dataLines = lines.slice(1).filter((l) => l.trim() !== "");
-          if (dataLines.length >= 1) {
-            const parsedLine2 = parseLine(dataLines[0]);
-            if (this._looksLikeDuplicateHeader(parsedHeader, parsedLine2)) {
-              throw new Error("DUPLICATE_HEADER_LINE");
+        this.isPreparingMapping = true;
+        this.progressPhase = 'mapping';
+        this.progressPercent = 0;
+        this.progressRowCount = 0;
+        this._cancelRequested = false;
+
+        try {
+            const totalRowCount = this.allRows.length;
+            const limit = totalRowCount || this.previewLimit;
+
+            const result = await rowsToObjectsAsync(this.allRows, this.columns, limit, {
+                onProgress: (progress) => this.updateMappingProgress(progress),
+                isAborted: () => this._cancelRequested
+            });
+
+            if (result.aborted) {
+                return;
             }
-          }
 
-        const columns = parseLine(headerLine).map((c, index) => { const t = (c || '').trim(); return t });// || `Column_${index + 1}`; });
-        const allRows = lines.slice(1).filter((l) => l !== '').map((l, i) => this.buildRow(parseLine(l), columns, i));
-        return { columns, rows: allRows.slice(0, this.previewLimit || DEFAULT_PREVIEW_LIMIT), allRows, totalRowCount: allRows.length };
+            const plainRows = result.rows;
+            this.persistToSessionStorage(plainRows, totalRowCount);
+            this.dispatchGoToMapping(plainRows, totalRowCount);
+        } finally {
+            this.isPreparingMapping = false;
+            this.progressPhase = '';
+        }
     }
 
-    buildRow(values, columns, index) {
-        return { id: index, values: columns.map((col, i) => { const val = (values[i] ?? '').trim(); const colLower = (col || '').toLowerCase(); const isIndustry = colLower === 'industry'; const isStatus = colLower === 'status'; return { key: `${col}_${index}`, value: val, isIndustry, isStatus, statusClass: isStatus ? this.computeStatusClass(val) : '' }; }) };
-    }
-    computeStatusClass(v) { const s = (v || '').toLowerCase(); if (s === 'active') return 'pill pill--green'; if (s === 'pending') return 'pill pill--yellow'; return 'pill pill--red'; }
-    toObjectRows(rows, columns, limit) {
-        const max = Math.max(0, Number(limit) || rows.length); const out = []; const len = Math.min(rows.length, max);
-        for (let i = 0; i < len; i += 1) { const r = rows[i]; const obj = {}; for (let c = 0; c < columns.length; c += 1) { obj[columns[c]] = (r.values[c]?.value ?? '').toString(); } out.push(obj); }
-        return out;
+    updateMappingProgress(progress) {
+        this.progressPercent = progress.percent;
+        this.progressRowCount = progress.rowsConverted;
     }
 
-    // ===== Mapping =====
-    handleGoForMapping() {
-        if (!Array.isArray(this.columns) || !this.columns.length) return;
-        const totalRowCount = Array.isArray(this.allRows) ? this.allRows.length : 0;
-        const plainRows     = this.toObjectRows(this.allRows, this.columns, totalRowCount || this.previewLimit);
-        try { window.sessionStorage.setItem(SS_COLS_KEY, this.columns.join(',')); window.sessionStorage.setItem(SS_ROWS_KEY, JSON.stringify(plainRows)); } catch (e) { console.debug('[CsvUploader] sessionStorage unavailable', e); }
-        this.dispatchEvent(new CustomEvent('gotomapping', { detail: { columns: this.columns, rows: plainRows, totalRowCount, fileName: this.fileName, fileSize: this.fileSize }, bubbles: true, composed: true }));
+    persistToSessionStorage(plainRows, totalRowCount) {
+        if (totalRowCount > SESSION_STORAGE_MAX_ROWS) {
+            console.debug(`[CsvUploader] sessionStorage skipped: ${totalRowCount} rows exceeds ${SESSION_STORAGE_MAX_ROWS} threshold`);
+            return;
+        }
+
+        try {
+            window.sessionStorage.setItem(SESSION_COLUMNS_KEY, this.columns.join(','));
+            window.sessionStorage.setItem(SESSION_ROWS_KEY, JSON.stringify(plainRows));
+        } catch (error) {
+            console.debug('[CsvUploader] sessionStorage unavailable', error);
+        }
     }
 
-    // ===== Sorting =====
-    rebuildDisplayColumns() { this._displayColumns = this.columns.map((name) => ({ name, isSorted: name === this.sortBy, sortAsc: this.sortBy === name ? this.sortAsc : true })); }
-    handleHeaderClick(e) {
-        const col = e.currentTarget?.dataset?.field; if (!col) return;
-        if (this.sortBy === col) this.sortAsc = !this.sortAsc; else { this.sortBy = col; this.sortAsc = true; }
-        this.rebuildDisplayColumns(); this.pageIndex = 1;
+    dispatchGoToMapping(plainRows, totalRowCount) {
+        const detail = {
+            columns: this.columns,
+            rows: plainRows,
+            totalRowCount,
+            fileName: this.fileName,
+            fileSize: this.fileSize
+        };
+
+        const event = new CustomEvent('gotomapping', {
+            detail,
+            bubbles: true,
+            composed: true
+        });
+        this.dispatchEvent(event);
     }
 
-    // ===== Search / Filters / Settings =====
-    handleSearchChange(e) { this.searchTerm = e.target.value || ''; this.pageIndex = 1; }
-    openSettings()  { this.showSettings = true; }
-    closeSettings() { this.showSettings = false; }
+    // ─── Sorting (UI) ────────────────────────────────────────────────────────
+
+    rebuildDisplayColumns() {
+        this._displayColumns = this.columns.map((name) => ({
+            name,
+            isSorted: name === this.sortBy,
+            sortAsc: this.sortBy === name ? this.sortAsc : true
+        }));
+    }
+
+    handleHeaderClick(event) {
+        const column = event.currentTarget?.dataset?.field;
+        if (!column) {
+            return;
+        }
+
+        if (this.sortBy === column) {
+            this.sortAsc = !this.sortAsc;
+        } else {
+            this.sortBy = column;
+            this.sortAsc = true;
+        }
+
+        this.rebuildDisplayColumns();
+        this.pageIndex = 1;
+    }
+
+    // ─── Search, filters, settings ───────────────────────────────────────────
+
+    handleSearchChange(event) {
+        const newValue = event.target.value || '';
+
+        if (this._searchDebounceTimer) {
+            clearTimeout(this._searchDebounceTimer);
+        }
+
+        this._searchDebounceTimer = window.setTimeout(() => {
+            this.searchTerm = newValue;
+            this.pageIndex = 1;
+            this._searchDebounceTimer = null;
+        }, 200);
+    }
+
+    openSettings() {
+        this.showSettings = true;
+    }
+
+    closeSettings() {
+        this.showSettings = false;
+    }
+
     applySettings() {
-        const pageSizeEl = this.template.querySelector('[data-id="page-size"]');
-        const previewEl  = this.template.querySelector('[data-id="preview-limit"]');
-        if (pageSizeEl) { const v = Number(pageSizeEl.value); if (!Number.isNaN(v) && v > 0) this.pageSize = v; }
-        if (previewEl)  { const v = Number(previewEl.value);  if (!Number.isNaN(v) && v > 0) this.previewLimit = v; }
-        this.pageIndex = 1; this.showSettings = false;
+        const pageSizeInput = this.template.querySelector('[data-id="page-size"]');
+        const previewInput = this.template.querySelector('[data-id="preview-limit"]');
+
+        const newPageSize = Number(pageSizeInput?.value);
+        if (!Number.isNaN(newPageSize) && newPageSize > 0) {
+            this.pageSize = newPageSize;
+        }
+
+        const newPreviewLimit = Number(previewInput?.value);
+        if (!Number.isNaN(newPreviewLimit) && newPreviewLimit > 0) {
+            this.previewLimit = newPreviewLimit;
+        }
+
+        this.pageIndex = 1;
+        this.showSettings = false;
     }
-    openFilters()  { this.showFilters = true; }
-    closeFilters() { this.showFilters = false; }
+
+    openFilters() {
+        this.showFilters = true;
+    }
+
+    closeFilters() {
+        this.showFilters = false;
+    }
+
     applyFilters() {
-        const colEl = this.template.querySelector('[data-id="filter-col"]');
-        const opEl  = this.template.querySelector('[data-id="filter-op"]');
-        const valEl = this.template.querySelector('[data-id="filter-val"]');
-        this.filter = { column: colEl?.value || '', operator: opEl?.value || 'contains', value: valEl?.value || '' };
-        this.pageIndex = 1; this.showFilters = false;
-    }
-    clearFilters() { this.filter = { column: '', operator: 'contains', value: '' }; this.pageIndex = 1; this.showFilters = false; }
+        const columnSelect = this.template.querySelector('[data-id="filter-col"]');
+        const operatorSelect = this.template.querySelector('[data-id="filter-op"]');
+        const valueInput = this.template.querySelector('[data-id="filter-val"]');
 
-    // ===== Pagination =====
-    gotoPrev() { if (!this.isFirstPage) this.pageIndex -= 1; }
-    gotoNext() { if (!this.isLastPage)  this.pageIndex += 1; }
-    gotoPage(e) { const n = e.currentTarget?.dataset?.page; if (!n) return; const num = Number(n); if (!Number.isNaN(num)) this.pageIndex = Math.min(Math.max(num, 1), this.totalPages); }
+        this.filter = {
+            column: columnSelect?.value || '',
+            operator: operatorSelect?.value || 'contains',
+            value: valueInput?.value || ''
+        };
 
-    // ===== Preview / Edit =====
-    handleRowView(e) { const rowId = Number(e.currentTarget?.dataset?.rowid); const idx = this.allRows.findIndex((r) => r.id === rowId); if (idx < 0) return; this.currentRowIndex = idx; this.previewCells = this.columns.map((label, i) => ({ label, value: this.allRows[idx].values[i]?.value || '' })); this.showPreview = true; }
-    closePreview() { this.showPreview = false; }
-    handleRowEdit(e) { const rowId = Number(e.currentTarget?.dataset?.rowid); const idx = this.allRows.findIndex((r) => r.id === rowId); if (idx < 0) return; this.currentRowIndex = idx; this.editBuffer = this.columns.map((label, i) => ({ label, value: this.allRows[idx].values[i]?.value || '', idx: i })); this.showEditor = true; }
-    editInputChanged(e) { const pos = Number(e.currentTarget?.dataset?.pos); if (Number.isNaN(pos)) return; const newValue = e.target.value; this.editBuffer = this.editBuffer.map((c, i) => (i === pos ? { ...c, value: newValue } : c)); }
-    saveEdit() { if (this.currentRowIndex < 0) return; const row = this.allRows[this.currentRowIndex]; const updatedValues = row.values.map((c, i) => ({ ...c, value: this.editBuffer[i]?.value ?? c.value })); this.allRows = [...this.allRows.slice(0, this.currentRowIndex), { ...row, values: updatedValues }, ...this.allRows.slice(this.currentRowIndex + 1)]; this.showEditor = false; }
-    cancelEdit() { this.showEditor = false; }
-
-    // *** helpers csv's validations  ***
-    // Retourne true si la ligne ressemble à des données (pas un header)
-    _looksLikeData(parsedLine) {
-        const nonEmptyCells = parsedLine.filter((c) => (c || "").trim() !== "");
-        if (nonEmptyCells.length === 0) return true; 
-        
-        const dataPatterns = [
-            /^\d+(\.\d+)?$/,                         // nombre
-            /^\d{2}[\/\-]\d{2}[\/\-]\d{4}$/,        // date
-            /^[\w.+-]+@[\w-]+\.[a-z]{2,}$/i,         // email
-            /^\+?[\d\s\-()]{7,}$/,                   // téléphone
-        ];
-        const dataCount = parsedLine.filter(cell => {
-            const val = (cell || '').trim();
-            return val !== '' && dataPatterns.some(p => p.test(val));
-        }).length;
-
-        // Si +50% des cellules sont des données typées → pas un header
-        return parsedLine.length > 0 && (dataCount / parsedLine.length) >= 0.5;
+        this.pageIndex = 1;
+        this.showFilters = false;
     }
 
-    // Retourne true si deux lignes se ressemblent structurellement (double header)
-    _looksLikeDuplicateHeader(line1, line2) {
-        const isTextOnly = (cells) =>
-            cells.every(c => /^[a-zA-Z_\s\u00C0-\u017F]+$/.test((c || '').trim()));
-        return isTextOnly(line1) && isTextOnly(line2);
+    clearFilters() {
+        this.filter = { column: '', operator: 'contains', value: '' };
+        this.pageIndex = 1;
+        this.showFilters = false;
     }
 
-    // ===== Navigation / Cleanup =====
-    handleBackClick() { this.dispatchEvent(new CustomEvent('previous', { bubbles: true, composed: true })); }
-    disconnectedCallback() { if (this._lastObjectUrl) { URL.revokeObjectURL(this._lastObjectUrl); this._lastObjectUrl = null; } }
+    // ─── Pagination handlers ─────────────────────────────────────────────────
+
+    gotoPrev() {
+        if (!this.isFirstPage) {
+            this.pageIndex -= 1;
+        }
+    }
+
+    gotoNext() {
+        if (!this.isLastPage) {
+            this.pageIndex += 1;
+        }
+    }
+
+    gotoPage(event) {
+        const pageAttribute = event.currentTarget?.dataset?.page;
+        if (!pageAttribute) {
+            return;
+        }
+
+        const requestedPage = Number(pageAttribute);
+        if (Number.isNaN(requestedPage)) {
+            return;
+        }
+
+        this.pageIndex = Math.min(Math.max(requestedPage, 1), this.totalPages);
+    }
+
+    // ─── Row preview / edit ──────────────────────────────────────────────────
+
+    handleRowView(event) {
+        const rowIndex = this.findRowIndexFromEvent(event);
+        if (rowIndex < 0) {
+            return;
+        }
+
+        this.currentRowIndex = rowIndex;
+        this.previewCells = this.buildPreviewCells(rowIndex);
+        this.showPreview = true;
+    }
+
+    handleRowEdit(event) {
+        const rowIndex = this.findRowIndexFromEvent(event);
+        if (rowIndex < 0) {
+            return;
+        }
+
+        this.currentRowIndex = rowIndex;
+        this.editedCells = this.buildEditedCells(rowIndex);
+        this.showEditor = true;
+    }
+
+    findRowIndexFromEvent(event) {
+        const rowId = Number(event.currentTarget?.dataset?.rowid);
+        return this.allRows.findIndex((row) => row.id === rowId);
+    }
+
+    buildPreviewCells(rowIndex) {
+        const row = this.allRows[rowIndex];
+        return this.columns.map((label, columnIndex) => ({
+            label,
+            value: this.getCellText(row, columnIndex)
+        }));
+    }
+
+    buildEditedCells(rowIndex) {
+        const row = this.allRows[rowIndex];
+        return this.columns.map((label, columnIndex) => ({
+            label,
+            value: this.getCellText(row, columnIndex)
+        }));
+    }
+
+    handleEditInputChange(event) {
+        const cellIndex = Number(event.currentTarget?.dataset?.cellIndex);
+        if (Number.isNaN(cellIndex)) {
+            return;
+        }
+
+        const newValue = event.target.value;
+        this.editedCells = this.editedCells.map((cell, index) => {
+            if (index !== cellIndex) {
+                return cell;
+            }
+            return { ...cell, value: newValue };
+        });
+    }
+
+    saveEdit() {
+        if (this.currentRowIndex < 0) {
+            return;
+        }
+
+        // allRows holds raw rows (values: string[]). Persist the edit as a
+        // plain string at the same column index.
+        const row = this.allRows[this.currentRowIndex];
+        const updatedValues = row.values.map((cell, columnIndex) => {
+            const editedValue = this.editedCells[columnIndex]?.value;
+            if (editedValue === undefined) {
+                return cell;
+            }
+            return editedValue;
+        });
+
+        const rowsBefore = this.allRows.slice(0, this.currentRowIndex);
+        const rowsAfter = this.allRows.slice(this.currentRowIndex + 1);
+        this.allRows = [...rowsBefore, { ...row, values: updatedValues }, ...rowsAfter];
+
+        this.showEditor = false;
+    }
+
+    closePreview() {
+        this.showPreview = false;
+    }
+
+    cancelEdit() {
+        this.showEditor = false;
+    }
+
+    // ─── Navigation & cleanup ────────────────────────────────────────────────
+
+    handleBackClick() {
+        const event = new CustomEvent('previous', { bubbles: true, composed: true });
+        this.dispatchEvent(event);
+    }
+
+    disconnectedCallback() {
+        if (this._lastObjectUrl) {
+            URL.revokeObjectURL(this._lastObjectUrl);
+            this._lastObjectUrl = null;
+        }
+        if (this._searchDebounceTimer) {
+            window.clearTimeout(this._searchDebounceTimer);
+            this._searchDebounceTimer = null;
+        }
+        this._cancelRequested = true;
+    }
+
     resetState() {
-        this.columns = []; this._displayColumns = []; this.allRows = []; this.totalRows = 0;
-        this.isPreview = false; this.isLoading = false; this.parseError = '';
-        this.searchTerm = ''; this.filter = { column: '', operator: 'contains', value: '' };
-        this.pageSize = DEFAULT_PAGE_SIZE; this.pageIndex = 1; this.sortBy = ''; this.sortAsc = true;
-        this.showPreview = false; this.showEditor = false; this.currentRowIndex = -1; this.previewCells = []; this.editBuffer = [];
+        this.columns = [];
+        this._displayColumns = [];
+        this.allRows = [];
+        this.fileRowCount = 0;
+
+        this.exceedsPreviewLimit = false;
+        this.isLoading = false;
+        this.parseError = '';
+        this.progressPercent = 0;
+        this.progressRowCount = 0;
+        this.progressPhase = '';
+
+        this.searchTerm = '';
+        this.filter = { column: '', operator: 'contains', value: '' };
+        this.pageSize = DEFAULT_PAGE_SIZE;
+        this.pageIndex = 1;
+        this.sortBy = '';
+        this.sortAsc = true;
+
+        this.showPreview = false;
+        this.showEditor = false;
+        this.currentRowIndex = -1;
+        this.previewCells = [];
+        this.editedCells = [];
     }
 }
