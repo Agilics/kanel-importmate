@@ -135,7 +135,7 @@
           <!-- Pagination -->
           <div class="table-footer">
             <div class="table-footer__left">
-              {showingText}
+              {paginationSummary}
             </div>
             <div class="table-footer__right pager">
               <button type="button" class="pager__btn" onclick={gotoPrev} disabled={isFirstPage}>
@@ -143,17 +143,17 @@
                 <span class="slds-m-left_xx-small">{label.previous}</span>
               </button>
 
-              <template for:each={pageNumbers} for:item="p">
-                <span key={p.key}>
-                  <template if:true={p.isEllipsis}>
-                    <span class="pager__ellipsis">{p.label}</span>
+              <template for:each={pageNumbers} for:item="pageItem">
+                <span key={pageItem.key}>
+                  <template if:true={pageItem.isEllipsis}>
+                    <span class="pager__ellipsis">{pageItem.label}</span>
                   </template>
-                  <template if:false={p.isEllipsis}>
-                    <template if:true={p.isActive}>
-                      <button type="button" class="pager__page pager__page--active">{p.label}</button>
+                  <template if:false={pageItem.isEllipsis}>
+                    <template if:true={pageItem.isActive}>
+                      <button type="button" class="pager__page pager__page--active">{pageItem.label}</button>
                     </template>
-                    <template if:false={p.isActive}>
-                      <button type="button" class="pager__page" data-page={p.page} onclick={gotoPage}>{p.label}</button>
+                    <template if:false={pageItem.isActive}>
+                      <button type="button" class="pager__page" data-page={pageItem.page} onclick={gotoPage}>{pageItem.label}</button>
                     </template>
                   </template>
                 </span>
@@ -178,8 +178,8 @@
       <div class="footer-actions__right">
         <button type="button"
           class="btn btn--primary"
-          onclick={handleGoForMapping}
-          disabled={disableGoForMapping}>
+          onclick={handleContinueToMapping}
+          disabled={isContinueToMappingDisabled}>
           <span>{label.continueBtn}</span>
           <lightning-icon icon-name="utility:chevronright" size="x-small"></lightning-icon>
         </button>
@@ -198,8 +198,8 @@
             <label class="lbl">{label.filtersColumn}</label>
             <select class="inp" data-id="filter-col">
               <option value="">{label.filtersColDefault}</option>
-              <template for:each={columns} for:item="c">
-                <option key={c} value={c}>{c}</option>
+              <template for:each={columns} for:item="columnName">
+                <option key={columnName} value={columnName}>{columnName}</option>
               </template>
             </select>
 
@@ -248,9 +248,9 @@
         <div class="modal">
           <div class="modal__header">{label.modalPreviewTitle}</div>
           <div class="modal__body">
-            <template for:each={previewCells} for:item="c">
-              <div key={c.label} class="slds-m-bottom_x-small">
-                <strong>{c.label}:</strong> <span>{c.value}</span>
+            <template for:each={previewCells} for:item="previewCell">
+              <div key={previewCell.label} class="slds-m-bottom_x-small">
+                <strong>{previewCell.label}:</strong> <span>{previewCell.value}</span>
               </div>
             </template>
           </div>
@@ -267,10 +267,10 @@
         <div class="modal">
           <div class="modal__header">{label.modalEditTitle}</div>
           <div class="modal__body">
-            <template for:each={editBuffer} for:item="c" for:index="index">
-              <div key={c.label} class="slds-m-bottom_small">
-                <label class="lbl">{c.label}</label>
-                <input class="inp" type="text" value={c.value} data-pos={index} oninput={editInputChanged}/>
+            <template for:each={editedCells} for:item="editedCell" for:index="cellIndex">
+              <div key={editedCell.label} class="slds-m-bottom_small">
+                <label class="lbl">{editedCell.label}</label>
+                <input class="inp" type="text" value={editedCell.value} data-cell-index={cellIndex} oninput={handleEditInputChange}/>
               </div>
             </template>
           </div>

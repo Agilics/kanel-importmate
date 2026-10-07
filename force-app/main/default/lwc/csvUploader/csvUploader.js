@@ -42,9 +42,9 @@ import LBL_MODAL_APPLY from '@salesforce/label/c.CsvUploader_Modal_Apply';
 import LBL_MODAL_CLOSE from '@salesforce/label/c.CsvUploader_Modal_Close';
 import LBL_MODAL_SAVE from '@salesforce/label/c.CsvUploader_Modal_Save';
 
-const SS_ROWS_KEY = 'IM_csvRows';
-const SS_COLS_KEY = 'IM_sourceColumnsCsv';
-const SS_MAX_ROWS_FOR_PERSIST = 5000;
+const SESSION_ROWS_KEY = 'IM_csvRows';
+const SESSION_COLUMNS_KEY = 'IM_sourceColumnsCsv';
+const SESSION_STORAGE_MAX_ROWS = 5000;
 const DEFAULT_PREVIEW_LIMIT = 100;
 const DEFAULT_PAGE_SIZE = 10;
 const PAGER_MAX_VISIBLE = 7;
@@ -111,19 +111,19 @@ export default class CsvUploader extends LightningElement {
     @track columns = [];
     @track _displayColumns = [];
     @track allRows = [];
-    totalRows = 0;
+    fileRowCount = 0;
 
     // UI state
     isLoading = false;
     parseError = '';
-    isPreview = false;
+    exceedsPreviewLimit = false;
 
     // Progress (large file streaming + mapping handoff)
     @track progressPercent = 0;
-    @track progressRows = 0;
+    @track progressRowCount = 0;
     @track progressPhase = '';
-    @track isHandoffInProgress = false;
-    _abortRequested = false;
+    @track isPreparingMapping = false;
+    _cancelRequested = false;
     _searchDebounceTimer = null;
 
     // Search, filter, settings
@@ -144,7 +144,7 @@ export default class CsvUploader extends LightningElement {
     @track showEditor = false;
     currentRowIndex = -1;
     @track previewCells = [];
-    @track editBuffer = [];
+    @track editedCells = [];
 
     _lastObjectUrl;
 
@@ -154,27 +154,27 @@ export default class CsvUploader extends LightningElement {
         return Array.isArray(this.columns) && this.columns.length > 0;
     }
 
-    get disableGoForMapping() {
-        return !this.hasHeaders || !!this.parseError || this.isHandoffInProgress;
+    get isContinueToMappingDisabled() {
+        return !this.hasHeaders || !!this.parseError || this.isPreparingMapping;
     }
 
     get displayColumns() {
         return this._displayColumns;
     }
 
-    get recordWord() {
-        return this.totalEntries === 1 ? 'record' : 'records';
+    get recordLabel() {
+        return this.filteredRowCount === 1 ? 'record' : 'records';
     }
 
     get badgeText() {
-        return `${this.totalEntries} ${this.recordWord}`;
+        return `${this.filteredRowCount} ${this.recordLabel}`;
     }
 
-    get showingText() {
+    get paginationSummary() {
         return SHOWING_ENTRIES
             .replace('{0}', this.showingFrom)
             .replace('{1}', this.showingTo)
-            .replace('{2}', this.totalEntries);
+            .replace('{2}', this.filteredRowCount);
     }
 
     get isParsing() {
@@ -190,16 +190,16 @@ export default class CsvUploader extends LightningElement {
             return 'Lecture du fichier…';
         }
         if (this.progressPhase === 'parsing') {
-            return `Analyse en cours — ${this.progressPercent}% (${this.progressRows} lignes)`;
+            return `Analyse en cours — ${this.progressPercent}% (${this.progressRowCount} lignes)`;
         }
         if (this.progressPhase === 'mapping') {
-            return `Préparation du mapping — ${this.progressPercent}% (${this.progressRows} lignes)`;
+            return `Préparation du mapping — ${this.progressPercent}% (${this.progressRowCount} lignes)`;
         }
         return '';
     }
 
     get showProgress() {
-        return this.isLoading || this.isHandoffInProgress;
+        return this.isLoading || this.isPreparingMapping;
     }
 
     // ─── Filtering / sorting ─────────────────────────────────────────────────
@@ -218,7 +218,7 @@ export default class CsvUploader extends LightningElement {
         return this.applySort(filtered);
     }
 
-    rawCellAt(row, columnIndex) {
+    getCellText(row, columnIndex) {
         const cell = row.values[columnIndex];
         if (cell === undefined || cell === null) return '';
         return typeof cell === 'object' ? (cell.value ?? '') : cell;
@@ -246,18 +246,18 @@ export default class CsvUploader extends LightningElement {
         }
 
         const columnIndex = this.columns.indexOf(column);
-        const needle = value.toString().toLowerCase();
+        const filterValue = value.toString().toLowerCase();
 
         return rows.filter((row) => {
-            const cellValue = this.rawCellAt(row, columnIndex).toString().toLowerCase();
+            const cellValue = this.getCellText(row, columnIndex).toString().toLowerCase();
 
             if (operator === FILTER_OP_EQUALS) {
-                return cellValue === needle;
+                return cellValue === filterValue;
             }
             if (operator === FILTER_OP_STARTS) {
-                return cellValue.startsWith(needle);
+                return cellValue.startsWith(filterValue);
             }
-            return cellValue.includes(needle);
+            return cellValue.includes(filterValue);
         });
     }
 
@@ -270,8 +270,8 @@ export default class CsvUploader extends LightningElement {
         const ascending = this.sortAsc;
 
         return [...rows].sort((rowA, rowB) => {
-            const valueA = this.rawCellAt(rowA, columnIndex).toString().toLowerCase();
-            const valueB = this.rawCellAt(rowB, columnIndex).toString().toLowerCase();
+            const valueA = this.getCellText(rowA, columnIndex).toString().toLowerCase();
+            const valueB = this.getCellText(rowB, columnIndex).toString().toLowerCase();
 
             if (valueA === valueB) {
                 return 0;
@@ -303,7 +303,7 @@ export default class CsvUploader extends LightningElement {
         const slice = this.filteredRows.slice(start, end);
         // Decorate only the rows we are about to render — keeps the UI snappy
         // even when allRows holds 300k+ raw rows.
-        return slice.map((row, i) => this.decorateRow(row, this.columns, start + i));
+        return slice.map((row, i) => this.buildDisplayRow(row, this.columns, start + i));
     }
 
     get showingFrom() {
@@ -317,7 +317,7 @@ export default class CsvUploader extends LightningElement {
         return Math.min(this.pageIndex * this.pageSize, this.filteredRows.length);
     }
 
-    get totalEntries() {
+    get filteredRowCount() {
         return this.filteredRows.length;
     }
 
@@ -334,7 +334,7 @@ export default class CsvUploader extends LightningElement {
     buildSimplePager(total, current) {
         const pages = [];
         for (let i = 1; i <= total; i += 1) {
-            pages.push(this.pagerPage(i, current));
+            pages.push(this.buildPageItem(i, current));
         }
         return pages;
     }
@@ -342,34 +342,34 @@ export default class CsvUploader extends LightningElement {
     buildCompactPager(total, current) {
         const pages = [];
 
-        pages.push(this.pagerPage(1, current));
+        pages.push(this.buildPageItem(1, current));
 
         if (current > 3) {
-            pages.push(this.pagerPage(2, current));
+            pages.push(this.buildPageItem(2, current));
         }
 
         const start = Math.max(3, current - 1);
         const end = Math.min(total - 2, current + 1);
 
         if (start > 3) {
-            pages.push(this.pagerEllipsis('left', pages.length));
+            pages.push(this.buildEllipsisItem('left', pages.length));
         }
         for (let i = start; i <= end; i += 1) {
-            pages.push(this.pagerPage(i, current));
+            pages.push(this.buildPageItem(i, current));
         }
         if (end < total - 2) {
-            pages.push(this.pagerEllipsis('right', pages.length));
+            pages.push(this.buildEllipsisItem('right', pages.length));
         }
 
         if (current < total - 2) {
-            pages.push(this.pagerPage(total - 1, current));
+            pages.push(this.buildPageItem(total - 1, current));
         }
-        pages.push(this.pagerPage(total, current));
+        pages.push(this.buildPageItem(total, current));
 
         return pages;
     }
 
-    pagerPage(pageNumber, currentPage) {
+    buildPageItem(pageNumber, currentPage) {
         return {
             key: `p-${pageNumber}`,
             label: String(pageNumber),
@@ -379,7 +379,7 @@ export default class CsvUploader extends LightningElement {
         };
     }
 
-    pagerEllipsis(position, sequence) {
+    buildEllipsisItem(position, sequence) {
         return {
             key: `e-${position}-${sequence}`,
             label: '…',
@@ -429,30 +429,30 @@ export default class CsvUploader extends LightningElement {
         this.fileSize = file.size;
         this.isLoading = true;
         this.progressPhase = 'reading';
-        this._abortRequested = false;
+        this._cancelRequested = false;
 
         const reader = new FileReader();
-        reader.onload = () => this.handleFileRead(reader.result);
+        reader.onload = () => this.parseFileText(reader.result);
         reader.onerror = () => this.handleParseError(reader.error);
         reader.readAsText(file);
     }
 
     handleCancelImport() {
-        this._abortRequested = true;
+        this._cancelRequested = true;
     }
 
-    async handleFileRead(rawText) {
+    async parseFileText(fileText) {
         try {
             this.progressPhase = 'parsing';
-            const text = rawText || '';
+            const text = fileText || '';
 
             const parsed = await parseCsvTextAsync(text, {
                 onProgress: (progress) => this.updateProgress(progress),
-                isAborted: () => this._abortRequested
+                isAborted: () => this._cancelRequested
             });
 
             if (parsed.aborted) {
-                this.handleAbort();
+                this.resetAfterCancel();
                 return;
             }
 
@@ -467,7 +467,7 @@ export default class CsvUploader extends LightningElement {
 
     updateProgress(progress) {
         this.progressPercent = progress.percent;
-        this.progressRows = progress.rowsBuilt;
+        this.progressRowCount = progress.rowsBuilt;
     }
 
     applyParsedData(parsed) {
@@ -480,19 +480,19 @@ export default class CsvUploader extends LightningElement {
         // so a 300k-row file does not pay the cost of building 300k × N cells up front.
         this.columns = columns;
         this.allRows = rawRows;
-        this.totalRows = totalRowCount;
+        this.fileRowCount = totalRowCount;
         this.pageIndex = 1;
-        this.isPreview = totalRowCount > this.previewLimit;
+        this.exceedsPreviewLimit = totalRowCount > this.previewLimit;
 
         this.rebuildDisplayColumns();
         this.dispatchCsvLoaded(columns, rawRows, totalRowCount);
     }
 
-    handleAbort() {
+    resetAfterCancel() {
         this.parseError = 'Import annulé.';
         this.columns = [];
         this.allRows = [];
-        this.totalRows = 0;
+        this.fileRowCount = 0;
     }
 
     handleParseError(error) {
@@ -509,7 +509,7 @@ export default class CsvUploader extends LightningElement {
         this.parseError = errorMessages[code] || 'Unable to read CSV file.';
         this.columns = [];
         this.allRows = [];
-        this.totalRows = 0;
+        this.fileRowCount = 0;
     }
 
     dispatchCsvLoaded(columns, rawRows, totalRowCount) {
@@ -532,14 +532,14 @@ export default class CsvUploader extends LightningElement {
 
     // ─── Row decoration (UI-specific cell metadata) ──────────────────────────
 
-    decorateRow(row, columns, index) {
-        const decoratedValues = columns.map((column, columnIndex) => {
-            return this.decorateCell(column, row.values[columnIndex] || '', index);
+    buildDisplayRow(row, columns, index) {
+        const displayCells = columns.map((column, columnIndex) => {
+            return this.buildDisplayCell(column, row.values[columnIndex] || '', index);
         });
-        return { id: index, values: decoratedValues };
+        return { id: index, values: displayCells };
     }
 
-    decorateCell(columnName, rawValue, rowIndex) {
+    buildDisplayCell(columnName, rawValue, rowIndex) {
         const columnLower = (columnName || '').toLowerCase();
         const isIndustry = columnLower === COLUMN_INDUSTRY;
         const isStatus = columnLower === COLUMN_STATUS;
@@ -560,24 +560,24 @@ export default class CsvUploader extends LightningElement {
 
     // ─── Mapping handoff ─────────────────────────────────────────────────────
 
-    async handleGoForMapping() {
-        if (!this.hasHeaders || this.isHandoffInProgress) {
+    async handleContinueToMapping() {
+        if (!this.hasHeaders || this.isPreparingMapping) {
             return;
         }
 
-        this.isHandoffInProgress = true;
+        this.isPreparingMapping = true;
         this.progressPhase = 'mapping';
         this.progressPercent = 0;
-        this.progressRows = 0;
-        this._abortRequested = false;
+        this.progressRowCount = 0;
+        this._cancelRequested = false;
 
         try {
             const totalRowCount = this.allRows.length;
             const limit = totalRowCount || this.previewLimit;
 
             const result = await rowsToObjectsAsync(this.allRows, this.columns, limit, {
-                onProgress: (progress) => this.updateHandoffProgress(progress),
-                isAborted: () => this._abortRequested
+                onProgress: (progress) => this.updateMappingProgress(progress),
+                isAborted: () => this._cancelRequested
             });
 
             if (result.aborted) {
@@ -588,25 +588,25 @@ export default class CsvUploader extends LightningElement {
             this.persistToSessionStorage(plainRows, totalRowCount);
             this.dispatchGoToMapping(plainRows, totalRowCount);
         } finally {
-            this.isHandoffInProgress = false;
+            this.isPreparingMapping = false;
             this.progressPhase = '';
         }
     }
 
-    updateHandoffProgress(progress) {
+    updateMappingProgress(progress) {
         this.progressPercent = progress.percent;
-        this.progressRows = progress.rowsConverted;
+        this.progressRowCount = progress.rowsConverted;
     }
 
     persistToSessionStorage(plainRows, totalRowCount) {
-        if (totalRowCount > SS_MAX_ROWS_FOR_PERSIST) {
-            console.debug(`[CsvUploader] sessionStorage skipped: ${totalRowCount} rows exceeds ${SS_MAX_ROWS_FOR_PERSIST} threshold`);
+        if (totalRowCount > SESSION_STORAGE_MAX_ROWS) {
+            console.debug(`[CsvUploader] sessionStorage skipped: ${totalRowCount} rows exceeds ${SESSION_STORAGE_MAX_ROWS} threshold`);
             return;
         }
 
         try {
-            window.sessionStorage.setItem(SS_COLS_KEY, this.columns.join(','));
-            window.sessionStorage.setItem(SS_ROWS_KEY, JSON.stringify(plainRows));
+            window.sessionStorage.setItem(SESSION_COLUMNS_KEY, this.columns.join(','));
+            window.sessionStorage.setItem(SESSION_ROWS_KEY, JSON.stringify(plainRows));
         } catch (error) {
             console.debug('[CsvUploader] sessionStorage unavailable', error);
         }
@@ -742,18 +742,17 @@ export default class CsvUploader extends LightningElement {
     }
 
     gotoPage(event) {
-        const raw = event.currentTarget?.dataset?.page;
-        if (!raw) {
+        const pageAttribute = event.currentTarget?.dataset?.page;
+        if (!pageAttribute) {
             return;
         }
 
-        const requested = Number(raw);
-        if (Number.isNaN(requested)) {
+        const requestedPage = Number(pageAttribute);
+        if (Number.isNaN(requestedPage)) {
             return;
         }
 
-        const clamped = Math.min(Math.max(requested, 1), this.totalPages);
-        this.pageIndex = clamped;
+        this.pageIndex = Math.min(Math.max(requestedPage, 1), this.totalPages);
     }
 
     // ─── Row preview / edit ──────────────────────────────────────────────────
@@ -776,7 +775,7 @@ export default class CsvUploader extends LightningElement {
         }
 
         this.currentRowIndex = rowIndex;
-        this.editBuffer = this.buildEditBuffer(rowIndex);
+        this.editedCells = this.buildEditedCells(rowIndex);
         this.showEditor = true;
     }
 
@@ -789,28 +788,27 @@ export default class CsvUploader extends LightningElement {
         const row = this.allRows[rowIndex];
         return this.columns.map((label, columnIndex) => ({
             label,
-            value: this.rawCellAt(row, columnIndex)
+            value: this.getCellText(row, columnIndex)
         }));
     }
 
-    buildEditBuffer(rowIndex) {
+    buildEditedCells(rowIndex) {
         const row = this.allRows[rowIndex];
         return this.columns.map((label, columnIndex) => ({
             label,
-            value: this.rawCellAt(row, columnIndex),
-            idx: columnIndex
+            value: this.getCellText(row, columnIndex)
         }));
     }
 
-    editInputChanged(event) {
-        const position = Number(event.currentTarget?.dataset?.pos);
-        if (Number.isNaN(position)) {
+    handleEditInputChange(event) {
+        const cellIndex = Number(event.currentTarget?.dataset?.cellIndex);
+        if (Number.isNaN(cellIndex)) {
             return;
         }
 
         const newValue = event.target.value;
-        this.editBuffer = this.editBuffer.map((cell, index) => {
-            if (index !== position) {
+        this.editedCells = this.editedCells.map((cell, index) => {
+            if (index !== cellIndex) {
                 return cell;
             }
             return { ...cell, value: newValue };
@@ -826,16 +824,16 @@ export default class CsvUploader extends LightningElement {
         // plain string at the same column index.
         const row = this.allRows[this.currentRowIndex];
         const updatedValues = row.values.map((cell, columnIndex) => {
-            const next = this.editBuffer[columnIndex]?.value;
-            if (next === undefined) {
+            const editedValue = this.editedCells[columnIndex]?.value;
+            if (editedValue === undefined) {
                 return cell;
             }
-            return next;
+            return editedValue;
         });
 
-        const before = this.allRows.slice(0, this.currentRowIndex);
-        const after = this.allRows.slice(this.currentRowIndex + 1);
-        this.allRows = [...before, { ...row, values: updatedValues }, ...after];
+        const rowsBefore = this.allRows.slice(0, this.currentRowIndex);
+        const rowsAfter = this.allRows.slice(this.currentRowIndex + 1);
+        this.allRows = [...rowsBefore, { ...row, values: updatedValues }, ...rowsAfter];
 
         this.showEditor = false;
     }
@@ -864,20 +862,20 @@ export default class CsvUploader extends LightningElement {
             window.clearTimeout(this._searchDebounceTimer);
             this._searchDebounceTimer = null;
         }
-        this._abortRequested = true;
+        this._cancelRequested = true;
     }
 
     resetState() {
         this.columns = [];
         this._displayColumns = [];
         this.allRows = [];
-        this.totalRows = 0;
+        this.fileRowCount = 0;
 
-        this.isPreview = false;
+        this.exceedsPreviewLimit = false;
         this.isLoading = false;
         this.parseError = '';
         this.progressPercent = 0;
-        this.progressRows = 0;
+        this.progressRowCount = 0;
         this.progressPhase = '';
 
         this.searchTerm = '';
@@ -891,6 +889,6 @@ export default class CsvUploader extends LightningElement {
         this.showEditor = false;
         this.currentRowIndex = -1;
         this.previewCells = [];
-        this.editBuffer = [];
+        this.editedCells = [];
     }
 }
