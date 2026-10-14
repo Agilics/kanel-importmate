@@ -137,7 +137,9 @@ private class ImportDmlBatchTest {
 
     @isTest
     static void testInvalidJsonCreatesLogs() {
-        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
+        // Projet frais : le projet du @testSetup possède déjà une exécution
+        // InProgress (règle d'unicité : une seule active par projet).
+        ImportProject__c project = TestDataFactory.createImportProject('Account');
 
         ImportExecution__c execution = new ImportExecution__c(
             Project__c = project.Id,
@@ -187,7 +189,9 @@ private class ImportDmlBatchTest {
 
     @isTest
     static void testEmptyScopeCompletesCleanly() {
-        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
+        // Projet frais : le projet du @testSetup possède déjà une exécution
+        // InProgress (règle d'unicité : une seule active par projet).
+        ImportProject__c project = TestDataFactory.createImportProject('Account');
 
         ImportExecution__c execution = new ImportExecution__c(
             Project__c = project.Id,

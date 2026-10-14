@@ -69,6 +69,14 @@ export default class ProjectFormComponent extends LightningElement {
       });
   }
 
+  get targetObjectOptionsWithSelected() {
+    return (this.options || []).map(o => ({ ...o, isSelected: o.value === this.targetObject }));
+  }
+
+  get isNoTargetSelected() {
+    return !this.targetObject;
+  }
+
   //Vérifie si le champs d'objet ciblé est selectionnée
   @api
   get isTargetObjetSelected() {
@@ -78,6 +86,7 @@ export default class ProjectFormComponent extends LightningElement {
   //Dispatching vers le composant principal MainComopnent
   //Evénement portant sur la mise à jour du nom du projet
   handleProjectNameChange(event) {
+    this.projectName = event.target.value;
     this.dispatchEvent(
       new CustomEvent("projectnamechange", { detail: event.target.value })
     );
@@ -86,6 +95,7 @@ export default class ProjectFormComponent extends LightningElement {
   //Dispatching vers le composant principal MainComopnent
   //  le événement portant sur la mise à jour de l'attribut description
   handleDescriptionChange(event) {
+    this.description = event.target.value;
     this.dispatchEvent(
       new CustomEvent("descriptionchange", { detail: event.target.value })
     );
@@ -94,6 +104,7 @@ export default class ProjectFormComponent extends LightningElement {
   //Dispatching vers le composant parent MainComponent
   //  de l'événement portant sur la mise à jour de l'attribut target object
   handleTargetObjectChange(event) {
+    this.targetObject = event.target.value;
     this.dispatchEvent(
       new CustomEvent("targetobjectchange", { detail: event.target.value })
     );
@@ -116,7 +127,17 @@ export default class ProjectFormComponent extends LightningElement {
   // réintialisation des valeurs de tous les champs  de textes | combo box
   @api
   resetFields() {
-    // reset valeurs UI
+    // Réinitialiser les propriétés (source de vérité côté enfant)
+    this.projectName = "";
+    this.description = "";
+    this.targetObject = "";
+
+    // Réinitialiser les champs visuels (classe CSS correcte)
+    this.template.querySelectorAll(".form-input").forEach((input) => {
+      input.value = "";
+    });
+
+    // Réinitialiser aussi l'ancien sélecteur pour compatibilité
     this.template.querySelectorAll(".rounded-input").forEach((input) => {
       input.value = "";
     });

@@ -4,28 +4,13 @@
     <div class="footer-actions">
       <!-- Cancel Button -->
       <button type="button" class="btn btn-secondary" onclick={handleCancel}>
-        <lightning-icon
-          icon-name="utility:back"
-          alternative-text="Cancel"
-          size="x-small"
-          title="Cancel"
-        ></lightning-icon>
+        <span class="btn-icon">←</span>
         <span>{label.cancelButtonLabel}</span>
       </button>
 
       <!-- Save & Continue Button -->
-      <button
-        type="button"
-        class="btn btn-primary"
-        onclick={handleCreateProject}
-      >
-        <lightning-icon
-          class="icon-inline custom-icon-output"
-          icon-name="standard:output"
-          alternative-text="Save & Continue"
-          size="small"
-          title="Save & Continue"
-        ></lightning-icon>
+      <button type="button" class="btn btn-primary" onclick={handleCreateProject}>
+        <span class="btn-icon">→</span>
         <span>{label.saveButtonLabel}</span>
       </button>
     </div>

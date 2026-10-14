@@ -194,6 +194,22 @@ export default class TransformationSaveModal extends LightningModal {
         return this.preSelectedColumns.length;
     }
 
+    get ruleTypeOptionsWithSelected() {
+        return this.ruleTypeOptions.map(o => ({ ...o, isSelected: o.value === this.ruleType }));
+    }
+
+    get separatorOptionsWithSelected() {
+        return this.separatorOptions.map(o => ({ ...o, isSelected: o.value === this.separator }));
+    }
+
+    get targetFieldOptionsWithSelected() {
+        return this.targetFieldOptions.map(o => ({ ...o, isSelected: this.preSelectedColumns.includes(o.value) }));
+    }
+
+    get booleanDisplayLabel() {
+        return this.booleanValue ? this.labels.yes : this.labels.no;
+    }
+
     // ===== Wire: charger règle existante =====
     @wire(getRuleById, { ruleId: '$existingRuleId' })
     wiredExistingRuleById(result) {
@@ -278,14 +294,14 @@ export default class TransformationSaveModal extends LightningModal {
     }
 
     handleTargetFieldsChange(event) {
-        this.selectedColumns = event.detail.value;
+        this.selectedColumns = Array.from(event.target.selectedOptions).map(o => o.value);
         this.fields = this.selectedColumns
             .map(id => this.mappingIdToFieldMap.get(id) || null)
             .filter(Boolean);
     }
 
     handleRuleTypeChange(event) {
-        this.ruleType = event.detail.value;
+        this.ruleType = event.target.value ?? event.detail?.value ?? '';
         const val = this.ruleType.replaceAll(' ', '');
         if (val === 'BooleanTransformation' || val.includes('Boolean')) {
             this.isBooleanTransformation = true;
@@ -295,7 +311,7 @@ export default class TransformationSaveModal extends LightningModal {
         }
     }
 
-    handleSeparatorChange(event) { this.separator = event.detail.value; }
+    handleSeparatorChange(event) { this.separator = event.target.value ?? event.detail?.value ?? ''; }
     handleTargetValueChange(event) { this.targetValue = event.detail.value; }
     handleDomainChange(event) { this.domain = event.detail.value; }
     handleBooleanValueChange(event) { this.booleanValue = event.target.checked; }
@@ -326,19 +342,7 @@ export default class TransformationSaveModal extends LightningModal {
         this.phone = '';
         this._mapping = { sourceColumn: '', targetField: '' };
 
-        const inputFields = [
-            ...this.template.querySelectorAll('lightning-input'),
-            ...this.template.querySelectorAll('lightning-combobox'),
-            ...this.template.querySelectorAll('lightning-dual-listbox')
-        ];
-
-        inputFields.forEach(field => {
-            if (field.reportValidity) {
-                field.value = field.tagName === 'LIGHTNING-DUAL-LISTBOX' ? [] : undefined;
-                field.setCustomValidity('');
-                field.reportValidity();
-            }
-        });
+        // Native elements re-render reactively from reset state — no DOM manipulation needed
     }
 
     // ===== Validation =====

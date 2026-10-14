@@ -1,9 +1,6 @@
-<!--
-   @description : DryRunValidator - HTML template with Custom Labels integration
-   @update      : NDEYE KHADY NIANG
--->
 <template>
   <div class="validation-container">
+
     <!-- Header -->
     <div class="page-header">
       <div class="header-content">
@@ -14,21 +11,14 @@
             <h1 class="header-title">{labels.title}</h1>
             <template if:true={validationExecuted}>
               <template if:true={hasErrors}>
-                <span class="error-status-badge">
-                  <lightning-icon icon-name="utility:error" size="xx-small"></lightning-icon>
-                  {labels.statusWithErrors}
-                </span>
+                <span class="error-status-badge">✕ {labels.statusWithErrors}</span>
               </template>
               <template if:false={hasErrors}>
-                <span class="error-status-badge success-badge">
-                  <lightning-icon icon-name="utility:success" size="xx-small"></lightning-icon>
-                  {labels.statusSuccess}
-                </span>
+                <span class="error-status-badge success-badge">✓ {labels.statusSuccess}</span>
               </template>
             </template>
           </div>
           <p class="header-subtitle">{labels.subtitle}</p>
-
           <span class="badge primary-badge">{projectName}</span>
           <template if:true={precheck.totalRows}>
             <p class="precheck-line">
@@ -39,276 +29,97 @@
           </template>
         </div>
 
-        <!-- Right: actions row (all inline) -->
+        <!-- Right: actions row -->
         <div class="header-actions-row">
-          <lightning-button
-            label={labels.btnSettings}
-            onclick={openSettings}
-            disabled={isLoading}
-            variant="neutral"
-            icon-name="utility:settings"
-            icon-position="left">
-          </lightning-button>
+          <button type="button" class="btn btn-icon btn-sm" onclick={openSettings} disabled={isLoading} title={labels.btnSettings}>⚙</button>
 
-          <!-- Insert valid / rollback failed toggle (inline with buttons) -->
-          <div class="keep-valid-rows-toggle">
-            <input
-              type="checkbox"
-              id="keepValidRowsCheck"
-              checked={settings.keepValidRows}
-              onchange={handleKeepValidRowsChange}
-              disabled={isLoading} />
-            <label for="keepValidRowsCheck">{labels.settingsKeepValidRows}</label>
-            <span class="rollback-hint">
-              <lightning-icon
-                icon-name="utility:info"
-                size="xx-small"
-                title="Checked → valid rows are inserted, only failed rows are rolled back. Unchecked → all rows are rolled back (safe dry-run).">
-              </lightning-icon>
-            </span>
-          </div>
+          <label class="keep-valid-rows-toggle">
+            <input type="checkbox" checked={settings.keepValidRows} onchange={handleKeepValidRowsChange} disabled={isLoading} />
+            <span>{labels.settingsKeepValidRows}</span>
+          </label>
 
-          <lightning-button
-            label={labels.btnRun}
-            onclick={runDryRun}
-            disabled={isDryRunDisabled}
-            variant="brand"
-            icon-name="utility:play"
-            icon-position="left">
-          </lightning-button>
-
-          <lightning-button
-            label={labels.btnExport}
-            onclick={exportErrors}
-            disabled={isExportDisabled}
-            variant="neutral"
-            icon-name="utility:download"
-            icon-position="left">
-          </lightning-button>
+          <button type="button" class="btn btn-primary" onclick={runDryRun} disabled={isDryRunDisabled}>▶ {labels.btnRun}</button>
+          <button type="button" class="btn btn-outline btn-sm" onclick={exportErrors} disabled={isExportDisabled}>📤 {labels.btnExport}</button>
         </div>
       </div>
     </div>
 
-    <!-- Settings Modal -->
-    <template if:true={isSettingsOpen}>
-      <section role="dialog" tabindex="-1" class="slds-modal slds-fade-in-open">
-        <div class="slds-modal__container">
-          <header class="slds-modal__header">
-            <h2 class="slds-text-heading_medium">{labels.settingsTitle}</h2>
-          </header>
+    <!-- KPI cards -->
+    <div class="statistics-grid">
+      <div class="stat-card stat-success">
+        <div class="kpi-icon">✅</div>
+        <div class="stat-number">{validCount}</div>
+        <div class="stat-label">{labels.progressValidated}</div>
+        <div class="kpi-pct stat-pct-success">{validPercentage}%</div>
+      </div>
+      <div class="stat-card stat-processing">
+        <div class="kpi-icon">◎</div>
+        <div class="stat-number">{processingCount}</div>
+        <div class="stat-label">{processingLabel}</div>
+        <div class="kpi-pct stat-pct-processing">{processingPercentage}%</div>
+      </div>
+      <div class="stat-card stat-error">
+        <div class="kpi-icon">✕</div>
+        <div class="stat-number">{failedCount}</div>
+        <div class="stat-label">{labels.progressFailedStat}</div>
+        <div class="kpi-pct stat-pct-error">{failedPercentage}%</div>
+      </div>
+      <div class="stat-card stat-remaining">
+        <div class="kpi-icon">─</div>
+        <div class="stat-number">{remainingCount}</div>
+        <div class="stat-label">{remainingLabel}</div>
+        <div class="kpi-pct stat-pct-muted">{remainingPercentage}%</div>
+      </div>
+    </div>
 
-          <div class="slds-modal__content slds-p-around_medium settings-body">
-            <div class="settings-grid">
-
-              <!-- Mode -->
-              <div class="settings-card">
-                <div class="settings-title">{labels.settingsMode}</div>
-                <lightning-combobox
-                  name="mode"
-                  label={labels.settingsModeLabel}
-                  value={settings.mode}
-                  options={modeOptions}
-                  onchange={handleSettingChange}>
-                </lightning-combobox>
-
-                <template if:true={isPartialOrSample}>
-                  <div class="range-inputs">
-                    <lightning-input
-                      name="fromLine"
-                      type="number"
-                      label="From line"
-                      min="1"
-                      value={settings.fromLine}
-                      onchange={handleSettingChange}
-                      disabled={isLoading}
-                      class="range-input">
-                    </lightning-input>
-                    <lightning-input
-                      name="toLine"
-                      type="number"
-                      label="To line"
-                      min="1"
-                      value={settings.toLine}
-                      onchange={handleSettingChange}
-                      disabled={isLoading}
-                      class="range-input">
-                    </lightning-input>
-                  </div>
-                  <div class="settings-help">
-                    Validate only the rows between "From line" and "To line" (inclusive). Line 1 = first data row after the header.
-                  </div>
-                </template>
-
-                <template if:false={isPartialOrSample}>
-                  <div class="settings-help">{labels.settingsSampleHelp}</div>
-                </template>
-              </div>
-
-              <!-- Performance -->
-              <div class="settings-card">
-                <div class="settings-title">{labels.settingsPerformance}</div>
-                <lightning-input
-                  name="asyncThreshold"
-                  type="number"
-                  label={labels.settingsAsync}
-                  value={settings.asyncThreshold}
-                  onchange={handleSettingChange}>
-                </lightning-input>
-
-                <lightning-combobox
-                  name="pageSize"
-                  label={labels.settingsPageSize}
-                  value={settings.pageSize}
-                  options={pageSizeOptions}
-                  onchange={handleSettingChange}>
-                </lightning-combobox>
-
-                <div class="settings-help">{labels.settingsPerfHelp}</div>
-              </div>
-
-              <!-- Behavior -->
-              <div class="settings-card">
-                <div class="settings-title">{labels.settingsBehavior}</div>
-
-                <lightning-input
-                  name="includeWarnings"
-                  type="checkbox"
-                  label={labels.settingsWarnings}
-                  checked={settings.includeWarnings}
-                  onchange={handleSettingChange}>
-                </lightning-input>
-
-                <lightning-input
-                  name="stopOnFirstErrorClientSide"
-                  type="checkbox"
-                  label={labels.settingsStop}
-                  checked={settings.stopOnFirstErrorClientSide}
-                  onchange={handleSettingChange}>
-                </lightning-input>
-
-                <lightning-combobox
-                  name="defaultTab"
-                  label={labels.settingsDefaultTab}
-                  value={settings.defaultTab}
-                  options={tabOptions}
-                  onchange={handleSettingChange}>
-                </lightning-combobox>
-
-                <div class="settings-help">{labels.settingsBehaviorHelp}</div>
-              </div>
-            </div>
-          </div>
-
-          <footer class="slds-modal__footer">
-            <lightning-button label={labels.btnClose} variant="neutral" onclick={closeSettings}></lightning-button>
-          </footer>
-        </div>
-      </section>
-      <div class="slds-backdrop slds-backdrop_open"></div>
-    </template>
-
-    <!-- Progress -->
+    <!-- Progress bar + status -->
     <template if:true={importStatus}>
       <div class="validation-progress-section">
         <div class="progress-header">
           <div class="progress-header-left">
-            <h2 class="progress-title">{labels.progressTitle}</h2>
-
             <template if:true={isImportInProgress}>
-              <span class="status-badge in-progress">
-                <span class="status-dot"></span>
-                {labels.progressInProgress}
-              </span>
+              <span class="status-badge in-progress"><span class="status-dot"></span>{labels.progressInProgress}</span>
             </template>
             <template if:true={isImportCompleted}>
-              <span class="status-badge completed">
-                <span class="status-dot"></span>
-                {labels.progressCompleted}
-              </span>
+              <span class="status-badge completed"><span class="status-dot"></span>{labels.progressCompleted}</span>
             </template>
             <template if:true={isImportFailed}>
-              <span class="status-badge failed">
-                <span class="status-dot"></span>
-                {labels.progressFailed}
-              </span>
+              <span class="status-badge failed"><span class="status-dot"></span>{labels.progressFailed}</span>
             </template>
             <template if:true={isImportCancelled}>
-              <span class="status-badge failed">
-                <span class="status-dot"></span>
-                {labels.progressCancelled}
-              </span>
+              <span class="status-badge failed"><span class="status-dot"></span>{labels.progressCancelled}</span>
             </template>
           </div>
-
           <div class="progress-header-right">
             <template if:true={isImportInProgress}>
-              <lightning-button
-                label={labels.btnCancel}
-                variant="destructive-text"
-                icon-name="utility:close"
-                icon-position="left"
-                onclick={handleCancelValidation}>
-              </lightning-button>
+              <button type="button" class="btn btn-ghost btn-sm" onclick={handleCancelValidation}>✕ {labels.btnCancel}</button>
             </template>
             <template if:true={canRetryValidation}>
-              <lightning-button
-                label={labels.btnRetry}
-                variant="brand-outline"
-                icon-name="utility:refresh"
-                icon-position="left"
-                onclick={handleRetryValidation}>
-              </lightning-button>
+              <button type="button" class="btn btn-outline btn-sm" onclick={handleRetryValidation}>↺ {labels.btnRetry}</button>
             </template>
           </div>
         </div>
 
-        <div class="progress-content">
-          <div class="progress-bar-container">
-            <div class="progress-info">
-              <span class="progress-numbers">
-                {processedCount} of {totalRecordsToProcess} records ({importProgressPercentage}%)
-              </span>
-            </div>
-            <lightning-progress-bar value={importProgressPercentage} variant={progressBarVariant} size="large"></lightning-progress-bar>
-          </div>
-
-          <div class="statistics-grid">
-            <div class="stat-card stat-success">
-              <div class="stat-number">{validCount}</div>
-              <div class="stat-label">{labels.progressValidated}</div>
-              <div class="stat-percentage">{validPercentage}%</div>
-            </div>
-            <div class="stat-card stat-processing">
-              <div class="stat-number">{processingCount}</div>
-              <div class="stat-label">{processingLabel}</div>
-              <div class="stat-percentage">{processingPercentage}%</div>
-            </div>
-            <div class="stat-card stat-error">
-              <div class="stat-number">{failedCount}</div>
-              <div class="stat-label">{labels.progressFailedStat}</div>
-              <div class="stat-percentage">{failedPercentage}%</div>
-            </div>
-            <div class="stat-card stat-remaining">
-              <div class="stat-number">{remainingCount}</div>
-              <div class="stat-label">{remainingLabel}</div>
-              <div class="stat-percentage">{remainingPercentage}%</div>
-            </div>
-          </div>
-
-          <template if:true={importMessage}>
-            <div class="message-box">
-              <lightning-icon icon-name="utility:info" size="x-small"></lightning-icon>
-              <span>{importMessage}</span>
-            </div>
-          </template>
-
-          <template if:true={currentExecutionId}>
-            <div class="execution-id">
-              <span>{labels.progressExecutionId}</span>
-              <code>{currentExecutionId}</code>
-            </div>
-          </template>
+        <div class="prog-meta">
+          <span class="prog-meta-label">{processedCount} / {totalRecordsToProcess} lignes ({importProgressPercentage}%)</span>
+          <span class="prog-meta-right">{importStatus}</span>
         </div>
+        <div class="prog-bar">
+          <div class="prog-fill" style={progressFillStyle}></div>
+        </div>
+
+        <template if:true={importMessage}>
+          <div class="message-box">
+            <span>ℹ</span>
+            <span>{importMessage}</span>
+          </div>
+        </template>
+        <template if:true={currentExecutionId}>
+          <div class="execution-id">
+            <span>{labels.progressExecutionId}</span>
+            <code>{currentExecutionId}</code>
+          </div>
+        </template>
       </div>
     </template>
 
@@ -320,129 +131,91 @@
             <h2 class="results-title">{labels.reportTitle}</h2>
 
             <div class="error-filters">
+              <!-- Tab strip -->
               <div class="error-tabs">
-                <button class={errorsTabClass} data-tab="errors" onclick={handleTabClick}>
-                  <span class="error-tab-badge">{labels.tabErrors} ({errorsCount})</span>
+                <button type="button" class={errorsTabClass} data-tab="errors" onclick={handleTabClick}>
+                  {labels.tabErrors}
+                  <span class="error-tab-badge">{errorsCount}</span>
                 </button>
-                <button class={warningsTabClass} data-tab="warnings" onclick={handleTabClick}>
-                  <span class="error-tab-badge">{labels.tabWarnings} ({warningsCount})</span>
+                <button type="button" class={warningsTabClass} data-tab="warnings" onclick={handleTabClick}>
+                  {labels.tabWarnings}
+                  <span class="error-tab-badge">{warningsCount}</span>
                 </button>
-                <button class={allTabClass} data-tab="all" onclick={handleTabClick}>
-                  {labels.tabAll} ({issuesCount})
+                <button type="button" class={allTabClass} data-tab="all" onclick={handleTabClick}>
+                  {labels.tabAll}
+                  <span class="error-tab-badge">{issuesCount}</span>
                 </button>
               </div>
 
               <div class="filter-controls">
                 <div class="search-container">
-                  <lightning-input
-                    type="search"
-                    placeholder={labels.searchPlaceholder}
-                    value={searchTerm}
-                    onchange={handleSearchChange}
-                    variant="label-hidden">
-                  </lightning-input>
+                  <div class="search-sm">
+                    <span>🔍</span>
+                    <input type="search" placeholder={labels.searchPlaceholder}
+                      value={searchTerm} onchange={handleSearchChange} />
+                  </div>
                 </div>
 
-                <lightning-combobox
-                  name="typeFilter"
-                  label="Filter"
-                  value={selectedErrorType}
-                  placeholder={labels.filterAllTypes}
-                  options={errorTypeOptions}
-                  onchange={handleFilterChange}
-                  variant="label-hidden">
-                </lightning-combobox>
+                <select class="type-select" onchange={handleFilterChange}>
+                  <template for:each={errorTypeOptionsWithSelected} for:item="o">
+                    <option key={o.value} value={o.value} selected={o.isSelected}>{o.label}</option>
+                  </template>
+                </select>
               </div>
             </div>
 
-            <div class="slds-m-bottom_medium">
-              <div class="slds-text-body_regular">
-                <strong>Total Issues Found: {displayedIssuesCount}</strong>
-                <template if:true={hasPartialIssuesLoaded}>
-                  <span class="slds-m-left_small">(showing partial results from {issuesCount} total)</span>
-                </template>
-                <template if:true={searchTerm}>
-                  <span class="slds-m-left_small">(Filtered)</span>
-                </template>
-              </div>
+            <div class="issues-summary">
+              <strong>Total Issues Found: {displayedIssuesCount}</strong>
+              <template if:true={hasPartialIssuesLoaded}>
+                <span class="issues-summary-note">(showing partial results from {issuesCount} total)</span>
+              </template>
+              <template if:true={searchTerm}>
+                <span class="issues-summary-note">(Filtered)</span>
+              </template>
             </div>
 
-            <!-- Table -->
-            <div class="slds-scrollable_x">
-              <table class="slds-table slds-table_cell-buffer slds-table_bordered slds-table_striped">
+            <!-- Aurora error table -->
+            <div class="aurora-table-wrap">
+              <table class="aurora-table">
                 <thead>
-                  <tr class="slds-line-height_reset">
-                    <th class="slds-text-title_caps" scope="col">
-                      <div class="slds-truncate">
-                        <lightning-input type="checkbox" onchange={handleSelectAll}></lightning-input>
-                      </div>
-                    </th>
-                    <th class="slds-text-title_caps" scope="col">
-                      <div class="slds-truncate">{labels.colLevel}</div>
-                    </th>
-                    <th class="slds-text-title_caps" scope="col">
-                      <div class="slds-truncate">{labels.colRow}</div>
-                    </th>
-                    <th class="slds-text-title_caps" scope="col">
-                      <div class="slds-truncate">{labels.colField}</div>
-                    </th>
-                    <th class="slds-text-title_caps" scope="col">
-                      <div class="slds-truncate">{labels.colType}</div>
-                    </th>
-                    <th class="slds-text-title_caps" scope="col">
-                      <div class="slds-truncate">{labels.colMessage}</div>
-                    </th>
-                    <th class="slds-text-title_caps" scope="col">
-                      <div class="slds-truncate">{labels.colActions}</div>
-                    </th>
+                  <tr>
+                    <th><input type="checkbox" onchange={handleSelectAll} /></th>
+                    <th>{labels.colLevel}</th>
+                    <th>{labels.colRow}</th>
+                    <th>{labels.colField}</th>
+                    <th>{labels.colType}</th>
+                    <th>{labels.colMessage}</th>
+                    <th>{labels.colActions}</th>
                   </tr>
                 </thead>
 
                 <tbody>
                   <template for:each={paginatedIssues} for:item="issue">
-                    <tr key={issue.id} class="slds-hint-parent">
-                      <td data-label="Select">
-                        <lightning-input
-                          type="checkbox"
+                    <tr key={issue.id}>
+                      <td>
+                        <input type="checkbox"
                           data-error-id={issue.id}
                           onchange={handleErrorSelect}
-                          checked={issue.isSelected}>
-                        </lightning-input>
+                          checked={issue.isSelected} />
                       </td>
-                      <td data-label="LEVEL">
+                      <td>
                         <span class={issue.levelClass}>{issue.issueLevel}</span>
                       </td>
-                      <td data-label="ROW">
-                        <div class="slds-truncate" title={issue.lineNumber}>
-                          <template if:true={issue.lineNumber}>Row {issue.lineNumber}</template>
-                          <template if:false={issue.lineNumber}>—</template>
-                        </div>
+                      <td>
+                        <template if:true={issue.lineNumber}>
+                          <span class="row-link">Row {issue.lineNumber}</span>
+                        </template>
+                        <template if:false={issue.lineNumber}>—</template>
                       </td>
-                      <td data-label="FIELD">
-                        <div class="slds-truncate" title={issue.fieldApiName}>{issue.fieldApiName}</div>
-                      </td>
-                      <td data-label="TYPE">
+                      <td class="field-cell">{issue.fieldApiName}</td>
+                      <td>
                         <span class="error-type-badge" data-error-type={issue.errorType}>{issue.errorType}</span>
                       </td>
-                      <td data-label="MESSAGE">
-                        <div class="slds-truncate" title={issue.errorMessage}>{issue.errorMessage}</div>
-                      </td>
-                      <td data-label="ACTIONS">
-                        <div class="slds-button-group">
-                          <lightning-button-icon
-                            icon-name="utility:edit"
-                            size="small"
-                            onclick={handleEditError}
-                            data-error-id={issue.id}
-                            title="Edit">
-                          </lightning-button-icon>
-                          <lightning-button-icon
-                            icon-name="utility:delete"
-                            size="small"
-                            onclick={handleDeleteError}
-                            data-error-id={issue.id}
-                            title="Delete">
-                          </lightning-button-icon>
+                      <td class="msg-cell">{issue.errorMessage}</td>
+                      <td>
+                        <div class="table-actions">
+                          <button type="button" class="btn-tbl-action" onclick={handleEditError} data-error-id={issue.id} title="Edit">✎</button>
+                          <button type="button" class="btn-tbl-action del" onclick={handleDeleteError} data-error-id={issue.id} title="Delete">✕</button>
                         </div>
                       </td>
                     </tr>
@@ -450,9 +223,7 @@
 
                   <template if:true={hasNoIssuesToDisplay}>
                     <tr>
-                      <td colspan="7" class="slds-text-align_center slds-p-vertical_medium">
-                        <div class="slds-text-body_regular">{labels.noIssues}</div>
-                      </td>
+                      <td colspan="7" class="table-empty-cell">{labels.noIssues}</td>
                     </tr>
                   </template>
                 </tbody>
@@ -461,26 +232,16 @@
 
             <!-- Pagination -->
             <template if:true={hasMultiplePages}>
-              <div class="slds-grid slds-grid_align-spread slds-m-top_medium">
-                <div class="slds-col">
-                  <p class="slds-text-body_small">
-                    {labels.paginationShowing} {startRecord} {labels.paginationTo} {endRecord} {labels.paginationOf} {filteredIssues.length} {labels.paginationIssues}
-                  </p>
-                </div>
-                <div class="slds-col">
-                  <div class="slds-button-group" role="group">
-                    <lightning-button label={labels.paginationPrevious} onclick={handlePreviousPage} disabled={isFirstPage} variant="neutral"></lightning-button>
-                    <template for:each={pageButtons} for:item="p">
-                      <lightning-button
-                        key={p.number}
-                        label={p.number}
-                        onclick={handlePageChange}
-                        data-page={p.number}
-                        variant={p.variant}>
-                      </lightning-button>
-                    </template>
-                    <lightning-button label={labels.paginationNext} onclick={handleNextPage} disabled={isLastPage} variant="neutral"></lightning-button>
-                  </div>
+              <div class="aurora-pagination">
+                <p class="pagination-info">
+                  {labels.paginationShowing} {startRecord} {labels.paginationTo} {endRecord} {labels.paginationOf} {filteredIssues.length} {labels.paginationIssues}
+                </p>
+                <div class="pagination-btns">
+                  <button type="button" class="pg-btn" onclick={handlePreviousPage} disabled={isFirstPage}>← {labels.paginationPrevious}</button>
+                  <template for:each={pageButtons} for:item="p">
+                    <button key={p.number} type="button" class={p.btnClass} data-page={p.number} onclick={handlePageChange}>{p.number}</button>
+                  </template>
+                  <button type="button" class="pg-btn" onclick={handleNextPage} disabled={isLastPage}>{labels.paginationNext} →</button>
                 </div>
               </div>
             </template>
@@ -489,13 +250,10 @@
 
         <!-- No issues -->
         <template if:false={hasIssues}>
-          <div class="slds-card slds-m-top_medium">
-            <div class="slds-card__body slds-card__body_inner">
-              <div class="slds-notify slds-notify_alert slds-theme_success" role="alert">
-                <span class="slds-assistive-text">Success</span>
-                <lightning-icon icon-name="utility:success" size="small" class="slds-m-right_x-small"></lightning-icon>
-                <h2>{labels.noErrors}</h2>
-              </div>
+          <div class="no-issues-card">
+            <div class="no-issues-inner">
+              <span class="no-issues-icon">✓</span>
+              <h2 class="no-issues-text">{labels.noErrors}</h2>
             </div>
           </div>
         </template>
@@ -504,42 +262,107 @@
 
     <!-- Spinner -->
     <template if:true={isLoading}>
-      <div class="slds-is-relative slds-m-top_medium">
-        <lightning-spinner alternative-text="Validation in progress..." size="medium"></lightning-spinner>
+      <div class="spinner-wrap">
+        <div class="drv-spinner"></div>
       </div>
     </template>
 
     <!-- Navigation -->
     <div class="action-buttons-section">
       <div class="action-buttons-content">
-        <lightning-button
-          label={labels.btnBack}
-          onclick={handlePreviousStep}
-          disabled={isLoading}
-          variant="neutral"
-          icon-name="utility:left"
-          icon-position="left">
-        </lightning-button>
-
+        <button type="button" class="btn btn-outline" onclick={handlePreviousStep} disabled={isLoading}>← {labels.btnBack}</button>
         <div class="action-buttons-right">
-          <lightning-button
-            label={labels.btnSkip}
-            onclick={handleSkipErrors}
-            disabled={isLoading}
-            variant="neutral"
-            class="slds-m-right_x-small">
-          </lightning-button>
-
-          <lightning-button
-            label={labels.btnProceed}
-            onclick={handleNextStep}
-            disabled={isProceedDisabled}
-            variant="brand"
-            icon-name="utility:right"
-            icon-position="right">
-          </lightning-button>
+          <button type="button" class="btn btn-ghost" onclick={handleSkipErrors} disabled={isLoading}>{labels.btnSkip}</button>
+          <button type="button" class="btn btn-primary" onclick={handleNextStep} disabled={isProceedDisabled}>{labels.btnProceed} →</button>
         </div>
       </div>
     </div>
   </div>
+
+  <!-- Settings Modal -->
+  <template if:true={isSettingsOpen}>
+    <section class="drv-modal-backdrop" role="presentation">
+      <div class="drv-modal" role="dialog" aria-modal="true" aria-label={labels.settingsTitle}>
+        <header class="drv-modal__header">
+          <h2>{labels.settingsTitle}</h2>
+        </header>
+        <div class="drv-modal__body settings-body">
+          <div class="settings-grid">
+
+            <!-- Mode -->
+            <div class="settings-card">
+              <div class="settings-title">{labels.settingsMode}</div>
+              <label class="settings-label">{labels.settingsModeLabel}</label>
+              <select class="settings-select" name="mode" onchange={handleSettingChange}>
+                <template for:each={modeOptionsWithSelected} for:item="o">
+                  <option key={o.value} value={o.value} selected={o.isSelected}>{o.label}</option>
+                </template>
+              </select>
+
+              <template if:true={isPartialOrSample}>
+                <div class="range-inputs">
+                  <div class="range-input">
+                    <label class="settings-label">From line</label>
+                    <input type="number" class="settings-input" name="fromLine" min="1"
+                      value={settings.fromLine} onchange={handleSettingChange} disabled={isLoading} />
+                  </div>
+                  <div class="range-input">
+                    <label class="settings-label">To line</label>
+                    <input type="number" class="settings-input" name="toLine" min="1"
+                      value={settings.toLine} onchange={handleSettingChange} disabled={isLoading} />
+                  </div>
+                </div>
+                <div class="settings-help">
+                  Validate only the rows between "From line" and "To line" (inclusive). Line 1 = first data row after the header.
+                </div>
+              </template>
+              <template if:false={isPartialOrSample}>
+                <div class="settings-help">{labels.settingsSampleHelp}</div>
+              </template>
+            </div>
+
+            <!-- Performance -->
+            <div class="settings-card">
+              <div class="settings-title">{labels.settingsPerformance}</div>
+              <label class="settings-label">{labels.settingsAsync}</label>
+              <input type="number" class="settings-input" name="asyncThreshold"
+                value={settings.asyncThreshold} onchange={handleSettingChange} />
+              <label class="settings-label" style="margin-top:10px">{labels.settingsPageSize}</label>
+              <select class="settings-select" name="pageSize" onchange={handleSettingChange}>
+                <template for:each={pageSizeOptionsWithSelected} for:item="o">
+                  <option key={o.value} value={o.value} selected={o.isSelected}>{o.label}</option>
+                </template>
+              </select>
+              <div class="settings-help">{labels.settingsPerfHelp}</div>
+            </div>
+
+            <!-- Behavior -->
+            <div class="settings-card">
+              <div class="settings-title">{labels.settingsBehavior}</div>
+              <label class="settings-check-label">
+                <input type="checkbox" name="includeWarnings"
+                  checked={settings.includeWarnings} onchange={handleSettingChange} />
+                {labels.settingsWarnings}
+              </label>
+              <label class="settings-check-label">
+                <input type="checkbox" name="stopOnFirstErrorClientSide"
+                  checked={settings.stopOnFirstErrorClientSide} onchange={handleSettingChange} />
+                {labels.settingsStop}
+              </label>
+              <label class="settings-label" style="margin-top:10px">{labels.settingsDefaultTab}</label>
+              <select class="settings-select" name="defaultTab" onchange={handleSettingChange}>
+                <template for:each={tabOptionsWithSelected} for:item="o">
+                  <option key={o.value} value={o.value} selected={o.isSelected}>{o.label}</option>
+                </template>
+              </select>
+              <div class="settings-help">{labels.settingsBehaviorHelp}</div>
+            </div>
+          </div>
+        </div>
+        <footer class="drv-modal__footer">
+          <button type="button" class="btn btn-outline" onclick={closeSettings}>{labels.btnClose}</button>
+        </footer>
+      </div>
+    </section>
+  </template>
 </template>

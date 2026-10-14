@@ -12,9 +12,11 @@ private class PreProcessBatchTest {
             project.Id, 'AccountNumber', 'AccountNumber'
         );
 
-        //dry run execution
+        //dry run execution (projet distinct : la règle d'unicité n'autorise
+        // qu'une exécution active par projet)
+        ImportProject__c dryRunProject = TestDataFactory.createImportProject('Account');
         ImportExecution__c dryRunExec = new ImportExecution__c(
-            Project__c = project.Id,
+            Project__c = dryRunProject.Id,
             Status__c = Constants.EXECUTION_STATUS_IN_PROGRESS,
             Phase__c = Constants.EXECUTION_PHASE_PREPROCESSING,
             Type__c = Constants.EXECUTION_TYPE_VALIDATION,
@@ -37,7 +39,7 @@ private class PreProcessBatchTest {
         }
         insert dryRunRows;
 
-        //import execution
+        //import execution (sur le projet principal qui possède les field mappings)
         ImportExecution__c importExec = new ImportExecution__c(
             Project__c = project.Id,
             Status__c = Constants.EXECUTION_STATUS_IN_PROGRESS,
@@ -172,7 +174,9 @@ private class PreProcessBatchTest {
 
     @isTest
     static void testIncompleteDataCompletesWithoutCrash() {
-        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
+        // Projet frais : le projet du @testSetup possède déjà une exécution
+        // InProgress (règle d'unicité : une seule active par projet).
+        ImportProject__c project = TestDataFactory.createImportProject('Account');
 
         ImportExecution__c execution = new ImportExecution__c(
             Project__c = project.Id,
@@ -219,7 +223,7 @@ private class PreProcessBatchTest {
 
     @isTest
     static void testEmptyScopeCompletesCleanly() {
-        ImportProject__c project = [SELECT Id FROM ImportProject__c LIMIT 1];
+        ImportProject__c project = TestDataFactory.createImportProject('Account');
 
         ImportExecution__c execution = new ImportExecution__c(
             Project__c = project.Id,

@@ -244,6 +244,16 @@ public with sharing class ScheduleServiceTest {
         Test.stopTest();
     }
 
+     @IsTest
+    static void testDeleteScheduleByIdEmpty() {
+        Test.startTest();
+        try {
+            ScheduleService.deleteScheduleById('');
+        } catch (Exception e) {
+            Assert.isTrue(String.isNotBlank(e.getMessage()));
+        }
+        Test.stopTest();
+    }
     
    
     @IsTest
@@ -306,8 +316,7 @@ public with sharing class ScheduleServiceTest {
         String type ='Import';
         Schedule__c schedule = TestDataFactory.createSchedule();
        
-        String projectId = String.valueOf(schedule.Project__c);
-        String apexJobId =  String.valueOf(schedule.Id); 
+        String projectId = String.valueOf(schedule.Project__c); 
 
         ImportExecution__c execution = TestDataFactory.createImportExecutionWithSchedule(schedule.Project__c,status,type,String.valueOf(schedule.Id) );
 
@@ -322,7 +331,38 @@ public with sharing class ScheduleServiceTest {
       
     }
 
+    @isTest
+    static void testExecuteScheduleSuccess() {
 
+        ImportProject__c project = TestDataFactory.createImportProject('Account');
+
+        String data = EncodingUtil.base64Encode(
+            Blob.valueOf('Name\nAcme')
+        );
+
+        ContentDocumentService.saveFileToProject(
+            data,
+            'test.csv',
+            project.Id
+        );
+
+        Schedule__c schedule = new Schedule__c(
+            Project__c = project.Id,
+            Frequency__c = 'DAILY',
+            NextRun__c = System.now().addDays(1)
+        );
+
+        insert schedule;
+
+        Test.startTest();
+
+        ScheduleJobResult result =
+            ScheduleService.executeSchedule(schedule.Id);
+
+        Test.stopTest();
+
+        Assert.isTrue(result.isSuccess());
+    }
 
 // Dans ScheduleControllerTest
     @IsTest
@@ -483,5 +523,109 @@ public with sharing class ScheduleServiceTest {
             'schedule'  => schedule,
             'execution' => execution
         };
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    //  BULK EXECUTE — "Programmer tout" (ScheduleService.bulkExecute)
+    // ═══════════════════════════════════════════════════════════════
+
+    /** Succès : 2 schedules -> 2 exécutions Pending de type Scheduled */
+    @IsTest
+    static void testBulkExecute_Success() {
+        // Given : un projet avec 2 schedules (NextRun futur) et aucune exécution active
+        ImportProject__c project = TestDataFactory.createImportProject('Account');
+        Schedule__c s1 = new Schedule__c(
+            Project__c = project.Id,
+            Frequency__c = 'Daily',
+            NextRun__c = System.now().addDays(1)
+        );
+        Schedule__c s2 = new Schedule__c(
+            Project__c = project.Id,
+            Frequency__c = 'Weekly',
+            NextRun__c = System.now().addDays(7)
+        );
+        insert new List<Schedule__c>{ s1, s2 };
+
+        // When
+        Test.startTest();
+        ScheduleService.BulkExecuteResult result = ScheduleService.bulkExecute(project.Id);
+        Test.stopTest();
+
+        // Then
+        Assert.areEqual(2, result.totalSchedules, 'Le total doit être 2 schedules');
+        Assert.areEqual(2, result.successCount, 'Les 2 exécutions doivent réussir');
+        Assert.areEqual(0, result.errorCount, 'Aucune erreur attendue');
+
+        List<ImportExecution__c> execs = [
+            SELECT Id, Status__c, Type__c
+            FROM ImportExecution__c
+            WHERE Project__c = :project.Id
+        ];
+        Assert.areEqual(2, execs.size(), '2 exécutions doivent être créées');
+        for (ImportExecution__c exec : execs) {
+            Assert.areEqual('Pending', exec.Status__c, 'Le statut doit être Pending');
+            Assert.areEqual('Scheduled', exec.Type__c, 'Le type doit être Scheduled');
+        }
+    }
+
+    /** Blocage : une exécution active existe déjà (règle d'unicité) */
+    @IsTest
+    static void testBulkExecute_BlockedByActiveExecution() {
+        // Given : un projet avec 1 schedule ET une exécution active (Pending)
+        ImportProject__c project = TestDataFactory.createImportProject('Account');
+        Schedule__c s = new Schedule__c(
+            Project__c = project.Id,
+            Frequency__c = 'Daily',
+            NextRun__c = System.now().addDays(1)
+        );
+        insert s;
+        TestDataFactory.createImportExecution(project.Id); // statut Pending par défaut
+
+        Integer countBefore = [
+            SELECT COUNT() FROM ImportExecution__c WHERE Project__c = :project.Id
+        ];
+
+        // When
+        Test.startTest();
+        ScheduleService.BulkExecuteResult result = ScheduleService.bulkExecute(project.Id);
+        Test.stopTest();
+
+        // Then
+        Assert.areEqual(1, result.errorCount, 'Une erreur d\'unicité doit être retournée');
+        Assert.areEqual(0, result.successCount, 'Aucune exécution ne doit être créée');
+        Assert.isTrue(result.errorMessages.size() > 0, 'Un message d\'erreur doit être présent');
+
+        Integer countAfter = [
+            SELECT COUNT() FROM ImportExecution__c WHERE Project__c = :project.Id
+        ];
+        Assert.areEqual(countBefore, countAfter, 'Aucune nouvelle exécution ne doit être insérée');
+    }
+
+    /** Aucun schedule pour le projet -> message d'erreur */
+    @IsTest
+    static void testBulkExecute_NoSchedules() {
+        // Given : un projet sans schedule
+        ImportProject__c project = TestDataFactory.createImportProject('Account');
+
+        // When
+        Test.startTest();
+        ScheduleService.BulkExecuteResult result = ScheduleService.bulkExecute(project.Id);
+        Test.stopTest();
+
+        // Then
+        Assert.areEqual(1, result.errorCount, 'Une erreur doit être retournée');
+        Assert.areEqual(0, result.successCount, 'Aucune exécution ne doit être créée');
+        Assert.isTrue(result.errorMessages.size() > 0, 'Un message doit indiquer l\'absence de planification');
+    }
+
+    /** projectId null -> erreur sans exception */
+    @IsTest
+    static void testBulkExecute_NullProjectId() {
+        Test.startTest();
+        ScheduleService.BulkExecuteResult result = ScheduleService.bulkExecute(null);
+        Test.stopTest();
+
+        Assert.areEqual(1, result.errorCount, 'Un projectId null doit produire une erreur');
+        Assert.areEqual(0, result.successCount, 'Aucune exécution ne doit être créée');
     }
 }

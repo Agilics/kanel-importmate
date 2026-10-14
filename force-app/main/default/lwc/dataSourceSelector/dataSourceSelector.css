@@ -1,352 +1,120 @@
-/* =========================
-   DryRunValidator - FULL CSS (toolbar fixed / no shift)
-   ========================= */
-
-.validation-container {
-  background-color: #f9fafb;
-  min-height: 100vh;
-  padding-bottom: 2rem;
-  overflow-x: hidden;
+/* ══ Aurora design tokens ══ */
+:host {
+  display: block;
+  font-family: 'Inter', -apple-system, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  --indigo:        #4F46E5;
+  --indigo-soft:   rgba(79,70,229,0.08);
+  --indigo-glow:   rgba(79,70,229,0.25);
+  --violet:        #7C3AED;
+  --green:         #10B981;
+  --green-soft:    rgba(16,185,129,0.1);
+  --coral:         #F43F5E;
+  --amber:         #F59E0B;
+  --text:          #0F172A;
+  --text-2:        #1E293B;
+  --muted:         #64748B;
+  --muted-2:       #94A3B8;
+  --border:        rgba(148,163,184,0.2);
+  --border-solid:  #E2E8F0;
+  --surface:       rgba(255,255,255,0.75);
+  --surface-solid: #FFFFFF;
+  --grad-brand:    linear-gradient(135deg,#4F46E5 0%,#7C3AED 100%);
+  --grad-green:    linear-gradient(135deg,#10B981 0%,#06B6D4 100%);
+  --shadow-xs:     0 1px 3px rgba(15,23,42,0.06),0 1px 2px rgba(15,23,42,0.04);
+  --shadow-sm:     0 2px 8px rgba(79,70,229,0.06),0 1px 3px rgba(15,23,42,0.04);
+  --shadow-md:     0 4px 20px rgba(79,70,229,0.10),0 2px 6px rgba(15,23,42,0.05);
+  --shadow-glow:   0 0 0 3px rgba(79,70,229,0.08),0 4px 20px rgba(79,70,229,0.15);
+  --radius-xs:     6px;
+  --radius-sm:     10px;
+  --radius:        16px;
+  --radius-lg:     24px;
+  --radius-pill:   999px;
+  --ease-out:      cubic-bezier(0.16,1,0.3,1);
 }
 
-/* =========================
-   Buttons
-   ========================= */
-lightning-button {
-  --slds-c-button-radius-border: 0.375rem;
+.container { padding: 32px 36px; }
+
+/* Section heading */
+.section-title {
+  font-size: 1.1rem; font-weight: 800; color: var(--text);
+  letter-spacing: -0.3px; margin: 0 0 18px;
 }
 
-lightning-button::part(button) {
-  border-radius: 0.375rem;
-  font-weight: 500;
-  font-size: 0.875rem;
-  transition: all 0.2s ease;
-  white-space: nowrap; /* ✅ never split labels */
+/* Section header */
+.card-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 24px;
+}
+.card-title {
+  font-size: 1rem; font-weight: 800; color: var(--text);
+  letter-spacing: -0.3px; margin: 0 0 4px;
+}
+.card-sub {
+  font-size: .82rem; color: var(--muted); margin: 0;
 }
 
-/* Brand */
-lightning-button[variant="brand"]::part(button) {
-  background: linear-gradient(135deg, #0b6bdc, #0a5fcc);
-  border: none;
-  box-shadow: 0 1px 3px rgba(11, 107, 220, 0.25);
-}
-lightning-button[variant="brand"]:hover::part(button) {
-  background: linear-gradient(135deg, #0a5fcc, #084db3);
-  box-shadow: 0 4px 8px rgba(11, 107, 220, 0.25);
-}
-
-/* Neutral */
-lightning-button[variant="neutral"]::part(button) {
-  background: #ffffff;
-  border: 1px solid #d1d5db;
-  color: #374151;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-}
-lightning-button[variant="neutral"]:hover::part(button) {
-  background: #f9fafb;
-  border-color: #9ca3af;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-lightning-button:disabled::part(button) {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* =========================
-   HEADER (✅ toolbar absolute -> NEVER moves)
-   ========================= */
-.page-header {
-  background-color: #f3f4f6;
-  padding: 1.5rem 2rem;
-  border-bottom: 1px solid #e5e7eb;
-  position: relative;     /* ✅ anchor for absolute toolbar */
-  overflow-x: hidden;
-}
-
-/* We reserve space on the right so left text never overlaps toolbar */
-.header-content {
-  position: relative;
-  padding-right: 520px;   /* ✅ reserve toolbar width (adjust if needed) */
-  min-width: 0;
-}
-
-/* Left content */
-.header-left {
-  min-width: 0;
-}
-
-.header-row {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap; /* badge can wrap under title if needed, toolbar won't move */
-  margin-bottom: 0.25rem;
-}
-
-.header-title {
-  font-size: 1.8rem;
-  font-weight: 800;
-  color: #111827;
-  margin: 0;
-}
-
-.header-subtitle {
-  font-size: 0.95rem;
-  color: #6b7280;
-  margin: 0;
-}
-
-.precheck-line {
-  margin-top: 0.25rem;
-  font-size: 0.85rem;
-  color: #6b7280;
-}
-
-/* Status badge (can appear/disappear without shifting toolbar) */
-.error-status-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.35rem 0.75rem;
-  border-radius: 0.4rem;
-  font-size: 0.85rem;
-  font-weight: 700;
-
-  background-color: #fee2e2;
-  color: #991b1b;
-
-  white-space: nowrap;
-  max-width: 420px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.success-badge {
-  background-color: #d1fae5;
-  color: #065f46;
-}
-
-/* ✅ FIX: toolbar pinned to a fixed coordinate (like your 2nd screenshot) */
-.header-right {
-  position: absolute;
-  top: 1.35rem;   /* ✅ fixed vertical alignment */
-  right: 2rem;    /* ✅ fixed right alignment */
-
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  flex-wrap: nowrap;
-  white-space: nowrap;
-}
-
-/* =========================
-   Progress
-   ========================= */
-.validation-progress-section {
-  background-color: white;
-  border-radius: 0.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  margin: 1.5rem 2rem;
-  padding: 1.5rem;
-}
-
-.progress-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.progress-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #111827;
-  margin: 0;
-}
-
-.status-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.375rem 0.875rem;
-  border-radius: 9999px;
-  font-size: 0.875rem;
-  font-weight: 700;
-}
-
-.status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-}
-
-.status-badge.in-progress {
-  background-color: #dbeafe;
-  color: #1e40af;
-}
-.status-badge.in-progress .status-dot {
-  background-color: #1e40af;
-}
-
-.status-badge.completed {
-  background-color: #d1fae5;
-  color: #065f46;
-}
-.status-badge.completed .status-dot {
-  background-color: #065f46;
-}
-
-.status-badge.failed {
-  background-color: #fee2e2;
-  color: #991b1b;
-}
-.status-badge.failed .status-dot {
-  background-color: #991b1b;
-}
-
-.progress-bar-container {
-  margin-bottom: 2rem;
-}
-
-.progress-info {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 1rem;
-}
-
-.progress-numbers {
-  font-size: 1rem;
-  font-weight: 700;
-  color: #374151;
-}
-
-/* =========================
-   Stats grid
-   ========================= */
-.statistics-grid {
+/* Source cards grid */
+.source-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1.25rem;
-  margin-bottom: 1.5rem;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
 }
 
-.stat-card {
-  padding: 1.5rem 1rem;
-  border-radius: 0.5rem;
-  text-align: center;
-  border: 1px solid #e5e5e5;
-  background: white;
-  transition: all 0.2s ease;
+.source-card {
+  border: 1.5px solid var(--border-solid);
+  border-radius: var(--radius);
+  padding: 26px 24px;
+  cursor: pointer;
+  background: var(--surface-solid);
+  box-shadow: var(--shadow-sm);
+  position: relative; overflow: hidden;
+  transition: all .22s var(--ease-out);
+}
+.source-card:hover {
+  border-color: rgba(79,70,229,0.4);
+  box-shadow: var(--shadow-md);
+  transform: translateY(-3px);
+}
+.source-card.selected {
+  border-color: var(--indigo);
+  box-shadow: var(--shadow-glow), var(--shadow-md);
 }
 
-.stat-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  transform: translateY(-2px);
+.source-icon {
+  width: 54px; height: 54px; border-radius: 14px;
+  display: grid; place-items: center; font-size: 24px;
+  margin-bottom: 16px;
+  background: var(--indigo-soft);
+  border: 1px solid rgba(79,70,229,0.12);
+  transition: all .2s;
+}
+.soql-icon-inner {
+  font-size: .9rem; font-weight: 700; color: var(--indigo);
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  letter-spacing: -1px;
 }
 
-.stat-number {
-  font-size: 2.5rem;
-  font-weight: 800;
-  line-height: 1;
-  margin-bottom: 0.25rem;
+.source-title {
+  font-size: .95rem; font-weight: 800; color: var(--text);
+  margin-bottom: 7px; letter-spacing: -0.3px;
+}
+.source-desc {
+  font-size: .82rem; color: var(--muted); line-height: 1.55; margin-bottom: 16px;
+}
+.source-features { display: flex; flex-direction: column; gap: 5px; }
+.source-feature {
+  font-size: .78rem; color: var(--muted);
+  display: flex; align-items: center; gap: 7px;
+}
+.source-feature::before {
+  content: '✓'; color: var(--green); font-weight: 700; font-size: .72rem;
+  width: 16px; height: 16px; background: var(--green-soft);
+  border-radius: 50%; display: grid; place-items: center; flex-shrink: 0;
 }
 
-.stat-label {
-  font-size: 0.875rem;
-  font-weight: 800;
-  margin-bottom: 0.25rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.stat-percentage {
-  font-size: 0.75rem;
-  font-weight: 600;
-  opacity: 0.85;
-}
-
-.stat-card.stat-success {
-  background: linear-gradient(135deg, #d1fae5, #a7f3d0);
-  border-color: #86efac;
-}
-.stat-card.stat-processing {
-  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
-  border-color: #93c5fd;
-}
-.stat-card.stat-error {
-  background: linear-gradient(135deg, #fee2e2, #fecaca);
-  border-color: #fca5a5;
-}
-.stat-card.stat-remaining {
-  background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
-  border-color: #d1d5db;
-}
-
-/* =========================
-   Action buttons section
-   ========================= */
-.action-buttons-section {
-  background-color: white;
-  border-radius: 0.5rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  margin: 1.5rem 2rem;
-  padding: 1.5rem;
-}
-
-.action-buttons-content {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.action-buttons-right {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-/* =========================
-   Responsive
-   ========================= */
-@media (max-width: 768px) {
-  .page-header {
-    padding: 1.25rem 1rem;
-  }
-
-  /* On mobile: toolbar back into normal flow */
-  .header-content {
-    padding-right: 0;
-  }
-
-  .header-right {
-    position: static;
-    margin-top: 1rem;
-    justify-content: flex-start;
-    flex-wrap: wrap;
-    white-space: normal;
-  }
-
-  .header-right lightning-button {
-    width: 100%;
-  }
-
-  .validation-progress-section,
-  .action-buttons-section {
-    margin-left: 1rem;
-    margin-right: 1rem;
-  }
-
-  .statistics-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-
-  .stat-number {
-    font-size: 2rem;
-  }
+/* Responsive */
+@media (max-width: 640px) {
+  .source-grid { grid-template-columns: 1fr; }
+  .container { padding: 20px 16px; }
 }

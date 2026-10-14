@@ -1,3 +1,34 @@
+﻿/* ══ Aurora design tokens ══ */
+:host {
+  --indigo:        #4F46E5;
+  --indigo-soft:   rgba(79,70,229,0.08);
+  --indigo-glow:   rgba(79,70,229,0.25);
+  --violet:        #7C3AED;
+  --green:         #10B981;
+  --green-soft:    rgba(16,185,129,0.1);
+  --coral:         #F43F5E;
+  --amber:         #F59E0B;
+  --text:          #0F172A;
+  --text-2:        #1E293B;
+  --muted:         #64748B;
+  --muted-2:       #94A3B8;
+  --border:        rgba(148,163,184,0.2);
+  --border-solid:  #E2E8F0;
+  --surface:       rgba(255,255,255,0.75);
+  --surface-solid: #FFFFFF;
+  --grad-brand:    linear-gradient(135deg,#4F46E5 0%,#7C3AED 100%);
+  --grad-green:    linear-gradient(135deg,#10B981 0%,#06B6D4 100%);
+  --shadow-xs:     0 1px 3px rgba(15,23,42,0.06),0 1px 2px rgba(15,23,42,0.04);
+  --shadow-sm:     0 2px 8px rgba(79,70,229,0.06),0 1px 3px rgba(15,23,42,0.04);
+  --shadow-md:     0 4px 20px rgba(79,70,229,0.10),0 2px 6px rgba(15,23,42,0.05);
+  --shadow-glow:   0 0 0 3px rgba(79,70,229,0.08),0 4px 20px rgba(79,70,229,0.15);
+  --radius-xs:     6px;
+  --radius-sm:     10px;
+  --radius:        16px;
+  --radius-lg:     24px;
+  --radius-pill:   999px;
+  --ease-out:      cubic-bezier(0.16,1,0.3,1);
+}
 /* SECTION HEADERS */
 .section-header {
   display: flex;
@@ -44,7 +75,7 @@
     border-radius: 0.5rem;
     font-weight: 600;
     font-size: 0.875rem;
-    font-family: "Salesforce Sans", Arial, sans-serif;
+    font-family: 'Inter', -apple-system, system-ui, sans-serif;
     line-height: 1.25rem;
     cursor: pointer;
     transition: all 0.2s ease-in-out;
@@ -53,12 +84,12 @@
 }
 
 .primary-icon{
- --slds-c-icon-color-foreground-default: #1e40af;
+ --slds-c-icon-color-foreground-default: #4F46E5;
 }
 
 /* Bouton primaire */
 .btn-primary {
-    background-color: #1e40af;
+    background: linear-gradient(135deg,#4F46E5 0%,#7C3AED 100%);
     color: #ffffff;
     box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
 }
@@ -109,10 +140,38 @@ lightning-textarea.success textarea {
     background-color: #f0fdf4;
 }
 
-/* Amélioration du dual-listbox pour la concaténation */
-lightning-dual-listbox {
-    width: 100%;
+/* ══ Section icons (replace lightning-icon) ══ */
+.section-icon {
+    font-size: 1.3rem; line-height: 1;
 }
+
+/* ══ Native inputs ══ */
+.rounded-input {
+    display: block; width: 100%; box-sizing: border-box;
+    padding: 8px 12px; border-radius: 8px;
+    border: 1px solid var(--border-solid, #E2E8F0); background: #fff;
+    font-size: .875rem; color: var(--text, #0F172A);
+    outline: none; transition: border-color .15s;
+    font-family: inherit;
+}
+.rounded-input:focus { border-color: var(--indigo, #4F46E5); box-shadow: 0 0 0 3px rgba(79,70,229,0.08); }
+.rounded-input:disabled { background: #F9FAFB; color: var(--muted, #64748B); cursor: not-allowed; }
+
+/* ══ Multi-select (dual-listbox replacement) ══ */
+.dual-listbox {
+    padding: 4px; height: auto; min-height: 120px;
+}
+.dual-listbox option { padding: 6px 8px; border-radius: 4px; }
+.dual-listbox option:checked { background: rgba(79,70,229,0.1); color: var(--indigo, #4F46E5); }
+
+/* ══ Toggle replacement ══ */
+.toggle-label {
+    display: inline-flex; align-items: center; gap: 8px;
+    cursor: pointer; font-size: .875rem; color: var(--text, #0F172A);
+}
+.toggle-label input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--indigo, #4F46E5); cursor: pointer; }
+.toggle-text { font-weight: 500; }
+.toggle-hint { font-size: .8rem; color: var(--muted, #64748B); }
 
 /* Responsive Design */
 @media (max-width: 768px) {

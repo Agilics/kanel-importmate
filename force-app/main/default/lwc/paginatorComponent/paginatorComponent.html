@@ -15,7 +15,7 @@
                  <template if:true={showNavigationButtons}>
                     <button type="button" class="pagination-btn pagination-btn--nav" onclick={gotoPreviousPage} disabled={isFirstPage}
                         aria-label="Go to previous page">
-                        <lightning-icon icon-name="utility:chevronleft" size="xx-small" class="pagination-icon"></lightning-icon>
+                        <span class="pagination-icon">‹</span>
                     </button>
                  </template>
                    
@@ -44,8 +44,8 @@
                 <!-- Next button --> 
                  <template if:true={showNavigationButtons}>
                     <button type="button" class="pagination-btn pagination-btn--nav" onclick={gotoNextPage} disabled={isLastPage}
-                        aria-label="Go to next page"> 
-                        <lightning-icon icon-name="utility:chevronright" size="xx-small" class="pagination-icon"></lightning-icon>
+                        aria-label="Go to next page">
+                        <span class="pagination-icon">›</span>
                     </button>
                  </template>  
             </div> 

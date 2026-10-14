@@ -1,118 +1,66 @@
-<!--
-   @description       : 
-   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
-   @group             : 
-   @last modified on  : 01-07-2026
-   @last modified by  : ChangeMeIn@UserSettingsUnder.SFDoc
-   --> 
 <template>
-   <!-- header content -->
-   <div class="header">
-      <div class={boxIconClass}>
-         <lightning-icon
-            icon-name={iconName} 
-            class={iconClass}
-            size={iconSize}>
-         </lightning-icon>
+  <!-- header -->
+  <div class="header">
+    <div class={boxIconClass}>
+      <span class="ec-icon">{iconEmoji}</span>
+    </div>
+    <div class="text-content">
+      <h3 class="title">{titleCard}</h3>
+      <p class="txt subtitle">{subtitleCard}</p>
+    </div>
+  </div>
+
+  <!-- Immediate execution -->
+  <template if:false={showScheduledCard}>
+    <div class="ec-form">
+      <!-- Execution mode -->
+      <div class={formGroup}>
+        <label class="ec-label">{labels.labelExecutionMode}</label>
+        <select class="ec-select" onchange={handleModeChange}>
+          <template for:each={modeOptionsWithSelected} for:item="o">
+            <option key={o.value} value={o.value} selected={o.isSelected}>{o.label}</option>
+          </template>
+        </select>
       </div>
-      <div class="text-content">
-         <h3 class="title">{titleCard}</h3>
-         <p class="txt subtitle">{subtitleCard}</p>
+
+      <!-- Batch size -->
+      <div class={formGroup}>
+        <label class="ec-label">{labels.labelBatchSize}</label>
+        <input type="number" class="ec-input" name="batch-size"
+          min="1" max="2000" step="1" value={batchSize}
+          placeholder="e.g. 200" onchange={handleBatchSizeChange} />
+        <p class="batch-size-hint">Recommended: 50–500. Leave blank to use the project default.</p>
       </div>
-   </div>
-   <!-- end header content-->
-   <!-- content --> 
-   <div class="slds-grid slds-wrap slds-gutters p-1">
-      <!-- Immediate Schedule -->
-      <template if:false={showScheduledCard}>
-         <lightning-layout multiple-rows="true" class="full-width">
-            <lightning-layout-item size="12" padding="around-small">
-               <!-- execution mode -->
-               <div class={formGroup}>
-                  <label class={formLabel} for="mode">
-                  {labels.labelExecutionMode}
-                  </label>
-                  <lightning-combobox 
-                     value={executionMode} 
-                     options={modeOptions}
-                     class="form-control"
-                     onchange={handleModeChange}>
-                  </lightning-combobox>
-               </div>
-            </lightning-layout-item>
-            <!-- Batch Size -->
-            <lightning-layout-item size="12" padding="around-small">
-               <div class={formGroup}>
-                  <lightning-input
-                     type="number"
-                     label={labels.labelBatchSize}
-                     name="batch-size"
-                     min="1"
-                     max="2000"
-                     step="1"
-                     value={batchSize}
-                     placeholder="e.g. 200"
-                     class="form-control"
-                     onchange={handleBatchSizeChange}>
-                  </lightning-input>
-                  <p class="batch-size-hint">Recommended: 50–500. Leave blank to use the project default.</p>
-               </div>
-            </lightning-layout-item>
-            <!-- checkbox --> 
-            <lightning-layout-item size="12" padding="around-small">
-               <lightning-input type="checkbox" checked={sendEmailNotification}
-                     onchange={handleEmailNotificationChange} 
-                     label={labels.labelSendEmail}>
-               </lightning-input>
-            </lightning-layout-item>
-         </lightning-layout>
+
+      <!-- Email notification checkbox -->
+      <label class="ec-check-label">
+        <input type="checkbox" checked={sendEmailNotification} onchange={handleEmailNotificationChange} />
+        {labels.labelSendEmail}
+      </label>
+    </div>
+  </template>
+
+  <!-- Scheduled execution -->
+  <template if:true={showScheduledCard}>
+    <div class="schedule-panel">
+      <div class="sched-form">
+        <div class="sched-field">
+          <label class="sched-label">{labels.labelFrequency}</label>
+          <select class="ec-select sched-combobox" onchange={handleFrequencyChange}>
+            <template for:each={frequencyOptionsWithSelected} for:item="o">
+              <option key={o.value} value={o.value} selected={o.isSelected}>{o.label}</option>
+            </template>
+          </select>
+        </div>
+        <div class="sched-field">
+          <label class="sched-label">{labels.labelStartDate}</label>
+          <input type="datetime-local" class="ec-input sched-datetime"
+            value={nextRun} onchange={handleNextRunChange} />
+        </div>
+      </div>
+      <template if:true={labels.scheduledImportNote}>
+        <div class="sched-note">{labels.scheduledImportNote}</div>
       </template>
-   </div>
-   <!-- end Immediate Schedule --> 
-   <!-- scheduled execution -->
-   <div class="slds-grid slds-wrap slds-grid_vertical-stretch scheduled-container">
-      <template if:true={showScheduledCard}>
-         <lightning-layout multiple-rows="true" class="slds-size_1-of-1 layout-full-width">
-            <lightning-layout-item size="12" padding="around-small">
-               <!-- ComboBox for Select Frequency DAILY | WEEKLY | MONTHLY -->
-               <div class={formGroup}>
-                  <label class={formLabel} for="frequency">
-                  {labels.labelFrequency}
-                  </label>
-                  <lightning-combobox
-                     class="frequency-combobox form-control  slds-size_1-of-1"
-                     name="frequency" 
-                     id="frequency"
-                     value={selectedFrequency}
-                     options={frequencyOptions}
-                     onchange={handleFrequencyChange}
-                     ></lightning-combobox>
-               </div>
-            </lightning-layout-item>
-            <!-- start date time-->
-            <lightning-layout-item size="12"  padding="horizontal-small">
-               <div >
-                  <label for="start-date" class={formLabel}>
-                     {labels.labelStartDate}
-                  </label>
-                  <lightning-input
-                     class="time-input form-control slds-size_1-of-1 "
-                     type="datetime" 
-                     id="start-date"
-                     value={nextRun}
-                     placeholder="mm/dd/yyyy --:-- --"
-                     onchange={handleNextRunChange}>
-                  </lightning-input>
-               </div>
-            </lightning-layout-item>
-            <!-- footer -->  
-            <lightning-layout-item size="12" padding="horizontal-small">
-               <div class="paragraph  txt regular-text slds-size_1-of-1">
-                  {labels.scheduledImportNote}
-               </div>
-            </lightning-layout-item>
-         </lightning-layout>
-      </template>
-      <!-- end scheduled execution  -->
-   </div>
+    </div>
+  </template>
 </template>

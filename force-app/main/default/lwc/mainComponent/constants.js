@@ -22,7 +22,8 @@ export const STEPS = {
   FIELD_MAPPING  : 3,
   TRANSFORMATIONS: 4,
   VALIDATION     : 5,
-  EXECUTION      : 6
+  EXECUTION      : 6,
+  SCHEDULE       : 7
 };
 
 // Step configuration
@@ -32,15 +33,18 @@ export const STEP_CONFIG = [
   { number: 3, label: 'Field Mapping',    hasLine: true  },
   { number: 4, label: 'Transformations',  hasLine: true  },
   { number: 5, label: 'Validation',       hasLine: true  },
-  { number: 6, label: 'Execution',        hasLine: false }
+  { number: 6, label: 'Execution',        hasLine: true  },
+  { number: 7, label: 'Scheduling',       hasLine: false }
 ];
 
 // Page constants
 export const PAGES = {
   DASHBOARD: 'dashboard',
   PROJECTS : 'projects',
+  HISTORY  : 'history',
   LOGS     : 'logs',
-  SETTINGS : 'settings'
+  SETTINGS : 'settings',
+  SCHEDULE : 'schedule'
 };
 
 // Quick Actions

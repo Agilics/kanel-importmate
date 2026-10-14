@@ -50,8 +50,8 @@ public with sharing class ObjectMetadataService {
     }
     public static Map<String, Schema.SObjectField> getFieldsForObject(String objectName) {
         if (!fieldsCache.containsKey(objectName)) {
-            if (!getGlobalDescribeMap().containsKey(objectName)) {
-                throw new ApplicationException();
+            if (Schema.getGlobalDescribe().get(objectName) == null) {
+                throw new ApplicationException('Object not found in schema: ' + objectName, 'OBJECT_NOT_FOUND');
             }
 
             Schema.DescribeSObjectResult describeResult = Schema.describeSObjects(new List<String>{objectName})[0];

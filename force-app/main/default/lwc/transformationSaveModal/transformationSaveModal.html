@@ -9,10 +9,7 @@
       <div class="slds-form slds-form_stacked">
 
          <div class="section-header">
-            <lightning-icon 
-               icon-name='utility:data_mapping' 
-               alternative-text='mapping' class="primary-icon" size='medium'>
-            </lightning-icon>
+            <span class="section-icon">🗂</span>
             <h2>{labels.sectionMapping}</h2>
          </div>
 
@@ -22,7 +19,7 @@
                   {labels.sourceColumn}<abbr class="slds-required" title="required">*</abbr>
                </label>
                <div class="slds-form-element__control">
-                  <input id="sourceColumnInput" type="text" class="slds-input" value={source} disabled />
+                  <input id="sourceColumnInput" type="text" class="rounded-input" value={source} disabled />
                </div>
             </div>
             <div class="form-control">
@@ -30,16 +27,13 @@
                   {labels.targetField}<abbr class="slds-required" title="required">*</abbr>
                </label>
                <div class="slds-form-element__control">
-                  <input id="targetFieldInput" type="text" class="slds-input" value={target} disabled />
+                  <input id="targetFieldInput" type="text" class="rounded-input" value={target} disabled />
                </div>
             </div>
          </div>
 
          <div class="section-header">
-            <lightning-icon
-               icon-name='utility:formula'
-               alternative-text='rules' class="primary-icon" size='medium'>
-            </lightning-icon>
+            <span class="section-icon">⚙</span>
             <h2>{labels.sectionRules}</h2>
          </div>
 
@@ -48,16 +42,12 @@
                {labels.ruleType} <abbr class="slds-required" title="required">*</abbr>
             </label>
             <div class="slds-form-element__control">
-               <lightning-combobox
-                  id="ruleType"
-                  label=""
-                  name="ruleType"
-                  value={ruleType}
-                  options={ruleTypeOptions}
-                  placeholder={labels.selectOption}
-                  onchange={handleRuleTypeChange}
-                  class="rounded-input">
-               </lightning-combobox>
+               <select id="ruleType" class="rounded-input" onchange={handleRuleTypeChange}>
+                  <option value="">{labels.selectOption}</option>
+                  <template for:each={ruleTypeOptionsWithSelected} for:item="opt">
+                     <option key={opt.value} value={opt.value} selected={opt.isSelected}>{opt.label}</option>
+                  </template>
+               </select>
             </div>
          </div>
 
@@ -67,18 +57,11 @@
                   {labels.sourceFields} <abbr class="slds-required" title="required">*</abbr>
                </label>
                <div class="slds-form-element__control">
-                  <lightning-dual-listbox
-                     id="sourceFields"
-                     name="sourceFields"
-                     label=""
-                     source-label={labels.sourceLabel}
-                     selected-label={labels.selectedLabel}
-                     options={targetFieldOptions}
-                     value={preSelectedColumns}
-                     onchange={handleTargetFieldsChange}
-                     max="3"
-                     class="rounded-input">
-                  </lightning-dual-listbox>
+                  <select id="sourceFields" class="rounded-input dual-listbox" size="6" multiple onchange={handleTargetFieldsChange}>
+                     <template for:each={targetFieldOptionsWithSelected} for:item="opt">
+                        <option key={opt.value} value={opt.value} selected={opt.isSelected}>{opt.label}</option>
+                     </template>
+                  </select>
                </div>
                <div class="slds-form-element__help">
                   {labels.selectFieldsHelp} {selectedFieldsCount} {labels.onLabel} 3 {labels.selectedLabel}
@@ -89,16 +72,12 @@
                   {labels.separator}
                </label>
                <div class="slds-form-element__control">
-                  <lightning-combobox
-                     id="separator"
-                     label=""
-                     name="separator"
-                     class="rounded-input"
-                     value={separator}
-                     options={separatorOptions}
-                     placeholder={labels.selectOption}
-                     onchange={handleSeparatorChange}>
-                  </lightning-combobox>
+                  <select id="separator" class="rounded-input" onchange={handleSeparatorChange}>
+                     <option value="">{labels.selectOption}</option>
+                     <template for:each={separatorOptionsWithSelected} for:item="opt">
+                        <option key={opt.value} value={opt.value} selected={opt.isSelected}>{opt.label}</option>
+                     </template>
+                  </select>
                </div>
             </div>
          </template>
@@ -109,15 +88,11 @@
                   <label class="slds-form-element__label">
                      {labels.chooseBooleanValue} <abbr class="slds-required" title="required">*</abbr>
                   </label>
-                  <lightning-input
-                     class="rounded-input"
-                     onchange={handleBooleanValueChange}
-                     type="toggle"
-                     label={labels.booleanValueLabel}
-                     message-toggle-active={labels.yes}
-                     message-toggle-inactive={labels.no}
-                     checked={booleanValue}>
-                  </lightning-input>
+                  <label class="toggle-label">
+                     <input type="checkbox" checked={booleanValue} onchange={handleBooleanValueChange} />
+                     <span class="toggle-text">{labels.booleanValueLabel}</span>
+                     <span class="toggle-hint">({booleanDisplayLabel})</span>
+                  </label>
                </div>
             </div>
          </template>
@@ -129,7 +104,6 @@
          <button aria-label="Cancel" onclick={handleCancel} class="btn btn-secondary">
             <label>{labels.cancel}</label>
          </button>
-         <!-- isEdit (pas _isEdit) est accessible dans le template -->
          <template if:true={isEditMode}>
             <button class="btn btn-primary" onclick={handleUpdateRule}>
                <label>{labels.updateRule}</label>

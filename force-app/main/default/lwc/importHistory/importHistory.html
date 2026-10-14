@@ -1,192 +1,95 @@
 <template>
   <div class="ih-shell">
-    <!-- HEADER -->
+
+    <!-- ══ PAGE HEADER ══ -->
     <div class="ih-header-row">
-      <div class="ih-header-left">
-        <div class="ih-header-icon">
-          <span class="ih-header-icon-dot"></span>
-        </div>
-        <div class="ih-header-text">
-          <h1 class="ih-title">{label.title}</h1>
-          <p class="ih-subtitle">{label.subtitle}</p>
-        </div>
+      <div>
+        <h1 class="ih-title">{label.title}</h1>
+        <p class="ih-subtitle">{label.subtitle}</p>
       </div>
-
-      <div class="ih-header-right">
-        <lightning-button
-          label={label.exportReport}
-          variant="neutral"
-          icon-name="utility:download"
-          icon-position="left"
-          onclick={handleExport}
-        ></lightning-button>
-
-        <lightning-button
-          class="ih-primary-btn"
-          label={label.newImportProject}
-          variant="brand"
-          icon-name="utility:add"
-          icon-position="left"
-          onclick={handleNewImportProject}
-        ></lightning-button>
-      </div>
+      <button type="button" class="ih-primary-btn" onclick={handleNewImportProject}>＋ {label.newImportProject}</button>
     </div>
 
-    <!-- FILTERS BAR -->
-    <section class="ih-filter-bar">
-      <div class="ih-filter-group">
-        <div class="ih-filter">
-          <label class="ih-filter-label">{label.filterStatus}</label>
-          <lightning-combobox
-            value={statusFilter}
-            options={statusOptions}
-            variant="label-hidden"
-            onchange={handleStatusChange}
-          ></lightning-combobox>
-        </div>
-
-        <div class="ih-filter">
-          <label class="ih-filter-label">{label.filterDateRange}</label>
-          <lightning-combobox
-            value={dateRangeFilter}
-            options={dateRangeOptions}
-            variant="label-hidden"
-            onchange={handleDateRangeChange}
-          ></lightning-combobox>
-        </div>
-
-        <div class="ih-filter">
-          <label class="ih-filter-label">{label.filterProject}</label>
-          <lightning-combobox
-            value={projectFilter}
-            options={projectOptions}
-            variant="label-hidden"
-            onchange={handleProjectChange}
-          ></lightning-combobox>
-        </div>
-
-        <div class="ih-filter">
-          <label class="ih-filter-label">{label.filterTargetObject}</label>
-          <lightning-combobox
-            value={targetFilter}
-            options={targetOptions}
-            variant="label-hidden"
-            onchange={handleTargetChange}
-          ></lightning-combobox>
-        </div>
-      </div>
-
-      <div class="ih-filter-actions">
-        <lightning-button
-          class="ih-apply-btn"
-          label={label.applyFilters}
-          variant="brand"
-          onclick={handleApplyFilters}
-        ></lightning-button>
-      </div>
-    </section>
-
-    <!-- KPI CARDS -->
+    <!-- ══ KPI STRIP ══ -->
     <section class="ih-kpi-row">
       <article class="ih-kpi-card">
-        <div class="ih-kpi-header">
-          <span class="ih-kpi-label">{label.kpiTotalExecutions}</span>
-          <div class="ih-kpi-icon ih-kpi-play">
-            <lightning-icon
-              icon-name="utility:play"
-              size="x-small"
-              alternative-text="Total executions"
-            ></lightning-icon>
-          </div>
-        </div>
-        <div class="ih-kpi-value">{totalExecutions}</div>
-      </article>
-
-      <article class="ih-kpi-card">
-        <div class="ih-kpi-header">
-          <span class="ih-kpi-label">{label.kpiSuccessRate}</span>
-          <div class="ih-kpi-icon ih-kpi-success">
-            <lightning-icon
-              icon-name="utility:check"
-              size="x-small"
-              alternative-text="Success rate"
-            ></lightning-icon>
-          </div>
-        </div>
-        <div class="ih-kpi-value ih-kpi-success-text">
-          {successRateDisplay}
+        <div class="ih-kmi-icon ih-kmi-icon-indigo">📦</div>
+        <div>
+          <div class="ih-kmi-val">{totalExecutions}</div>
+          <div class="ih-kmi-label">{label.kpiTotalExecutions}</div>
         </div>
       </article>
 
       <article class="ih-kpi-card">
-        <div class="ih-kpi-header">
-          <span class="ih-kpi-label">{label.kpiRecordsProcessed}</span>
-          <div class="ih-kpi-icon ih-kpi-records">
-            <lightning-icon
-              icon-name="utility:database"
-              size="x-small"
-              alternative-text="Records processed"
-            ></lightning-icon>
-          </div>
+        <div class="ih-kmi-icon ih-kmi-icon-green">✅</div>
+        <div>
+          <div class="ih-kmi-val ih-kmi-val-green">{successRateDisplay}</div>
+          <div class="ih-kmi-label">{label.kpiSuccessRate}</div>
         </div>
-        <div class="ih-kpi-value">{recordsProcessedDisplay}</div>
       </article>
 
       <article class="ih-kpi-card">
-        <div class="ih-kpi-header">
-          <span class="ih-kpi-label">{label.kpiAvgDuration}</span>
-          <div class="ih-kpi-icon ih-kpi-duration">
-            <lightning-icon
-              icon-name="utility:clock"
-              size="x-small"
-              alternative-text="Average duration"
-            ></lightning-icon>
-          </div>
+        <div class="ih-kmi-icon ih-kmi-icon-coral">❌</div>
+        <div>
+          <div class="ih-kmi-val">{recordsProcessedDisplay}</div>
+          <div class="ih-kmi-label">{label.kpiRecordsProcessed}</div>
         </div>
-        <div class="ih-kpi-value">{avgDurationDisplay}</div>
+      </article>
+
+      <article class="ih-kpi-card">
+        <div class="ih-kmi-icon ih-kmi-icon-amber">📊</div>
+        <div>
+          <div class="ih-kmi-val">{avgDurationDisplay}</div>
+          <div class="ih-kmi-label">{label.kpiAvgDuration}</div>
+        </div>
       </article>
     </section>
 
-    <!-- EXECUTION HISTORY TABLE -->
-    <section class="ih-table-card">
+    <!-- ══ FILTER BAR ══ -->
+    <div class="ih-filter-bar">
+      <div class="ih-search-box">
+        <span class="ih-search-icon">🔍</span>
+        <input type="search" class="ih-search-input" placeholder={label.tableSearch}
+          value={searchTerm} oninput={handleSearchChange} />
+      </div>
+
+      <select class="ih-filter-select" onchange={handleStatusChange}>
+        <template for:each={statusOptionsWithSelected} for:item="o">
+          <option key={o.value} value={o.value} selected={o.isSelected}>{o.label}</option>
+        </template>
+      </select>
+
+      <select class="ih-filter-select" onchange={handleProjectChange}>
+        <template for:each={projectOptionsWithSelected} for:item="o">
+          <option key={o.value} value={o.value} selected={o.isSelected}>{o.label}</option>
+        </template>
+      </select>
+
+      <select class="ih-filter-select" onchange={handleDateRangeChange}>
+        <template for:each={dateRangeOptionsWithSelected} for:item="o">
+          <option key={o.value} value={o.value} selected={o.isSelected}>{o.label}</option>
+        </template>
+      </select>
+
+      <button type="button" class="ih-apply-btn" onclick={handleApplyFilters}>{label.applyFilters}</button>
+      <button type="button" class="ih-export-btn" onclick={handleExport}>📤 {label.exportReport}</button>
+    </div>
+
+    <!-- ══ HISTORY TABLE ══ -->
+    <div class="ih-table-card">
       <div class="ih-table-header-row">
         <h2 class="ih-table-title">{label.tableTitle}</h2>
-
         <div class="ih-table-header-right">
-          <lightning-button
-            label={deleteSelectedLabel}
-            variant="destructive-text"
-            icon-name="utility:delete"
-            icon-position="left"
-            onclick={handleDeleteSelected}
-            disabled={isBulkDeleteDisabled}
-          ></lightning-button>
-
-          <div class="ih-search-wrapper">
-            <lightning-input
-              type="search"
-              variant="label-hidden"
-              placeholder={label.tableSearch}
-              value={searchTerm}
-              onchange={handleSearchChange}
-            ></lightning-input>
-          </div>
-
-          <lightning-button-icon
-            icon-name="utility:filterList"
-            alternative-text="Filter"
-            variant="border-filled"
-          ></lightning-button-icon>
+          <button type="button" class="ih-del-sel-btn" onclick={handleDeleteSelected} disabled={isBulkDeleteDisabled}>
+            🗑 {deleteSelectedLabel}
+          </button>
         </div>
       </div>
 
       <div class="ih-table-wrapper">
         <template if:true={isDeleting}>
           <div class="ih-spinner-overlay">
-            <lightning-spinner
-              alternative-text="Deleting executions"
-              size="small"
-            ></lightning-spinner>
+            <div class="ih-spinner"></div>
           </div>
         </template>
 
@@ -194,19 +97,13 @@
           <thead>
             <tr>
               <th>
-                <lightning-input
-                  type="checkbox"
-                  variant="label-hidden"
-                  checked={isAllPageSelected}
-                  onchange={handleToggleSelectPage}
-                ></lightning-input>
+                <input type="checkbox" checked={isAllPageSelected} onchange={handleToggleSelectPage} />
               </th>
               <th>{label.tableColProject}</th>
-              <th>{label.tableColStatus}</th>
-              <th>{label.tableColTarget}</th>
-              <th>{label.tableColRecords}</th>
-              <th>{label.tableColDuration}</th>
               <th>{label.tableColStarted}</th>
+              <th>{label.tableColDuration}</th>
+              <th>{label.tableColRecords}</th>
+              <th>{label.tableColStatus}</th>
               <th class="ih-actions-col">{label.tableColActions}</th>
             </tr>
           </thead>
@@ -215,90 +112,80 @@
             <template if:true={pageRows}>
               <template if:true={pageRows.length}>
                 <template for:each={pageRows} for:item="row">
-                  <tr key={row.id}>
-                    <td>
-                      <lightning-input
-                        type="checkbox"
-                        variant="label-hidden"
-                        data-id={row.id}
-                        checked={row.isSelected}
-                        onchange={handleToggleSelectRow}
-                      ></lightning-input>
+                  <tr key={row.id} data-id={row.id} onclick={handleRowClick}>
+
+                    <td onclick={handleCellClick}>
+                      <input type="checkbox" data-id={row.id}
+                        checked={row.isSelected} onchange={handleToggleSelectRow} />
                     </td>
+
+                    <!-- Projet -->
                     <td>
                       <div class="ih-project-cell">
-                        <div class={row.iconBgClass}>
-                          <lightning-icon
-                            icon-name={row.iconName}
-                            size="small"
-                            class="ih-project-icon-inner"
-                            alternative-text="Project icon"
-                          ></lightning-icon>
-                        </div>
-
+                        <div class={row.iconBgClass}>{row.iconEmoji}</div>
                         <div class="ih-project-text">
                           <div class="ih-project-name">{row.projectName}</div>
-                          <div class="ih-project-sub">{row.executionLabel}</div>
+                          <span class="ih-proj-obj">{row.targetObject}</span>
                         </div>
                       </div>
                     </td>
 
+                    <!-- Démarré le -->
                     <td>
-                      <div>
-                        <span class={row.statusClass}>{row.statusLabel}</span>
-                        <div class="ih-project-sub">{row.phaseText}</div>
+                      <div class="ih-exec-date">{row.startedText}</div>
+                      <div class="ih-exec-time">{row.executionLabel}</div>
+                    </td>
+
+                    <!-- Durée -->
+                    <td>
+                      <span class="ih-exec-dur">{row.durationText}</span>
+                    </td>
+
+                    <!-- Enregistrements -->
+                    <td>
+                      <div class="ih-rec-counts">
+                        <span class="ih-rec-ok">{row.recordsText}</span>
+                        <span class="ih-rec-err">{row.phaseText}</span>
                       </div>
                     </td>
 
+                    <!-- Statut -->
                     <td>
-                      <span class="ih-link-text">{row.targetObject}</span>
+                      <span class={row.statusClass}>{row.statusLabel}</span>
+                      <template if:true={row.showStatusDot}>
+                        <span class={row.statusDotClass}></span>
+                      </template>
                     </td>
 
-                    <td>{row.recordsText}</td>
-                    <td>{row.durationText}</td>
-                    <td>{row.startedText}</td>
-
-                    <td class="ih-actions-cell">
+                    <!-- Actions -->
+                    <td class="ih-actions-cell" onclick={handleCellClick}>
                       <div class="ih-actions-inline">
-                        <lightning-button
-                          variant="base"
-                          label={row.actionLabel}
-                          class="ih-link-button"
+                        <button
+                          class="ih-row-btn ih-row-btn-view"
                           data-id={row.id}
                           onclick={handleView}
-                        ></lightning-button>
-
-                        <lightning-button-icon
-                          icon-name="utility:download"
-                          alternative-text="Download"
-                          variant="bare"
-                          size="x-small"
-                        ></lightning-button-icon>
-
-                        <lightning-button-icon
-                          icon-name="utility:delete"
-                          alternative-text="Delete"
-                          variant="bare"
-                          size="x-small"
+                        >Détails</button>
+                        <button
+                          class="ih-row-btn ih-row-btn-export"
+                          data-id={row.id}
+                          onclick={handleExportSelected}
+                        >📤</button>
+                        <button
+                          class="ih-row-btn ih-row-btn-del"
                           data-id={row.id}
                           onclick={handleDeleteExecution}
                           disabled={isBusy}
-                        ></lightning-button-icon>
-
-                        <template if:true={row.showStatusDot}>
-                          <span class={row.statusDotClass}></span>
-                        </template>
+                        >🗑</button>
                       </div>
                     </td>
+
                   </tr>
                 </template>
               </template>
 
               <template if:false={pageRows.length}>
                 <tr>
-                  <td colspan="8" class="ih-empty">
-                    {label.tableEmpty}
-                  </td>
+                  <td colspan="7" class="ih-empty">{label.tableEmpty}</td>
                 </tr>
               </template>
             </template>
@@ -306,48 +193,115 @@
         </table>
       </div>
 
-      <div class="ih-footer-row">
-        <p class="ih-results-text">{showingText}</p>
-
-        <div class="ih-pagination">
-          <lightning-button-icon
-            icon-name="utility:chevronleft"
-            alternative-text="Previous"
+      <!-- Pagination -->
+      <div class="ih-pager">
+        <span class="ih-pager-info">{showingText}</span>
+        <div class="ih-pager-btns">
+          <button
+            class="ih-pg"
             onclick={handlePrevious}
             disabled={isPreviousDisabled}
-            variant="border-filled"
-            size="small"
-          ></lightning-button-icon>
-
-          <span class="ih-page-indicator">{currentPage}</span>
-
-          <lightning-button-icon
-            icon-name="utility:chevronright"
-            alternative-text="Next"
+          >←</button>
+          <span class="ih-pg ih-pg-active">{currentPage}</span>
+          <button
+            class="ih-pg"
             onclick={handleNext}
             disabled={isNextDisabled}
-            variant="border-filled"
-            size="small"
-          ></lightning-button-icon>
+          >→</button>
         </div>
       </div>
-    </section>
+    </div>
+
   </div>
 
-  <!-- CREATE PROJECT MODAL -->
+  <!-- ══ DRAWER OVERLAY ══ -->
+  <template if:true={showViewModal}>
+    <div class="ih-drawer-overlay" onclick={closeViewModal}></div>
+    <div class="ih-drawer ih-drawer-open">
+      <div class="ih-drawer-header">
+        <div class="ih-drawer-title">Détails — {selectedRow.executionLabel}</div>
+        <button class="ih-drawer-close" onclick={closeViewModal}>✕</button>
+      </div>
+
+      <div class="ih-drawer-body">
+
+        <!-- Résumé -->
+        <div class="ih-drawer-section">
+          <div class="ih-drawer-sec-title">Résumé</div>
+          <div class="ih-drawer-row">
+            <span class="ih-dr-key">{label.detailStatus}</span>
+            <span class="ih-dr-val"><span class={selectedRow.statusClass}>{selectedRow.statusLabel}</span></span>
+          </div>
+          <div class="ih-drawer-row">
+            <span class="ih-dr-key">{label.detailTargetObject}</span>
+            <span class="ih-dr-val">{selectedRow.targetObject}</span>
+          </div>
+          <div class="ih-drawer-row">
+            <span class="ih-dr-key">{label.detailPhase}</span>
+            <span class="ih-dr-val">{selectedRow.phaseText}</span>
+          </div>
+        </div>
+
+        <!-- Métriques -->
+        <div class="ih-drawer-section">
+          <div class="ih-drawer-sec-title">{label.modalRecords}</div>
+          <div class="ih-drawer-row">
+            <span class="ih-dr-key">{label.detailProcessed}</span>
+            <span class="ih-dr-val ih-dr-val-green">{selectedRow.processed}</span>
+          </div>
+          <div class="ih-drawer-row">
+            <span class="ih-dr-key">{label.detailSuccess}</span>
+            <span class="ih-dr-val ih-dr-val-green">{selectedRow.success}</span>
+          </div>
+          <div class="ih-drawer-row">
+            <span class="ih-dr-key">{label.detailFailed}</span>
+            <span class="ih-dr-val ih-dr-val-coral">{selectedRow.failed}</span>
+          </div>
+          <div class="ih-drawer-row">
+            <span class="ih-dr-key">{label.detailTotal}</span>
+            <span class="ih-dr-val">{selectedRow.total}</span>
+          </div>
+          <div class="ih-drawer-row">
+            <span class="ih-dr-key">{label.detailRemaining}</span>
+            <span class="ih-dr-val">{selectedRow.remaining}</span>
+          </div>
+        </div>
+
+        <!-- Timing -->
+        <div class="ih-drawer-section">
+          <div class="ih-drawer-sec-title">{label.modalExecDetails}</div>
+          <div class="ih-drawer-row">
+            <span class="ih-dr-key">{label.detailStarted}</span>
+            <span class="ih-dr-val">{selectedRow.startedText}</span>
+          </div>
+          <div class="ih-drawer-row">
+            <span class="ih-dr-key">{label.detailDuration}</span>
+            <span class="ih-dr-val">{selectedRow.durationText}</span>
+          </div>
+          <div class="ih-drawer-row">
+            <span class="ih-dr-key">{label.detailRecordsSummary}</span>
+            <span class="ih-dr-val">{selectedRow.recordsText}</span>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="ih-drawer-footer">
+        <button type="button" class="ih-export-btn" onclick={handleExportSelected}>📤 {label.modalExportExec}</button>
+        <button type="button" class="ih-del-btn" data-id={selectedRow.id}
+          onclick={handleDeleteExecution} disabled={isDeleteSelectedDisabled}>🗑 {label.modalDeleteExec}</button>
+      </div>
+    </div>
+  </template>
+
+  <!-- ══ CREATE PROJECT MODAL ══ -->
   <template if:true={showCreateModal}>
     <section class="ih-modal-backdrop">
       <div class="ih-modal">
         <div class="ih-modal-header">
           <h2>{label.modalCreateTitle}</h2>
-          <lightning-button-icon
-            icon-name="utility:close"
-            alternative-text="Close"
-            variant="bare"
-            onclick={handleCreateCancel}
-          ></lightning-button-icon>
+          <button type="button" class="ih-modal-close" onclick={handleCreateCancel}>✕</button>
         </div>
-
         <div class="ih-modal-body">
           <c-project-form-card-component
             onsaveproject={handleProjectSaved}
@@ -358,115 +312,4 @@
     </section>
   </template>
 
-  <!-- VIEW EXECUTION MODAL -->
-  <template if:true={showViewModal}>
-    <section class="ih-modal-backdrop">
-      <div class="ih-modal ih-modal-view">
-        <div class="ih-modal-header ih-modal-header-view">
-          <div class="ih-modal-header-left">
-            <div class={selectedRow.iconBgClass}>
-              <lightning-icon
-                icon-name={selectedRow.iconName}
-                size="small"
-                class="ih-project-icon-inner"
-              ></lightning-icon>
-            </div>
-            <div class="ih-modal-title-block">
-              <h2>{selectedRow.projectName}</h2>
-              <p>{selectedRow.executionLabel}</p>
-            </div>
-          </div>
-
-          <div class="ih-modal-header-right">
-            <span class={selectedRow.statusClass}>{selectedRow.statusLabel}</span>
-
-            <lightning-button
-              label={label.modalExportExec}
-              variant="neutral"
-              icon-name="utility:download"
-              icon-position="left"
-              onclick={handleExportSelected}
-            ></lightning-button>
-
-            <lightning-button
-              label={label.modalDeleteExec}
-              variant="destructive-text"
-              icon-name="utility:delete"
-              icon-position="left"
-              data-id={selectedRow.id}
-              onclick={handleDeleteExecution}
-              disabled={isDeleteSelectedDisabled}
-            ></lightning-button>
-
-            <lightning-button-icon
-              icon-name="utility:close"
-              alternative-text="Close"
-              variant="bare"
-              onclick={closeViewModal}
-            ></lightning-button-icon>
-          </div>
-        </div>
-
-        <div class="ih-modal-body ih-modal-body-view">
-          <div class="ih-view-grid">
-            <div class="ih-view-column">
-              <h3 class="ih-view-section-title">{label.modalExecDetails}</h3>
-              <dl class="ih-view-list">
-                <div class="ih-view-row">
-                  <dt>{label.detailTargetObject}</dt>
-                  <dd>{selectedRow.targetObject}</dd>
-                </div>
-                <div class="ih-view-row">
-                  <dt>{label.detailStatus}</dt>
-                  <dd>{selectedRow.statusLabel}</dd>
-                </div>
-                <div class="ih-view-row">
-                  <dt>{label.detailPhase}</dt>
-                  <dd>{selectedRow.phaseText}</dd>
-                </div>
-                <div class="ih-view-row">
-                  <dt>{label.detailStarted}</dt>
-                  <dd>{selectedRow.startedText}</dd>
-                </div>
-                <div class="ih-view-row">
-                  <dt>{label.detailDuration}</dt>
-                  <dd>{selectedRow.durationText}</dd>
-                </div>
-              </dl>
-            </div>
-
-            <div class="ih-view-column">
-              <h3 class="ih-view-section-title">{label.modalRecords}</h3>
-              <dl class="ih-view-list">
-                <div class="ih-view-row">
-                  <dt>{label.detailProcessed}</dt>
-                  <dd>{selectedRow.processed}</dd>
-                </div>
-                <div class="ih-view-row">
-                  <dt>{label.detailTotal}</dt>
-                  <dd>{selectedRow.total}</dd>
-                </div>
-                <div class="ih-view-row">
-                  <dt>{label.detailFailed}</dt>
-                  <dd>{selectedRow.failed}</dd>
-                </div>
-                <div class="ih-view-row">
-                  <dt>{label.detailSuccess}</dt>
-                  <dd>{selectedRow.success}</dd>
-                </div>
-                <div class="ih-view-row">
-                  <dt>{label.detailRemaining}</dt>
-                  <dd>{selectedRow.remaining}</dd>
-                </div>
-                <div class="ih-view-row">
-                  <dt>{label.detailRecordsSummary}</dt>
-                  <dd>{selectedRow.recordsText}</dd>
-                </div>
-              </dl>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  </template>
 </template>

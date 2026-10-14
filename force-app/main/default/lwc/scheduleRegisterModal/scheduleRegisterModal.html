@@ -2,36 +2,34 @@
     <section class="modal-backdrop">
         <div class="modal">
             <header class="modal__header">
-                <h2 class="slds-text-heading_medium">Add New Schedule</h2>
+                <h2>Add New Schedule</h2>
+                <button type="button" class="modal-close-btn" onclick={handleCloseModal} title="Close">✕</button>
             </header>
             <div class="modal__body">
                 <div class="form-group">
                     <label class="form-label" for="freq">Frequency</label>
-                    <lightning-combobox
-                        id="freq"
-                        class="rounded-input"
-                        name="frequency"
-                        value={selectedFrequency}
-                        options={picklistValues}
-                        onchange={handleFrequencyChange}
-                        variant="label-hidden"
-                    ></lightning-combobox>
+                    <select id="freq" class="rounded-input" onchange={handleFrequencyChange}>
+                        <template for:each={picklistValuesWithSelected} for:item="o">
+                            <option key={o.value} value={o.value} selected={o.isSelected}>{o.label}</option>
+                        </template>
+                    </select>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" for="time">Time</label>
-                    <lightning-input id="time" class="rounded-input" type="datetime" value={nextRun} onchange={handleNextRunChange}
-                        variant="label-hidden"></lightning-input>
+                    <label class="form-label" for="time">Date &amp; Heure</label>
+                    <input
+                        id="time"
+                        type="datetime-local"
+                        class="rounded-input"
+                        value={nextRun}
+                        onchange={handleNextRunChange}
+                    />
                 </div>
             </div>
 
             <footer class="modal__footer">
-                <button class="btn btn-secondary" onclick={handleCloseModal}>
-                   <label>Cancel</label>
-                </button>
-                <button class="btn btn-primary" onclick={handleAddSchedule}>
-                    <label>Add Schedule</label>
-                </button>
+                <button type="button" class="btn btn-secondary" onclick={handleCloseModal}>Cancel</button>
+                <button type="button" class="btn btn-primary" onclick={handleAddSchedule}>Add Schedule</button>
             </footer>
         </div>
     </section>

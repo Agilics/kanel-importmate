@@ -432,19 +432,29 @@ export default class ImportHistory extends LightningElement {
   }
 
   handleStatusChange(event) {
-    this.statusFilter = event.detail.value;
+    this.statusFilter = event.target.value ?? event.detail?.value ?? 'all';
   }
 
   handleDateRangeChange(event) {
-    this.dateRangeFilter = event.detail.value;
+    this.dateRangeFilter = event.target.value ?? event.detail?.value ?? 'all';
   }
 
   handleProjectChange(event) {
-    this.projectFilter = event.detail.value;
+    this.projectFilter = event.target.value ?? event.detail?.value ?? 'all';
   }
 
   handleTargetChange(event) {
-    this.targetFilter = event.detail.value;
+    this.targetFilter = event.target.value ?? event.detail?.value ?? 'all';
+  }
+
+  get statusOptionsWithSelected() {
+    return this.statusOptions.map(o => ({ ...o, isSelected: o.value === this.statusFilter }));
+  }
+  get dateRangeOptionsWithSelected() {
+    return this.dateRangeOptions.map(o => ({ ...o, isSelected: o.value === this.dateRangeFilter }));
+  }
+  get projectOptionsWithSelected() {
+    return this.projectOptions.map(o => ({ ...o, isSelected: o.value === this.projectFilter }));
   }
 
   handleApplyFilters() {
@@ -569,27 +579,28 @@ export default class ImportHistory extends LightningElement {
       const targetLower = (r.targetObject || '').toLowerCase();
 
       let iconName = 'standard:record';
+      let iconEmoji = '📋';
       let iconBgClass = 'ih-project-icon ih-project-icon-generic';
 
       if (targetLower.includes('contact')) {
-        iconName = 'standard:contact';
+        iconName = 'standard:contact'; iconEmoji = '👤';
         iconBgClass = 'ih-project-icon ih-project-icon-blue';
       } else if (targetLower.includes('opportunity')) {
-        iconName = 'standard:opportunity';
+        iconName = 'standard:opportunity'; iconEmoji = '💰';
         iconBgClass = 'ih-project-icon ih-project-icon-orange';
       } else if (targetLower.includes('account')) {
-        iconName = 'standard:account';
+        iconName = 'standard:account'; iconEmoji = '🏢';
         iconBgClass = 'ih-project-icon ih-project-icon-purple';
       } else if (targetLower.includes('lead')) {
-        iconName = 'standard:lead';
+        iconName = 'standard:lead'; iconEmoji = '⚡';
         iconBgClass = 'ih-project-icon ih-project-icon-indigo';
       }
 
       if (nameLower.includes('analytics') || nameLower.includes('report')) {
-        iconName = 'standard:dashboard';
+        iconName = 'standard:dashboard'; iconEmoji = '📈';
         iconBgClass = 'ih-project-icon ih-project-icon-pink';
       } else if (nameLower.includes('migration') || nameLower.includes('sync')) {
-        iconName = 'standard:flow';
+        iconName = 'standard:flow'; iconEmoji = '🔄';
         iconBgClass = 'ih-project-icon ih-project-icon-teal';
       }
 
@@ -605,6 +616,7 @@ export default class ImportHistory extends LightningElement {
         durationText: this.formatDuration(r.durationMs),
         startedText: this.formatRelativeTime(r.startedAt),
         iconName,
+        iconEmoji,
         iconBgClass,
         showStatusDot,
         statusDotClass
@@ -688,7 +700,23 @@ export default class ImportHistory extends LightningElement {
     }
   }
 
+  handleRowClick(event) {
+    const id = event.currentTarget.dataset.id;
+    if (!id) return;
+    const row = (this.pageRows || []).find((r) => r.id === id);
+    if (!row) return;
+    this.selectedRow = { ...row };
+    this.showViewModal = true;
+  }
+
+  // Prevent row-level click from firing when interacting with cells that
+  // contain checkboxes or action buttons.
+  handleCellClick(event) {
+    event.stopPropagation();
+  }
+
   handleView(event) {
+    event.stopPropagation();
     const id = event.currentTarget.dataset.id;
     const row = (this.pageRows || []).find((r) => r.id === id);
 
@@ -787,6 +815,7 @@ export default class ImportHistory extends LightningElement {
   }
 
   async handleDeleteExecution(event) {
+    event.stopPropagation();
     const executionId = event.currentTarget?.dataset?.id;
     if (!executionId) {
       this.showToast('Error', LBL_TOAST_EXEC_ID_MISSING, 'error');

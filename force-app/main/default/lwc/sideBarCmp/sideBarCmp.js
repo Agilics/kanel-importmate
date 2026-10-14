@@ -8,8 +8,11 @@ import STEP_PROJECT_SETUP from '@salesforce/label/c.SideBar_Step_ProjectSetup';
 import STEP_DATA_SOURCE from '@salesforce/label/c.SideBar_Step_DataSource';
 import STEP_FIELD_MAPPING from '@salesforce/label/c.SideBar_Step_FieldMapping';
 import STEP_TRANSFORMATIONS from '@salesforce/label/c.SideBar_Step_Transformations';
-import STEP_VALIDATION from '@salesforce/label/c.SideBar_Step_Validation';
 import STEP_EXECUTION from '@salesforce/label/c.SideBar_Step_Execution';
+import STEP_VALIDATION from '@salesforce/label/c.SideBar_Step_Validation';
+
+import STEP_SCHEDULE from '@salesforce/label/c.SideBar_Step_Schedule';
+
 
 // QUICK ACTIONS
 import TITLE_SECTION from '@salesforce/label/c.SideBar_QuickAction_Title';
@@ -26,9 +29,9 @@ export default class SideBarCmp extends LightningElement {
     @api showProjectDetails = false;
 
     quickActions = [
-        { icon: 'utility:refresh', label: QUICK_ACTION_RECENT_PROJECT },
-        { icon: 'utility:chart', label:    QUICK_ACTION_ANALYTICS },
-        { icon: 'utility:clock', label:    QUICK_ACTION_EXECUTION_HISTORY }
+        { icon: 'utility:refresh', iconEmoji: '↺', label: QUICK_ACTION_RECENT_PROJECT },
+        { icon: 'utility:chart',   iconEmoji: '📊', label: QUICK_ACTION_ANALYTICS },
+        { icon: 'utility:clock',   iconEmoji: '⏱', label: QUICK_ACTION_EXECUTION_HISTORY }
     ];
 
     get steps() {
@@ -36,9 +39,10 @@ export default class SideBarCmp extends LightningElement {
             { number: 1, label: STEP_PROJECT_SETUP},
             { number: 2, label: STEP_DATA_SOURCE},
             { number: 3, label: STEP_FIELD_MAPPING},
-            { number: 4, label:  STEP_TRANSFORMATIONS},
+            { number: 4, label: STEP_TRANSFORMATIONS},
             { number: 5, label: STEP_VALIDATION},
-            { number: 6, label:  STEP_EXECUTION }
+            { number: 6, label: STEP_EXECUTION},
+            { number: 7, label: STEP_SCHEDULE}
         ].map(step => ({
             ...step,
             cssClass: this.getStepClass(step.number),

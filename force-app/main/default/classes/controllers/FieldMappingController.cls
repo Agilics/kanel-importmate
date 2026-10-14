@@ -51,9 +51,16 @@ public with sharing class FieldMappingController {
         String targetObjectApiName,
         List<FieldMappingRepository.FieldMappingDTO> rows
     ) {
-      
-        List<FieldMappingRepository.FieldMappingDTO> mappingRowDtos = rows;
-        return FieldMappingService.saveMappings(targetObjectApiName, mappingRowDtos);
+        try {
+            return FieldMappingService.saveMappings(targetObjectApiName, rows);
+        } catch (AuraHandledException e) {
+            throw e;
+        } catch (Exception e) {
+            String msg = e.getMessage();
+            throw new AuraHandledException(
+                String.isNotBlank(msg) ? msg : 'Erreur lors de la sauvegarde des mappings.'
+            );
+        }
     }
 
     @AuraEnabled(cacheable=true)
@@ -66,11 +73,19 @@ public with sharing class FieldMappingController {
         String targetObjectApiName,
         String rowsJson
     ) {
-        List<FieldMappingRepository.FieldMappingDTO> parsedMappingRowDtos =
-            (List<FieldMappingRepository.FieldMappingDTO>)
-            JSON.deserialize(rowsJson, List<FieldMappingRepository.FieldMappingDTO>.class);
-
-        return FieldMappingService.saveMappings(targetObjectApiName, parsedMappingRowDtos);
+        try {
+            List<FieldMappingRepository.FieldMappingDTO> parsedMappingRowDtos =
+                (List<FieldMappingRepository.FieldMappingDTO>)
+                JSON.deserialize(rowsJson, List<FieldMappingRepository.FieldMappingDTO>.class);
+            return FieldMappingService.saveMappings(targetObjectApiName, parsedMappingRowDtos);
+        } catch (AuraHandledException e) {
+            throw e;
+        } catch (Exception e) {
+            String msg = e.getMessage();
+            throw new AuraHandledException(
+                String.isNotBlank(msg) ? msg : 'Erreur lors de la sauvegarde des mappings.'
+            );
+        }
     }
 
 

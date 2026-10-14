@@ -1,191 +1,131 @@
+/* ══ Aurora variables (mêmes noms que aurora-shared.css) ══ */
+:host {
+  display: block;
+  font-family: 'Inter', -apple-system, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  --indigo:        #4F46E5;
+  --indigo-soft:   rgba(79,70,229,0.08);
+  --indigo-glow:   rgba(79,70,229,0.25);
+  --violet:        #7C3AED;
+  --green:         #10B981;
+  --green-soft:    rgba(16,185,129,0.1);
+  --coral:         #F43F5E;
+  --amber:         #F59E0B;
+  --text:          #0F172A;
+  --text-2:        #1E293B;
+  --muted:         #64748B;
+  --muted-2:       #94A3B8;
+  --border:        rgba(148,163,184,0.2);
+  --border-solid:  #E2E8F0;
+  --surface:       rgba(255,255,255,0.75);
+  --surface-solid: #FFFFFF;
+  --grad-brand:    linear-gradient(135deg,#4F46E5 0%,#7C3AED 100%);
+  --grad-green:    linear-gradient(135deg,#10B981 0%,#06B6D4 100%);
+  --shadow-sm:     0 2px 8px rgba(79,70,229,0.06),0 1px 3px rgba(15,23,42,0.04);
+  --shadow-md:     0 4px 20px rgba(79,70,229,0.10),0 2px 6px rgba(15,23,42,0.05);
+  --shadow-lg:     0 8px 40px rgba(79,70,229,0.15),0 4px 12px rgba(15,23,42,0.06);
+  --shadow-glow:   0 0 0 3px rgba(79,70,229,0.08),0 4px 20px rgba(79,70,229,0.15);
+  --radius-sm:     10px;
+  --radius:        16px;
+  --radius-pill:   999px;
+  --ease-out:      cubic-bezier(0.16,1,0.3,1);
+}
+
+/* ══ Card (prototype: .project-card) ══ */
 .project-card {
-    background: white;
-    border: 1px solid #e5e7eb;
-    border-radius: 0.5rem;
-    padding: 1.25rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  background: var(--surface-solid);
+  border: 1px solid var(--border-solid);
+  border-radius: var(--radius-sm);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  transition: all .25s var(--ease-out);
+  cursor: pointer;
+  display: flex; flex-direction: column; gap: 13px;
+  height: 100%; position: relative;
+  box-sizing: border-box;
 }
-
 .project-card:hover {
-    box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.15);
-    transform: translateY(-2px);
-    border-color: #1e40af;
+  border-color: rgba(79,70,229,0.3);
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-3px);
+  background: var(--surface-solid);
 }
 
-/* Card Header */
-.card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 1rem;
+/* ══ Edit/Delete actions — visible on hover ══ */
+.card-actions {
+  position: absolute; top: 12px; right: 12px;
+  display: flex; gap: 4px;
+  opacity: 0; transition: opacity .2s;
+}
+.project-card:hover .card-actions { opacity: 1; }
+.card-act-btn {
+  width: 26px; height: 26px; border-radius: 6px;
+  border: 1px solid var(--border-solid); background: var(--surface-solid);
+  color: var(--muted); font-size: 13px; cursor: pointer;
+  display: grid; place-items: center; line-height: 1;
+  transition: all .12s;
+}
+.card-act-btn:hover { border-color: var(--indigo); color: var(--indigo); background: var(--indigo-soft); }
+.card-act-btn.del:hover { border-color: var(--coral); color: var(--coral); background: var(--coral-soft); }
+
+/* ══ Top row: name + object badge (prototype: .project-top) ══ */
+.project-top {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; gap: 8px;
+  padding-right: 56px;
+}
+.project-name {
+  font-size: .88rem; font-weight: 700; color: var(--text);
+  line-height: 1.35; letter-spacing: -0.2px;
+}
+.project-object {
+  font-size: .7rem; font-weight: 600; color: var(--indigo);
+  background: var(--indigo-soft);
+  border: 1px solid rgba(79,70,229,0.12);
+  padding: 3px 9px; border-radius: var(--radius-pill);
+  flex-shrink: 0; white-space: nowrap;
 }
 
-.card-header-left {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    flex: 1;
-}
-
-.project-title {
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: #111827;
-    margin: 0;
-    line-height: 1.5;
-}
-
-.card-header-right {
-    display: flex;
-    gap: 0.25rem;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-}
-
-.project-card:hover .card-header-right {
-    opacity: 1;
-}
-
-.action-icon {
-    color: #6b7280;
-}
-
-.action-icon:hover {
-    color: #1e40af;
-}
-
-/* Status Badge */
-.status-badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.25rem 0.75rem;
-    border-radius: 9999px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    text-transform: capitalize;
-}
-
-.status-success {
-    background-color: #d1fae5;
-    color: #065f46;
-}
-
-.status-progress {
-    background-color: #fef3c7;
-    color: #92400e;
-}
-
-.status-error {
-    background-color: #fee2e2;
-    color: #991b1b;
-}
-
-.status-draft {
-    background-color: #f3f4f6;
-    color: #374151;
-}
-
-/* Card Body */
-.card-body {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.project-description {
-    font-size: 0.875rem;
-    color: #6b7280;
-    margin: 0;
-    line-height: 1.5;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-
-/* Project Meta */
-.project-meta {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-}
-
-.meta-item {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.875rem;
-}
-
-.meta-label {
-    color: #6b7280;
-    font-weight: 500;
-}
-
-.meta-value {
-    color: #111827;
-    font-weight: 600;
-}
-
-/* Progress Section */
-.progress-section {
-    margin-top: 0.5rem;
-}
-
-.progress-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.5rem;
-}
-
+/* ══ Progress (prototype: .progress-label / .progress-bar / .progress-fill) ══ */
 .progress-label {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: #6b7280;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+  display: flex; justify-content: space-between;
+  font-size: .72rem; color: var(--muted); margin-bottom: 6px;
 }
-
-.progress-percentage {
-    font-size: 0.875rem;
-    font-weight: 600;
-    color: #1e40af;
-}
-
 .progress-bar {
-    width: 100%;
-    height: 0.5rem;
-    background-color: #e5e7eb;
-    border-radius: 9999px;
-    overflow: hidden;
+  height: 5px; background: rgba(148,163,184,0.15);
+  border-radius: var(--radius-pill); overflow: hidden;
 }
-
 .progress-fill {
-    height: 100%;
-    background: linear-gradient(90deg, #3b82f6 0%, #1e40af 100%);
-    border-radius: 9999px;
-    transition: width 0.3s ease;
+  height: 100%; border-radius: var(--radius-pill);
+  background: var(--grad-brand);
+  transition: width .8s var(--ease-out);
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-    .project-card {
-        padding: 1rem;
-    }
-
-    .card-header {
-        flex-direction: column;
-        gap: 0.75rem;
-    }
-
-    .card-header-right {
-        opacity: 1;
-    }
-
-    .project-meta {
-        gap: 0.75rem;
-    }
+/* ══ Footer (prototype: .project-footer) ══ */
+.project-footer {
+  display: flex; align-items: center;
+  justify-content: space-between; margin-top: auto;
 }
+.project-meta { font-size: .72rem; color: var(--muted-2); }
+.project-action {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: .78rem; font-weight: 600; color: var(--indigo);
+  background: var(--indigo-soft); border: 1px solid rgba(79,70,229,0.15);
+  padding: 5px 12px; border-radius: var(--radius-pill);
+  transition: all .15s; white-space: nowrap;
+}
+.project-card:hover .project-action {
+  background: var(--indigo); color: #fff;
+  box-shadow: 0 4px 12px var(--indigo-glow);
+}
+
+/* ══ Status badges (prototype: .status-badge .badge-*) ══ */
+.status-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: .72rem; font-weight: 600; padding: 3px 10px;
+  border-radius: var(--radius-pill); border: 1px solid transparent;
+}
+.badge-active { background: var(--green-soft); color: #059669; border-color: rgba(16,185,129,0.2); }
+.badge-done   { background: var(--indigo-soft); color: var(--indigo); border-color: rgba(79,70,229,0.15); }
+.badge-draft  { background: rgba(148,163,184,0.08); color: var(--muted); border-color: rgba(148,163,184,0.2); }
+.badge-error  { background: rgba(245,158,11,0.1); color: #B45309; border-color: rgba(245,158,11,0.2); }

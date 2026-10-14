@@ -1,0 +1,162 @@
+<template>
+  <div class="analytics-page">
+
+    <!-- Page header -->
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">Analytique</h1>
+        <p class="page-sub">Vue d'ensemble des performances d'import</p>
+      </div>
+      <div class="header-actions">
+        <div class="period-btns">
+          <template for:each={periods} for:item="p">
+            <button key={p.key} class={p.cls} data-period={p.key} onclick={handlePeriod}>{p.label}</button>
+          </template>
+        </div>
+        <button type="button" class="btn btn-outline btn-sm">📤 Exporter</button>
+      </div>
+    </div>
+
+    <!-- KPI large cards -->
+    <div class="kpi-lg">
+      <div class="kpi-lg-card">
+        <div class="klc-top">
+          <div class="klc-icon klc-indigo">📦</div>
+          <span class="klc-trend trend-up">↑ +18%</span>
+        </div>
+        <div class="klc-val">{totalRecordsFormatted}</div>
+        <div class="klc-label">Records importés ce mois</div>
+      </div>
+      <div class="kpi-lg-card">
+        <div class="klc-top">
+          <div class="klc-icon klc-green">✅</div>
+          <span class="klc-trend trend-up">↑ +0.4%</span>
+        </div>
+        <div class="klc-val">{kpi.successRate}%</div>
+        <div class="klc-label">Taux de succès global</div>
+      </div>
+      <div class="kpi-lg-card">
+        <div class="klc-top">
+          <div class="klc-icon klc-amber">⚡</div>
+          <span class="klc-trend trend-up">↑ +2</span>
+        </div>
+        <div class="klc-val">{kpi.executions}</div>
+        <div class="klc-label">Exécutions ce mois</div>
+      </div>
+      <div class="kpi-lg-card">
+        <div class="klc-top">
+          <div class="klc-icon klc-coral">⏱</div>
+          <span class="klc-trend trend-dn">↓ -12s</span>
+        </div>
+        <div class="klc-val">{kpi.avgDuration}</div>
+        <div class="klc-label">Durée moyenne d'import</div>
+      </div>
+    </div>
+
+    <!-- Volume + Donut -->
+    <div class="charts-grid">
+
+      <!-- Bar chart -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Volume d'imports par semaine</div>
+            <div class="chart-sub">Records insérés avec succès</div>
+          </div>
+          <div class="chart-legend">
+            <span class="legend-pill legend-indigo">Insérés</span>
+            <span class="legend-pill legend-coral">Erreurs</span>
+          </div>
+        </div>
+        <div class="bar-chart">
+          <template for:each={barChartData} for:item="bar">
+            <div key={bar.label} class="bar-wrap">
+              <div class="bar-stack">
+                <div class="bar bar-error" style={bar.errStyle} title={bar.errVal}></div>
+                <div class="bar bar-success" style={bar.okStyle} title={bar.okVal}></div>
+              </div>
+              <div class="bar-label">{bar.label}</div>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <!-- Donut -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Taux de succès</div>
+            <div class="chart-sub">Ce mois · toutes exécutions</div>
+          </div>
+        </div>
+        <div class="donut-wrap">
+          <div class="donut" style={donutStyle}>
+            <div class="donut-center">
+              <div class="donut-val">{kpi.successRate}%</div>
+              <div class="donut-sub">Succès</div>
+            </div>
+          </div>
+          <div class="donut-legend">
+            <div class="legend-item">
+              <div class="legend-dot legend-dot-green"></div>
+              Lignes valides
+              <span class="legend-val legend-val-green">{validRecords}</span>
+            </div>
+            <div class="legend-item">
+              <div class="legend-dot legend-dot-coral"></div>
+              Erreurs
+              <span class="legend-val legend-val-coral">{failedRecords}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Object breakdown + Activity -->
+    <div class="charts-grid-2">
+
+      <!-- Horizontal bars by object -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div>
+            <div class="chart-title">Répartition par objet Salesforce</div>
+            <div class="chart-sub">Records importés par type d'objet</div>
+          </div>
+        </div>
+        <div class="hbar-list">
+          <template for:each={objectBreakdown} for:item="obj">
+            <div key={obj.name} class="hbar-item">
+              <div class="hbar-meta">
+                <span class="hbar-name">{obj.name}</span>
+                <span class="hbar-val">{obj.val} — {obj.pct}%</span>
+              </div>
+              <div class="hbar-track">
+                <div class="hbar-fill" style={obj.fillStyle}></div>
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+
+      <!-- Activity feed -->
+      <div class="chart-card">
+        <div class="chart-header">
+          <div class="chart-title">Activité récente</div>
+        </div>
+        <div class="activity-list">
+          <template for:each={recentActivity} for:item="act">
+            <div key={act.id} class="activity-item">
+              <div class="act-dot" style={act.dotStyle}>{act.icon}</div>
+              <div>
+                <div class="act-title">{act.title}</div>
+                <div class="act-sub">{act.sub}</div>
+              </div>
+              <span class="act-time">{act.time}</span>
+            </div>
+          </template>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</template>

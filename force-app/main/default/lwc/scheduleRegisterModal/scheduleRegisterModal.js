@@ -75,12 +75,16 @@ export default class ScheduleRegisterModal extends LightningElement {
         }
     }
     
+    get picklistValuesWithSelected() {
+        return (this.picklistValues || []).map(o => ({ ...o, isSelected: o.value === this.selectedFrequency }));
+    }
+
     handleFrequencyChange(event) {
-        this.selectedFrequency = event.detail.value;
+        this.selectedFrequency = event.target.value ?? event.detail?.value ?? '';
     }
 
     handleNextRunChange(event) {
-        this.nextRun = event.detail.value; 
+        this.nextRun = event.target.value ?? event.detail?.value ?? '';
     }
 
     async handleAddSchedule() {

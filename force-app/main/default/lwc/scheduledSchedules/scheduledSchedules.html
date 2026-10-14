@@ -1,7 +1,7 @@
 <!--
-  @description: c-scheduled-schedules avec INLINE EDIT
+  @description: c-scheduled-schedules avec INLINE EDIT (Aurora native HTML)
   @author: mouhamed niang
-  @last modified: 26-03-2026
+  @last modified: 06-07-2026
 -->
 <template>
     <div class="card" aria-label="list of schedules with status">
@@ -23,9 +23,7 @@
                                     <td>
                                         <div class="project-cell">
                                             <div class={schedule.boxIconClass} aria-label="box icon">
-                                                <lightning-icon icon-name={schedule.iconStatusName} size="small"
-                                                    class={schedule.iconClass}>
-                                                </lightning-icon>
+                                                <span class={schedule.iconClass}>{schedule.iconStatusEmoji}</span>
                                             </div>
                                             <div class="project-info">
                                                 <div class="project-name">{schedule.title}</div>
@@ -37,21 +35,23 @@
                                         <span class={schedule.badgeStatusClass}>{schedule.statusLabel}</span>
                                     </td>
                                     <td class="actions">
-                                        
-                                        <template if:false={schedule.isNotCompleted}>
-                                            <lightning-icon icon-name={schedule.iconActionName} onclick={handleToggleStatus}
-                                                data-id={schedule.id} data-running={schedule.isRunning} size="xx-small"
-                                                alternative-text="Toggle Status" title="Toggle Status" class="action-icon">
-                                            </lightning-icon>
+                                        <!-- Pause/Resume : visible seulement si Pending ou Suspended -->
+                                        <template if:true={schedule.canToggle}>
+                                            <button type="button" class="action-icon-btn"
+                                                data-id={schedule.id} data-running={schedule.isRunning}
+                                                onclick={handleToggleStatus}
+                                                disabled={schedule.toggleBtnDisabled}
+                                                title="Toggle Status">
+                                                {schedule.iconActionEmoji}
+                                            </button>
                                         </template>
-                                        <lightning-icon icon-name="utility:edit" onclick={handleEditClick}
-                                            class="action-icon" title="Edit" size="xx-small" data-id={schedule.id}
-                                            disabled={isLoading}>
-                                        </lightning-icon>
-                                        <lightning-icon aria-label="Delete" data-id={schedule.id}
-                                            onclick={handleDeleteSchedule} icon-name="utility:delete" size="xx-small"
-                                            title="Delete" class="action-icon">
-                                        </lightning-icon>
+                                        <!-- Édition : désactivé si Completed ou InProgress -->
+                                        <button type="button" class="action-icon-btn" title="Edit"
+                                            data-id={schedule.id} onclick={handleEditClick}
+                                            disabled={schedule.editBtnDisabled}>✏</button>
+                                        <button type="button" class="action-icon-btn action-icon-btn--delete"
+                                            data-id={schedule.id} onclick={handleDeleteSchedule}
+                                            disabled={isLoading} title="Delete">🗑</button>
                                     </td>
                                 </template>
 
@@ -64,21 +64,15 @@
                                             <div class="edit-header">
                                                 <div class="edit-header-left">
                                                     <div class="edit-header-icon">
-                                                        <lightning-icon icon-name="utility:edit" size="x-small"
-                                                            class="icon-white">
-                                                        </lightning-icon>
+                                                        <span class="icon-white">✏</span>
                                                     </div>
                                                     <div>
                                                         <div class="edit-header-title">{labels.editTitle}</div>
                                                         <div class="edit-header-sub">{schedule.title}</div>
                                                     </div>
                                                 </div>
-                                                <button class="edit-close" onclick={handleCancelEdit}
-                                                    disabled={isLoading} title="Close">
-                                                    <lightning-icon icon-name="utility:close" size="x-small"
-                                                        class="icon-white">
-                                                    </lightning-icon>
-                                                </button>
+                                                <button type="button" class="edit-close" onclick={handleCancelEdit}
+                                                    disabled={isLoading} title="Close">✕</button>
                                             </div>
 
                                             <!-- Body -->
@@ -101,12 +95,15 @@
                                                     </template>
                                                 </div>
 
-                                                <!-- Next Run datetime (single field) -->
+                                                <!-- Next Run datetime -->
                                                 <div class="field-group full-width">
-                                                    <lightning-input type="datetime" label={labels.labelNextRun}
-                                                        value={editNextRun} onchange={handleNextRunChange}
-                                                        message-when-value-missing="Next run date is required">
-                                                    </lightning-input>
+                                                    <label class="field-label">{labels.labelNextRun}</label>
+                                                    <input
+                                                        type="datetime-local"
+                                                        class="rounded-input"
+                                                        value={editNextRun}
+                                                        onchange={handleNextRunNativeChange}
+                                                    />
                                                     <template if:true={nextRunHasError}>
                                                         <span class="form-error">{nextRunErrorMessage}</span>
                                                     </template>
@@ -116,9 +113,7 @@
 
                                             <!-- Info bar -->
                                             <div class="edit-info-bar">
-                                                <lightning-icon icon-name="utility:info" size="x-small"
-                                                    class="primary-icon">
-                                                </lightning-icon>
+                                                <span class="primary-icon">ℹ</span>
                                                 <span>{labels.editInfoBar}</span>
                                             </div>
 
@@ -126,18 +121,14 @@
                                             <div class="edit-footer">
                                                 <span class="edit-footer-id">ID: {schedule.scheduleId}</span>
                                                 <div class="edit-footer-actions">
-                                                    <button class="btn btn-secondary" onclick={handleCancelEdit}
+                                                    <button type="button" class="btn btn-secondary" onclick={handleCancelEdit}
                                                         disabled={isLoading}>
-                                                        <lightning-icon class="mr-2" icon-name="utility:clear"
-                                                            size="x-small">
-                                                        </lightning-icon>
+                                                        <span class="mr-2">✕</span>
                                                         {labels.cancelBtn}
                                                     </button>
-                                                    <button class="btn btn-primary" onclick={handleSaveEdit}
+                                                    <button type="button" class="btn btn-primary" onclick={handleSaveEdit}
                                                         disabled={isSaveDisabled}>
-                                                        <lightning-icon icon-name="utility:shift_scheduling_operation"
-                                                            size="x-small" class=" mr-2 icon-white">
-                                                        </lightning-icon>
+                                                        <span class="mr-2 icon-white">↻</span>
                                                         {labels.labelRescheduleBtn}
                                                     </button>
                                                 </div>
@@ -157,7 +148,7 @@
         <!-- No schedules -->
         <template if:false={hasSchedules}>
             <div class="no-schedules-container">
-                <lightning-icon icon-name="custom:custom64" size="large" class="no-schedules-icon"></lightning-icon>
+                <span class="no-schedules-icon">📅</span>
                 <div class="is-centered">
                     <p class="no-schedules-message">{noSchedulesMessage}</p>
                 </div>

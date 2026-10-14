@@ -1,6 +1,43 @@
-.white-icon {
-    --slds-c-icon-color-foreground-default: #ffffff;
+﻿/* ══ Aurora design tokens ══ */
+:host {
+  --indigo:        #4F46E5;
+  --indigo-soft:   rgba(79,70,229,0.08);
+  --indigo-glow:   rgba(79,70,229,0.25);
+  --violet:        #7C3AED;
+  --green:         #10B981;
+  --green-soft:    rgba(16,185,129,0.1);
+  --coral:         #F43F5E;
+  --amber:         #F59E0B;
+  --text:          #0F172A;
+  --text-2:        #1E293B;
+  --muted:         #64748B;
+  --muted-2:       #94A3B8;
+  --border:        rgba(148,163,184,0.2);
+  --border-solid:  #E2E8F0;
+  --surface:       rgba(255,255,255,0.75);
+  --surface-solid: #FFFFFF;
+  --grad-brand:    linear-gradient(135deg,#4F46E5 0%,#7C3AED 100%);
+  --grad-green:    linear-gradient(135deg,#10B981 0%,#06B6D4 100%);
+  --shadow-xs:     0 1px 3px rgba(15,23,42,0.06),0 1px 2px rgba(15,23,42,0.04);
+  --shadow-sm:     0 2px 8px rgba(79,70,229,0.06),0 1px 3px rgba(15,23,42,0.04);
+  --shadow-md:     0 4px 20px rgba(79,70,229,0.10),0 2px 6px rgba(15,23,42,0.05);
+  --shadow-glow:   0 0 0 3px rgba(79,70,229,0.08),0 4px 20px rgba(79,70,229,0.15);
+  --radius-xs:     6px;
+  --radius-sm:     10px;
+  --radius:        16px;
+  --radius-lg:     24px;
+  --radius-pill:   999px;
+  --ease-out:      cubic-bezier(0.16,1,0.3,1);
 }
+/* ══ Icon replacements ══ */
+.test-run-play-icon { font-size: .85rem; color: #1f41a6; line-height: 1; }
+.alert-icon { color: #5E82E4; font-size: .9rem; margin-right: 4px; }
+.close-icon-btn {
+    background: transparent; border: none; cursor: pointer;
+    font-size: 1rem; color: var(--muted, #64748B); padding: 4px 8px;
+    border-radius: 6px; line-height: 1; transition: color .15s;
+}
+.close-icon-btn:hover { color: var(--text, #0F172A); }
 
 /*Modal CSS*/
 :host {
@@ -333,7 +370,7 @@ THIS .slds-grid_align-end {
     border-radius: 0.5rem;
     font-weight: 300;
     font-size: 14px;
-    font-family: "Salesforce Sans", Arial, sans-serif;
+    font-family: 'Inter', -apple-system, system-ui, sans-serif;
     cursor: pointer;
     transition: all 0.2s ease-in-out;
     border: none;
@@ -345,7 +382,7 @@ THIS .slds-grid_align-end {
 
 /* Bouton primaire */
 .btn-primary {
-    background-color: #1e40af;
+    background: linear-gradient(135deg,#4F46E5 0%,#7C3AED 100%);
     color: #ffffff;
     box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
 }
@@ -387,7 +424,7 @@ THIS .slds-grid_align-end {
     border-radius: 0.5rem;
     font-weight: 300;
     font-size: 14px;
-    font-family: "Salesforce Sans", Arial, sans-serif; 
+    font-family: 'Inter', -apple-system, system-ui, sans-serif; 
     cursor: pointer;
     transition: all 0.2s ease-in-out;
     border: none; 
@@ -399,7 +436,7 @@ THIS .slds-grid_align-end {
 
 /* Bouton primaire */
 .btn-primary {
-    background-color: #1e40af;
+    background: linear-gradient(135deg,#4F46E5 0%,#7C3AED 100%);
     color: #ffffff;
     box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
 }
@@ -440,8 +477,8 @@ THIS .slds-grid_align-end {
 }
 .btn-outline-primary{
     background: transparent;
-    color: #1E40AF;
-    border: 1px solid #0176d3;
+    color: #4F46E5;
+    border: 1px solid #4F46E5;
 }
 
 .btn-outline-primary:hover{
@@ -463,14 +500,14 @@ THIS .slds-grid_align-end {
 /* Bouton secondaire */
 .btn-secondary {
     background-color: #ffffff;
-    color: #1E40AF;
-    border: 1px solid #0176d3;
+    color: #4F46E5;
+    border: 1px solid #4F46E5;
     font-weight: 500;
 }
 
 .btn-secondary:hover {
     background-color: #f9fafb;
-    border-color: #1e40af;
+    border-color: #4F46E5;
 }
 
 .btn-secondary:active {
@@ -481,6 +518,32 @@ THIS .slds-grid_align-end {
 lightning-button-icon.slds-modal-close {
     display: none;
 }
-.primary-icon{ 
-  --slds-c-icon-color-foreground-default: #1e40af;
+.primary-icon { color: #4F46E5; }
+
+/* ══ Native table (replaces lightning-datatable) ══ */
+.tpm-table-wrap { overflow-x: auto; overflow-y: auto; height: 100%; }
+.tpm-table {
+    width: 100%; border-collapse: collapse; font-size: .82rem;
+    font-family: 'Inter', -apple-system, system-ui, sans-serif;
 }
+.tpm-th {
+    padding: 8px 12px; text-align: left; font-size: .68rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .06em; color: #64748B;
+    background: rgba(248,250,252,0.95); border-bottom: 1px solid #E2E8F0;
+    white-space: nowrap;
+}
+.tpm-th-cb { padding: 8px 8px; background: rgba(248,250,252,0.95); border-bottom: 1px solid #E2E8F0; }
+.tpm-td-cb { padding: 8px 8px; border-bottom: 1px solid rgba(226,232,240,0.5); vertical-align: middle; }
+.tpm-table tbody td { padding: 8px 12px; border-bottom: 1px solid rgba(226,232,240,0.5); vertical-align: middle; }
+.tpm-table tbody tr:hover td { background: rgba(79,70,229,0.025); }
+.tpm-table tbody tr:last-child td { border-bottom: none; }
+.tpm-check-label { display: inline-flex; align-items: center; gap: 6px; font-size: .82rem; cursor: pointer; }
+
+/* ══ Status pills ══ */
+.status-pill {
+    display: inline-flex; align-items: center; padding: 2px 8px;
+    border-radius: 999px; font-size: .72rem; font-weight: 600; border: 1px solid transparent;
+}
+.status-pill--valid   { background: rgba(16,185,129,0.1);  color: #059669; border-color: rgba(16,185,129,0.2); }
+.status-pill--invalid { background: rgba(244,63,94,0.08);  color: #BE123C; border-color: rgba(244,63,94,0.15); }
+.status-pill--active  { background: rgba(79,70,229,0.08);  color: #4F46E5; border-color: rgba(79,70,229,0.15); }

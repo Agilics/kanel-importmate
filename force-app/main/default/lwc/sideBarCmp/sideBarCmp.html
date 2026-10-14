@@ -9,9 +9,7 @@
             <div class="project-header">
                 <h2 class="project-name">
                     {projectName}
-                    <lightning-button-icon icon-name="utility:edit" alternative-text="Edit Project" size="x-small"
-                        variant="bare" class="edit-icon" onclick={navigateToProjectPage}>
-                    </lightning-button-icon>
+                    <button type="button" class="edit-project-btn" onclick={navigateToProjectPage} title="Edit Project">✏</button>
                 </h2>
             </div>
         </template>
@@ -22,10 +20,7 @@
                     <div key={step.number} class={step.cssClass} data-step={step.number} onclick={handleStepClick}>
                         <div class="step-indicator">
                             <template if:true={step.isCompleted}>
-                                <span class="step-number">
-                                    <lightning-icon icon-name="utility:check" size="xx-small"
-                                        alternative-text="Completed"></lightning-icon>
-                                </span>
+                                <span class="step-number step-check">✓</span>
                             </template>
                             <template if:false={step.isCompleted}>
                                 <span class="step-number">{step.number}</span>
@@ -43,7 +38,7 @@
                     <template for:each={quickActions} for:item="action">
                         <button key={action.label} class="quick-action-btn" onclick={handleQuickAction}
                             data-action={action.label}>
-                            <lightning-icon icon-name={action.icon} size="x-small" class="action-icon"></lightning-icon>
+                            <span class="action-icon-emoji">{action.iconEmoji}</span>
                             <span class="action-label">{action.label}</span>
                         </button>
                     </template>

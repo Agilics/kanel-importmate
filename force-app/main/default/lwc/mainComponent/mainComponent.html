@@ -8,22 +8,17 @@
 -->
 <template>
   <template if:true={isLoading}>
-    <div class="slds-spinner_container">
-      <lightning-spinner
-        alternative-text="Loading"
-        size="medium"
-        variant="inverse"
-      >
-      </lightning-spinner>
+    <div class="main-spinner-overlay">
+      <div class="main-spinner"></div>
     </div>
   </template>
 
   <div class="app-wrapper">
-    <!-- App Header -->
-<!--     <c-app-header-cmp
+    <!-- App Header (Aurora dark navbar — prototype: .header) -->
+    <c-app-header-cmp
       active-page={activePage}
       onnavigation={handleNavigation}
-    ></c-app-header-cmp> -->
+    ></c-app-header-cmp>
 
     <div class="app-layout" role="main" aria-label="ImportMate project interface">
       <!-- Sidebar -->
@@ -42,20 +37,27 @@
         <!-- Project Context Bar — visible on all pages when a project is active -->
         <template if:true={currentProject}>
           <div class="project-context-bar">
-            <lightning-icon icon-name="utility:folder" size="x-small" class="project-context-bar__icon"></lightning-icon>
+            <span class="project-context-bar__icon">📁</span>
             <span class="project-context-bar__label">Projet actif :</span>
             <span class="project-context-bar__name">{currentProject.Name}</span>
             <template if:true={currentProject.TargetObject__c}>
               <span class="project-context-bar__sep">·</span>
-              <lightning-icon icon-name="utility:salesforce1" size="x-small" class="project-context-bar__icon"></lightning-icon>
+              <span class="project-context-bar__icon">☁</span>
               <span class="project-context-bar__object">{currentProject.TargetObject__c}</span>
             </template>
           </div>
         </template>
 
+        <!-- Analytics View -->
+        <template if:true={showAnalytics}>
+          <div class="content-container">
+            <c-analytics-cmp></c-analytics-cmp>
+          </div>
+        </template>
+
         <!-- Execution History View -->
         <template if:true={showExecutionHistory}>
-          <div class="content-container ih">
+          <div class="content-container">
             <c-import-history onnewimportproject={openProjectForm}>
             </c-import-history>
           </div>
@@ -71,15 +73,23 @@
               onprojectselect={handleProjectSelect}
               onprojectedit={handleEditProject}
             ></c-dashboard-cmp>
-           
-           
+          </div>
+        </template>
 
+        <!-- Schedule View -->
+        <template if:true={showSchedule}>
+          <div class="content-container">
+            <c-schedule-page 
+                project-id={currentProject.Id} 
+                project-name={currentProject.Name}>
+            </c-schedule-page>
           </div>
         </template>
 
         <!-- Projects Workflow View -->
         <template if:false={showDashboard}>
           <div class="content-container">
+
             <!-- <div class="container"> -->
               <!-- Step 1: Project Setup -->
 
@@ -108,6 +118,7 @@
               <template if:true={showCsvUploader}>
                 <c-csv-uploader
                   project-name={currentProject.Name}
+                  project-id={currentProject.Id}
                   oncsvloaded={handleCsvLoaded}
                   ongotomapping={handleStartMapping}
                   onprevious={handleBackToDataSourceSelection}
@@ -165,11 +176,22 @@
                   project-name={currentProject.Name}
                   csv-data={csvData}
                   onprevious={handleBackToStep}
+                  onnext={handleNextStep}
                 ></c-execution-cmp>
+              </template>
+
+              <!-- Step 7: Scheduling -->
+              <template if:true={isScheduling}>
+                <c-schedule-page 
+                  project-id={currentProject.Id} 
+                  project-name={currentProject.Name}
+                  onprevious={handleBackToStep}>
+                </c-schedule-page>
               </template>
             <!-- </div> -->
           </div>
         </template>
+
       </div>
     </div>
   </div>
@@ -182,9 +204,7 @@
             <!-- Header -->
             <header class="slds-modal__header">
                 <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse"
-                    title="Close" onclick={closeForm}>
-                    <lightning-icon icon-name="utility:close"
-                      alternative-text="Close" size="small"></lightning-icon>
+                    title="Close" onclick={closeForm}>✕
                 </button>
                 <h2 class="slds-modal__title">{modal_edit_title }</h2>
             </header>

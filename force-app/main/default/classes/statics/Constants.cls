@@ -52,6 +52,23 @@ public with sharing class Constants {
     public static final String EXECUTION_STATUS_PENDING = 'Pending';
     public static final String EXECUTION_STATUS_CANCELLED = 'Cancelled';
 
+    // ===== Mode de sélection du fichier (Schedule__c.FM_FileSelector_Mode__c) =====
+    public static final String FILE_MODE_INHERIT   = 'Inherit';    // Réutiliser la source des étapes précédentes
+    public static final String FILE_MODE_CRITERIA  = 'Criteria';   // Choisir par critères (motif de nom)
+    public static final String FILE_MODE_FIXED     = 'Fixed';      // Même fichier à chaque exécution
+
+    // ===== Sélection quand plusieurs fichiers correspondent (FM_FileSelector_SelectionMode__c) =====
+    public static final String FILE_SELECTION_LATEST          = 'Latest';          // Le plus récent
+    public static final String FILE_SELECTION_ALL             = 'All';             // Tous
+    public static final String FILE_SELECTION_ONE_PER_EXEC    = 'OnePerExecution'; // Un par exécution
+
+    // ===== Modèles de nom de fichier (motifs avec date automatique) =====
+    public static final String FILE_PATTERN_DAILY     = 'Fichier daté quotidien';
+    public static final String FILE_PATTERN_MONTHLY   = 'Fichier daté mensuel';
+    public static final String FILE_PATTERN_ANY_CSV   = 'N\'importe quel CSV';
+    public static final String FILE_PATTERN_SPECIFIC  = 'Un fichier précis';
+    public static final String FILE_PATTERN_CUSTOM    = 'Personnalisé';
+
     public static final String EXECUTION_PHASE_STAGING = 'Staging';
     public static final String EXECUTION_PHASE_PREPROCESSING = 'PreProcessing';
     public static final String EXECUTION_PHASE_VALIDATING = 'Validating';
@@ -73,8 +90,9 @@ public with sharing class Constants {
 
     public static final String EXECUTION_TYPE_VALIDATION = 'Validation';
     public static final String EXECUTION_TYPE_TRANSFORMATION = 'Transformation';
-    public static final String EXECUTION_TYPE_IMPORT = 'Import';
-    public static final String EXECUTION_TYPE_UPDATE = 'Update';
+    public static final String EXECUTION_TYPE_IMPORT     = 'Import';
+    public static final String EXECUTION_TYPE_SCHEDULED  = 'Scheduled';
+    public static final String EXECUTION_TYPE_UPDATE     = 'Update';
     public static final String EXECUTION_TYPE_DELETE = 'Delete';
     public static final String EXECUTION_TYPE_UPSERT = 'Upsert';    
 

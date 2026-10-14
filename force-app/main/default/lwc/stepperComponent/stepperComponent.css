@@ -1,124 +1,95 @@
-/* Stepper container */
-.stepper {
-  display: flex;
-  justify-content: center;
-  gap: 3rem;
-  user-select: none;
-  padding: 1rem 0;
-  max-width: 900px;
-  margin: 5rem auto 7rem auto;
+/* ══ Aurora design tokens ══ */
+:host {
+  --indigo:        #4F46E5;
+  --indigo-soft:   rgba(79,70,229,0.08);
+  --indigo-glow:   rgba(79,70,229,0.25);
+  --violet:        #7C3AED;
+  --green:         #10B981;
+  --green-soft:    rgba(16,185,129,0.1);
+  --text:          #0F172A;
+  --muted:         #64748B;
+  --muted-2:       #94A3B8;
+  --border:        rgba(148,163,184,0.2);
+  --border-solid:  #E2E8F0;
+  --surface:       rgba(255,255,255,0.75);
+  --grad-brand:    linear-gradient(135deg,#4F46E5 0%,#7C3AED 100%);
+  --grad-green:    linear-gradient(135deg,#10B981 0%,#06B6D4 100%);
+  --shadow-sm:     0 2px 8px rgba(79,70,229,0.06),0 1px 3px rgba(15,23,42,0.04);
+  --radius-sm:     10px;
+  --radius-pill:   999px;
+  --ease-out:      cubic-bezier(0.16,1,0.3,1);
 }
-a {
+
+/* ══ Stepper wrapper (prototype: .stepper-wrap / .stepper) ══ */
+.stepper {
+  display: flex; align-items: center;
+  background: var(--surface-solid, #FFFFFF);
+  border: 1px solid var(--border-solid, #E2E8F0);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-sm);
+  padding: 5px 8px;
+  overflow-x: auto; gap: 0;
+  user-select: none;
+}
+
+/* ══ Each step (prototype: .step) ══ */
+.step {
+  display: flex; align-items: center; gap: 7px;
+  padding: 7px 14px; border-radius: var(--radius-pill);
+  font-size: .78rem; font-weight: 500; color: var(--muted);
+  white-space: nowrap; flex-shrink: 0;
+  transition: all .2s var(--ease-out);
+  cursor: pointer;
+  background: transparent; border: none; font-family: inherit;
   text-decoration: none;
 }
-/* Each step container */
-.step {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  position: relative;
-  flex: 1;
-  min-width: 80px;
-}
 
-/* Circle with step number */
+/* ══ Step number circle (prototype: .step-num) ══ */
 .step-circle {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  background: #c2c8d1;
-  color: #135392;
-  font-weight: 600;
-  display: flex;
-  font-size: 20px;
-  align-items: center;
-  justify-content: center;
-  z-index: 2;
-  position: relative;
-  flex-wrap: wrap;
-  transition: background-color 0.3s, color 0.3s;
-  cursor: pointer;
-  -webkit-transition: background-color 0.3s, color 0.3s;
-  -moz-transition: background-color 0.3s, color 0.3s;
-  -ms-transition: background-color 0.3s, color 0.3s;
-  -o-transition: background-color 0.3s, color 0.3s;
-  -webkit-border-radius: 50%;
-  -moz-border-radius: 50%;
-  -ms-border-radius: 50%;
-  -o-border-radius: 50%;
-}
-/* Active step circle style */
-.step.active .step-circle {
-  background: #1d4e8b;
-  color: #fff;
-  cursor: default;
-  box-shadow: 0 0 8px rgb(29 78 139 / 0.5);
-}
-/* Completed step circle style */
-.step.completed .step-circle {
-  background: #3c6bb8;
-  color: white;
-  cursor: pointer;
-  box-shadow: 0 0 8px rgba(60, 107, 184, 0.5);
+  width: 24px; height: 24px; border-radius: 50%;
+  display: grid; place-items: center;
+  font-size: .72rem; font-weight: 700;
+  background: rgba(148,163,184,0.15);
+  color: var(--muted); flex-shrink: 0;
+  transition: all .2s var(--ease-out);
 }
 
-/* Label below each circle */
+/* ══ Step label ══ */
 .step-label {
-  margin-top: 0.5rem;
-  font-size: 14px;
-  color: #697584;
-  text-align: center;
-  max-width: 90px;
-  line-height: 1.2;
-  user-select: none;
+  font-size: .78rem; font-weight: 500; color: var(--muted);
+  transition: color .15s;
 }
 
-/* Label for step title (under number) - bold for active and completed */
-.step.active .step-label,
-.step.completed .step-label {
-  color: #203547;
-  font-weight: 600;
+/* ══ Done step (prototype: .step.done) ══ */
+.step.completed { color: var(--green); }
+.step.completed .step-circle {
+  background: var(--green); color: #fff;
+  box-shadow: 0 2px 8px rgba(16,185,129,0.4);
 }
+.step.completed .step-label { color: var(--green); }
 
-/* Line connector between steps 
-    .step-line {
-      position: absolute;
-      top: 16px;
-      */ /*Halfofcircleheight*/ /*left: 50%;
-      width: 100%;
-      height: 3px;
-      background: #c2c8d1;
-      z-index: 1;
-      transform: translateX(50%);
-      border-radius: 2px;
-      -webkit-border-radius: 2px;
-      -moz-border-radius: 2px;
-      -ms-border-radius: 2px;
-      -o-border-radius: 2px;
-      -webkit-transform: translateX(50%);
-      -moz-transform: translateX(50%);
-      -ms-transform: translateX(50%);
-      -o-transform: translateX(50%);
-}*/
-/* Colored line up to completed or active step */
-.step.completed ~ .step .step-line,
-.step.active ~ .step .step-line {
-  background: #c2c8d1;
+/* ══ Active step (prototype: .step.active) ══ */
+.step.active { color: var(--indigo); font-weight: 600; background: var(--indigo-soft); }
+.step.active .step-circle {
+  background: var(--grad-brand); color: #fff;
+  box-shadow: 0 0 0 3px rgba(79,70,229,0.2), 0 4px 10px rgba(79,70,229,0.35);
 }
-.step.completed .step-line,
-.step.active .step-line {
-  background: linear-gradient(to right, #1d4e8b 0%, #3c6bb8 100%);
+.step.active .step-label { color: var(--indigo); font-weight: 600; }
+
+/* ══ Connector (prototype: .step-connector) ══ */
+.step-line {
+  width: 20px; height: 1.5px;
+  background: var(--border-solid); flex-shrink: 0;
+  transition: background .3s;
+  pointer-events: none;
 }
+.step.completed + .step .step-line { background: var(--green); }
 
 /* Hide line on last step */
-.step:last-child .step-line {
-  display: none;
-}
+.step:last-child .step-line { display: none; }
 
-/* Responsive adjustments */
-@media (max-width: 520px) {
-  .step-label {
-    font-size: 0.65rem;
-    max-width: 70px;
-  }
+/* Responsive */
+@media (max-width: 600px) {
+  .step-label { display: none; }
+  .step { padding: 7px 8px; }
 }

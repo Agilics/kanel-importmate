@@ -1,61 +1,52 @@
-<!--
-   @description       : Data source selector page - shows selection cards for CSV or SOQL
-   @author            : ChangeMeIn@UserSettingsUnder.SFDoc
-   @group             : 
-   @last modified on  : 04-22-2026
-   @last modified by  : Mouhamed NIANG
-   @Modification: Add project's name 
--->
-   <template>
-    <div class="container" id="container">
+<template>
+  <div class="ds-page">
+    <div class="card">
 
-        <!-- Header title -->
-        <div class="header">
-            <div class="flex">
-                <h1 class="header-title">{label.title}</h1>
-                <span class="badge primary-badge header-subtitle ">
-                  {projectName}
-                </span>
-            </div>
-            <p class="header-subtitle">{label.subtitle}</p>
+      <!-- Card header -->
+      <div class="card-header">
+        <div>
+          <div class="card-title">{label.title}</div>
+          <div class="card-sub">{label.subtitle}</div>
+        </div>
+        <template if:true={projectName}>
+          <span class="project-badge">{projectName}</span>
+        </template>
+      </div>
+
+      <!-- Source grid (prototype: .source-grid) -->
+      <div class="source-grid">
+
+        <!-- CSV Card (prototype: .source-card) -->
+        <div class="source-card" onclick={handleCSV}>
+          <div class="source-icon">📄</div>
+          <div class="source-title">{label.uploadTitle}</div>
+          <div class="source-desc">{label.uploadSubtitle}</div>
+          <div class="source-features">
+            <template for:each={uploadContents} for:item="item">
+              <div key={item.Id} class="source-feature">{item.Name}</div>
+            </template>
+          </div>
         </div>
 
-        <div class="cards">
-
-            <!-- CARD FILE UPLOAD -->
-            <div class="upload">
-                <c-data-source-card
-                    contents={uploadContents}
-                    title={label.uploadTitle}
-                    subtitle={label.uploadSubtitle}
-                    text-button={textButton}
-                    is-upload={isUpload}
-                    current-project={currentProject}
-                    oncardaction={handleCSV}
-                ></c-data-source-card>
-            </div>
-            <!-- END CARD FILE UPLOAD -->
-
-            <!-- CARD QUERY BUILDER -->
-            <div class="query">
-                <c-data-source-card
-                    contents={queryContents}
-                    title={label.queryTitle}
-                    subtitle={label.querySubTitle}
-                    text-button={textButton}
-                    is-upload={isNotUpload}
-                    current-project={currentProject}
-                    oncardaction={handleSOQL}
-                ></c-data-source-card>
-            </div>
-            <!-- END CARD QUERY BUILDER -->
-
+        <!-- SOQL Card (prototype: .source-card) -->
+        <div class="source-card" onclick={handleSOQL}>
+          <div class="source-icon soql-icon">{soqlIconSymbol}</div>
+          <div class="source-title">{label.queryTitle}</div>
+          <div class="source-desc">{label.querySubTitle}</div>
+          <div class="source-features">
+            <template for:each={queryContents} for:item="item">
+              <div key={item.Id} class="source-feature">{item.Name}</div>
+            </template>
+          </div>
         </div>
 
-        <!-- Back Button -->
-        <button type="button" class="btn btn-secondary" onclick={handleBackToProjectSetup}>
-            <span>{label.back}</span>
-        </button>
+      </div>
+
+      <!-- Card footer -->
+      <div class="card-footer">
+        <button class="btn btn-ghost" onclick={handleBackToProjectSetup}>← {label.back}</button>
+      </div>
 
     </div>
+  </div>
 </template>

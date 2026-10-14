@@ -48,10 +48,10 @@ export default class DashboardCmp extends LightningElement {
 
     // ── Filter tabs ───────────────────────────────────────────────────────────
     @track filterTabs = [
-        { label: Dashboard_Filter_All_Project, value: 'all',       active: true  },
-        { label: Dashboard_Filter_Active,      value: 'active',    active: false },
-        { label: Dashboard_Filter_Completed,   value: 'completed', active: false },
-        { label: Dashboard_Filter_Scheduled,   value: 'scheduled', active: false }
+        { label: Dashboard_Filter_All_Project, value: 'all',       active: true,  className: 'filter-btn active' },
+        { label: Dashboard_Filter_Active,      value: 'active',    active: false, className: 'filter-btn' },
+        { label: Dashboard_Filter_Completed,   value: 'completed', active: false, className: 'filter-btn' },
+        { label: Dashboard_Filter_Scheduled,   value: 'scheduled', active: false, className: 'filter-btn' }
     ];
 
     // ── Bound label objects ───────────────────────────────────────────────────
@@ -123,7 +123,7 @@ export default class DashboardCmp extends LightningElement {
         this.filterTabs = this.filterTabs.map(tab => ({
             ...tab,
             active:    tab.value === selectedValue,
-            className: tab.value === selectedValue ? 'filter-tab active' : 'filter-tab'
+            className: tab.value === selectedValue ? 'filter-btn active' : 'filter-btn'
         }));
         this.filterProjects();
     }
@@ -249,7 +249,7 @@ export default class DashboardCmp extends LightningElement {
                 value:       String(totalProjects),
                 change:      '',
                 changeLabel: '',
-                icon:        'standard:folder',
+                icon:        '📁',
                 iconColor:   'blue'
             },
             {
@@ -258,25 +258,25 @@ export default class DashboardCmp extends LightningElement {
                 value:       recordsImported,
                 change:      '',
                 changeLabel: '',
-                icon:        'standard:data_integration_hub',
+                icon:        '📊',
                 iconColor:   'green'
             },
             {
                 id:          3,
-                label:       Dashboard_Stat_Success_Rate,     // ← label (was 'Success Rate')
+                label:       Dashboard_Stat_Success_Rate,
                 value:       successRate,
                 change:      '',
                 changeLabel: '',
-                icon:        'standard:approval',
+                icon:        '✓',
                 iconColor:   'green'
             },
             {
                 id:          4,
-                label:       Dashboard_Stat_Active_Projects,  // ← label (was 'Active Projects')
+                label:       Dashboard_Stat_Active_Projects,
                 value:       String(activeProjects),
                 change:      '',
                 changeLabel: '',
-                icon:        'standard:event',
+                icon:        '⚡',
                 iconColor:   'purple'
             }
         ];
