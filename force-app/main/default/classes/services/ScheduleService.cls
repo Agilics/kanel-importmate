@@ -397,7 +397,24 @@ public with sharing class ScheduleService {
             
             Schedule__c schedule = ScheduleRepository.getScheduleById(scheduleId);
             Id projectId = Id.valueOf(schedule.Project__c);
-            List<ContentDocumentService.ContentFileWrapper> files = ContentDocumentService.getProjectFiles(String.valueOf(projectId));
+            List<ContentDocumentService.ContentFileWrapper> allFiles = ContentDocumentService.getProjectFiles(String.valueOf(projectId));
+
+            // === RÃ©solution du motif (DOC_UI_Planification v1.0 : Inherit / Fixed / Criteria) ===
+            Id fixedDocId = resolveFixedFileId(schedule);
+            Set<String> alreadyImported = ExecutionRepository.getImportedFileNames(projectId);
+            List<ContentDocumentService.ContentFileWrapper> files =
+                FilePatternResolver.selectFilesForExecution(schedule, allFiles, alreadyImported, fixedDocId);
+
+            // Message spÃ©cifique si aucun fichier ne correspond au motif
+            if (files.isEmpty() && !allFiles.isEmpty()) {
+                String mode = schedule.FM_FileSelector_Mode__c;
+                String resolvedPattern = String.isBlank(schedule.FM_FilePatternName__c) ? ''
+                    : FilePatternResolver.resolve(schedule.FM_FilePatternName__c, Date.today()).resolvedPattern;
+                return ScheduleJobResult.error(
+                    'Aucun fichier ne correspond au motif "' + resolvedPattern + '"' +
+                    ' (mode : ' + mode + '). VÃ©rifiez la configuration du planning.'
+                );
+            }
 
            // Validation
             ScheduleJobResult validationResult = validateExecution(schedule, projectId, files);
@@ -514,9 +531,47 @@ public with sharing class ScheduleService {
         execution.Status__c = Constants.EXECUTION_STATUS_IN_PROGRESS;
         execution.Phase__c  = Constants.EXECUTION_PHASE_IMPORTING;
         execution.TotalRecords__c = file.size();   // important pour le suivi
+        execution.SourceFileName__c = joinFileNames(file);   // traçabilité "non encore importé"
 
         ExecutionRepository.updateImportExecution(execution);
         return execution;
+    }
+    /**
+     * Récupère l'Id du fichier fixe lié au schedule (mode Fixed uniquement).
+     * Le fichier fixe est persisté à la création via ContentDocumentLink
+     * (LinkedEntityId = scheduleId, cf. ScheduleController.addScheduleWithFile).
+     */
+    private static Id resolveFixedFileId(Schedule__c schedule) {
+        if (schedule == null ||
+            schedule.FM_FileSelector_Mode__c == null ||
+            !Constants.FILE_MODE_FIXED.equals(schedule.FM_FileSelector_Mode__c)) {
+            return null;
+        }
+        try {
+            List<ContentDocumentLink> links = [
+                SELECT ContentDocumentId
+                FROM   ContentDocumentLink
+                WHERE  LinkedEntityId = :schedule.Id
+                ORDER BY ContentDocument.CreatedDate DESC
+                LIMIT 1
+            ];
+            return links.isEmpty() ? null : links[0].ContentDocumentId;
+        } catch (Exception e) {
+            ErrorLogService.logException(e);
+            return null;
+        }
+    }
+
+    /** Concatène les noms de fichiers séparés par ", " (format attendu par getImportedFileNames). */
+    private static String joinFileNames(List<ContentDocumentService.ContentFileWrapper> files) {
+        if (files == null || files.isEmpty()) return '';
+        List<String> names = new List<String>();
+        for (ContentDocumentService.ContentFileWrapper f : files) {
+            if (String.isNotBlank(f.fileName)) {
+                names.add(f.fileName);
+            }
+        }
+        return String.join(names, ', ');
     }
 
     //lancer l'importation  via une exÃ©cution batch

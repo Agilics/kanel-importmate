@@ -259,5 +259,36 @@ public with sharing class ExecutionRepository {
         return execution;
     }
 
+    /**
+     * RÃ©cupÃ¨re l'ensemble des noms de fichiers dÃ©jÃ  importÃ©s pour un projet,
+     * Ã  partir des exÃ©cutions terminÃ©es (Completed/Failed).
+     * UtilisÃ© par la rÃ¨gle mÃ©tier "non encore importÃ©" (modes Latest / OnePerExecution).
+     * @param projectId L'ID du projet
+     * @return Set des noms de fichiers dÃ©jÃ  consommÃ©s (jamais null)
+     */
+    public static Set<String> getImportedFileNames(Id projectId) {
+        Set<String> names = new Set<String>();
+        if (projectId == null) return names;
+        if (!SecurityUtils.isAccessible(ImportExecution__c.SObjectType)) return names;
+
+        List<ImportExecution__c> past = [
+            SELECT SourceFileName__c
+            FROM ImportExecution__c
+            WHERE Project__c = :projectId
+            AND   Status__c IN ('Completed', 'Failed')
+            AND   SourceFileName__c != null
+        ];
+
+        for (ImportExecution__c e : past) {
+            // SourceFileName__c peut contenir plusieurs noms sÃ©parÃ©s par ", "
+            for (String name : e.SourceFileName__c.split(', ')) {
+                if (String.isNotBlank(name)) {
+                    names.add(name);
+                }
+            }
+        }
+        return names;
+    }
+
 
 }

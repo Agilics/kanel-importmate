@@ -115,6 +115,116 @@ public with sharing class FilePatternResolver {
         return action + patternPart + '.';
     }
 
+    /**
+     * Sélectionne les fichiers à utiliser pour une exécution planifiée,
+     * en appliquant le mode de sélection (FM_FileSelector_Mode__c), le motif
+     * (FM_FilePatternName__c avec jetons {yyyy-MM-dd}/{yyyyMM}, génériques * et ?)
+     * et le mode de multiple (FM_FileSelector_SelectionMode__c : Latest/All/OnePerExecution).
+     *
+     * Règle métier (DOC_UI_Planification v1.0) :
+     *  - Inherit  : tous les fichiers projet (comportement historique).
+     *  - Fixed    : uniquement le fichier lié au schedule (ContentDocumentLink).
+     *  - Criteria : fichiers dont le nom matche le motif résolu à la date du jour,
+     *               puis selon SelectionMode : Latest = plus récent NON importé,
+     *               All = tous, OnePerExecution = un seul NON importé.
+     *
+     * @param schedule Le Schedule__c (doit contenir les champs FM_*)
+     * @param allFiles Liste des fichiers CSV/TXT liés au projet (ordre : plus récent d'abord)
+     * @param alreadyImportedFileNames Noms des fichiers déjà importés dans les exécutions antérieures
+     * @param fixedContentDocumentId Id du fichier fixe (mode Fixed uniquement, sinon null)
+     * @return Liste des fichiers retenus (peut être vide si aucun ne matche)
+     */
+    public static List<ContentDocumentService.ContentFileWrapper> selectFilesForExecution(
+        Schedule__c schedule,
+        List<ContentDocumentService.ContentFileWrapper> allFiles,
+        Set<String> alreadyImportedFileNames,
+        Id fixedContentDocumentId
+    ) {
+        List<ContentDocumentService.ContentFileWrapper> selected = new List<ContentDocumentService.ContentFileWrapper>();
+        if (allFiles == null || allFiles.isEmpty()) return selected;
+
+        String mode      = schedule.FM_FileSelector_Mode__c;
+        String selection = schedule.FM_FileSelector_SelectionMode__c;
+        String pattern   = schedule.FM_FilePatternName__c;
+
+        // --- Mode Inherit (défaut) : comportement historique ---
+        if (String.isBlank(mode) || Constants.FILE_MODE_INHERIT.equals(mode)) {
+            return allFiles;
+        }
+
+        // --- Mode Fixed : uniquement le fichier lié au schedule ---
+        if (Constants.FILE_MODE_FIXED.equals(mode)) {
+            if (fixedContentDocumentId == null) return selected;
+            for (ContentDocumentService.ContentFileWrapper f : allFiles) {
+                if (fixedContentDocumentId == f.contentDocumentId) {
+                    selected.add(f);
+                    break;
+                }
+            }
+            return selected;
+        }
+
+        // --- Mode Criteria : filtrage par motif résolu à la date du jour ---
+        if (!Constants.FILE_MODE_CRITERIA.equals(mode)) return selected;
+
+        ResolutionResult resolution = resolve(pattern, Date.today());
+        if (!resolution.isValid) return selected;
+
+        Pattern regex = toRegexPattern(resolution.resolvedPattern);
+        List<ContentDocumentService.ContentFileWrapper> matches = new List<ContentDocumentService.ContentFileWrapper>();
+        for (ContentDocumentService.ContentFileWrapper f : allFiles) {
+            // Fichiers déjà importés exclus (règle "non encore importé")
+            if (alreadyImportedFileNames != null && alreadyImportedFileNames.contains(f.fileName)) {
+                continue;
+            }
+            Matcher m = regex.matcher(f.fileName == null ? '' : f.fileName);
+            if (m.matches()) {
+                matches.add(f);   // allFiles est trié du plus récent au plus ancien
+            }
+        }
+
+        if (matches.isEmpty()) return selected;
+
+        // --- Application du mode de multiple ---
+        if (Constants.FILE_SELECTION_ALL.equals(selection)) {
+            selected.addAll(matches);
+        } else if (Constants.FILE_SELECTION_ONE_PER_EXEC.equals(selection)) {
+            selected.add(matches[0]);   // le plus récent non encore importé
+        } else {
+            // Latest (défaut) : le plus récent non encore importé
+            selected.add(matches[0]);
+        }
+        return selected;
+    }
+
+    /**
+     * Convertit un motif résolu (génériques * et ?) en regex Java pour le matching
+     * des noms de fichiers. * -> .*, ? -> . , le reste est échappé (Pattern.quote par caractère).
+     * @param resolvedPattern Motif résolu (jetons date déjà remplacés)
+     * @return Pattern compilé (matching complet, case-insensitive)
+     */
+    public static Pattern toRegexPattern(String resolvedPattern) {
+        String regex = toRegexString(resolvedPattern);
+        // (?i) : flag inline Apex (Pattern.compile n'accepte pas de flag en 2e argument)
+        return Pattern.compile('(?i)' + regex);
+    }
+
+    // Conversion motif -> chaîne regex : * -> .*, ? -> . , échappement du reste
+    private static String toRegexString(String resolvedPattern) {
+        if (String.isBlank(resolvedPattern)) return '.*';
+        String regex = '';
+        for (Integer i = 0; i < resolvedPattern.length(); i++) {
+            String c = resolvedPattern.substring(i, i + 1);
+            if (c == '*') {
+                regex += '.*';
+            } else if (c == '?') {
+                regex += '.';
+            } else {
+                regex += Pattern.quote(c);
+            }
+        }
+        return regex;
+    }
     // â”€â”€ Helpers privÃ©s â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     private static String formatDate(Date d, String pattern) {
         if (d == null) return '';
